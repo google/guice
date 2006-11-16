@@ -305,6 +305,47 @@ public final class ContainerBuilder {
   }
 
   /**
+   * Convenience method.&nbsp;Equivalent to {@code alias(type, Container.DEFAULT_NAME,
+   * type)}.
+   *
+   * @see #alias(Class, String, String)
+   */
+  public <T> ContainerBuilder alias(Class<T> type, String alias) {
+    return alias(type, Container.DEFAULT_NAME, alias);
+  }
+  
+  /**
+   * Maps an existing factory to a new name. 
+   * 
+   * @param type of dependency
+   * @param name of dependency
+   * @param alias of to the dependency
+   * @return this builder
+   */
+  public <T> ContainerBuilder alias(Class<T> type, String name, String alias) {
+    return alias(Key.newInstance(type, name), Key.newInstance(type, alias));
+  }
+  
+  /**
+   * Maps an existing dependency. All methods in this class ultimately funnel through
+   * here.
+   */
+  private <T> ContainerBuilder alias(final Key<T> key,
+      final Key<T> aliasKey) {
+    ensureNotCreated();
+    checkKey(aliasKey);
+    
+    final InternalFactory<? extends T> scopedFactory = 
+      (InternalFactory<? extends T>)factories.get(key);
+    if (scopedFactory == null) {
+        throw new DependencyException(
+                "Dependency mapping for " + key + " doesn't exists.");
+    }
+    factories.put(aliasKey, scopedFactory);
+    return this;
+  }
+
+  /**
    * Maps a constant value to the given name.
    */
   public ContainerBuilder constant(String name, String value) {

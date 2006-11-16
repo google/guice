@@ -447,7 +447,12 @@ class ContainerImpl implements Container {
     Key<T> key = Key.newInstance(type, name);
     context.setExternalContext(ExternalContext.newInstance(null, key, this));
     try {
-      return getFactory(key).create(context);
+      InternalFactory o = getFactory(key);
+      if (o != null) {
+          return getFactory(key).create(context);
+      } else {
+          return null;
+      }
     } finally {
       context.setExternalContext(previous);
     }
