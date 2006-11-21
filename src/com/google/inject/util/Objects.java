@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
+package com.google.inject.util;
+
 /**
- * <i>Guice</i> (pronounced "juice"). A lightweight dependency injection
- * container. Features include:
+ * Object utilities.
  *
- * <ul>
- *   <li>constructor, method, and field injection</li>
- *   <li>static method and field injection</li>
- *   <li>circular reference support (including constructors if you depend upon
- *    interfaces)</li>
- *   <li>high performance</li>
- *   <li>externalize what needs to be and no more</li>
- * </ul>
+ * @author crazybob@google.com (Bob Lee)
  */
-package com.google.inject;
+public class Objects {
+
+  /**
+   * Detects null values.
+   *
+   * @param t value
+   * @param message to display in the event of a null
+   * @return t
+   */
+  public static <T> T nonNull(T t, String message) {
+    if (t == null) {
+      throw new NullPointerException(message);
+    }
+    return t;
+  }
+}

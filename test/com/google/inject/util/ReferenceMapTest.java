@@ -16,8 +16,9 @@
 
 package com.google.inject.util;
 
-import static com.google.inject.util.ReferenceType.*;
-import com.google.inject.util.ReferenceMap;
+import static com.google.inject.util.ReferenceType.SOFT;
+import static com.google.inject.util.ReferenceType.STRONG;
+import static com.google.inject.util.ReferenceType.WEAK;
 
 import junit.framework.TestCase;
 
@@ -31,13 +32,12 @@ import java.util.concurrent.ConcurrentMap;
  * @author crazybob@google.com (Bob Lee)
  * @author mbostock@google.com (Mike Bostock)
  */
+@SuppressWarnings({"unchecked"})
 public class ReferenceMapTest extends TestCase {
 
   private enum CleanupMode {
     ENQUEUE_KEY, ENQUEUE_VALUE, GC;
   }
-
-
 
   public void testValueCleanupWithWeakKey() {
     ReferenceMap map = new ReferenceMap(WEAK, STRONG);
@@ -45,29 +45,11 @@ public class ReferenceMapTest extends TestCase {
     assertCleanup(map, CleanupMode.GC);
   }
 
-  /*
-   * commented out because this test is undependable
-  public void testValueCleanupWithSoftKey() {
-    ReferenceMap map = new ReferenceMap(SOFT, STRONG);
-    map.put(new Object(), new Object());
-    assertCleanup(map, CleanupMode.GC);
-  }
-  */
-
   public void testKeyCleanupWithWeakValue() {
     ReferenceMap map = new ReferenceMap(STRONG, WEAK);
     map.put(new Object(), new Object());
     assertCleanup(map, CleanupMode.GC);
   }
-
-  /*
-   * commented out because this test is undependable
-  public void testKeyCleanupWithSoftValue() {
-    ReferenceMap map = new ReferenceMap(STRONG, SOFT);
-    map.put(new Object(), new Object());
-    assertCleanup(map, CleanupMode.GC);
-  }
-  */
 
   public void testInternedValueCleanupWithWeakKey() {
     ReferenceMap map = new ReferenceMap(WEAK, STRONG);

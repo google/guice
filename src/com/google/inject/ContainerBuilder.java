@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -36,6 +37,9 @@ import java.util.logging.Logger;
  *   <li>Injects the current {@link Container}.
  *   <li>Injects the {@link Logger} for the injected member's declaring class.
  * </ul>
+ *
+ * <p>Converts constants as needed from {@code String} to any primitive type
+ * in addition to {@code enum} and {@code Class}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -128,23 +132,23 @@ public final class ContainerBuilder {
     InternalFactory<T> internalFactory =
         new InternalFactory<T>() {
 
-      public T create(InternalContext context) {
-        try {
-          Context externalContext = context.getExternalContext();
-          return factory.create(externalContext);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
+          public T create(InternalContext context) {
+            try {
+              Context externalContext = context.getExternalContext();
+              return factory.create(externalContext);
+            } catch (Exception e) {
+              throw new RuntimeException(e);
+            }
+          }
 
-      public String toString() {
-        return new LinkedHashMap<String, Object>() {{
-          put("type", type);
-          put("name", name);
-          put("factory", factory);
-        }}.toString();
-      }
-    };
+          public String toString() {
+            return new LinkedHashMap<String, Object>() {{
+              put("type", type);
+              put("name", name);
+              put("factory", factory);
+            }}.toString();
+          }
+        };
 
     return factory(Key.newInstance(type, name), internalFactory, scope);
   }
@@ -305,18 +309,38 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Convenience method.&nbsp;Equivalent to {@code alias(type, Container.DEFAULT_NAME,
-   * type)}.
+   * Maps constant names to values.
+   */
+  public ContainerBuilder properties(Map<String, String> properties) {
+    for (Map.Entry<String, String> entry : properties.entrySet()) {
+      constant(entry.getKey(), entry.getValue());
+    }
+    return this;
+  }
+
+  /**
+   * Maps constant names to values.
+   */
+  public ContainerBuilder properties(Properties properties) {
+    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+      constant((String) entry.getKey(), (String) entry.getValue());
+    }
+    return this;
+  }
+
+  /**
+   * Convenience method.&nbsp;Equivalent to {@code alias(type,
+   * Container.DEFAULT_NAME, type)}.
    *
    * @see #alias(Class, String, String)
    */
   public <T> ContainerBuilder alias(Class<T> type, String alias) {
     return alias(type, Container.DEFAULT_NAME, alias);
   }
-  
+
   /**
-   * Maps an existing factory to a new name. 
-   * 
+   * Maps an existing factory to a new name.
+   *
    * @param type of dependency
    * @param name of dependency
    * @param alias of to the dependency
@@ -325,21 +349,22 @@ public final class ContainerBuilder {
   public <T> ContainerBuilder alias(Class<T> type, String name, String alias) {
     return alias(Key.newInstance(type, name), Key.newInstance(type, alias));
   }
-  
+
   /**
-   * Maps an existing dependency. All methods in this class ultimately funnel through
-   * here.
+   * Maps an existing dependency. All methods in this class ultimately funnel
+   * through here.
    */
+  @SuppressWarnings({"unchecked"})
   private <T> ContainerBuilder alias(final Key<T> key,
       final Key<T> aliasKey) {
     ensureNotCreated();
     checkKey(aliasKey);
-    
-    final InternalFactory<? extends T> scopedFactory = 
-      (InternalFactory<? extends T>)factories.get(key);
+
+    final InternalFactory<? extends T> scopedFactory =
+        (InternalFactory<? extends T>) factories.get(key);
     if (scopedFactory == null) {
-        throw new DependencyException(
-                "Dependency mapping for " + key + " doesn't exists.");
+      throw new DependencyException(
+          "Dependency mapping for " + key + " doesn't exists.");
     }
     factories.put(aliasKey, scopedFactory);
     return this;
@@ -420,22 +445,7 @@ public final class ContainerBuilder {
    */
   private <T> ContainerBuilder constant(final Class<T> type, final String name,
       final T value) {
-    InternalFactory<T> factory = new InternalFactory<T>() {
-      public T create(InternalContext ignored) {
-        return value;
-      }
-
-      public String toString() {
-        return new LinkedHashMap<String, Object>() {
-          {
-            put("type", type);
-            put("name", name);
-            put("value", value);
-          }
-        }.toString();
-      }
-    };
-
+    InternalFactory<T> factory = new ConstantFactory<T>(value);
     return factory(Key.newInstance(type, name), factory, Scope.DEFAULT);
   }
 

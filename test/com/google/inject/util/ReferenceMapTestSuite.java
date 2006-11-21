@@ -35,6 +35,7 @@ import java.util.Set;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
+@SuppressWarnings({"unchecked"})
 public class ReferenceMapTestSuite {
 
   public static Test suite() {

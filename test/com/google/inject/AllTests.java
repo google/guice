@@ -32,6 +32,7 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
+    suite.addTestSuite(ConstantConversionTest.class);
     suite.addTestSuite(ContainerTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(StaticInjectionTest.class);
@@ -39,12 +40,10 @@ public class AllTests {
     suite.addTestSuite(FactoryTest.class);
     suite.addTestSuite(SuperclassTest.class);
 
-    // util.
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(ReferenceMapTest.class);
-    suite.addTestSuite(ReferenceCacheTest.class);
-
     suite.addTest(ReferenceMapTestSuite.suite());
+    suite.addTestSuite(ReferenceCacheTest.class);
 
     return suite;
   }

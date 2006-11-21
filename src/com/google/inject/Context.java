@@ -51,7 +51,7 @@ public interface Context {
   Class<?> getType();
 
   /**
-   * Gets the name of the injection specified by {@link Inject#value()}.
+   * Gets the name of the injection specified by {@link @Inject#name()}.
    */
   String getName();
 }

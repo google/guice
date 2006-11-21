@@ -30,11 +30,12 @@ class InternalContext {
   final ContainerImpl container;
   final Map<Object, ConstructionContext<?>> constructionContexts =
       new HashMap<Object, ConstructionContext<?>>();
-  Scope.Strategy scopeStrategy;
+  final Scope.Strategy scopeStrategy;
   ExternalContext<?> externalContext;
 
-  InternalContext(ContainerImpl container) {
+  InternalContext(ContainerImpl container, Scope.Strategy scopeStrategy) {
     this.container = container;
+    this.scopeStrategy = scopeStrategy;
   }
 
   public Container getContainer() {
@@ -47,12 +48,8 @@ class InternalContext {
 
   Scope.Strategy getScopeStrategy() {
     if (scopeStrategy == null) {
-      scopeStrategy = container.localScopeStrategy.get();
-
-      if (scopeStrategy == null) {
-        throw new IllegalStateException("Scope strategy not set. "
-            + "Please call Container.setScopeStrategy().");
-      }
+      throw new IllegalStateException("Scope strategy not set. "
+          + "Please call Container.setScopeStrategy().");
     }
 
     return scopeStrategy;

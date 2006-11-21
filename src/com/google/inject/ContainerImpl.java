@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.util.ReferenceCache;
+import com.google.inject.util.Strings;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -29,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,9 @@ import java.util.Map;
  */
 class ContainerImpl implements Container {
 
+  private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS =
+      new PrimitiveConverters();
+
   final Map<Key<?>, InternalFactory<?>> factories;
 
   ContainerImpl(Map<Key<?>, InternalFactory<?>> factories) {
@@ -48,8 +53,62 @@ class ContainerImpl implements Container {
   }
 
   @SuppressWarnings("unchecked")
-  <T> InternalFactory<? extends T> getFactory(Key<T> key) {
-    return (InternalFactory<T>) factories.get(key);
+  <T> InternalFactory<? extends T> getFactory(Member member, Key<T> key) {
+    // Do we have a factory for the specified type and name?
+    InternalFactory<T> internalFactory =
+        (InternalFactory<T>) factories.get(key);
+    if (internalFactory != null) {
+      return internalFactory;
+    }
+
+    // Do we have a constant String factory of the same name?
+    InternalFactory<String> stringFactory =
+        (InternalFactory<String>) factories.get(
+            Key.newInstance(String.class, key.getName()));
+    if (stringFactory == null
+        || !(stringFactory instanceof ConstantFactory)) {
+      return null;
+    }
+
+    Class<T> type = key.getType();
+
+    // We don't need do pass in an InternalContext because we know this is
+    // a ConstantFactory which will not use it.
+    String value = stringFactory.create(null);
+
+    // Do we need a primitive?
+    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(type);
+    if (converter != null) {
+      return new ConstantFactory<T>(converter.convert(member, key, value));
+    }
+
+    // Do we need an enum?
+    if (Enum.class.isAssignableFrom(type)) {
+      T t = null;
+      try {
+        t = (T) Enum.valueOf((Class) type, value);
+      } catch (IllegalArgumentException e) {
+        throw new ConstantConversionException(member, key, value, e);
+      }
+      return new ConstantFactory<T>(t);
+    }
+
+    // Do we need a class?
+    if (type == Class.class) {
+      try {
+        return new ConstantFactory<T>((T) Class.forName(value));
+      } catch (ClassNotFoundException e) {
+        throw new ConstantConversionException(member, key, value, e);
+      }
+    }
+
+    return null;
+  }
+
+  boolean isConstantType(Class<?> type) {
+    return PRIMITIVE_CONVERTERS.containsKey(type)
+        || Enum.class.isAssignableFrom(type)
+        || type == Class.class;
   }
 
   /**
@@ -161,7 +220,7 @@ class ContainerImpl implements Container {
       field.setAccessible(true);
 
       Key<?> key = Key.newInstance(field.getType(), name);
-      factory = container.getFactory(key);
+      factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(
             "No mapping found for dependency " + key + " in " + field + ".");
@@ -212,7 +271,7 @@ class ContainerImpl implements Container {
 
   <T> ParameterInjector<T> createParameterInjector(
       Key<T> key, Member member) throws MissingDependencyException {
-    InternalFactory<? extends T> factory = getFactory(key);
+    InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(
           "No mapping found for dependency " + key + " in " + member + ".");
@@ -300,13 +359,14 @@ class ContainerImpl implements Container {
                 constructor.getParameterAnnotations(),
                 constructor.getParameterTypes(),
                 inject.value()
-              );
+            );
       } catch (MissingDependencyException e) {
         throw new DependencyException(e);
       }
       injectors = container.injectors.get(implementation);
     }
 
+    @SuppressWarnings({"unchecked"})
     private Constructor<T> findConstructorIn(Class<T> implementation) {
       Constructor<T> found = null;
       for (Constructor<T> constructor
@@ -314,7 +374,7 @@ class ContainerImpl implements Container {
         if (constructor.getAnnotation(Inject.class) != null) {
           if (found != null) {
             throw new DependencyException("More than one constructor annotated"
-              + " with @Inject found in " + implementation + ".");
+                + " with @Inject found in " + implementation + ".");
           }
           found = constructor;
         }
@@ -436,6 +496,8 @@ class ContainerImpl implements Container {
       ConstructorInjector<T> constructor = getConstructor(implementation);
       return implementation.cast(
           constructor.construct(context, implementation));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -447,12 +509,11 @@ class ContainerImpl implements Container {
     Key<T> key = Key.newInstance(type, name);
     context.setExternalContext(ExternalContext.newInstance(null, key, this));
     try {
-      InternalFactory o = getFactory(key);
-      if (o != null) {
-          return getFactory(key).create(context);
-      } else {
-          return null;
+      InternalFactory<? extends T> factory = getFactory(null, key);
+      if (factory == null) {
+        throw new DependencyException("Missing binding for " + key + ".");
       }
+      return factory.create(context);
     } finally {
       context.setExternalContext(previous);
     }
@@ -460,6 +521,14 @@ class ContainerImpl implements Container {
 
   <T> T getInstance(Class<T> type, InternalContext context) {
     return getInstance(type, DEFAULT_NAME, context);
+  }
+
+  public boolean hasBindingFor(Key<?> key) {
+    try {
+      return getFactory(null, key) != null;
+    } catch (ConstantConversionException e) {
+      return false;
+    }
   }
 
   public void inject(final Object o) {
@@ -509,7 +578,7 @@ class ContainerImpl implements Container {
   <T> T callInContext(ContextualCallable<T> callable) {
     InternalContext[] reference = localContext.get();
     if (reference[0] == null) {
-      reference[0] = new InternalContext(this);
+      reference[0] = new InternalContext(this, localScopeStrategy.get());
       try {
         return callable.call(reference[0]);
       } finally {
@@ -557,5 +626,73 @@ class ContainerImpl implements Container {
     MissingDependencyException(String message) {
       super(message);
     }
+  }
+
+  /**
+   * Map of primitive type converters.
+   */
+  static class PrimitiveConverters extends HashMap<Class<?>, Converter<?>> {
+
+    PrimitiveConverters() {
+      putParser(Integer.class, int.class);
+      putParser(Long.class, long.class);
+      putParser(Boolean.class, boolean.class);
+      putParser(Byte.class, byte.class);
+      putParser(Short.class, short.class);
+      putParser(Float.class, float.class);
+      putParser(Double.class, double.class);
+
+      // Character doesn't follow the same pattern.
+      Converter<Character> characterConverter = new Converter<Character>() {
+        public Character convert(Member member, Key<Character> key,
+            String value) {
+          value = value.trim();
+          if (value.length() != 1) {
+            throw new ConstantConversionException(member, key, value,
+                "Length != 1.");
+          }
+          return value.charAt(0);
+        }
+      };
+      put(char.class, characterConverter);
+      put(Character.class, characterConverter);
+    }
+
+    <T> void putParser(Class<T> wrapper, final Class<T> primitive) {
+      try {
+        final Method parser = wrapper.getMethod("parse" +
+            Strings.capitalize(primitive.getName()), String.class);
+        Converter<T> converter = new Converter<T>() {
+          @SuppressWarnings({"unchecked"})
+          public T convert(Member member, Key<T> key, String value) {
+            try {
+              return (T) parser.invoke(null, value);
+            } catch (IllegalAccessException e) {
+              // This should never happen.
+              throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+              throw new ConstantConversionException(member, key, value,
+                  e.getTargetException());
+            }
+          }
+        };
+        put(wrapper, converter);
+        put(primitive, converter);
+      } catch (NoSuchMethodException e) {
+        // This should never happen.
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Converts a {@code String} to another type.
+   */
+  interface Converter<T> {
+
+    /**
+     * Converts {@code String} value.
+     */
+    T convert(Member member, Key<T> key, String value);
   }
 }

@@ -22,55 +22,23 @@ import static com.google.inject.util.ReferenceType.WEAK;
 
 import junit.framework.TestCase;
 
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ReferenceCacheTest extends TestCase {
 
-  public void testCancellation() {
-    final AtomicInteger count = new AtomicInteger();
-
-    final ReferenceCache rc = new ReferenceCache() {
-      protected Object create(Object key) {
-        try {
-          cancel();
-          Thread.sleep(10);
-          return null;
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
+  public void testRuntimeException() {
+    class CreationException extends RuntimeException {}
+    try {
+      new ReferenceCache() {
+        protected Object create(Object key) {
+          throw new CreationException();
         }
-      }
-    };
-
-    Thread[] threads = new Thread[3];
-    for (int i = 0; i < 3; i++) {
-      threads[i] = new Thread() {
-        public void run() {
-          try {
-            rc.get("foo");
-            fail();
-          } catch (CancellationException e) {
-            count.incrementAndGet();
-          }
-        }
-      };
-    }
-    for (int i = 0; i < 3; i++) {
-      threads[i].start();
-    }
-    for (int i = 0; i < 3; i++) {
-      try {
-        threads[i].join();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    assertEquals(threads.length, count.get());
+      }.get(new Object());
+      fail();
+    } catch (CreationException e) { /* expected */ }
   }
 
   public void testApply() {

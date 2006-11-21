@@ -100,4 +100,12 @@ public interface Container {
    * Removes the scope strategy for the current thread.
    */
   void removeScopeStrategy();
+
+  /**
+   * Checks whether the container has a binding for given key.
+   *
+   * @param key binding key
+   * @return {@code true} if a binding exists for the given key
+   */
+  boolean hasBindingFor(Key<?> key);
 }

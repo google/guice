@@ -16,27 +16,22 @@
 
 package com.google.inject;
 
+import static com.google.inject.util.Objects.nonNull;
+
 /**
- * Dependency mapping key. Uniquely identified by the required type and name.
+ * Binding key. Uniquely identified by the type and name.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class Key<T> {
+public class Key<T> {
 
   final Class<T> type;
   final String name;
   final int hashCode;
 
   private Key(Class<T> type, String name) {
-    if (type == null) {
-      throw new NullPointerException("Type is null.");
-    }
-    if (name == null) {
-      throw new NullPointerException("Name is null.");
-    }
-
-    this.type = type;
-    this.name = name;
+    this.type = nonNull(type, "type");
+    this.name = nonNull(name, "name");
 
     hashCode = type.hashCode() * 31 + name.hashCode();
   }
@@ -68,7 +63,7 @@ class Key<T> {
     return "[type=" + type.getName() + ", name='" + name + "']";
   }
 
-  static <T> Key<T> newInstance(Class<T> type, String name) {
+  public static <T> Key<T> newInstance(Class<T> type, String name) {
     return new Key<T>(type, name);
   }
 }

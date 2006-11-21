@@ -16,8 +16,6 @@
 
 package com.google.inject.util;
 
-import com.google.inject.util.FinalizableReference;
-
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.logging.Level;

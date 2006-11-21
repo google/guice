@@ -166,7 +166,7 @@ public class ContainerTest extends TestCase {
   }
 
   public void testInjectStatics() {
-    Container c = new ContainerBuilder()
+    new ContainerBuilder()
         .constant("s", "test")
         .constant("i", 5)
         .injectStatics(Static.class)
