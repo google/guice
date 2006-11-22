@@ -443,7 +443,7 @@ public final class ContainerBuilder {
   /**
    * Maps a constant value to the given type and name.
    */
-  private <T> ContainerBuilder constant(final Class<T> type, final String name,
+  public <T> ContainerBuilder constant(final Class<T> type, final String name,
       final T value) {
     InternalFactory<T> factory = new ConstantFactory<T>(value);
     return factory(Key.newInstance(type, name), factory, Scope.DEFAULT);
