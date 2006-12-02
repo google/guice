@@ -16,29 +16,10 @@
 
 package com.google.inject;
 
-import static java.lang.annotation.ElementType.*;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Target;
-
 /**
- * <p>Annotates members and parameters which should have their value[s]
- * injected.
- *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({METHOD, CONSTRUCTOR, FIELD, PARAMETER})
-@Retention(RUNTIME)
-public @interface Inject {
+public interface Scope2 {
 
-  /**
-   * Dependency name. Defaults to {@link Key#DEFAULT_NAME}.
-   */
-  String value() default Key.DEFAULT_NAME;
-
-  /**
-   * Whether or not injection is required. Applicable only to methods and
-   * fields (not constructors or parameters).
-   */
-  boolean required() default true;
+  <T> Factory<T> scope(Binding<T> binding);
 }

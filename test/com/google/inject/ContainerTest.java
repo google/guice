@@ -53,7 +53,7 @@ public class ContainerTest extends TestCase {
   public void testGetInstance() {
     Container container = createFooContainer();
 
-    Bar bar = container.getInstance(Bar.class, Container.DEFAULT_NAME);
+    Bar bar = container.getInstance(Bar.class, Key.DEFAULT_NAME);
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }

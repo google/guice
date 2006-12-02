@@ -65,11 +65,6 @@ package com.google.inject;
 public interface Container {
 
   /**
-   * Default dependency name.
-   */
-  String DEFAULT_NAME = "default";
-
-  /**
    * Injects dependencies into the fields and methods of an existing object.
    */
   void inject(Object o);

@@ -73,11 +73,11 @@ public final class ContainerBuilder {
    */
   public ContainerBuilder() {
     // In the current container as the default Container implementation.
-    factories.put(Key.newInstance(Container.class, Container.DEFAULT_NAME),
+    factories.put(Key.newInstance(Container.class, Key.DEFAULT_NAME),
         CONTAINER_FACTORY);
 
     // Inject the logger for the injected member's declaring class.
-    factories.put(Key.newInstance(Logger.class, Container.DEFAULT_NAME),
+    factories.put(Key.newInstance(Logger.class, Key.DEFAULT_NAME),
         LOGGER_FACTORY);
   }
 
@@ -161,7 +161,7 @@ public final class ContainerBuilder {
    */
   public <T> ContainerBuilder factory(Class<T> type,
       Factory<? extends T> factory, Scope scope) {
-    return factory(type, Container.DEFAULT_NAME, factory, scope);
+    return factory(type, Key.DEFAULT_NAME, factory, scope);
   }
 
   /**
@@ -183,7 +183,7 @@ public final class ContainerBuilder {
    */
   public <T> ContainerBuilder factory(Class<T> type,
       Factory<? extends T> factory) {
-    return factory(type, Container.DEFAULT_NAME, factory, Scope.DEFAULT);
+    return factory(type, Key.DEFAULT_NAME, factory, Scope.DEFAULT);
   }
 
   /**
@@ -255,7 +255,7 @@ public final class ContainerBuilder {
    */
   public <T> ContainerBuilder factory(Class<T> type,
       Class<? extends T> implementation) {
-    return factory(type, Container.DEFAULT_NAME, implementation);
+    return factory(type, Key.DEFAULT_NAME, implementation);
   }
 
   /**
@@ -265,7 +265,7 @@ public final class ContainerBuilder {
    * @see #factory(Class, String, Class)
    */
   public <T> ContainerBuilder factory(Class<T> type) {
-    return factory(type, Container.DEFAULT_NAME, type);
+    return factory(type, Key.DEFAULT_NAME, type);
   }
 
   /**
@@ -285,7 +285,7 @@ public final class ContainerBuilder {
    */
   public <T> ContainerBuilder factory(Class<T> type,
       Class<? extends T> implementation, Scope scope) {
-    return factory(type, Container.DEFAULT_NAME, implementation, scope);
+    return factory(type, Key.DEFAULT_NAME, implementation, scope);
   }
 
   /**
@@ -295,7 +295,7 @@ public final class ContainerBuilder {
    * @see #factory(Class, String, Class, Scope)
    */
   public <T> ContainerBuilder factory(Class<T> type, Scope scope) {
-    return factory(type, Container.DEFAULT_NAME, type, scope);
+    return factory(type, Key.DEFAULT_NAME, type, scope);
   }
 
   /**
@@ -335,7 +335,7 @@ public final class ContainerBuilder {
    * @see #alias(Class, String, String)
    */
   public <T> ContainerBuilder alias(Class<T> type, String alias) {
-    return alias(type, Container.DEFAULT_NAME, alias);
+    return alias(type, Key.DEFAULT_NAME, alias);
   }
 
   /**
@@ -473,7 +473,7 @@ public final class ContainerBuilder {
    * Container.DEFAULT_NAME)}.
    */
   public boolean contains(Class<?> type) {
-    return contains(type, Container.DEFAULT_NAME);
+    return contains(type, Key.DEFAULT_NAME);
   }
 
   /**

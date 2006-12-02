@@ -520,7 +520,7 @@ class ContainerImpl implements Container {
   }
 
   <T> T getInstance(Class<T> type, InternalContext context) {
-    return getInstance(type, DEFAULT_NAME, context);
+    return getInstance(type, Key.DEFAULT_NAME, context);
   }
 
   public boolean hasBindingFor(Key<?> key) {
