@@ -90,7 +90,7 @@ public final class ContainerBuilder {
     ensureNotCreated();
     checkKey(key);
     final InternalFactory<? extends T> scopedFactory =
-        scope.scopeFactory(key.getType(), key.getName(), factory);
+        scope.scopeFactory(key.getRawType(), key.getName(), factory);
     factories.put(key, scopedFactory);
     if (scope == Scope.SINGLETON) {
       singletonFactories.add(new InternalFactory<T>() {

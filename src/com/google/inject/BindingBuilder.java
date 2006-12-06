@@ -141,7 +141,7 @@ public class BindingBuilder<T> {
         this.constructor =
             context.getContainerImpl().getConstructor(implementation);
       }
-      return (I) constructor.construct(context, key.getType());
+      return (I) constructor.construct(context, key.getRawType());
     }
 
     public String toString() {

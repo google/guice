@@ -39,11 +39,11 @@ class ConstantConversionException extends DependencyException {
       String reason) {
     return member == null
         ? "Error converting '" + value + "' to "
-            + key.getType().getSimpleName()
+            + key.getRawType().getSimpleName()
             + " while getting dependency named '" + key.getName()
             + "'. Reason: " + reason
         : "Error converting '" + value + "' to "
-            + key.getType().getSimpleName() + " while injecting "
+            + key.getRawType().getSimpleName() + " while injecting "
             + member.getName() + " with dependency named '" + key.getName()
             + "' in " + member.getDeclaringClass().getSimpleName()
             + ". Reason: " + reason;

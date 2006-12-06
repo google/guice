@@ -70,7 +70,7 @@ class ContainerImpl implements Container {
       return null;
     }
 
-    Class<T> type = key.getType();
+    Class<T> type = key.getRawType();
 
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
