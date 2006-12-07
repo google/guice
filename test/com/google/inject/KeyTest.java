@@ -19,6 +19,8 @@ public class KeyTest extends TestCase {
     Method m = getClass().getMethod("foo", List.class, List.class);
     Type[] types = m.getGenericParameterTypes();
     assertEquals(types[0], types[1]);
-    System.err.println(types[0]);
+    Key<List<String>> k = new Key<List<String>>() {};
+    assertEquals(types[0], k.getType());
+    assertFalse(types[0].equals(new Key<List<Integer>>() {}.getType()));
   }
 }

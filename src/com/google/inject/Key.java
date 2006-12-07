@@ -140,6 +140,13 @@ public abstract class Key<T> {
   }
 
   /**
+   * Gets the key corresponding the raw type.
+   */
+  public Key<?> rawKey() {
+    return Key.newInstance(rawType, name);
+  }
+
+  /**
    * Compares the binding name and type. Uses {@code String} representations
    * to compare types as the reflection API doesn't give us a lot of options
    * when it comes to comparing parameterized types.
