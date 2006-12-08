@@ -64,7 +64,7 @@ class ContainerImpl implements Container {
     // Do we have a constant String factory of the same name?
     InternalFactory<String> stringFactory =
         (InternalFactory<String>) factories.get(
-            Key.newInstance(String.class, key.getName()));
+            Key.get(String.class, key.getName()));
     if (stringFactory == null
         || !(stringFactory instanceof ConstantFactory)) {
       return null;
@@ -219,7 +219,7 @@ class ContainerImpl implements Container {
       this.field = field;
       field.setAccessible(true);
 
-      Key<?> key = Key.newInstance(field.getType(), name);
+      Key<?> key = Key.get(field.getType(), name);
       factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(
@@ -262,7 +262,7 @@ class ContainerImpl implements Container {
     for (Class<?> parameterType : parameterTypes) {
       Inject annotation = findInject(annotationsIterator.next());
       String name = annotation == null ? defaultName : annotation.value();
-      Key<?> key = Key.newInstance(parameterType, name);
+      Key<?> key = Key.get(parameterType, name);
       parameterInjectors.add(createParameterInjector(key, member));
     }
 
@@ -506,7 +506,7 @@ class ContainerImpl implements Container {
   @SuppressWarnings("unchecked")
   <T> T getInstance(Class<T> type, String name, InternalContext context) {
     ExternalContext<?> previous = context.getExternalContext();
-    Key<T> key = Key.newInstance(type, name);
+    Key<T> key = Key.get(type, name);
     context.setExternalContext(ExternalContext.newInstance(null, key, this));
     try {
       InternalFactory<? extends T> factory = getFactory(null, key);

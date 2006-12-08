@@ -73,11 +73,11 @@ public final class ContainerBuilder {
    */
   public ContainerBuilder() {
     // In the current container as the default Container implementation.
-    factories.put(Key.newInstance(Container.class, Key.DEFAULT_NAME),
+    factories.put(Key.get(Container.class, Key.DEFAULT_NAME),
         CONTAINER_FACTORY);
 
     // Inject the logger for the injected member's declaring class.
-    factories.put(Key.newInstance(Logger.class, Key.DEFAULT_NAME),
+    factories.put(Key.get(Logger.class, Key.DEFAULT_NAME),
         LOGGER_FACTORY);
   }
 
@@ -150,7 +150,7 @@ public final class ContainerBuilder {
           }
         };
 
-    return factory(Key.newInstance(type, name), internalFactory, scope);
+    return factory(Key.get(type, name), internalFactory, scope);
   }
 
   /**
@@ -224,7 +224,7 @@ public final class ContainerBuilder {
       }
     };
 
-    return factory(Key.newInstance(type, name), factory, scope);
+    return factory(Key.get(type, name), factory, scope);
   }
 
   /**
@@ -347,7 +347,7 @@ public final class ContainerBuilder {
    * @return this builder
    */
   public <T> ContainerBuilder alias(Class<T> type, String name, String alias) {
-    return alias(Key.newInstance(type, name), Key.newInstance(type, alias));
+    return alias(Key.get(type, name), Key.get(type, alias));
   }
 
   /**
@@ -446,7 +446,7 @@ public final class ContainerBuilder {
   public <T> ContainerBuilder constant(final Class<T> type, final String name,
       final T value) {
     InternalFactory<T> factory = new ConstantFactory<T>(value);
-    return factory(Key.newInstance(type, name), factory, Scope.DEFAULT);
+    return factory(Key.get(type, name), factory, Scope.DEFAULT);
   }
 
   /**
@@ -465,7 +465,7 @@ public final class ContainerBuilder {
    * name.
    */
   public boolean contains(Class<?> type, String name) {
-    return factories.containsKey(Key.newInstance(type, name));
+    return factories.containsKey(Key.get(type, name));
   }
 
   /**

@@ -29,7 +29,7 @@ public class FactoryTest extends TestCase {
   public void testInjection() throws Exception {
     ContainerBuilder cb = new ContainerBuilder();
 
-    // Called from getInstance().
+    // Called from get().
     cb.factory(Foo.class, createFactory(Foo.class, "default", null));
 
     // Called during singleton loading.

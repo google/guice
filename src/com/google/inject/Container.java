@@ -81,7 +81,7 @@ public interface Container {
   <T> T getInstance(Class<T> type, String name);
 
   /**
-   * Convenience method.&nbsp;Equivalent to {@code getInstance(type,
+   * Convenience method.&nbsp;Equivalent to {@code get(type,
    * DEFAULT_NAME)}.
    */
   <T> T getInstance(Class<T> type);

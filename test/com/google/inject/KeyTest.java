@@ -15,12 +15,20 @@ public class KeyTest extends TestCase {
 
   public void foo(List<String> a, List<String> b) {}
 
-  public void testEquality() throws Exception {
+  public void testEquality() {
+    assertEquals(
+      new Key<List<String>>("foo") {},
+      Key.get(new TypeToken<List<String>>() {}, "foo")
+    );
+  }
+
+  public void testTypeEquality() throws Exception {
     Method m = getClass().getMethod("foo", List.class, List.class);
     Type[] types = m.getGenericParameterTypes();
     assertEquals(types[0], types[1]);
     Key<List<String>> k = new Key<List<String>>() {};
-    assertEquals(types[0], k.getType());
-    assertFalse(types[0].equals(new Key<List<Integer>>() {}.getType()));
+    assertEquals(types[0], k.getTypeToken().getType());
+    assertFalse(types[0].equals(
+        new Key<List<Integer>>() {}.getTypeToken().getType()));
   }
 }

@@ -19,10 +19,19 @@ package com.google.inject;
 import static com.google.inject.util.Objects.nonNull;
 
 import java.lang.reflect.Type;
-import java.lang.reflect.ParameterizedType;
 
 /**
- * Binding key. Composed of the type to be injected and a name.
+ * Binding key. A type token and a name. Matches the type and name ({@link
+ * Inject#value()}) at a point of injection.
+ *
+ * <p>For example, {@code new Key<List<String>>("names") {}} will match:
+ *
+ * <pre>
+ *   @Inject("names")
+ *   public void setList(List<String> list) {
+ *     ...
+ *   }
+ * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -33,30 +42,26 @@ public abstract class Key<T> {
    */
   public static final String DEFAULT_NAME = "default";
 
-  final Class<T> rawType;
   final String name;
-  final String typeString;
-  final Type type;
+  final TypeToken<T> typeToken;
+  final int hashCode;
 
   /**
    * Constructs a new key. Derives the type from this class's type parameter.
-   * Requires client to create an empty anonymous class.
+   *
+   * <p>Clients create an empty anonymous subclass. Doing so embeds the type
+   * parameter in the anonymous class's type hierarchy so we can reconstitute
+   * it at runtime despite erasure.
    *
    * <p>Example usage for a binding of type {@code Foo} named "bar":
    * {@code new Key<Foo>("bar") {}}.
-   *
-   * <p>The curly braces in the example serve to create an empty anonymous
-   * class.
    */
+  @SuppressWarnings({"unchecked"})
   protected Key(String name) {
     this.name = nonNull(name, "name");
-    Type superclass = getClass().getGenericSuperclass();
-    if (superclass instanceof Class) {
-      throw new RuntimeException("Missing type parameter.");
-    }
-    this.type = ((ParameterizedType) superclass).getActualTypeArguments()[0];
-    this.rawType = getRawType(type);
-    this.typeString = toString(type);
+    this.typeToken =
+        (TypeToken<T>) TypeToken.fromSuperclassTypeParameter(getClass());
+    this.hashCode = computeHashCode();
   }
 
   /**
@@ -67,58 +72,34 @@ public abstract class Key<T> {
     this(DEFAULT_NAME);
   }
 
+  /**
+   * Unsafe. Constructs a key from a manually specified type.
+   */
+  @SuppressWarnings({"unchecked"})
   private Key(Type type, String name) {
     this.name = nonNull(name, "name");
-    this.type = nonNull(type, "type");
-    this.rawType = getRawType(nonNull(type, "type"));
-    this.typeString = toString(type);
+    this.typeToken = (TypeToken<T>) TypeToken.get(type);
+    this.hashCode = computeHashCode();
   }
 
   /**
-   * Calls {@code getName()} on {@code Class}es and {@code toString()} on other
-   * {@code Type}s.
+   * Constructs a key from a manually specified type token.
    */
-  private static String toString(Type type) {
-    return type instanceof Class<?>
-        ? ((Class<?>) type).getName()
-        : type.toString();
+  private Key(TypeToken<T> typeToken, String name) {
+    this.name = nonNull(name, "name");
+    this.typeToken = typeToken;
+    this.hashCode = computeHashCode();
   }
 
-  @SuppressWarnings({"unchecked"})
-  private static <T> Class<T> getRawType(Type type) {
-    if (type instanceof Class<?>) {
-      // type is a normal class.
-      return (Class<T>) type;
-    } else {
-      // type is a parameterized type.
-      if (!(type instanceof ParameterizedType)) {
-        unexpectedType(type, ParameterizedType.class);
-      }
-      ParameterizedType parameterizedType = (ParameterizedType) type;
-
-      // I'm not exactly sure why getRawType() returns Type instead of Class.
-      // Neal isn't either but suspects some pathological case related
-      // to nested classes exists.
-      Type rawType = parameterizedType.getRawType();
-      if (!(rawType instanceof Class<?>)) {
-        unexpectedType(rawType, Class.class);
-      }
-      return (Class<T>) rawType;
-    }
-  }
-
-  static void unexpectedType(Type token, Class<?> expected) {
-    throw new AssertionError(
-        "Unexpected type. Expected: " + expected.getName()
-        + ", got: " + token.getClass().getName()
-        + ", for type token: " + token.toString() + ".");
+  private int computeHashCode() {
+    return typeToken.hashCode() * 31 + name.hashCode();
   }
 
   /**
-   * Gets the raw type of this binding.
+   * Gets token representing the type to be injected.
    */
-  public Class<T> getRawType() {
-    return rawType;
+  public TypeToken<T> getTypeToken() {
+    return typeToken;
   }
 
   /**
@@ -128,71 +109,81 @@ public abstract class Key<T> {
     return name;
   }
 
-  /**
-   * Gets the type of this binding.
-   */
-  public Type getType() {
-    return type;
-  }
-
   public int hashCode() {
-    return typeString.hashCode();
+    return this.hashCode;
   }
 
-  /**
-   * Gets the key corresponding the raw type.
-   */
-  public Key<?> rawKey() {
-    return Key.newInstance(rawType, name);
+  @Deprecated
+  Class<T> getRawType() {
+    return (Class<T>) typeToken.getRawType();
   }
 
-  /**
-   * Compares the binding name and type. Uses {@code String} representations
-   * to compare types as the reflection API doesn't give us a lot of options
-   * when it comes to comparing parameterized types.
-   *
-   * @inheritDoc
-   */
   public boolean equals(Object o) {
     if (o == this) {
       return true;
     }
-    if (!(o instanceof Key)) {
+    if (!(o instanceof Key<?>)) {
       return false;
     }
-    Key other = (Key) o;
-    return name.equals(other.name) && typeString.equals(other.typeString);
+    Key<?> other = (Key<?>) o;
+    return name.equals(other.name) && typeToken.equals(other.typeToken);
   }
 
   public String toString() {
-    return "Key[type=" + typeString + ", name='" + name + "']";
+    return Key.class.getSimpleName()
+        + "[type=" + typeToken + ", name='" + name + "']";
   }
 
   /**
-   * Constructs a key from a raw type.
+   * Gets a key for a {@code Class}. Defaults name to {@link #DEFAULT_NAME}.
    */
-  public static <T> Key<T> newInstance(Class<T> type) {
-    return new Key<T>(type, DEFAULT_NAME) {};
+  public static <T> Key<T> get(Class<T> type) {
+    return new ManualKey<T>(type, DEFAULT_NAME);
   }
 
   /**
-   * Constructs a key from a raw type and a name.
+   * Gets a key for a {@code Class} and a name.
    */
-  public static <T> Key<T> newInstance(Class<T> type, String name) {
-    return new Key<T>(type, name) {};
+  public static <T> Key<T> get(Class<T> type, String name) {
+    return new ManualKey<T>(type, name);
   }
 
   /**
-   * Constructs a key from a type.
+   * Gets a key for a type. Defaults name to {@link #DEFAULT_NAME}.
    */
-  public static Key<?> newInstance(Type type) {
-    return new Key<Object>(type, DEFAULT_NAME) {};
+  public static Key<?> get(Type type) {
+    return new ManualKey<Object>(type, DEFAULT_NAME);
   }
 
   /**
-   * Constructs a key from a type and a name.
+   * Gets a key for a type and a name.
    */
-  public static Key<?> newInstance(Type type, String name) {
-    return new Key<Object>(type, name) {};
+  public static Key<?> get(Type type, String name) {
+    return new ManualKey<Object>(type, name);
+  }
+
+  /**
+   * Gets a key for a type token. Defaults name to {@link #DEFAULT_NAME}.
+   */
+  public static <T> Key<T> get(TypeToken<T> typeToken) {
+    return new ManualKey<T>(typeToken, DEFAULT_NAME);
+  }
+
+  /**
+   * Gets key for a type token and a name.
+   */
+  public static <T> Key<T> get(TypeToken<T> typeToken, String name) {
+    return new ManualKey<T>(typeToken, name);
+  }
+
+  private static class ManualKey<T> extends Key<T> {
+
+    private ManualKey(Type type, String name) {
+      super(type, name);
+    }
+
+    private ManualKey(TypeToken<T> typeToken, String name) {
+      super(typeToken, name);
+    }
   }
 }
