@@ -16,50 +16,63 @@
 
 package com.google.inject;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.google.inject.util.Objects.nonNull;
+import com.google.inject.util.Objects;
+
+import java.util.*;
 
 /**
- * Builds a binding from a type and optional name to a given implementation
- * in a given scope. Uses the given type as the implementation by default.
+ * Builds a binding.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public class BindingBuilder<T> {
 
-  final Key<T> key;
-  String source;
+  final SourceProvider sourceProvider;
+  Key<T> key;
+  Object source;
   InternalFactory<? extends T> factory;
-  Factory<? extends T> externalFactory;
-  final List<Key<? super T>> exportKeys = new ArrayList<Key<? super T>>();
+  boolean eagerlyLoad = false;
+
+  /**
+   * Keeps error messages in order and prevents duplicates.
+   */
+  Set<ErrorMessage> errorMessages = new LinkedHashSet<ErrorMessage>();
 
   /**
    * Creates a new binding for the given key.
    */
-  public BindingBuilder(Key<T> key) {
-    this.key = key;
+  BindingBuilder(Key<T> key, SourceProvider sourceProvider) {
+    this.key = nonNull(key, "key");
+    this.sourceProvider = nonNull(sourceProvider, "sourceProvider");
   }
 
   /**
-   * Exports this binding.
+   * Specifies that this binding should load as soon as its scope loads. For
+   * example, a singleton will load at startup.
    */
-  public BindingBuilder exportBinding() {
-    return exportBinding(this.key);
+  public BindingBuilder<T> eagerlyLoad() {
+    this.eagerlyLoad = true;
+    return this;
   }
 
   /**
-   * Exports this binding with the given key.
+   * Sets the name of this dependency.
    */
-  public BindingBuilder exportBinding(Key<? super T> exportKey) {
-    this.exportKeys.add(exportKey);
+  public BindingBuilder<T> named(String name) {
+    if (!this.key.hasDefaultName()) {
+      errorMessages.add(
+          new ErrorMessage(source, "Name set more than once."));
+    }
+
+    this.key = this.key.rename(name);
     return this;
   }
 
   /**
    * Sets the implementation to the given class.
    */
-  public <I extends T> BindingBuilder implementation(
-      final Class<I> implementation) {
+  public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
     ensureImplementationIsNotSet();
     this.factory = new DefaultFactory<I>(implementation);
     return this;
@@ -68,10 +81,8 @@ public class BindingBuilder<T> {
   /**
    * Uses the given factory to create instances of the implementation.
    */
-  public BindingBuilder factory(final Factory<? extends T> factory) {
+  public BindingBuilder<T> to(final Factory<? extends T> factory) {
     ensureImplementationIsNotSet();
-
-    this.externalFactory = factory;
 
     this.factory = new InternalFactory<T>() {
       public T create(InternalContext context) {
@@ -91,33 +102,40 @@ public class BindingBuilder<T> {
     return this;
   }
 
-  private <I extends T> void ensureImplementationIsNotSet() {
+  /**
+   * Sets the implementation to the given class.
+   */
+  public BindingBuilder<T> to(Key<? extends T> implementation) {
+    ensureImplementationIsNotSet();
+//    this.factory = new DefaultFactory<I>(implementation);
+    return this;
+  }
+
+  private void ensureImplementationIsNotSet() {
     if (factory != null) {
-      throw new IllegalStateException("An implementation is already set.");
+      errorMessages.add(
+          new ErrorMessage(source, "Implementation set more than once."));
     }
   }
 
   /**
    * Specifies the scope.
    */
-  public BindingBuilder scope(Scope scope) {
+  public BindingBuilder<T> in(Scope scope) {
     if (scope != null) {
-      throw new IllegalStateException("Scope is already set.");
+      errorMessages.add(
+          new ErrorMessage(source, "Scope set more than once."));
     }
 
     return this;
   }
 
   /**
-   * Sets the source string. Useful for debugging. Contents may include the
+   * Sets the source object. Useful for debugging. Contents may include the
    * name of the file and the line number this binding came from, a code
    * snippet, etc.
    */
-  public BindingBuilder source(String source) {
-    if (source != null) {
-      throw new IllegalStateException("Source is already set.");
-    }
-
+  public BindingBuilder<T> from(Object source) {
     this.source = source;
     return this;
   }

@@ -96,6 +96,20 @@ public abstract class Key<T> {
   }
 
   /**
+   * Returns {@code true} if this key has the default name.
+   */
+  public boolean hasDefaultName() {
+    return DEFAULT_NAME.equals(this.name);
+  }
+
+  /**
+   * Returns a new key with the same type as this key and the given name,
+   */
+  public Key<T> rename(String name) {
+    return new SimpleKey<T>(this.typeToken, name);    
+  }
+
+  /**
    * Gets token representing the type to be injected.
    */
   public TypeToken<T> getTypeToken() {
@@ -138,51 +152,51 @@ public abstract class Key<T> {
    * Gets a key for a {@code Class}. Defaults name to {@link #DEFAULT_NAME}.
    */
   public static <T> Key<T> get(Class<T> type) {
-    return new ManualKey<T>(type, DEFAULT_NAME);
+    return new SimpleKey<T>(type, DEFAULT_NAME);
   }
 
   /**
    * Gets a key for a {@code Class} and a name.
    */
   public static <T> Key<T> get(Class<T> type, String name) {
-    return new ManualKey<T>(type, name);
+    return new SimpleKey<T>(type, name);
   }
 
   /**
    * Gets a key for a type. Defaults name to {@link #DEFAULT_NAME}.
    */
   public static Key<?> get(Type type) {
-    return new ManualKey<Object>(type, DEFAULT_NAME);
+    return new SimpleKey<Object>(type, DEFAULT_NAME);
   }
 
   /**
    * Gets a key for a type and a name.
    */
   public static Key<?> get(Type type, String name) {
-    return new ManualKey<Object>(type, name);
+    return new SimpleKey<Object>(type, name);
   }
 
   /**
    * Gets a key for a type token. Defaults name to {@link #DEFAULT_NAME}.
    */
   public static <T> Key<T> get(TypeToken<T> typeToken) {
-    return new ManualKey<T>(typeToken, DEFAULT_NAME);
+    return new SimpleKey<T>(typeToken, DEFAULT_NAME);
   }
 
   /**
    * Gets key for a type token and a name.
    */
   public static <T> Key<T> get(TypeToken<T> typeToken, String name) {
-    return new ManualKey<T>(typeToken, name);
+    return new SimpleKey<T>(typeToken, name);
   }
 
-  private static class ManualKey<T> extends Key<T> {
+  private static class SimpleKey<T> extends Key<T> {
 
-    private ManualKey(Type type, String name) {
+    private SimpleKey(Type type, String name) {
       super(type, name);
     }
 
-    private ManualKey(TypeToken<T> typeToken, String name) {
+    private SimpleKey(TypeToken<T> typeToken, String name) {
       super(typeToken, name);
     }
   }

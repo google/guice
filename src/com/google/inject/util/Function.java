@@ -22,7 +22,7 @@ package com.google.inject.util;
  * <code>Function&lt;String,Integer&gt;</code> and transform integers in String
  * format to Integer format.
  *
- * <p>The transformation on the source object does not necessarily result in
+ * <p>The transformation on the from object does not necessarily result in
  * an object of a different type.  For example, a
  * {@code FarenheitToCelciusFunction} may implement
  * <code>Function&lt;Float,Float&gt;</code>.
@@ -37,7 +37,7 @@ public interface Function<F,T> {
    * of type {@code T}.  Note that types {@code F} and {@code T} may or may not
    * be the same.
    *
-   * @param from The source object.
+   * @param from The from object.
    * @return The resulting object.
    */
   T apply(F from);

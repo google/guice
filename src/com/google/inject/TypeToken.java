@@ -75,7 +75,7 @@ public abstract class TypeToken<T> {
    * Gets type token from super class's type parameter.
    */
   static TypeToken<?> fromSuperclassTypeParameter(Class<?> subclass) {
-    return new ManualTypeToken<Object>(getSuperclassTypeParameter(subclass));
+    return new SimpleTypeToken<Object>(getSuperclassTypeParameter(subclass));
   }
 
   @SuppressWarnings({"unchecked"})
@@ -147,18 +147,18 @@ public abstract class TypeToken<T> {
    * Gets type token for the given {@code Type} instance.
    */
   public static TypeToken<?> get(Type type) {
-    return new ManualTypeToken<Object>(type);
+    return new SimpleTypeToken<Object>(type);
   }
 
   /**
    * Gets type token for the given {@code Class} instance.
    */
   public static <T> TypeToken<T> get(Class<T> type) {
-    return new ManualTypeToken<T>(type);
+    return new SimpleTypeToken<T>(type);
   }
 
-  private static class ManualTypeToken<T> extends TypeToken<T> {
-    public ManualTypeToken(Type type) {
+  private static class SimpleTypeToken<T> extends TypeToken<T> {
+    public SimpleTypeToken(Type type) {
       super(type);
     }
   }
