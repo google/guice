@@ -29,26 +29,27 @@ public class FactoryTest extends TestCase {
   public void testInjection() throws Exception {
     ContainerBuilder cb = new ContainerBuilder();
 
-    // Called from get().
-    cb.factory(Foo.class, createFactory(Foo.class, "default", null));
+    // Called from getInstance().
+    cb.bind(Foo.class).to(createFactory(Foo.class, "default", null));
 
     // Called during singleton loading.
-    cb.factory(Bar.class, "fooBar",
-        createFactory(Bar.class, "fooBar", null), Scope.SINGLETON);
+    cb.bind(Bar.class)
+        .named("fooBar")
+        .to(createFactory(Bar.class, "fooBar", null))
+        .in(Scope.SINGLETON);
 
-    cb.factory(Tee.class, "tee1",
-        createFactory(Tee.class, "tee1",
+    cb.bind(Tee.class).named("tee1")
+        .to(createFactory(Tee.class, "tee1",
             Bar.class.getDeclaredConstructor(Tee.class)));
 
-    cb.factory(Tee.class, "tee2",
-        createFactory(Tee.class, "tee2",
-            Bar.class.getDeclaredField("tee2")));
+    cb.bind(Tee.class).named("tee2").to(
+        createFactory(Tee.class, "tee2", Bar.class.getDeclaredField("tee2")));
 
     final Method execute = Tee.class.getDeclaredMethod(
         "execute", Bob.class, Bob.class);
-    cb.factory(Bob.class, "bob1",
+    cb.bind(Bob.class).named("bob1").to(
         createFactory(Bob.class, "bob1", execute));
-    cb.factory(Bob.class, "bob2",
+    cb.bind(Bob.class).named("bob2").to(
         createFactory(Bob.class, "bob2", execute));
 
     Container c = cb.create(true);
@@ -64,10 +65,10 @@ public class FactoryTest extends TestCase {
     assertNotNull(foo.bar.tee2.bob2);
   }
 
-  <T> Factory<T> createFactory(final Class<T> type, final String name,
-      final Member expectedMember) {
-    return new Factory<T>() {
-      public T create(Context context) throws Exception {
+  <T> ContextualFactory<T> createFactory(
+      final Class<T> type, final String name, final Member expectedMember) {
+    return new ContextualFactory<T>() {
+      public T get(Context context) {
         assertEquals(expectedMember, context.getMember());
         assertEquals(name, context.getName());
         assertEquals(type, context.getType());

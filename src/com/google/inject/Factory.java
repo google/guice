@@ -17,18 +17,14 @@
 package com.google.inject;
 
 /**
- * A custom factory. Creates objects which will be injected.
+ * Gets instances of {@code T}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface Factory<T> {
 
   /**
-   * Creates an object to be injected.
-   *
-   * @param context of this injection
-   * @return instance to be injected
-   * @throws Exception if unable to create object
+   * Gets an instance of {@code T}.
    */
-  T create(Context context) throws Exception;
+  T get();
 }

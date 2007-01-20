@@ -25,7 +25,7 @@ public class SuperclassTest extends TestCase {
 
   public void testSuperclassInjection() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.factory(Foo.class);
+    builder.bind(Foo.class);
     Container container = builder.create(false);
     Sub sub = container.inject(Sub.class);
     sub = container.inject(Sub.class);

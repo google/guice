@@ -29,5 +29,5 @@ interface InternalFactory<T> {
    * @param context of this injection
    * @return instance to be injected
    */
-  T create(InternalContext context);
+  T get(InternalContext context);
 }

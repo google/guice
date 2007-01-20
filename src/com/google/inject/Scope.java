@@ -29,7 +29,7 @@ public enum Scope {
    * One instance per injection.
    */
   DEFAULT {
-    <T> InternalFactory<? extends T> scopeFactory(Class<T> type, String name,
+    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
         InternalFactory<? extends T> factory) {
       return factory;
     }
@@ -39,14 +39,14 @@ public enum Scope {
    * One instance per container.
    */
   SINGLETON {
-    <T> InternalFactory<? extends T> scopeFactory(Class<T> type, String name,
+    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
         final InternalFactory<? extends T> factory) {
       return new InternalFactory<T>() {
         T instance;
-        public T create(InternalContext context) {
+        public T get(InternalContext context) {
           synchronized (context.getContainer()) {
             if (instance == null) {
-              instance = factory.create(context);
+              instance = factory.get(context);
             }
             return instance;
           }
@@ -67,14 +67,14 @@ public enum Scope {
    * eligible for garbage collection, i.e. memory leak.
    */
   THREAD {
-    <T> InternalFactory<? extends T> scopeFactory(Class<T> type, String name,
+    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
         final InternalFactory<? extends T> factory) {
       return new InternalFactory<T>() {
         final ThreadLocal<T> threadLocal = new ThreadLocal<T>();
-        public T create(final InternalContext context) {
+        public T get(final InternalContext context) {
           T t = threadLocal.get();
           if (t == null) {
-            t = factory.create(context);
+            t = factory.get(context);
             threadLocal.set(t);
           }
           return t;
@@ -91,14 +91,14 @@ public enum Scope {
    * One instance per request.
    */
   REQUEST {
-    <T> InternalFactory<? extends T> scopeFactory(final Class<T> type,
-        final String name, final InternalFactory<? extends T> factory) {
+    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
+        final InternalFactory<? extends T> factory) {
       return new InternalFactory<T>() {
-        public T create(InternalContext context) {
+        public T get(InternalContext context) {
           Strategy strategy = context.getScopeStrategy();
           try {
             return strategy.findInRequest(
-                type, name, toCallable(context, factory));
+                key, toCallable(context, factory));
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -115,14 +115,14 @@ public enum Scope {
    * One instance per session.
    */
   SESSION {
-    <T> InternalFactory<? extends T> scopeFactory(final Class<T> type,
-        final String name, final InternalFactory<? extends T> factory) {
+    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
+        final InternalFactory<? extends T> factory) {
       return new InternalFactory<T>() {
-        public T create(InternalContext context) {
+        public T get(InternalContext context) {
           Strategy strategy = context.getScopeStrategy();
           try {
             return strategy.findInSession(
-                type, name, toCallable(context, factory));
+                key, toCallable(context, factory));
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -139,14 +139,14 @@ public enum Scope {
    * One instance per wizard.
    */
   WIZARD {
-    <T> InternalFactory<? extends T> scopeFactory(final Class<T> type,
-        final String name, final InternalFactory<? extends T> factory) {
+    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
+        final InternalFactory<? extends T> factory) {
       return new InternalFactory<T>() {
-        public T create(InternalContext context) {
+        public T get(InternalContext context) {
           Strategy strategy = context.getScopeStrategy();
           try {
             return strategy.findInWizard(
-                type, name, toCallable(context, factory));
+                key, toCallable(context, factory));
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -163,7 +163,7 @@ public enum Scope {
       final InternalFactory<? extends T> factory) {
     return new Callable<T>() {
       public T call() throws Exception {
-        return factory.create(context);
+        return factory.get(context);
       }
     };
   }
@@ -172,7 +172,7 @@ public enum Scope {
    * Wraps factory with scoping logic.
    */
   abstract <T> InternalFactory<? extends T> scopeFactory(
-      Class<T> type, String name, InternalFactory<? extends T> factory);
+      Key<T> key, InternalFactory<? extends T> factory);
 
   /**
    * Pluggable scoping strategy. Enables users to provide custom
@@ -186,21 +186,21 @@ public enum Scope {
      * Finds an object for the given type and name in the request scope.
      * Creates a new object if necessary using the given factory.
      */
-    <T> T findInRequest(Class<T> type, String name,
+    <T> T findInRequest(Key<T> key,
         Callable<? extends T> factory) throws Exception;
 
     /**
      * Finds an object for the given type and name in the session scope.
      * Creates a new object if necessary using the given factory.
      */
-    <T> T findInSession(Class<T> type, String name,
+    <T> T findInSession(Key<T> key,
         Callable<? extends T> factory) throws Exception;
 
     /**
      * Finds an object for the given type and name in the wizard scope.
      * Creates a new object if necessary using the given factory.
      */
-    <T> T findInWizard(Class<T> type, String name,
+    <T> T findInWizard(Key<T> key,
         Callable<? extends T> factory) throws Exception;
   }
 }

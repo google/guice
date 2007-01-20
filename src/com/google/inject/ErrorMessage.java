@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.util.Objects;
 
 /**
  * A configuration error.
@@ -32,6 +31,20 @@ public class ErrorMessage {
   public ErrorMessage(Object source, String message) {
     this.source = nonNull(source, "source");
     this.message = nonNull(message, "message");
+  }
+
+  /**
+   * Gets the source of the configuration which resulted in this error message.
+   */
+  public Object getSource() {
+    return source;
+  }
+
+  /**
+   * Gets the error message text.
+   */
+  public String getMessage() {
+    return message;
   }
 
   public String toString() {

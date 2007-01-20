@@ -41,11 +41,10 @@ public class ContainerTest extends TestCase {
 
   private Container createFooContainer() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder
-      .factory(Bar.class, BarImpl.class)
-      .factory(Tee.class, TeeImpl.class)
-      .constant("s", "test")
-      .constant("i", 5);
+    builder.bind(Bar.class).to(BarImpl.class);
+    builder.bind(Tee.class).to(TeeImpl.class);
+    builder.bind("s").to("test");
+    builder.bind("i").to(5);
 
     return builder.create(false);
   }
@@ -127,9 +126,8 @@ public class ContainerTest extends TestCase {
 
   public void testCircularlyDependentConstructors() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder
-        .factory(A.class, AImpl.class)
-        .factory(B.class, BImpl.class);
+    builder.bind(A.class).to(AImpl.class);
+    builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
     A a = container.inject(AImpl.class);
@@ -166,11 +164,11 @@ public class ContainerTest extends TestCase {
   }
 
   public void testInjectStatics() {
-    new ContainerBuilder()
-        .constant("s", "test")
-        .constant("i", 5)
-        .injectStatics(Static.class)
-        .create(false);
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind("s").to("test");
+    builder.bind("i").to(5);
+    builder.injectStatics(Static.class);
+    builder.create(false);
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);

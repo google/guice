@@ -16,442 +16,186 @@
 
 package com.google.inject;
 
+import com.google.inject.util.Objects;
+import static com.google.inject.util.Objects.nonNull;
+
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.logging.Logger;
 
 /**
- * Builds a dependency injection {@link Container}. The combination of
- * dependency type and name uniquely identifies a dependency mapping; you can
- * use the same name for two different types. Not safe for concurrent use.
+ * Builds a dependency injection {@link Container}. Binds {@link Key}s to
+ * implementations. For example, a binding implementation could be anything
+ * from a constant value to an object in the HTTP session.
  *
- * <p>Adds the following factories by default:
+ * <p>Not safe for concurrent use.
+ *
+ * <p>Default bindings include:
  *
  * <ul>
- *   <li>Injects the current {@link Container}.
- *   <li>Injects the {@link Logger} for the injected member's declaring class.
+ *   <li>The {@link Container} iself
+ *   <li>The {@link Logger} for the class being injected
  * </ul>
  *
  * <p>Converts constants as needed from {@code String} to any primitive type
- * in addition to {@code enum} and {@code Class}.
+ * in addition to {@code enum} and {@code Class<?>}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public final class ContainerBuilder {
 
-  final Map<Key<?>, InternalFactory<?>> factories =
-      new HashMap<Key<?>, InternalFactory<?>>();
-  final List<InternalFactory<?>> singletonFactories =
-      new ArrayList<InternalFactory<?>>();
+  final List<BindingBuilder<?>> bindingBuilders =
+      new ArrayList<BindingBuilder<?>>();
+  final List<ConstantBindingBuilder> constantBindingBuilders =
+      new ArrayList<ConstantBindingBuilder>();
+  final List<LinkedBindingBuilder<?>> linkedBindingBuilders =
+      new ArrayList<LinkedBindingBuilder<?>>();
+
   final List<Class<?>> staticInjections = new ArrayList<Class<?>>();
+
   boolean created;
+
+  /**
+   * Keeps error messages in order and prevents duplicates.
+   */
+  Set<ErrorMessage> errorMessages = new LinkedHashSet<ErrorMessage>();
 
   private static final InternalFactory<Container> CONTAINER_FACTORY =
       new InternalFactory<Container>() {
-        public Container create(InternalContext context) {
+        public Container get(InternalContext context) {
           return context.getContainer();
         }
       };
 
   private static final InternalFactory<Logger> LOGGER_FACTORY =
       new InternalFactory<Logger>() {
-        public Logger create(InternalContext context) {
+        public Logger get(InternalContext context) {
           Member member = context.getExternalContext().getMember();
           return member == null ? Logger.getAnonymousLogger()
               : Logger.getLogger(member.getDeclaringClass().getName());
         }
       };
 
+  static final String UNKNOWN_SOURCE = "[unknown source]";
+
   /**
    * Constructs a new builder.
    */
   public ContainerBuilder() {
-    // In the current container as the default Container implementation.
-    factories.put(Key.get(Container.class, Key.DEFAULT_NAME),
-        CONTAINER_FACTORY);
-
-    // Inject the logger for the injected member's declaring class.
-    factories.put(Key.get(Logger.class, Key.DEFAULT_NAME),
-        LOGGER_FACTORY);
+    bind(Container.class).to(CONTAINER_FACTORY);
+    bind(Logger.class).to(LOGGER_FACTORY);
   }
 
   /**
-   * Maps a dependency. All methods in this class ultimately funnel through
-   * here.
+   * Creates a source object to be associated with a binding. Called by
+   * default for each binding. The default implementation returns {@code
+   * ContainerBuilder}'s caller's {@code StackTraceElement}.
+   *
+   * <p>If you plan on manually setting the source (say for example you've
+   * implemented an XML configuration), you might override this method and
+   * return {@code null} to avoid unnecessary overhead.
    */
-  private <T> ContainerBuilder factory(final Key<T> key,
-      InternalFactory<? extends T> factory, Scope scope) {
+  protected Object source() {
+    // Search up the stack until we find a class outside of this one.
+    for (StackTraceElement element : new Throwable().getStackTrace()) {
+      if (!element.getClassName().equals(ContainerBuilder.class.getName()))
+        return element;
+    }
+    throw new AssertionError();
+  }
+
+  /**
+   * Binds the given key.
+   */
+  public <T> BindingBuilder<T> bind(Key<T> key) {
     ensureNotCreated();
-    checkKey(key);
-    final InternalFactory<? extends T> scopedFactory =
-        scope.scopeFactory(key.getRawType(), key.getName(), factory);
-    factories.put(key, scopedFactory);
-    if (scope == Scope.SINGLETON) {
-      singletonFactories.add(new InternalFactory<T>() {
-        public T create(InternalContext context) {
-          try {
-            context.setExternalContext(ExternalContext.newInstance(
-                null, key, context.getContainerImpl()));
-            return scopedFactory.create(context);
-          } finally {
-            context.setExternalContext(null);
-          }
-        }
-      });
-    }
-    return this;
+    BindingBuilder<T> builder = new BindingBuilder<T>(key).from(source());
+    bindingBuilders.add(builder);
+    return builder;
   }
 
   /**
-   * Ensures a key isn't already mapped.
+   * Binds the given type.
    */
-  private void checkKey(Key<?> key) {
-    if (factories.containsKey(key)) {
-      throw new DependencyException(
-          "Dependency mapping for " + key + " already exists.");
-    }
+  public <T> BindingBuilder<T> bind(TypeToken<T> typeToken) {
+    return bind(Key.get(typeToken));
   }
 
   /**
-   * Maps a factory to a given dependency type and name.
-   *
-   * @param type of dependency
-   * @param name of dependency
-   * @param factory creates objects to inject
-   * @param scope scope of injected instances
-   * @return this builder
+   * Binds the given type.
    */
-  public <T> ContainerBuilder factory(final Class<T> type, final String name,
-      final Factory<? extends T> factory, Scope scope) {
-    InternalFactory<T> internalFactory =
-        new InternalFactory<T>() {
-
-          public T create(InternalContext context) {
-            try {
-              Context externalContext = context.getExternalContext();
-              return factory.create(externalContext);
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          public String toString() {
-            return new LinkedHashMap<String, Object>() {{
-              put("type", type);
-              put("name", name);
-              put("factory", factory);
-            }}.toString();
-          }
-        };
-
-    return factory(Key.get(type, name), internalFactory, scope);
+  public <T> BindingBuilder<T> bind(Class<T> clazz) {
+    return bind(Key.get(clazz));
   }
 
   /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, factory, scope)}.
-   *
-   * @see #factory(Class, String, Factory, Scope)
+   * Links the given key to another key effectively creating an alias for a
+   * binding.
    */
-  public <T> ContainerBuilder factory(Class<T> type,
-      Factory<? extends T> factory, Scope scope) {
-    return factory(type, Key.DEFAULT_NAME, factory, scope);
+  public <T> LinkedBindingBuilder<T> link(Key<T> key) {
+    ensureNotCreated();
+    LinkedBindingBuilder<T> builder =
+        new LinkedBindingBuilder<T>(key).from(source());
+    linkedBindingBuilders.add(builder);
+    return builder;
   }
 
   /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type, name, factory,
-   * Scope.DEFAULT)}.
-   *
-   * @see #factory(Class, String, Factory, Scope)
+   * Binds a constant to the given name.
    */
-  public <T> ContainerBuilder factory(Class<T> type, String name,
-      Factory<? extends T> factory) {
-    return factory(type, name, factory, Scope.DEFAULT);
+  public ConstantBindingBuilder bind(String name) {
+    ensureNotCreated();
+    return bind(name, source());
   }
 
   /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, factory, Scope.DEFAULT)}.
-   *
-   * @see #factory(Class, String, Factory, Scope)
+   * Binds a constant to the given name from the given source.
    */
-  public <T> ContainerBuilder factory(Class<T> type,
-      Factory<? extends T> factory) {
-    return factory(type, Key.DEFAULT_NAME, factory, Scope.DEFAULT);
+  private ConstantBindingBuilder bind(String name, Object source) {
+    ConstantBindingBuilder builder =
+        new ConstantBindingBuilder(Objects.nonNull(name, "name")).from(source);
+    constantBindingBuilders.add(builder);
+    return builder;
   }
 
   /**
-   * Maps an implementation class to a given dependency type and name. Creates
-   * instances using the container, recursively injecting dependencies.
-   *
-   * @param type of dependency
-   * @param name of dependency
-   * @param implementation class
-   * @param scope scope of injected instances
-   * @return this builder
+   * Binds string constants based on the given properties.
    */
-  public <T> ContainerBuilder factory(final Class<T> type, final String name,
-      final Class<? extends T> implementation, final Scope scope) {
-    // This factory creates new instances of the given implementation.
-    // We have to lazy load the constructor because the Container
-    // hasn't been created yet.
-    InternalFactory<? extends T> factory = new InternalFactory<T>() {
-
-      volatile ContainerImpl.ConstructorInjector<? extends T> constructor;
-
-      @SuppressWarnings("unchecked")
-      public T create(InternalContext context) {
-        if (constructor == null) {
-          this.constructor =
-              context.getContainerImpl().getConstructor(implementation);
-        }
-        return (T) constructor.construct(context, type);
-      }
-
-      public String toString() {
-        return new LinkedHashMap<String, Object>() {{
-          put("type", type);
-          put("name", name);
-          put("implementation", implementation);
-          put("scope", scope);
-        }}.toString();
-      }
-    };
-
-    return factory(Key.get(type, name), factory, scope);
-  }
-
-  /**
-   * Maps an implementation class to a given dependency type and name. Creates
-   * instances using the container, recursively injecting dependencies.
-   *
-   * <p>Sets scope to value from {@link Scoped} annotation on the
-   * implementation class. Defaults to {@link Scope#DEFAULT} if no annotation
-   * is found.
-   *
-   * @param type of dependency
-   * @param name of dependency
-   * @param implementation class
-   * @return this builder
-   */
-  public <T> ContainerBuilder factory(final Class<T> type, String name,
-      final Class<? extends T> implementation) {
-    Scoped scoped = implementation.getAnnotation(Scoped.class);
-    Scope scope = scoped == null ? Scope.DEFAULT : scoped.value();
-    return factory(type, name, implementation, scope);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, implementation)}.
-   *
-   * @see #factory(Class, String, Class)
-   */
-  public <T> ContainerBuilder factory(Class<T> type,
-      Class<? extends T> implementation) {
-    return factory(type, Key.DEFAULT_NAME, implementation);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, type)}.
-   *
-   * @see #factory(Class, String, Class)
-   */
-  public <T> ContainerBuilder factory(Class<T> type) {
-    return factory(type, Key.DEFAULT_NAME, type);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type, name, type)}.
-   *
-   * @see #factory(Class, String, Class)
-   */
-  public <T> ContainerBuilder factory(Class<T> type, String name) {
-    return factory(type, name, type);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, implementation, scope)}.
-   *
-   * @see #factory(Class, String, Class, Scope)
-   */
-  public <T> ContainerBuilder factory(Class<T> type,
-      Class<? extends T> implementation, Scope scope) {
-    return factory(type, Key.DEFAULT_NAME, implementation, scope);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type,
-   * Container.DEFAULT_NAME, type, scope)}.
-   *
-   * @see #factory(Class, String, Class, Scope)
-   */
-  public <T> ContainerBuilder factory(Class<T> type, Scope scope) {
-    return factory(type, Key.DEFAULT_NAME, type, scope);
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code factory(type, name, type,
-   * scope)}.
-   *
-   * @see #factory(Class, String, Class, Scope)
-   */
-  public <T> ContainerBuilder factory(Class<T> type, String name, Scope scope) {
-    return factory(type, name, type, scope);
-  }
-
-  /**
-   * Maps constant names to values.
-   */
-  public ContainerBuilder properties(Map<String, String> properties) {
+  public ContainerBuilder bindProperties(Map<String, String> properties) {
+    ensureNotCreated();
+    Object source = source();
     for (Map.Entry<String, String> entry : properties.entrySet()) {
-      constant(entry.getKey(), entry.getValue());
+      String key = entry.getKey();
+      String value = entry.getValue();
+      bind(key, source).to(value);
     }
     return this;
   }
 
   /**
-   * Maps constant names to values.
+   * Binds string constants based on the given properties.
    */
-  public ContainerBuilder properties(Properties properties) {
-    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      constant((String) entry.getKey(), (String) entry.getValue());
-    }
-    return this;
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code alias(type,
-   * Container.DEFAULT_NAME, type)}.
-   *
-   * @see #alias(Class, String, String)
-   */
-  public <T> ContainerBuilder alias(Class<T> type, String alias) {
-    return alias(type, Key.DEFAULT_NAME, alias);
-  }
-
-  /**
-   * Maps an existing factory to a new name.
-   *
-   * @param type of dependency
-   * @param name of dependency
-   * @param alias of to the dependency
-   * @return this builder
-   */
-  public <T> ContainerBuilder alias(Class<T> type, String name, String alias) {
-    return alias(Key.get(type, name), Key.get(type, alias));
-  }
-
-  /**
-   * Maps an existing dependency. All methods in this class ultimately funnel
-   * through here.
-   */
-  @SuppressWarnings({"unchecked"})
-  private <T> ContainerBuilder alias(final Key<T> key,
-      final Key<T> aliasKey) {
+  public ContainerBuilder bindProperties(Properties properties) {
     ensureNotCreated();
-    checkKey(aliasKey);
-
-    final InternalFactory<? extends T> scopedFactory =
-        (InternalFactory<? extends T>) factories.get(key);
-    if (scopedFactory == null) {
-      throw new DependencyException(
-          "Dependency mapping for " + key + " doesn't exists.");
+    Object source = source();
+    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+      String key = (String) entry.getKey();
+      String value = (String) entry.getValue();
+      bind(key, source).to(value);
     }
-    factories.put(aliasKey, scopedFactory);
     return this;
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, String value) {
-    return constant(String.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, int value) {
-    return constant(int.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, long value) {
-    return constant(long.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, boolean value) {
-    return constant(boolean.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, double value) {
-    return constant(double.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, float value) {
-    return constant(float.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, short value) {
-    return constant(short.class, name, value);
-  }
-
-  /**
-   * Maps a constant value to the given name.
-   */
-  public ContainerBuilder constant(String name, char value) {
-    return constant(char.class, name, value);
-  }
-
-  /**
-   * Maps a class to the given name.
-   */
-  public ContainerBuilder constant(String name, Class value) {
-    return constant(Class.class, name, value);
-  }
-
-  /**
-   * Maps an enum to the given name.
-   */
-  public <E extends Enum<E>> ContainerBuilder constant(String name, E value) {
-    return constant(value.getDeclaringClass(), name, value);
-  }
-
-  /**
-   * Maps a constant value to the given type and name.
-   */
-  public <T> ContainerBuilder constant(final Class<T> type, final String name,
-      final T value) {
-    InternalFactory<T> factory = new ConstantFactory<T>(value);
-    return factory(Key.get(type, name), factory, Scope.DEFAULT);
   }
 
   /**
    * Upon creation, the {@link Container} will inject static fields and methods
-   * into the given classes.
+   * in the given classes.
    *
    * @param types for which static members will be injected
    */
@@ -461,19 +205,10 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Returns true if this builder contains a mapping for the given type and
-   * name.
+   * Adds an error message to be reported at creation time.
    */
-  public boolean contains(Class<?> type, String name) {
-    return factories.containsKey(Key.get(type, name));
-  }
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code contains(type,
-   * Container.DEFAULT_NAME)}.
-   */
-  public boolean contains(Class<?> type) {
-    return contains(type, Key.DEFAULT_NAME);
+  void add(ErrorMessage errorMessage) {
+    errorMessages.add(errorMessage);
   }
 
   /**
@@ -489,19 +224,87 @@ public final class ContainerBuilder {
   public Container create(boolean loadSingletons) {
     ensureNotCreated();
     created = true;
-    final ContainerImpl container = new ContainerImpl(
-        new HashMap<Key<?>, InternalFactory<?>>(factories));
+
+    HashMap<Key<?>, InternalFactory<?>> factories =
+        new HashMap<Key<?>, InternalFactory<?>>();
+
+    for (ConstantBindingBuilder builder : constantBindingBuilders) {
+      if (builder.hasValue()) {
+        factories.put(builder.getKey(), builder.getInternalFactory());
+      } else {
+        add(new ErrorMessage(builder.getSource(),
+            "Constant value isn't set."));
+      }
+    }
+
+    final List<ContainerImpl.ContextualCallable<Void>> singletonLoaders =
+        new ArrayList<ContainerImpl.ContextualCallable<Void>>();
+
+    for (BindingBuilder<?> builder : bindingBuilders) {
+      final Key<?> key = builder.getKey();
+      final InternalFactory<?> factory = builder.getInternalFactory();
+      factories.put(key, factory);
+
+      if (builder.isSingleton()) {
+        singletonLoaders.add(new ContainerImpl.ContextualCallable<Void>() {
+          public Void call(InternalContext context) {
+            context.setExternalContext(
+                ExternalContext.newInstance(null, key,
+                    context.getContainerImpl()));
+            try {
+              factory.get(context);
+              return null;
+            } finally {
+              context.setExternalContext(null);
+            }
+          }
+        });
+      }
+    }
+
+    for (LinkedBindingBuilder<?> builder : linkedBindingBuilders) {
+      // TODO: Support alias to a later-declared alias.
+      Key<?> destination = builder.getDestination();
+      if (destination == null) {
+        add(new ErrorMessage(builder.getSource(),
+            "Link destination isn't set."));
+        continue;
+      }
+
+      InternalFactory<?> factory = factories.get(destination);
+      if (factory == null) {
+        add(new ErrorMessage(builder.getSource(),
+            "Destination of link binding not found: " + destination));
+        continue;
+      }
+
+      factories.put(builder.getKey(), factory);
+    }
+
+    // TODO: Handle this better.
+    if (!errorMessages.isEmpty()) {
+      for (ErrorMessage errorMessage : errorMessages) {
+        System.err.println(errorMessage);
+        throw new DependencyException("Configuration errors.");
+      }
+    }
+
+    final ContainerImpl container = new ContainerImpl(factories);
+
+    container.injectStatics(staticInjections);
+
     if (loadSingletons) {
       container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
         public Void call(InternalContext context) {
-          for (InternalFactory<?> factory : singletonFactories) {
-            factory.create(context);
+          for (ContainerImpl.ContextualCallable<Void> singletonLoader
+              : singletonLoaders) {
+            singletonLoader.call(context);
           }
           return null;
         }
       });
     }
-    container.injectStatics(staticInjections);
+
     return container;
   }
 
@@ -520,15 +323,359 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Implemented by classes which participate in building a container.
+   * Implemented by classes which participate in building a container. Useful
+   * for encapsulating and reusing configuration logic.
    */
   public interface Command {
 
     /**
-     * Contributes factories to the given builder.
-     *
-     * @param builder
+     * Configures the given builder.
      */
     void build(ContainerBuilder builder);
+  }
+
+  /**
+   * Binds a {@link Key} to an implementation in a given scope.
+   */
+  public class BindingBuilder<T> implements SourceAware<BindingBuilder<T>> {
+
+    Object source = ContainerBuilder.UNKNOWN_SOURCE;
+    Key<T> key;
+    InternalFactory<? extends T> factory;
+    Scope scope;
+
+    BindingBuilder(Key<T> key) {
+      this.key = nonNull(key, "key");
+    }
+
+    Key<T> getKey() {
+      return key;
+    }
+
+    public BindingBuilder<T> from(Object source) {
+      this.source = source;
+      return this;
+    }
+
+    /**
+     * Sets the name of this binding.
+     */
+    public BindingBuilder<T> named(String name) {
+      if (!this.key.hasDefaultName()) {
+        add(new ErrorMessage(source, "Name set more than once."));
+      }
+
+      this.key = this.key.named(name);
+      return this;
+    }
+
+    /**
+     * Binds to instances of the given implementation class. The {@link
+     * Container} will inject the implementation instances as well. Sets the
+     * scope based on the @{@link Scoped} annotation on the implementation
+     * class if present.
+     */
+    public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
+      return to(TypeToken.get(implementation));
+    }
+
+    /**
+     * Binds to instances of the given implementation type. The {@link
+     * Container} will inject the implementation instances as well. Sets the
+     * scope based on the @{@link Scoped} annotation on the implementation
+     * class if present.
+     */
+    public <I extends T> BindingBuilder<T> to(TypeToken<I> implementation) {
+      ensureImplementationIsNotSet();
+      this.factory = new DefaultFactory<I>(implementation);
+      setScopeFromType(implementation.getRawType());
+      return this;
+    }
+
+    private void setScopeFromType(Class<?> implementation) {
+      Scoped scoped = implementation.getAnnotation(Scoped.class);
+      if (scoped != null) {
+        in(scoped.value());
+      }
+    }
+
+    /**
+     * Binds to instances from the given factory.
+     */
+    public BindingBuilder<T> to(
+        final ContextualFactory<? extends T> factory) {
+      ensureImplementationIsNotSet();
+
+      this.factory = new InternalFactory<T>() {
+        public T get(InternalContext context) {
+          return factory.get(context.getExternalContext());
+        }
+
+        public String toString() {
+          return factory.toString();
+        }
+      };
+
+      return this;
+    }
+
+    /**
+     * Binds to instances from the given factory.
+     */
+    public BindingBuilder<T> to(final Factory<? extends T> factory) {
+      ensureImplementationIsNotSet();
+
+      this.factory = new InternalFactory<T>() {
+        public T get(InternalContext context) {
+          return factory.get();
+        }
+
+        public String toString() {
+          return factory.toString();
+        }
+      };
+
+      return this;
+    }
+
+    /**
+     * Binds to the given instance.
+     */
+    BindingBuilder<T> to(T instance) {
+      ensureImplementationIsNotSet();
+      this.factory = new ConstantFactory<T>(instance);
+      return this;
+    }
+
+    /**
+     * Binds to instances from the given factory.
+     */
+    BindingBuilder<T> to(final InternalFactory<? extends T> factory) {
+      ensureImplementationIsNotSet();
+      this.factory = factory;
+      return this;
+    }
+
+    /**
+     * Adds an error message if the implementation has already been bound.
+     */
+    private void ensureImplementationIsNotSet() {
+      if (factory != null) {
+        add(new ErrorMessage(source, "Implementation set more than once."));
+      }
+    }
+
+    /**
+     * Specifies the scope.
+     */
+    public BindingBuilder<T> in(Scope scope) {
+      if (this.scope != null) {
+        add(new ErrorMessage(source, "Scope set more than once."));
+      }
+
+      this.scope = scope;
+      return this;
+    }
+
+    InternalFactory<? extends T> getInternalFactory() {
+      // If an implementation wasn't specified, use the injection type.
+      if (this.factory == null) {
+        to(key.getTypeToken());
+      }
+
+      if (scope == null) {
+        return this.factory;
+      }
+
+      return scope.scopeFactory(key, this.factory);
+    }
+
+    boolean isSingleton() {
+      return this.scope == Scope.SINGLETON;
+    }
+
+    /**
+     * Injects new instances of the specified implementation class.
+     */
+    private class DefaultFactory<I extends T> implements InternalFactory<I> {
+
+      volatile ContainerImpl.ConstructorInjector<I> constructor;
+
+      private final TypeToken<I> implementation;
+
+      public DefaultFactory(TypeToken<I> implementation) {
+        // TODO: Ensure this is a concrete implementation.
+        this.implementation = implementation;
+      }
+
+      @SuppressWarnings("unchecked")
+      public I get(InternalContext context) {
+        if (constructor == null) {
+          this.constructor =
+              context.getContainerImpl().getConstructor(implementation);
+        }
+        return (I) constructor.construct(context, key.getRawType());
+      }
+
+      public String toString() {
+        return implementation.toString();
+      }
+    }
+  }
+
+  /**
+   * Builds a constant binding.
+   */
+  public class ConstantBindingBuilder
+      implements SourceAware<ConstantBindingBuilder> {
+
+    final String name;
+    Class<?> type;
+    Object value;
+    Object source = ContainerBuilder.UNKNOWN_SOURCE;
+
+    ConstantBindingBuilder(String name) {
+      this.name = name;
+    }
+
+    Key<?> getKey() {
+      return Key.get(type, name);
+    }
+
+    boolean hasValue() {
+      return type != null;
+    }
+
+    Object getSource() {
+      return source;
+    }
+
+    InternalFactory<?> getInternalFactory() {
+      return new ConstantFactory<Object>(value);
+    }
+
+    public ConstantBindingBuilder from(Object source) {
+      this.source = source;
+      return this;
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(String value) {
+      return to(String.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(int value) {
+      return to(int.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(long value) {
+      return to(long.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(boolean value) {
+      return to(boolean.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(double value) {
+      return to(double.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(float value) {
+      return to(float.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(short value) {
+      return to(short.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(char value) {
+      return to(char.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public ConstantBindingBuilder to(Class<?> value) {
+      return to(Class.class, value);
+    }
+
+    /**
+     * Binds constant to the given value.
+     */
+    public <E extends Enum<E>> ConstantBindingBuilder to(E value) {
+      return to(value.getDeclaringClass(), value);
+    }
+
+    /**
+     * Maps a constant value to the given type and name.
+     */
+    <T> ConstantBindingBuilder to(final Class<T> type, final T value) {
+      this.type = type;
+      this.value = value;
+      return this;
+    }
+  }
+
+  /**
+   * Links one binding to another.
+   */
+  public class LinkedBindingBuilder<T>
+      implements SourceAware<LinkedBindingBuilder<T>> {
+
+    Key<T> key;
+    Key<? extends T> destination;
+    Object source = ContainerBuilder.UNKNOWN_SOURCE;
+
+    LinkedBindingBuilder(Key<T> key) {
+      this.key = key;
+    }
+
+    Object getSource() {
+      return source;
+    }
+
+    Key<T> getKey() {
+      return key;
+    }
+
+    Key<? extends T> getDestination() {
+      return destination;
+    }
+
+    public LinkedBindingBuilder<T> from(Object source) {
+      this.source = source;
+      return this;
+    }
+
+    /**
+     * Links to another binding with the given key.
+     */
+    public LinkedBindingBuilder<T> to(Key<? extends T> destination) {
+      this.destination = destination;
+      return this;
+    }
   }
 }

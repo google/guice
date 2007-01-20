@@ -27,7 +27,7 @@ class ConstantFactory<T> implements InternalFactory<T> {
     this.value = value;
   }
 
-  public T create(InternalContext ignored) {
+  public T get(InternalContext ignored) {
     return value;
   }
 

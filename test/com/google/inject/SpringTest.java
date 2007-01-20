@@ -73,14 +73,17 @@ public class SpringTest extends TestCase {
   };
 
   static final Callable<Foo> juiceFactory = new Callable<Foo>() {
+    final Container container;
+    {
+      ContainerBuilder builder = new ContainerBuilder();
+      builder.bind(Tee.class).to(TeeImpl.class);
+      builder.bind(Bar.class).to(BarImpl.class);
+      builder.bind(Foo.class).to(Foo.class);
+      builder.bind("i").to(5);
+      builder.bind("s").to("test");
 
-    final Container container = new ContainerBuilder()
-        .factory(Tee.class, TeeImpl.class)
-        .factory(Bar.class, BarImpl.class)
-        .factory(Foo.class, Foo.class)
-        .constant("i", 5)
-        .constant("s", "test")
-        .create(false);
+      container = builder.create(false);
+    }
 
     public Foo call() throws Exception {
       return container.inject(Foo.class);

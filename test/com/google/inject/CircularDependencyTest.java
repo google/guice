@@ -27,9 +27,8 @@ public class CircularDependencyTest extends TestCase {
 
   public void testCircularlyDependentConstructors() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder
-        .factory(A.class, AImpl.class)
-        .factory(B.class, BImpl.class);
+    builder.bind(A.class).to(AImpl.class);
+    builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
     A a = container.inject(AImpl.class);

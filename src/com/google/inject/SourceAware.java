@@ -17,11 +17,16 @@
 package com.google.inject;
 
 /**
- * Binds an interface with a name to a scope and implementation.
+ * Implemented by classes which can remember their source.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Binding<T> {
+interface SourceAware<R> {
 
-
+  /**
+   * Sets the source object. Useful for debugging. Contents may include the
+   * name of the file and the line number this binding came from, a code
+   * snippet, etc.
+   */
+  R from(Object source);
 }

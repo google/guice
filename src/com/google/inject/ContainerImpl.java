@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ class ContainerImpl implements Container {
 
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
-    String value = stringFactory.create(null);
+    String value = stringFactory.get(null);
 
     // Do we need a primitive?
     Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(type);
@@ -219,7 +220,7 @@ class ContainerImpl implements Container {
       this.field = field;
       field.setAccessible(true);
 
-      Key<?> key = Key.get(field.getType(), name);
+      Key<?> key = Key.get(field.getGenericType(), name);
       factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(
@@ -233,7 +234,7 @@ class ContainerImpl implements Container {
       ExternalContext<?> previous = context.getExternalContext();
       context.setExternalContext(externalContext);
       try {
-        field.set(o, factory.create(context));
+        field.set(o, factory.get(context));
       } catch (IllegalAccessException e) {
         throw new AssertionError(e);
       } finally {
@@ -252,14 +253,14 @@ class ContainerImpl implements Container {
    */
   <M extends AccessibleObject & Member> ParameterInjector<?>[]
       getParametersInjectors(M member,
-      Annotation[][] annotations, Class[] parameterTypes, String defaultName)
+      Annotation[][] annotations, Type[] parameterTypes, String defaultName)
       throws MissingDependencyException {
     List<ParameterInjector<?>> parameterInjectors =
         new ArrayList<ParameterInjector<?>>();
 
     Iterator<Annotation[]> annotationsIterator =
         Arrays.asList(annotations).iterator();
-    for (Class<?> parameterType : parameterTypes) {
+    for (Type parameterType : parameterTypes) {
       Inject annotation = findInject(annotationsIterator.next());
       String name = annotation == null ? defaultName : annotation.value();
       Key<?> key = Key.get(parameterType, name);
@@ -311,7 +312,7 @@ class ContainerImpl implements Container {
       this.method = method;
       method.setAccessible(true);
 
-      Class<?>[] parameterTypes = method.getParameterTypes();
+      Type[] parameterTypes = method.getGenericParameterTypes();
       if (parameterTypes.length == 0) {
         throw new DependencyException(
             method + " has no parameters to inject.");
@@ -357,7 +358,7 @@ class ContainerImpl implements Container {
             : container.getParametersInjectors(
                 constructor,
                 constructor.getParameterAnnotations(),
-                constructor.getParameterTypes(),
+                constructor.getGenericParameterTypes(),
                 inject.value()
             );
       } catch (MissingDependencyException e) {
@@ -464,7 +465,7 @@ class ContainerImpl implements Container {
       ExternalContext<?> previous = context.getExternalContext();
       context.setExternalContext(externalContext);
       try {
-        return factory.create(context);
+        return factory.get(context);
       } finally {
         context.setExternalContext(previous);
       }
@@ -513,7 +514,7 @@ class ContainerImpl implements Container {
       if (factory == null) {
         throw new DependencyException("Missing binding for " + key + ".");
       }
-      return factory.create(context);
+      return factory.get(context);
     } finally {
       context.setExternalContext(previous);
     }
@@ -601,6 +602,11 @@ class ContainerImpl implements Container {
   @SuppressWarnings("unchecked")
   <T> ConstructorInjector<T> getConstructor(Class<T> implementation) {
     return constructors.get(implementation);
+  }
+
+  @SuppressWarnings("unchecked")
+  <T> ConstructorInjector<T> getConstructor(TypeToken<T> implementation) {
+    return constructors.get(implementation.getRawType());
   }
 
   final ThreadLocal<Scope.Strategy> localScopeStrategy =

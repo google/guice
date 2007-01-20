@@ -24,14 +24,14 @@ import java.lang.reflect.Type;
  * Binding key. A type token and a name. Matches the type and name ({@link
  * Inject#value()}) at a point of injection.
  *
- * <p>For example, {@code new Key<List<String>>("names") {}} will match:
+ * <p>For example, <tt>new Key&lt;List&lt;String>>("cities") {}</tt> will match:
  *
- * <pre>
- *   @Inject("names")
- *   public void setList(List<String> list) {
+ * <tt>
+ *   @Inject("cities")
+ *   public void setList(List&lt;String> cities) {
  *     ...
  *   }
- * </pre>
+ * </tt>
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -105,7 +105,7 @@ public abstract class Key<T> {
   /**
    * Returns a new key with the same type as this key and the given name,
    */
-  public Key<T> rename(String name) {
+  public Key<T> named(String name) {
     return new SimpleKey<T>(this.typeToken, name);    
   }
 
@@ -158,7 +158,7 @@ public abstract class Key<T> {
   /**
    * Gets a key for a {@code Class} and a name.
    */
-  public static <T> Key<T> get(Class<T> type, String name) {
+  static <T> Key<T> get(Class<T> type, String name) {
     return new SimpleKey<T>(type, name);
   }
 
@@ -172,7 +172,7 @@ public abstract class Key<T> {
   /**
    * Gets a key for a type and a name.
    */
-  public static Key<?> get(Type type, String name) {
+  static Key<?> get(Type type, String name) {
     return new SimpleKey<Object>(type, name);
   }
 
@@ -186,7 +186,7 @@ public abstract class Key<T> {
   /**
    * Gets key for a type token and a name.
    */
-  public static <T> Key<T> get(TypeToken<T> typeToken, String name) {
+  static <T> Key<T> get(TypeToken<T> typeToken, String name) {
     return new SimpleKey<T>(typeToken, name);
   }
 

@@ -24,11 +24,12 @@ import junit.framework.TestCase;
 public class StaticInjectionTest extends TestCase {
 
   public void testInjectStatics() {
-    Container c = new ContainerBuilder()
-        .constant("s", "test")
-        .constant("i", 5)
-        .injectStatics(StaticInjectionTest.Static.class)
-        .create(false);
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind("s").to("test");
+    builder.bind("i").to(5);
+    builder.injectStatics(StaticInjectionTest.Static.class);
+
+    Container c = builder.create(false);
 
     assertEquals("test", StaticInjectionTest.Static.s);
     assertEquals(5, StaticInjectionTest.Static.i);

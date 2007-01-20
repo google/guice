@@ -17,9 +17,16 @@
 package com.google.inject;
 
 /**
+ * Gets instances of {@code T}.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Scope2 {
+public interface ContextualFactory<T> {
 
-  <T> Factory<T> scope(Binding<T> binding);
+  /**
+   * Gets an instance of {@code T}.
+   *
+   * @param context of this call
+   */
+  T get(Context context);
 }

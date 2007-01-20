@@ -58,7 +58,7 @@ public class ConstantConversionTest extends TestCase {
     }};
 
     ContainerBuilder b = new ContainerBuilder();
-    b.properties(properties);
+    b.bindProperties(properties);
     Container c = b.create(false);
     Foo foo = c.inject(Foo.class);
 
@@ -89,7 +89,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidInteger() {
     ContainerBuilder b = new ContainerBuilder();
-    b.constant("#", "invalid");
+    b.bind("#").to("invalid");
     Container c = b.create(false);
     try {
       c.inject(InvalidInteger.class);
@@ -107,7 +107,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidCharacter() {
     ContainerBuilder b = new ContainerBuilder();
-    b.constant("foo", "invalid");
+    b.bind("foo").to("invalid");
     Container c = b.create(false);
     try {
       c.inject(InvalidCharacter.class);
@@ -125,7 +125,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidEnum() {
     ContainerBuilder b = new ContainerBuilder();
-    b.constant("foo", "invalid");
+    b.bind("foo").to("invalid");
     Container c = b.create(false);
     try {
       c.inject(InvalidEnum.class);

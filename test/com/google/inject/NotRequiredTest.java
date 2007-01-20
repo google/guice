@@ -24,9 +24,9 @@ import junit.framework.TestCase;
 public class NotRequiredTest extends TestCase {
 
   public void testProvided() {
-    Container c = new ContainerBuilder()
-        .factory(Bar.class)
-        .create(false);
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind(Bar.class);
+    Container c = builder.create(false);
     Foo foo = c.inject(Foo.class);
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
