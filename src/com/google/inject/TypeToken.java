@@ -22,7 +22,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
 
 /**
- * Represents a generic type {@code T}.
+ * Represents a generic type {@code T}. Due to erasure, Java doesn't provide
+ * a way to represent generic types. This class enables that.
  *
  * <p>Assumes {@code Type} implements {@code equals()} and {@code hashCode()}
  * as a value (as opposed to identity) comparison.

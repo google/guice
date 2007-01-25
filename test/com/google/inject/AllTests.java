@@ -41,6 +41,7 @@ public class AllTests {
     suite.addTestSuite(NotRequiredTest.class);
     suite.addTestSuite(FactoryTest.class);
     suite.addTestSuite(SuperclassTest.class);
+    suite.addTestSuite(FactoryInjectionTest.class);
 
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(ReferenceMapTest.class);

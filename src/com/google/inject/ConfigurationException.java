@@ -17,16 +17,21 @@
 package com.google.inject;
 
 /**
- * Implemented by classes which can remember their source.
+ * Thrown when the {@link ContainerBuilder} is misconfigured.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface SourceAware<R> {
+public class ConfigurationException extends RuntimeException {
 
-  /**
-   * Sets the source object. Useful for debugging. Contents may include the
-   * name of the file and the line number this binding came from, a code
-   * snippet, etc.
-   */
-  R from(Object source);
+  public ConfigurationException(String message) {
+    super(message);
+  }
+
+  public ConfigurationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ConfigurationException(Throwable cause) {
+    super(cause);
+  }
 }

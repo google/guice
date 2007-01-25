@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scope.SINGLETON;
+import static com.google.inject.Scopes.*;
 
 import junit.framework.TestCase;
 
@@ -31,7 +31,7 @@ public class CircularDependencyTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
-    A a = container.inject(AImpl.class);
+    A a = container.newInstance(AImpl.class);
     assertNotNull(a.getB().getA());
   }
 

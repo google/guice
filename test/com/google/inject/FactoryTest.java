@@ -36,7 +36,7 @@ public class FactoryTest extends TestCase {
     cb.bind(Bar.class)
         .named("fooBar")
         .to(createFactory(Bar.class, "fooBar", null))
-        .in(Scope.SINGLETON);
+        .in(Scopes.SINGLETON);
 
     cb.bind(Tee.class).named("tee1")
         .to(createFactory(Tee.class, "tee1",
@@ -54,7 +54,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.create(true);
 
-    Foo foo = c.getInstance(Foo.class);
+    Foo foo = c.getFactory(Key.get(Foo.class)).get();
 
     assertNotNull(foo.bar);
     assertNotNull(foo.bar.tee1);
@@ -70,9 +70,9 @@ public class FactoryTest extends TestCase {
     return new ContextualFactory<T>() {
       public T get(Context context) {
         assertEquals(expectedMember, context.getMember());
-        assertEquals(name, context.getName());
-        assertEquals(type, context.getType());
-        return context.getContainer().inject(type);
+        assertEquals(name, context.getKey().getName());
+        assertEquals(type, context.getKey().getTypeToken().getType());
+        return context.getContainer().newInstance(type);
       }
     };
   }

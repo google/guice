@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
- * {@link Inject}. Immutable.
+ * {@link Inject}.
  *
  * <p>When injecting a method or constructor, you can additionally annotate
  * its parameters with {@link Inject} and specify a dependency name. When a
@@ -52,11 +52,12 @@ package com.google.inject;
  *  }
  * </pre>
  *
- * <p>To create and inject an instance of {@code Foo}:
+ * <p>To get an instance of {@code Foo}:
  *
  * <pre>
  *  Container c = ...;
- *  Foo foo = c.inject(Foo.class);
+ *  Factory&lt;Foo> fooFactory = c.getFactory(Key.get(Foo.class));
+ *  Foo foo = fooFactory.get();
  * </pre>
  *
  * @see ContainerBuilder
@@ -67,34 +68,17 @@ public interface Container {
   /**
    * Injects dependencies into the fields and methods of an existing object.
    */
-  void inject(Object o);
+  void injectMembers(Object o);
 
   /**
    * Creates and injects a new instance of type {@code implementation}.
    */
-  <T> T inject(Class<T> implementation);
+  <T> T newInstance(Class<T> implementation);
 
   /**
-   * Gets an instance of the given dependency which was declared in
-   * {@link com.google.inject.ContainerBuilder}.
+   * Gets the factory bound to the given key.
    */
-  <T> T getInstance(Class<T> type, String name);
-
-  /**
-   * Convenience method.&nbsp;Equivalent to {@code get(type,
-   * DEFAULT_NAME)}.
-   */
-  <T> T getInstance(Class<T> type);
-
-  /**
-   * Sets the scope strategy for the current thread.
-   */
-  void setScopeStrategy(Scope.Strategy scopeStrategy);
-
-  /**
-   * Removes the scope strategy for the current thread.
-   */
-  void removeScopeStrategy();
+  <T> Factory<T> getFactory(Key<T> key);
 
   /**
    * Checks whether the container has a binding for given key.

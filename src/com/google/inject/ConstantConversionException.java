@@ -23,7 +23,7 @@ import java.lang.reflect.Member;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstantConversionException extends DependencyException {
+class ConstantConversionException extends ConfigurationException {
 
   ConstantConversionException(Member member, Key<?> key, String value,
       String reason) {

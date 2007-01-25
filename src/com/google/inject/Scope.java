@@ -1,206 +1,25 @@
-/**
- * Copyright (C) 2006 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2006 Google Inc. All Rights Reserved.
 
 package com.google.inject;
 
-import java.util.concurrent.Callable;
-
 /**
- * Scope of an injected objects.
+ * A scope which bound objects can reside in. Add a new scope using {@link
+ * com.google.inject.ContainerBuilder#put(String, Scope)} and reference it from
+ * bindings using its name.
  *
- * @author crazybob
+ * @author crazybob@google.com (Bob Lee)
  */
-public enum Scope {
+public interface Scope {
 
   /**
-   * One instance per injection.
-   */
-  DEFAULT {
-    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
-        InternalFactory<? extends T> factory) {
-      return factory;
-    }
-  },
-
-  /**
-   * One instance per container.
-   */
-  SINGLETON {
-    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
-        final InternalFactory<? extends T> factory) {
-      return new InternalFactory<T>() {
-        T instance;
-        public T get(InternalContext context) {
-          synchronized (context.getContainer()) {
-            if (instance == null) {
-              instance = factory.get(context);
-            }
-            return instance;
-          }
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-    }
-  },
-
-  /**
-   * One instance per thread.
+   * Scopes a factory. The returned factory returns objects from this scope.
+   * If an object does not exist in this scope, the factory can use the given
+   * creator to create one.
    *
-   * <p><b>Note:</b> if a thread local object strongly references its {@link
-   * Container}, neither the {@code Container} nor the object will be
-   * eligible for garbage collection, i.e. memory leak.
+   * @param key binding key
+   * @param creator creates new instances as needed
+   * @return a new factory which only delegates to the given factory when an
+   *  instance of the requested object doesn't already exist in the scope
    */
-  THREAD {
-    <T> InternalFactory<? extends T> scopeFactory(Key<T> key,
-        final InternalFactory<? extends T> factory) {
-      return new InternalFactory<T>() {
-        final ThreadLocal<T> threadLocal = new ThreadLocal<T>();
-        public T get(final InternalContext context) {
-          T t = threadLocal.get();
-          if (t == null) {
-            t = factory.get(context);
-            threadLocal.set(t);
-          }
-          return t;
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-    }
-  },
-
-  /**
-   * One instance per request.
-   */
-  REQUEST {
-    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
-        final InternalFactory<? extends T> factory) {
-      return new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          Strategy strategy = context.getScopeStrategy();
-          try {
-            return strategy.findInRequest(
-                key, toCallable(context, factory));
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-    }
-  },
-
-  /**
-   * One instance per session.
-   */
-  SESSION {
-    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
-        final InternalFactory<? extends T> factory) {
-      return new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          Strategy strategy = context.getScopeStrategy();
-          try {
-            return strategy.findInSession(
-                key, toCallable(context, factory));
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-    }
-  },
-
-  /**
-   * One instance per wizard.
-   */
-  WIZARD {
-    <T> InternalFactory<? extends T> scopeFactory(final Key<T> key,
-        final InternalFactory<? extends T> factory) {
-      return new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          Strategy strategy = context.getScopeStrategy();
-          try {
-            return strategy.findInWizard(
-                key, toCallable(context, factory));
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-    }
-  };
-
-  <T> Callable<? extends T> toCallable(final InternalContext context,
-      final InternalFactory<? extends T> factory) {
-    return new Callable<T>() {
-      public T call() throws Exception {
-        return factory.get(context);
-      }
-    };
-  }
-
-  /**
-   * Wraps factory with scoping logic.
-   */
-  abstract <T> InternalFactory<? extends T> scopeFactory(
-      Key<T> key, InternalFactory<? extends T> factory);
-
-  /**
-   * Pluggable scoping strategy. Enables users to provide custom
-   * implementations of request, session, and wizard scopes. Implement and
-   * pass to {@link
-   * Container#setScopeStrategy(com.google.inject.Scope.Strategy)}.
-   */
-  public interface Strategy {
-
-    /**
-     * Finds an object for the given type and name in the request scope.
-     * Creates a new object if necessary using the given factory.
-     */
-    <T> T findInRequest(Key<T> key,
-        Callable<? extends T> factory) throws Exception;
-
-    /**
-     * Finds an object for the given type and name in the session scope.
-     * Creates a new object if necessary using the given factory.
-     */
-    <T> T findInSession(Key<T> key,
-        Callable<? extends T> factory) throws Exception;
-
-    /**
-     * Finds an object for the given type and name in the wizard scope.
-     * Creates a new object if necessary using the given factory.
-     */
-    <T> T findInWizard(Key<T> key,
-        Callable<? extends T> factory) throws Exception;
-  }
+  public <T> Factory<T> scope(Key<T> key, Factory<T> creator);
 }

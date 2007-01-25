@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scope.SINGLETON;
+import static com.google.inject.Scopes.SINGLETON;
 
 import junit.framework.TestCase;
 
@@ -27,7 +27,7 @@ public class ContainerTest extends TestCase {
 
   public void testInjection() {
     Container container = createFooContainer();
-    Foo foo = container.inject(Foo.class);
+    Foo foo = container.newInstance(Foo.class);
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -52,7 +52,7 @@ public class ContainerTest extends TestCase {
   public void testGetInstance() {
     Container container = createFooContainer();
 
-    Bar bar = container.getInstance(Bar.class, Key.DEFAULT_NAME);
+    Bar bar = container.getFactory(Key.get(Bar.class)).get();
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }
@@ -130,7 +130,7 @@ public class ContainerTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
-    A a = container.inject(AImpl.class);
+    A a = container.newInstance(AImpl.class);
     assertNotNull(a.getB().getA());
   }
 

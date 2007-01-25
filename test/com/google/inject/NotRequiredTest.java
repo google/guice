@@ -27,7 +27,7 @@ public class NotRequiredTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Bar.class);
     Container c = builder.create(false);
-    Foo foo = c.inject(Foo.class);
+    Foo foo = c.newInstance(Foo.class);
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
   }
@@ -35,7 +35,7 @@ public class NotRequiredTest extends TestCase {
   public void testNotProvided() {
     Container c = new ContainerBuilder()
         .create(false);
-    Foo foo = c.inject(Foo.class);
+    Foo foo = c.newInstance(Foo.class);
     assertNull(foo.bar);
     assertNull(foo.fromMethod);
   }

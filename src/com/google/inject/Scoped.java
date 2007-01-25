@@ -22,8 +22,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a scoped implementation class.
+ * Annotates an implementation class with the name of its scope.
  *
+ * @see com.google.inject.ContainerBuilder#put(String, Scope)
  * @author crazybob
  */
 @Target(ElementType.TYPE)
@@ -31,7 +32,7 @@ import java.lang.annotation.Target;
 public @interface Scoped {
 
   /**
-   * Scope.
+   * Scope name.
    */
-  Scope value();
+  String value();
 }

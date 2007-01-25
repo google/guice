@@ -29,6 +29,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,6 +61,25 @@ class ContainerImpl implements Container {
         (InternalFactory<T>) factories.get(key);
     if (internalFactory != null) {
       return internalFactory;
+    }
+
+    // Handle cases where T is a Factory<?>.
+    if (key.getTypeToken().getRawType().equals(Factory.class)) {
+      Type factoryType = key.getTypeToken().getType();
+      if (!(factoryType instanceof ParameterizedType)) {
+        return null;
+      }
+      Type entryType =
+          ((ParameterizedType) factoryType).getActualTypeArguments()[0];
+
+      // This can throw ConfigurationException.
+      final Factory<?> factory = getFactory(Key.get(entryType, key.getName()));
+      return new InternalFactory<T>() {
+        @SuppressWarnings({"unchecked"})
+        public T get(InternalContext context) {
+          return (T) factory;
+        }
+      };
     }
 
     // Do we have a constant String factory of the same name?
@@ -192,7 +212,7 @@ class ContainerImpl implements Container {
             injectors.add(injectorFactory.create(this, member, inject.value()));
           } catch (MissingDependencyException e) {
             if (inject.required()) {
-              throw new DependencyException(e);
+              throw new ConfigurationException(e);
             }
           }
         }
@@ -224,7 +244,8 @@ class ContainerImpl implements Container {
       factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(
-            "No mapping found for dependency " + key + " in " + field + ".");
+            "No mapping found for dependency " + key + " for field: "
+                + field);
       }
 
       this.externalContext = ExternalContext.newInstance(field, key, container);
@@ -275,7 +296,8 @@ class ContainerImpl implements Container {
     InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(
-          "No mapping found for dependency " + key + " in " + member + ".");
+          "No mapping found for dependency " + key + " for member: "
+              + member + "");
     }
 
     ExternalContext<T> externalContext =
@@ -314,7 +336,7 @@ class ContainerImpl implements Container {
 
       Type[] parameterTypes = method.getGenericParameterTypes();
       if (parameterTypes.length == 0) {
-        throw new DependencyException(
+        throw new ConfigurationException(
             method + " has no parameters to inject.");
       }
       parameterInjectors = container.getParametersInjectors(
@@ -362,7 +384,7 @@ class ContainerImpl implements Container {
                 inject.value()
             );
       } catch (MissingDependencyException e) {
-        throw new DependencyException(e);
+        throw new ConfigurationException(e);
       }
       injectors = container.injectors.get(implementation);
     }
@@ -374,7 +396,7 @@ class ContainerImpl implements Container {
           : implementation.getDeclaredConstructors()) {
         if (constructor.getAnnotation(Inject.class) != null) {
           if (found != null) {
-            throw new DependencyException("More than one constructor annotated"
+            throw new ConfigurationException("More than one constructor annotated"
                 + " with @Inject found in " + implementation + ".");
           }
           found = constructor;
@@ -389,7 +411,7 @@ class ContainerImpl implements Container {
       try {
         return implementation.getDeclaredConstructor();
       } catch (NoSuchMethodException e) {
-        throw new DependencyException("Could not find a suitable constructor"
+        throw new ConfigurationException("Could not find a suitable constructor"
             + " in " + implementation.getName() + ".");
       }
     }
@@ -485,14 +507,14 @@ class ContainerImpl implements Container {
     return parameters;
   }
 
-  void inject(Object o, InternalContext context) {
+  void injectMembers(Object o, InternalContext context) {
     List<Injector> injectors = this.injectors.get(o.getClass());
     for (Injector injector : injectors) {
       injector.inject(context, o);
     }
   }
 
-  <T> T inject(Class<T> implementation, InternalContext context) {
+  <T> T newInstance(Class<T> implementation, InternalContext context) {
     try {
       ConstructorInjector<T> constructor = getConstructor(implementation);
       return implementation.cast(
@@ -504,26 +526,6 @@ class ContainerImpl implements Container {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  <T> T getInstance(Class<T> type, String name, InternalContext context) {
-    ExternalContext<?> previous = context.getExternalContext();
-    Key<T> key = Key.get(type, name);
-    context.setExternalContext(ExternalContext.newInstance(null, key, this));
-    try {
-      InternalFactory<? extends T> factory = getFactory(null, key);
-      if (factory == null) {
-        throw new DependencyException("Missing binding for " + key + ".");
-      }
-      return factory.get(context);
-    } finally {
-      context.setExternalContext(previous);
-    }
-  }
-
-  <T> T getInstance(Class<T> type, InternalContext context) {
-    return getInstance(type, Key.DEFAULT_NAME, context);
-  }
-
   public boolean hasBindingFor(Key<?> key) {
     try {
       return getFactory(null, key) != null;
@@ -532,37 +534,46 @@ class ContainerImpl implements Container {
     }
   }
 
-  public void inject(final Object o) {
+  public void injectMembers(final Object o) {
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
-        inject(o, context);
+        injectMembers(o, context);
         return null;
       }
     });
   }
 
-  public <T> T inject(final Class<T> implementation) {
+  public <T> T newInstance(final Class<T> implementation) {
     return callInContext(new ContextualCallable<T>() {
       public T call(InternalContext context) {
-        return inject(implementation, context);
+        return newInstance(implementation, context);
       }
     });
   }
 
-  public <T> T getInstance(final Class<T> type, final String name) {
-    return callInContext(new ContextualCallable<T>() {
-      public T call(InternalContext context) {
-        return getInstance(type, name, context);
-      }
-    });
-  }
+  public <T> Factory<T> getFactory(final Key<T> key) {
+    final InternalFactory<? extends T> factory = getFactory(null, key);
 
-  public <T> T getInstance(final Class<T> type) {
-    return callInContext(new ContextualCallable<T>() {
-      public T call(InternalContext context) {
-        return getInstance(type, context);
+    if (factory == null) {
+      throw new ConfigurationException("Missing binding for " + key + ".");
+    }
+
+    return new Factory<T>() {
+      public T get() {
+        return callInContext(new ContextualCallable<T>() {
+          public T call(InternalContext context) {
+            ExternalContext<?> previous = context.getExternalContext();
+            context.setExternalContext(
+                ExternalContext.newInstance(null, key, ContainerImpl.this));
+            try {
+              return factory.get(context);
+            } finally {
+              context.setExternalContext(previous);
+            }
+          }
+        });
       }
-    });
+    };
   }
 
   ThreadLocal<InternalContext[]> localContext =
@@ -579,7 +590,7 @@ class ContainerImpl implements Container {
   <T> T callInContext(ContextualCallable<T> callable) {
     InternalContext[] reference = localContext.get();
     if (reference[0] == null) {
-      reference[0] = new InternalContext(this, localScopeStrategy.get());
+      reference[0] = new InternalContext(this);
       try {
         return callable.call(reference[0]);
       } finally {
@@ -607,17 +618,6 @@ class ContainerImpl implements Container {
   @SuppressWarnings("unchecked")
   <T> ConstructorInjector<T> getConstructor(TypeToken<T> implementation) {
     return constructors.get(implementation.getRawType());
-  }
-
-  final ThreadLocal<Scope.Strategy> localScopeStrategy =
-      new ThreadLocal<Scope.Strategy>();
-
-  public void setScopeStrategy(Scope.Strategy scopeStrategy) {
-    this.localScopeStrategy.set(scopeStrategy);
-  }
-
-  public void removeScopeStrategy() {
-    this.localScopeStrategy.remove();
   }
 
   /**

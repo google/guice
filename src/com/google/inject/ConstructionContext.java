@@ -66,7 +66,7 @@ class ConstructionContext<T> {
     // instance (as opposed to one per caller).
 
     if (!expectedType.isInterface()) {
-      throw new DependencyException(
+      throw new ConfigurationException(
           expectedType.getName() + " is not an interface.");
     }
 

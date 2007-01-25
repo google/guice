@@ -51,12 +51,16 @@ import java.util.logging.Logger;
  */
 public final class ContainerBuilder {
 
+  private static final Logger logger =
+      Logger.getLogger(ContainerBuilder.class.getName());
+
   final List<BindingBuilder<?>> bindingBuilders =
       new ArrayList<BindingBuilder<?>>();
   final List<ConstantBindingBuilder> constantBindingBuilders =
       new ArrayList<ConstantBindingBuilder>();
   final List<LinkedBindingBuilder<?>> linkedBindingBuilders =
       new ArrayList<LinkedBindingBuilder<?>>();
+  final Map<String, Scope> scopes = new HashMap<String, Scope>();
 
   final List<Class<?>> staticInjections = new ArrayList<Class<?>>();
 
@@ -85,18 +89,28 @@ public final class ContainerBuilder {
 
   static final String UNKNOWN_SOURCE = "[unknown source]";
 
+  static final Scope DEFAULT_SCOPE = new Scope() {
+    public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
+      // We actually optimize around this.
+      throw new UnsupportedOperationException();
+    }
+  };
+
   /**
    * Constructs a new builder.
    */
   public ContainerBuilder() {
+    put(Scopes.DEFAULT, DEFAULT_SCOPE);
+    put(Scopes.SINGLETON, SingletonScope.INSTANCE);
+
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
   }
 
   /**
-   * Creates a source object to be associated with a binding. Called by
-   * default for each binding. The default implementation returns {@code
-   * ContainerBuilder}'s caller's {@code StackTraceElement}.
+   * Creates a source object to be associated with a binding. Useful for
+   * debugging. Called by default for each binding. The default implementation
+   * returns {@code ContainerBuilder}'s caller's {@code StackTraceElement}.
    *
    * <p>If you plan on manually setting the source (say for example you've
    * implemented an XML configuration), you might override this method and
@@ -109,6 +123,19 @@ public final class ContainerBuilder {
         return element;
     }
     throw new AssertionError();
+  }
+
+  /**
+   * Maps a {@link Scope} instance to a given name. Scopes should be mapped
+   * before used in bindings. @{@link Scoped#value()} references this name.
+   */
+  public void put(String name, Scope scope) {
+    if (scopes.containsKey(nonNull(name, "name"))) {
+      add(new ErrorMessage(source(), "Scope named '" + name
+          + "' is already defined."));
+    } else {
+        scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
+    }
   }
 
   /**
@@ -166,7 +193,7 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Binds string constants based on the given properties.
+   * Binds a string constant for each property.
    */
   public ContainerBuilder bindProperties(Map<String, String> properties) {
     ensureNotCreated();
@@ -180,7 +207,7 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Binds string constants based on the given properties.
+   * Binds a string constant for each property.
    */
   public ContainerBuilder bindProperties(Properties properties) {
     ensureNotCreated();
@@ -227,6 +254,7 @@ public final class ContainerBuilder {
 
     HashMap<Key<?>, InternalFactory<?>> factories =
         new HashMap<Key<?>, InternalFactory<?>>();
+    ContainerImpl container = new ContainerImpl(factories);
 
     for (ConstantBindingBuilder builder : constantBindingBuilders) {
       if (builder.hasValue()) {
@@ -242,7 +270,7 @@ public final class ContainerBuilder {
 
     for (BindingBuilder<?> builder : bindingBuilders) {
       final Key<?> key = builder.getKey();
-      final InternalFactory<?> factory = builder.getInternalFactory();
+      final InternalFactory<?> factory = builder.getInternalFactory(container);
       factories.put(key, factory);
 
       if (builder.isSingleton()) {
@@ -284,12 +312,11 @@ public final class ContainerBuilder {
     // TODO: Handle this better.
     if (!errorMessages.isEmpty()) {
       for (ErrorMessage errorMessage : errorMessages) {
-        System.err.println(errorMessage);
-        throw new DependencyException("Configuration errors.");
+        logger.severe(errorMessage.toString());
       }
+      throw new ConfigurationException("We encountered configuration errors."
+        + " See the log for details.");
     }
-
-    final ContainerImpl container = new ContainerImpl(factories);
 
     container.injectStatics(staticInjections);
 
@@ -323,21 +350,9 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Implemented by classes which participate in building a container. Useful
-   * for encapsulating and reusing configuration logic.
-   */
-  public interface Command {
-
-    /**
-     * Configures the given builder.
-     */
-    void build(ContainerBuilder builder);
-  }
-
-  /**
    * Binds a {@link Key} to an implementation in a given scope.
    */
-  public class BindingBuilder<T> implements SourceAware<BindingBuilder<T>> {
+  public class BindingBuilder<T> {
 
     Object source = ContainerBuilder.UNKNOWN_SOURCE;
     Key<T> key;
@@ -352,7 +367,7 @@ public final class ContainerBuilder {
       return key;
     }
 
-    public BindingBuilder<T> from(Object source) {
+    BindingBuilder<T> from(Object source) {
       this.source = source;
       return this;
     }
@@ -466,32 +481,79 @@ public final class ContainerBuilder {
     }
 
     /**
-     * Specifies the scope.
+     * Specifies the scope. References the name passed to {@link
+     * ContainerBuilder#put(String, Scope)}.
      */
-    public BindingBuilder<T> in(Scope scope) {
-      if (this.scope != null) {
-        add(new ErrorMessage(source, "Scope set more than once."));
-      }
+    public BindingBuilder<T> in(String scopeName) {
+      ensureScopeNotSet();
 
-      this.scope = scope;
+      // We could defer this lookup to when we create the container, but this
+      // is fine for now.
+      this.scope = scopes.get(scopeName);
+      if (this.scope == null) {
+        add(new ErrorMessage(source, "Scope named '" + scopeName
+            + "' not found."));
+      }
       return this;
     }
 
-    InternalFactory<? extends T> getInternalFactory() {
+    /**
+     * Specifies the scope.
+     */
+    public BindingBuilder<T> in(Scope scope) {
+      ensureScopeNotSet();
+
+      this.scope = nonNull(scope, "scope");
+      return this;
+    }
+
+    private void ensureScopeNotSet() {
+      if (this.scope != null) {
+        add(new ErrorMessage(source, "Scope set more than once."));
+      }
+    }
+
+    InternalFactory<? extends T> getInternalFactory(
+        final ContainerImpl container) {
       // If an implementation wasn't specified, use the injection type.
       if (this.factory == null) {
         to(key.getTypeToken());
       }
 
-      if (scope == null) {
+      if (scope == null || scope == DEFAULT_SCOPE) {
         return this.factory;
       }
 
-      return scope.scopeFactory(key, this.factory);
+      // TODO: This is a little hairy.
+      final InternalFactory<? extends T> internalFactory = this.factory;
+      final Factory<T> factory = scope.scope(this.key, new Factory<T>() {
+        public T get() {
+          return container.callInContext(
+              new ContainerImpl.ContextualCallable<T>() {
+            public T call(InternalContext context) {
+              return internalFactory.get(context);
+            }
+          });
+        }
+
+        public String toString() {
+          return internalFactory.toString();
+        }
+      });
+
+      return new InternalFactory<T>() {
+        public T get(InternalContext context) {
+          return factory.get();
+        }
+
+        public String toString() {
+          return factory.toString();
+        }
+      };
     }
 
     boolean isSingleton() {
-      return this.scope == Scope.SINGLETON;
+      return this.scope == SingletonScope.INSTANCE;
     }
 
     /**
@@ -499,6 +561,7 @@ public final class ContainerBuilder {
      */
     private class DefaultFactory<I extends T> implements InternalFactory<I> {
 
+      ContainerImpl container;
       volatile ContainerImpl.ConstructorInjector<I> constructor;
 
       private final TypeToken<I> implementation;
@@ -526,8 +589,7 @@ public final class ContainerBuilder {
   /**
    * Builds a constant binding.
    */
-  public class ConstantBindingBuilder
-      implements SourceAware<ConstantBindingBuilder> {
+  public class ConstantBindingBuilder {
 
     final String name;
     Class<?> type;
@@ -554,7 +616,7 @@ public final class ContainerBuilder {
       return new ConstantFactory<Object>(value);
     }
 
-    public ConstantBindingBuilder from(Object source) {
+    ConstantBindingBuilder from(Object source) {
       this.source = source;
       return this;
     }
@@ -642,8 +704,7 @@ public final class ContainerBuilder {
   /**
    * Links one binding to another.
    */
-  public class LinkedBindingBuilder<T>
-      implements SourceAware<LinkedBindingBuilder<T>> {
+  public class LinkedBindingBuilder<T> {
 
     Key<T> key;
     Key<? extends T> destination;
@@ -665,7 +726,7 @@ public final class ContainerBuilder {
       return destination;
     }
 
-    public LinkedBindingBuilder<T> from(Object source) {
+    LinkedBindingBuilder<T> from(Object source) {
       this.source = source;
       return this;
     }
@@ -677,5 +738,10 @@ public final class ContainerBuilder {
       this.destination = destination;
       return this;
     }
+  }
+
+  interface ContainerAwareFactory<T> extends Factory<T> {
+
+    void setContainer(ContainerImpl container);
   }
 }

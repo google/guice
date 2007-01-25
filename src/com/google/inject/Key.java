@@ -26,12 +26,12 @@ import java.lang.reflect.Type;
  *
  * <p>For example, <tt>new Key&lt;List&lt;String>>("cities") {}</tt> will match:
  *
- * <tt>
- *   @Inject("cities")
+ * <pre>
+ *   &#64;Inject("cities")
  *   public void setList(List&lt;String> cities) {
  *     ...
  *   }
- * </tt>
+ * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */

@@ -31,27 +31,14 @@ public interface Context {
   Container getContainer();
 
   /**
-   * Gets the current scope strategy. See {@link
-   * Container#setScopeStrategy(Scope.Strategy)}.
-   *
-   * @throws IllegalStateException if no strategy has been set
-   */
-  Scope.Strategy getScopeStrategy();
-
-  /**
    * Gets the field, method or constructor which is being injected. Returns
-   * {@code null} if the object currently being constructed is pre-loaded as
-   * a singleton or requested from {@link Container#getInstance(Class)}.
+   * {@code null} if the object isn't being directly injected (i.e. it's
+   * a preloaded singleton, returned from {@link Factory#get()}, etc.
    */
   Member getMember();
 
   /**
-   * Gets the type of the field or parameter which is being injected.
+   * Gets the binding key for the object currently being retrieved.
    */
-  Class<?> getType();
-
-  /**
-   * Gets the name of the injection specified by {@link @Inject#name()}.
-   */
-  String getName();
+  Key<?> getKey();
 }

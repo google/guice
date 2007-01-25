@@ -17,21 +17,13 @@
 package com.google.inject;
 
 /**
- * Thrown when a dependency is misconfigured.
- *
- * @author crazybob@google.com (Bob Lee)
+ * Implemented by classes which participate in building a container. Useful
+ * for encapsulating and reusing configuration logic.
  */
-public class DependencyException extends RuntimeException {
+public interface Module {
 
-  public DependencyException(String message) {
-    super(message);
-  }
-
-  public DependencyException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public DependencyException(Throwable cause) {
-    super(cause);
-  }
+  /**
+   * Configures the given builder.
+   */
+  void configure(ContainerBuilder builder);
 }

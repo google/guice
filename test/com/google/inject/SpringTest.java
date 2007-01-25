@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scope.*;
+import static com.google.inject.Scopes.SINGLETON;
 
 import junit.framework.TestCase;
 
@@ -86,7 +86,7 @@ public class SpringTest extends TestCase {
     }
 
     public Foo call() throws Exception {
-      return container.inject(Foo.class);
+      return container.newInstance(Foo.class);
     }
   };
 

@@ -27,11 +27,11 @@ public class SuperclassTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class);
     Container container = builder.create(false);
-    Sub sub = container.inject(Sub.class);
-    sub = container.inject(Sub.class);
-    sub = container.inject(Sub.class);
-    sub = container.inject(Sub.class);
-    sub = container.inject(Sub.class);
+    Sub sub = container.newInstance(Sub.class);
+    sub = container.newInstance(Sub.class);
+    sub = container.newInstance(Sub.class);
+    sub = container.newInstance(Sub.class);
+    sub = container.newInstance(Sub.class);
     assertNotNull(sub.field);
     assertNotNull(sub.fromMethod);
   }

@@ -37,12 +37,8 @@ class ExternalContext<T> implements Context {
     this.container = container;
   }
 
-  public Class<T> getType() {
-    return key.getRawType();
-  }
-
-  public Scope.Strategy getScopeStrategy() {
-    return container.localScopeStrategy.get();
+  public Key<?> getKey() {
+    return this.key;
   }
 
   public Container getContainer() {
@@ -53,15 +49,10 @@ class ExternalContext<T> implements Context {
     return member;
   }
 
-  public String getName() {
-    return key.getName();
-  }
-
   public String toString() {
     return "Context" + new LinkedHashMap<String, Object>() {{
       put("member", member);
-      put("type", getType());
-      put("name", getName());
+      put("key", getKey());
       put("container", container);
     }}.toString();
   }
