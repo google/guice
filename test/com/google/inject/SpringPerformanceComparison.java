@@ -83,7 +83,6 @@ public class SpringPerformanceComparison {
       builder.bind("s").to("test");
 
       fooFactory = builder.create(false).getFactory(Key.get(Foo.class));
-      fooFactory.get();
     }
 
     public Foo call() throws Exception {
@@ -101,29 +100,25 @@ public class SpringPerformanceComparison {
   }
 
   public static void main(String[] args) throws Exception {
-    for (int i = 0; i < 10000000; i++) {
-      juiceFactory.call();
+    validate(springFactory);
+    validate(springFactory);
+    validate(juiceFactory);
+    validate(juiceFactory);
+
+    int count = 100000;
+    for (int i2 = 0; i2 < 10; i2++) {
+      long time = System.currentTimeMillis();
+      for (int i = 0; i < count; i++)
+        springFactory.call();
+      time = System.currentTimeMillis() - time;
+      System.err.println("Spring: " + count * 1000 / time + " creations/s");
+
+      time = System.currentTimeMillis();
+      for (int i = 0; i < count; i++)
+        juiceFactory.call();
+      time = System.currentTimeMillis() - time;
+      System.err.println("Guice:  " + count * 1000 / time + " creations/s");
     }
-//    validate(springFactory);
-//    validate(springFactory);
-//    validate(juiceFactory);
-//    validate(juiceFactory);
-//
-//    System.err.println("Creations of Foo per second:");
-//    int count = 100000;
-//    for (int i2 = 0; i2 < 10; i2++) {
-//      long time = System.currentTimeMillis();
-//      for (int i = 0; i < count; i++)
-//        springFactory.call();
-//      time = System.currentTimeMillis() - time;
-//      System.err.println("Spring: " + count * 1000 / time + "/s");
-//
-//      time = System.currentTimeMillis();
-//      for (int i = 0; i < count; i++)
-//        juiceFactory.call();
-//      time = System.currentTimeMillis() - time;
-//      System.err.println("Guice:  " + count * 1000 / time + "/s");
-//    }
   }
 
   public static class Foo {
