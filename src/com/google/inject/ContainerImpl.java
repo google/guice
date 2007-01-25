@@ -455,8 +455,10 @@ class ContainerImpl implements Container {
         constructionContext.setCurrentReference(t);
 
         // Inject fields and methods.
-        for (Injector injector : injectors) {
-          injector.inject(context, t);
+        if (!injectors.isEmpty()) {
+          for (Injector injector : injectors) {
+            injector.inject(context, t);
+          }
         }
 
         return t;

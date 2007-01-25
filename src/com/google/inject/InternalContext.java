@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Internal context. Used to coordinate injections and support circular
@@ -28,8 +28,7 @@ import java.util.Map;
 class InternalContext {
 
   final ContainerImpl container;
-  final Map<Object, ConstructionContext<?>> constructionContexts =
-      new HashMap<Object, ConstructionContext<?>>();
+  Map<Object, ConstructionContext<?>> constructionContexts;
   ExternalContext<?> externalContext;
 
   InternalContext(ContainerImpl container) {
@@ -46,13 +45,20 @@ class InternalContext {
 
   @SuppressWarnings("unchecked")
   <T> ConstructionContext<T> getConstructionContext(Object key) {
-    ConstructionContext<T> constructionContext =
-        (ConstructionContext<T>) constructionContexts.get(key);
-    if (constructionContext == null) {
-      constructionContext = new ConstructionContext<T>();
+    if (constructionContexts == null) {
+      constructionContexts = new HashMap<Object, ConstructionContext<?>>();
+      ConstructionContext<T> constructionContext = new ConstructionContext<T>();
       constructionContexts.put(key, constructionContext);
+      return constructionContext;
+    } else {
+      ConstructionContext<T> constructionContext =
+          (ConstructionContext<T>) constructionContexts.get(key);
+      if (constructionContext == null) {
+        constructionContext = new ConstructionContext<T>();
+        constructionContexts.put(key, constructionContext);
+      }
+      return constructionContext;
     }
-    return constructionContext;
   }
 
   @SuppressWarnings("unchecked")

@@ -561,7 +561,6 @@ public final class ContainerBuilder {
      */
     private class DefaultFactory<I extends T> implements InternalFactory<I> {
 
-      ContainerImpl container;
       volatile ContainerImpl.ConstructorInjector<I> constructor;
 
       private final TypeToken<I> implementation;
