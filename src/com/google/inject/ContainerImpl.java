@@ -19,6 +19,10 @@ package com.google.inject;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 
+import net.sf.cglib.reflect.FastMethod;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastConstructor;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
@@ -96,6 +100,9 @@ class ContainerImpl implements Container {
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
     String value = stringFactory.get(null);
+
+    // TODO: Generalize everything below here and enable users to plug in
+    // their own converters.
 
     // Do we need a primitive?
     Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(type);
@@ -326,12 +333,14 @@ class ContainerImpl implements Container {
 
   static class MethodInjector implements Injector {
 
-    final Method method;
+    final FastMethod fastMethod;
     final ParameterInjector<?>[] parameterInjectors;
 
     public MethodInjector(ContainerImpl container, Method method, String name)
         throws MissingDependencyException {
-      this.method = method;
+      this.fastMethod =
+          FastClass.create(method.getDeclaringClass()).getMethod(method);
+
       method.setAccessible(true);
 
       Type[] parameterTypes = method.getGenericParameterTypes();
@@ -345,7 +354,7 @@ class ContainerImpl implements Container {
 
     public void inject(InternalContext context, Object o) {
       try {
-        method.invoke(o, getParameters(method, context, parameterInjectors));
+        fastMethod.invoke(o, getParameters(context, parameterInjectors));
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -364,13 +373,13 @@ class ContainerImpl implements Container {
 
     final Class<T> implementation;
     final List<Injector> injectors;
-    final Constructor<T> constructor;
+    final FastConstructor fastConstructor;
     final ParameterInjector<?>[] parameterInjectors;
 
     ConstructorInjector(ContainerImpl container, Class<T> implementation) {
       this.implementation = implementation;
 
-      constructor = findConstructorIn(implementation);
+      Constructor<T> constructor = findConstructorIn(implementation);
       constructor.setAccessible(true);
 
       try {
@@ -387,6 +396,9 @@ class ContainerImpl implements Container {
         throw new ConfigurationException(e);
       }
       injectors = container.injectors.get(implementation);
+
+      fastConstructor = FastClass.create(constructor.getDeclaringClass())
+          .getConstructor(constructor);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -442,9 +454,8 @@ class ContainerImpl implements Container {
         // First time through...
         constructionContext.startConstruction();
         try {
-          Object[] parameters =
-              getParameters(constructor, context, parameterInjectors);
-          t = constructor.newInstance(parameters);
+          Object[] parameters = getParameters(context, parameterInjectors);
+          t = newInstance(parameters);
           constructionContext.setProxyDelegates(t);
         } finally {
           constructionContext.finishConstruction();
@@ -462,15 +473,16 @@ class ContainerImpl implements Container {
         }
 
         return t;
-      } catch (InstantiationException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
       } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
       } finally {
         constructionContext.removeCurrentReference();
       }
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private T newInstance(Object[] parameters) throws InvocationTargetException {
+      return (T) fastConstructor.newInstance(parameters);
     }
   }
 
@@ -485,7 +497,7 @@ class ContainerImpl implements Container {
       this.factory = factory;
     }
 
-    T inject(Member member, InternalContext context) {
+    T inject(InternalContext context) {
       ExternalContext<?> previous = context.getExternalContext();
       context.setExternalContext(externalContext);
       try {
@@ -496,7 +508,7 @@ class ContainerImpl implements Container {
     }
   }
 
-  private static Object[] getParameters(Member member, InternalContext context,
+  private static Object[] getParameters(InternalContext context,
       ParameterInjector[] parameterInjectors) {
     if (parameterInjectors == null) {
       return null;
@@ -504,7 +516,7 @@ class ContainerImpl implements Container {
 
     Object[] parameters = new Object[parameterInjectors.length];
     for (int i = 0; i < parameters.length; i++) {
-      parameters[i] = parameterInjectors[i].inject(member, context);
+      parameters[i] = parameterInjectors[i].inject(context);
     }
     return parameters;
   }
