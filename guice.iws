@@ -18,8 +18,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Key.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Key.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/SingletonScope.java" afterPath="$PROJECT_DIR$/src/com/google/inject/SingletonScope.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" afterPath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" />
     </list>
   </component>
@@ -193,7 +198,25 @@
       <file leaf-file-name="ContainerImpl.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="483" column="19" selection-start="16109" selection-end="16109" vertical-scroll-proportion="0.016236868">
+            <state line="82" column="0" selection-start="2710" selection-end="2710" vertical-scroll-proportion="0.21145976">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ContainerBuilder.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="256" column="0" selection-start="7981" selection-end="7981" vertical-scroll-proportion="0.3328786">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Key.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/Key.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="188" column="9" selection-start="4748" selection-end="4748" vertical-scroll-proportion="0.941337">
               <folding />
             </state>
           </provider>
@@ -202,7 +225,7 @@
       <file leaf-file-name="FastClass.class" pinned="false" current="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar!/net/sf/cglib/reflect/FastClass.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="47" selection-start="386" selection-end="386" vertical-scroll-proportion="0.016472869">
+            <state line="12" column="47" selection-start="386" selection-end="386" vertical-scroll-proportion="0.02367688">
               <folding />
             </state>
           </provider>
@@ -211,16 +234,34 @@
       <file leaf-file-name="AllTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="3" selection-start="950" selection-end="950" vertical-scroll-proportion="0.12989494">
+            <state line="37" column="34" selection-start="1219" selection-end="1219" vertical-scroll-proportion="0.39427012">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SpringPerformanceComparison.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SingletonScope.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/SingletonScope.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="42" column="0" selection-start="1160" selection-end="1160" vertical-scroll-proportion="0.9536153">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ContainerTest.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="63" column="68" selection-start="1990" selection-end="1990" vertical-scroll-proportion="0.39427012">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SpringPerformanceComparison.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="36" selection-start="1297" selection-end="1297" vertical-scroll-proportion="0.1461318">
+            <state line="38" column="13" selection-start="1438" selection-end="1438" vertical-scroll-proportion="0.32469305">
               <folding />
             </state>
           </provider>
@@ -229,7 +270,7 @@
       <file leaf-file-name="Scoped.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/Scoped.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="18" selection-start="1024" selection-end="1024" vertical-scroll-proportion="0.22731614">
+            <state line="31" column="18" selection-start="1024" selection-end="1024" vertical-scroll-proportion="0.32469305">
               <folding />
             </state>
           </provider>
@@ -238,7 +279,7 @@
       <file leaf-file-name="FastMethod.class" pinned="false" current="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar!/net/sf/cglib/reflect/FastMethod.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="13" selection-start="158" selection-end="158" vertical-scroll-proportion="0.065891474">
+            <state line="5" column="13" selection-start="158" selection-end="158" vertical-scroll-proportion="0.09470752">
               <folding />
             </state>
           </provider>
@@ -690,7 +731,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14623655" order="1" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3282876" order="8" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29044464" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29044464" order="2" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="6" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39978448" order="0" />
@@ -783,40 +824,12 @@
   </component>
   <component name="com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectRootMasterDetailsConfigurable" proportions="0.16666667" version="1">
     <option name="myPlainMode" value="false" />
-    <option name="myLastEditedConfigurable" value="cglib-nodep-2.1_3" />
+    <option name="myLastEditedConfigurable" value="1.5" />
   </component>
   <component name="com.intellij.profile.ui.ErrorOptionsConfigurable" proportions="0.16666667,0.60142857" version="1">
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Scopes.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="16" selection-start="393" selection-end="393" vertical-scroll-proportion="0.43355703">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/SingletonScope.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="15" selection-start="481" selection-end="481" vertical-scroll-proportion="0.47919464">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="88" column="0" selection-start="2454" selection-end="2454" vertical-scroll-proportion="1.224161">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="23" selection-start="364" selection-end="364" vertical-scroll-proportion="0.34228188">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="12" column="13" selection-start="225" selection-end="225" vertical-scroll-proportion="0.20536913">
@@ -852,44 +865,72 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="483" column="19" selection-start="16109" selection-end="16109" vertical-scroll-proportion="0.016236868">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar!/net/sf/cglib/reflect/FastClass.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="47" selection-start="386" selection-end="386" vertical-scroll-proportion="0.016472869">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="3" selection-start="950" selection-end="950" vertical-scroll-proportion="0.12989494">
+        <state line="12" column="47" selection-start="386" selection-end="386" vertical-scroll-proportion="0.02367688">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/Scoped.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="18" selection-start="1024" selection-end="1024" vertical-scroll-proportion="0.22731614">
+        <state line="31" column="18" selection-start="1024" selection-end="1024" vertical-scroll-proportion="0.32469305">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="jar://$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar!/net/sf/cglib/reflect/FastMethod.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="13" selection-start="158" selection-end="158" vertical-scroll-proportion="0.065891474">
+        <state line="5" column="13" selection-start="158" selection-end="158" vertical-scroll-proportion="0.09470752">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Key.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="188" column="9" selection-start="4748" selection-end="4748" vertical-scroll-proportion="0.941337">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="256" column="0" selection-start="7981" selection-end="7981" vertical-scroll-proportion="0.3328786">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="82" column="0" selection-start="2710" selection-end="2710" vertical-scroll-proportion="0.21145976">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="68" selection-start="1990" selection-end="1990" vertical-scroll-proportion="0.39427012">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="34" selection-start="1219" selection-end="1219" vertical-scroll-proportion="0.39427012">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="36" selection-start="1297" selection-end="1297" vertical-scroll-proportion="0.1461318">
+        <state line="38" column="13" selection-start="1438" selection-end="1438" vertical-scroll-proportion="0.32469305">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/SingletonScope.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="42" column="0" selection-start="1160" selection-end="1160" vertical-scroll-proportion="0.9536153">
           <folding />
         </state>
       </provider>

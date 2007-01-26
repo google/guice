@@ -16,19 +16,22 @@ class SingletonScope implements Scope {
   public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
     return new Factory<T>() {
 
-      T instance;
+      private volatile T instance;
 
       public T get() {
-        // Use a pretty coarse lock. We don't want to run into deadlocks when
-        // two threads try to load circularly-dependent singletons.
-        // Maybe one of these days we will identify independent graphs of
-        // singletons and offer to load them in parallel.
-        synchronized (Container.class) {
-          if (instance == null) {
-            instance = creator.get();
+        // Double checked locking improves performance and is safe as of Java 5.
+        if (instance == null) {
+          // Use a pretty coarse lock. We don't want to run into deadlocks when
+          // two threads try to load circularly-dependent singletons.
+          // Maybe one of these days we will identify independent graphs of
+          // singletons and offer to load them in parallel.
+          synchronized (Container.class) {
+            if (instance == null) {
+              instance = creator.get();
+            }
           }
-          return instance;
         }
+        return instance;
       }
 
       public String toString() {

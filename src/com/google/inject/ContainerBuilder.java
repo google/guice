@@ -258,7 +258,9 @@ public final class ContainerBuilder {
 
     for (ConstantBindingBuilder builder : constantBindingBuilders) {
       if (builder.hasValue()) {
-        factories.put(builder.getKey(), builder.getInternalFactory());
+        Key<?> key = builder.getKey();
+        InternalFactory<?> factory = builder.getInternalFactory();
+        factories.put(key, factory);
       } else {
         add(new ErrorMessage(builder.getSource(),
             "Constant value isn't set."));

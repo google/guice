@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Default {@link Container} implementation.
@@ -48,6 +49,34 @@ import java.util.Map;
  * @author crazybob@google.com (Bob Lee)
  */
 class ContainerImpl implements Container {
+
+  /**
+   * Maps between primitive types and their wrappers and vice versa.
+   */
+  private static final Map<Class<?>, Class<?>> PRIMITIVE_COUNTERPARTS;
+  static {
+    Map<Class<?>, Class<?>> primitiveToWrapper =
+        new HashMap<Class<?>, Class<?>>() {{
+          put(int.class, Integer.class);
+          put(long.class, Long.class);
+          put(boolean.class, Boolean.class);
+          put(byte.class, Byte.class);
+          put(short.class, Short.class);
+          put(float.class, Float.class);
+          put(double.class, Double.class);
+          put(char.class, Character.class);
+        }};
+
+    Map<Class<?>, Class<?>> counterparts = new HashMap<Class<?>, Class<?>>();
+    for (Map.Entry<Class<?>, Class<?>> entry : primitiveToWrapper.entrySet()) {
+      Class<?> key = entry.getKey();
+      Class<?> value = entry.getValue();
+      counterparts.put(key, value);
+      counterparts.put(value, key);
+    }
+
+    PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
+  }
 
   private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS =
       new PrimitiveConverters();
@@ -84,6 +113,17 @@ class ContainerImpl implements Container {
           return (T) factory;
         }
       };
+    }
+
+    // Auto[un]box primitives.
+    Class<?> primitiveCounterpart =
+        PRIMITIVE_COUNTERPARTS.get(key.getTypeToken().getRawType());
+    if (primitiveCounterpart != null) {
+      internalFactory = (InternalFactory<T>) factories.get(
+          Key.get(primitiveCounterpart, key.getName()));
+      if (internalFactory != null) {
+        return internalFactory;
+      }
     }
 
     // Do we have a constant String factory of the same name?
@@ -654,13 +694,13 @@ class ContainerImpl implements Container {
   static class PrimitiveConverters extends HashMap<Class<?>, Converter<?>> {
 
     PrimitiveConverters() {
-      putParser(Integer.class, int.class);
-      putParser(Long.class, long.class);
-      putParser(Boolean.class, boolean.class);
-      putParser(Byte.class, byte.class);
-      putParser(Short.class, short.class);
-      putParser(Float.class, float.class);
-      putParser(Double.class, double.class);
+      putParser(int.class);
+      putParser(long.class);
+      putParser(boolean.class);
+      putParser(byte.class);
+      putParser(short.class);
+      putParser(float.class);
+      putParser(double.class);
 
       // Character doesn't follow the same pattern.
       Converter<Character> characterConverter = new Converter<Character>() {
@@ -678,8 +718,9 @@ class ContainerImpl implements Container {
       put(Character.class, characterConverter);
     }
 
-    <T> void putParser(Class<T> wrapper, final Class<T> primitive) {
+    <T> void putParser(final Class<T> primitive) {
       try {
+        Class<?> wrapper = PRIMITIVE_COUNTERPARTS.get(primitive);
         final Method parser = wrapper.getMethod("parse" +
             Strings.capitalize(primitive.getName()), String.class);
         Converter<T> converter = new Converter<T>() {

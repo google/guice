@@ -105,7 +105,7 @@ public abstract class Key<T> {
   /**
    * Returns a new key with the same type as this key and the given name,
    */
-  public Key<T> named(String name) {
+  Key<T> named(String name) {
     return new SimpleKey<T>(this.typeToken, name);    
   }
 
@@ -158,7 +158,7 @@ public abstract class Key<T> {
   /**
    * Gets a key for a {@code Class} and a name.
    */
-  static <T> Key<T> get(Class<T> type, String name) {
+  public static <T> Key<T> get(Class<T> type, String name) {
     return new SimpleKey<T>(type, name);
   }
 
@@ -172,7 +172,7 @@ public abstract class Key<T> {
   /**
    * Gets a key for a type and a name.
    */
-  static Key<?> get(Type type, String name) {
+  public static Key<?> get(Type type, String name) {
     return new SimpleKey<Object>(type, name);
   }
 
@@ -186,7 +186,7 @@ public abstract class Key<T> {
   /**
    * Gets key for a type token and a name.
    */
-  static <T> Key<T> get(TypeToken<T> typeToken, String name) {
+  public static <T> Key<T> get(TypeToken<T> typeToken, String name) {
     return new SimpleKey<T>(typeToken, name);
   }
 

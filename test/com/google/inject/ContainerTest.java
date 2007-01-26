@@ -57,6 +57,18 @@ public class ContainerTest extends TestCase {
     assertEquals(5, bar.getI());
   }
 
+  public void testIntAndIntegerAreInterchangeable() {
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind("i").to(5);
+    Container container = builder.create(false);
+    IntegerWrapper iw = container.newInstance(IntegerWrapper.class);
+    assertEquals(5, (int) iw.i);
+  }
+
+  static class IntegerWrapper {
+    @Inject("i") Integer i;
+  }
+
   static class Foo {
 
     @Inject Bar bar;
