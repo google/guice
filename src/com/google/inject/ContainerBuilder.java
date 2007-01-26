@@ -40,6 +40,7 @@ import java.util.logging.Logger;
  * <p>Default bindings include:
  *
  * <ul>
+ *   <li>A {@code Factory<T>} for each binding of type {@code T}
  *   <li>The {@link Container} iself
  *   <li>The {@link Logger} for the class being injected
  * </ul>
@@ -625,80 +626,79 @@ public final class ContainerBuilder {
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(String value) {
-      return to(String.class, value);
+    public void to(String value) {
+      to(String.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(int value) {
-      return to(int.class, value);
+    public void to(int value) {
+      to(int.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(long value) {
-      return to(long.class, value);
+    public void to(long value) {
+      to(long.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(boolean value) {
-      return to(boolean.class, value);
+    public void to(boolean value) {
+      to(boolean.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(double value) {
-      return to(double.class, value);
+    public void to(double value) {
+      to(double.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(float value) {
-      return to(float.class, value);
+    public void to(float value) {
+      to(float.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(short value) {
-      return to(short.class, value);
+    public void to(short value) {
+      to(short.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(char value) {
-      return to(char.class, value);
+    public void to(char value) {
+      to(char.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public ConstantBindingBuilder to(Class<?> value) {
-      return to(Class.class, value);
+    public void to(Class<?> value) {
+      to(Class.class, value);
     }
 
     /**
      * Binds constant to the given value.
      */
-    public <E extends Enum<E>> ConstantBindingBuilder to(E value) {
-      return to(value.getDeclaringClass(), value);
+    public <E extends Enum<E>> void to(E value) {
+      to(value.getDeclaringClass(), value);
     }
 
     /**
      * Maps a constant value to the given type and name.
      */
-    <T> ConstantBindingBuilder to(final Class<T> type, final T value) {
+    <T> void to(final Class<T> type, final T value) {
       this.type = type;
       this.value = value;
-      return this;
     }
   }
 
@@ -735,9 +735,8 @@ public final class ContainerBuilder {
     /**
      * Links to another binding with the given key.
      */
-    public LinkedBindingBuilder<T> to(Key<? extends T> destination) {
+    public void to(Key<? extends T> destination) {
       this.destination = destination;
-      return this;
     }
   }
 
