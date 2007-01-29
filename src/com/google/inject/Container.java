@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
- * @{@link Inject}.
+ * &#64;{@link Inject}.
  *
  * <p>When injecting a method or constructor, you can additionally annotate
  * its parameters with {@link Inject} and specify a dependency name. When a
