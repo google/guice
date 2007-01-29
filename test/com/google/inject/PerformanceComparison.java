@@ -36,7 +36,7 @@ import java.util.concurrent.Callable;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class SpringPerformanceComparison {
+public class PerformanceComparison {
 
   static final Callable<Foo> springFactory = new Callable<Foo>() {
 
@@ -79,11 +79,16 @@ public class SpringPerformanceComparison {
     final Factory<Foo> fooFactory;
     {
       ContainerBuilder builder = new ContainerBuilder();
-      builder.bind(Tee.class).to(TeeImpl.class);
-      builder.bind(Bar.class).to(BarImpl.class);
-      builder.bind(Foo.class).to(Foo.class);
-      builder.bind("i").to(5);
-      builder.bind("s").to("test");
+
+      builder.apply(new AbstractModule() {
+        protected void configure() {
+          bind(Tee.class).to(TeeImpl.class);
+          bind(Bar.class).to(BarImpl.class);
+          bind(Foo.class).to(Foo.class);
+          bind("i").to(5);
+          bind("s").to("test");
+        }
+      });
 
       fooFactory = builder.create(false).getCreator(Foo.class);
     }
@@ -117,35 +122,29 @@ public class SpringPerformanceComparison {
   }
 
   public static void main(String[] args) throws Exception {
-    validate(springFactory);
+    // Once warm up. Takes lazy loading out of the equation and ensures we
+    // created the graphs properly.
     validate(springFactory);
     validate(juiceFactory);
-    validate(juiceFactory);
-    validate(byHandFactory);
     validate(byHandFactory);
 
-    int count = 100000;
     for (int i2 = 0; i2 < 10; i2++) {
-      long time = System.currentTimeMillis();
-      for (int i = 0; i < count; i++)
-        springFactory.call();
-      time = System.currentTimeMillis() - time;
-      System.err.println("Spring:  " + count * 1000 / time + " creations/s");
-
-      time = System.currentTimeMillis();
-      for (int i = 0; i < count; i++)
-        juiceFactory.call();
-      time = System.currentTimeMillis() - time;
-      System.err.println("Guice:   " + count * 1000 / time + " creations/s");
-
-      time = System.currentTimeMillis();
-      for (int i = 0; i < count; i++)
-        byHandFactory.call();
-      time = System.currentTimeMillis() - time;
-      System.err.println("By Hand: " + count * 1000 / time + " creations/s");
+      iterate(springFactory, "Spring:  ");
+      iterate(juiceFactory,  "Guice:   ");
+      iterate(byHandFactory, "By Hand: ");
 
       System.err.println();
     }
+  }
+
+  static void iterate(Callable<Foo> callable, String label) throws Exception {
+    int count = 100000;
+    long time = System.currentTimeMillis();
+    for (int i = 0; i < count; i++) {
+      callable.call();
+    }
+    time = System.currentTimeMillis() - time;
+    System.err.println(label + count * 1000 / time + " creations/s");
   }
 
   public static class Foo {

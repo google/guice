@@ -41,10 +41,15 @@ public class ContainerTest extends TestCase {
 
   private Container createFooContainer() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(Bar.class).to(BarImpl.class);
-    builder.bind(Tee.class).to(TeeImpl.class);
-    builder.bind("s").to("test");
-    builder.bind("i").to(5);
+
+    builder.apply(new AbstractModule() {
+      protected void configure() {
+        bind(Bar.class).to(BarImpl.class);
+        bind(Tee.class).to(TeeImpl.class);
+        bind("s").to("test");
+        bind("i").to(5);
+      }
+    });
 
     return builder.create(false);
   }

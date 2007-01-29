@@ -196,7 +196,7 @@ public final class ContainerBuilder {
   /**
    * Binds a string constant for each property.
    */
-  public ContainerBuilder bindProperties(Map<String, String> properties) {
+  public void bindProperties(Map<String, String> properties) {
     ensureNotCreated();
     Object source = source();
     for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -204,13 +204,12 @@ public final class ContainerBuilder {
       String value = entry.getValue();
       bind(key, source).to(value);
     }
-    return this;
   }
 
   /**
    * Binds a string constant for each property.
    */
-  public ContainerBuilder bindProperties(Properties properties) {
+  public void bindProperties(Properties properties) {
     ensureNotCreated();
     Object source = source();
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -218,7 +217,6 @@ public final class ContainerBuilder {
       String value = (String) entry.getValue();
       bind(key, source).to(value);
     }
-    return this;
   }
 
   /**
@@ -227,9 +225,15 @@ public final class ContainerBuilder {
    *
    * @param types for which static members will be injected
    */
-  public ContainerBuilder injectStatics(Class<?>... types) {
+  public void injectStatics(Class<?>... types) {
     staticInjections.addAll(Arrays.asList(types));
-    return this;
+  }
+
+  /**
+   * Applies the given module to this builder.
+   */
+  public void apply(Module module) {
+    module.configure(this);    
   }
 
   /**
