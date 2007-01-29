@@ -17,7 +17,7 @@ public class FactoryInjectionTest extends TestCase {
 
     Container container = builder.create(false);
 
-    Foo foo = container.newInstance(Foo.class);
+    Foo foo = container.getCreator(Foo.class).get();
 
     Bar bar = foo.barFactory.get();
     assertNotNull(bar);

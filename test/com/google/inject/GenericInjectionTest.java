@@ -17,7 +17,7 @@ public class GenericInjectionTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(new TypeToken<List<String>>() {}).to(names);
     Container container = builder.create(false);
-    Foo foo = container.newInstance(Foo.class);
+    Foo foo = container.getCreator(Foo.class).get();
     assertEquals(names, foo.names);
   }
 

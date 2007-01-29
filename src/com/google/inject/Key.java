@@ -127,9 +127,8 @@ public abstract class Key<T> {
     return this.hashCode;
   }
 
-  @Deprecated
-  Class<T> getRawType() {
-    return (Class<T>) typeToken.getRawType();
+  Class<? super T> getRawType() {
+    return typeToken.getRawType();
   }
 
   public boolean equals(Object o) {

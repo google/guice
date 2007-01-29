@@ -60,7 +60,7 @@ public class ConstantConversionTest extends TestCase {
     ContainerBuilder b = new ContainerBuilder();
     b.bindProperties(properties);
     Container c = b.create(false);
-    Foo foo = c.newInstance(Foo.class);
+    Foo foo = c.getCreator(Foo.class).get();
 
     checkNumbers(
       foo.integerField,
@@ -92,7 +92,7 @@ public class ConstantConversionTest extends TestCase {
     b.bind("#").to("invalid");
     Container c = b.create(false);
     try {
-      c.newInstance(InvalidInteger.class);
+      c.getCreator(InvalidInteger.class).get();
       fail();
     } catch (ConstantConversionException e) {
       assertTrue(e.getMessage().startsWith(
@@ -110,7 +110,7 @@ public class ConstantConversionTest extends TestCase {
     b.bind("foo").to("invalid");
     Container c = b.create(false);
     try {
-      c.newInstance(InvalidCharacter.class);
+      c.getCreator(InvalidCharacter.class).get();
       fail();
     } catch (ConstantConversionException e) {
       assertTrue(e.getMessage().startsWith(
@@ -128,7 +128,7 @@ public class ConstantConversionTest extends TestCase {
     b.bind("foo").to("invalid");
     Container c = b.create(false);
     try {
-      c.newInstance(InvalidEnum.class);
+      c.getCreator(InvalidEnum.class).get();
       fail();
     } catch (ConstantConversionException e) {
       assertTrue(e.getMessage().startsWith(

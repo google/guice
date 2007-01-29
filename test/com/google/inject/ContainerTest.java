@@ -27,7 +27,7 @@ public class ContainerTest extends TestCase {
 
   public void testInjection() {
     Container container = createFooContainer();
-    Foo foo = container.newInstance(Foo.class);
+    Foo foo = container.getCreator(Foo.class).get();
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -61,7 +61,7 @@ public class ContainerTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("i").to(5);
     Container container = builder.create(false);
-    IntegerWrapper iw = container.newInstance(IntegerWrapper.class);
+    IntegerWrapper iw = container.getCreator(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
@@ -142,7 +142,7 @@ public class ContainerTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
-    A a = container.newInstance(AImpl.class);
+    A a = container.getCreator(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 

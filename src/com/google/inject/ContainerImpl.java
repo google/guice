@@ -135,7 +135,7 @@ class ContainerImpl implements Container {
       return null;
     }
 
-    Class<T> type = key.getRawType();
+    Class<?> type = key.getRawType();
 
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
@@ -409,7 +409,7 @@ class ContainerImpl implements Container {
         }
       };
 
-  static class ConstructorInjector<T> {
+  class ConstructorInjector<T> implements Factory<T> {
 
     final Class<T> implementation;
     final List<Injector> injectors;
@@ -524,6 +524,21 @@ class ContainerImpl implements Container {
     private T newInstance(Object[] parameters) throws InvocationTargetException {
       return (T) fastConstructor.newInstance(parameters);
     }
+
+    public T get() {
+      try {
+        return callInContext(new ContextualCallable<T>() {
+          @SuppressWarnings({"unchecked"})
+          public T call(InternalContext context) {
+            return (T) construct(context, implementation);
+          }
+        });
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   static class ParameterInjector<T> {
@@ -568,16 +583,8 @@ class ContainerImpl implements Container {
     }
   }
 
-  <T> T newInstance(Class<T> implementation, InternalContext context) {
-    try {
-      ConstructorInjector<T> constructor = getConstructor(implementation);
-      return implementation.cast(
-          constructor.construct(context, implementation));
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public <T> Factory<T> getCreator(final Class<T> implementation) {
+    return getConstructor(implementation);
   }
 
   public boolean hasBindingFor(Key<?> key) {
@@ -593,14 +600,6 @@ class ContainerImpl implements Container {
       public Void call(InternalContext context) {
         injectMembers(o, context);
         return null;
-      }
-    });
-  }
-
-  public <T> T newInstance(final Class<T> implementation) {
-    return callInContext(new ContextualCallable<T>() {
-      public T call(InternalContext context) {
-        return newInstance(implementation, context);
       }
     });
   }

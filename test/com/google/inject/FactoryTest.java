@@ -72,7 +72,7 @@ public class FactoryTest extends TestCase {
         assertEquals(expectedMember, context.getMember());
         assertEquals(name, context.getKey().getName());
         assertEquals(type, context.getKey().getTypeToken().getType());
-        return context.getContainer().newInstance(type);
+        return context.getContainer().getCreator(type).get();
       }
     };
   }
