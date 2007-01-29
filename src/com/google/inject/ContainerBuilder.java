@@ -109,13 +109,11 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Creates a source object to be associated with a binding. Useful for
-   * debugging. Called by default for each binding. The default implementation
-   * returns {@code ContainerBuilder}'s caller's {@code StackTraceElement}.
-   *
-   * <p>If you plan on manually setting the source (say for example you've
-   * implemented an XML configuration), you might override this method and
-   * return {@code null} to avoid unnecessary overhead.
+   * Creates an object pointing to the current location within the
+   * configuration. If we run into a problem later, we'll be able to trace it
+   * back to the original source. Useful for debugging. The default
+   * implementation returns {@code ContainerBuilder}'s caller's {@code
+   * StackTraceElement}.
    */
   protected Object source() {
     // Search up the stack until we find a class outside of this one.
@@ -127,8 +125,9 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Maps a {@link Scope} instance to a given name. Scopes should be mapped
-   * before used in bindings. @{@link Scoped#value()} references this name.
+   * Maps a {@link Scope} instance to a given scope name. Scopes should be
+   * mapped before used in bindings. @{@link Scoped#value()} references this
+   * name.
    */
   public void put(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {

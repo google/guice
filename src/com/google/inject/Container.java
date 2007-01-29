@@ -56,7 +56,8 @@ package com.google.inject;
  *
  * <pre>
  *  Container c = ...;
- *  Factory&lt;Foo> fooFactory = c.getFactory(Key.get(Foo.class));
+ *  Key<Foo> fooKey = Key.get(Foo.class);
+ *  Factory&lt;Foo> fooFactory = c.getFactory(fooKey);
  *  Foo foo = fooFactory.get();
  * </pre>
  *
@@ -72,7 +73,7 @@ public interface Container {
 
   /**
    * Gets a factory which injects the given class's constructor and creates
-   * a new instance.
+   * new instances of {@code T}.
    */
   <T> Factory<T> getCreator(Class<T> implementation);
 
