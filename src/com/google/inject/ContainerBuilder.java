@@ -219,12 +219,12 @@ public final class ContainerBuilder {
   }
 
   /**
-   * Upon creation, the {@link Container} will inject static fields and methods
-   * in the given classes.
+   * Upon successful creation, the {@link Container} will inject static fields
+   * and methods in the given classes.
    *
    * @param types for which static members will be injected
    */
-  public void injectStatics(Class<?>... types) {
+  public void requestStaticInjection(Class<?>... types) {
     staticInjections.addAll(Arrays.asList(types));
   }
 
@@ -244,7 +244,7 @@ public final class ContainerBuilder {
 
   /**
    * Creates a {@link Container} instance. Injects static members for classes
-   * which were registered using {@link #injectStatics(Class...)}.
+   * which were registered using {@link #requestStaticInjection(Class...)}.
    *
    * @param loadSingletons If true, the container will load all singletons
    *  now. If false, the container will lazily load singletons. Eager loading

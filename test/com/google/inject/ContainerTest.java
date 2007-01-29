@@ -184,7 +184,7 @@ public class ContainerTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("s").to("test");
     builder.bind("i").to(5);
-    builder.injectStatics(Static.class);
+    builder.requestStaticInjection(Static.class);
     builder.create(false);
 
     assertEquals("test", Static.s);

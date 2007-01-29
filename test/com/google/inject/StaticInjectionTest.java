@@ -27,7 +27,7 @@ public class StaticInjectionTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("s").to("test");
     builder.bind("i").to(5);
-    builder.injectStatics(StaticInjectionTest.Static.class);
+    builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
     Container c = builder.create(false);
 

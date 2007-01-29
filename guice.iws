@@ -20,17 +20,18 @@
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" afterPath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/NotRequiredTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/NotRequiredTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Key.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Key.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Key.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Key.java" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/SourceProvider.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/SourceProvider.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" />
@@ -317,7 +318,7 @@
       <file leaf-file-name="ContainerBuilder.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="126" column="5" selection-start="4179" selection-end="4179" vertical-scroll-proportion="0.44338337">
+            <state line="223" column="4" selection-start="6862" selection-end="6862" vertical-scroll-proportion="0.2633015">
               <folding />
             </state>
           </provider>
@@ -1062,7 +1063,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="126" column="5" selection-start="4179" selection-end="4179" vertical-scroll-proportion="0.44338337">
+        <state line="223" column="4" selection-start="6862" selection-end="6862" vertical-scroll-proportion="0.2633015">
           <folding />
         </state>
       </provider>

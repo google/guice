@@ -95,10 +95,10 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#injectStatics(Class[])
+   * @see ContainerBuilder#requestStaticInjection(Class[])
    */
-  protected void injectStatics(Class<?>... types) {
-    builder.injectStatics(types);
+  protected void requestStaticInjection(Class<?>... types) {
+    builder.requestStaticInjection(types);
   }
 
   /**
