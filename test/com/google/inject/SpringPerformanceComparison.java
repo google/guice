@@ -85,11 +85,25 @@ public class SpringPerformanceComparison {
       builder.bind("i").to(5);
       builder.bind("s").to("test");
 
-      fooFactory = builder.create(false).getFactory(Key.get(Foo.class));
+      fooFactory = builder.create(false).getCreator(Foo.class);
     }
 
     public Foo call() throws Exception {
       return fooFactory.get();
+    }
+  };
+
+  static final Callable<Foo> byHandFactory = new Callable<Foo>() {
+    final Tee tee = new TeeImpl("test");
+    public Foo call() throws Exception {
+      Foo foo = new Foo();
+      foo.setI(5);
+      foo.setS("test");
+      Bar bar = new BarImpl(tee, 5);
+      Bar copy = new BarImpl(tee, 5);
+      foo.setBar(bar);
+      foo.setCopy(copy);
+      return foo;
     }
   };
 
@@ -107,6 +121,8 @@ public class SpringPerformanceComparison {
     validate(springFactory);
     validate(juiceFactory);
     validate(juiceFactory);
+    validate(byHandFactory);
+    validate(byHandFactory);
 
     int count = 100000;
     for (int i2 = 0; i2 < 10; i2++) {
@@ -114,13 +130,21 @@ public class SpringPerformanceComparison {
       for (int i = 0; i < count; i++)
         springFactory.call();
       time = System.currentTimeMillis() - time;
-      System.err.println("Spring: " + count * 1000 / time + " creations/s");
+      System.err.println("Spring:  " + count * 1000 / time + " creations/s");
 
       time = System.currentTimeMillis();
       for (int i = 0; i < count; i++)
         juiceFactory.call();
       time = System.currentTimeMillis() - time;
-      System.err.println("Guice:  " + count * 1000 / time + " creations/s");
+      System.err.println("Guice:   " + count * 1000 / time + " creations/s");
+
+      time = System.currentTimeMillis();
+      for (int i = 0; i < count; i++)
+        byHandFactory.call();
+      time = System.currentTimeMillis() - time;
+      System.err.println("By Hand: " + count * 1000 / time + " creations/s");
+
+      System.err.println();
     }
   }
 

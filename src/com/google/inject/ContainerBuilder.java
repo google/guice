@@ -739,9 +739,4 @@ public final class ContainerBuilder {
       this.destination = destination;
     }
   }
-
-  interface ContainerAwareFactory<T> extends Factory<T> {
-
-    void setContainer(ContainerImpl container);
-  }
 }
