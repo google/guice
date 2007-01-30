@@ -3,6 +3,7 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
+import com.google.inject.spi.ErrorMessage;
 
 import java.util.Map;
 import java.util.Properties;
@@ -102,7 +103,7 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#add(ErrorMessage)
+   * @see ContainerBuilder#add(com.google.inject.spi.ErrorMessage)
    */
   protected void add(ErrorMessage errorMessage) {
     builder.add(errorMessage);

@@ -56,7 +56,7 @@ package com.google.inject;
  *
  * <pre>
  *  Container c = ...;
- *  Key<Foo> fooKey = Key.get(Foo.class);
+ *  Key&lt;Foo> fooKey = Key.get(Foo.class);
  *  Factory&lt;Foo> fooFactory = c.getFactory(fooKey);
  *  Foo foo = fooFactory.get();
  * </pre>

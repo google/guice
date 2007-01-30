@@ -83,8 +83,18 @@ class ContainerImpl implements Container {
 
   final Map<Key<?>, InternalFactory<?>> factories;
 
+  ErrorHandler errorHandler = new InvalidErrorHandler();
+
   ContainerImpl(Map<Key<?>, InternalFactory<?>> factories) {
     this.factories = factories;
+  }
+
+  void setErrorHandler(ErrorHandler errorHandler) {
+    this.errorHandler = errorHandler;
+  }
+
+  ErrorHandler getErrorHandler() {
+    return errorHandler;
   }
 
   @SuppressWarnings("unchecked")
@@ -105,14 +115,20 @@ class ContainerImpl implements Container {
       Type entryType =
           ((ParameterizedType) factoryType).getActualTypeArguments()[0];
 
-      // This can throw ConfigurationException.
-      final Factory<?> factory = getFactory(Key.get(entryType, key.getName()));
-      return new InternalFactory<T>() {
-        @SuppressWarnings({"unchecked"})
-        public T get(InternalContext context) {
-          return (T) factory;
-        }
-      };
+      try {
+        final Factory<?> factory =
+            getFactory(Key.get(entryType, key.getName()));
+        return new InternalFactory<T>() {
+          @SuppressWarnings({"unchecked"})
+          public T get(InternalContext context) {
+            return (T) factory;
+          }
+        };
+      } catch (ConfigurationException e) {
+        errorHandler.handle(
+            "Missing binding to " + key + " required by '" + member + "'.");
+        return invalidFactory();
+      }
     }
 
     // Auto[un]box primitives.
@@ -147,7 +163,13 @@ class ContainerImpl implements Container {
     // Do we need a primitive?
     Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(type);
     if (converter != null) {
-      return new ConstantFactory<T>(converter.convert(member, key, value));
+      try {
+        T t = converter.convert(member, key, value);
+        return new ConstantFactory<T>(t);
+      } catch (ConstantConversionException e) {
+        errorHandler.handle(e);
+        return null;
+      }
     }
 
     // Do we need an enum?
@@ -156,7 +178,9 @@ class ContainerImpl implements Container {
       try {
         t = (T) Enum.valueOf((Class) type, value);
       } catch (IllegalArgumentException e) {
-        throw new ConstantConversionException(member, key, value, e);
+        errorHandler.handle(
+            ConstantConversionException.createConstantConversionError(value, key, member, e.toString()));
+        return invalidFactory();
       }
       return new ConstantFactory<T>(t);
     }
@@ -166,7 +190,9 @@ class ContainerImpl implements Container {
       try {
         return new ConstantFactory<T>((T) Class.forName(value));
       } catch (ClassNotFoundException e) {
-        throw new ConstantConversionException(member, key, value, e);
+        errorHandler.handle(
+            ConstantConversionException.createConstantConversionError(value, key, member, e.toString()));
+        return invalidFactory();
       }
     }
 
@@ -259,7 +285,8 @@ class ContainerImpl implements Container {
             injectors.add(injectorFactory.create(this, member, inject.value()));
           } catch (MissingDependencyException e) {
             if (inject.required()) {
-              throw new ConfigurationException(e);
+              // TODO: Report errors for more than one parameter per member.
+              errorHandler.handle(e);
             }
           }
         }
@@ -285,14 +312,15 @@ class ContainerImpl implements Container {
     public FieldInjector(ContainerImpl container, Field field, String name)
         throws MissingDependencyException {
       this.field = field;
+
+      // Ewwwww...
       field.setAccessible(true);
 
       Key<?> key = Key.get(field.getGenericType(), name);
       factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(
-            "No mapping found for dependency " + key + " for field: "
-                + field);
+            "Missing binding to " + key + " required by '" + field + "'.");
       }
 
       this.externalContext = ExternalContext.newInstance(field, key, container);
@@ -343,8 +371,7 @@ class ContainerImpl implements Container {
     InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(
-          "No mapping found for dependency " + key + " for member: "
-              + member + "");
+          "Missing binding to " + key + " required by '" + member + "'.");
     }
 
     ExternalContext<T> externalContext =
@@ -380,16 +407,11 @@ class ContainerImpl implements Container {
         throws MissingDependencyException {
       this.fastMethod =
           FastClass.create(method.getDeclaringClass()).getMethod(method);
-
-      method.setAccessible(true);
-
       Type[] parameterTypes = method.getGenericParameterTypes();
-      if (parameterTypes.length == 0) {
-        throw new ConfigurationException(
-            method + " has no parameters to inject.");
-      }
-      parameterInjectors = container.getParametersInjectors(
-          method, method.getParameterAnnotations(), parameterTypes, name);
+      parameterInjectors = parameterTypes.length > 0
+          ? container.getParametersInjectors(
+              method, method.getParameterAnnotations(), parameterTypes, name)
+          : null;
     }
 
     public void inject(InternalContext context, Object o) {
@@ -418,13 +440,18 @@ class ContainerImpl implements Container {
 
     ConstructorInjector(ContainerImpl container, Class<T> implementation) {
       this.implementation = implementation;
-
       Constructor<T> constructor = findConstructorIn(implementation);
-      constructor.setAccessible(true);
+      parameterInjectors = createParameterInjector(container, constructor);
+      injectors = container.injectors.get(implementation);
+      fastConstructor = FastClass.create(constructor.getDeclaringClass())
+          .getConstructor(constructor);
+    }
 
+    ParameterInjector<?>[] createParameterInjector(ContainerImpl container,
+        Constructor<T> constructor) {
       try {
         Inject inject = constructor.getAnnotation(Inject.class);
-        parameterInjectors = inject == null
+        return inject == null
             ? null // default constructor.
             : container.getParametersInjectors(
                 constructor,
@@ -433,12 +460,9 @@ class ContainerImpl implements Container {
                 inject.value()
             );
       } catch (MissingDependencyException e) {
-        throw new ConfigurationException(e);
+        errorHandler.handle(e);
+        return null;
       }
-      injectors = container.injectors.get(implementation);
-
-      fastConstructor = FastClass.create(constructor.getDeclaringClass())
-          .getConstructor(constructor);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -448,8 +472,9 @@ class ContainerImpl implements Container {
           : implementation.getDeclaredConstructors()) {
         if (constructor.getAnnotation(Inject.class) != null) {
           if (found != null) {
-            throw new ConfigurationException("More than one constructor annotated"
+            errorHandler.handle("More than one constructor annotated"
                 + " with @Inject found in " + implementation + ".");
+            return invalidConstructor();
           }
           found = constructor;
         }
@@ -463,8 +488,9 @@ class ContainerImpl implements Container {
       try {
         return implementation.getDeclaredConstructor();
       } catch (NoSuchMethodException e) {
-        throw new ConfigurationException("Could not find a suitable constructor"
+        errorHandler.handle("Could not find a suitable constructor"
             + " in " + implementation.getName() + ".");
+        return invalidConstructor();
       }
     }
 
@@ -521,7 +547,8 @@ class ContainerImpl implements Container {
     }
 
     @SuppressWarnings({"unchecked"})
-    private T newInstance(Object[] parameters) throws InvocationTargetException {
+    private T newInstance(Object[] parameters)
+        throws InvocationTargetException {
       return (T) fastConstructor.newInstance(parameters);
     }
 
@@ -538,6 +565,25 @@ class ContainerImpl implements Container {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+    }
+  }
+
+  /**
+   * A placeholder. This enables us to continue processing and gather more
+   * errors but blows up if you actually try to use it.
+   */
+  static class InvalidConstructor {
+    InvalidConstructor() {
+      throw new AssertionError();
+    }
+  }
+
+  @SuppressWarnings({"unchecked"})
+  static <T> Constructor<T> invalidConstructor() {
+    try {
+      return (Constructor<T>) InvalidConstructor.class.getDeclaredConstructor();
+    } catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
     }
   }
 
@@ -590,7 +636,7 @@ class ContainerImpl implements Container {
   public boolean hasBindingFor(Key<?> key) {
     try {
       return getFactory(null, key) != null;
-    } catch (ConstantConversionException e) {
+    } catch (ConfigurationException e) {
       return false;
     }
   }
@@ -704,7 +750,7 @@ class ContainerImpl implements Container {
       // Character doesn't follow the same pattern.
       Converter<Character> characterConverter = new Converter<Character>() {
         public Character convert(Member member, Key<Character> key,
-            String value) {
+            String value) throws ConstantConversionException {
           value = value.trim();
           if (value.length() != 1) {
             throw new ConstantConversionException(member, key, value,
@@ -724,12 +770,12 @@ class ContainerImpl implements Container {
             Strings.capitalize(primitive.getName()), String.class);
         Converter<T> converter = new Converter<T>() {
           @SuppressWarnings({"unchecked"})
-          public T convert(Member member, Key<T> key, String value) {
+          public T convert(Member member, Key<T> key, String value)
+              throws ConstantConversionException {
             try {
               return (T) parser.invoke(null, value);
             } catch (IllegalAccessException e) {
-              // This should never happen.
-              throw new RuntimeException(e);
+              throw new AssertionError(e);
             } catch (InvocationTargetException e) {
               throw new ConstantConversionException(member, key, value,
                   e.getTargetException());
@@ -739,8 +785,7 @@ class ContainerImpl implements Container {
         put(wrapper, converter);
         put(primitive, converter);
       } catch (NoSuchMethodException e) {
-        // This should never happen.
-        throw new RuntimeException(e);
+        throw new AssertionError(e);
       }
     }
   }
@@ -753,6 +798,30 @@ class ContainerImpl implements Container {
     /**
      * Converts {@code String} value.
      */
-    T convert(Member member, Key<T> key, String value);
+    T convert(Member member, Key<T> key, String value)
+        throws ConstantConversionException;
+  }
+
+  private static InternalFactory<?> INVALID_FACTORY =
+      new InternalFactory<Object>() {
+        public Object get(InternalContext context) {
+          throw new AssertionError();
+        }
+      };
+
+  @SuppressWarnings({"unchecked"})
+  static <T> InternalFactory<T> invalidFactory() {
+    return (InternalFactory<T>) INVALID_FACTORY;
+  }
+
+  private static class InvalidErrorHandler implements ErrorHandler {
+
+    public void handle(String message) {
+      throw new AssertionError();
+    }
+
+    public void handle(Throwable t) {
+      throw new AssertionError();
+    }
   }
 }

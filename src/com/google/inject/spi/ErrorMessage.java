@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.spi;
 
 import static com.google.inject.util.Objects.nonNull;
 

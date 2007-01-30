@@ -94,8 +94,8 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getCreator(InvalidInteger.class).get();
       fail();
-    } catch (ConstantConversionException e) {
-      assertTrue(e.getMessage().startsWith(
+    } catch (ConfigurationException e) {
+      assertTrue(e.getMessage().contains(
           "Error converting 'invalid' to Integer while injecting integerField "
               + "with dependency named '#' in InvalidInteger. Reason:"));
     }
@@ -112,8 +112,9 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getCreator(InvalidCharacter.class).get();
       fail();
-    } catch (ConstantConversionException e) {
-      assertTrue(e.getMessage().startsWith(
+    } catch (ConfigurationException e) {
+      e.printStackTrace();
+      assertTrue(e.getMessage().contains(
           "Error converting 'invalid' to char while injecting foo "
               + "with dependency named 'foo' in InvalidCharacter. Reason:"));
     }
@@ -130,7 +131,7 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getCreator(InvalidEnum.class).get();
       fail();
-    } catch (ConstantConversionException e) {
+    } catch (ConfigurationException e) {
       assertTrue(e.getMessage().startsWith(
           "Error converting 'invalid' to Bar while injecting foo "
               + "with dependency named 'foo' in InvalidEnum. Reason:"));

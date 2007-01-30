@@ -23,7 +23,7 @@ import java.lang.reflect.Member;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstantConversionException extends ConfigurationException {
+class ConstantConversionException extends Exception {
 
   ConstantConversionException(Member member, Key<?> key, String value,
       String reason) {
@@ -35,8 +35,22 @@ class ConstantConversionException extends ConfigurationException {
     this(member, key, value, reason.toString());
   }
 
-  private static String createMessage(String value, Key<?> key, Member member,
+  static String createMessage(String value, Key<?> key, Member member,
       String reason) {
+    return member == null
+        ? "Error converting '" + value + "' to "
+            + key.getRawType().getSimpleName()
+            + " while getting dependency named '" + key.getName()
+            + "'. Reason: " + reason
+        : "Error converting '" + value + "' to "
+            + key.getRawType().getSimpleName() + " while injecting "
+            + member.getName() + " with dependency named '" + key.getName()
+            + "' in " + member.getDeclaringClass().getSimpleName()
+            + ". Reason: " + reason;
+  }
+
+  static String createConstantConversionError(
+      String value, Key<?> key, Member member, String reason) {
     return member == null
         ? "Error converting '" + value + "' to "
             + key.getRawType().getSimpleName()

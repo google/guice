@@ -20,24 +20,31 @@
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" afterPath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/NotRequiredTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/NotRequiredTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Key.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Key.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/SourceProvider.java" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javadoc/com/google/inject/ErrorMessage.html" afterPath="$PROJECT_DIR$/javadoc/com/google/inject/ErrorMessage.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ConstantConversionException.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ConstantConversionException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Key.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Key.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorHandler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/StaticInjectionTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/SimpleModule.java" afterPath="$PROJECT_DIR$/src/com/google/inject/SimpleModule.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/CircularDependencyTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/CircularDependencyTest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/ErrorMessage.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -210,7 +217,7 @@
       <file leaf-file-name="ContextualFactory.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContextualFactory.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="17" selection-start="726" selection-end="726" vertical-scroll-proportion="0.20873123">
+            <state line="23" column="17" selection-start="726" selection-end="726" vertical-scroll-proportion="0.24598071">
               <folding />
             </state>
           </provider>
@@ -219,7 +226,43 @@
       <file leaf-file-name="ContainerImpl.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="671" column="29" selection-start="21743" selection-end="21743" vertical-scroll-proportion="0.3383356">
+            <state line="127" column="28" selection-start="4125" selection-end="4125" vertical-scroll-proportion="0.54662377">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Class.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/src.zip!/java/lang/Class.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1946" column="26" selection-start="81791" selection-end="81791" vertical-scroll-proportion="1.1270096">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorHandler.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorHandler.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="17" column="13" selection-start="280" selection-end="280" vertical-scroll-proportion="0.46463022">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorMessage.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/ErrorMessage.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="25" column="13" selection-start="775" selection-end="775" vertical-scroll-proportion="0.3006431">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ReferenceCache.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/ReferenceCache.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="39" column="9" selection-start="1221" selection-end="1221" vertical-scroll-proportion="0.6446945">
               <folding />
             </state>
           </provider>
@@ -228,7 +271,7 @@
       <file leaf-file-name="CircularDependencyTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/CircularDependencyTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="67" column="0" selection-start="1549" selection-end="1549" vertical-scroll-proportion="1.1828104">
+            <state line="67" column="0" selection-start="1549" selection-end="1549" vertical-scroll-proportion="1.3938906">
               <folding />
             </state>
           </provider>
@@ -237,7 +280,7 @@
       <file leaf-file-name="GenericInjectionTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="50" selection-start="582" selection-end="582" vertical-scroll-proportion="0.37107778">
+            <state line="19" column="50" selection-start="582" selection-end="582" vertical-scroll-proportion="0.43729904">
               <folding />
             </state>
           </provider>
@@ -246,7 +289,7 @@
       <file leaf-file-name="SuperclassTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/SuperclassTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="22" selection-start="1042" selection-end="1042" vertical-scroll-proportion="0.39427012">
+            <state line="31" column="22" selection-start="1042" selection-end="1042" vertical-scroll-proportion="0.46463022">
               <folding />
             </state>
           </provider>
@@ -255,16 +298,16 @@
       <file leaf-file-name="NotRequiredTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/NotRequiredTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="43" selection-start="956" selection-end="956" vertical-scroll-proportion="0.3478854">
+            <state line="29" column="43" selection-start="956" selection-end="956" vertical-scroll-proportion="0.40996784">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ConstantConversionTest.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ConstantConversionTest.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="13" selection-start="770" selection-end="770" vertical-scroll-proportion="-1.4242837">
+            <state line="116" column="40" selection-start="3372" selection-end="3372" vertical-scroll-proportion="0.85209006">
               <folding />
             </state>
           </provider>
@@ -273,7 +316,7 @@
       <file leaf-file-name="ConstantConversionException.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstantConversionException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="6" selection-start="773" selection-end="773" vertical-scroll-proportion="0.25511596">
+            <state line="27" column="2" selection-start="824" selection-end="824" vertical-scroll-proportion="0.35530546">
               <folding />
             </state>
           </provider>
@@ -282,7 +325,7 @@
       <file leaf-file-name="FactoryInjectionTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/FactoryInjectionTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="51" selection-start="499" selection-end="499" vertical-scroll-proportion="0.44065484">
+            <state line="19" column="51" selection-start="499" selection-end="499" vertical-scroll-proportion="0.5192926">
               <folding />
             </state>
           </provider>
@@ -291,7 +334,7 @@
       <file leaf-file-name="FactoryTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/FactoryTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="85" column="0" selection-start="2663" selection-end="2663" vertical-scroll-proportion="0.8021828">
+            <state line="85" column="0" selection-start="2663" selection-end="2663" vertical-scroll-proportion="0.9453376">
               <folding />
             </state>
           </provider>
@@ -300,7 +343,7 @@
       <file leaf-file-name="ContainerTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="44" column="0" selection-start="1314" selection-end="1314" vertical-scroll-proportion="0.579809">
+            <state line="44" column="0" selection-start="1314" selection-end="1314" vertical-scroll-proportion="0.68327975">
               <folding />
             </state>
           </provider>
@@ -315,10 +358,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ContainerBuilder.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ContainerBuilder.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="223" column="4" selection-start="6862" selection-end="6862" vertical-scroll-proportion="0.2633015">
+            <state line="622" column="9" selection-start="18813" selection-end="18813" vertical-scroll-proportion="3.4324758">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorHandlingTest.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="43" column="0" selection-start="810" selection-end="810" vertical-scroll-proportion="1.1752411">
               <folding />
             </state>
           </provider>
@@ -327,7 +379,7 @@
       <file leaf-file-name="PerformanceComparison.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="19" selection-start="1444" selection-end="1444" vertical-scroll-proportion="0.32469305">
+            <state line="38" column="19" selection-start="1444" selection-end="1444" vertical-scroll-proportion="0.38263667">
               <folding />
             </state>
           </provider>
@@ -336,7 +388,7 @@
       <file leaf-file-name="AbstractModule.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/AbstractModule.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="43" selection-start="438" selection-end="438" vertical-scroll-proportion="0.2633015">
+            <state line="103" column="0" selection-start="2555" selection-end="2555" vertical-scroll-proportion="1.1093248">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -347,7 +399,7 @@
       <file leaf-file-name="Key.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/Key.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="139" column="5" selection-start="3533" selection-end="3533" vertical-scroll-proportion="2.8526604">
+            <state line="139" column="5" selection-start="3533" selection-end="3533" vertical-scroll-proportion="3.3617363">
               <folding />
             </state>
           </provider>
@@ -356,7 +408,7 @@
       <file leaf-file-name="AllTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="13" selection-start="964" selection-end="964" vertical-scroll-proportion="0.20873123">
+            <state line="29" column="13" selection-start="964" selection-end="964" vertical-scroll-proportion="0.24598071">
               <folding />
             </state>
           </provider>
@@ -365,7 +417,7 @@
       <file leaf-file-name="Function.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/Function.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="3" selection-start="1284" selection-end="1284" vertical-scroll-proportion="0.39427012">
+            <state line="31" column="3" selection-start="1284" selection-end="1284" vertical-scroll-proportion="0.46463022">
               <folding />
             </state>
           </provider>
@@ -374,7 +426,7 @@
       <file leaf-file-name="Container.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="73" column="5" selection-start="2091" selection-end="2091" vertical-scroll-proportion="0.420191">
+            <state line="58" column="11" selection-start="1733" selection-end="1733" vertical-scroll-proportion="0.59003216">
               <folding />
             </state>
           </provider>
@@ -383,7 +435,7 @@
       <file leaf-file-name="ConstructionContext.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstructionContext.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="17" selection-start="1151" selection-end="1151" vertical-scroll-proportion="0.44065484">
+            <state line="41" column="7" selection-start="1175" selection-end="1175" vertical-scroll-proportion="0.38906753">
               <folding />
             </state>
           </provider>
@@ -392,7 +444,7 @@
       <file leaf-file-name="Scope.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/Scope.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="1" selection-start="836" selection-end="836" vertical-scroll-proportion="0.55661666">
+            <state line="24" column="1" selection-start="836" selection-end="836" vertical-scroll-proportion="0.6559486">
               <folding />
             </state>
           </provider>
@@ -401,7 +453,7 @@
       <file leaf-file-name="Objects.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/Objects.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="13" selection-start="716" selection-end="716" vertical-scroll-proportion="0.20873123">
+            <state line="23" column="13" selection-start="716" selection-end="716" vertical-scroll-proportion="0.24598071">
               <folding />
             </state>
           </provider>
@@ -410,7 +462,7 @@
       <file leaf-file-name="FinalizableReference.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/FinalizableReference.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="10" selection-start="817" selection-end="817" vertical-scroll-proportion="0.2319236">
+            <state line="24" column="10" selection-start="817" selection-end="817" vertical-scroll-proportion="0.27331188">
               <folding />
             </state>
           </provider>
@@ -462,6 +514,16 @@
         </PATH_ELEMENT>
         <PATH_ELEMENT>
           <option name="myItemId" value="com.google.inject.util" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="guice.ipr" />
+          <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageViewProjectNode" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT>
+          <option name="myItemId" value="com.google.inject.spi" />
           <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PackageElementNode" />
         </PATH_ELEMENT>
       </PATH>
@@ -656,6 +718,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
+      <recent name="com.google.inject.ConstantConversionException" />
       <recent name="com.google.inject.ContainerBuilder" />
       <recent name="com.google.inject.Key" />
     </key>
@@ -666,11 +729,12 @@
       <recent name="" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.google.inject.spi" />
       <recent name="com.google.inject.util" />
     </key>
   </component>
   <component name="RestoreUpdateTree" />
-  <component name="RunManager" selected="Application.PerformanceComparison">
+  <component name="RunManager" selected="JUnit.AllTests">
     <tempConfiguration default="false" name="AllTests" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <pattern value="com.google.inject.*" />
       <module name="guice" />
@@ -862,7 +926,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14623655" order="1" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3282876" order="8" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29044464" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39545885" order="2" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="6" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39978448" order="0" />
@@ -961,62 +1025,6 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/Function.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="3" selection-start="1284" selection-end="1284" vertical-scroll-proportion="0.39427012">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/Objects.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="13" selection-start="716" selection-end="716" vertical-scroll-proportion="0.20873123">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/FinalizableReference.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="10" selection-start="817" selection-end="817" vertical-scroll-proportion="0.2319236">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Scope.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="1" selection-start="836" selection-end="836" vertical-scroll-proportion="0.55661666">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="13" selection-start="770" selection-end="770" vertical-scroll-proportion="-1.4242837">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstantConversionException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="6" selection-start="773" selection-end="773" vertical-scroll-proportion="0.25511596">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstructionContext.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="17" selection-start="1151" selection-end="1151" vertical-scroll-proportion="0.44065484">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="44" column="0" selection-start="1314" selection-end="1314" vertical-scroll-proportion="0.579809">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/package-info.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
@@ -1024,30 +1032,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="671" column="29" selection-start="21743" selection-end="21743" vertical-scroll-proportion="0.3383356">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="13" selection-start="964" selection-end="964" vertical-scroll-proportion="0.20873123">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="19" selection-start="1444" selection-end="1444" vertical-scroll-proportion="0.32469305">
+        <state line="38" column="19" selection-start="1444" selection-end="1444" vertical-scroll-proportion="0.38263667">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/AbstractModule.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="43" selection-start="438" selection-end="438" vertical-scroll-proportion="0.2633015">
+        <state line="103" column="0" selection-start="2555" selection-end="2555" vertical-scroll-proportion="1.1093248">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1056,14 +1050,84 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="5" selection-start="2091" selection-end="2091" vertical-scroll-proportion="0.420191">
+        <state line="58" column="11" selection-start="1733" selection-end="1733" vertical-scroll-proportion="0.59003216">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstructionContext.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="41" column="7" selection-start="1175" selection-end="1175" vertical-scroll-proportion="0.38906753">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/util/ReferenceCache.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="9" selection-start="1221" selection-end="1221" vertical-scroll-proportion="0.6446945">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/ErrorMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="13" selection-start="775" selection-end="775" vertical-scroll-proportion="0.3006431">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="13" selection-start="280" selection-end="280" vertical-scroll-proportion="0.46463022">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ConstantConversionException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="2" selection-start="824" selection-end="824" vertical-scroll-proportion="0.35530546">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/src.zip!/java/lang/Class.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1946" column="26" selection-start="81791" selection-end="81791" vertical-scroll-proportion="1.1270096">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="43" column="0" selection-start="810" selection-end="810" vertical-scroll-proportion="1.1752411">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="127" column="28" selection-start="4125" selection-end="4125" vertical-scroll-proportion="0.54662377">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="223" column="4" selection-start="6862" selection-end="6862" vertical-scroll-proportion="0.2633015">
+        <state line="622" column="9" selection-start="18813" selection-end="18813" vertical-scroll-proportion="3.4324758">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="29" column="13" selection-start="964" selection-end="964" vertical-scroll-proportion="0.24598071">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="116" column="40" selection-start="3372" selection-end="3372" vertical-scroll-proportion="0.85209006">
           <folding />
         </state>
       </provider>

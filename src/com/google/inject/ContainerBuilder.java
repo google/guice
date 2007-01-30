@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
+import com.google.inject.spi.ErrorMessage;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
@@ -108,6 +109,30 @@ public final class ContainerBuilder {
     bind(Logger.class).to(LOGGER_FACTORY);
   }
 
+  final List<Validation> validations = new ArrayList<Validation>();
+
+  /**
+   * Registers a type to be validated for injection when we create the
+   * container.
+   */
+  void validate(final Object source, final Class<?> type) {
+    validations.add(new Validation() {
+      public void run(ContainerImpl container) {
+        ErrorHandler previous = container.getErrorHandler();
+        try {
+          container.setErrorHandler(new ConfigurationErrorHandler(source));
+          container.getConstructor(type);
+        } finally {
+          container.setErrorHandler(previous);
+        }
+      }
+    });
+  }
+
+  interface Validation {
+    void run(ContainerImpl container);
+  }
+
   /**
    * Creates an object pointing to the current location within the
    * configuration. If we run into a problem later, we'll be able to trace it
@@ -117,9 +142,12 @@ public final class ContainerBuilder {
    */
   protected Object source() {
     // Search up the stack until we find a class outside of this one.
-    for (StackTraceElement element : new Throwable().getStackTrace()) {
-      if (!element.getClassName().equals(ContainerBuilder.class.getName()))
-        return element;
+    for (final StackTraceElement element : new Throwable().getStackTrace()) {
+      String className = element.getClassName();
+      if (!className.equals(ContainerBuilder.class.getName())
+          && !className.equals(AbstractModule.class.getName()))
+        return element.getFileName() + ":" 
+            + element.getLineNumber() + ":";
     }
     throw new AssertionError();
   }
@@ -315,14 +343,22 @@ public final class ContainerBuilder {
       factories.put(builder.getKey(), factory);
     }
 
-    // TODO: Handle this better.
+    // Run validations.
+    for (Validation validation : validations) {
+      validation.run(container);
+    }
+
     if (!errorMessages.isEmpty()) {
+      StringBuilder error = new StringBuilder();
+      error.append("Configuration errors:\n");
       for (ErrorMessage errorMessage : errorMessages) {
-        logger.severe(errorMessage.toString());
+        error.append(errorMessage).append('\n');
       }
-      throw new ConfigurationException("We encountered configuration errors."
+      logger.severe(error.toString());
+      throw new ConfigurationException("Encountered configuration errors."
         + " See the log for details.");
     }
+    container.setErrorHandler(new RuntimeErrorHandler());
 
     container.injectStatics(staticInjections);
 
@@ -408,6 +444,7 @@ public final class ContainerBuilder {
      */
     public <I extends T> BindingBuilder<T> to(TypeToken<I> implementation) {
       ensureImplementationIsNotSet();
+      validate(source, implementation.getRawType());
       this.factory = new DefaultFactory<I>(implementation);
       setScopeFromType(implementation.getRawType());
       return this;
@@ -579,8 +616,10 @@ public final class ContainerBuilder {
       @SuppressWarnings("unchecked")
       public I get(InternalContext context) {
         if (constructor == null) {
-          this.constructor =
-              context.getContainerImpl().getConstructor(implementation);
+          // This unnecessary cast is a workaround for an annoying compiler
+          // bug I keep running into.
+          Object c = context.getContainerImpl().getConstructor(implementation);
+          this.constructor = (ContainerImpl.ConstructorInjector<I>) c;
         }
         return (I) constructor.construct(context, key.getRawType());
       }
@@ -740,6 +779,34 @@ public final class ContainerBuilder {
      */
     public void to(Key<? extends T> destination) {
       this.destination = destination;
+    }
+  }
+
+  class ConfigurationErrorHandler implements ErrorHandler {
+
+    final Object source;
+
+    ConfigurationErrorHandler(Object source) {
+      this.source = source;
+    }
+
+    public void handle(String message) {
+      add(new ErrorMessage(source, message));
+    }
+
+    public void handle(Throwable t) {
+      add(new ErrorMessage(source, t.getMessage()));
+    }
+  }
+
+  class RuntimeErrorHandler implements ErrorHandler {
+
+    public void handle(String message) {
+      throw new ConfigurationException(message);
+    }
+
+    public void handle(Throwable t) {
+      throw new ConfigurationException(t);
     }
   }
 }
