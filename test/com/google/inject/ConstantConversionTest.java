@@ -113,7 +113,6 @@ public class ConstantConversionTest extends TestCase {
       c.getCreator(InvalidCharacter.class).get();
       fail();
     } catch (ConfigurationException e) {
-      e.printStackTrace();
       assertTrue(e.getMessage().contains(
           "Error converting 'invalid' to char while injecting foo "
               + "with dependency named 'foo' in InvalidCharacter. Reason:"));

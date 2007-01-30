@@ -36,8 +36,8 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/test/com/google/inject/SpringPerformanceComparison.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/GenericInjectionTest.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/FactoryTest.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java" />
@@ -307,7 +307,7 @@
       <file leaf-file-name="ConstantConversionTest.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="116" column="40" selection-start="3372" selection-end="3372" vertical-scroll-proportion="0.85209006">
+            <state line="115" column="0" selection-start="3305" selection-end="3305" vertical-scroll-proportion="0.2073955">
               <folding />
             </state>
           </provider>
@@ -1127,7 +1127,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="116" column="40" selection-start="3372" selection-end="3372" vertical-scroll-proportion="0.85209006">
+        <state line="115" column="0" selection-start="3305" selection-end="3305" vertical-scroll-proportion="0.2073955">
           <folding />
         </state>
       </provider>
