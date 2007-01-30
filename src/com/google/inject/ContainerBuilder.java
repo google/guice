@@ -146,8 +146,9 @@ public final class ContainerBuilder {
       String className = element.getClassName();
       if (!className.equals(ContainerBuilder.class.getName())
           && !className.equals(AbstractModule.class.getName()))
-        return element.getFileName() + ":" 
-            + element.getLineNumber() + ":";
+        return element;
+//        return element.getFileName() + ":"
+//            + element.getLineNumber() + ":";
     }
     throw new AssertionError();
   }

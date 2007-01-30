@@ -82,9 +82,9 @@ public class PerformanceComparison {
 
       builder.apply(new AbstractModule() {
         protected void configure() {
-          bind(Tee.class).to(TeeImpl.class);
+          bind(Tee.class).named("tee").to(TeeImpl.class);
           bind(Bar.class).to(BarImpl.class);
-          bind(Foo.class).to(Foo.class);
+          bind(Foo.class);
           bind("i").to(5);
           bind("s").to("test");
         }
