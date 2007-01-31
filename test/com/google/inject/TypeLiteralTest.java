@@ -23,13 +23,13 @@ import java.util.List;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class TypeTokenTest extends TestCase {
+public class TypeLiteralTest extends TestCase {
 
   public void testEquality() {
-    TypeToken<List<String>> t1 = new TypeToken<List<String>>() {};
-    TypeToken<List<String>> t2 = new TypeToken<List<String>>() {};
-    TypeToken<List<Integer>> t3 = new TypeToken<List<Integer>>() {};
-    TypeToken<String> t4 = new TypeToken<String>() {};
+    TypeLiteral<List<String>> t1 = new TypeLiteral<List<String>>() {};
+    TypeLiteral<List<String>> t2 = new TypeLiteral<List<String>>() {};
+    TypeLiteral<List<Integer>> t3 = new TypeLiteral<List<Integer>>() {};
+    TypeLiteral<String> t4 = new TypeLiteral<String>() {};
 
     assertEquals(t1, t2);
     assertEquals(t2, t1);
@@ -40,13 +40,13 @@ public class TypeTokenTest extends TestCase {
     assertFalse(t2.equals(t4));
     assertFalse(t4.equals(t2));
 
-    TypeToken<String> t5 = TypeToken.get(String.class);
+    TypeLiteral<String> t5 = TypeLiteral.get(String.class);
     assertEquals(t4, t5);
   }
 
   public void testMissingTypeParameter() {
     try {
-      new TypeToken() {};
+      new TypeLiteral() {};
       fail();
     } catch (RuntimeException e) { /* expected */ }
   }

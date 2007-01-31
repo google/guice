@@ -21,17 +21,17 @@ package com.google.inject;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ConfigurationException extends RuntimeException {
+class ConfigurationException extends RuntimeException {
 
-  public ConfigurationException(String message) {
+  ConfigurationException(String message) {
     super(message);
   }
 
-  public ConfigurationException(String message, Throwable cause) {
+  ConfigurationException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public ConfigurationException(Throwable cause) {
+  ConfigurationException(Throwable cause) {
     super(cause);
   }
 }

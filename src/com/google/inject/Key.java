@@ -21,8 +21,8 @@ import static com.google.inject.util.Objects.nonNull;
 import java.lang.reflect.Type;
 
 /**
- * Binding key. A type token and a name. Matches the type and name ({@link
- * Inject#value()}) at a point of injection.
+ * Binding key consisting of a type and a name. Matches the type and
+ * name ({@link Inject#value()}) at a point of injection.
  *
  * <p>For example, <tt>new Key&lt;List&lt;String>>("cities") {}</tt> will match:
  *
@@ -43,7 +43,7 @@ public abstract class Key<T> {
   public static final String DEFAULT_NAME = "default";
 
   final String name;
-  final TypeToken<T> typeToken;
+  final TypeLiteral<T> typeLiteral;
   final int hashCode;
 
   /**
@@ -59,8 +59,8 @@ public abstract class Key<T> {
   @SuppressWarnings({"unchecked"})
   protected Key(String name) {
     this.name = nonNull(name, "name");
-    this.typeToken =
-        (TypeToken<T>) TypeToken.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral =
+        (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
   }
 
@@ -78,21 +78,21 @@ public abstract class Key<T> {
   @SuppressWarnings({"unchecked"})
   private Key(Type type, String name) {
     this.name = nonNull(name, "name");
-    this.typeToken = (TypeToken<T>) TypeToken.get(type);
+    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.get(type);
     this.hashCode = computeHashCode();
   }
 
   /**
-   * Constructs a key from a manually specified type token.
+   * Constructs a key from a manually specified type.
    */
-  private Key(TypeToken<T> typeToken, String name) {
+  private Key(TypeLiteral<T> typeLiteral, String name) {
     this.name = nonNull(name, "name");
-    this.typeToken = typeToken;
+    this.typeLiteral = typeLiteral;
     this.hashCode = computeHashCode();
   }
 
   private int computeHashCode() {
-    return typeToken.hashCode() * 31 + name.hashCode();
+    return typeLiteral.hashCode() * 31 + name.hashCode();
   }
 
   /**
@@ -106,14 +106,14 @@ public abstract class Key<T> {
    * Returns a new key with the same type as this key and the given name,
    */
   Key<T> named(String name) {
-    return new SimpleKey<T>(this.typeToken, name);    
+    return new SimpleKey<T>(this.typeLiteral, name);
   }
 
   /**
-   * Gets token representing the type to be injected.
+   * Gets the key type.
    */
-  public TypeToken<T> getTypeToken() {
-    return typeToken;
+  public TypeLiteral<T> getType() {
+    return typeLiteral;
   }
 
   /**
@@ -128,7 +128,7 @@ public abstract class Key<T> {
   }
 
   Class<? super T> getRawType() {
-    return typeToken.getRawType();
+    return typeLiteral.getRawType();
   }
 
   public boolean equals(Object o) {
@@ -139,12 +139,12 @@ public abstract class Key<T> {
       return false;
     }
     Key<?> other = (Key<?>) o;
-    return name.equals(other.name) && typeToken.equals(other.typeToken);
+    return name.equals(other.name) && typeLiteral.equals(other.typeLiteral);
   }
 
   public String toString() {
     return Key.class.getSimpleName()
-        + "[type=" + typeToken + ", name='" + name + "']";
+        + "[type=" + typeLiteral + ", name='" + name + "']";
   }
 
   /**
@@ -176,17 +176,17 @@ public abstract class Key<T> {
   }
 
   /**
-   * Gets a key for a type token. Defaults name to {@link #DEFAULT_NAME}.
+   * Gets a key for a type. Defaults name to {@link #DEFAULT_NAME}.
    */
-  public static <T> Key<T> get(TypeToken<T> typeToken) {
-    return new SimpleKey<T>(typeToken, DEFAULT_NAME);
+  public static <T> Key<T> get(TypeLiteral<T> typeLiteral) {
+    return new SimpleKey<T>(typeLiteral, DEFAULT_NAME);
   }
 
   /**
-   * Gets key for a type token and a name.
+   * Gets key for a type and a name.
    */
-  public static <T> Key<T> get(TypeToken<T> typeToken, String name) {
-    return new SimpleKey<T>(typeToken, name);
+  public static <T> Key<T> get(TypeLiteral<T> typeLiteral, String name) {
+    return new SimpleKey<T>(typeLiteral, name);
   }
 
   private static class SimpleKey<T> extends Key<T> {
@@ -195,8 +195,8 @@ public abstract class Key<T> {
       super(type, name);
     }
 
-    private SimpleKey(TypeToken<T> typeToken, String name) {
-      super(typeToken, name);
+    private SimpleKey(TypeLiteral<T> typeLiteral, String name) {
+      super(typeLiteral, name);
     }
   }
 }

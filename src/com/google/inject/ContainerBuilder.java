@@ -163,8 +163,8 @@ public final class ContainerBuilder {
   /**
    * Binds the given type.
    */
-  public <T> BindingBuilder<T> bind(TypeToken<T> typeToken) {
-    return bind(Key.get(typeToken));
+  public <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+    return bind(Key.get(typeLiteral));
   }
 
   /**
@@ -447,7 +447,7 @@ public final class ContainerBuilder {
      * class if present.
      */
     public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
-      return to(TypeToken.get(implementation));
+      return to(TypeLiteral.get(implementation));
     }
 
     /**
@@ -456,7 +456,7 @@ public final class ContainerBuilder {
      * scope based on the @{@link Scoped} annotation on the implementation
      * class if present.
      */
-    public <I extends T> BindingBuilder<T> to(TypeToken<I> implementation) {
+    public <I extends T> BindingBuilder<T> to(TypeLiteral<I> implementation) {
       ensureImplementationIsNotSet();
       validate(source, implementation.getRawType());
       this.factory = new DefaultFactory<I>(implementation);
@@ -574,7 +574,7 @@ public final class ContainerBuilder {
         final ContainerImpl container) {
       // If an implementation wasn't specified, use the injection type.
       if (this.factory == null) {
-        to(key.getTypeToken());
+        to(key.getType());
       }
 
       if (scope == null || scope == DEFAULT_SCOPE) {
@@ -620,9 +620,9 @@ public final class ContainerBuilder {
 
       volatile ContainerImpl.ConstructorInjector<I> constructor;
 
-      private final TypeToken<I> implementation;
+      private final TypeLiteral<I> implementation;
 
-      public DefaultFactory(TypeToken<I> implementation) {
+      public DefaultFactory(TypeLiteral<I> implementation) {
         // TODO: Ensure this is a concrete implementation.
         this.implementation = implementation;
       }

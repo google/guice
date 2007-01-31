@@ -58,8 +58,8 @@ abstract class AbstractErrorHandler implements ErrorHandler {
       new Converter<Key>(Key.class) {
         public String toString(Key k) {
           return k.hasDefaultName()
-              ? k.getTypeToken().toString()
-              : k.getTypeToken() + " named '" + k.getName() + "'";
+              ? k.getType().toString()
+              : k.getType() + " named '" + k.getName() + "'";
         }
       }
   );

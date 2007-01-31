@@ -64,10 +64,10 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#bind(TypeToken)
+   * @see ContainerBuilder#bind(TypeLiteral)
    */
-  protected <T> ContainerBuilder.BindingBuilder<T> bind(TypeToken<T> typeToken) {
-    return builder.bind(typeToken);
+  protected <T> ContainerBuilder.BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+    return builder.bind(typeLiteral);
   }
 
   /**

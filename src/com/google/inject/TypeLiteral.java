@@ -30,33 +30,33 @@ import java.lang.reflect.ParameterizedType;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class TypeToken<T> {
+public abstract class TypeLiteral<T> {
 
   final Class<? super T> rawType;
   final Type type;
 
   /**
-   * Constructs a new type token. Derives represented class from type
+   * Constructs a new type literal. Derives represented class from type
    * parameter.
    *
    * <p>Clients create an empty anonymous subclass. Doing so embeds the type
    * parameter in the anonymous class's type hierarchy so we can reconstitute
    * it at runtime despite erasure.
    *
-   * <p>For example: {@code TypeToken<List<String>> t = new
-   * TypeToken<List<String>>() {};}
+   * <p>For example: {@code TypeLiteral<List<String>> t = new
+   * TypeLiteral<List<String>>() {};}
    */
   @SuppressWarnings({"unchecked"})
-  protected TypeToken() {
+  protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
     this.rawType = (Class<? super T>) getRawType(type);
   }
 
   /**
-   * Unsafe. Constructs a type token manually.
+   * Unsafe. Constructs a type literal manually.
    */
   @SuppressWarnings({"unchecked"})
-  private TypeToken(Type type) {
+  private TypeLiteral(Type type) {
     this.rawType = (Class<? super T>) getRawType(nonNull(type, "type"));
     this.type = type;
   }
@@ -73,10 +73,10 @@ public abstract class TypeToken<T> {
   }
 
   /**
-   * Gets type token from super class's type parameter.
+   * Gets type literal from super class's type parameter.
    */
-  static TypeToken<?> fromSuperclassTypeParameter(Class<?> subclass) {
-    return new SimpleTypeToken<Object>(getSuperclassTypeParameter(subclass));
+  static TypeLiteral<?> fromSuperclassTypeParameter(Class<?> subclass) {
+    return new SimpleTypeLiteral<Object>(getSuperclassTypeParameter(subclass));
   }
 
   @SuppressWarnings({"unchecked"})
@@ -124,10 +124,10 @@ public abstract class TypeToken<T> {
     if (o == this) {
       return true;
     }
-    if (!(o instanceof TypeToken<?>)) {
+    if (!(o instanceof TypeLiteral<?>)) {
       return false;
     }
-    TypeToken<?> t = (TypeToken<?>) o;
+    TypeLiteral<?> t = (TypeLiteral<?>) o;
     return type.equals(t.type);
   }
 
@@ -137,29 +137,29 @@ public abstract class TypeToken<T> {
           : type.toString();
   }
 
-  static void unexpectedType(Type token, Class<?> expected) {
+  static void unexpectedType(Type type, Class<?> expected) {
     throw new AssertionError(
         "Unexpected type. Expected: " + expected.getName()
-        + ", got: " + token.getClass().getName()
-        + ", for type token: " + token.toString() + ".");
+        + ", got: " + type.getClass().getName()
+        + ", for type literal: " + type.toString() + ".");
   }
 
   /**
-   * Gets type token for the given {@code Type} instance.
+   * Gets type literal for the given {@code Type} instance.
    */
-  public static TypeToken<?> get(Type type) {
-    return new SimpleTypeToken<Object>(type);
+  public static TypeLiteral<?> get(Type type) {
+    return new SimpleTypeLiteral<Object>(type);
   }
 
   /**
-   * Gets type token for the given {@code Class} instance.
+   * Gets type literal for the given {@code Class} instance.
    */
-  public static <T> TypeToken<T> get(Class<T> type) {
-    return new SimpleTypeToken<T>(type);
+  public static <T> TypeLiteral<T> get(Class<T> type) {
+    return new SimpleTypeLiteral<T>(type);
   }
 
-  private static class SimpleTypeToken<T> extends TypeToken<T> {
-    public SimpleTypeToken(Type type) {
+  private static class SimpleTypeLiteral<T> extends TypeLiteral<T> {
+    public SimpleTypeLiteral(Type type) {
       super(type);
     }
   }

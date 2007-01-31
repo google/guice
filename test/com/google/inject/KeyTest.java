@@ -32,7 +32,7 @@ public class KeyTest extends TestCase {
   public void testEquality() {
     assertEquals(
       new Key<List<String>>("foo") {},
-      Key.get(new TypeToken<List<String>>() {}, "foo")
+      Key.get(new TypeLiteral<List<String>>() {}, "foo")
     );
   }
 
@@ -41,8 +41,8 @@ public class KeyTest extends TestCase {
     Type[] types = m.getGenericParameterTypes();
     assertEquals(types[0], types[1]);
     Key<List<String>> k = new Key<List<String>>() {};
-    assertEquals(types[0], k.getTypeToken().getType());
+    assertEquals(types[0], k.getType().getType());
     assertFalse(types[0].equals(
-        new Key<List<Integer>>() {}.getTypeToken().getType()));
+        new Key<List<Integer>>() {}.getType().getType()));
   }
 }

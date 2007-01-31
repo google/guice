@@ -107,8 +107,8 @@ class ContainerImpl implements Container {
     }
 
     // Handle cases where T is a Factory<?>.
-    if (key.getTypeToken().getRawType().equals(Factory.class)) {
-      Type factoryType = key.getTypeToken().getType();
+    if (key.getType().getRawType().equals(Factory.class)) {
+      Type factoryType = key.getType().getType();
       if (!(factoryType instanceof ParameterizedType)) {
         return null;
       }
@@ -132,7 +132,7 @@ class ContainerImpl implements Container {
 
     // Auto[un]box primitives.
     Class<?> primitiveCounterpart =
-        PRIMITIVE_COUNTERPARTS.get(key.getTypeToken().getRawType());
+        PRIMITIVE_COUNTERPARTS.get(key.getType().getRawType());
     if (primitiveCounterpart != null) {
       internalFactory = (InternalFactory<T>) factories.get(
           Key.get(primitiveCounterpart, key.getName()));
@@ -743,7 +743,7 @@ class ContainerImpl implements Container {
   }
 
   @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(TypeToken<T> implementation) {
+  <T> ConstructorInjector<T> getConstructor(TypeLiteral<T> implementation) {
     return constructors.get(implementation.getRawType());
   }
 
