@@ -32,11 +32,11 @@ public class FactoryTest extends TestCase {
     // Called from getInstance().
     cb.bind(Foo.class).to(createFactory(Foo.class, "default", null));
 
-    // Called during singleton loading.
+    // Called during preloading.
     cb.bind(Bar.class)
         .named("fooBar")
         .to(createFactory(Bar.class, "fooBar", null))
-        .in(Scopes.SINGLETON);
+        .in(Scopes.CONTAINER);
 
     cb.bind(Tee.class).named("tee1")
         .to(createFactory(Tee.class, "tee1",

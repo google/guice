@@ -125,8 +125,7 @@ class ContainerImpl implements Container {
           }
         };
       } catch (ConfigurationException e) {
-        errorHandler.handle(
-            "Missing binding to " + key + " required by '" + member + "'.");
+        errorHandler.handle(ErrorMessage.MISSING_BINDING, member, key);
         return invalidFactory();
       }
     }
@@ -179,7 +178,8 @@ class ContainerImpl implements Container {
         t = (T) Enum.valueOf((Class) type, value);
       } catch (IllegalArgumentException e) {
         errorHandler.handle(
-            ConstantConversionException.createConstantConversionError(value, key, member, e.toString()));
+            ConstantConversionException.createMessage(
+                value, key, member, e.toString()));
         return invalidFactory();
       }
       return new ConstantFactory<T>(t);
@@ -191,7 +191,8 @@ class ContainerImpl implements Container {
         return new ConstantFactory<T>((T) Class.forName(value));
       } catch (ClassNotFoundException e) {
         errorHandler.handle(
-            ConstantConversionException.createConstantConversionError(value, key, member, e.toString()));
+            ConstantConversionException.createMessage(
+                value, key, member, e.toString()));
         return invalidFactory();
       }
     }
@@ -211,6 +212,11 @@ class ContainerImpl implements Container {
   final Map<Class<?>, List<Injector>> injectors =
       new ReferenceCache<Class<?>, List<Injector>>() {
         protected List<Injector> create(Class<?> key) {
+          if (key.isInterface()) {
+            errorHandler.handle(ErrorMessage.CANNOT_INJECT_INTERFACE, key);
+            return Collections.emptyList();
+          }
+
           List<Injector> injectors = new ArrayList<Injector>();
           addInjectors(key, injectors);
           return injectors;
@@ -286,7 +292,7 @@ class ContainerImpl implements Container {
           } catch (MissingDependencyException e) {
             if (inject.required()) {
               // TODO: Report errors for more than one parameter per member.
-              errorHandler.handle(e);
+              e.handle(errorHandler);
             }
           }
         }
@@ -319,8 +325,7 @@ class ContainerImpl implements Container {
       Key<?> key = Key.get(field.getGenericType(), name);
       factory = container.getFactory(field, key);
       if (factory == null) {
-        throw new MissingDependencyException(
-            "Missing binding to " + key + " required by '" + field + "'.");
+        throw new MissingDependencyException(key, field);
       }
 
       this.externalContext = ExternalContext.newInstance(field, key, container);
@@ -351,6 +356,15 @@ class ContainerImpl implements Container {
       getParametersInjectors(M member,
       Annotation[][] annotations, Type[] parameterTypes, String defaultName)
       throws MissingDependencyException {
+    boolean defaultNameOverridden = !defaultName.equals(Key.DEFAULT_NAME);
+
+    // We only carry over the name from the member level annotation to the
+    // parameters if there's only one parameter.
+    if (parameterTypes.length != 1 && defaultNameOverridden) {
+      errorHandler.handle(
+          ErrorMessage.NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS, member);
+    }
+
     List<ParameterInjector<?>> parameterInjectors =
         new ArrayList<ParameterInjector<?>>();
 
@@ -358,7 +372,18 @@ class ContainerImpl implements Container {
         Arrays.asList(annotations).iterator();
     for (Type parameterType : parameterTypes) {
       Inject annotation = findInject(annotationsIterator.next());
-      String name = annotation == null ? defaultName : annotation.value();
+
+      String name;
+      if (defaultNameOverridden) {
+        name = defaultName;
+        if (annotation != null) {
+          errorHandler.handle(
+              ErrorMessage.NAME_ON_MEMBER_AND_PARAMETER, member);
+        }
+      } else {
+        name = annotation == null ? defaultName : annotation.value();
+      }
+
       Key<?> key = Key.get(parameterType, name);
       parameterInjectors.add(createParameterInjector(key, member));
     }
@@ -370,8 +395,7 @@ class ContainerImpl implements Container {
       Key<T> key, Member member) throws MissingDependencyException {
     InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
-      throw new MissingDependencyException(
-          "Missing binding to " + key + " required by '" + member + "'.");
+      throw new MissingDependencyException(key, member);
     }
 
     ExternalContext<T> externalContext =
@@ -427,6 +451,11 @@ class ContainerImpl implements Container {
       new ReferenceCache<Class<?>, ConstructorInjector>() {
         @SuppressWarnings("unchecked")
         protected ConstructorInjector<?> create(Class<?> implementation) {
+          if (implementation.isInterface()) {
+            errorHandler.handle(ErrorMessage.CANNOT_INJECT_INTERFACE,
+                implementation);
+          }
+
           return new ConstructorInjector(ContainerImpl.this, implementation);
         }
       };
@@ -460,7 +489,7 @@ class ContainerImpl implements Container {
                 inject.value()
             );
       } catch (MissingDependencyException e) {
-        errorHandler.handle(e);
+        e.handle(errorHandler);
         return null;
       }
     }
@@ -472,8 +501,8 @@ class ContainerImpl implements Container {
           : implementation.getDeclaredConstructors()) {
         if (constructor.getAnnotation(Inject.class) != null) {
           if (found != null) {
-            errorHandler.handle("More than one constructor annotated"
-                + " with @Inject found in " + implementation + ".");
+            errorHandler.handle(
+                ErrorMessage.TOO_MANY_CONSTRUCTORS, implementation);
             return invalidConstructor();
           }
           found = constructor;
@@ -488,8 +517,7 @@ class ContainerImpl implements Container {
       try {
         return implementation.getDeclaredConstructor();
       } catch (NoSuchMethodException e) {
-        errorHandler.handle("Could not find a suitable constructor"
-            + " in " + implementation.getName() + ".");
+        errorHandler.handle(ErrorMessage.MISSING_CONSTRUCTOR, implementation);
         return invalidConstructor();
       }
     }
@@ -728,8 +756,16 @@ class ContainerImpl implements Container {
 
   static class MissingDependencyException extends Exception {
 
-    MissingDependencyException(String message) {
-      super(message);
+    final Key<?> key;
+    final Member member;
+
+    MissingDependencyException(Key<?> key, Member member) {
+      this.key = key;
+      this.member = member;
+    }
+
+    void handle(ErrorHandler errorHandler) {
+      errorHandler.handle(ErrorMessage.MISSING_BINDING, member, key);
     }
   }
 
@@ -815,6 +851,10 @@ class ContainerImpl implements Container {
   }
 
   private static class InvalidErrorHandler implements ErrorHandler {
+
+    public void handle(String message, Object... arguments) {
+      throw new AssertionError();
+    }
 
     public void handle(String message) {
       throw new AssertionError();

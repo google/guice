@@ -18,23 +18,23 @@ package com.google.inject;
 
 import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.spi.ErrorMessage;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 /**
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
- * implementations. For example, a binding implementation could be anything
- * from a constant value to an object in the HTTP session.
+ * implementations. A binding implementation could be anything from a constant
+ * value to an object in the HTTP session.
  *
  * <p>Not safe for concurrent use.
  *
@@ -103,7 +103,7 @@ public final class ContainerBuilder {
    */
   public ContainerBuilder() {
     put(Scopes.DEFAULT, DEFAULT_SCOPE);
-    put(Scopes.SINGLETON, SingletonScope.INSTANCE);
+    put(Scopes.CONTAINER, ContainerScope.INSTANCE);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
@@ -129,28 +129,12 @@ public final class ContainerBuilder {
     });
   }
 
+  /**
+   * A validation command to run after we create the container but before
+   * we return it to the client.
+   */
   interface Validation {
     void run(ContainerImpl container);
-  }
-
-  /**
-   * Creates an object pointing to the current location within the
-   * configuration. If we run into a problem later, we'll be able to trace it
-   * back to the original source. Useful for debugging. The default
-   * implementation returns {@code ContainerBuilder}'s caller's {@code
-   * StackTraceElement}.
-   */
-  protected Object source() {
-    // Search up the stack until we find a class outside of this one.
-    for (final StackTraceElement element : new Throwable().getStackTrace()) {
-      String className = element.getClassName();
-      if (!className.equals(ContainerBuilder.class.getName())
-          && !className.equals(AbstractModule.class.getName()))
-        return element;
-//        return element.getFileName() + ":"
-//            + element.getLineNumber() + ":";
-    }
-    throw new AssertionError();
   }
 
   /**
@@ -160,10 +144,9 @@ public final class ContainerBuilder {
    */
   public void put(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {
-      add(new ErrorMessage(source(), "Scope named '" + name
-          + "' is already defined."));
+      addError(source(), ErrorMessage.DUPLICATE_SCOPES, name);
     } else {
-        scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
+      scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
     }
   }
 
@@ -264,6 +247,14 @@ public final class ContainerBuilder {
     module.configure(this);    
   }
 
+  void addError(Object source, String message, Object... arguments) {
+    new ConfigurationErrorHandler(source).handle(message, arguments);
+  }
+
+  void addError(Object source, String message) {
+    new ConfigurationErrorHandler(source).handle(message);
+  }
+
   /**
    * Adds an error message to be reported at creation time.
    */
@@ -275,13 +266,14 @@ public final class ContainerBuilder {
    * Creates a {@link Container} instance. Injects static members for classes
    * which were registered using {@link #requestStaticInjection(Class...)}.
    *
-   * @param loadSingletons If true, the container will load all singletons
-   *  now. If false, the container will lazily load singletons. Eager loading
-   *  is appropriate for production use while lazy loading can speed
-   *  development.
+   * @param preload If true, the container will load all container-scoped
+   *  bindings now. If false, the container will lazily load them. Eager
+   *  loading is appropriate for production use (catch errors early and take
+   *  any performance hit up front) while lazy loading can speed development.
+   *
    * @throws IllegalStateException if called more than once
    */
-  public Container create(boolean loadSingletons) {
+  public Container create(boolean preload) {
     ensureNotCreated();
     created = true;
 
@@ -293,23 +285,22 @@ public final class ContainerBuilder {
       if (builder.hasValue()) {
         Key<?> key = builder.getKey();
         InternalFactory<?> factory = builder.getInternalFactory();
-        factories.put(key, factory);
+        putFactory(builder.getSource(), factories, key, factory);
       } else {
-        add(new ErrorMessage(builder.getSource(),
-            "Constant value isn't set."));
+        addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
       }
     }
 
-    final List<ContainerImpl.ContextualCallable<Void>> singletonLoaders =
+    final List<ContainerImpl.ContextualCallable<Void>> preloaders =
         new ArrayList<ContainerImpl.ContextualCallable<Void>>();
 
     for (BindingBuilder<?> builder : bindingBuilders) {
       final Key<?> key = builder.getKey();
       final InternalFactory<?> factory = builder.getInternalFactory(container);
-      factories.put(key, factory);
+      putFactory(builder.getSource(), factories, key, factory);
 
-      if (builder.isSingleton()) {
-        singletonLoaders.add(new ContainerImpl.ContextualCallable<Void>() {
+      if (builder.isInContainerScope()) {
+        preloaders.add(new ContainerImpl.ContextualCallable<Void>() {
           public Void call(InternalContext context) {
             context.setExternalContext(
                 ExternalContext.newInstance(null, key,
@@ -329,19 +320,18 @@ public final class ContainerBuilder {
       // TODO: Support alias to a later-declared alias.
       Key<?> destination = builder.getDestination();
       if (destination == null) {
-        add(new ErrorMessage(builder.getSource(),
-            "Link destination isn't set."));
+        addError(builder.getSource(), ErrorMessage.MISSING_LINK_DESTINATION);
         continue;
       }
 
       InternalFactory<?> factory = factories.get(destination);
       if (factory == null) {
-        add(new ErrorMessage(builder.getSource(),
-            "Destination of link binding not found: " + destination));
+        addError(builder.getSource(), ErrorMessage.LINK_DESTINATION_NOT_FOUND,
+            destination);
         continue;
       }
 
-      factories.put(builder.getKey(), factory);
+      putFactory(builder.getSource(), factories, builder.getKey(), factory);
     }
 
     // Run validations.
@@ -351,10 +341,20 @@ public final class ContainerBuilder {
 
     if (!errorMessages.isEmpty()) {
       StringBuilder error = new StringBuilder();
-      error.append("Configuration errors:\n");
+      error.append("Guice configuration errors:\n\n");
+      int index = 1;
       for (ErrorMessage errorMessage : errorMessages) {
-        error.append(errorMessage).append('\n');
+        error.append(index++)
+            .append(". ")
+            .append("at ")
+            .append(errorMessage.getSource())
+            .append(':')
+            .append('\n')
+            .append("  ")
+            .append(errorMessage.getMessage())
+            .append("\n\n");
       }
+      error.append(errorMessages.size()).append(" error[s]\n");
       logger.severe(error.toString());
       throw new ConfigurationException("Encountered configuration errors."
         + " See the log for details.");
@@ -363,12 +363,12 @@ public final class ContainerBuilder {
 
     container.injectStatics(staticInjections);
 
-    if (loadSingletons) {
+    if (preload) {
       container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
         public Void call(InternalContext context) {
-          for (ContainerImpl.ContextualCallable<Void> singletonLoader
-              : singletonLoaders) {
-            singletonLoader.call(context);
+          for (ContainerImpl.ContextualCallable<Void> preloader
+              : preloaders) {
+            preloader.call(context);
           }
           return null;
         }
@@ -378,13 +378,22 @@ public final class ContainerBuilder {
     return container;
   }
 
+  void putFactory(Object source, Map<Key<?>, InternalFactory<?>> factories,
+      Key<?> key, InternalFactory<?> factory) {
+    if (factories.containsKey(key)) {
+      addError(source, ErrorMessage.BINDING_ALREADY_SET, key);
+    } else {
+      factories.put(key, factory);
+    }
+  }
+
   /**
    * Currently we only support creating one Container instance per builder.
    * If we want to support creating more than one container per builder,
    * we should move to a "factory factory" model where we create a factory
    * instance per Container. Right now, one factory instance would be
-   * shared across all the containers, singletons synchronize on the
-   * container when lazy loading, etc.
+   * shared across all the containers, which means container-scoped objects
+   * would be shared, etc.
    */
   private void ensureNotCreated() {
     if (created) {
@@ -406,6 +415,10 @@ public final class ContainerBuilder {
       this.key = nonNull(key, "key");
     }
 
+    Object getSource() {
+      return source;
+    }
+
     Key<T> getKey() {
       return key;
     }
@@ -420,7 +433,7 @@ public final class ContainerBuilder {
      */
     public BindingBuilder<T> named(String name) {
       if (!this.key.hasDefaultName()) {
-        add(new ErrorMessage(source, "Name set more than once."));
+        addError(source, ErrorMessage.NAME_ALREADY_SET);
       }
 
       this.key = this.key.named(name);
@@ -520,7 +533,7 @@ public final class ContainerBuilder {
      */
     private void ensureImplementationIsNotSet() {
       if (factory != null) {
-        add(new ErrorMessage(source, "Implementation set more than once."));
+        addError(source, ErrorMessage.IMPLEMENTATION_ALREADY_SET);
       }
     }
 
@@ -533,10 +546,10 @@ public final class ContainerBuilder {
 
       // We could defer this lookup to when we create the container, but this
       // is fine for now.
-      this.scope = scopes.get(scopeName);
+      this.scope = scopes.get(nonNull(scopeName, "scope name"));
       if (this.scope == null) {
-        add(new ErrorMessage(source, "Scope named '" + scopeName
-            + "' not found."));
+        addError(source, ErrorMessage.SCOPE_NOT_FOUND, scopeName,
+            scopes.keySet());
       }
       return this;
     }
@@ -553,7 +566,7 @@ public final class ContainerBuilder {
 
     private void ensureScopeNotSet() {
       if (this.scope != null) {
-        add(new ErrorMessage(source, "Scope set more than once."));
+        addError(source, ErrorMessage.SCOPE_ALREADY_SET);
       }
     }
 
@@ -596,8 +609,8 @@ public final class ContainerBuilder {
       };
     }
 
-    boolean isSingleton() {
-      return this.scope == SingletonScope.INSTANCE;
+    boolean isInContainerScope() {
+      return this.scope == ContainerScope.INSTANCE;
     }
 
     /**
@@ -740,8 +753,12 @@ public final class ContainerBuilder {
      * Maps a constant value to the given type and name.
      */
     <T> void to(final Class<T> type, final T value) {
-      this.type = type;
-      this.value = value;
+      if (this.value != null) {
+        addError(source, ErrorMessage.CONSTANT_VALUE_ALREADY_SET);
+      } else {
+        this.type = type;
+        this.value = value;
+      }
     }
   }
 
@@ -779,11 +796,18 @@ public final class ContainerBuilder {
      * Links to another binding with the given key.
      */
     public void to(Key<? extends T> destination) {
-      this.destination = destination;
+      if (this.destination != null) {
+        addError(source, ErrorMessage.LINK_DESTINATION_ALREADY_SET);
+      } else {
+        this.destination = destination;
+      }
     }
   }
 
-  class ConfigurationErrorHandler implements ErrorHandler {
+  /**
+   * Handles errors up until we successfully create the container.
+   */
+  class ConfigurationErrorHandler extends AbstractErrorHandler {
 
     final Object source;
 
@@ -800,7 +824,10 @@ public final class ContainerBuilder {
     }
   }
 
-  class RuntimeErrorHandler implements ErrorHandler {
+  /**
+   * Handles errors after the container is created.
+   */
+  class RuntimeErrorHandler extends AbstractErrorHandler {
 
     public void handle(String message) {
       throw new ConfigurationException(message);
@@ -809,5 +836,40 @@ public final class ContainerBuilder {
     public void handle(Throwable t) {
       throw new ConfigurationException(t);
     }
+  }
+
+  final Set<String> skippedClassNames = new HashSet<String>(Arrays.asList(
+      ContainerBuilder.class.getName(),
+      AbstractModule.class.getName()
+  ));
+
+  /**
+   * Instructs the builder to skip the given class in the stack trace when
+   * determining the source of a binding. Use this to keep the container
+   * builder from logging utility methods as the sources of bindings (i.e.
+   * it will skip to the utility methods' callers instead).
+   *
+   * <p>Skipping only takes place after this method is called.
+   */
+  void skipSource(Class<?> clazz) {
+    skippedClassNames.add(clazz.getName());
+  }
+
+  /**
+   * Creates an object pointing to the current location within the
+   * configuration. If we run into a problem later, we'll be able to trace it
+   * back to the original source. Useful for debugging. The default
+   * implementation returns {@code ContainerBuilder}'s caller's {@code
+   * StackTraceElement}.
+   */
+  Object source() {
+    // Search up the stack until we find a class outside of this one.
+    for (final StackTraceElement element : new Throwable().getStackTrace()) {
+      String className = element.getClassName();
+      if (!skippedClassNames.contains(className)) {
+        return element;
+      }
+    }
+    throw new AssertionError();
   }
 }

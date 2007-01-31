@@ -3,7 +3,6 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
-import com.google.inject.spi.ErrorMessage;
 
 import java.util.Map;
 import java.util.Properties;
@@ -12,7 +11,18 @@ import java.util.Properties;
  * A support class for {@link Module}s which reduces repetition and
  * results in a more readable configuration. Simply extends this class,
  * implement {@link #configure()}, and call the inherited methods which mirror
- * those found in {@link ContainerBuilder}.
+ * those found in {@link ContainerBuilder}. For example:
+ *
+ * <pre>
+ * public class MyModule extends AbstractModule {
+ *   protected void configure() {
+ *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER);
+ *     bind(BarImpl.class);
+ *     link(Bar.class).to(BarImpl.class);
+ *     bind("port").to(8080);
+ *   }
+ * }
+ * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -100,13 +110,6 @@ public abstract class AbstractModule implements Module {
    */
   protected void requestStaticInjection(Class<?>... types) {
     builder.requestStaticInjection(types);
-  }
-
-  /**
-   * @see ContainerBuilder#add(com.google.inject.spi.ErrorMessage)
-   */
-  protected void add(ErrorMessage errorMessage) {
-    builder.add(errorMessage);
   }
 
   /**

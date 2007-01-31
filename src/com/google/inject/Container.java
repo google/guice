@@ -21,9 +21,9 @@ package com.google.inject;
  * &#64;{@link Inject}.
  *
  * <p>When injecting a method or constructor, you can additionally annotate
- * its parameters with {@link Inject} and specify a dependency name. When a
- * parameter has no annotation, the container uses the name from the method or
- * constructor's {@link Inject} annotation respectively.
+ * its parameters with &#64;{@link Inject} and specify a dependency name. When
+ * a parameter has no annotation, the container uses the name from the method
+ * or constructor's &#64;{@link Inject} annotation respectively.
  *
  * <p>For example:
  *

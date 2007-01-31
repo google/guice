@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.SINGLETON;
+import static com.google.inject.Scopes.CONTAINER;
 
 import static junit.framework.Assert.*;
 
@@ -206,7 +206,7 @@ public class PerformanceComparison {
     String getS();
   }
 
-  @Scoped(SINGLETON)
+  @Scoped(CONTAINER)
   public static class TeeImpl implements Tee {
 
     final String s;

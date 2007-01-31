@@ -17,7 +17,7 @@
 package com.google.inject;
 
 /**
- * Implemented by classes which participate in building a container. Useful
+ * Implemented by classes which configure a container. Useful
  * for encapsulating and reusing configuration logic.
  */
 public interface Module {

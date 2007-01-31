@@ -17,5 +17,10 @@ interface ErrorHandler {
   /**
    * Handles an error.
    */
+  void handle(String message, Object... arguments);
+
+  /**
+   * Handles an error.
+   */
   void handle(Throwable t);
 }

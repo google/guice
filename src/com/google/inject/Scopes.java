@@ -15,7 +15,7 @@ public class Scopes {
   public static final String DEFAULT = Key.DEFAULT_NAME;
 
   /**
-   * Singleton scope's name. One instance per {@link Container}.
+   * Container scope's name. One instance per {@link Container}.
    */
-  public static final String SINGLETON = "singleton";
+  public static final String CONTAINER = "container";
 }

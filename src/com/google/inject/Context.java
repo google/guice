@@ -32,8 +32,8 @@ public interface Context {
 
   /**
    * Gets the field, method or constructor which is being injected. Returns
-   * {@code null} if the object isn't being directly injected (i.e. it's
-   * a preloaded singleton, returned from {@link Factory#get()}, etc.
+   * {@code null} if the object isn't being injected into anywhere (i.e. it's
+   * preloaded, returned from {@link Factory#get()}, etc.).
    */
   Member getMember();
 

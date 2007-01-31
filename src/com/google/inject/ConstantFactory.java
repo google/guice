@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.util.Objects;
+
 /**
  * @author crazybob@google.com (Bob Lee)
  */
@@ -24,7 +26,7 @@ class ConstantFactory<T> implements InternalFactory<T> {
   private final T value;
 
   public ConstantFactory(T value) {
-    this.value = value;
+    this.value = Objects.nonNull(value, "value");
   }
 
   public T get(InternalContext ignored) {
