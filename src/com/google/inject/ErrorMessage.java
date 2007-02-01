@@ -80,8 +80,12 @@ class ErrorMessage {
       + " between @Inject on member and parameter: %s. Please remove the name"
       + " from the member-level @Inject or remove @Inject from the parameter.";
 
+  static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
+      + " container-scoped bindings.";
+
   final Object source;
   final String message;
+
 
   public ErrorMessage(Object source, String message) {
     this.source = nonNull(source, "source");

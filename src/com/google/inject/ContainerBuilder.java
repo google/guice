@@ -315,7 +315,7 @@ public final class ContainerBuilder {
 
     stopwatch.resetAndLog(logger, "Static validation");
 
-    // Blow up.
+    // Blow up if we encountered errors.
     if (!errorMessages.isEmpty()) {
       throw new ContainerCreationException(createErrorMessage());
     }
@@ -331,21 +331,23 @@ public final class ContainerBuilder {
     stopwatch.resetAndLog(logger, "Static member injection");
 
     // Run preloading commands.
-    if (preload) {
-      container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
-        public Void call(InternalContext context) {
-          for (ContainerImpl.ContextualCallable<Void> preloader
-              : preloaders) {
-            preloader.call(context);
-          }
-          return null;
-        }
-      });
-    }
+    runPreloaders(container, preloaders);
 
     stopwatch.resetAndLog(logger, "Preloading");
 
     return container;
+  }
+
+  private void runPreloaders(ContainerImpl container,
+      final List<ContainerImpl.ContextualCallable<Void>> preloaders) {
+    container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
+      public Void call(InternalContext context) {
+        for (ContainerImpl.ContextualCallable<Void> preloader : preloaders) {
+          preloader.call(context);
+        }
+        return null;
+      }
+    });
   }
 
   private String createErrorMessage() {
@@ -396,20 +398,14 @@ public final class ContainerBuilder {
       final InternalFactory<?> factory = builder.getInternalFactory(container);
       putFactory(builder.getSource(), factories, key, factory);
 
-      if (preload && builder.isInContainerScope()) {
-        preloaders.add(new ContainerImpl.ContextualCallable<Void>() {
-          public Void call(InternalContext context) {
-            context.setExternalContext(
-                ExternalContext.newInstance(null, key,
-                    context.getContainerImpl()));
-            try {
-              factory.get(context);
-              return null;
-            } finally {
-              context.setExternalContext(null);
-            }
-          }
-        });
+      if (builder.isInContainerScope()) {
+        if (preload || builder.shouldPreload()) {
+          preloaders.add(new BindingPreloader(key, factory));
+        }
+      } else {
+        if (builder.shouldPreload()) {
+          addError(builder.getSource(), ErrorMessage.PRELOAD_NOT_ALLOWED);
+        }
       }
     }
   }
@@ -459,6 +455,7 @@ public final class ContainerBuilder {
     Key<T> key;
     InternalFactory<? extends T> factory;
     Scope scope;
+    boolean preload = false;
 
     BindingBuilder(Key<T> key) {
       this.key = nonNull(key, "key");
@@ -599,6 +596,20 @@ public final class ContainerBuilder {
       if (this.scope != null) {
         addError(source, ErrorMessage.SCOPE_ALREADY_SET);
       }
+    }
+
+    /**
+     * Instructs the builder to eagerly load this binding when it creates
+     * the container. Useful for application initialization logic. Currently
+     * only supported for container-scoped bindings.
+     */
+    public BindingBuilder<T> preload() {
+      this.preload = true;
+      return this;
+    }
+
+    boolean shouldPreload() {
+      return preload;
     }
 
     InternalFactory<? extends T> getInternalFactory(
@@ -920,6 +931,30 @@ public final class ContainerBuilder {
           return null;
         }
       });
+    }
+  }
+
+  static class BindingPreloader
+      implements ContainerImpl.ContextualCallable<Void> {
+
+    private final Key<?> key;
+    private final InternalFactory<?> factory;
+
+    public BindingPreloader(Key<?> key, InternalFactory<?> factory) {
+      this.key = key;
+      this.factory = factory;
+    }
+
+    public Void call(InternalContext context) {
+      ExternalContext<?> externalContext =
+          ExternalContext.newInstance(null, key, context.getContainerImpl());
+      context.setExternalContext(externalContext);
+      try {
+        factory.get(context);
+        return null;
+      } finally {
+        context.setExternalContext(null);
+      }
     }
   }
 }
