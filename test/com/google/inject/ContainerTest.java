@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  */
 public class ContainerTest extends TestCase {
 
-  public void testInjection() {
+  public void testInjection() throws ContainerCreationException {
     Container container = createFooContainer();
     Foo foo = container.getCreator(Foo.class).get();
 
@@ -39,7 +39,7 @@ public class ContainerTest extends TestCase {
     assertSame(foo.bar, foo.bar.getTee().getBar());
   }
 
-  private Container createFooContainer() {
+  private Container createFooContainer() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
 
     builder.apply(new AbstractModule() {
@@ -54,7 +54,7 @@ public class ContainerTest extends TestCase {
     return builder.create(false);
   }
 
-  public void testGetInstance() {
+  public void testGetInstance() throws ContainerCreationException {
     Container container = createFooContainer();
 
     Bar bar = container.getFactory(Key.get(Bar.class)).get();
@@ -62,7 +62,8 @@ public class ContainerTest extends TestCase {
     assertEquals(5, bar.getI());
   }
 
-  public void testIntAndIntegerAreInterchangeable() {
+  public void testIntAndIntegerAreInterchangeable()
+      throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("i").to(5);
     Container container = builder.create(false);
@@ -141,7 +142,8 @@ public class ContainerTest extends TestCase {
     }
   }
 
-  public void testCircularlyDependentConstructors() {
+  public void testCircularlyDependentConstructors()
+      throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
@@ -180,7 +182,7 @@ public class ContainerTest extends TestCase {
     }
   }
 
-  public void testInjectStatics() {
+  public void testInjectStatics() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("s").to("test");
     builder.bind("i").to(5);

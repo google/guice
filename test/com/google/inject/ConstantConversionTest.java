@@ -49,7 +49,7 @@ public class ConstantConversionTest extends TestCase {
     TEE, BAZ, BOB;
   }
 
-  public void testConstantInjection() {
+  public void testConstantInjection() throws ContainerCreationException {
     Map<String, String> properties = new HashMap<String, String>() {{
       put("#", "5");
       put("boolean", "true");
@@ -87,7 +87,7 @@ public class ConstantConversionTest extends TestCase {
     }
   }
 
-  public void testInvalidInteger() {
+  public void testInvalidInteger() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bind("#").to("invalid");
     Container c = b.create(false);
@@ -105,7 +105,7 @@ public class ConstantConversionTest extends TestCase {
     @Inject("#") Integer integerField;
   }
 
-  public void testInvalidCharacter() {
+  public void testInvalidCharacter() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bind("foo").to("invalid");
     Container c = b.create(false);
@@ -123,7 +123,7 @@ public class ConstantConversionTest extends TestCase {
     @Inject("foo") char foo;
   }
 
-  public void testInvalidEnum() {
+  public void testInvalidEnum() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bind("foo").to("invalid");
     Container c = b.create(false);

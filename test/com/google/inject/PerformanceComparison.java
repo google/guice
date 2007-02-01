@@ -90,7 +90,11 @@ public class PerformanceComparison {
         }
       });
 
-      fooFactory = builder.create(false).getCreator(Foo.class);
+      try {
+        fooFactory = builder.create(false).getCreator(Foo.class);
+      } catch (ContainerCreationException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     public Foo call() throws Exception {

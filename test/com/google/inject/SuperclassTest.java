@@ -23,7 +23,7 @@ import junit.framework.TestCase;
  */
 public class SuperclassTest extends TestCase {
 
-  public void testSuperclassInjection() {
+  public void testSuperclassInjection() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class);
     Container container = builder.create(false);

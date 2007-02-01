@@ -25,7 +25,8 @@ import junit.framework.TestCase;
  */
 public class CircularDependencyTest extends TestCase {
 
-  public void testCircularlyDependentConstructors() {
+  public void testCircularlyDependentConstructors()
+      throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);

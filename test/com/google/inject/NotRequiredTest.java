@@ -23,7 +23,7 @@ import junit.framework.TestCase;
  */
 public class NotRequiredTest extends TestCase {
 
-  public void testProvided() {
+  public void testProvided() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Bar.class);
     Container c = builder.create(false);
@@ -32,9 +32,8 @@ public class NotRequiredTest extends TestCase {
     assertNotNull(foo.fromMethod);
   }
 
-  public void testNotProvided() {
-    Container c = new ContainerBuilder()
-        .create(false);
+  public void testNotProvided() throws ContainerCreationException {
+    Container c = new ContainerBuilder().create(false);
     Foo foo = c.getCreator(Foo.class).get();
     assertNull(foo.bar);
     assertNull(foo.fromMethod);

@@ -23,7 +23,7 @@ import junit.framework.TestCase;
  */
 public class StaticInjectionTest extends TestCase {
 
-  public void testInjectStatics() {
+  public void testInjectStatics() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("s").to("test");
     builder.bind("i").to(5);

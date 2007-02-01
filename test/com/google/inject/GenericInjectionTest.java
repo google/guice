@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class GenericInjectionTest extends TestCase {
 
-  public void testGenericInjection() {
+  public void testGenericInjection() throws ContainerCreationException {
     List<String> names = Arrays.asList("foo", "bar", "bob");
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(new TypeLiteral<List<String>>() {}).to(names);

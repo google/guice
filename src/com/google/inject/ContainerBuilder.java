@@ -262,6 +262,8 @@ public final class ContainerBuilder {
     errorMessages.add(errorMessage);
   }
 
+  Stopwatch stopwatch = new Stopwatch();
+
   /**
    * Creates a {@link Container} instance. Injects static members for classes
    * which were registered using {@link #requestStaticInjection(Class...)}.
@@ -271,51 +273,93 @@ public final class ContainerBuilder {
    *  loading is appropriate for production use (catch errors early and take
    *  any performance hit up front) while lazy loading can speed development.
    *
+   * @throws ContainerCreationException if configuration errors are found. The
+   *  expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
-  public Container create(boolean preload) {
+  public synchronized Container create(boolean preload)
+      throws ContainerCreationException {
+    // Only one Container per builder.
     ensureNotCreated();
     created = true;
 
+    stopwatch.resetAndLog(logger, "Configuration");
+
+    // Create the container.
     HashMap<Key<?>, InternalFactory<?>> factories =
         new HashMap<Key<?>, InternalFactory<?>>();
     ContainerImpl container = new ContainerImpl(factories);
 
-    for (ConstantBindingBuilder builder : constantBindingBuilders) {
-      if (builder.hasValue()) {
-        Key<?> key = builder.getKey();
-        InternalFactory<?> factory = builder.getInternalFactory();
-        putFactory(builder.getSource(), factories, key, factory);
-      } else {
-        addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
-      }
-    }
+    createConstantBindings(factories);
 
+    // Commands to execute before returning the Container instance.
     final List<ContainerImpl.ContextualCallable<Void>> preloaders =
         new ArrayList<ContainerImpl.ContextualCallable<Void>>();
 
-    for (BindingBuilder<?> builder : bindingBuilders) {
-      final Key<?> key = builder.getKey();
-      final InternalFactory<?> factory = builder.getInternalFactory(container);
-      putFactory(builder.getSource(), factories, key, factory);
+    createBindings(container, factories, preload, preloaders);
+    createLinkedBindings(factories);
 
-      if (builder.isInContainerScope()) {
-        preloaders.add(new ContainerImpl.ContextualCallable<Void>() {
-          public Void call(InternalContext context) {
-            context.setExternalContext(
-                ExternalContext.newInstance(null, key,
-                    context.getContainerImpl()));
-            try {
-              factory.get(context);
-              return null;
-            } finally {
-              context.setExternalContext(null);
-            }
-          }
-        });
-      }
+    stopwatch.resetAndLog(logger, "Binding creation");
+
+    // Run validations.
+    for (Validation validation : validations) {
+      validation.run(container);
     }
 
+    stopwatch.resetAndLog(logger, "Validation");
+
+    // Blow up.
+    if (!errorMessages.isEmpty()) {
+      throw new ContainerCreationException(createErrorMessage());
+    }
+
+    // Switch to runtime error handling.
+    container.setErrorHandler(new RuntimeErrorHandler());
+
+    // Inject static members.
+    container.injectStatics(staticInjections);
+
+    stopwatch.resetAndLog(logger, "Static member injection");
+
+    // Run preloading commands.
+    if (preload) {
+      container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
+        public Void call(InternalContext context) {
+          for (ContainerImpl.ContextualCallable<Void> preloader
+              : preloaders) {
+            preloader.call(context);
+          }
+          return null;
+        }
+      });
+    }
+
+    stopwatch.resetAndLog(logger, "Preloading");
+
+    return container;
+  }
+
+  private String createErrorMessage() {
+    StringBuilder error = new StringBuilder();
+    error.append("Guice configuration errors:\n\n");
+    int index = 1;
+    for (ErrorMessage errorMessage : errorMessages) {
+      error.append(index++)
+          .append(") ")
+          .append("Error at ")
+          .append(errorMessage.getSource())
+          .append(':')
+          .append('\n')
+          .append("  ")
+          .append(errorMessage.getMessage())
+          .append("\n\n");
+    }
+    error.append(errorMessages.size()).append(" error[s]\n");
+    return error.toString();
+  }
+
+  private void createLinkedBindings(
+      HashMap<Key<?>, InternalFactory<?>> factories) {
     for (LinkedBindingBuilder<?> builder : linkedBindingBuilders) {
       // TODO: Support alias to a later-declared alias.
       Key<?> destination = builder.getDestination();
@@ -333,49 +377,44 @@ public final class ContainerBuilder {
 
       putFactory(builder.getSource(), factories, builder.getKey(), factory);
     }
+  }
 
-    // Run validations.
-    for (Validation validation : validations) {
-      validation.run(container);
-    }
+  private void createBindings(ContainerImpl container,
+      HashMap<Key<?>, InternalFactory<?>> factories, boolean preload,
+      List<ContainerImpl.ContextualCallable<Void>> preloaders) {
+    for (BindingBuilder<?> builder : bindingBuilders) {
+      final Key<?> key = builder.getKey();
+      final InternalFactory<?> factory = builder.getInternalFactory(container);
+      putFactory(builder.getSource(), factories, key, factory);
 
-    if (!errorMessages.isEmpty()) {
-      StringBuilder error = new StringBuilder();
-      error.append("Guice configuration errors:\n\n");
-      int index = 1;
-      for (ErrorMessage errorMessage : errorMessages) {
-        error.append(index++)
-            .append(". ")
-            .append("at ")
-            .append(errorMessage.getSource())
-            .append(':')
-            .append('\n')
-            .append("  ")
-            .append(errorMessage.getMessage())
-            .append("\n\n");
-      }
-      error.append(errorMessages.size()).append(" error[s]\n");
-      logger.severe(error.toString());
-      throw new ConfigurationException("Encountered configuration errors."
-        + " See the log for details.");
-    }
-    container.setErrorHandler(new RuntimeErrorHandler());
-
-    container.injectStatics(staticInjections);
-
-    if (preload) {
-      container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
-        public Void call(InternalContext context) {
-          for (ContainerImpl.ContextualCallable<Void> preloader
-              : preloaders) {
-            preloader.call(context);
+      if (preload && builder.isInContainerScope()) {
+        preloaders.add(new ContainerImpl.ContextualCallable<Void>() {
+          public Void call(InternalContext context) {
+            context.setExternalContext(
+                ExternalContext.newInstance(null, key,
+                    context.getContainerImpl()));
+            try {
+              factory.get(context);
+              return null;
+            } finally {
+              context.setExternalContext(null);
+            }
           }
-          return null;
-        }
-      });
+        });
+      }
     }
+  }
 
-    return container;
+  private void createConstantBindings(HashMap<Key<?>, InternalFactory<?>> factories) {
+    for (ConstantBindingBuilder builder : constantBindingBuilders) {
+      if (builder.hasValue()) {
+        Key<?> key = builder.getKey();
+        InternalFactory<?> factory = builder.getInternalFactory();
+        putFactory(builder.getSource(), factories, key, factory);
+      } else {
+        addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
+      }
+    }
   }
 
   void putFactory(Object source, Map<Key<?>, InternalFactory<?>> factories,

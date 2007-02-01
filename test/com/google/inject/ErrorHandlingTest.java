@@ -42,7 +42,7 @@ public class ErrorHandlingTest {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.apply(new MyModule());
     builder.create(true);

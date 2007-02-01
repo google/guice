@@ -9,7 +9,7 @@ import junit.framework.TestCase;
  */
 public class FactoryInjectionTest extends TestCase {
 
-  public void testFactoryInjection() {
+  public void testFactoryInjection() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
 
     builder.bind(Bar.class);
