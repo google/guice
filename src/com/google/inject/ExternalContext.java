@@ -30,11 +30,14 @@ class ExternalContext<T> implements Context {
   final Member member;
   final Key<T> key;
   final ContainerImpl container;
+  final int parameterIndex;
 
-  public ExternalContext(Member member, Key<T> key, ContainerImpl container) {
+  public ExternalContext(Member member, int paramterIndex, Key<T> key,
+      ContainerImpl container) {
     this.member = member;
     this.key = key;
     this.container = container;
+    this.parameterIndex = paramterIndex;
   }
 
   public Key<?> getKey() {
@@ -49,6 +52,10 @@ class ExternalContext<T> implements Context {
     return member;
   }
 
+  public int getParameterIndex() {
+    return parameterIndex;
+  }
+
   public String toString() {
     return "Context" + new LinkedHashMap<String, Object>() {{
       put("member", member);
@@ -57,8 +64,13 @@ class ExternalContext<T> implements Context {
     }}.toString();
   }
 
-  static <T> ExternalContext<T> newInstance(Member member, Key<T> key,
-      ContainerImpl container) {
-    return new ExternalContext<T>(member, key, container);
+  static <T> ExternalContext<T> newInstance(Member member,
+      Key<T> key, ContainerImpl container) {
+    return new ExternalContext<T>(member, -1, key, container);
+  }
+
+  static <T> ExternalContext<T> newInstance(Member member, int parameterIndex,
+      Key<T> key, ContainerImpl container) {
+    return new ExternalContext<T>(member, parameterIndex, key, container);
   }
 }

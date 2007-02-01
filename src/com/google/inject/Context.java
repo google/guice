@@ -38,6 +38,12 @@ public interface Context {
   Member getMember();
 
   /**
+   * Gets the index of the parameter which is being injected. Returns
+   * {@code -1} if we aren't injecting a parameter.
+   */
+  int getParameterIndex();
+
+  /**
    * Gets the binding key for the object currently being retrieved.
    */
   Key<?> getKey();

@@ -358,6 +358,7 @@ class ContainerImpl implements Container {
 
     Iterator<Annotation[]> annotationsIterator =
         Arrays.asList(annotations).iterator();
+    int index = 0;
     for (Type parameterType : parameterTypes) {
       Inject annotation = findInject(annotationsIterator.next());
 
@@ -373,21 +374,21 @@ class ContainerImpl implements Container {
       }
 
       Key<?> key = Key.get(parameterType, name);
-      parameterInjectors.add(createParameterInjector(key, member));
+      parameterInjectors.add(createParameterInjector(key, member, index++));
     }
 
     return toArray(parameterInjectors);
   }
 
   <T> ParameterInjector<T> createParameterInjector(
-      Key<T> key, Member member) throws MissingDependencyException {
+      Key<T> key, Member member, int index) throws MissingDependencyException {
     InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(key, member);
     }
 
     ExternalContext<T> externalContext =
-        ExternalContext.newInstance(member, key, this);
+        ExternalContext.newInstance(member, index, key, this);
     return new ParameterInjector<T>(externalContext, factory);
   }
 

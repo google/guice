@@ -26,6 +26,56 @@ import java.lang.reflect.Method;
  */
 public class FactoryTest extends TestCase {
 
+  public void testParameterIndex() throws ContainerCreationException {
+    ContainerBuilder cb = new ContainerBuilder();
+
+    cb.bind(Zero.class).to(new ContextualFactory<Zero>() {
+      public Zero get(Context context) {
+        assertEquals(0, context.getParameterIndex());
+        return new Zero();
+      }
+    });
+
+    cb.bind(One.class).to(new ContextualFactory<One>() {
+      public One get(Context context) {
+        assertEquals(1, context.getParameterIndex());
+        return new One();
+      }
+    });
+
+    cb.bind(NegativeOne.class).to(new ContextualFactory<NegativeOne>() {
+      public NegativeOne get(Context context) {
+        assertEquals(-1, context.getParameterIndex());
+        return new NegativeOne();
+      }
+    });
+
+    Container c = cb.create(false);
+
+    A a = c.getCreator(A.class).get();
+
+    assertNotNull(a.negativeOne);
+    assertTrue(a.initCalled);
+  }
+
+  static class A {
+
+    @Inject
+    NegativeOne negativeOne;
+
+    boolean initCalled;
+
+    @Inject void init(Zero zero, One one) {
+      assertNotNull(zero);
+      assertNotNull(one);
+      initCalled = true;
+    }
+  }
+
+  static class Zero {}
+  static class One {}
+  static class NegativeOne {}
+
   public void testInjection() throws Exception {
     ContainerBuilder cb = new ContainerBuilder();
 
