@@ -104,8 +104,8 @@ public final class ContainerBuilder {
    * Constructs a new builder.
    */
   public ContainerBuilder() {
-    put(Scopes.DEFAULT, DEFAULT_SCOPE);
-    put(Scopes.CONTAINER, ContainerScope.INSTANCE);
+    put(Scopes.DEFAULT_SCOPE, DEFAULT_SCOPE);
+    put(Scopes.CONTAINER_SCOPE, ContainerScope.INSTANCE);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
@@ -590,6 +590,13 @@ public final class ContainerBuilder {
 
       this.scope = nonNull(scope, "scope");
       return this;
+    }
+
+    /**
+     * Specifies container scope (i.e. one instance per container).
+     */
+    public BindingBuilder<T> inContainerScope() {
+      return in(Scopes.CONTAINER_SCOPE);
     }
 
     private void ensureScopeNotSet() {

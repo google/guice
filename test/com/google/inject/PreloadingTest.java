@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
+import static com.google.inject.Scopes.CONTAINER_SCOPE;
 
 import junit.framework.TestCase;
 
@@ -46,7 +46,7 @@ public class PreloadingTest extends TestCase {
 
   private ContainerBuilder createContainerBuilder() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(Foo.class).in(CONTAINER).preload();
+    builder.bind(Foo.class).in(CONTAINER_SCOPE).preload();
     builder.bind(Bar.class);
     return builder;
   }
@@ -67,7 +67,7 @@ public class PreloadingTest extends TestCase {
     }
   }
 
-  @Scoped(CONTAINER)
+  @Scoped(CONTAINER_SCOPE)
   static class Bar {
     static int count = 0;
     public Bar() {

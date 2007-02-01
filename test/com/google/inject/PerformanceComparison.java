@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
+import static com.google.inject.Scopes.CONTAINER_SCOPE;
 
 import static junit.framework.Assert.*;
 
@@ -210,7 +210,7 @@ public class PerformanceComparison {
     String getS();
   }
 
-  @Scoped(CONTAINER)
+  @Scoped(CONTAINER_SCOPE)
   public static class TeeImpl implements Tee {
 
     final String s;

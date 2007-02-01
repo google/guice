@@ -40,7 +40,7 @@ public class CircularDependencyTest extends TestCase {
     B getB();
   }
 
-  @Scoped(CONTAINER)
+  @Scoped(CONTAINER_SCOPE)
   static class AImpl implements A {
     final B b;
     @Inject public AImpl(B b) {

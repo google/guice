@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
+import static com.google.inject.Scopes.CONTAINER_SCOPE;
 
 import junit.framework.TestCase;
 
@@ -96,7 +96,7 @@ public class ContainerTest extends TestCase {
     int getI();
   }
 
-  @Scoped(CONTAINER)
+  @Scoped(CONTAINER_SCOPE)
   static class BarImpl implements Bar {
 
     @Inject("i") int i;
@@ -157,7 +157,7 @@ public class ContainerTest extends TestCase {
     B getB();
   }
 
-  @Scoped(CONTAINER)
+  @Scoped(CONTAINER_SCOPE)
   static class AImpl implements A {
     final B b;
     @Inject public AImpl(B b) {

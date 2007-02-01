@@ -26,10 +26,10 @@ public class Scopes {
   /**
    * Default scope's name. One instance per injection.
    */
-  public static final String DEFAULT = Key.DEFAULT_NAME;
+  public static final String DEFAULT_SCOPE = Key.DEFAULT_NAME;
 
   /**
    * Container scope's name. One instance per {@link Container}.
    */
-  public static final String CONTAINER = "container";
+  public static final String CONTAINER_SCOPE = "container";
 }

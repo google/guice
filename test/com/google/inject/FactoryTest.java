@@ -86,7 +86,7 @@ public class FactoryTest extends TestCase {
     cb.bind(Bar.class)
         .named("fooBar")
         .to(createFactory(Bar.class, "fooBar", null))
-        .in(Scopes.CONTAINER);
+        .in(Scopes.CONTAINER_SCOPE);
 
     cb.bind(Tee.class).named("tee1")
         .to(createFactory(Tee.class, "tee1",
