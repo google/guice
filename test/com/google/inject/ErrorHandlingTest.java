@@ -9,6 +9,9 @@ import java.util.List;
  */
 public class ErrorHandlingTest {
 
+  @Inject("missing")
+  static List<String> missing;
+
   static class Foo {
     @Inject
     public Foo(Runnable r) {}
@@ -39,6 +42,7 @@ public class ErrorHandlingTest {
       bind(Tee.class);
       bind(String.class).named("foo").in("foo");
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
+      requestStaticInjection(ErrorHandlingTest.class);
     }
   }
 

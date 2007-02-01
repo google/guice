@@ -89,12 +89,18 @@ class ContainerImpl implements Container {
     this.factories = factories;
   }
 
-  void setErrorHandler(ErrorHandler errorHandler) {
+  void withErrorHandler(ErrorHandler errorHandler, Runnable runnable) {
+    ErrorHandler previous = this.errorHandler;
     this.errorHandler = errorHandler;
+    try {
+      runnable.run();
+    } finally {
+      this.errorHandler = previous;
+    }
   }
 
-  ErrorHandler getErrorHandler() {
-    return errorHandler;
+  void setErrorHandler(ErrorHandler errorHandler) {
+    this.errorHandler = errorHandler;
   }
 
   @SuppressWarnings("unchecked")
@@ -238,24 +244,6 @@ class ContainerImpl implements Container {
     // TODO (crazybob): Filter out overridden members.
     addInjectorsForFields(clazz.getDeclaredFields(), false, injectors);
     addInjectorsForMethods(clazz.getDeclaredMethods(), false, injectors);
-  }
-
-  void injectStatics(List<Class<?>> staticInjections) {
-    final List<Injector> injectors = new ArrayList<Injector>();
-
-    for (Class<?> clazz : staticInjections) {
-      addInjectorsForFields(clazz.getDeclaredFields(), true, injectors);
-      addInjectorsForMethods(clazz.getDeclaredMethods(), true, injectors);
-    }
-
-    callInContext(new ContextualCallable<Void>() {
-      public Void call(InternalContext context) {
-        for (Injector injector : injectors) {
-          injector.inject(context, null);
-        }
-        return null;
-      }
-    });
   }
 
   void addInjectorsForMethods(Method[] methods, boolean statics,

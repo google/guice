@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
+import com.google.inject.util.Stopwatch;
 import static com.google.inject.util.Objects.nonNull;
 
 import java.lang.reflect.Member;
@@ -64,7 +65,8 @@ public final class ContainerBuilder {
       new ArrayList<LinkedBindingBuilder<?>>();
   final Map<String, Scope> scopes = new HashMap<String, Scope>();
 
-  final List<Class<?>> staticInjections = new ArrayList<Class<?>>();
+  final List<StaticInjection> staticInjections =
+      new ArrayList<StaticInjection>();
 
   boolean created;
 
@@ -117,14 +119,13 @@ public final class ContainerBuilder {
    */
   void validate(final Object source, final Class<?> type) {
     validations.add(new Validation() {
-      public void run(ContainerImpl container) {
-        ErrorHandler previous = container.getErrorHandler();
-        try {
-          container.setErrorHandler(new ConfigurationErrorHandler(source));
-          container.getConstructor(type);
-        } finally {
-          container.setErrorHandler(previous);
-        }
+      public void run(final ContainerImpl container) {
+        container.withErrorHandler(new ConfigurationErrorHandler(source),
+            new Runnable() {
+              public void run() {
+                container.getConstructor(type);
+              }
+            });
       }
     });
   }
@@ -237,7 +238,7 @@ public final class ContainerBuilder {
    * @param types for which static members will be injected
    */
   public void requestStaticInjection(Class<?>... types) {
-    staticInjections.addAll(Arrays.asList(types));
+    staticInjections.add(new StaticInjection(source(), types));
   }
 
   /**
@@ -308,6 +309,12 @@ public final class ContainerBuilder {
 
     stopwatch.resetAndLog(logger, "Validation");
 
+    for (StaticInjection staticInjection : staticInjections) {
+      staticInjection.createInjectors(container);
+    }
+
+    stopwatch.resetAndLog(logger, "Static validation");
+
     // Blow up.
     if (!errorMessages.isEmpty()) {
       throw new ContainerCreationException(createErrorMessage());
@@ -317,7 +324,9 @@ public final class ContainerBuilder {
     container.setErrorHandler(new RuntimeErrorHandler());
 
     // Inject static members.
-    container.injectStatics(staticInjections);
+    for (StaticInjection staticInjection : staticInjections) {
+      staticInjection.runInjectors(container);
+    }
 
     stopwatch.resetAndLog(logger, "Static member injection");
 
@@ -871,5 +880,46 @@ public final class ContainerBuilder {
       }
     }
     throw new AssertionError();
+  }
+
+  /**
+   * A requested static injection.
+   */
+  class StaticInjection {
+
+    final Object source;
+    final Class<?>[] types;
+    final List<ContainerImpl.Injector> injectors =
+        new ArrayList<ContainerImpl.Injector>();
+
+    public StaticInjection(Object source, Class<?>[] types) {
+      this.source = source;
+      this.types = types;
+    }
+
+    void createInjectors(final ContainerImpl container) {
+      container.withErrorHandler(new ConfigurationErrorHandler(source),
+          new Runnable() {
+            public void run() {
+              for (Class<?> clazz : types) {
+                container.addInjectorsForFields(
+                    clazz.getDeclaredFields(), true, injectors);
+                container.addInjectorsForMethods(
+                    clazz.getDeclaredMethods(), true, injectors);
+              }
+            }
+          });
+    }
+
+    void runInjectors(ContainerImpl container) {
+      container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
+        public Void call(InternalContext context) {
+          for (ContainerImpl.Injector injector : injectors) {
+            injector.inject(context, null);
+          }
+          return null;
+        }
+      });
+    }
   }
 }
