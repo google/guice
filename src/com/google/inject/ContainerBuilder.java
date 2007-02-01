@@ -93,8 +93,8 @@ public final class ContainerBuilder {
 
   static final Scope DEFAULT_SCOPE = new Scope() {
     public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
-      // We actually optimize around this.
-      throw new UnsupportedOperationException();
+      // We special case optimize default scope, so this never actually runs.
+      throw new AssertionError();
     }
   };
 
@@ -405,7 +405,8 @@ public final class ContainerBuilder {
     }
   }
 
-  private void createConstantBindings(HashMap<Key<?>, InternalFactory<?>> factories) {
+  private void createConstantBindings(
+      HashMap<Key<?>, InternalFactory<?>> factories) {
     for (ConstantBindingBuilder builder : constantBindingBuilders) {
       if (builder.hasValue()) {
         Key<?> key = builder.getKey();
@@ -498,7 +499,7 @@ public final class ContainerBuilder {
     public <I extends T> BindingBuilder<T> to(TypeLiteral<I> implementation) {
       ensureImplementationIsNotSet();
       validate(source, implementation.getRawType());
-      this.factory = new DefaultFactory<I>(implementation);
+      this.factory = new DefaultFactory<I>(key, implementation);
       setScopeFromType(implementation.getRawType());
       return this;
     }
@@ -517,15 +518,7 @@ public final class ContainerBuilder {
         final ContextualFactory<? extends T> factory) {
       ensureImplementationIsNotSet();
 
-      this.factory = new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          return factory.get(context.getExternalContext());
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
+      this.factory = new InternalToContextualFactoryAdapter<T>(factory);
 
       return this;
     }
@@ -535,17 +528,7 @@ public final class ContainerBuilder {
      */
     public BindingBuilder<T> to(final Factory<? extends T> factory) {
       ensureImplementationIsNotSet();
-
-      this.factory = new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          return factory.get();
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
-
+      this.factory = new InternalFactoryToFactoryAdapter<T>(factory);
       return this;
     }
 
@@ -620,66 +603,44 @@ public final class ContainerBuilder {
         return this.factory;
       }
 
-      // TODO: This is a little hairy.
-      final InternalFactory<? extends T> internalFactory = this.factory;
-      final Factory<T> factory = scope.scope(this.key, new Factory<T>() {
-        public T get() {
-          return container.callInContext(
-              new ContainerImpl.ContextualCallable<T>() {
-            public T call(InternalContext context) {
-              return internalFactory.get(context);
-            }
-          });
-        }
-
-        public String toString() {
-          return internalFactory.toString();
-        }
-      });
-
-      return new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          return factory.get();
-        }
-
-        public String toString() {
-          return factory.toString();
-        }
-      };
+      Factory<T> scoped = scope.scope(this.key,
+          new FactoryToInternalFactoryAdapter<T>(container, this.factory));
+      return new InternalFactoryToFactoryAdapter<T>(scoped);
     }
 
     boolean isInContainerScope() {
       return this.scope == ContainerScope.INSTANCE;
     }
+  }
 
-    /**
-     * Injects new instances of the specified implementation class.
-     */
-    private class DefaultFactory<I extends T> implements InternalFactory<I> {
+  /**
+   * Injects new instances of the specified implementation class.
+   */
+  private static class DefaultFactory<T> implements InternalFactory<T> {
 
-      volatile ContainerImpl.ConstructorInjector<I> constructor;
+    volatile ContainerImpl.ConstructorInjector<T> constructor;
 
-      private final TypeLiteral<I> implementation;
+    private final TypeLiteral<T> implementation;
+    private final Key<? super T> key;
 
-      public DefaultFactory(TypeLiteral<I> implementation) {
-        // TODO: Ensure this is a concrete implementation.
-        this.implementation = implementation;
+    public DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation) {
+      this.key = key;
+      this.implementation = implementation;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(InternalContext context) {
+      if (constructor == null) {
+        // This unnecessary cast is a workaround for an annoying compiler
+        // bug I keep running into.
+        Object c = context.getContainerImpl().getConstructor(implementation);
+        this.constructor = (ContainerImpl.ConstructorInjector<T>) c;
       }
+      return (T) constructor.construct(context, key.getRawType());
+    }
 
-      @SuppressWarnings("unchecked")
-      public I get(InternalContext context) {
-        if (constructor == null) {
-          // This unnecessary cast is a workaround for an annoying compiler
-          // bug I keep running into.
-          Object c = context.getContainerImpl().getConstructor(implementation);
-          this.constructor = (ContainerImpl.ConstructorInjector<I>) c;
-        }
-        return (I) constructor.construct(context, key.getRawType());
-      }
-
-      public String toString() {
-        return implementation.toString();
-      }
+    public String toString() {
+      return implementation.toString();
     }
   }
 

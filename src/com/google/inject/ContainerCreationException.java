@@ -4,7 +4,8 @@ package com.google.inject;
 
 /**
  * Thrown when errors occurs while creating a {@link Container}. Includes a
- * list of encountered errors.
+ * list of encountered errors. Typically, a client should catch this exception,
+ * log it, and stop execution.
  *
  * @author crazybob@google.com (Bob Lee)
  */
