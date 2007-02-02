@@ -16,9 +16,37 @@
 
 package com.google.inject.intercept;
 
+import org.aopalliance.intercept.MethodInterceptor;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.lang.reflect.Method;
+
 /**
+ * Creates a {@link ProxyFactory}.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public class ProxyFactoryBuilder {
 
+  final List<MethodAspect> methodAspects = new ArrayList<MethodAspect>();
+
+  /**
+   * Applies the given method interceptor to the methods matched by the class
+   * and method queries.
+   */
+  public ProxyFactoryBuilder intercept(Query<? super Class> classQuery,
+      Query<? super Method> methodQuery, MethodInterceptor interceptor) {
+    methodAspects.add(new MethodAspect(classQuery, methodQuery, interceptor));
+    return this;
+  }
+
+  /**
+   * Creates a {@code ProxyFactory}.
+   */
+  public ProxyFactory create() {
+    List<MethodAspect> methodAspects = new ArrayList<MethodAspect>();
+    methodAspects.addAll(this.methodAspects);
+    return new ProxyFactory(methodAspects);
+  }
 }
