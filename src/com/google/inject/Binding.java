@@ -54,7 +54,7 @@ public class Binding<T> {
   volatile Factory<T> factory;
 
   /**
-   * Gets the factory which returns instances for this binding.
+   * Gets the factory which returns instances of {@code T}.
    */
   public Factory<T> getFactory() {
     if (factory == null) {
