@@ -20,6 +20,7 @@ import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
+import com.google.inject.intercept.QueryTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

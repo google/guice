@@ -1,14 +1,14 @@
 // Copyright 2006 Google Inc. All Rights Reserved.
 
-package com.google.inject;
+package com.google.inject.intercept;
 
-import static com.google.inject.Queries.annotatedWith;
-import static com.google.inject.Queries.any;
-import static com.google.inject.Queries.equalTo;
-import static com.google.inject.Queries.inPackage;
-import static com.google.inject.Queries.not;
-import static com.google.inject.Queries.sameAs;
-import static com.google.inject.Queries.subclassesOf;
+import static com.google.inject.intercept.Queries.annotatedWith;
+import static com.google.inject.intercept.Queries.any;
+import static com.google.inject.intercept.Queries.equalTo;
+import static com.google.inject.intercept.Queries.inPackage;
+import static com.google.inject.intercept.Queries.not;
+import static com.google.inject.intercept.Queries.sameAs;
+import static com.google.inject.intercept.Queries.subclassesOf;
 
 import junit.framework.TestCase;
 

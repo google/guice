@@ -1,6 +1,6 @@
 // Copyright 2006 Google Inc. All Rights Reserved.
 
-package com.google.inject;
+package com.google.inject.intercept;
 
 /**
  * Returns {@code true} or {@code false} for a given input.

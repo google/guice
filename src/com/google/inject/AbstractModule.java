@@ -30,7 +30,7 @@ import java.util.Properties;
  * <pre>
  * public class MyModule extends AbstractModule {
  *   protected void configure() {
- *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER);
+ *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER_SCOPE);
  *     bind(BarImpl.class);
  *     link(Bar.class).to(BarImpl.class);
  *     bind("port").to(8080);

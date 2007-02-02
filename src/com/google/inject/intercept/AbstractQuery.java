@@ -1,9 +1,9 @@
 // Copyright 2006 Google Inc. All Rights Reserved.
 
-package com.google.inject;
+package com.google.inject.intercept;
 
 /**
- * Implements {@link #and(Query)} and {@link #or(Query)}.
+ * Implements {@code and()} and {@code or()}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
