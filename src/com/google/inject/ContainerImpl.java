@@ -135,7 +135,7 @@ class ContainerImpl implements Container {
           }
         };
       } catch (ConfigurationException e) {
-        errorHandler.handle(ErrorMessage.MISSING_BINDING, member, key);
+        errorHandler.handle(ErrorMessages.MISSING_BINDING, member, key);
         return invalidFactory();
       }
     }
@@ -221,7 +221,7 @@ class ContainerImpl implements Container {
       new ReferenceCache<Class<?>, List<Injector>>() {
         protected List<Injector> create(Class<?> key) {
           if (key.isInterface()) {
-            errorHandler.handle(ErrorMessage.CANNOT_INJECT_INTERFACE, key);
+            errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE, key);
             return Collections.emptyList();
           }
 
@@ -365,7 +365,7 @@ class ContainerImpl implements Container {
     // parameters if there's only one parameter.
     if (parameterTypes.length != 1 && defaultNameOverridden) {
       errorHandler.handle(
-          ErrorMessage.NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS, member);
+          ErrorMessages.NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS, member);
     }
 
     List<ParameterInjector<?>> parameterInjectors =
@@ -382,7 +382,7 @@ class ContainerImpl implements Container {
         name = defaultName;
         if (annotation != null) {
           errorHandler.handle(
-              ErrorMessage.NAME_ON_MEMBER_AND_PARAMETER, member);
+              ErrorMessages.NAME_ON_MEMBER_AND_PARAMETER, member);
         }
       } else {
         name = annotation == null ? defaultName : annotation.value();
@@ -456,7 +456,7 @@ class ContainerImpl implements Container {
         @SuppressWarnings("unchecked")
         protected ConstructorInjector<?> create(Class<?> implementation) {
           if (implementation.isInterface()) {
-            errorHandler.handle(ErrorMessage.CANNOT_INJECT_INTERFACE,
+            errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE,
                 implementation);
           }
 
@@ -625,7 +625,7 @@ class ContainerImpl implements Container {
     }
 
     void handle(ErrorHandler errorHandler) {
-      errorHandler.handle(ErrorMessage.MISSING_BINDING, member, key);
+      errorHandler.handle(ErrorMessages.MISSING_BINDING, member, key);
     }
   }
 

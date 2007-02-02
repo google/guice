@@ -57,7 +57,7 @@ class ConstructorInjector<T> implements Factory<T> {
       if (constructor.getAnnotation(Inject.class) != null) {
         if (found != null) {
           container.errorHandler.handle(
-              ErrorMessage.TOO_MANY_CONSTRUCTORS, implementation);
+              ErrorMessages.TOO_MANY_CONSTRUCTORS, implementation);
           return ContainerImpl.invalidConstructor();
         }
         found = constructor;
@@ -72,7 +72,7 @@ class ConstructorInjector<T> implements Factory<T> {
     try {
       return implementation.getDeclaredConstructor();
     } catch (NoSuchMethodException e) {
-      container.errorHandler.handle(ErrorMessage.MISSING_CONSTRUCTOR, implementation);
+      container.errorHandler.handle(ErrorMessages.MISSING_CONSTRUCTOR, implementation);
       return ContainerImpl.invalidConstructor();
     }
   }

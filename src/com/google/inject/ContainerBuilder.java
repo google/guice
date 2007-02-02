@@ -22,6 +22,7 @@ import com.google.inject.util.ToStringBuilder;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.spi.ConstructionProxyFactory;
 import com.google.inject.spi.DefaultConstructionProxyFactory;
+import com.google.inject.spi.Message;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public final class ContainerBuilder {
   /**
    * Keeps error messages in order and prevents duplicates.
    */
-  Set<ErrorMessage> errorMessages = new LinkedHashSet<ErrorMessage>();
+  Set<Message> errorMessages = new LinkedHashSet<Message>();
 
   private static final InternalFactory<Container> CONTAINER_FACTORY =
       new InternalFactory<Container>() {
@@ -162,7 +163,7 @@ public final class ContainerBuilder {
    */
   public void put(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {
-      addError(source(), ErrorMessage.DUPLICATE_SCOPES, name);
+      addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
     } else {
       scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
     }
@@ -276,7 +277,7 @@ public final class ContainerBuilder {
   /**
    * Adds an error message to be reported at creation time.
    */
-  void add(ErrorMessage errorMessage) {
+  void add(Message errorMessage) {
     errorMessages.add(errorMessage);
   }
 
@@ -331,7 +332,7 @@ public final class ContainerBuilder {
 
     // Blow up if we encountered errors.
     if (!errorMessages.isEmpty()) {
-      throw new ContainerCreationException(createErrorMessage());
+      throw new ContainerCreationException(errorMessages);
     }
 
     // Switch to runtime error handling.
@@ -364,25 +365,6 @@ public final class ContainerBuilder {
     });
   }
 
-  private String createErrorMessage() {
-    StringBuilder error = new StringBuilder();
-    error.append("Guice configuration errors:\n\n");
-    int index = 1;
-    for (ErrorMessage errorMessage : errorMessages) {
-      error.append(index++)
-          .append(") ")
-          .append("Error at ")
-          .append(errorMessage.getSource())
-          .append(':')
-          .append('\n')
-          .append("  ")
-          .append(errorMessage.getMessage())
-          .append("\n\n");
-    }
-    error.append(errorMessages.size()).append(" error[s]\n");
-    return error.toString();
-  }
-
   private void createLinkedBindings() {
     for (LinkedBindingBuilder<?> builder : linkedBindingBuilders) {
       createLinkedBinding(builder);
@@ -394,13 +376,13 @@ public final class ContainerBuilder {
     // TODO: Support linking to a later-declared link?
     Key<? extends T> destinationKey = builder.getDestination();
     if (destinationKey == null) {
-      addError(builder.getSource(), ErrorMessage.MISSING_LINK_DESTINATION);
+      addError(builder.getSource(), ErrorMessages.MISSING_LINK_DESTINATION);
       return;
     }
 
     Binding<? extends T> destination = getBinding(destinationKey);
     if (destination == null) {
-      addError(builder.getSource(), ErrorMessage.LINK_DESTINATION_NOT_FOUND,
+      addError(builder.getSource(), ErrorMessages.LINK_DESTINATION_NOT_FOUND,
           destinationKey);
       return;
     }
@@ -441,7 +423,7 @@ public final class ContainerBuilder {
       }
     } else {
       if (builder.shouldPreload()) {
-        addError(builder.getSource(), ErrorMessage.PRELOAD_NOT_ALLOWED);
+        addError(builder.getSource(), ErrorMessages.PRELOAD_NOT_ALLOWED);
       }
     }
   }
@@ -462,14 +444,14 @@ public final class ContainerBuilder {
           Binding.newInstance(container, key, builder.getSource(), factory);
       putBinding(binding);
     } else {
-      addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
+      addError(builder.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
     }
   }
 
   void putFactory(Object source, Map<Key<?>, InternalFactory<?>> factories,
       Key<?> key, InternalFactory<?> factory) {
     if (factories.containsKey(key)) {
-      addError(source, ErrorMessage.BINDING_ALREADY_SET, key);
+      addError(source, ErrorMessages.BINDING_ALREADY_SET, key);
     } else {
       factories.put(key, factory);
     }
@@ -480,7 +462,7 @@ public final class ContainerBuilder {
     Map<Key<?>, Binding<?>> bindings = container.internalBindings();
     Binding<?> original = bindings.get(key);
     if (bindings.containsKey(key)) {
-      addError(binding.getSource(), ErrorMessage.BINDING_ALREADY_SET, key,
+      addError(binding.getSource(), ErrorMessages.BINDING_ALREADY_SET, key,
           original.getSource());
     } else {
       bindings.put(key, binding);
@@ -535,7 +517,7 @@ public final class ContainerBuilder {
      */
     public BindingBuilder<T> named(String name) {
       if (!this.key.hasDefaultName()) {
-        addError(source, ErrorMessage.NAME_ALREADY_SET);
+        addError(source, ErrorMessages.NAME_ALREADY_SET);
       }
 
       this.key = this.key.named(name);
@@ -618,7 +600,7 @@ public final class ContainerBuilder {
      */
     private void ensureImplementationIsNotSet() {
       if (factory != null) {
-        addError(source, ErrorMessage.IMPLEMENTATION_ALREADY_SET);
+        addError(source, ErrorMessages.IMPLEMENTATION_ALREADY_SET);
       }
     }
 
@@ -633,7 +615,7 @@ public final class ContainerBuilder {
       // is fine for now.
       this.scope = scopes.get(nonNull(scopeName, "scope name"));
       if (this.scope == null) {
-        addError(source, ErrorMessage.SCOPE_NOT_FOUND, scopeName,
+        addError(source, ErrorMessages.SCOPE_NOT_FOUND, scopeName,
             scopes.keySet());
       }
       return this;
@@ -658,7 +640,7 @@ public final class ContainerBuilder {
 
     private void ensureScopeNotSet() {
       if (this.scope != null) {
-        addError(source, ErrorMessage.SCOPE_ALREADY_SET);
+        addError(source, ErrorMessages.SCOPE_ALREADY_SET);
       }
     }
 
@@ -838,7 +820,7 @@ public final class ContainerBuilder {
      */
     <T> void to(final Class<T> type, final T value) {
       if (this.value != null) {
-        addError(source, ErrorMessage.CONSTANT_VALUE_ALREADY_SET);
+        addError(source, ErrorMessages.CONSTANT_VALUE_ALREADY_SET);
       } else {
         this.type = type;
         this.value = value;
@@ -881,7 +863,7 @@ public final class ContainerBuilder {
      */
     public void to(Key<? extends T> destination) {
       if (this.destination != null) {
-        addError(source, ErrorMessage.LINK_DESTINATION_ALREADY_SET);
+        addError(source, ErrorMessages.LINK_DESTINATION_ALREADY_SET);
       } else {
         this.destination = destination;
       }
@@ -900,11 +882,11 @@ public final class ContainerBuilder {
     }
 
     public void handle(String message) {
-      add(new ErrorMessage(source, message));
+      add(new Message(source, message));
     }
 
     public void handle(Throwable t) {
-      add(new ErrorMessage(source, t.getMessage()));
+      add(new Message(source, t.getMessage()));
     }
   }
 

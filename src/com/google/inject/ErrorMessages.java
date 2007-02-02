@@ -1,29 +1,11 @@
-/**
- * Copyright (C) 2006 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2006 Google Inc. All Rights Reserved.
 
 package com.google.inject;
 
-import static com.google.inject.util.Objects.nonNull;
-
 /**
- * A configuration error.
- *
  * @author crazybob@google.com (Bob Lee)
  */
-class ErrorMessage {
+class ErrorMessages {
 
   static final String MISSING_BINDING =
       "Binding to %2$s not found, but %1$s requires it.";
@@ -44,7 +26,7 @@ class ErrorMessage {
   static final String MISSING_CONSTANT_VALUE = "Missing constant value. Please"
       + " call to(...).";
 
-  static final String MISSING_LINK_DESTINATION = "Missing link destination." 
+  static final String MISSING_LINK_DESTINATION = "Missing link destination."
       + " Please call to(Key<?>).";
 
   static final String LINK_DESTINATION_NOT_FOUND = "Binding to %s not found.";
@@ -83,47 +65,4 @@ class ErrorMessage {
 
   static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
       + " container-scoped bindings.";
-
-  final Object source;
-  final String message;
-
-
-  public ErrorMessage(Object source, String message) {
-    this.source = nonNull(source, "source");
-    this.message = nonNull(message, "message");
-  }
-
-  public ErrorMessage(String message) {
-    this(ContainerBuilder.UNKNOWN_SOURCE, message);
-  }
-
-  /**
-   * Gets the source of the configuration which resulted in this error message.
-   */
-  public Object getSource() {
-    return source;
-  }
-
-  /**
-   * Gets the error message text.
-   */
-  public String getMessage() {
-    return message;
-  }
-
-  public String toString() {
-    return source + " " + message;
-  }
-
-  public int hashCode() {
-    return source.hashCode() * 31 + message.hashCode();
-  }
-
-  public boolean equals(Object o) {
-    if (!(o instanceof ErrorMessage)) {
-      return false;
-    }
-    ErrorMessage e = (ErrorMessage) o;
-    return source.equals(e.source) && message.equals(e.message);
-  }
 }

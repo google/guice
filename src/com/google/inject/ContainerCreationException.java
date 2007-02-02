@@ -16,6 +16,11 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.Message;
+
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Thrown when errors occurs while creating a {@link Container}. Includes a
  * list of encountered errors. Typically, a client should catch this exception,
@@ -25,8 +30,40 @@ package com.google.inject;
  */
 public class ContainerCreationException extends Exception {
 
-  public ContainerCreationException(String message) {
-    super(message);
+  final Collection<Message> errorMessages;
+
+  /**
+   * Constructs a new exception for the given errors.
+   */
+  public ContainerCreationException(Collection<Message> errorMessages) {
+    super(createErrorMessage(errorMessages));
+    this.errorMessages = errorMessages;
+  }
+
+  private static String createErrorMessage(Collection<Message> errorMessages) {
+    StringBuilder error = new StringBuilder();
+    error.append("Guice configuration errors:\n\n");
+    int index = 1;
+    for (Message errorMessage : errorMessages) {
+      error.append(index++)
+          .append(") ")
+          .append("Error at ")
+          .append(errorMessage.getSource())
+          .append(':')
+          .append('\n')
+          .append("  ")
+          .append(errorMessage.getMessage())
+          .append("\n\n");
+    }
+    error.append(errorMessages.size()).append(" error[s]\n");
+    return error.toString();
+  }
+
+  /**
+   * Gets the error messages which resulted in this exception.
+   */
+  public Collection<Message> getErrorMessages() {
+    return Collections.unmodifiableCollection(errorMessages);
   }
 
   public synchronized Throwable fillInStackTrace() {
