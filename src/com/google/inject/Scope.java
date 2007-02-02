@@ -21,6 +21,9 @@ package com.google.inject;
  * com.google.inject.ContainerBuilder#put(String, Scope)} and reference it from
  * bindings using its name.
  *
+ * <p>Scope implementations should override {@code toString()} and include the
+ * creator's {@code toString()} output. Doing so aids debugging.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface Scope {

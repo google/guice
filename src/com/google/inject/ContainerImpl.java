@@ -81,12 +81,12 @@ class ContainerImpl implements Container {
   private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS =
       new PrimitiveConverters();
 
-  final Map<Key<?>, InternalFactory<?>> factories;
+  final Map<Key<?>, Binding<?>> bindings;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
-  ContainerImpl(Map<Key<?>, InternalFactory<?>> factories) {
-    this.factories = factories;
+  ContainerImpl(Map<Key<?>, Binding<?>> bindings) {
+    this.bindings = bindings;
   }
 
   void withErrorHandler(ErrorHandler errorHandler, Runnable runnable) {
@@ -103,13 +103,13 @@ class ContainerImpl implements Container {
     this.errorHandler = errorHandler;
   }
 
-  @SuppressWarnings("unchecked")
   <T> InternalFactory<? extends T> getFactory(Member member, Key<T> key) {
+    // TODO: Clean up unchecked type warnings.
+
     // Do we have a factory for the specified type and name?
-    InternalFactory<T> internalFactory =
-        (InternalFactory<T>) factories.get(key);
-    if (internalFactory != null) {
-      return internalFactory;
+    Binding<T> binding = getBinding(key);
+    if (binding != null) {
+      return binding.getInternalFactory();
     }
 
     // Handle cases where T is a Factory<?>.
@@ -140,19 +140,17 @@ class ContainerImpl implements Container {
     Class<?> primitiveCounterpart =
         PRIMITIVE_COUNTERPARTS.get(key.getType().getRawType());
     if (primitiveCounterpart != null) {
-      internalFactory = (InternalFactory<T>) factories.get(
-          Key.get(primitiveCounterpart, key.getName()));
-      if (internalFactory != null) {
-        return internalFactory;
+      Binding<?> counterpartBinding =
+          getBinding(Key.get(primitiveCounterpart, key.getName()));
+      if (counterpartBinding != null) {
+        return (InternalFactory<T>) counterpartBinding.getInternalFactory();
       }
     }
 
     // Do we have a constant String factory of the same name?
-    InternalFactory<String> stringFactory =
-        (InternalFactory<String>) factories.get(
-            Key.get(String.class, key.getName()));
-    if (stringFactory == null
-        || !(stringFactory instanceof ConstantFactory)) {
+    Binding<String> stringBinding =
+        getBinding(Key.get(String.class, key.getName()));
+    if (stringBinding == null || !stringBinding.isConstant()) {
       return null;
     }
 
@@ -160,7 +158,7 @@ class ContainerImpl implements Container {
 
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
-    String value = stringFactory.get(null);
+    String value = stringBinding.getInternalFactory().get(null);
 
     // TODO: Generalize everything below here and enable users to plug in
     // their own converters.
@@ -286,6 +284,19 @@ class ContainerImpl implements Container {
         }
       }
     }
+  }
+
+  Map<Key<?>, Binding<?>> internalBindings() {
+    return bindings;
+  }
+
+  public Map<Key<?>, Binding<?>> getBindings() {
+    return Collections.unmodifiableMap(bindings);
+  }
+
+  @SuppressWarnings({"unchecked"})
+  public <T> Binding<T> getBinding(Key<T> key) {
+    return (Binding<T>) bindings.get(key);
   }
 
   interface InjectorFactory<M extends Member & AnnotatedElement> {
@@ -650,14 +661,6 @@ class ContainerImpl implements Container {
     return getConstructor(implementation);
   }
 
-  public boolean hasBindingFor(Key<?> key) {
-    try {
-      return getFactory(null, key) != null;
-    } catch (ConfigurationException e) {
-      return false;
-    }
-  }
-
   public void injectMembers(final Object o) {
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
@@ -717,10 +720,6 @@ class ContainerImpl implements Container {
       // Someone else will clean up this context.
       return callable.call(reference[0]);
     }
-  }
-
-  interface ContextualCallable<T> {
-    T call(InternalContext context);
   }
 
   /**

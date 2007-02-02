@@ -39,7 +39,7 @@ public interface Context {
 
   /**
    * Gets the index of the parameter which is being injected. Returns
-   * {@code -1} if we aren't injecting a parameter.
+   * {@code -1} if a parameter isn't being injected.
    */
   int getParameterIndex();
 

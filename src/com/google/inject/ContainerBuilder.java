@@ -68,7 +68,7 @@ public final class ContainerBuilder {
   final List<StaticInjection> staticInjections =
       new ArrayList<StaticInjection>();
 
-  boolean created;
+  ContainerImpl container;
 
   /**
    * Keeps error messages in order and prevents duplicates.
@@ -280,25 +280,22 @@ public final class ContainerBuilder {
    */
   public synchronized Container create(boolean preload)
       throws ContainerCreationException {
-    // Only one Container per builder.
-    ensureNotCreated();
-    created = true;
-
     stopwatch.resetAndLog(logger, "Configuration");
 
     // Create the container.
-    HashMap<Key<?>, InternalFactory<?>> factories =
-        new HashMap<Key<?>, InternalFactory<?>>();
-    ContainerImpl container = new ContainerImpl(factories);
+    ensureNotCreated();
+    Map<Key<?>, Binding<?>> bindings =
+        new HashMap<Key<?>, Binding<?>>();
+    container = new ContainerImpl(bindings);
 
-    createConstantBindings(factories);
+    createConstantBindings();
 
     // Commands to execute before returning the Container instance.
-    final List<ContainerImpl.ContextualCallable<Void>> preloaders =
-        new ArrayList<ContainerImpl.ContextualCallable<Void>>();
+    final List<ContextualCallable<Void>> preloaders =
+        new ArrayList<ContextualCallable<Void>>();
 
-    createBindings(container, factories, preload, preloaders);
-    createLinkedBindings(factories);
+    createBindings(preload, preloaders);
+    createLinkedBindings();
 
     stopwatch.resetAndLog(logger, "Binding creation");
 
@@ -339,10 +336,10 @@ public final class ContainerBuilder {
   }
 
   private void runPreloaders(ContainerImpl container,
-      final List<ContainerImpl.ContextualCallable<Void>> preloaders) {
-    container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
+      final List<ContextualCallable<Void>> preloaders) {
+    container.callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
-        for (ContainerImpl.ContextualCallable<Void> preloader : preloaders) {
+        for (ContextualCallable<Void> preloader : preloaders) {
           preloader.call(context);
         }
         return null;
@@ -369,57 +366,86 @@ public final class ContainerBuilder {
     return error.toString();
   }
 
-  private void createLinkedBindings(
-      HashMap<Key<?>, InternalFactory<?>> factories) {
+  private void createLinkedBindings() {
     for (LinkedBindingBuilder<?> builder : linkedBindingBuilders) {
-      // TODO: Support alias to a later-declared alias.
-      Key<?> destination = builder.getDestination();
-      if (destination == null) {
-        addError(builder.getSource(), ErrorMessage.MISSING_LINK_DESTINATION);
-        continue;
-      }
-
-      InternalFactory<?> factory = factories.get(destination);
-      if (factory == null) {
-        addError(builder.getSource(), ErrorMessage.LINK_DESTINATION_NOT_FOUND,
-            destination);
-        continue;
-      }
-
-      putFactory(builder.getSource(), factories, builder.getKey(), factory);
+      createLinkedBinding(builder);
     }
   }
 
-  private void createBindings(ContainerImpl container,
-      HashMap<Key<?>, InternalFactory<?>> factories, boolean preload,
-      List<ContainerImpl.ContextualCallable<Void>> preloaders) {
+  private <T> void createLinkedBinding(
+      LinkedBindingBuilder<T> builder) {
+    // TODO: Support linking to a later-declared link?
+    Key<? extends T> destinationKey = builder.getDestination();
+    if (destinationKey == null) {
+      addError(builder.getSource(), ErrorMessage.MISSING_LINK_DESTINATION);
+      return;
+    }
+
+    Binding<? extends T> destination = getBinding(destinationKey);
+    if (destination == null) {
+      addError(builder.getSource(), ErrorMessage.LINK_DESTINATION_NOT_FOUND,
+          destinationKey);
+      return;
+    }
+
+    Binding<?> binding =
+        Binding.newInstance(container, builder.getKey(), builder.getSource(),
+            destination.getInternalFactory());
+
+    putBinding(binding);
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private <T> Binding<T> getBinding(Key<T> destinationKey) {
+    return (Binding<T>) container.internalBindings().get(destinationKey);
+  }
+
+  private void createBindings(boolean preload,
+      List<ContextualCallable<Void>> preloaders) {
     for (BindingBuilder<?> builder : bindingBuilders) {
-      final Key<?> key = builder.getKey();
-      final InternalFactory<?> factory = builder.getInternalFactory(container);
-      putFactory(builder.getSource(), factories, key, factory);
+      createBinding(builder, preload, preloaders);
+    }
+  }
 
-      if (builder.isInContainerScope()) {
-        if (preload || builder.shouldPreload()) {
-          preloaders.add(new BindingPreloader(key, factory));
-        }
-      } else {
-        if (builder.shouldPreload()) {
-          addError(builder.getSource(), ErrorMessage.PRELOAD_NOT_ALLOWED);
-        }
+  private <T> void createBinding(BindingBuilder<T> builder,
+      boolean preload, List<ContextualCallable<Void>> preloaders) {
+    final Key<T> key = builder.getKey();
+    final InternalFactory<? extends T> factory =
+        builder.getInternalFactory(container);
+    Binding<?> binding = Binding.newInstance(
+        container, key, builder.getSource(), factory);
+
+    putBinding(binding);
+
+    // Register to preload if necessary.
+    if (builder.isInContainerScope()) {
+      if (preload || builder.shouldPreload()) {
+        preloaders.add(new BindingPreloader(key, factory));
+      }
+    } else {
+      if (builder.shouldPreload()) {
+        addError(builder.getSource(), ErrorMessage.PRELOAD_NOT_ALLOWED);
       }
     }
   }
 
-  private void createConstantBindings(
-      HashMap<Key<?>, InternalFactory<?>> factories) {
+  private void createConstantBindings() {
     for (ConstantBindingBuilder builder : constantBindingBuilders) {
-      if (builder.hasValue()) {
-        Key<?> key = builder.getKey();
-        InternalFactory<?> factory = builder.getInternalFactory();
-        putFactory(builder.getSource(), factories, key, factory);
-      } else {
-        addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
-      }
+      createConstantBinding(builder);
+    }
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private <T> void createConstantBinding(ConstantBindingBuilder builder) {
+    if (builder.hasValue()) {
+      Key<T> key = (Key<T>) builder.getKey();
+      InternalFactory<? extends T> factory =
+          (InternalFactory<? extends T>) builder.getInternalFactory();
+      Binding<?> binding =
+          Binding.newInstance(container, key, builder.getSource(), factory);
+      putBinding(binding);
+    } else {
+      addError(builder.getSource(), ErrorMessage.MISSING_CONSTANT_VALUE);
     }
   }
 
@@ -432,6 +458,18 @@ public final class ContainerBuilder {
     }
   }
 
+  void putBinding(Binding<?> binding) {
+    Key<?> key = binding.getKey();
+    Map<Key<?>, Binding<?>> bindings = container.internalBindings();
+    Binding<?> original = bindings.get(key);
+    if (bindings.containsKey(key)) {
+      addError(binding.getSource(), ErrorMessage.BINDING_ALREADY_SET, key,
+          original.getSource());
+    } else {
+      bindings.put(key, binding);
+    }
+  }
+
   /**
    * Currently we only support creating one Container instance per builder.
    * If we want to support creating more than one container per builder,
@@ -441,7 +479,7 @@ public final class ContainerBuilder {
    * would be shared, etc.
    */
   private void ensureNotCreated() {
-    if (created) {
+    if (container != null) {
       throw new IllegalStateException("Container already created.");
     }
   }
@@ -455,6 +493,7 @@ public final class ContainerBuilder {
     Key<T> key;
     InternalFactory<? extends T> factory;
     Scope scope;
+    String scopeName;
     boolean preload = false;
 
     BindingBuilder(Key<T> key) {
@@ -544,6 +583,7 @@ public final class ContainerBuilder {
     BindingBuilder<T> to(T instance) {
       ensureImplementationIsNotSet();
       this.factory = new ConstantFactory<T>(instance);
+      in(Scopes.CONTAINER_SCOPE);
       return this;
     }
 
@@ -593,7 +633,7 @@ public final class ContainerBuilder {
     }
 
     /**
-     * Specifies container scope (i.e. one instance per container).
+     * Specifies container scope (i.e.&nbsp;one instance per container).
      */
     public BindingBuilder<T> inContainerScope() {
       return in(Scopes.CONTAINER_SCOPE);
@@ -930,7 +970,7 @@ public final class ContainerBuilder {
     }
 
     void runInjectors(ContainerImpl container) {
-      container.callInContext(new ContainerImpl.ContextualCallable<Void>() {
+      container.callInContext(new ContextualCallable<Void>() {
         public Void call(InternalContext context) {
           for (ContainerImpl.Injector injector : injectors) {
             injector.inject(context, null);
@@ -942,7 +982,7 @@ public final class ContainerBuilder {
   }
 
   static class BindingPreloader
-      implements ContainerImpl.ContextualCallable<Void> {
+      implements ContextualCallable<Void> {
 
     private final Key<?> key;
     private final InternalFactory<?> factory;

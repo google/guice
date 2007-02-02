@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import java.util.Map;
+
 /**
  * Injects dependencies into constructors, methods and fields annotated with
  * &#64;{@link Inject}.
@@ -83,10 +85,12 @@ public interface Container {
   <T> Factory<T> getFactory(Key<T> key);
 
   /**
-   * Checks whether the container has a binding for given key.
-   *
-   * @param key binding key
-   * @return {@code true} if a binding exists for the given key
+   * Gets all bindings.
    */
-  boolean hasBindingFor(Key<?> key);
+  Map<Key<?>, Binding<?>> getBindings();
+
+  /**
+   * Gets a binding for the given key.
+   */
+  <T> Binding<T> getBinding(Key<T> key);
 }

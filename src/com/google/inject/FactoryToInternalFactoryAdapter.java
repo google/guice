@@ -33,7 +33,7 @@ class FactoryToInternalFactoryAdapter<T> implements Factory<T> {
 
   public T get() {
     return container.callInContext(
-        new ContainerImpl.ContextualCallable<T>() {
+        new ContextualCallable<T>() {
       public T call(InternalContext context) {
         return internalFactory.get(context);
       }

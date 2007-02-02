@@ -70,7 +70,8 @@ class ErrorMessage {
   static final String LINK_DESTINATION_ALREADY_SET = "Link destination is"
       + " set more than once.";
 
-  static final String BINDING_ALREADY_SET = "A binding to %s already exists.";
+  static final String BINDING_ALREADY_SET = "A binding to %s was already"
+      + " configured at %s.";
 
   static final String NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS = "Member-level"
       + " @Inject name is not allowed when the member has more than one"

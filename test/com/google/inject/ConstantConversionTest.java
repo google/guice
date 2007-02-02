@@ -49,6 +49,18 @@ public class ConstantConversionTest extends TestCase {
     TEE, BAZ, BOB;
   }
 
+  public void testOneConstantInjection() throws ContainerCreationException {
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind("#").to("5");
+    Container container = builder.create(false);
+    Simple simple = container.getCreator(Simple.class).get();
+    assertEquals(5, simple.i);
+  }
+
+  static class Simple {
+    @Inject("#") int i;
+  }
+
   public void testConstantInjection() throws ContainerCreationException {
     Map<String, String> properties = new HashMap<String, String>() {{
       put("#", "5");
