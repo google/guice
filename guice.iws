@@ -19,18 +19,18 @@
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Scope.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Scope.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/ContextualCallable.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Context.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Context.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/ContextualCallable.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/Binding.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/ReflectionTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ConstantConversionTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Foo.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Foo.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/FactoryToInternalFactoryAdapter.java" afterPath="$PROJECT_DIR$/src/com/google/inject/FactoryToInternalFactoryAdapter.java" />
     </list>
@@ -211,10 +211,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ReflectionTest.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ReflectionTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/ReflectionTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state line="13" column="24" selection-start="360" selection-end="360" vertical-scroll-proportion="0.3480315">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorMessage.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="80" column="1" selection-start="2913" selection-end="2913" vertical-scroll-proportion="0.5622047">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorHandlingTest.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="64" column="8" selection-start="1690" selection-end="1690" vertical-scroll-proportion="1.3385826">
               <folding />
             </state>
           </provider>
@@ -518,7 +536,7 @@
     </key>
   </component>
   <component name="RestoreUpdateTree" />
-  <component name="RunManager" selected="JUnit.AllTests">
+  <component name="RunManager" selected="Application.ErrorHandlingTest">
     <tempConfiguration default="false" name="ReflectionTest" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <pattern value="com.google.inject.*" />
       <module name="guice" />
@@ -846,20 +864,6 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="0" selection-start="2658" selection-end="2658" vertical-scroll-proportion="0.38582677">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContextualFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="17" selection-start="726" selection-end="726" vertical-scroll-proportion="0.24094488">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="25" column="13" selection-start="877" selection-end="877" vertical-scroll-proportion="0.2944882">
@@ -947,6 +951,20 @@
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/ReflectionTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="24" selection-start="360" selection-end="360" vertical-scroll-proportion="0.3480315">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorMessage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="80" column="1" selection-start="2913" selection-end="2913" vertical-scroll-proportion="0.5622047">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="64" column="8" selection-start="1690" selection-end="1690" vertical-scroll-proportion="1.3385826">
           <folding />
         </state>
       </provider>
