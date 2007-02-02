@@ -20,19 +20,19 @@
     <list default="true" name="Default" comment="">
       <change type="DELETED" beforePath="$PROJECT_DIR$/test/com/google/inject/QueryTest.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" afterPath="$PROJECT_DIR$/src/com/google/inject/AbstractModule.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Query.java" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/Query.java" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Query.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/Queries.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/PredicatesTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/PredicatesTest.java" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/src/com/google/inject/AbstractQuery.java" afterPath="" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Predicate.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Predicate.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/AbstractQuery.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Binding.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Binding.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/AbstractPredicate.java" afterPath="$PROJECT_DIR$/src/com/google/inject/AbstractPredicate.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Predicates.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Predicates.java" />
