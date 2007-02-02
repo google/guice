@@ -18,7 +18,10 @@ package com.google.inject;
 
 import com.google.inject.util.Objects;
 import com.google.inject.util.Stopwatch;
+import com.google.inject.util.ToStringBuilder;
 import static com.google.inject.util.Objects.nonNull;
+import com.google.inject.spi.ConstructionProxyFactory;
+import com.google.inject.spi.DefaultConstructionProxyFactory;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
@@ -100,15 +103,29 @@ public final class ContainerBuilder {
     }
   };
 
+  final ConstructionProxyFactory constructionProxyFactory;
+
   /**
    * Constructs a new builder.
+   *
+   * @param constructionProxyFactory to use when constructing objects
    */
-  public ContainerBuilder() {
+  public ContainerBuilder(ConstructionProxyFactory constructionProxyFactory) {
     put(Scopes.DEFAULT_SCOPE, DEFAULT_SCOPE);
     put(Scopes.CONTAINER_SCOPE, ContainerScope.INSTANCE);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
+
+    this.constructionProxyFactory = nonNull(constructionProxyFactory,
+        "construction proxy factory");
+  }
+
+  /**
+   * Constructs a new builder.
+   */
+  public ContainerBuilder() {
+    this(new DefaultConstructionProxyFactory());
   }
 
   final List<Validation> validations = new ArrayList<Validation>();
@@ -286,7 +303,7 @@ public final class ContainerBuilder {
     ensureNotCreated();
     Map<Key<?>, Binding<?>> bindings =
         new HashMap<Key<?>, Binding<?>>();
-    container = new ContainerImpl(bindings);
+    container = new ContainerImpl(constructionProxyFactory, bindings);
 
     createConstantBindings();
 
@@ -685,7 +702,7 @@ public final class ContainerBuilder {
    */
   private static class DefaultFactory<T> implements InternalFactory<T> {
 
-    volatile ContainerImpl.ConstructorInjector<T> constructor;
+    volatile ConstructorInjector<T> constructor;
 
     private final TypeLiteral<T> implementation;
     private final Key<? super T> key;
@@ -698,16 +715,16 @@ public final class ContainerBuilder {
     @SuppressWarnings("unchecked")
     public T get(InternalContext context) {
       if (constructor == null) {
-        // This unnecessary cast is a workaround for an annoying compiler
-        // bug I keep running into.
-        Object c = context.getContainerImpl().getConstructor(implementation);
-        this.constructor = (ContainerImpl.ConstructorInjector<T>) c;
+        this.constructor =
+            context.getContainerImpl().getConstructor(implementation);
       }
       return (T) constructor.construct(context, key.getRawType());
     }
 
     public String toString() {
-      return implementation.toString();
+      return new ToStringBuilder(Factory.class)
+          .add("implementation", implementation)
+          .toString();
     }
   }
 

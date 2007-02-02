@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
+import com.google.inject.util.ToStringBuilder;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -34,6 +35,8 @@ class ConstantFactory<T> implements InternalFactory<T> {
   }
 
   public String toString() {
-    return "ConstantFactory[" + value + "]";
+    return new ToStringBuilder(ConstantFactory.class)
+        .add("value", value)
+        .toString();
   }
 }

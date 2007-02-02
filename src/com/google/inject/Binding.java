@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.util.ToStringBuilder;
+
 /**
  * A binding from a {@link Key} (type and name) to an implementation.
  *
@@ -77,5 +79,13 @@ public class Binding<T> {
    */
   public boolean isConstant() {
     return internalFactory instanceof ConstantFactory<?>;
+  }
+
+  public String toString() {
+    return new ToStringBuilder(Binding.class)
+        .add("key", key)
+        .add("source", source)
+        .add("factory", internalFactory)
+        .toString();
   }
 }

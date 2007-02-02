@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import java.util.concurrent.Callable;
+import java.text.DecimalFormat;
 
 /**
  * A semi-useless microbenchmark. Spring and Guice constuct the same object
@@ -37,6 +38,22 @@ import java.util.concurrent.Callable;
  * @author crazybob@google.com (Bob Lee)
  */
 public class PerformanceComparison {
+
+  public static void main(String[] args) throws Exception {
+    // Once warm up. Takes lazy loading out of the equation and ensures we
+    // created the graphs properly.
+    validate(springFactory);
+    validate(juiceFactory);
+    validate(byHandFactory);
+
+    for (int i2 = 0; i2 < 10; i2++) {
+      iterate(springFactory, "Spring:  ");
+      iterate(juiceFactory,  "Guice:   ");
+      iterate(byHandFactory, "By Hand: ");
+
+      System.err.println();
+    }
+  }
 
   static final Callable<Foo> springFactory = new Callable<Foo>() {
 
@@ -82,7 +99,7 @@ public class PerformanceComparison {
 
       builder.apply(new AbstractModule() {
         protected void configure() {
-          bind(Tee.class).named("tee").to(TeeImpl.class);
+          bind(Tee.class).to(TeeImpl.class);
           bind(Bar.class).to(BarImpl.class);
           bind(Foo.class);
           bind("i").to(5);
@@ -125,21 +142,7 @@ public class PerformanceComparison {
     assertEquals("test", foo.bar.getTee().getS());
   }
 
-  public static void main(String[] args) throws Exception {
-    // Once warm up. Takes lazy loading out of the equation and ensures we
-    // created the graphs properly.
-    validate(springFactory);
-    validate(juiceFactory);
-    validate(byHandFactory);
-
-    for (int i2 = 0; i2 < 10; i2++) {
-      iterate(springFactory, "Spring:  ");
-      iterate(juiceFactory,  "Guice:   ");
-      iterate(byHandFactory, "By Hand: ");
-
-      System.err.println();
-    }
-  }
+  static DecimalFormat format = new DecimalFormat();
 
   static void iterate(Callable<Foo> callable, String label) throws Exception {
     int count = 100000;
@@ -148,7 +151,8 @@ public class PerformanceComparison {
       callable.call();
     }
     time = System.currentTimeMillis() - time;
-    System.err.println(label + count * 1000 / time + " creations/s");
+    System.err.println(label
+        + format.format(count * 1000 / time) + " creations/s");
   }
 
   public static class Foo {

@@ -23,7 +23,17 @@ import java.lang.reflect.ParameterizedType;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
- * represent generic types, so this class does.
+ * represent generic types, so this class does. Forces clients to create a
+ * subclass of this class which enables retrieval the type information
+ * even at runtime.
+ *
+ * <p>For example, to create a {@code TypeLiteral} for {@code List<String>},
+ * you can create an empty anonymous inner class:
+ *
+ * <pre>
+ * TypeLiteral<List<String>> listOfString =
+ *   new TypeLiteral<List<String>>() {};
+ * </pre>
  *
  * <p>Assumes {@code Type} implements {@code equals()} and {@code hashCode()}
  * as a value (as opposed to identity) comparison.

@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
 /**
- * Query implementations.
+ * Query implementations. Supports querying classes and methods.
  *
  * @author crazybob@google.com (Bob Lee)
  */

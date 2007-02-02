@@ -15,16 +15,6 @@
  */
 
 /**
- * <i>Guice</i> (pronounced "juice"). A lightweight dependency injection
- * container. Features include:
- *
- * <ul>
- *   <li>constructor, method, and field injection</li>
- *   <li>static method and field injection</li>
- *   <li>circular reference support (including constructors if you depend upon
- *    interfaces)</li>
- *   <li>high performance</li>
- *   <li>externalize what needs to be and no more</li>
- * </ul>
+ * <i>Guice</i> (sounds like like "juice")
  */
 package com.google.inject;
