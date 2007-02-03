@@ -582,7 +582,7 @@ public final class ContainerBuilder extends SourceConsumer {
     /**
      * Binds to the given instance.
      */
-    BindingBuilder<T> to(T instance) {
+    public BindingBuilder<T> to(T instance) {
       ensureImplementationIsNotSet();
       this.factory = new ConstantFactory<T>(instance);
       in(Scopes.CONTAINER_SCOPE);

@@ -19,7 +19,8 @@
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/ContainerTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -189,10 +190,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ContainerBuilder.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ContainerBuilder.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="327" column="48" selection-start="10085" selection-end="10085" vertical-scroll-proportion="0.5912162">
+            <state line="584" column="45" selection-start="17858" selection-end="17858" vertical-scroll-proportion="0.33277026">
               <folding />
             </state>
           </provider>
@@ -201,7 +202,7 @@
       <file leaf-file-name="PerformanceComparison.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="0" selection-start="1758" selection-end="1758" vertical-scroll-proportion="-3.7145271">
+            <state line="47" column="0" selection-start="1758" selection-end="1758" vertical-scroll-proportion="0.028716216">
               <folding />
             </state>
           </provider>
@@ -210,16 +211,34 @@
       <file leaf-file-name="Queries.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="150" column="5" selection-start="3888" selection-end="3888" vertical-scroll-proportion="1.081081">
+            <state line="150" column="5" selection-start="3888" selection-end="3888" vertical-scroll-proportion="0.33952704">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AllTests.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="AllTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
           <provider selected="true" editor-type-id="text-editor">
             <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.25844595">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Container.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="69" column="17" selection-start="2010" selection-end="2010" vertical-scroll-proportion="0.028716216">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ContainerTest.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="196" column="0" selection-start="4337" selection-end="4337" vertical-scroll-proportion="0.4881757">
               <folding />
             </state>
           </provider>
@@ -727,7 +746,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="22" width="1916" height="1178" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="CVS" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
@@ -743,7 +762,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14623655" order="1" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3282876" order="8" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39962998" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39962998" order="2" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="6" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32639545" order="4" />
@@ -844,23 +863,9 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/guice.iws">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="907" column="11" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.029462738">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="595" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="100" column="23" selection-start="2670" selection-end="2670" vertical-scroll-proportion="1.5557432">
           <folding />
         </state>
       </provider>
@@ -921,30 +926,44 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="327" column="48" selection-start="10085" selection-end="10085" vertical-scroll-proportion="0.5912162">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="0" selection-start="1758" selection-end="1758" vertical-scroll-proportion="-3.7145271">
+        <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.25844595">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="150" column="5" selection-start="3888" selection-end="3888" vertical-scroll-proportion="1.081081">
+        <state line="150" column="5" selection-start="3888" selection-end="3888" vertical-scroll-proportion="0.33952704">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/PerformanceComparison.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.25844595">
+        <state line="47" column="0" selection-start="1758" selection-end="1758" vertical-scroll-proportion="0.028716216">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="69" column="17" selection-start="2010" selection-end="2010" vertical-scroll-proportion="0.028716216">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="196" column="0" selection-start="4337" selection-end="4337" vertical-scroll-proportion="0.4881757">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="584" column="45" selection-start="17858" selection-end="17858" vertical-scroll-proportion="0.33277026">
           <folding />
         </state>
       </provider>
