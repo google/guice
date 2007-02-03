@@ -63,7 +63,7 @@ public class ProxyFactory implements ConstructionProxyFactory {
   };
 
   /**
-   * Gets a factory for the given type. Uses the default constructor. Wraps
+   * Gets a factory for the given type. Uses the zero-arg constructor. Wraps
    * exceptions in {@code RuntimeException} including
    * {@code InvocationTargetException}.
    */

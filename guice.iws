@@ -19,28 +19,10 @@
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iml" afterPath="$PROJECT_DIR$/guice.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/build/cglib-nodep-2.1_3.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/package-info.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/util/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/aopalliance.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" afterPath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/IntegrationTest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/build/cglib-nodep-2.1_3.jar" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar" afterPath="" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -221,10 +203,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AllTests.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="AllTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="48" column="23" selection-start="1745" selection-end="1745" vertical-scroll-proportion="0.68881685">
+            <state line="43" column="38" selection-start="1526" selection-end="1526" vertical-scroll-proportion="0.55105346">
               <folding />
             </state>
           </provider>
@@ -389,11 +371,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProxyFactory.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ProxyFactory.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="13" selection-start="1553" selection-end="1553" vertical-scroll-proportion="0.3306321">
-              <folding />
+            <state line="65" column="58" selection-start="2171" selection-end="2171" vertical-scroll-proportion="0.4132901">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -430,7 +414,7 @@
       <file leaf-file-name="guice.iws" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/guice.iws">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="938" column="99" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+            <state line="973" column="38" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
               <folding />
             </state>
           </provider>
@@ -1167,7 +1151,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/guice.iws">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="938" column="99" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+        <state line="973" column="38" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
           <folding />
         </state>
       </provider>
@@ -1206,13 +1190,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="13" selection-start="1553" selection-end="1553" vertical-scroll-proportion="0.3306321">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="34" column="20" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.55105346">
@@ -1222,8 +1199,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="23" selection-start="1745" selection-end="1745" vertical-scroll-proportion="0.68881685">
+        <state line="43" column="38" selection-start="1526" selection-end="1526" vertical-scroll-proportion="0.55105346">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="65" column="58" selection-start="2171" selection-end="2171" vertical-scroll-proportion="0.4132901">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
