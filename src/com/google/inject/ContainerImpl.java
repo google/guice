@@ -581,6 +581,18 @@ class ContainerImpl implements Container {
     });
   }
 
+  public <T> T getInstance(TypeLiteral<T> type) {
+    return getFactory(Key.get(type)).get();
+  }
+
+  public <T> T getInstance(Class<T> type) {
+    return getFactory(Key.get(type)).get();
+  }
+
+  public <T> T getInstance(Key<T> key) {
+    return getFactory(key).get();
+  }
+
   public <T> Factory<T> getFactory(Class<T> type) {
     return getFactory(Key.get(type));
   }
@@ -593,7 +605,8 @@ class ContainerImpl implements Container {
     final InternalFactory<? extends T> factory = getFactory(null, key);
 
     if (factory == null) {
-      throw new ConfigurationException("Missing binding for " + key + ".");
+      throw new ConfigurationException("Missing binding to " +
+          AbstractErrorHandler.convert(key) + ".");
     }
 
     return new Factory<T>() {

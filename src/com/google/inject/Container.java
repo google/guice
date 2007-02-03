@@ -101,12 +101,27 @@ public interface Container {
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
   /**
-   * Gets factory bound to the given type.
+   * Gets the factory bound to the given type.
    */
   <T> Factory<T> getFactory(Class<T> type);
 
   /**
-   * Gets factory bound to the given type.
+   * Gets the factory bound to the given type.
    */
   <T> Factory<T> getFactory(TypeLiteral<T> type);
+
+  /**
+   * Gets an instance from the factory bound to the given type.
+   */
+  <T> T getInstance(TypeLiteral<T> type);
+
+  /**
+   * Gets an instance from the factory bound to the given type.
+   */
+  <T> T getInstance(Class<T> type);
+
+  /**
+   * Gets an instance from the factory bound to the given key.
+   */
+  <T> T getInstance(Key<T> key);
 }

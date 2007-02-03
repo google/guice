@@ -20,8 +20,8 @@
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.ipr" afterPath="$PROJECT_DIR$/guice.ipr" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -194,16 +194,25 @@
       <file leaf-file-name="ContainerBuilder.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="584" column="45" selection-start="17858" selection-end="17858" vertical-scroll-proportion="0.016236868">
+            <state line="654" column="32" selection-start="19807" selection-end="19807" vertical-scroll-proportion="0.33333334">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ContainerImpl.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ContainerImpl.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="583" column="29" selection-start="18511" selection-end="18511" vertical-scroll-proportion="0.36580706">
+            <state line="595" column="0" selection-start="18754" selection-end="18754" vertical-scroll-proportion="0.5931232">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorMessages.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="41" column="6" selection-start="1346" selection-end="1346" vertical-scroll-proportion="0.42215854">
               <folding />
             </state>
           </provider>
@@ -236,10 +245,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Container.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Container.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="69" column="17" selection-start="2010" selection-end="2010" vertical-scroll-proportion="0.39159504">
+            <state line="127" column="0" selection-start="3268" selection-end="3268" vertical-scroll-proportion="0.9025788">
               <folding />
             </state>
           </provider>
@@ -873,13 +882,6 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="0" selection-start="1540" selection-end="1540" vertical-scroll-proportion="0.3445946">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="34" column="20" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.028716216">
@@ -950,13 +952,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="69" column="17" selection-start="2010" selection-end="2010" vertical-scroll-proportion="0.39159504">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/ContainerTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="196" column="0" selection-start="4337" selection-end="4337" vertical-scroll-proportion="0.7325692">
@@ -966,14 +961,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="584" column="45" selection-start="17858" selection-end="17858" vertical-scroll-proportion="0.016236868">
+        <state line="654" column="32" selection-start="19807" selection-end="19807" vertical-scroll-proportion="0.33333334">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="41" column="6" selection-start="1346" selection-end="1346" vertical-scroll-proportion="0.42215854">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="583" column="29" selection-start="18511" selection-end="18511" vertical-scroll-proportion="0.36580706">
+        <state line="595" column="0" selection-start="18754" selection-end="18754" vertical-scroll-proportion="0.5931232">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/Container.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="127" column="0" selection-start="3268" selection-end="3268" vertical-scroll-proportion="0.9025788">
           <folding />
         </state>
       </provider>
