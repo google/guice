@@ -581,6 +581,14 @@ class ContainerImpl implements Container {
     });
   }
 
+  public <T> Factory<T> getFactory(Class<T> type) {
+    return getFactory(Key.get(type));
+  }
+
+  public <T> Factory<T> getFactory(TypeLiteral<T> type) {
+    return getFactory(Key.get(type));
+  }
+
   public <T> Factory<T> getFactory(final Key<T> key) {
     final InternalFactory<? extends T> factory = getFactory(null, key);
 
