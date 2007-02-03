@@ -149,7 +149,7 @@ public class Queries {
   }
 
   /**
-   * Returns a predicate which matches methods with matching return types.
+   * Returns a query which matches methods with matching return types.
    */
   public static Query<Method> returns(
       final Query<? super Class<?>> returnType) {
