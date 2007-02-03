@@ -29,7 +29,7 @@
     <mkdir dir="${build.dir}/dist"/>
     <jarjar jarfile="${build.dir}/dist/guice-${version}.jar">
       <fileset dir="${build.dir}/classes"/>
-      <zipfileset src="lib/build/cglib-nodep-2.1_3.jar"/>
+      <zipfileset src="lib/build/cglib-nodep-2.2_beta1.jar"/>
       <rule pattern="net.sf.cglib.**" result="com.google.inject.cglib.@1"/>
     </jarjar>
   </target>

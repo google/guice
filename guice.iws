@@ -261,7 +261,7 @@
       <file leaf-file-name="SourceConsumer.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/SourceConsumer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="11" selection-start="644" selection-end="644" vertical-scroll-proportion="0.5235008">
+            <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5235008">
               <folding />
             </state>
           </provider>
@@ -1219,7 +1219,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/SourceConsumer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="11" selection-start="644" selection-end="644" vertical-scroll-proportion="0.5235008">
+        <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5235008">
           <folding />
         </state>
       </provider>
