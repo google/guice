@@ -16,24 +16,23 @@
 
 package com.google.inject;
 
-import com.google.inject.util.Objects;
-import com.google.inject.util.Stopwatch;
-import com.google.inject.util.ToStringBuilder;
-import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.spi.ConstructionProxyFactory;
 import com.google.inject.spi.DefaultConstructionProxyFactory;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.SourceConsumer;
+import com.google.inject.util.Objects;
+import static com.google.inject.util.Objects.nonNull;
+import com.google.inject.util.Stopwatch;
+import com.google.inject.util.ToStringBuilder;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.logging.Logger;
 
 /**
@@ -56,7 +55,7 @@ import java.util.logging.Logger;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class ContainerBuilder {
+public final class ContainerBuilder extends SourceConsumer {
 
   private static final Logger logger =
       Logger.getLogger(ContainerBuilder.class.getName());
@@ -904,41 +903,6 @@ public final class ContainerBuilder {
     public void handle(Throwable t) {
       throw new ConfigurationException(t);
     }
-  }
-
-  final Set<String> skippedClassNames = new HashSet<String>(Arrays.asList(
-      ContainerBuilder.class.getName(),
-      AbstractModule.class.getName()
-  ));
-
-  /**
-   * Instructs the builder to skip the given class in the stack trace when
-   * determining the source of a binding. Use this to keep the container
-   * builder from logging utility methods as the sources of bindings (i.e.
-   * it will skip to the utility methods' callers instead).
-   *
-   * <p>Skipping only takes place after this method is called.
-   */
-  void skipSource(Class<?> clazz) {
-    skippedClassNames.add(clazz.getName());
-  }
-
-  /**
-   * Creates an object pointing to the current location within the
-   * configuration. If we run into a problem later, we'll be able to trace it
-   * back to the original source. Useful for debugging. The default
-   * implementation returns {@code ContainerBuilder}'s caller's {@code
-   * StackTraceElement}.
-   */
-  Object source() {
-    // Search up the stack until we find a class outside of this one.
-    for (final StackTraceElement element : new Throwable().getStackTrace()) {
-      String className = element.getClassName();
-      if (!skippedClassNames.contains(className)) {
-        return element;
-      }
-    }
-    throw new AssertionError();
   }
 
   /**
