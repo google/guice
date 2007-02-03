@@ -18,17 +18,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/SourceConsumer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iml" afterPath="$PROJECT_DIR$/guice.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/build/cglib-nodep-2.1_3.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/DefaultSourceProvider.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar" afterPath="" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/SourceProvider.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -218,10 +209,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ErrorHandlingTest.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="ErrorHandlingTest.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="65" column="15" selection-start="1732" selection-end="1732" vertical-scroll-proportion="1.4051864">
+            <state line="40" column="0" selection-start="1039" selection-end="1039" vertical-scroll-proportion="0.7163695">
               <folding />
             </state>
           </provider>
@@ -258,10 +249,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SourceConsumer.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SourceConsumer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/SourceConsumer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5235008">
+            <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5948136">
               <folding />
             </state>
           </provider>
@@ -298,33 +289,6 @@
         <entry file="jar://$PROJECT_DIR$/lib/aopalliance.jar!/org/aopalliance/intercept/Joinpoint.class">
           <provider selected="true" editor-type-id="text-editor">
             <state line="11" column="37" selection-start="313" selection-end="313" vertical-scroll-proportion="0.27552673">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Enhancer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/lib/build/cglib-src-2.1_3.jar!/net/sf/cglib/proxy/Enhancer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="589" column="23" selection-start="26039" selection-end="26039" vertical-scroll-proportion="0.33225283">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DuplicatesPredicate.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/lib/build/cglib-src-2.1_3.jar!/net/sf/cglib/core/DuplicatesPredicate.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="13" selection-start="712" selection-end="712" vertical-scroll-proportion="0.13776337">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ReflectUtils.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/lib/build/cglib-src-2.1_3.jar!/net/sf/cglib/core/ReflectUtils.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="344" column="23" selection-start="13257" selection-end="13257" vertical-scroll-proportion="0.5656402">
               <folding />
             </state>
           </provider>
@@ -424,7 +388,7 @@
       <file leaf-file-name="guice.iws" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/guice.iws">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="954" column="53" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+            <state line="965" column="45" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
               <folding />
             </state>
           </provider>
@@ -773,7 +737,7 @@
     </key>
   </component>
   <component name="RestoreUpdateTree" />
-  <component name="RunManager" selected="JUnit.AllTests">
+  <component name="RunManager" selected="Application.ErrorHandlingTest">
     <tempConfiguration default="false" name="ProxyFactoryTest" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <pattern value="com.google.inject.intercept.*" />
       <module name="guice" />
@@ -1000,7 +964,7 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15854311" order="0" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29517502" order="1" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.16236559" order="1" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.47492903" order="10" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.47492903" order="10" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="6" />
       <window_info id="Profile" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32890996" order="13" />
       <window_info id="Module Dependencies" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
@@ -1008,7 +972,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14623655" order="1" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3282876" order="8" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.40018922" order="2" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40018922" order="2" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="2" />
       <window_info id="File View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="6" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39978448" order="0" />
@@ -1101,7 +1065,7 @@
   </component>
   <component name="com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectRootMasterDetailsConfigurable" proportions="0.16666667" version="1">
     <option name="myPlainMode" value="false" />
-    <option name="myLastEditedConfigurable" value="cglib-nodep-2.1_3.jar" />
+    <option name="myLastEditedConfigurable" value="cglib-nodep-2.2_beta1.jar" />
   </component>
   <component name="com.intellij.profile.ui.ErrorOptionsConfigurable" proportions="0.16666667,0.60142857" version="1">
     <option name="myLastEditedConfigurable" value="Default" />
@@ -1178,13 +1142,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="65" column="15" selection-start="1732" selection-end="1732" vertical-scroll-proportion="1.4051864">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/Message.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="14" column="3" selection-start="0" selection-end="595" vertical-scroll-proportion="0.38573745">
@@ -1219,7 +1176,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/SourceConsumer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5235008">
+        <state line="28" column="24" selection-start="855" selection-end="855" vertical-scroll-proportion="0.5948136">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/ErrorHandlingTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="40" column="0" selection-start="1039" selection-end="1039" vertical-scroll-proportion="0.7163695">
           <folding />
         </state>
       </provider>
