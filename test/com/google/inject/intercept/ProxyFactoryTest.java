@@ -18,6 +18,7 @@ package com.google.inject.intercept;
 
 import com.google.inject.spi.ConstructionProxy;
 import static com.google.inject.intercept.Queries.*;
+import com.google.inject.Factory;
 
 import junit.framework.TestCase;
 
@@ -41,10 +42,9 @@ public class ProxyFactoryTest extends TestCase {
     builder.intercept(all(), all(), interceptor);
     ProxyFactory factory = builder.create();
 
-    ConstructionProxy<Simple> constructor =
-        factory.get(Simple.class.getDeclaredConstructor());
+    Factory<Simple> creator = factory.getFactory(Simple.class);
 
-    Simple simple = constructor.newInstance();
+    Simple simple = creator.get();
     simple.invoke();
     assertTrue(simple.invoked);
     assertTrue(interceptor.invoked);

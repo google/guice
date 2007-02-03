@@ -20,6 +20,7 @@ import com.google.inject.spi.ConstructionProxyFactory;
 import com.google.inject.spi.ConstructionProxy;
 import com.google.inject.spi.DefaultConstructionProxyFactory;
 import com.google.inject.util.ReferenceCache;
+import com.google.inject.Factory;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Callback;
@@ -60,6 +61,25 @@ public class ProxyFactory implements ConstructionProxyFactory {
       return createConstructionProxy(constructor);
     }
   };
+
+  /**
+   * Gets a factory for the given type. Uses the default constructor. Wraps
+   * exceptions in {@code RuntimeException} including
+   * {@code InvocationTargetException}.
+   */
+  public <T> Factory<T> getFactory(Class<T> type) throws NoSuchMethodException {
+    final ConstructionProxy<T> constructionProxy =
+        createConstructionProxy(type.getDeclaredConstructor());
+    return new Factory<T>() {
+      public T get() {
+        try {
+          return constructionProxy.newInstance();
+        } catch (InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+  }
 
   <T> ConstructionProxy<T> createConstructionProxy(Constructor<T> constructor) {
     Class<T> declaringClass = constructor.getDeclaringClass();

@@ -20,25 +20,25 @@
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iml" afterPath="$PROJECT_DIR$/guice.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/util/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/aopalliance.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/aopalliance.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" afterPath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/package-info.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/IntegrationTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/IntegrationTest.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -219,19 +219,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AllTests.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="AllTests.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
           <provider selected="true" editor-type-id="text-editor">
             <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.24797407">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="package-info.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/google/inject/spi/package-info.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="3" selection-start="604" selection-end="604" vertical-scroll-proportion="0.46839547">
               <folding />
             </state>
           </provider>
@@ -387,10 +378,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProxyFactoryTest.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ProxyFactoryTest.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="3" selection-start="595" selection-end="595" vertical-scroll-proportion="0.38573745">
+            <state line="34" column="20" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.55105346">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProxyFactory.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="47" column="13" selection-start="1553" selection-end="1553" vertical-scroll-proportion="0.3306321">
               <folding />
             </state>
           </provider>
@@ -428,7 +428,7 @@
       <file leaf-file-name="guice.iws" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/guice.iws">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="938" column="195" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+            <state line="938" column="91" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
               <folding />
             </state>
           </provider>
@@ -777,13 +777,13 @@
   </component>
   <component name="RestoreUpdateTree" />
   <component name="RunManager" selected="JUnit.AllTests">
-    <tempConfiguration default="false" name="IntegrationTest" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
+    <tempConfiguration default="false" name="ProxyFactoryTest" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <pattern value="com.google.inject.intercept.*" />
       <module name="guice" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="com.google.inject.intercept" />
-      <option name="MAIN_CLASS_NAME" value="com.google.inject.intercept.IntegrationTest" />
+      <option name="MAIN_CLASS_NAME" value="com.google.inject.intercept.ProxyFactoryTest" />
       <option name="METHOD_NAME" />
       <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" />
@@ -1110,13 +1110,6 @@
     <option name="myLastEditedConfigurable" value="Default" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="101" column="28" selection-start="2794" selection-end="2794" vertical-scroll-proportion="0.8265802">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/AbstractErrorHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="32" column="0" selection-start="1032" selection-end="1032" vertical-scroll-proportion="0.38573745">
@@ -1147,13 +1140,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.24797407">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="57" column="3" selection-start="1894" selection-end="1894" vertical-scroll-proportion="-5.593193">
@@ -1179,7 +1165,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/guice.iws">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="938" column="195" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+        <state line="938" column="91" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
           <folding />
         </state>
       </provider>
@@ -1218,9 +1204,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="13" selection-start="1553" selection-end="1553" vertical-scroll-proportion="0.3306321">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="3" selection-start="595" selection-end="595" vertical-scroll-proportion="0.38573745">
+        <state line="34" column="20" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.55105346">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/com/google/inject/AllTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="13" selection-start="1115" selection-end="1115" vertical-scroll-proportion="0.24797407">
           <folding />
         </state>
       </provider>
