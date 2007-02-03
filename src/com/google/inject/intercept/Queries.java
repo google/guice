@@ -30,7 +30,7 @@ public class Queries {
 
   private Queries() {}
 
-  static Query<?> ALL = new AbstractQuery<Object>() {
+  static Query<Object> ALL = new AbstractQuery<Object>() {
     public boolean matches(Object o) {
       return true;
     }
@@ -39,9 +39,8 @@ public class Queries {
   /**
    * Returns a query which matches any input.
    */
-  @SuppressWarnings({"unchecked"})
-  public static <T> Query<T> all() {
-    return (Query<T>) ALL;
+  public static Query<Object> all() {
+    return ALL;
   }
 
   /**

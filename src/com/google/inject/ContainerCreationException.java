@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Thrown when errors occurs while creating a {@link Container}. Includes a
+ * Thrown when errors occur while creating a {@link Container}. Includes a
  * list of encountered errors. Typically, a client should catch this exception,
  * log it, and stop execution.
  *
