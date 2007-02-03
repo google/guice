@@ -20,13 +20,19 @@ import static com.google.inject.Scopes.CONTAINER_SCOPE;
 
 import junit.framework.TestCase;
 
-import java.util.List;
-import java.util.ArrayList;
-
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ContainerTest extends TestCase {
+
+  public void testFactoryMethods() {
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.bind(Widget.class).in(Scopes.CONTAINER_SCOPE);
+
+
+  }
+
+  static class Widget {}
 
   public void testInjection() throws ContainerCreationException {
     Container container = createFooContainer();

@@ -64,6 +64,13 @@ public abstract class AbstractModule implements Module {
   protected abstract void configure();
 
   /**
+   * Gets the builder.
+   */
+  protected ContainerBuilder builder() {
+    return builder;
+  }
+
+  /**
    * @see ContainerBuilder#put(String, Scope)
    */
   protected void put(String name, Scope scope) {
