@@ -134,9 +134,9 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#apply(Module)
+   * @see ContainerBuilder#install(Module)
    */
-  protected void apply(Module module) {
-    builder.apply(module);
+  protected void install(Module module) {
+    builder.install(module);
   }
 }

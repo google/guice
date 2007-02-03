@@ -97,7 +97,7 @@ public class PerformanceComparison {
     {
       ContainerBuilder builder = new ContainerBuilder();
 
-      builder.apply(new AbstractModule() {
+      builder.install(new AbstractModule() {
         protected void configure() {
           bind(Tee.class).to(TeeImpl.class);
           bind(Bar.class).to(BarImpl.class);

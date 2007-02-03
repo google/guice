@@ -261,7 +261,7 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Applies the given module to this builder.
    */
-  public void apply(Module module) {
+  public void install(Module module) {
     module.configure(this);    
   }
 

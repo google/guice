@@ -62,7 +62,7 @@ public class ContainerTest extends TestCase {
   private Container createFooContainer() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
 
-    builder.apply(new AbstractModule() {
+    builder.install(new AbstractModule() {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
