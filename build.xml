@@ -25,7 +25,7 @@
   <target name="jar" depends="compile"
        description="Build jar.">
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" 
-      classpath="lib/build/jarjar-0.7.jar"/>
+      classpath="lib/build/jarjar-0.8.jar"/>
     <mkdir dir="${build.dir}/dist"/>
     <jarjar jarfile="${build.dir}/dist/guice-${version}.jar">
       <fileset dir="${build.dir}/classes"/>
@@ -81,6 +81,23 @@
         <pathelement location="${build.dir}/test"/>
         <pathelement location="${build.dir}/classes"/>
         <path refid="compile.classpath"/>
+      </classpath>
+      <arg value="com.google.inject.AllTests"/>    
+    </java>
+  </target>
+  
+  <target name="test.dist"
+      depends="jar, test.compile"
+      description="Execute JUnit tests against distribution jar.">
+    <java fork="true" 
+        classname="junit.textui.TestRunner"
+        failonerror="true"
+        taskname="junit">
+      <classpath>
+        <pathelement location="${build.dir}/test"/>
+        <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
+        <pathelement location="lib/aopalliance.jar"/>
+        <pathelement location="lib/build/junit.jar"/>
       </classpath>
       <arg value="com.google.inject.AllTests"/>    
     </java>
