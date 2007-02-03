@@ -25,14 +25,25 @@ import junit.framework.TestCase;
  */
 public class ContainerTest extends TestCase {
 
-  public void testFactoryMethods() {
+  public void testFactoryMethods() throws ContainerCreationException {
+    Singleton singleton = new Singleton();
+
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(Widget.class).in(Scopes.CONTAINER_SCOPE);
+    builder.bind(Singleton.class).to(singleton);
+    Container container = builder.create(true);
 
-
+    assertSame(singleton,
+        container.getFactory(Key.get(Singleton.class)).get());
+    assertSame(singleton, container.getFactory(Singleton.class).get());
+    assertSame(singleton,
+        container.getFactory(new TypeLiteral<Singleton>() {}).get());
+    assertSame(singleton, container.getInstance(Key.get(Singleton.class)));
+    assertSame(singleton, container.getInstance(Singleton.class));
+    assertSame(singleton,
+        container.getInstance(new TypeLiteral<Singleton>() {}));
   }
 
-  static class Widget {}
+  static class Singleton {}
 
   public void testInjection() throws ContainerCreationException {
     Container container = createFooContainer();
