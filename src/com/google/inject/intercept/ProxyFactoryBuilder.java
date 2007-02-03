@@ -34,10 +34,16 @@ public class ProxyFactoryBuilder {
   /**
    * Applies the given method interceptor to the methods matched by the class
    * and method queries.
+   *
+   * @param classQuery matches classes the interceptor should apply to. For
+   *  example: {@code only(Runnable.class)}.
+   * @param methodQuery matches methods the interceptor should apply to. For
+   *  example: {@code annotatedWith(Transactional.class)}.
+   * @param interceptors to apply
    */
-  public ProxyFactoryBuilder intercept(Query<? super Class> classQuery,
-      Query<? super Method> methodQuery, MethodInterceptor interceptor) {
-    methodAspects.add(new MethodAspect(classQuery, methodQuery, interceptor));
+  public ProxyFactoryBuilder intercept(Query<? super Class<?>> classQuery,
+      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
+    methodAspects.add(new MethodAspect(classQuery, methodQuery, interceptors));
     return this;
   }
 

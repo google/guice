@@ -315,6 +315,8 @@ public final class ContainerBuilder {
     createBindings(preload, preloaders);
     createLinkedBindings();
 
+    container.index();
+
     stopwatch.resetAndLog(logger, "Binding creation");
 
     // Run validations.

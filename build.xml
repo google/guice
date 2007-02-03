@@ -93,6 +93,7 @@
         <pathelement location="${src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
+      <link href="http://aopalliance.sourceforge.net/doc"/>
     </javadoc>
   </target>
 

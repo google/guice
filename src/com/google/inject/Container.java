@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import java.util.Map;
+import java.util.List;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
@@ -93,4 +94,9 @@ public interface Container {
    * Gets a binding for the given key.
    */
   <T> Binding<T> getBinding(Key<T> key);
+
+  /**
+   * Finds all bindings to the given type.
+   */
+  <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 }

@@ -96,7 +96,7 @@ public class ProxyFactory implements ConstructionProxyFactory {
       for (MethodInterceptorsPair methodInterceptorsPair
           : methodInterceptorsPairs) {
         if (methodAspect.matches(methodInterceptorsPair.method)) {
-          methodInterceptorsPair.add(methodAspect.interceptor());
+          methodInterceptorsPair.addAll(methodAspect.interceptors());
           anyMatched = true;
         }
       }
@@ -107,6 +107,7 @@ public class ProxyFactory implements ConstructionProxyFactory {
 
     // Create callbacks.
     Callback[] callbacks = new Callback[methods.size()];
+    // noinspection unchecked
     Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
     for (int i = 0; i < methods.size(); i++) {
       MethodInterceptorsPair methodInterceptorsPair =
@@ -167,11 +168,11 @@ public class ProxyFactory implements ConstructionProxyFactory {
       this.method = method;
     }
 
-    void add(MethodInterceptor interceptor) {
-      if (interceptors == null) {
-        interceptors = new ArrayList<MethodInterceptor>();
+    void addAll(List<MethodInterceptor> interceptors) {
+      if (this.interceptors == null) {
+        this.interceptors = new ArrayList<MethodInterceptor>();
       }
-      interceptors.add(interceptor);
+      this.interceptors.addAll(interceptors);
     }
 
     boolean hasInterceptors() {

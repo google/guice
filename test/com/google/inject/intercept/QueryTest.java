@@ -16,13 +16,7 @@
 
 package com.google.inject.intercept;
 
-import static com.google.inject.intercept.Queries.annotatedWith;
-import static com.google.inject.intercept.Queries.any;
-import static com.google.inject.intercept.Queries.equalTo;
-import static com.google.inject.intercept.Queries.inPackage;
-import static com.google.inject.intercept.Queries.not;
-import static com.google.inject.intercept.Queries.sameAs;
-import static com.google.inject.intercept.Queries.subclassesOf;
+import static com.google.inject.intercept.Queries.*;
 
 import junit.framework.TestCase;
 
@@ -35,16 +29,16 @@ import java.lang.annotation.RetentionPolicy;
 public class QueryTest extends TestCase {
 
   public void testAny() {
-    assertTrue(any().matches(null));
+    assertTrue(all().matches(null));
   }
 
   public void testNot() {
-    assertFalse(not(any()).matches(null));
+    assertFalse(not(all()).matches(null));
   }
 
   public void testAnd() {
-    assertTrue(any().and(any()).matches(null));
-    assertFalse(any().and(not(any())).matches(null));
+    assertTrue(all().and(all()).matches(null));
+    assertFalse(all().and(not(all())).matches(null));
   }
 
   public void testAnnotatedWith() {
@@ -59,15 +53,15 @@ public class QueryTest extends TestCase {
     assertFalse(subclassesOf(Runnable.class).matches(Object.class));
   }
 
-  public void testEqualTo() {
-    assertTrue(equalTo(1000).matches(new Integer(1000)));
-    assertFalse(equalTo(1).matches(new Integer(1000)));
+  public void testOnly() {
+    assertTrue(only(1000).matches(new Integer(1000)));
+    assertFalse(only(1).matches(new Integer(1000)));
   }
 
   public void testSameAs() {
     Object o = new Object();
-    assertTrue(sameAs(o).matches(o));
-    assertFalse(sameAs(o).matches(new Object()));
+    assertTrue(only(o).matches(o));
+    assertFalse(only(o).matches(new Object()));
   }
 
   public void testInPackage() {

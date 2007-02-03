@@ -16,11 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.intercept.ProxyFactoryTest;
+import com.google.inject.intercept.QueryTest;
+import com.google.inject.intercept.IntegrationTest;
 import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
-import com.google.inject.intercept.QueryTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -46,6 +48,9 @@ public class AllTests {
     suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(QueryTest.class);
+
+    suite.addTestSuite(ProxyFactoryTest.class);
+    suite.addTestSuite(IntegrationTest.class);
 
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(ReferenceMapTest.class);

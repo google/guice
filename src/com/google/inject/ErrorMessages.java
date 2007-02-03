@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import java.lang.reflect.Member;
+import java.util.List;
+
 /**
  * Error message templates.
  *
@@ -23,8 +26,23 @@ package com.google.inject;
  */
 class ErrorMessages {
 
-  static final String MISSING_BINDING =
-      "Binding to %2$s not found, but %1$s requires it.";
+  private static final String MISSING_BINDING =
+      "Binding to %s not found, but %s requires it. No bindings to that"
+          + " type were found.";
+
+  private static final String MISSING_BINDING_BUT_OTHERS_EXIST =
+      "Binding to %s not found, but %s requires it. The names of other"
+          + " bindings to that type include: %s";
+
+  static void handleMissingBinding(ErrorHandler errorHandler, Member member,
+      Key<?> key, List<String> otherNames) {
+    if (otherNames.isEmpty()) {
+      errorHandler.handle(MISSING_BINDING, key, member);
+    } else {
+      errorHandler.handle(MISSING_BINDING_BUT_OTHERS_EXIST,
+          key, member, otherNames);
+    }
+  }
 
   static final String CONSTRUCTOR_RULES = "Classes must have either one (and"
       + " only one) constructor annotated with @Inject or a zero-argument"

@@ -31,8 +31,8 @@ import java.lang.reflect.ParameterizedType;
  * you can create an empty anonymous inner class:
  *
  * <pre>
- * TypeLiteral<List<String>> listOfString =
- *   new TypeLiteral<List<String>>() {};
+ * TypeLiteral&lt;List&lt;String>> listOfString =
+ *   new TypeLiteral&lt;List&lt;String>>() {};
  * </pre>
  *
  * <p>Assumes {@code Type} implements {@code equals()} and {@code hashCode()}

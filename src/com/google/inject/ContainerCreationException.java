@@ -36,8 +36,12 @@ public class ContainerCreationException extends Exception {
    * Constructs a new exception for the given errors.
    */
   public ContainerCreationException(Collection<Message> errorMessages) {
-    super(createErrorMessage(errorMessages));
+    super();
     this.errorMessages = errorMessages;
+  }
+
+  public String getMessage() {
+    return createErrorMessage(errorMessages);
   }
 
   private static String createErrorMessage(Collection<Message> errorMessages) {

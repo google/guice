@@ -84,6 +84,8 @@ class ContainerImpl implements Container {
 
   final ConstructionProxyFactory constructionProxyFactory;
   final Map<Key<?>, Binding<?>> bindings;
+  final Map<TypeLiteral<?>, List<Binding<?>>> bindingsByType =
+      new HashMap<TypeLiteral<?>, List<Binding<?>>>();
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
@@ -91,6 +93,42 @@ class ContainerImpl implements Container {
       Map<Key<?>, Binding<?>> bindings) {
     this.constructionProxyFactory = constructionProxyFactory;
     this.bindings = bindings;
+  }
+
+  /**
+   * Indexes bindings by type.
+   */
+  void index() {
+    for (Binding<?> binding : bindings.values()) {
+      index(binding);
+    }
+  }
+
+  <T> void index(Binding<T> binding) {
+    TypeLiteral<T> type = binding.getKey().getType();
+    List<Binding<?>> bindings = bindingsByType.get(type);
+    if (bindings == null) {
+      bindings = new ArrayList<Binding<?>>();
+      bindingsByType.put(type, bindings);
+    }
+    bindings.add(binding);
+  }
+
+  @SuppressWarnings({"unchecked"})
+  public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
+    List bindings = bindingsByType.get(type);
+    if (bindings == null) {
+      return Collections.emptyList();
+    }
+    return (List<Binding<T>>) bindings;
+  }
+
+  <T> List<String> getNamesOfBindingsTo(TypeLiteral<T> type) {
+    List<String> names = new ArrayList<String>();
+    for (Binding<T> binding : findBindingsByType(type)) {
+      names.add(binding.getKey().getName());
+    }
+    return names;
   }
 
   void withErrorHandler(ErrorHandler errorHandler, Runnable runnable) {
@@ -135,7 +173,8 @@ class ContainerImpl implements Container {
           }
         };
       } catch (ConfigurationException e) {
-        errorHandler.handle(ErrorMessages.MISSING_BINDING, member, key);
+        ErrorMessages.handleMissingBinding(errorHandler, member, key,
+            getNamesOfBindingsTo(key.getType()));
         return invalidFactory();
       }
     }
@@ -312,7 +351,7 @@ class ContainerImpl implements Container {
     return Modifier.isStatic(member.getModifiers());
   }
 
-  static class FieldInjector implements Injector {
+  class FieldInjector implements Injector {
 
     final Field field;
     final InternalFactory<?> factory;
@@ -614,7 +653,7 @@ class ContainerImpl implements Container {
     void inject(InternalContext context, Object o);
   }
 
-  static class MissingDependencyException extends Exception {
+  class MissingDependencyException extends Exception {
 
     final Key<?> key;
     final Member member;
@@ -625,7 +664,8 @@ class ContainerImpl implements Container {
     }
 
     void handle(ErrorHandler errorHandler) {
-      errorHandler.handle(ErrorMessages.MISSING_BINDING, member, key);
+      ErrorMessages.handleMissingBinding(errorHandler, member, key,
+          getNamesOfBindingsTo(key.getType()));
     }
   }
 

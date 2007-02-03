@@ -30,7 +30,7 @@ public class Queries {
 
   private Queries() {}
 
-  static Query<?> ANY = new AbstractQuery<Object>() {
+  static Query<?> ALL = new AbstractQuery<Object>() {
     public boolean matches(Object o) {
       return true;
     }
@@ -40,8 +40,8 @@ public class Queries {
    * Returns a query which matches any input.
    */
   @SuppressWarnings({"unchecked"})
-  public static <T> Query<T> any() {
-    return (Query<T>) ANY;
+  public static <T> Query<T> all() {
+    return (Query<T>) ALL;
   }
 
   /**
@@ -86,11 +86,11 @@ public class Queries {
   /**
    * Returns a query which matches objects equal to the given object.
    */
-  public static <T> Query<T> equalTo(final T t) {
-    Objects.nonNull(t, "t");
-    return new AbstractQuery<T>() {
-      public boolean matches(T other) {
-        return t.equals(other);
+  public static Query<Object> only(final Object o) {
+    Objects.nonNull(o, "o");
+    return new AbstractQuery<Object>() {
+      public boolean matches(Object other) {
+        return o.equals(other);
       }
     };
   }
@@ -98,11 +98,11 @@ public class Queries {
   /**
    * Returns a query which matches only the given object.
    */
-  public static <T> Query<T> sameAs(final T t) {
-    Objects.nonNull(t, "t");
-    return new AbstractQuery<T>() {
-      public boolean matches(T other) {
-        return t == other;
+  public static Query<Object> identicalTo(final Object o) {
+    Objects.nonNull(o, "o");
+    return new AbstractQuery<Object>() {
+      public boolean matches(Object other) {
+        return o == other;
       }
     };
   }
