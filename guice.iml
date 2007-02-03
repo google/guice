@@ -48,7 +48,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="cglib-nodep-2.1_3" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -56,6 +55,17 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/build/cglib-nodep-2.1_3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/lib/build/cglib-src-2.1_3.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntryProperties />

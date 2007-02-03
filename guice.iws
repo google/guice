@@ -19,26 +19,28 @@
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iml" afterPath="$PROJECT_DIR$/guice.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/build/cglib-nodep-2.1_3.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/InterceptorStackCallback.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/Queries.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/ProxyFactoryTest.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/lib/cglib-nodep-2.1_3.jar" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ErrorMessages.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/spi/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/util/package-info.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/aopalliance.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactoryBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" afterPath="$PROJECT_DIR$/test/com/google/inject/AllTests.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/aopalliance.jar" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerImpl.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerCreationException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/ProxyFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/guice.iws" afterPath="$PROJECT_DIR$/guice.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" afterPath="$PROJECT_DIR$/src/com/google/inject/TypeLiteral.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/Container.java" afterPath="$PROJECT_DIR$/src/com/google/inject/Container.java" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/package-info.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" afterPath="$PROJECT_DIR$/src/com/google/inject/ContainerBuilder.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/QueryTest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/IntegrationTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" afterPath="$PROJECT_DIR$/src/com/google/inject/intercept/MethodAspect.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/com/google/inject/intercept/IntegrationTest.java" />
     </list>
   </component>
   <component name="ChangeListSynchronizer" />
@@ -428,7 +430,7 @@
       <file leaf-file-name="guice.iws" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/guice.iws">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="938" column="100" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+            <state line="938" column="99" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
               <folding />
             </state>
           </provider>
@@ -1104,7 +1106,7 @@
   </component>
   <component name="com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectRootMasterDetailsConfigurable" proportions="0.16666667" version="1">
     <option name="myPlainMode" value="false" />
-    <option name="myLastEditedConfigurable" value="guice" />
+    <option name="myLastEditedConfigurable" value="cglib-nodep-2.1_3.jar" />
   </component>
   <component name="com.intellij.profile.ui.ErrorOptionsConfigurable" proportions="0.16666667,0.60142857" version="1">
     <option name="myLastEditedConfigurable" value="Default" />
@@ -1165,7 +1167,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/guice.iws">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="938" column="100" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
+        <state line="938" column="99" selection-start="47825" selection-end="47825" vertical-scroll-proportion="0.3936877">
           <folding />
         </state>
       </provider>
