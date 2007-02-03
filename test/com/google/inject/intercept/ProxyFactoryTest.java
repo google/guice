@@ -39,7 +39,7 @@ public class ProxyFactoryTest extends TestCase {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
-    builder.intercept(all(), all(), interceptor);
+    builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
     Factory<Simple> creator = factory.getFactory(Simple.class);
@@ -129,7 +129,7 @@ public class ProxyFactoryTest extends TestCase {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
-    builder.intercept(all(), all(), interceptor);
+    builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<A> constructor =
@@ -145,7 +145,7 @@ public class ProxyFactoryTest extends TestCase {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
-    builder.intercept(not(all()), not(all()), interceptor);
+    builder.intercept(not(any()), not(any()), interceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<A> constructor =
@@ -169,7 +169,7 @@ public class ProxyFactoryTest extends TestCase {
     CountingInterceptor countingInterceptor = new CountingInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
-    builder.intercept(all(), all(), doubleInterceptor, countingInterceptor);
+    builder.intercept(any(), any(), doubleInterceptor, countingInterceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<Counter> constructor =

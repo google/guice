@@ -31,8 +31,8 @@ class ErrorMessages {
           + " type were found.";
 
   private static final String MISSING_BINDING_BUT_OTHERS_EXIST =
-      "Binding to %s not found, but %s requires it. The names of other"
-          + " bindings to that type include: %s";
+      "Binding to %s not found, but %s requires it. Names of other"
+          + " bindings to that type: %s";
 
   static void handleMissingBinding(ErrorHandler errorHandler, Member member,
       Key<?> key, List<String> otherNames) {

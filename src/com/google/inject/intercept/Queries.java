@@ -20,6 +20,7 @@ import com.google.inject.util.Objects;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 
 /**
  * Query implementations. Supports querying classes and methods.
@@ -30,17 +31,21 @@ public class Queries {
 
   private Queries() {}
 
-  static Query<Object> ALL = new AbstractQuery<Object>() {
+  static Query<Object> ANY = new AbstractQuery<Object>() {
     public boolean matches(Object o) {
       return true;
+    }
+
+    public String toString() {
+      return "any()";
     }
   };
 
   /**
    * Returns a query which matches any input.
    */
-  public static Query<Object> all() {
-    return ALL;
+  public static Query<Object> any() {
+    return ANY;
   }
 
   /**
@@ -51,6 +56,10 @@ public class Queries {
     return new AbstractQuery<T>() {
       public boolean matches(T t) {
         return !p.matches(t);
+      }
+
+      public String toString() {
+        return "not(" + p + ")";
       }
     };
   }
@@ -67,17 +76,26 @@ public class Queries {
         Annotation annotation = element.getAnnotation(annotationType);
         return annotation != null;
       }
+
+      public String toString() {
+        return "annotatedWith(" + annotationType.getSimpleName() + ".class)";
+      }
     };
   }
 
   /**
-   * Returns a query which matches subclasses of the given type.
+   * Returns a query which matches subclasses of the given type (as well as
+   * the given type).
    */
   public static Query<Class> subclassesOf(final Class<?> superclass) {
     Objects.nonNull(superclass, "superclass");
     return new AbstractQuery<Class>() {
       public boolean matches(Class subclass) {
         return superclass.isAssignableFrom(subclass);
+      }
+
+      public String toString() {
+        return "subclassesOf(" + superclass.getSimpleName() + ".class)";
       }
     };
   }
@@ -91,6 +109,10 @@ public class Queries {
       public boolean matches(Object other) {
         return o.equals(other);
       }
+
+      public String toString() {
+        return "only(" + o + ")";
+      }
     };
   }
 
@@ -102,6 +124,10 @@ public class Queries {
     return new AbstractQuery<Object>() {
       public boolean matches(Object other) {
         return o == other;
+      }
+
+      public String toString() {
+        return "identicalTo(" + o + ")";
       }
     };
   }
@@ -115,21 +141,27 @@ public class Queries {
       public boolean matches(Class c) {
         return c.getPackage().equals(p);
       }
+
+      public String toString() {
+        return "package(" + p.getName() + ")";
+      }
     };
   }
 
-// Can't get the types to work.
-//
-//  /**
-//   * Returns a predicate which matches methods with matching return types.
-//   */
-//  public static Query<Method> returns(
-//      final Query<? super Class<?>> returnType) {
-//    Objects.nonNull(returnType, "return type query");
-//    return new AbstractQuery<Method>() {
-//      public boolean matches(Method m) {
-//        return returnType.matches(m.getReturnType());
-//      }
-//    };
-//  }
+  /**
+   * Returns a predicate which matches methods with matching return types.
+   */
+  public static Query<Method> returns(
+      final Query<? super Class<?>> returnType) {
+    Objects.nonNull(returnType, "return type query");
+    return new AbstractQuery<Method>() {
+      public boolean matches(Method m) {
+        return returnType.matches(m.getReturnType());
+      }
+
+      public String toString() {
+        return "returns(" + returnType + ")";
+      }
+    };
+  }
 }

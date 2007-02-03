@@ -314,9 +314,11 @@ public final class ContainerBuilder extends SourceConsumer {
     createBindings(preload, preloaders);
     createLinkedBindings();
 
+    stopwatch.resetAndLog(logger, "Binding creation");
+
     container.index();
 
-    stopwatch.resetAndLog(logger, "Binding creation");
+    stopwatch.resetAndLog(logger, "Binding indexing");
 
     // Run validations.
     for (Validation validation : validations) {

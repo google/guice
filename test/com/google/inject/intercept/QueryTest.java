@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -29,16 +30,16 @@ import java.lang.annotation.RetentionPolicy;
 public class QueryTest extends TestCase {
 
   public void testAny() {
-    assertTrue(all().matches(null));
+    assertTrue(any().matches(null));
   }
 
   public void testNot() {
-    assertFalse(not(all()).matches(null));
+    assertFalse(not(any()).matches(null));
   }
 
   public void testAnd() {
-    assertTrue(all().and(all()).matches(null));
-    assertFalse(all().and(not(all())).matches(null));
+    assertTrue(any().and(any()).matches(null));
+    assertFalse(any().and(not(any())).matches(null));
   }
 
   public void testAnnotatedWith() {
@@ -71,12 +72,13 @@ public class QueryTest extends TestCase {
         .matches(Object.class));
   }
 
-//  public void testReturns() throws NoSuchMethodException {
-//    Predicate<Class<String>> returnTypePredicate = sameAs(String.class);
-//    Predicate<Method> predicate = returns(returnTypePredicate);
-//    assertTrue(predicate.matches(
-//        Object.class.getMethod("toString")));
-//  }
+  public void testReturns() throws NoSuchMethodException {
+    Query<Method> predicate = returns(only(String.class));
+    assertTrue(predicate.matches(
+        Object.class.getMethod("toString")));
+    assertFalse(predicate.matches(
+        Object.class.getMethod("hashCode")));
+  }
   
   static abstract class MyRunnable implements Runnable {}
   

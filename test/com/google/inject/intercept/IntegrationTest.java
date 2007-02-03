@@ -35,7 +35,7 @@ public class IntegrationTest extends TestCase {
   public void testIntegration() throws ContainerCreationException {
     CountingInterceptor counter = new CountingInterceptor();
     ProxyFactoryBuilder proxyFactoryBuilder = new ProxyFactoryBuilder();
-    proxyFactoryBuilder.intercept(all(), all(), counter);
+    proxyFactoryBuilder.intercept(any(), any(), counter);
     ProxyFactory proxyFactory = proxyFactoryBuilder.create();
 
     ContainerBuilder containerBuilder = new ContainerBuilder(proxyFactory);

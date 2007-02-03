@@ -34,7 +34,8 @@ public class DefaultSourceProvider implements SourceProvider {
   final Set<String> skippedClassNames = new HashSet<String>(Arrays.asList(
       ContainerBuilder.class.getName(),
       AbstractModule.class.getName(),
-      DefaultSourceProvider.class.getName()
+      DefaultSourceProvider.class.getName(),
+      SourceConsumer.class.getName()
   ));
 
   /**
@@ -45,7 +46,7 @@ public class DefaultSourceProvider implements SourceProvider {
    *
    * <p>Skipping only takes place after this method is called.
    */
-  public void skipSource(Class<?> clazz) {
+  public void skip(Class<?> clazz) {
     skippedClassNames.add(clazz.getName());
   }
 
