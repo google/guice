@@ -30,7 +30,7 @@ import java.util.Properties;
  * <pre>
  * public class MyModule extends AbstractModule {
  *   protected void configure() {
- *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER_SCOPE);
+ *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER);
  *     bind(BarImpl.class);
  *     link(Bar.class).to(BarImpl.class);
  *     bind("port").to(8080);
@@ -71,10 +71,10 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#put(String, Scope)
+   * @see ContainerBuilder#scope(String, Scope)
    */
   protected void put(String name, Scope scope) {
-    builder.put(name, scope);
+    builder.scope(name, scope);
   }
 
   /**

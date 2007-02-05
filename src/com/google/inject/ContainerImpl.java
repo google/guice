@@ -581,6 +581,22 @@ class ContainerImpl implements Container {
     });
   }
 
+  public <T> T getInstance(TypeLiteral<T> type, String name) {
+    return getFactory(Key.get(type, name)).get();
+  }
+
+  public <T> T getInstance(Class<T> type, String name) {
+    return getFactory(Key.get(type, name)).get();
+  }
+
+  public <T> Factory<T> getFactory(Class<T> type, String name) {
+    return getFactory(Key.get(type, name));
+  }
+
+  public <T> Factory<T> getFactory(TypeLiteral<T> type, String name) {
+    return getFactory(Key.get(type, name));
+  }
+
   public <T> T getInstance(TypeLiteral<T> type) {
     return getFactory(Key.get(type)).get();
   }

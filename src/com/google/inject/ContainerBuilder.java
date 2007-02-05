@@ -24,8 +24,10 @@ import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
+import static com.google.inject.Scopes.*;
 
 import java.lang.reflect.Member;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -96,13 +98,6 @@ public final class ContainerBuilder extends SourceConsumer {
 
   static final String UNKNOWN_SOURCE = "[unknown source]";
 
-  static final Scope DEFAULT_SCOPE = new Scope() {
-    public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
-      // We special case optimize default scope, so this never actually runs.
-      throw new AssertionError();
-    }
-  };
-
   final ConstructionProxyFactory constructionProxyFactory;
 
   /**
@@ -111,8 +106,8 @@ public final class ContainerBuilder extends SourceConsumer {
    * @param constructionProxyFactory to use when constructing objects
    */
   public ContainerBuilder(ConstructionProxyFactory constructionProxyFactory) {
-    put(Scopes.DEFAULT_SCOPE, DEFAULT_SCOPE);
-    put(Scopes.CONTAINER_SCOPE, ContainerScope.INSTANCE);
+    scope(DEFAULT);
+    scope(CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
@@ -156,12 +151,26 @@ public final class ContainerBuilder extends SourceConsumer {
   }
 
   /**
-   * Maps a {@link Scope} instance to a given scope name. Scopes should be
-   * mapped before used in bindings. @{@link Scoped#value()} references this
-   * name.
+   * Adds a new scope. Maps a {@link Scope} instance to a given scope name.
+   * Scopes should be mapped before used in bindings. {@link Scoped#value()}
+   * references this name.
    */
-  public void put(String name, Scope scope) {
+  public void scope(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {
+      addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
+    } else {
+      scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
+    }
+  }
+
+  /**
+   * Adds a new scope. Maps an enum-based {@link Scope} instance using the
+   * enum's name as the scope name. Scopes should be mapped before used in
+   * bindings. {@link Scoped#value()} references this name.
+   */
+  public <E extends Enum<E> & Scope> void scope(E scope) {
+    String name = scope.name();
+    if (scopes.containsKey(nonNull(scope.name(), "name"))) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
     } else {
       scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
@@ -420,7 +429,7 @@ public final class ContainerBuilder extends SourceConsumer {
     putBinding(binding);
 
     // Register to preload if necessary.
-    if (builder.isInContainerScope()) {
+    if (builder.isContainerScoped()) {
       if (preload || builder.shouldPreload()) {
         preloaders.add(new BindingPreloader(key, factory));
       }
@@ -552,9 +561,17 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     private void setScopeFromType(Class<?> implementation) {
-      Scoped scoped = implementation.getAnnotation(Scoped.class);
-      if (scoped != null) {
-        in(scoped.value());
+      for (Annotation annotation : implementation.getAnnotations()) {
+        Class<? extends Annotation> annotationType =
+            annotation.annotationType();
+        if (annotationType == Scoped.class) {
+          in(((Scoped) annotation).value());
+        } else {
+          Scoped scoped = annotationType.getAnnotation(Scoped.class);
+          if (scoped != null) {
+            in(scoped.value());
+          }
+        }
       }
     }
 
@@ -585,7 +602,7 @@ public final class ContainerBuilder extends SourceConsumer {
     public BindingBuilder<T> to(T instance) {
       ensureImplementationIsNotSet();
       this.factory = new ConstantFactory<T>(instance);
-      in(Scopes.CONTAINER_SCOPE);
+      in(CONTAINER);
       return this;
     }
 
@@ -609,7 +626,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     /**
      * Specifies the scope. References the name passed to {@link
-     * ContainerBuilder#put(String, Scope)}.
+     * ContainerBuilder#scope(String, Scope)}.
      */
     public BindingBuilder<T> in(String scopeName) {
       ensureScopeNotSet();
@@ -638,7 +655,7 @@ public final class ContainerBuilder extends SourceConsumer {
      * Specifies container scope (i.e.&nbsp;one instance per container).
      */
     public BindingBuilder<T> inContainerScope() {
-      return in(Scopes.CONTAINER_SCOPE);
+      return in(CONTAINER);
     }
 
     private void ensureScopeNotSet() {
@@ -668,7 +685,8 @@ public final class ContainerBuilder extends SourceConsumer {
         to(key.getType());
       }
 
-      if (scope == null || scope == DEFAULT_SCOPE) {
+      // Default scope does nothing.
+      if (scope == null || scope == DEFAULT) {
         return this.factory;
       }
 
@@ -677,8 +695,8 @@ public final class ContainerBuilder extends SourceConsumer {
       return new InternalFactoryToFactoryAdapter<T>(scoped);
     }
 
-    boolean isInContainerScope() {
-      return this.scope == ContainerScope.INSTANCE;
+    boolean isContainerScoped() {
+      return this.scope == Scopes.CONTAINER;
     }
   }
 

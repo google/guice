@@ -124,4 +124,24 @@ public interface Container {
    * Gets an instance from the factory bound to the given key.
    */
   <T> T getInstance(Key<T> key);
+
+  /**
+   * Gets an instance from the factory bound to the given type and name.
+   */
+  <T> T getInstance(TypeLiteral<T> type, String name);
+
+  /**
+   * Gets an instance from the factory bound to the given type and name.
+   */
+  <T> T getInstance(Class<T> type, String name);
+
+  /**
+   * Gets the factory bound to the given type and name.
+   */
+  <T> Factory<T> getFactory(Class<T> type, String name);
+
+  /**
+   * Gets the factory bound to the given type and name.
+   */
+  <T> Factory<T> getFactory(TypeLiteral<T> type, String name);
 }

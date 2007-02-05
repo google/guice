@@ -77,8 +77,10 @@ class ErrorMessages {
       + " Available scope names: %s";
 
   static final String SCOPE_ALREADY_SET = "Scope is set more than once."
-      + " You can set the scope by calling in(...) or by annotating the"
-      + " implementation class with @Scoped.";
+      + " You can set the scope by calling in(...), by annotating the"
+      + " implementation class with @Scoped, or by annotating the"
+      + " implementation with with an annotation which is annotated with"
+      + " @Scoped.";
 
   static final String CONSTANT_VALUE_ALREADY_SET =
       "Constant value is set more than once.";

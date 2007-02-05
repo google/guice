@@ -17,19 +17,50 @@
 package com.google.inject;
 
 /**
- * Scope constants.
+ * Built in scope implementations.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Scopes {
+public enum Scopes implements Scope {
 
   /**
-   * Default scope's name. One instance per injection.
+   * Instance per injection.
    */
-  public static final String DEFAULT_SCOPE = Key.DEFAULT_NAME;
+  DEFAULT {
+    public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
+      return creator;
+    }
+  },
 
   /**
-   * Container scope's name. One instance per {@link Container}.
+   * Instance per container.
    */
-  public static final String CONTAINER_SCOPE = "container";
+  CONTAINER {
+    public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
+      return new Factory<T>() {
+
+        private volatile T instance;
+
+        public T get() {
+          // Double checked locking improves performance and is safe as of Java 5.
+          if (instance == null) {
+            // Use a pretty coarse lock. We don't want to run into deadlocks when
+            // two threads try to load circularly-dependent objects.
+            // Maybe one of these days we will identify independent graphs of
+            // objects and offer to load them in parallel.
+            synchronized (Container.class) {
+              if (instance == null) {
+                instance = creator.get();
+              }
+            }
+          }
+          return instance;
+        }
+
+        public String toString() {
+          return creator.toString();
+        }
+      };
+    }
+  }
 }

@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * A scope which bound objects can reside in. Add a new scope using {@link
- * com.google.inject.ContainerBuilder#put(String, Scope)} and reference it from
+ * com.google.inject.ContainerBuilder#scope(String, Scope)} and reference it from
  * bindings using its name.
  *
  * <p>Scope implementations should override {@code toString()} and include the

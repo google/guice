@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER_SCOPE;
+import static com.google.inject.Scopes.CONTAINER;
 
 import junit.framework.TestCase;
 
@@ -27,9 +27,11 @@ public class ContainerTest extends TestCase {
 
   public void testFactoryMethods() throws ContainerCreationException {
     Singleton singleton = new Singleton();
+    Singleton other = new Singleton();
 
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Singleton.class).to(singleton);
+    builder.bind(Singleton.class).named("other").to(other);
     Container container = builder.create(true);
 
     assertSame(singleton,
@@ -41,6 +43,16 @@ public class ContainerTest extends TestCase {
     assertSame(singleton, container.getInstance(Singleton.class));
     assertSame(singleton,
         container.getInstance(new TypeLiteral<Singleton>() {}));
+
+    assertSame(other,
+        container.getFactory(Key.get(Singleton.class, "other")).get());
+    assertSame(other, container.getFactory(Singleton.class, "other").get());
+    assertSame(other,
+        container.getFactory(new TypeLiteral<Singleton>() {}, "other").get());
+    assertSame(other, container.getInstance(Key.get(Singleton.class, "other")));
+    assertSame(other, container.getInstance(Singleton.class, "other"));
+    assertSame(other,
+        container.getInstance(new TypeLiteral<Singleton>() {}, "other"));
   }
 
   static class Singleton {}
@@ -116,7 +128,7 @@ public class ContainerTest extends TestCase {
     int getI();
   }
 
-  @Scoped(CONTAINER_SCOPE)
+  @ContainerScoped
   static class BarImpl implements Bar {
 
     @Inject("i") int i;
@@ -177,7 +189,7 @@ public class ContainerTest extends TestCase {
     B getB();
   }
 
-  @Scoped(CONTAINER_SCOPE)
+  @ContainerScoped
   static class AImpl implements A {
     final B b;
     @Inject public AImpl(B b) {

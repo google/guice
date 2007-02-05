@@ -27,7 +27,7 @@ public class FactoryInjectionTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
 
     builder.bind(Bar.class);
-    builder.bind(ContainerScoped.class).in(Scopes.CONTAINER_SCOPE);
+    builder.bind(ContainerScoped.class).in(Scopes.CONTAINER);
 
     Container container = builder.create(false);
 

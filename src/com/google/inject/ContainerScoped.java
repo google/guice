@@ -16,27 +16,17 @@
 
 package com.google.inject;
 
+import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
 
 /**
- * Annotates an implementation class with the name of its scope.
+ * One instance per container.
  *
- * <p>If you apply {@code Scoped} to another annotation, that annotation will
- * act as an alias and the user will not have to explicitly specify a name.
- * See {@link com.google.inject.ContainerScoped} for an example.
- *
- * @see com.google.inject.ContainerBuilder#scope(String, Scope)
- * @author crazybob
+ * @author crazybob@google.com (Bob Lee)
  */
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target(ElementType.TYPE)
 @Retention(RUNTIME)
-public @interface Scoped {
-
-  /**
-   * Scope name.
-   */
-  String value();
-}
+@Scoped("CONTAINER")
+public @interface ContainerScoped {}
