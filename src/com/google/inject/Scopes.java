@@ -21,31 +21,44 @@ package com.google.inject;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public enum Scopes implements Scope {
+public class Scopes {
+
+  private Scopes() {}
 
   /**
-   * One instance per injection.
+   * Name of the default scope.
    */
-  DEFAULT {
+  public static final String DEFAULT_NAME = "DEFAULT";
+
+  /**
+   * The default scope, one instance per injection.
+   */
+  public static final Scope DEFAULT = new Scope() {
     public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
       return creator;
     }
-  },
+  };
+
+  /**
+   * Name of container scope.
+   */
+  public static final String CONTAINER_NAME = "CONTAINER";
 
   /**
    * One instance per container.
    */
-  CONTAINER {
+  public static final Scope CONTAINER = new Scope() {
     public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
       return new Factory<T>() {
 
         private volatile T instance;
 
         public T get() {
-          // Double checked locking improves performance and is safe as of Java 5.
+          // Double checked locking improves performance and is safe as of
+          // Java 5.
           if (instance == null) {
-            // Use a pretty coarse lock. We don't want to run into deadlocks when
-            // two threads try to load circularly-dependent objects.
+            // Use a pretty coarse lock. We don't want to run into deadlocks
+            // when two threads try to load circularly-dependent objects.
             // Maybe one of these days we will identify independent graphs of
             // objects and offer to load them in parallel.
             synchronized (Container.class) {
@@ -62,5 +75,5 @@ public enum Scopes implements Scope {
         }
       };
     }
-  }
+  };
 }

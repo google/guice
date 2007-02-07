@@ -106,8 +106,8 @@ public final class ContainerBuilder extends SourceConsumer {
    * @param constructionProxyFactory to use when constructing objects
    */
   public ContainerBuilder(ConstructionProxyFactory constructionProxyFactory) {
-    scope(DEFAULT);
-    scope(CONTAINER);
+    scope(DEFAULT_NAME, DEFAULT);
+    scope(CONTAINER_NAME, CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
@@ -157,20 +157,6 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   public void scope(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {
-      addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
-    } else {
-      scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
-    }
-  }
-
-  /**
-   * Adds a new scope. Maps an enum-based {@link Scope} instance using the
-   * enum's name as the scope name. Scopes should be mapped before used in
-   * bindings. {@link Scoped#value()} references this name.
-   */
-  public <E extends Enum<E> & Scope> void scope(E scope) {
-    String name = scope.name();
-    if (scopes.containsKey(nonNull(scope.name(), "name"))) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
     } else {
       scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
