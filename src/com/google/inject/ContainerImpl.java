@@ -19,10 +19,10 @@ package com.google.inject;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
+import com.google.inject.util.GuiceFastClass;
 import com.google.inject.spi.ConstructionProxyFactory;
 
 import net.sf.cglib.reflect.FastMethod;
-import net.sf.cglib.reflect.FastClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -473,7 +473,7 @@ class ContainerImpl implements Container {
     public MethodInjector(ContainerImpl container, Method method, String name)
         throws MissingDependencyException {
       this.fastMethod =
-          FastClass.create(method.getDeclaringClass()).getMethod(method);
+          GuiceFastClass.create(method.getDeclaringClass()).getMethod(method);
       Type[] parameterTypes = method.getGenericParameterTypes();
       parameterInjectors = parameterTypes.length > 0
           ? container.getParametersInjectors(

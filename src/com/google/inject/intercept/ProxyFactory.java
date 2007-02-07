@@ -20,6 +20,8 @@ import com.google.inject.spi.ConstructionProxyFactory;
 import com.google.inject.spi.ConstructionProxy;
 import com.google.inject.spi.DefaultConstructionProxyFactory;
 import com.google.inject.util.ReferenceCache;
+import com.google.inject.util.GuiceFastClass;
+import com.google.inject.util.GuiceNamingPolicy;
 import com.google.inject.Factory;
 
 import net.sf.cglib.proxy.Enhancer;
@@ -153,6 +155,7 @@ public class ProxyFactory implements ConstructionProxyFactory {
     });
     enhancer.setCallbackTypes(callbackTypes);
     enhancer.setUseFactory(false);
+    enhancer.setNamingPolicy(new GuiceNamingPolicy());
 
     Class<?> proxied = enhancer.createClass();
 
@@ -167,7 +170,7 @@ public class ProxyFactory implements ConstructionProxyFactory {
    */
   <T> ConstructionProxy<T> createConstructionProxy(Class<?> clazz,
       Class[] parameterTypes) {
-    FastClass fastClass = FastClass.create(clazz);
+    FastClass fastClass = GuiceFastClass.create(clazz);
     final FastConstructor fastConstructor =
         fastClass.getConstructor(parameterTypes);
     return new ConstructionProxy<T>() {
