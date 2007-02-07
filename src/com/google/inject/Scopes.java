@@ -24,7 +24,7 @@ package com.google.inject;
 public enum Scopes implements Scope {
 
   /**
-   * Instance per injection.
+   * One instance per injection.
    */
   DEFAULT {
     public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
@@ -33,7 +33,7 @@ public enum Scopes implements Scope {
   },
 
   /**
-   * Instance per container.
+   * One instance per container.
    */
   CONTAINER {
     public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {

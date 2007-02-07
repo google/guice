@@ -22,7 +22,8 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * One instance per container.
+ * Apply this to annotation classes when you want one instance per container,
+ * as opposed to one instance per injection.
  *
  * @author crazybob@google.com (Bob Lee)
  */
