@@ -23,6 +23,7 @@ import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
+import com.google.inject.servlet.ServletTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -51,6 +52,8 @@ public class AllTests {
 
     suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
+
+    suite.addTestSuite(ServletTest.class);
 
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(ReferenceMapTest.class);

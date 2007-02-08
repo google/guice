@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.servlet;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.google.inject.AbstractModule;
+import static com.google.inject.servlet.ServletScopes.*;
 
 /**
- * Apply this to implementation classes when you want one instance per
- * container, as opposed to one instance per injection.
+ * Configures the servlet scopes.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target(ElementType.TYPE)
-@Retention(RUNTIME)
-@Scoped(Scopes.CONTAINER_NAME)
-public @interface ContainerScoped {}
+public class ServletModule extends AbstractModule {
+
+  protected void configure() {
+    scope(REQUEST_NAME, REQUEST);
+    scope(SESSION_NAME, SESSION);
+  }
+}

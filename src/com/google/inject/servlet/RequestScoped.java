@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.servlet;
 
-import java.lang.annotation.Target;
+import com.google.inject.Scoped;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Apply this to implementation classes when you want one instance per
- * container, as opposed to one instance per injection.
+ * Apply this to implementation classes when you want one instance per request.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 @Target(ElementType.TYPE)
-@Retention(RUNTIME)
-@Scoped(Scopes.CONTAINER_NAME)
-public @interface ContainerScoped {}
+@Retention(RetentionPolicy.RUNTIME)
+@Scoped(ServletScopes.REQUEST_NAME)
+public @interface RequestScoped {}

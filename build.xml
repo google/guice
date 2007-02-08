@@ -98,6 +98,8 @@
         <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
         <pathelement location="lib/build/junit.jar"/>
+        <pathelement location="lib/build/servlet-api-2.5.jar"/>
+        <pathelement location="lib/build/easymock.jar"/>
       </classpath>
       <arg value="com.google.inject.AllTests"/>    
     </java>
