@@ -73,7 +73,7 @@ public abstract class AbstractModule implements Module {
   /**
    * @see ContainerBuilder#scope(String, Scope)
    */
-  protected void put(String name, Scope scope) {
+  protected void scope(String name, Scope scope) {
     builder.scope(name, scope);
   }
 
