@@ -25,20 +25,13 @@
   <target name="jar" depends="compile"
        description="Build jar.">
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" 
-      classpath="lib/build/jarjar-0.8.jar"/>
+      classpath="lib/build/jarjar-0.9.jar"/>
     <mkdir dir="${build.dir}/dist"/>
-    <jarjar jarfile="${build.dir}/dist/guice-${version}-jarjared.jar">
+    <jarjar jarfile="${build.dir}/dist/guice-${version}.jar">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="lib/build/cglib-nodep-2.2_beta1.jar"/>
       <rule pattern="net.sf.cglib.**" result="com.google.inject.cglib.@1"/>
     </jarjar>
-    <delete dir="${build.dir}/unjarjared"/>
-    <mkdir dir="${build.dir}/unjarjared"/>
-    <unjar src="${build.dir}/dist/guice-${version}-jarjared.jar" 
-      dest="${build.dir}/unjarjared"/>
-    <delete file="${build.dir}/dist/guice-${version}-jarjared.jar"/>
-    <jar destfile="${build.dir}/dist/guice-${version}.jar"
-      basedir="${build.dir}/unjarjared"/>
   </target>
 
   <target name="dist" depends="jar, javadoc"
