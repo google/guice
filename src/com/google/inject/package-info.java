@@ -15,6 +15,6 @@
  */
 
 /**
- * <i>Guice</i> (sounds like like "juice")
+ * <i>Guice</i> (sounds like "juice")
  */
 package com.google.inject;

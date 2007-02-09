@@ -77,7 +77,7 @@ public class Binding<T> {
   /**
    * Is this a constant binding?
    */
-  public boolean isConstant() {
+  boolean isConstant() {
     return internalFactory instanceof ConstantFactory<?>;
   }
 
