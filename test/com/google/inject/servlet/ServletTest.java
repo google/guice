@@ -32,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -40,19 +41,15 @@ public class ServletTest extends TestCase {
 
   public void testNewRequestObject()
       throws ContainerCreationException, IOException, ServletException {
-    ContainerBuilder builder = new ContainerBuilder();
-    builder.install(new ServletModule());
-    builder.bind(InSession.class);
-    builder.bind(InRequest.class);
-    final Container container = builder.create(false);
+    final Container container = createContainer();
 
     GuiceFilter filter = new GuiceFilter();
 
     final HttpServletRequest request = createMock(HttpServletRequest.class);
 
-    String requestName = Key.get(InRequest.class).toString();
-    expect(request.getAttribute(requestName)).andReturn(null);
-    request.setAttribute(eq(requestName), isA(InRequest.class));
+    String name = Key.get(InRequest.class).toString();
+    expect(request.getAttribute(name)).andReturn(null);
+    request.setAttribute(eq(name), isA(InRequest.class));
 
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
@@ -70,6 +67,114 @@ public class ServletTest extends TestCase {
 
     verify(request);
     assertTrue(invoked[0]);
+  }
+
+  public void testExistingRequestObject()
+      throws ContainerCreationException, IOException, ServletException {
+    final Container container = createContainer();
+
+    GuiceFilter filter = new GuiceFilter();
+
+    final HttpServletRequest request = createMock(HttpServletRequest.class);
+
+    final InRequest inRequest = new InRequest();
+    String name = Key.get(InRequest.class).toString();
+    expect(request.getAttribute(name)).andReturn(inRequest).times(2);
+
+    final boolean[] invoked = new boolean[1];
+    FilterChain filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        invoked[0] = true;
+        assertSame(request, servletRequest);
+        assertSame(inRequest, container.getInstance(InRequest.class));
+        assertSame(inRequest, container.getInstance(InRequest.class));
+      }
+    };
+
+    replay(request);
+
+    filter.doFilter(request, null, filterChain);
+
+    verify(request);
+    assertTrue(invoked[0]);
+  }
+
+  public void testNewSessionObject()
+      throws ContainerCreationException, IOException, ServletException {
+    final Container container = createContainer();
+
+    GuiceFilter filter = new GuiceFilter();
+
+    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpSession session = createMock(HttpSession.class);
+
+    String name = Key.get(InSession.class).toString();
+
+    expect(request.getSession()).andReturn(session);
+    expect(session.getAttribute(name)).andReturn(null);
+    session.setAttribute(eq(name), isA(InSession.class));
+
+    final boolean[] invoked = new boolean[1];
+    FilterChain filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        invoked[0] = true;
+        assertSame(request, servletRequest);
+        assertTrue(container.getInstance(InSession.class) instanceof InSession);
+      }
+    };
+
+    replay(request, session);
+
+    filter.doFilter(request, null, filterChain);
+
+    verify(request, session);
+    assertTrue(invoked[0]);
+  }
+
+  public void testExistingSessionObject()
+      throws ContainerCreationException, IOException, ServletException {
+    final Container container = createContainer();
+
+    GuiceFilter filter = new GuiceFilter();
+
+    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpSession session = createMock(HttpSession.class);
+
+    String name = Key.get(InSession.class).toString();
+
+    final InSession inSession = new InSession();
+    expect(request.getSession()).andReturn(session).times(2);
+    expect(session.getAttribute(name)).andReturn(inSession).times(2);
+
+    final boolean[] invoked = new boolean[1];
+    FilterChain filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        invoked[0] = true;
+        assertSame(request, servletRequest);
+
+        assertSame(inSession, container.getInstance(InSession.class));
+        assertSame(inSession, container.getInstance(InSession.class));
+      }
+    };
+
+    replay(request, session);
+
+    filter.doFilter(request, null, filterChain);
+
+    verify(request, session);
+    assertTrue(invoked[0]);
+  }
+
+  private Container createContainer() throws ContainerCreationException {
+    ContainerBuilder builder = new ContainerBuilder();
+    builder.install(new ServletModule());
+    builder.bind(InSession.class);
+    builder.bind(InRequest.class);
+    final Container container = builder.create(false);
+    return container;
   }
 
   @SessionScoped
