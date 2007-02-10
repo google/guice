@@ -20,7 +20,7 @@ import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
 import com.google.inject.util.GuiceFastClass;
-import com.google.inject.spi.ConstructionProxyFactory;
+import com.google.inject.ConstructionProxyFactory;
 
 import net.sf.cglib.reflect.FastMethod;
 

@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.ConstructionProxy;
+import com.google.inject.ConstructionProxy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

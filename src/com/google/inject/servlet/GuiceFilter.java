@@ -19,12 +19,13 @@ package com.google.inject.servlet;
 import java.io.IOException;
 
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Apply this filter to all requests where you plan to use servlet scopes.
@@ -33,30 +34,58 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class GuiceFilter implements Filter {
 
-  static ThreadLocal<HttpServletRequest> localRequest =
-      new ThreadLocal<HttpServletRequest>();
+  static ThreadLocal<Context> localContext = new ThreadLocal<Context>();
 
   public void doFilter(ServletRequest servletRequest,
       ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest previous = localRequest.get();
+    Context previous = localContext.get();
     try {
-      localRequest.set((HttpServletRequest) servletRequest);
+      localContext.set(new Context((HttpServletRequest) servletRequest,
+          (HttpServletResponse) servletResponse));
       filterChain.doFilter(servletRequest, servletResponse);
     } finally {
-      localRequest.set(previous);
+      localContext.set(previous);
     }
   }
 
   static HttpServletRequest getRequest() {
-    HttpServletRequest request = localRequest.get();
-    if (request == null) {
+    return getContext().getRequest();
+  }
+
+  static HttpServletResponse getResponse() {
+    return getContext().getResponse();
+  }
+
+  static Context getContext() {
+    Context context = localContext.get();
+    if (context == null) {
       throw new RuntimeException("Please apply " + GuiceFilter.class.getName()
-        + " to any request which uses servlet scopes.");
+          + " to any request which uses servlet scopes.");
     }
-    return request;
+    return context;
+  }
+
+  static class Context {
+
+    final HttpServletRequest request;
+    final HttpServletResponse response;
+
+    Context(HttpServletRequest request, HttpServletResponse response) {
+      this.request = request;
+      this.response = response;
+    }
+
+    HttpServletRequest getRequest() {
+      return request;
+    }
+
+    HttpServletResponse getResponse() {
+      return response;
+    }
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {}
+
   public void destroy() {}
 }

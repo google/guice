@@ -16,14 +16,12 @@
 
 package com.google.inject;
 
-import com.google.inject.intercept.ProxyFactoryTest;
-import com.google.inject.intercept.QueryTest;
-import com.google.inject.intercept.IntegrationTest;
+import com.google.inject.query.QueryTest;
+import com.google.inject.servlet.ServletTest;
 import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
-import com.google.inject.servlet.ServletTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

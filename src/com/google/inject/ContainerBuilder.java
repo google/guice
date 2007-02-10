@@ -16,18 +16,23 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.ConstructionProxyFactory;
-import com.google.inject.spi.DefaultConstructionProxyFactory;
+import static com.google.inject.Scopes.CONTAINER;
+import static com.google.inject.Scopes.CONTAINER_NAME;
+import static com.google.inject.Scopes.DEFAULT;
+import static com.google.inject.Scopes.DEFAULT_NAME;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
 import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-import static com.google.inject.Scopes.*;
+import com.google.inject.query.Query;
 
-import java.lang.reflect.Member;
+import org.aopalliance.intercept.MethodInterceptor;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -98,29 +103,19 @@ public final class ContainerBuilder extends SourceConsumer {
 
   static final String UNKNOWN_SOURCE = "[unknown source]";
 
-  final ConstructionProxyFactory constructionProxyFactory;
+  final ProxyFactoryBuilder proxyFactoryBuilder;
 
   /**
    * Constructs a new builder.
-   *
-   * @param constructionProxyFactory to use when constructing objects
    */
-  public ContainerBuilder(ConstructionProxyFactory constructionProxyFactory) {
+  public ContainerBuilder() {
     scope(DEFAULT_NAME, DEFAULT);
     scope(CONTAINER_NAME, CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
 
-    this.constructionProxyFactory = nonNull(constructionProxyFactory,
-        "construction proxy factory");
-  }
-
-  /**
-   * Constructs a new builder.
-   */
-  public ContainerBuilder() {
-    this(new DefaultConstructionProxyFactory());
+    this.proxyFactoryBuilder = new ProxyFactoryBuilder();
   }
 
   final List<Validation> validations = new ArrayList<Validation>();
@@ -148,6 +143,21 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   interface Validation {
     void run(ContainerImpl container);
+  }
+
+  /**
+   * Applies the given method interceptor to the methods matched by the class
+   * and method queries.
+   *
+   * @param classQuery matches classes the interceptor should apply to. For
+   *  example: {@code only(Runnable.class)}.
+   * @param methodQuery matches methods the interceptor should apply to. For
+   *  example: {@code annotatedWith(Transactional.class)}.
+   * @param interceptors to apply
+   */
+  public void intercept(Query<? super Class<?>> classQuery,
+      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
+    proxyFactoryBuilder.intercept(classQuery, methodQuery, interceptors);
   }
 
   /**
@@ -298,7 +308,8 @@ public final class ContainerBuilder extends SourceConsumer {
     ensureNotCreated();
     Map<Key<?>, Binding<?>> bindings =
         new HashMap<Key<?>, Binding<?>>();
-    container = new ContainerImpl(constructionProxyFactory, bindings);
+    container = new ContainerImpl(
+        proxyFactoryBuilder.create(), bindings);
 
     createConstantBindings();
 

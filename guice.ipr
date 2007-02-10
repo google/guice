@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project version="4" relativePaths="false">
+<project version="4" relativePaths="true">
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
   </component>
   <component name="Build editor project-level loader">
     <settings>
       <class-settings class="com.google.devtools.intellig.configcheck.ProjectPathChecker" />
-      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
       <class-settings class="com.google.devtools.intellig.configcheck.ProjectJdkChecker">
-        <setting name="getProjectJdk" value="/usr/local/buildtools/java/jdk1.5.0_06" />
+        <setting name="getProjectJdk" value="$PROJECT_DIR$/../../buildtools/java/jdk1.5.0_06" />
         <setting name="getModuleJdks" value="rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAABA/QAAAAAAAAHg=" />
       </class-settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
       <class-settings class="com.google.devtools.intellig.configcheck.ClearOutputChecker" />
     </settings>
   </component>
@@ -822,9 +822,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/struts2/struts2.iml" filepath="$PROJECT_DIR$/struts2/struts2.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" />
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK" />
   <component name="ProjectRunConfigurationManager" />
   <component name="RmicSettings">
     <option name="IS_EANABLED" value="false" />
