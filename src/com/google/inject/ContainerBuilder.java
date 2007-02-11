@@ -20,13 +20,13 @@ import static com.google.inject.Scopes.CONTAINER;
 import static com.google.inject.Scopes.CONTAINER_NAME;
 import static com.google.inject.Scopes.DEFAULT;
 import static com.google.inject.Scopes.DEFAULT_NAME;
+import com.google.inject.query.Query;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
 import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-import com.google.inject.query.Query;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -83,7 +83,7 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Keeps error messages in order and prevents duplicates.
    */
-  Set<Message> errorMessages = new LinkedHashSet<Message>();
+  final Set<Message> errorMessages = new LinkedHashSet<Message>();
 
   private static final InternalFactory<Container> CONTAINER_FACTORY =
       new InternalFactory<Container>() {
@@ -267,7 +267,7 @@ public final class ContainerBuilder extends SourceConsumer {
    * Applies the given module to this builder.
    */
   public void install(Module module) {
-    module.configure(this);    
+    module.configure(this);
   }
 
   void addError(Object source, String message, Object... arguments) {
@@ -285,7 +285,7 @@ public final class ContainerBuilder extends SourceConsumer {
     errorMessages.add(errorMessage);
   }
 
-  Stopwatch stopwatch = new Stopwatch();
+  final Stopwatch stopwatch = new Stopwatch();
 
   /**
    * Creates a {@link Container} instance. Injects static members for classes
@@ -851,7 +851,7 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   public class LinkedBindingBuilder<T> {
 
-    Key<T> key;
+    final Key<T> key;
     Key<? extends T> destination;
     Object source = ContainerBuilder.UNKNOWN_SOURCE;
 

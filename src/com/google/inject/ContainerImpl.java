@@ -16,11 +16,10 @@
 
 package com.google.inject;
 
+import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
-import com.google.inject.util.GuiceFastClass;
-import com.google.inject.ConstructionProxyFactory;
 
 import net.sf.cglib.reflect.FastMethod;
 
@@ -33,15 +32,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * Default {@link Container} implementation.
@@ -106,21 +105,23 @@ class ContainerImpl implements Container {
 
   <T> void index(Binding<T> binding) {
     TypeLiteral<T> type = binding.getKey().getType();
-    List<Binding<?>> bindings = bindingsByType.get(type);
-    if (bindings == null) {
-      bindings = new ArrayList<Binding<?>>();
-      bindingsByType.put(type, bindings);
+    List<Binding<?>> bindingsForThisType = bindingsByType.get(type);
+    if (bindingsForThisType == null) {
+      bindingsForThisType = new ArrayList<Binding<?>>();
+      bindingsByType.put(type, bindingsForThisType);
     }
-    bindings.add(binding);
+    bindingsForThisType.add(binding);
   }
 
-  @SuppressWarnings({"unchecked"})
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-    List bindings = bindingsByType.get(type);
-    if (bindings == null) {
+    // IntelliJ doesn't understand that the below is "correct"
+    //noinspection RedundantCast,RawUseOfParameterizedType
+    @SuppressWarnings({"unchecked"})
+    List<Binding<T>> bindingsForThisType = (List) bindingsByType.get(type);
+    if (bindingsForThisType == null) {
       return Collections.emptyList();
     }
-    return (List<Binding<T>>) bindings;
+    return bindingsForThisType;
   }
 
   <T> List<String> getNamesOfBindingsTo(TypeLiteral<T> type) {
@@ -186,7 +187,8 @@ class ContainerImpl implements Container {
       Binding<?> counterpartBinding =
           getBinding(Key.get(primitiveCounterpart, key.getName()));
       if (counterpartBinding != null) {
-        return (InternalFactory<T>) counterpartBinding.getInternalFactory();
+        return (InternalFactory<? extends T>)
+            counterpartBinding.getInternalFactory();
       }
     }
 
@@ -490,7 +492,7 @@ class ContainerImpl implements Container {
     }
   }
 
-  Map<Class<?>, ConstructorInjector> constructors =
+  final Map<Class<?>, ConstructorInjector> constructors =
       new ReferenceCache<Class<?>, ConstructorInjector>() {
         @SuppressWarnings("unchecked")
         protected ConstructorInjector<?> create(Class<?> implementation) {
@@ -562,8 +564,8 @@ class ContainerImpl implements Container {
   }
 
   void injectMembers(Object o, InternalContext context) {
-    List<Injector> injectors = this.injectors.get(o.getClass());
-    for (Injector injector : injectors) {
+    List<Injector> injectorsForClass = injectors.get(o.getClass());
+    for (Injector injector : injectorsForClass) {
       injector.inject(context, o);
     }
   }
@@ -643,7 +645,7 @@ class ContainerImpl implements Container {
     };
   }
 
-  ThreadLocal<InternalContext[]> localContext =
+  final ThreadLocal<InternalContext[]> localContext =
       new ThreadLocal<InternalContext[]>() {
         protected InternalContext[] initialValue() {
           return new InternalContext[1];
@@ -775,7 +777,7 @@ class ContainerImpl implements Container {
         throws ConstantConversionException;
   }
 
-  private static InternalFactory<?> INVALID_FACTORY =
+  private static final InternalFactory<?> INVALID_FACTORY =
       new InternalFactory<Object>() {
         public Object get(InternalContext context) {
           throw new AssertionError();

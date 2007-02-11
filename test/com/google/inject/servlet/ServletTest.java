@@ -23,7 +23,12 @@ import com.google.inject.Key;
 
 import junit.framework.TestCase;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 import java.io.IOException;
 
@@ -173,8 +178,7 @@ public class ServletTest extends TestCase {
     builder.install(new ServletModule());
     builder.bind(InSession.class);
     builder.bind(InRequest.class);
-    final Container container = builder.create(false);
-    return container;
+    return builder.create(false);
   }
 
   @SessionScoped

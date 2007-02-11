@@ -53,9 +53,9 @@ public class Scopes {
 
         private volatile T instance;
 
+        // DCL is safe as of Java 5, which we obviously require
+        @SuppressWarnings("DoubleCheckedLocking")
         public T get() {
-          // Double checked locking improves performance and is safe as of
-          // Java 5.
           if (instance == null) {
             // Use a pretty coarse lock. We don't want to run into deadlocks
             // when two threads try to load circularly-dependent objects.

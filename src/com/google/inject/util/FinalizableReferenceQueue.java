@@ -59,7 +59,7 @@ class FinalizableReferenceQueue extends ReferenceQueue<Object> {
     thread.start();
   }
 
-  static ReferenceQueue<Object> instance = createAndStart();
+  static final ReferenceQueue<Object> instance = createAndStart();
 
   static FinalizableReferenceQueue createAndStart() {
     FinalizableReferenceQueue queue = new FinalizableReferenceQueue();

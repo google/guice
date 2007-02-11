@@ -17,13 +17,21 @@
 package com.google.inject;
 
 /**
- * Implemented by classes which configure a container. Useful
- * for encapsulating and reusing configuration logic.
+ * A module contributes a set of configurations, typically interface bindings,
+ * to a {@link ContainerBuilder} which will later create a {@link Container}.
+ * Implementing this interface is the standard means for encapsulating and
+ * reusing configuration logic. Your Module classes can use a more streamlined
+ * syntax by extending {@link AbstractModule} rather than implementing this
+ * interface directly.
+ *
+ * @since 1.0
  */
 public interface Module {
 
   /**
-   * Configures the given builder.
+   * Contributes bindings and other configurations to a container builder, so
+   * that the resulting {@link Container} will include this module properly set
+   * up.
    */
   void configure(ContainerBuilder builder);
 }

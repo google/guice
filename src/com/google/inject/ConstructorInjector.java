@@ -16,8 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.ConstructionProxy;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -33,7 +31,7 @@ class ConstructorInjector<T> implements Factory<T> {
   final ContainerImpl.ParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
-  private ContainerImpl container;
+  private final ContainerImpl container;
 
   ConstructorInjector(ContainerImpl container, Class<T> implementation) {
     this.container = container;

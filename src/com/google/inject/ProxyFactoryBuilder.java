@@ -20,9 +20,9 @@ import com.google.inject.query.Query;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creates a {@link ProxyFactory}.
@@ -53,8 +53,6 @@ class ProxyFactoryBuilder {
    * Creates a {@code ProxyFactory}.
    */
   public ProxyFactory create() {
-    List<MethodAspect> methodAspects = new ArrayList<MethodAspect>();
-    methodAspects.addAll(this.methodAspects);
-    return new ProxyFactory(methodAspects);
+    return new ProxyFactory(new ArrayList<MethodAspect>(methodAspects));
   }
 }

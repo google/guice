@@ -20,6 +20,7 @@ import com.google.inject.spi.Message;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Formatter;
 
 /**
  * Thrown when errors occur while creating a {@link Container}. Includes a
@@ -45,22 +46,13 @@ public class ContainerCreationException extends Exception {
   }
 
   private static String createErrorMessage(Collection<Message> errorMessages) {
-    StringBuilder error = new StringBuilder();
-    error.append("Guice configuration errors:\n\n");
+    Formatter fmt = new Formatter().format("Guice configuration errors:%n%n");
     int index = 1;
     for (Message errorMessage : errorMessages) {
-      error.append(index++)
-          .append(") ")
-          .append("Error at ")
-          .append(errorMessage.getSource())
-          .append(':')
-          .append('\n')
-          .append("  ")
-          .append(errorMessage.getMessage())
-          .append("\n\n");
+      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSource())
+         .format(" %s%n%n", errorMessage.getMessage());
     }
-    error.append(errorMessages.size()).append(" error[s]\n");
-    return error.toString();
+    return fmt.format("%s error[s]%n", errorMessages.size()).toString();
   }
 
   /**

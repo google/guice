@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class GuiceFilter implements Filter {
 
-  static ThreadLocal<Context> localContext = new ThreadLocal<Context>();
+  static final ThreadLocal<Context> localContext = new ThreadLocal<Context>();
 
   public void doFilter(ServletRequest servletRequest,
       ServletResponse servletResponse, FilterChain filterChain)

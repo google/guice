@@ -63,8 +63,8 @@ public class ReferenceMapTestSuite {
 
   public static class MapTest extends TestCase {
 
-    ReferenceType keyType;
-    ReferenceType valueType;
+    final ReferenceType keyType;
+    final ReferenceType valueType;
 
     public MapTest(String name, ReferenceType keyType,
         ReferenceType valueType) {
@@ -240,6 +240,7 @@ public class ReferenceMapTestSuite {
       assertEquals(3, map.count);
     }
 
+    @SuppressWarnings("IOResourceOpenedButNotSafelyClosed")
     public Object serializeAndDeserialize(Object o) throws IOException,
         ClassNotFoundException {
       ByteArrayOutputStream out = new ByteArrayOutputStream();

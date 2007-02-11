@@ -362,7 +362,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
    */
   static class ReferenceAwareWrapper {
 
-    Object wrapped;
+    final Object wrapped;
 
     ReferenceAwareWrapper(Object wrapped) {
       this.wrapped = wrapped;
@@ -399,7 +399,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
   class SoftKeyReference extends FinalizableSoftReference<Object>
       implements InternalReference {
 
-    int hashCode;
+    final int hashCode;
 
     public SoftKeyReference(Object key) {
       super(key);
@@ -422,7 +422,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
   class WeakKeyReference extends FinalizableWeakReference<Object>
       implements InternalReference {
 
-    int hashCode;
+    final int hashCode;
 
     public WeakKeyReference(Object key) {
       super(key);
@@ -445,7 +445,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
   class SoftValueReference extends FinalizableSoftReference<Object>
       implements InternalReference {
 
-    Object keyReference;
+    final Object keyReference;
 
     public SoftValueReference(Object keyReference, Object value) {
       super(value);
@@ -464,7 +464,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
   class WeakValueReference extends FinalizableWeakReference<Object>
       implements InternalReference {
 
-    Object keyReference;
+    final Object keyReference;
 
     public WeakValueReference(Object keyReference, Object value) {
       super(value);
@@ -497,7 +497,7 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
     return PutStrategy.REPLACE;
   }
 
-  private enum PutStrategy implements Strategy {
+  protected enum PutStrategy implements Strategy {
     PUT {
       public Object execute(ReferenceMap map, Object keyReference,
           Object valueReference) {
@@ -529,8 +529,8 @@ public class ReferenceMap<K, V> implements Map<K, V>, Serializable {
 
   class Entry implements Map.Entry<K, V> {
 
-    K key;
-    V value;
+    final K key;
+    final V value;
 
     public Entry(K key, V value) {
       this.key = key;

@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Implements formatting. Converts known types to readable strings.
@@ -46,7 +46,7 @@ abstract class AbstractErrorHandler implements ErrorHandler {
   }
 
   @SuppressWarnings("unchecked")
-  static Collection<Converter<?>> converters = Arrays.asList(
+  static final Collection<Converter<?>> converters = Arrays.asList(
       new Converter<Method>(Method.class) {
         public String toString(Method m) {
           return "method " + m.getDeclaringClass().getName() + "."

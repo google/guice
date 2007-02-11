@@ -16,9 +16,8 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
-
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -26,8 +25,8 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import java.util.concurrent.Callable;
 import java.text.DecimalFormat;
+import java.util.concurrent.Callable;
 
 /**
  * A semi-useless microbenchmark. Spring and Guice constuct the same object
@@ -142,7 +141,7 @@ public class PerformanceComparison {
     assertEquals("test", foo.bar.getTee().getS());
   }
 
-  static DecimalFormat format = new DecimalFormat();
+  static final DecimalFormat format = new DecimalFormat();
 
   static void iterate(Callable<Foo> callable, String label) throws Exception {
     int count = 100000;
