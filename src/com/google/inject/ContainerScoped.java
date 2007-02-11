@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 
 /**
  * Apply this to implementation classes when you want one instance per
@@ -27,7 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target(ElementType.TYPE)
-@Retention(RUNTIME)
-@Scoped(Scopes.CONTAINER_NAME)
-public @interface ContainerScoped {}
+@Target(ElementType.TYPE) @Retention(RUNTIME) @Scoped(Scopes.CONTAINER_NAME)
+public @interface ContainerScoped {
+
+}

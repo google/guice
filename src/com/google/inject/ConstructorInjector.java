@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
  * Injects constructors.
  *
  * @author crazybob@google.com (Bob Lee)
-*/
+ */
 class ConstructorInjector<T> implements Factory<T> {
 
   final Class<T> implementation;
@@ -55,17 +55,18 @@ class ConstructorInjector<T> implements Factory<T> {
               constructor.getGenericParameterTypes(),
               inject.value()
           );
-    } catch (ContainerImpl.MissingDependencyException e) {
+    }
+    catch (ContainerImpl.MissingDependencyException e) {
       e.handle(container.errorHandler);
       return null;
     }
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   private Constructor<T> findConstructorIn(Class<T> implementation) {
     Constructor<T> found = null;
-    for (Constructor<T> constructor
-        : implementation.getDeclaredConstructors()) {
+    for (Constructor<T> constructor : implementation.getDeclaredConstructors())
+    {
       if (constructor.getAnnotation(Inject.class) != null) {
         if (found != null) {
           container.errorHandler.handle(
@@ -83,19 +84,21 @@ class ConstructorInjector<T> implements Factory<T> {
     // instead.
     try {
       return implementation.getDeclaredConstructor();
-    } catch (NoSuchMethodException e) {
-      container.errorHandler.handle(ErrorMessages.MISSING_CONSTRUCTOR, implementation);
+    }
+    catch (NoSuchMethodException e) {
+      container.errorHandler.handle(
+          ErrorMessages.MISSING_CONSTRUCTOR, implementation);
       return ContainerImpl.invalidConstructor();
     }
   }
 
   /**
-   * Construct an instance. Returns {@code Object} instead of {@code T}
-   * because it may return a proxy.
+   * Construct an instance. Returns {@code Object} instead of {@code T} because
+   * it may return a proxy.
    */
   Object construct(InternalContext context, Class<? super T> expectedType) {
-    ConstructionContext<T> constructionContext =
-        context.getConstructionContext(this);
+    ConstructionContext<T> constructionContext
+        = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
@@ -115,11 +118,12 @@ class ConstructorInjector<T> implements Factory<T> {
       // First time through...
       constructionContext.startConstruction();
       try {
-        Object[] parameters =
-            ContainerImpl.getParameters(context, parameterInjectors);
+        Object[] parameters
+            = ContainerImpl.getParameters(context, parameterInjectors);
         t = newInstance(parameters);
         constructionContext.setProxyDelegates(t);
-      } finally {
+      }
+      finally {
         constructionContext.finishConstruction();
       }
 
@@ -128,35 +132,38 @@ class ConstructorInjector<T> implements Factory<T> {
       constructionContext.setCurrentReference(t);
 
       // Inject fields and methods.
-      for (int i = 0; i < injectors.length; i++) {
-        injectors[i].inject(context, t);
+      for (ContainerImpl.Injector injector : injectors) {
+        injector.inject(context, t);
       }
 
       return t;
-    } catch (InvocationTargetException e) {
+    }
+    catch (InvocationTargetException e) {
       throw new RuntimeException(e);
-    } finally {
+    }
+    finally {
       constructionContext.removeCurrentReference();
     }
   }
 
-  @SuppressWarnings({"unchecked"})
-  private T newInstance(Object[] parameters)
-      throws InvocationTargetException {
-    return (T) constructionProxy.newInstance(parameters);
+  @SuppressWarnings("unchecked")
+  private T newInstance(Object[] parameters) throws InvocationTargetException {
+    return constructionProxy.newInstance(parameters);
   }
 
   public T get() {
     try {
       return container.callInContext(new ContextualCallable<T>() {
-        @SuppressWarnings({"unchecked"})
+        @SuppressWarnings("unchecked")
         public T call(InternalContext context) {
           return (T) construct(context, implementation);
         }
       });
-    } catch (RuntimeException e) {
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

@@ -16,17 +16,17 @@
 
 package com.google.inject;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
  * &#64;{@link Inject}.
  *
- * <p>When injecting a method or constructor, you can additionally annotate
- * its parameters with &#64;{@link Inject} and specify a dependency name. When
- * a parameter has no annotation, the container uses the name from the method
- * or constructor's &#64;{@link Inject} annotation respectively.
+ * <p>When injecting a method or constructor, you can additionally annotate its
+ * parameters with &#64;{@link Inject} and specify a dependency name. When a
+ * parameter has no annotation, the container uses the name from the method or
+ * constructor's &#64;{@link Inject} annotation respectively.
  *
  * <p>For example:
  *
@@ -64,8 +64,8 @@ import java.util.List;
  *  Foo foo = fooFactory.get();
  * </pre>
  *
- * @see ContainerBuilder
  * @author crazybob@google.com (Bob Lee)
+ * @see ContainerBuilder
  */
 public interface Container {
 
@@ -75,8 +75,8 @@ public interface Container {
   void injectMembers(Object o);
 
   /**
-   * Gets a factory which injects the given class's constructor and creates
-   * new instances of {@code T}.
+   * Gets a factory which injects the given class's constructor and creates new
+   * instances of {@code T}.
    */
   <T> Factory<T> getCreator(Class<T> implementation);
 

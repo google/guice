@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * @author crazybob@google.com (Bob Lee)
-*/
+ */
 class FactoryToInternalFactoryAdapter<T> implements Factory<T> {
 
   private final ContainerImpl container;
@@ -32,8 +32,7 @@ class FactoryToInternalFactoryAdapter<T> implements Factory<T> {
   }
 
   public T get() {
-    return container.callInContext(
-        new ContextualCallable<T>() {
+    return container.callInContext(new ContextualCallable<T>() {
       public T call(InternalContext context) {
         return internalFactory.get(context);
       }

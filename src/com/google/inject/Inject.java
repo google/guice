@@ -16,9 +16,12 @@
 
 package com.google.inject;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
@@ -27,7 +30,7 @@ import java.lang.annotation.Target;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({METHOD, CONSTRUCTOR, FIELD, PARAMETER})
+@Target({ METHOD, CONSTRUCTOR, FIELD, PARAMETER })
 @Retention(RUNTIME)
 public @interface Inject {
 
@@ -37,8 +40,8 @@ public @interface Inject {
   String value() default Key.DEFAULT_NAME;
 
   /**
-   * Whether or not injection is required. Applicable only to methods and
-   * fields (not constructors or parameters).
+   * Whether or not injection is required. Applicable only to methods and fields
+   * (not constructors or parameters).
    */
   boolean required() default true;
 }

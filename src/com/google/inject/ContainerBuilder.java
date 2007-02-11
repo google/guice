@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.ContainerImpl.Injector;
 import static com.google.inject.Scopes.CONTAINER;
 import static com.google.inject.Scopes.CONTAINER_NAME;
 import static com.google.inject.Scopes.DEFAULT;
@@ -27,9 +28,6 @@ import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -41,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
@@ -52,31 +51,31 @@ import java.util.logging.Logger;
  * <p>Default bindings include:
  *
  * <ul>
- *   <li>A {@code Factory<T>} for each binding of type {@code T}
- *   <li>The {@link Container} iself
- *   <li>The {@link Logger} for the class being injected
+ * <li>A {@code Factory<T>} for each binding of type {@code T}
+ * <li>The {@link Container} iself
+ * <li>The {@link Logger} for the class being injected
  * </ul>
  *
- * <p>Converts constants as needed from {@code String} to any primitive type
- * in addition to {@code enum} and {@code Class<?>}.
+ * <p>Converts constants as needed from {@code String} to any primitive type in
+ * addition to {@code enum} and {@code Class<?>}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public final class ContainerBuilder extends SourceConsumer {
 
-  private static final Logger logger =
-      Logger.getLogger(ContainerBuilder.class.getName());
+  private static final Logger logger
+      = Logger.getLogger(ContainerBuilder.class.getName());
 
-  final List<BindingBuilder<?>> bindingBuilders =
-      new ArrayList<BindingBuilder<?>>();
-  final List<ConstantBindingBuilder> constantBindingBuilders =
-      new ArrayList<ConstantBindingBuilder>();
-  final List<LinkedBindingBuilder<?>> linkedBindingBuilders =
-      new ArrayList<LinkedBindingBuilder<?>>();
+  final List<BindingBuilder<?>> bindingBuilders
+      = new ArrayList<BindingBuilder<?>>();
+  final List<ConstantBindingBuilder> constantBindingBuilders
+      = new ArrayList<ConstantBindingBuilder>();
+  final List<LinkedBindingBuilder<?>> linkedBindingBuilders
+      = new ArrayList<LinkedBindingBuilder<?>>();
   final Map<String, Scope> scopes = new HashMap<String, Scope>();
 
-  final List<StaticInjection> staticInjections =
-      new ArrayList<StaticInjection>();
+  final List<StaticInjection> staticInjections
+      = new ArrayList<StaticInjection>();
 
   ContainerImpl container;
 
@@ -85,21 +84,22 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   final Set<Message> errorMessages = new LinkedHashSet<Message>();
 
-  private static final InternalFactory<Container> CONTAINER_FACTORY =
-      new InternalFactory<Container>() {
-        public Container get(InternalContext context) {
-          return context.getContainer();
-        }
-      };
+  private static final InternalFactory<Container> CONTAINER_FACTORY
+      = new InternalFactory<Container>() {
+    public Container get(InternalContext context) {
+      return context.getContainer();
+    }
+  };
 
-  private static final InternalFactory<Logger> LOGGER_FACTORY =
-      new InternalFactory<Logger>() {
-        public Logger get(InternalContext context) {
-          Member member = context.getExternalContext().getMember();
-          return member == null ? Logger.getAnonymousLogger()
-              : Logger.getLogger(member.getDeclaringClass().getName());
-        }
-      };
+  private static final InternalFactory<Logger> LOGGER_FACTORY
+      = new InternalFactory<Logger>() {
+    public Logger get(InternalContext context) {
+      Member member = context.getExternalContext().getMember();
+      return member == null
+          ? Logger.getAnonymousLogger()
+          : Logger.getLogger(member.getDeclaringClass().getName());
+    }
+  };
 
   static final String UNKNOWN_SOURCE = "[unknown source]";
 
@@ -150,9 +150,9 @@ public final class ContainerBuilder extends SourceConsumer {
    * and method queries.
    *
    * @param classQuery matches classes the interceptor should apply to. For
-   *  example: {@code only(Runnable.class)}.
+   *     example: {@code only(Runnable.class)}.
    * @param methodQuery matches methods the interceptor should apply to. For
-   *  example: {@code annotatedWith(Transactional.class)}.
+   *     example: {@code annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
   public void intercept(Query<? super Class<?>> classQuery,
@@ -168,7 +168,8 @@ public final class ContainerBuilder extends SourceConsumer {
   public void scope(String name, Scope scope) {
     if (scopes.containsKey(nonNull(name, "name"))) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
-    } else {
+    }
+    else {
       scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
     }
   }
@@ -292,12 +293,11 @@ public final class ContainerBuilder extends SourceConsumer {
    * which were registered using {@link #requestStaticInjection(Class...)}.
    *
    * @param preload If true, the container will load all container-scoped
-   *  bindings now. If false, the container will lazily load them. Eager
-   *  loading is appropriate for production use (catch errors early and take
-   *  any performance hit up front) while lazy loading can speed development.
-   *
+   *     bindings now. If false, the container will lazily load them. Eager
+   *     loading is appropriate for production use (catch errors early and take
+   *     any performance hit up front) while lazy loading can speed development.
    * @throws ContainerCreationException if configuration errors are found. The
-   *  expectation is that the application will log this exception and exit.
+   *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
   public synchronized Container create(boolean preload)
@@ -306,16 +306,14 @@ public final class ContainerBuilder extends SourceConsumer {
 
     // Create the container.
     ensureNotCreated();
-    Map<Key<?>, Binding<?>> bindings =
-        new HashMap<Key<?>, Binding<?>>();
-    container = new ContainerImpl(
-        proxyFactoryBuilder.create(), bindings);
+    Map<Key<?>, Binding<?>> bindings = new HashMap<Key<?>, Binding<?>>();
+    container = new ContainerImpl(proxyFactoryBuilder.create(), bindings);
 
     createConstantBindings();
 
     // Commands to execute before returning the Container instance.
-    final List<ContextualCallable<Void>> preloaders =
-        new ArrayList<ContextualCallable<Void>>();
+    final List<ContextualCallable<Void>> preloaders
+        = new ArrayList<ContextualCallable<Void>>();
 
     createBindings(preload, preloaders);
     createLinkedBindings();
@@ -380,8 +378,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  private <T> void createLinkedBinding(
-      LinkedBindingBuilder<T> builder) {
+  private <T> void createLinkedBinding(LinkedBindingBuilder<T> builder) {
     // TODO: Support linking to a later-declared link?
     Key<? extends T> destinationKey = builder.getDestination();
     if (destinationKey == null) {
@@ -396,14 +393,13 @@ public final class ContainerBuilder extends SourceConsumer {
       return;
     }
 
-    Binding<?> binding =
-        Binding.newInstance(container, builder.getKey(), builder.getSource(),
-            destination.getInternalFactory());
+    Binding<?> binding = Binding.newInstance(container, builder.getKey(),
+        builder.getSource(), destination.getInternalFactory());
 
     putBinding(binding);
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   private <T> Binding<T> getBinding(Key<T> destinationKey) {
     return (Binding<T>) container.internalBindings().get(destinationKey);
   }
@@ -415,13 +411,13 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  private <T> void createBinding(BindingBuilder<T> builder,
-      boolean preload, List<ContextualCallable<Void>> preloaders) {
+  private <T> void createBinding(BindingBuilder<T> builder, boolean preload,
+      List<ContextualCallable<Void>> preloaders) {
     final Key<T> key = builder.getKey();
-    final InternalFactory<? extends T> factory =
-        builder.getInternalFactory(container);
-    Binding<?> binding = Binding.newInstance(
-        container, key, builder.getSource(), factory);
+    final InternalFactory<? extends T> factory
+        = builder.getInternalFactory(container);
+    Binding<?> binding
+        = Binding.newInstance(container, key, builder.getSource(), factory);
 
     putBinding(binding);
 
@@ -430,7 +426,8 @@ public final class ContainerBuilder extends SourceConsumer {
       if (preload || builder.shouldPreload()) {
         preloaders.add(new BindingPreloader(key, factory));
       }
-    } else {
+    }
+    else {
       if (builder.shouldPreload()) {
         addError(builder.getSource(), ErrorMessages.PRELOAD_NOT_ALLOWED);
       }
@@ -443,16 +440,17 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   private <T> void createConstantBinding(ConstantBindingBuilder builder) {
     if (builder.hasValue()) {
       Key<T> key = (Key<T>) builder.getKey();
-      InternalFactory<? extends T> factory =
-          (InternalFactory<? extends T>) builder.getInternalFactory();
-      Binding<?> binding =
-          Binding.newInstance(container, key, builder.getSource(), factory);
+      InternalFactory<? extends T> factory
+          = (InternalFactory<? extends T>) builder.getInternalFactory();
+      Binding<?> binding
+          = Binding.newInstance(container, key, builder.getSource(), factory);
       putBinding(binding);
-    } else {
+    }
+    else {
       addError(builder.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
     }
   }
@@ -461,7 +459,8 @@ public final class ContainerBuilder extends SourceConsumer {
       Key<?> key, InternalFactory<?> factory) {
     if (factories.containsKey(key)) {
       addError(source, ErrorMessages.BINDING_ALREADY_SET, key);
-    } else {
+    }
+    else {
       factories.put(key, factory);
     }
   }
@@ -473,18 +472,18 @@ public final class ContainerBuilder extends SourceConsumer {
     if (bindings.containsKey(key)) {
       addError(binding.getSource(), ErrorMessages.BINDING_ALREADY_SET, key,
           original.getSource());
-    } else {
+    }
+    else {
       bindings.put(key, binding);
     }
   }
 
   /**
-   * Currently we only support creating one Container instance per builder.
-   * If we want to support creating more than one container per builder,
-   * we should move to a "factory factory" model where we create a factory
-   * instance per Container. Right now, one factory instance would be
-   * shared across all the containers, which means container-scoped objects
-   * would be shared, etc.
+   * Currently we only support creating one Container instance per builder. If
+   * we want to support creating more than one container per builder, we should
+   * move to a "factory factory" model where we create a factory instance per
+   * Container. Right now, one factory instance would be shared across all the
+   * containers, which means container-scoped objects would be shared, etc.
    */
   private void ensureNotCreated() {
     if (container != null) {
@@ -528,15 +527,14 @@ public final class ContainerBuilder extends SourceConsumer {
       if (!this.key.hasDefaultName()) {
         addError(source, ErrorMessages.NAME_ALREADY_SET);
       }
-
       this.key = this.key.named(name);
       return this;
     }
 
     /**
-     * Binds to instances of the given implementation class. The {@link
-     * Container} will inject the implementation instances as well. Sets the
-     * scope based on the @{@link Scoped} annotation on the implementation
+     * Binds to instances of the given implementation class. The
+     * {@link Container} will inject the implementation instances as well. Sets
+     * the scope based on the @{@link Scoped} annotation on the implementation
      * class if present.
      */
     public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
@@ -544,9 +542,9 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     /**
-     * Binds to instances of the given implementation type. The {@link
-     * Container} will inject the implementation instances as well. Sets the
-     * scope based on the @{@link Scoped} annotation on the implementation
+     * Binds to instances of the given implementation type. The
+     * {@link Container} will inject the implementation instances as well. Sets
+     * the scope based on the @{@link Scoped} annotation on the implementation
      * class if present.
      */
     public <I extends T> BindingBuilder<T> to(TypeLiteral<I> implementation) {
@@ -559,11 +557,12 @@ public final class ContainerBuilder extends SourceConsumer {
 
     private void setScopeFromType(Class<?> implementation) {
       for (Annotation annotation : implementation.getAnnotations()) {
-        Class<? extends Annotation> annotationType =
-            annotation.annotationType();
+        Class<? extends Annotation> annotationType
+            = annotation.annotationType();
         if (annotationType == Scoped.class) {
           in(((Scoped) annotation).value());
-        } else {
+        }
+        else {
           Scoped scoped = annotationType.getAnnotation(Scoped.class);
           if (scoped != null) {
             in(scoped.value());
@@ -622,8 +621,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     /**
-     * Specifies the scope. References the name passed to {@link
-     * ContainerBuilder#scope(String, Scope)}.
+     * Specifies the scope. References the name passed to {@link #scope}.
      */
     public BindingBuilder<T> in(String scopeName) {
       ensureScopeNotSet();
@@ -662,9 +660,9 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     /**
-     * Instructs the builder to eagerly load this binding when it creates
-     * the container. Useful for application initialization logic. Currently
-     * only supported for container-scoped bindings.
+     * Instructs the builder to eagerly load this binding when it creates the
+     * container. Useful for application initialization logic. Currently only
+     * supported for container-scoped bindings.
      */
     public BindingBuilder<T> preload() {
       this.preload = true;
@@ -715,8 +713,8 @@ public final class ContainerBuilder extends SourceConsumer {
     @SuppressWarnings("unchecked")
     public T get(InternalContext context) {
       if (constructor == null) {
-        this.constructor =
-            context.getContainerImpl().getConstructor(implementation);
+        this.constructor
+            = context.getContainerImpl().getConstructor(implementation);
       }
       return (T) constructor.construct(context, key.getRawType());
     }
@@ -929,8 +927,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     final Object source;
     final Class<?>[] types;
-    final List<ContainerImpl.Injector> injectors =
-        new ArrayList<ContainerImpl.Injector>();
+    final List<Injector> injectors = new ArrayList<Injector>();
 
     public StaticInjection(Object source, Class<?>[] types) {
       this.source = source;
@@ -954,7 +951,7 @@ public final class ContainerBuilder extends SourceConsumer {
     void runInjectors(ContainerImpl container) {
       container.callInContext(new ContextualCallable<Void>() {
         public Void call(InternalContext context) {
-          for (ContainerImpl.Injector injector : injectors) {
+          for (Injector injector : injectors) {
             injector.inject(context, null);
           }
           return null;
@@ -963,8 +960,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  static class BindingPreloader
-      implements ContextualCallable<Void> {
+  static class BindingPreloader implements ContextualCallable<Void> {
 
     private final Key<?> key;
     private final InternalFactory<?> factory;
@@ -975,13 +971,14 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     public Void call(InternalContext context) {
-      ExternalContext<?> externalContext =
-          ExternalContext.newInstance(null, key, context.getContainerImpl());
+      ExternalContext<?> externalContext
+          = ExternalContext.newInstance(null, key, context.getContainerImpl());
       context.setExternalContext(externalContext);
       try {
         factory.get(context);
         return null;
-      } finally {
+      }
+      finally {
         context.setExternalContext(null);
       }
     }

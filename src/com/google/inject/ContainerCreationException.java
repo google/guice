@@ -17,15 +17,14 @@
 package com.google.inject;
 
 import com.google.inject.spi.Message;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
 
 /**
- * Thrown when errors occur while creating a {@link Container}. Includes a
- * list of encountered errors. Typically, a client should catch this exception,
- * log it, and stop execution.
+ * Thrown when errors occur while creating a {@link Container}. Includes a list
+ * of encountered errors. Typically, a client should catch this exception, log
+ * it, and stop execution.
  *
  * @author crazybob@google.com (Bob Lee)
  */

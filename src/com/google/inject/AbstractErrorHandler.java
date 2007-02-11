@@ -60,8 +60,7 @@ abstract class AbstractErrorHandler implements ErrorHandler {
       },
       new Converter<Field>(Field.class) {
         public String toString(Field f) {
-          return "field " + f.getDeclaringClass().getName() + "."
-              + f.getName();
+          return "field " + f.getDeclaringClass().getName() + "." + f.getName();
         }
       },
       new Converter<Class>(Class.class) {

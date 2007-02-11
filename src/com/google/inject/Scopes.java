@@ -23,7 +23,8 @@ package com.google.inject;
  */
 public class Scopes {
 
-  private Scopes() {}
+  private Scopes() {
+  }
 
   /**
    * Name of the default scope.
@@ -53,14 +54,16 @@ public class Scopes {
 
         private volatile T instance;
 
-        // DCL is safe as of Java 5, which we obviously require
+        // DCL on a volatile is safe as of Java 5, which we obviously require
         @SuppressWarnings("DoubleCheckedLocking")
         public T get() {
           if (instance == null) {
-            // Use a pretty coarse lock. We don't want to run into deadlocks
-            // when two threads try to load circularly-dependent objects.
-            // Maybe one of these days we will identify independent graphs of
-            // objects and offer to load them in parallel.
+            /*
+             * Use a pretty coarse lock. We don't want to run into deadlocks
+             * when two threads try to load circularly-dependent objects.
+             * Maybe one of these days we will identify independent graphs of
+             * objects and offer to load them in parallel.
+             */
             synchronized (Container.class) {
               if (instance == null) {
                 instance = creator.get();

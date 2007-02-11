@@ -17,12 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.util.GuiceFastClass;
-
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastConstructor;
 
 /**
  * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
@@ -31,16 +29,15 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class DefaultConstructionProxyFactory
-    implements ConstructionProxyFactory {
+class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
   public <T> ConstructionProxy<T> get(Constructor<T> constructor) {
-    FastClass fastClass =
-        GuiceFastClass.create(constructor.getDeclaringClass());
-    final FastConstructor fastConstructor =
-        fastClass.getConstructor(constructor);
+    Class<T> classToConstruct = constructor.getDeclaringClass();
+    FastClass fastClass = GuiceFastClass.create(classToConstruct);
+    final FastConstructor fastConstructor
+        = fastClass.getConstructor(constructor);
     return new ConstructionProxy<T>() {
-      @SuppressWarnings({"unchecked"})
+      @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);

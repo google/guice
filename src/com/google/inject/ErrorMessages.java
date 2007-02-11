@@ -38,9 +38,10 @@ class ErrorMessages {
       Key<?> key, List<String> otherNames) {
     if (otherNames.isEmpty()) {
       errorHandler.handle(MISSING_BINDING, key, member);
-    } else {
-      errorHandler.handle(MISSING_BINDING_BUT_OTHERS_EXIST,
-          key, member, otherNames);
+    }
+    else {
+      errorHandler.handle(
+          MISSING_BINDING_BUT_OTHERS_EXIST, key, member, otherNames);
     }
   }
 
@@ -54,8 +55,7 @@ class ErrorMessages {
   static final String TOO_MANY_CONSTRUCTORS = "More than one constructor"
       + " annotated with @Inject found in %s. " + CONSTRUCTOR_RULES;
 
-  static final String DUPLICATE_SCOPES =
-      "A scope named '%s' already exists.";
+  static final String DUPLICATE_SCOPES = "A scope named '%s' already exists.";
 
   static final String MISSING_CONSTANT_VALUE = "Missing constant value. Please"
       + " call to(...).";
@@ -70,8 +70,8 @@ class ErrorMessages {
 
   static final String NAME_ALREADY_SET = "Binding name is set more than once.";
 
-  static final String IMPLEMENTATION_ALREADY_SET =
-      "Implementation is set more than once.";
+  static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
+      + " than once.";
 
   static final String SCOPE_NOT_FOUND = "Scope named '%s' not found."
       + " Available scope names: %s";
@@ -82,8 +82,8 @@ class ErrorMessages {
       + " implementation with with an annotation which is annotated with"
       + " @Scoped.";
 
-  static final String CONSTANT_VALUE_ALREADY_SET =
-      "Constant value is set more than once.";
+  static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
+      + " than once.";
 
   static final String LINK_DESTINATION_ALREADY_SET = "Link destination is"
       + " set more than once.";

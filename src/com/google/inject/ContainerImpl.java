@@ -16,13 +16,11 @@
 
 package com.google.inject;
 
+import static com.google.inject.ConstantConversionException.createMessage;
 import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
-
-import net.sf.cglib.reflect.FastMethod;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
@@ -41,12 +39,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 
 /**
  * Default {@link Container} implementation.
  *
- * @see ContainerBuilder
  * @author crazybob@google.com (Bob Lee)
+ * @see ContainerBuilder
  */
 class ContainerImpl implements Container {
 
@@ -78,13 +78,13 @@ class ContainerImpl implements Container {
     PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
   }
 
-  private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS =
-      new PrimitiveConverters();
+  private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS
+      = new PrimitiveConverters();
 
   final ConstructionProxyFactory constructionProxyFactory;
   final Map<Key<?>, Binding<?>> bindings;
-  final Map<TypeLiteral<?>, List<Binding<?>>> bindingsByType =
-      new HashMap<TypeLiteral<?>, List<Binding<?>>>();
+  final Map<TypeLiteral<?>, List<Binding<?>>> bindingsByType
+      = new HashMap<TypeLiteral<?>, List<Binding<?>>>();
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
@@ -116,7 +116,7 @@ class ContainerImpl implements Container {
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
     // IntelliJ doesn't understand that the below is "correct"
     //noinspection RedundantCast,RawUseOfParameterizedType
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     List<Binding<T>> bindingsForThisType = (List) bindingsByType.get(type);
     if (bindingsForThisType == null) {
       return Collections.emptyList();
@@ -137,7 +137,8 @@ class ContainerImpl implements Container {
     this.errorHandler = errorHandler;
     try {
       runnable.run();
-    } finally {
+    }
+    finally {
       this.errorHandler = previous;
     }
   }
@@ -161,19 +162,20 @@ class ContainerImpl implements Container {
       if (!(factoryType instanceof ParameterizedType)) {
         return null;
       }
-      Type entryType =
-          ((ParameterizedType) factoryType).getActualTypeArguments()[0];
+      Type entryType
+          = ((ParameterizedType) factoryType).getActualTypeArguments()[0];
 
       try {
-        final Factory<?> factory =
-            getFactory(Key.get(entryType, key.getName()));
+        final Factory<?> factory
+            = getFactory(Key.get(entryType, key.getName()));
         return new InternalFactory<T>() {
-          @SuppressWarnings({"unchecked"})
+          @SuppressWarnings("unchecked")
           public T get(InternalContext context) {
             return (T) factory;
           }
         };
-      } catch (ConfigurationException e) {
+      }
+      catch (ConfigurationException e) {
         ErrorMessages.handleMissingBinding(errorHandler, member, key,
             getNamesOfBindingsTo(key.getType()));
         return invalidFactory();
@@ -181,11 +183,11 @@ class ContainerImpl implements Container {
     }
 
     // Auto[un]box primitives.
-    Class<?> primitiveCounterpart =
-        PRIMITIVE_COUNTERPARTS.get(key.getType().getRawType());
+    Class<?> primitiveCounterpart
+        = PRIMITIVE_COUNTERPARTS.get(key.getType().getRawType());
     if (primitiveCounterpart != null) {
-      Binding<?> counterpartBinding =
-          getBinding(Key.get(primitiveCounterpart, key.getName()));
+      Binding<?> counterpartBinding
+          = getBinding(Key.get(primitiveCounterpart, key.getName()));
       if (counterpartBinding != null) {
         return (InternalFactory<? extends T>)
             counterpartBinding.getInternalFactory();
@@ -193,8 +195,8 @@ class ContainerImpl implements Container {
     }
 
     // Do we have a constant String factory of the same name?
-    Binding<String> stringBinding =
-        getBinding(Key.get(String.class, key.getName()));
+    Binding<String> stringBinding
+        = getBinding(Key.get(String.class, key.getName()));
     if (stringBinding == null || !stringBinding.isConstant()) {
       return null;
     }
@@ -214,7 +216,8 @@ class ContainerImpl implements Container {
       try {
         T t = converter.convert(member, key, value);
         return new ConstantFactory<T>(t);
-      } catch (ConstantConversionException e) {
+      }
+      catch (ConstantConversionException e) {
         errorHandler.handle(e);
         return null;
       }
@@ -222,13 +225,12 @@ class ContainerImpl implements Container {
 
     // Do we need an enum?
     if (Enum.class.isAssignableFrom(type)) {
-      T t = null;
+      T t;
       try {
         t = (T) Enum.valueOf((Class) type, value);
-      } catch (IllegalArgumentException e) {
-        errorHandler.handle(
-            ConstantConversionException.createMessage(
-                value, key, member, e.toString()));
+      }
+      catch (IllegalArgumentException e) {
+        errorHandler.handle(createMessage(value, key, member, e.toString()));
         return invalidFactory();
       }
       return new ConstantFactory<T>(t);
@@ -238,10 +240,9 @@ class ContainerImpl implements Container {
     if (type == Class.class) {
       try {
         return new ConstantFactory<T>((T) Class.forName(value));
-      } catch (ClassNotFoundException e) {
-        errorHandler.handle(
-            ConstantConversionException.createMessage(
-                value, key, member, e.toString()));
+      }
+      catch (ClassNotFoundException e) {
+        errorHandler.handle(createMessage(value, key, member, e.toString()));
         return invalidFactory();
       }
     }
@@ -258,19 +259,19 @@ class ContainerImpl implements Container {
   /**
    * Field and method injectors.
    */
-  final Map<Class<?>, List<Injector>> injectors =
-      new ReferenceCache<Class<?>, List<Injector>>() {
-        protected List<Injector> create(Class<?> key) {
-          if (key.isInterface()) {
-            errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE, key);
-            return Collections.emptyList();
-          }
+  final Map<Class<?>, List<Injector>> injectors
+      = new ReferenceCache<Class<?>, List<Injector>>() {
+    protected List<Injector> create(Class<?> key) {
+      if (key.isInterface()) {
+        errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE, key);
+        return Collections.emptyList();
+      }
 
-          List<Injector> injectors = new ArrayList<Injector>();
-          addInjectors(key, injectors);
-          return injectors;
-        }
-      };
+      List<Injector> injectors = new ArrayList<Injector>();
+      addInjectors(key, injectors);
+      return injectors;
+    }
+  };
 
   /**
    * Recursively adds injectors for fields and methods from the given class to
@@ -320,7 +321,8 @@ class ContainerImpl implements Container {
         if (inject != null) {
           try {
             injectors.add(injectorFactory.create(this, member, inject.value()));
-          } catch (MissingDependencyException e) {
+          }
+          catch (MissingDependencyException e) {
             if (inject.required()) {
               // TODO: Report errors for more than one parameter per member.
               e.handle(errorHandler);
@@ -339,7 +341,7 @@ class ContainerImpl implements Container {
     return Collections.unmodifiableMap(bindings);
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   public <T> Binding<T> getBinding(Key<T> key) {
     return (Binding<T>) bindings.get(key);
   }
@@ -380,9 +382,11 @@ class ContainerImpl implements Container {
       context.setExternalContext(externalContext);
       try {
         field.set(o, factory.get(context));
-      } catch (IllegalAccessException e) {
+      }
+      catch (IllegalAccessException e) {
         throw new AssertionError(e);
-      } finally {
+      }
+      finally {
         context.setExternalContext(previous);
       }
     }
@@ -396,8 +400,8 @@ class ContainerImpl implements Container {
    * @param parameterTypes parameter types
    * @return injections
    */
-  <M extends AccessibleObject & Member> ParameterInjector<?>[]
-      getParametersInjectors(M member,
+  <M extends AccessibleObject & Member>
+  ParameterInjector<?>[] getParametersInjectors(M member,
       Annotation[][] annotations, Type[] parameterTypes, String defaultName)
       throws MissingDependencyException {
     boolean defaultNameOverridden = !defaultName.equals(Key.DEFAULT_NAME);
@@ -409,11 +413,10 @@ class ContainerImpl implements Container {
           ErrorMessages.NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS, member);
     }
 
-    List<ParameterInjector<?>> parameterInjectors =
-        new ArrayList<ParameterInjector<?>>();
-
-    Iterator<Annotation[]> annotationsIterator =
-        Arrays.asList(annotations).iterator();
+    ParameterInjector<?>[] parameterInjectors
+        = new ParameterInjector<?>[parameterTypes.length];
+    Iterator<Annotation[]> annotationsIterator
+        = Arrays.asList(annotations).iterator();
     int index = 0;
     for (Type parameterType : parameterTypes) {
       Inject annotation = findInject(annotationsIterator.next());
@@ -425,34 +428,29 @@ class ContainerImpl implements Container {
           errorHandler.handle(
               ErrorMessages.NAME_ON_MEMBER_AND_PARAMETER, member);
         }
-      } else {
+      }
+      else {
         name = annotation == null ? defaultName : annotation.value();
       }
 
       Key<?> key = Key.get(parameterType, name);
-      parameterInjectors.add(createParameterInjector(key, member, index++));
+      parameterInjectors[index] = createParameterInjector(key, member, index);
+      index++;
     }
 
-    return toArray(parameterInjectors);
+    return parameterInjectors;
   }
 
-  <T> ParameterInjector<T> createParameterInjector(
-      Key<T> key, Member member, int index) throws MissingDependencyException {
+  <T> ParameterInjector<T> createParameterInjector(Key<T> key, Member member,
+      int index) throws MissingDependencyException {
     InternalFactory<? extends T> factory = getFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(key, member);
     }
 
-    ExternalContext<T> externalContext =
-        ExternalContext.newInstance(member, index, key, this);
+    ExternalContext<T> externalContext
+        = ExternalContext.newInstance(member, index, key, this);
     return new ParameterInjector<T>(externalContext, factory);
-  }
-
-  @SuppressWarnings("unchecked")
-  private ParameterInjector<?>[] toArray(
-      List<ParameterInjector<?>> parameterInjections) {
-    return parameterInjections.toArray(
-        new ParameterInjector[parameterInjections.size()]);
   }
 
   /**
@@ -474,8 +472,8 @@ class ContainerImpl implements Container {
 
     public MethodInjector(ContainerImpl container, Method method, String name)
         throws MissingDependencyException {
-      this.fastMethod =
-          GuiceFastClass.create(method.getDeclaringClass()).getMethod(method);
+      FastClass fastClass = GuiceFastClass.create(method.getDeclaringClass());
+      this.fastMethod = fastClass.getMethod(method);
       Type[] parameterTypes = method.getGenericParameterTypes();
       parameterInjectors = parameterTypes.length > 0
           ? container.getParametersInjectors(
@@ -486,24 +484,25 @@ class ContainerImpl implements Container {
     public void inject(InternalContext context, Object o) {
       try {
         fastMethod.invoke(o, getParameters(context, parameterInjectors));
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
   }
 
-  final Map<Class<?>, ConstructorInjector> constructors =
-      new ReferenceCache<Class<?>, ConstructorInjector>() {
-        @SuppressWarnings("unchecked")
-        protected ConstructorInjector<?> create(Class<?> implementation) {
-          if (implementation.isInterface()) {
-            errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE,
-                implementation);
-          }
+  final Map<Class<?>, ConstructorInjector> constructors
+      = new ReferenceCache<Class<?>, ConstructorInjector>() {
+    @SuppressWarnings("unchecked")
+    protected ConstructorInjector<?> create(Class<?> implementation) {
+      if (implementation.isInterface()) {
+        errorHandler.handle(
+            ErrorMessages.CANNOT_INJECT_INTERFACE, implementation);
+      }
 
-          return new ConstructorInjector(ContainerImpl.this, implementation);
-        }
-      };
+      return new ConstructorInjector(ContainerImpl.this, implementation);
+    }
+  };
 
   /**
    * A placeholder. This enables us to continue processing and gather more
@@ -515,11 +514,12 @@ class ContainerImpl implements Container {
     }
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   static <T> Constructor<T> invalidConstructor() {
     try {
       return (Constructor<T>) InvalidConstructor.class.getDeclaredConstructor();
-    } catch (NoSuchMethodException e) {
+    }
+    catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
   }
@@ -540,7 +540,8 @@ class ContainerImpl implements Container {
       context.setExternalContext(externalContext);
       try {
         return factory.get(context);
-      } finally {
+      }
+      finally {
         context.setExternalContext(previous);
       }
     }
@@ -623,8 +624,8 @@ class ContainerImpl implements Container {
     final InternalFactory<? extends T> factory = getFactory(null, key);
 
     if (factory == null) {
-      throw new ConfigurationException("Missing binding to " +
-          AbstractErrorHandler.convert(key) + ".");
+      throw new ConfigurationException(
+          "Missing binding to " + AbstractErrorHandler.convert(key) + ".");
     }
 
     return new Factory<T>() {
@@ -636,7 +637,8 @@ class ContainerImpl implements Container {
                 ExternalContext.newInstance(null, key, ContainerImpl.this));
             try {
               return factory.get(context);
-            } finally {
+            }
+            finally {
               context.setExternalContext(previous);
             }
           }
@@ -645,12 +647,12 @@ class ContainerImpl implements Container {
     };
   }
 
-  final ThreadLocal<InternalContext[]> localContext =
-      new ThreadLocal<InternalContext[]>() {
-        protected InternalContext[] initialValue() {
-          return new InternalContext[1];
-        }
-      };
+  final ThreadLocal<InternalContext[]> localContext
+      = new ThreadLocal<InternalContext[]>() {
+    protected InternalContext[] initialValue() {
+      return new InternalContext[1];
+    }
+  };
 
   /**
    * Looks up thread local context. Creates (and removes) a new context if
@@ -662,11 +664,13 @@ class ContainerImpl implements Container {
       reference[0] = new InternalContext(this);
       try {
         return callable.call(reference[0]);
-      } finally {
+      }
+      finally {
         // Only remove the context if this call created it.
         reference[0] = null;
       }
-    } else {
+    }
+    else {
       // Someone else will clean up this context.
       return callable.call(reference[0]);
     }
@@ -741,17 +745,19 @@ class ContainerImpl implements Container {
     <T> void putParser(final Class<T> primitive) {
       try {
         Class<?> wrapper = PRIMITIVE_COUNTERPARTS.get(primitive);
-        final Method parser = wrapper.getMethod("parse" +
-            Strings.capitalize(primitive.getName()), String.class);
+        final Method parser = wrapper.getMethod(
+            "parse" + Strings.capitalize(primitive.getName()), String.class);
         Converter<T> converter = new Converter<T>() {
-          @SuppressWarnings({"unchecked"})
+          @SuppressWarnings("unchecked")
           public T convert(Member member, Key<T> key, String value)
               throws ConstantConversionException {
             try {
               return (T) parser.invoke(null, value);
-            } catch (IllegalAccessException e) {
+            }
+            catch (IllegalAccessException e) {
               throw new AssertionError(e);
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e) {
               throw new ConstantConversionException(member, key, value,
                   e.getTargetException());
             }
@@ -759,7 +765,8 @@ class ContainerImpl implements Container {
         };
         put(wrapper, converter);
         put(primitive, converter);
-      } catch (NoSuchMethodException e) {
+      }
+      catch (NoSuchMethodException e) {
         throw new AssertionError(e);
       }
     }
@@ -777,14 +784,14 @@ class ContainerImpl implements Container {
         throws ConstantConversionException;
   }
 
-  private static final InternalFactory<?> INVALID_FACTORY =
-      new InternalFactory<Object>() {
-        public Object get(InternalContext context) {
-          throw new AssertionError();
-        }
-      };
+  private static final InternalFactory<?> INVALID_FACTORY
+      = new InternalFactory<Object>() {
+    public Object get(InternalContext context) {
+      throw new AssertionError();
+    }
+  };
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   static <T> InternalFactory<T> invalidFactory() {
     return (InternalFactory<T>) INVALID_FACTORY;
   }

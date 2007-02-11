@@ -19,8 +19,7 @@ package com.google.inject;
 /**
  * @author crazybob@google.com (Bob Lee)
 */
-class InternalToContextualFactoryAdapter<T> 
-    implements InternalFactory<T> {
+class InternalToContextualFactoryAdapter<T> implements InternalFactory<T> {
 
   private final ContextualFactory<? extends T> factory;
 

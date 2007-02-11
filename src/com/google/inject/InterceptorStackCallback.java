@@ -16,14 +16,12 @@
 
 package com.google.inject;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
+import java.util.List;
 import net.sf.cglib.proxy.MethodProxy;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.AccessibleObject;
-import java.util.List;
 
 /**
  * Intercepts a method with a stack of interceptors.
@@ -38,14 +36,14 @@ class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
   public InterceptorStackCallback(Method method,
       List<MethodInterceptor> interceptors) {
     this.method = method;
-    this.interceptors = interceptors.toArray(
-        new MethodInterceptor[interceptors.size()]);
+    this.interceptors
+        = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
   }
 
   public Object intercept(Object proxy, Method method, Object[] arguments,
       MethodProxy methodProxy) throws Throwable {
-    return new InterceptedMethodInvocation(
-        proxy, methodProxy, arguments).proceed();
+    return new InterceptedMethodInvocation(proxy, methodProxy, arguments)
+        .proceed();
   }
 
   class InterceptedMethodInvocation implements MethodInvocation {
@@ -66,9 +64,10 @@ class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
       try {
         index++;
         return index == interceptors.length
-          ? methodProxy.invokeSuper(proxy, arguments)
-          : interceptors[index].invoke(this);
-      } finally {
+            ? methodProxy.invokeSuper(proxy, arguments)
+            : interceptors[index].invoke(this);
+      }
+      finally {
         index--;
       }
     }

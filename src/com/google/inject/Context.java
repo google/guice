@@ -38,8 +38,8 @@ public interface Context {
   Member getMember();
 
   /**
-   * Gets the index of the parameter which is being injected. Returns
-   * {@code -1} if a parameter isn't being injected.
+   * Gets the index of the parameter which is being injected. Returns {@code -1}
+   * if a parameter isn't being injected.
    */
   int getParameterIndex();
 

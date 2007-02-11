@@ -16,14 +16,12 @@
 
 package com.google.inject;
 
-import com.google.inject.util.Objects;
 import com.google.inject.query.Query;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
+import com.google.inject.util.Objects;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Ties a query to a method interceptor.
@@ -36,12 +34,12 @@ class MethodAspect {
   final Query<? super Method> methodQuery;
   final List<MethodInterceptor> interceptors;
 
-  MethodAspect(Query<? super Class<?>> classQuery, Query<? super Method> methodQuery,
-      MethodInterceptor... interceptors) {
+  MethodAspect(Query<? super Class<?>> classQuery,
+      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
     this.classQuery = Objects.nonNull(classQuery, "class query");
     this.methodQuery = Objects.nonNull(methodQuery, "method query");
-    this.interceptors =
-        Arrays.asList(Objects.nonNull(interceptors, "interceptors"));
+    this.interceptors
+        = Arrays.asList(Objects.nonNull(interceptors, "interceptors"));
   }
 
   boolean matches(Class<?> clazz) {

@@ -20,8 +20,8 @@ import java.lang.reflect.Member;
 import java.util.LinkedHashMap;
 
 /**
- * An immutable snapshot of the current context which is safe to
- * expose to client code.
+ * An immutable snapshot of the current context which is safe to expose to
+ * client code.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -64,8 +64,8 @@ class ExternalContext<T> implements Context {
     }}.toString();
   }
 
-  static <T> ExternalContext<T> newInstance(Member member,
-      Key<T> key, ContainerImpl container) {
+  static <T> ExternalContext<T> newInstance(
+      Member member, Key<T> key, ContainerImpl container) {
     return new ExternalContext<T>(member, -1, key, container);
   }
 

@@ -17,26 +17,23 @@
 package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
-
-import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
  * represent generic types, so this class does. Forces clients to create a
- * subclass of this class which enables retrieval the type information
- * even at runtime.
+ * subclass of this class which enables retrieval the type information even at
+ * runtime.
  *
- * <p>For example, to create a {@code TypeLiteral} for {@code List<String>},
- * you can create an empty anonymous inner class:
+ * <p>For example, to create a type literal for {@code List<String>}, you can
+ * create an empty anonymous inner class:
  *
- * <pre>
- * TypeLiteral&lt;List&lt;String>> listOfString =
- *   new TypeLiteral&lt;List&lt;String>>() {};
- * </pre>
+ * <p>
+ * {@code TypeLiteral<List<String>> list = new TypeLiteral<List<String>>() {};}
  *
- * <p>Assumes {@code Type} implements {@code equals()} and {@code hashCode()}
- * as a value (as opposed to identity) comparison.
+ * <p>Assumes that type {@code T} implements {@link Object#equals} and
+ * {@link Object#hashCode()} as value (as opposed to identity) comparison.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -50,13 +47,10 @@ public abstract class TypeLiteral<T> {
    * parameter.
    *
    * <p>Clients create an empty anonymous subclass. Doing so embeds the type
-   * parameter in the anonymous class's type hierarchy so we can reconstitute
-   * it at runtime despite erasure.
-   *
-   * <p>For example: {@code TypeLiteral<List<String>> t = new
-   * TypeLiteral<List<String>>() {};}
+   * parameter in the anonymous class's type hierarchy so we can reconstitute it
+   * at runtime despite erasure.
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
     this.rawType = (Class<? super T>) getRawType(type);
@@ -65,7 +59,7 @@ public abstract class TypeLiteral<T> {
   /**
    * Unsafe. Constructs a type literal manually.
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   private TypeLiteral(Type type) {
     this.rawType = (Class<? super T>) getRawType(nonNull(type, "type"));
     this.type = type;
@@ -89,12 +83,13 @@ public abstract class TypeLiteral<T> {
     return new SimpleTypeLiteral<Object>(getSuperclassTypeParameter(subclass));
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   private static Class<?> getRawType(Type type) {
     if (type instanceof Class<?>) {
       // type is a normal class.
       return (Class<?>) type;
-    } else {
+    }
+    else {
       // type is a parameterized type.
       if (!(type instanceof ParameterizedType)) {
         unexpectedType(type, ParameterizedType.class);
@@ -143,8 +138,8 @@ public abstract class TypeLiteral<T> {
 
   public String toString() {
     return type instanceof Class<?>
-          ? ((Class<?>) type).getName()
-          : type.toString();
+        ? ((Class<?>) type).getName()
+        : type.toString();
   }
 
   static void unexpectedType(Type type, Class<?> expected) {

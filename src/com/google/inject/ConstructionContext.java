@@ -17,11 +17,11 @@
 package com.google.inject;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Context of a dependency construction. Used to manage circular references.
@@ -75,22 +75,18 @@ class ConstructionContext<T> {
       invocationHandlers = new ArrayList<DelegatingInvocationHandler<T>>();
     }
 
-    DelegatingInvocationHandler<T> invocationHandler =
-        new DelegatingInvocationHandler<T>();
+    DelegatingInvocationHandler<T> invocationHandler
+        = new DelegatingInvocationHandler<T>();
     invocationHandlers.add(invocationHandler);
 
-    return Proxy.newProxyInstance(
-      expectedType.getClassLoader(),
-      new Class[] { expectedType },
-      invocationHandler
-    );
+    return Proxy.newProxyInstance(expectedType.getClassLoader(),
+        new Class[] { expectedType }, invocationHandler);
   }
 
   void setProxyDelegates(T delegate) {
     if (invocationHandlers != null) {
-      for (DelegatingInvocationHandler<T> invocationHandler
-          : invocationHandlers) {
-        invocationHandler.setDelegate(delegate);
+      for (DelegatingInvocationHandler<T> handler : invocationHandlers) {
+        handler.setDelegate(delegate);
       }
     }
   }
@@ -109,11 +105,14 @@ class ConstructionContext<T> {
 
       try {
         return method.invoke(delegate, args);
-      } catch (IllegalAccessException e) {
+      }
+      catch (IllegalAccessException e) {
         throw new RuntimeException(e);
-      } catch (IllegalArgumentException e) {
+      }
+      catch (IllegalArgumentException e) {
         throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
+      }
+      catch (InvocationTargetException e) {
         throw e.getTargetException();
       }
     }

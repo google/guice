@@ -17,12 +17,11 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
-
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * A support class for {@link Module}s which reduces repetition and
+ * A support class for {@link Module Modules} which reduces repetition and
  * results in a more readable configuration. Simply extends this class,
  * implement {@link #configure()}, and call the inherited methods which mirror
  * those found in {@link ContainerBuilder}. For example:
@@ -53,7 +52,8 @@ public abstract class AbstractModule implements Module {
 
       configure();
 
-    } finally {
+    }
+    finally {
       this.builder = null;
     }
   }

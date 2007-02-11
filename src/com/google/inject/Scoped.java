@@ -25,13 +25,12 @@ import java.lang.annotation.Target;
  * Annotates an implementation class with the name of its scope.
  *
  * <p>If you apply {@code Scoped} to another annotation, that annotation will
- * act as an alias and the user will not have to explicitly specify a name.
- * See {@link com.google.inject.ContainerScoped} for an example.
+ * act as an alias and the user will not have to explicitly specify a name. See
+ * {@link ContainerScoped} for an example.
  *
- * @see com.google.inject.ContainerBuilder#scope(String, Scope)
  * @author crazybob
  */
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
 @Retention(RUNTIME)
 public @interface Scoped {
 

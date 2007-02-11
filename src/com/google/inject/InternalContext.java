@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Internal context. Used to coordinate injections and support circular
@@ -50,9 +50,10 @@ class InternalContext {
       ConstructionContext<T> constructionContext = new ConstructionContext<T>();
       constructionContexts.put(key, constructionContext);
       return constructionContext;
-    } else {
-      ConstructionContext<T> constructionContext =
-          (ConstructionContext<T>) constructionContexts.get(key);
+    }
+    else {
+      ConstructionContext<T> constructionContext
+          = (ConstructionContext<T>) constructionContexts.get(key);
       if (constructionContext == null) {
         constructionContext = new ConstructionContext<T>();
         constructionContexts.put(key, constructionContext);

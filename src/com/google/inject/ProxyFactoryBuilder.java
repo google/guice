@@ -17,12 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.query.Query;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Creates a {@link ProxyFactory}.
@@ -38,9 +36,9 @@ class ProxyFactoryBuilder {
    * and method queries.
    *
    * @param classQuery matches classes the interceptor should apply to. For
-   *  example: {@code only(Runnable.class)}.
+   *     example: {@code only(Runnable.class)}.
    * @param methodQuery matches methods the interceptor should apply to. For
-   *  example: {@code annotatedWith(Transactional.class)}.
+   *     example: {@code annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
   public ProxyFactoryBuilder intercept(Query<? super Class<?>> classQuery,

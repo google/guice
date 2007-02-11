@@ -17,17 +17,16 @@
 package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
-
 import java.lang.reflect.Type;
 
 /**
- * Binding key consisting of a type and a name. Matches the type and
- * name ({@link Inject#value()}) at a point of injection.
+ * Binding key consisting of a type and a name. Matches the type and name
+ * ({@link Inject#value()}) at a point of injection.
  *
- * <p>For example, <tt>new Key&lt;List&lt;String>>("cities") {}</tt> will match:
+ * <p>For example, {@code new Key<List<String>>("cities") {}} will match:
  *
  * <pre>
- *   &#64;Inject("cities")
+ *   {@literal @}Inject("cities")
  *   public void setList(List&lt;String> cities) {
  *     ...
  *   }
@@ -50,17 +49,17 @@ public abstract class Key<T> {
    * Constructs a new key. Derives the type from this class's type parameter.
    *
    * <p>Clients create an empty anonymous subclass. Doing so embeds the type
-   * parameter in the anonymous class's type hierarchy so we can reconstitute
-   * it at runtime despite erasure.
+   * parameter in the anonymous class's type hierarchy so we can reconstitute it
+   * at runtime despite erasure.
    *
    * <p>Example usage for a binding of type {@code Foo} named "bar":
    * {@code new Key<Foo>("bar") {}}.
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   protected Key(String name) {
     this.name = nonNull(name, "name");
-    this.typeLiteral =
-        (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral
+        = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
   }
 
@@ -75,16 +74,14 @@ public abstract class Key<T> {
   /**
    * Unsafe. Constructs a key from a manually specified type.
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   private Key(Type type, String name) {
     this.name = nonNull(name, "name");
     this.typeLiteral = (TypeLiteral<T>) TypeLiteral.get(type);
     this.hashCode = computeHashCode();
   }
 
-  /**
-   * Constructs a key from a manually specified type.
-   */
+  /** Constructs a key from a manually specified type. */
   private Key(TypeLiteral<T> typeLiteral, String name) {
     this.name = nonNull(name, "name");
     this.typeLiteral = typeLiteral;
@@ -119,7 +116,7 @@ public abstract class Key<T> {
   /**
    * Gets the binding name.
    */
-  public String getName() {
+ public String getName() {
     return name;
   }
 

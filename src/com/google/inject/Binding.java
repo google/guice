@@ -30,8 +30,8 @@ public class Binding<T> {
   final Object source;
   final InternalFactory<? extends T> internalFactory;
 
-  Binding(ContainerImpl container, Key<T> key,
-      Object source, InternalFactory<? extends T> internalFactory) {
+  Binding(ContainerImpl container, Key<T> key, Object source,
+      InternalFactory<? extends T> internalFactory) {
     this.container = container;
     this.key = key;
     this.source = source;

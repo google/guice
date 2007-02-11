@@ -19,16 +19,6 @@ package com.google.inject;
 import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.GuiceNamingPolicy;
 import com.google.inject.util.ReferenceCache;
-
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.NoOp;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +26,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.NoOp;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastConstructor;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Proxies classes applying interceptors to methods as specified in
@@ -46,15 +43,15 @@ import java.util.Map;
 class ProxyFactory implements ConstructionProxyFactory {
 
   final List<MethodAspect> methodAspects;
-  final ConstructionProxyFactory defaultFactory =
-      new DefaultConstructionProxyFactory();
+  final ConstructionProxyFactory defaultFactory
+      = new DefaultConstructionProxyFactory();
 
   ProxyFactory(List<MethodAspect> methodAspects) {
     this.methodAspects = methodAspects;
   }
 
-  Map<Constructor<?>, ConstructionProxy<?>> constructionProxies =
-      new ReferenceCache<Constructor<?>, ConstructionProxy<?>>() {
+  Map<Constructor<?>, ConstructionProxy<?>> constructionProxies
+      = new ReferenceCache<Constructor<?>, ConstructionProxy<?>>() {
     protected ConstructionProxy<?> create(Constructor<?> constructor) {
       return createConstructionProxy(constructor);
     }
@@ -62,17 +59,18 @@ class ProxyFactory implements ConstructionProxyFactory {
 
   /**
    * Gets a factory for the given type. Uses the zero-arg constructor. Wraps
-   * exceptions in {@code RuntimeException} including
-   * {@code InvocationTargetException}.
+   * exceptions in {@link RuntimeException} including
+   * {@link InvocationTargetException}.
    */
   public <T> Factory<T> getFactory(Class<T> type) throws NoSuchMethodException {
-    final ConstructionProxy<T> constructionProxy =
-        createConstructionProxy(type.getDeclaredConstructor());
+    final ConstructionProxy<T> constructionProxy
+        = createConstructionProxy(type.getDeclaredConstructor());
     return new Factory<T>() {
       public T get() {
         try {
           return constructionProxy.newInstance();
-        } catch (InvocationTargetException e) {
+        }
+        catch (InvocationTargetException e) {
           throw new RuntimeException(e);
         }
       }
@@ -99,22 +97,20 @@ class ProxyFactory implements ConstructionProxyFactory {
     final Map<Method, Integer> indices = new HashMap<Method, Integer>();
 
     // Create method/interceptor holders and record indices.
-    List<MethodInterceptorsPair> methodInterceptorsPairs =
-        new ArrayList<MethodInterceptorsPair>();
+    List<MethodInterceptorsPair> methodInterceptorsPairs
+        = new ArrayList<MethodInterceptorsPair>();
     for (int i = 0; i < methods.size(); i++) {
       Method method = methods.get(i);
       methodInterceptorsPairs.add(new MethodInterceptorsPair(method));
       indices.put(method, i);
     }
 
-    // Iterate over aspects and add interceptors for the methods they apply
-    // to.
+    // Iterate over aspects and add interceptors for the methods they apply to
     boolean anyMatched = false;
     for (MethodAspect methodAspect : applicableAspects) {
-      for (MethodInterceptorsPair methodInterceptorsPair
-          : methodInterceptorsPairs) {
-        if (methodAspect.matches(methodInterceptorsPair.method)) {
-          methodInterceptorsPair.addAll(methodAspect.interceptors());
+      for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
+        if (methodAspect.matches(pair.method)) {
+          pair.addAll(methodAspect.interceptors());
           anyMatched = true;
         }
       }
@@ -128,14 +124,14 @@ class ProxyFactory implements ConstructionProxyFactory {
     // noinspection unchecked
     Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
     for (int i = 0; i < methods.size(); i++) {
-      MethodInterceptorsPair methodInterceptorsPair =
-          methodInterceptorsPairs.get(i);
-      if (!methodInterceptorsPair.hasInterceptors()) {
+      MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
+      if (!pair.hasInterceptors()) {
         callbacks[i] = NoOp.INSTANCE;
         callbackTypes[i] = NoOp.class;
-      } else {
+      }
+      else {
         callbacks[i] = new InterceptorStackCallback(
-            methodInterceptorsPair.method, methodInterceptorsPair.interceptors);
+            pair.method, pair.interceptors);
         callbackTypes[i] = net.sf.cglib.proxy.MethodInterceptor.class;
       }
     }
@@ -167,10 +163,10 @@ class ProxyFactory implements ConstructionProxyFactory {
   <T> ConstructionProxy<T> createConstructionProxy(Class<?> clazz,
       Class[] parameterTypes) {
     FastClass fastClass = GuiceFastClass.create(clazz);
-    final FastConstructor fastConstructor =
-        fastClass.getConstructor(parameterTypes);
+    final FastConstructor fastConstructor
+        = fastClass.getConstructor(parameterTypes);
     return new ConstructionProxy<T>() {
-      @SuppressWarnings({"unchecked"})
+      @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
@@ -199,7 +195,7 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings("unchecked")
   public <T> ConstructionProxy<T> get(Constructor<T> constructor) {
     return (ConstructionProxy<T>) constructionProxies.get(constructor);
   }
