@@ -83,8 +83,7 @@ class ContainerImpl implements Container {
 
   final ConstructionProxyFactory constructionProxyFactory;
   final Map<Key<?>, Binding<?>> bindings;
-  final Map<TypeLiteral<?>, List<Binding<?>>> bindingsByType
-      = new HashMap<TypeLiteral<?>, List<Binding<?>>>();
+  final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<String, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
@@ -106,24 +105,11 @@ class ContainerImpl implements Container {
   }
 
   <T> void index(Binding<T> binding) {
-    TypeLiteral<T> type = binding.getKey().getType();
-    List<Binding<?>> bindingsForThisType = bindingsByType.get(type);
-    if (bindingsForThisType == null) {
-      bindingsForThisType = new ArrayList<Binding<?>>();
-      bindingsByType.put(type, bindingsForThisType);
-    }
-    bindingsForThisType.add(binding);
+    bindingsMultimap.put(binding.getKey().getType(), binding);
   }
 
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-    // IntelliJ doesn't understand that the below is "correct"
-    //noinspection RedundantCast,RawUseOfParameterizedType
-    @SuppressWarnings("unchecked")
-    List<Binding<T>> bindingsForThisType = (List) bindingsByType.get(type);
-    if (bindingsForThisType == null) {
-      return Collections.emptyList();
-    }
-    return bindingsForThisType;
+    return bindingsMultimap.getAll(type);
   }
 
   <T> List<String> getNamesOfBindingsTo(TypeLiteral<T> type) {
@@ -345,6 +331,7 @@ class ContainerImpl implements Container {
     return Collections.unmodifiableMap(bindings);
   }
 
+  // TODO: try to get rid of the warning
   @SuppressWarnings("unchecked")
   public <T> Binding<T> getBinding(Key<T> key) {
     return (Binding<T>) bindings.get(key);
@@ -357,6 +344,32 @@ class ContainerImpl implements Container {
 
   private boolean isStatic(Member member) {
     return Modifier.isStatic(member.getModifiers());
+  }
+
+  private static class BindingsMultimap {
+    private final Map<TypeLiteral<?>, List<? extends Binding<?>>> map
+        = new HashMap<TypeLiteral<?>, List<? extends Binding<?>>>();
+
+    public <T> void put(TypeLiteral<T> type, Binding<T> binding) {
+      List<Binding<T>> bindingsForThisType = getFromMap(type);
+      if (bindingsForThisType == null) {
+        bindingsForThisType = new ArrayList<Binding<T>>();
+        // We only put matching entries into the map
+        map.put(type, bindingsForThisType);
+      }
+      bindingsForThisType.add(binding);
+    }
+
+    public <T> List<Binding<T>> getAll(TypeLiteral<T> type) {
+      List<Binding<T>> list = getFromMap(type);
+      return list == null ? Collections.<Binding<T>>emptyList() : list;
+    }
+
+    // safe because we only put matching entries into the map
+    @SuppressWarnings("unchecked")
+    private <T> List<Binding<T>> getFromMap(TypeLiteral<T> type) {
+      return (List<Binding<T>>) map.get(type);
+    }
   }
 
   class FieldInjector implements Injector {

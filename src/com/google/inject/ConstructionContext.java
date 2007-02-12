@@ -60,7 +60,7 @@ class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  Object createProxy(Class<? super T> expectedType) {
+  T createProxy(Class<T> expectedType) {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).
@@ -79,8 +79,9 @@ class ConstructionContext<T> {
         = new DelegatingInvocationHandler<T>();
     invocationHandlers.add(invocationHandler);
 
-    return Proxy.newProxyInstance(expectedType.getClassLoader(),
+    Object object = Proxy.newProxyInstance(expectedType.getClassLoader(),
         new Class[] { expectedType }, invocationHandler);
+    return expectedType.cast(object);
   }
 
   void setProxyDelegates(T delegate) {

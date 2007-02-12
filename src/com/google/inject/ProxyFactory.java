@@ -121,7 +121,8 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     // Create callbacks.
     Callback[] callbacks = new Callback[methods.size()];
-    // noinspection unchecked
+
+    @SuppressWarnings("unchecked")
     Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
     for (int i = 0; i < methods.size(); i++) {
       MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);

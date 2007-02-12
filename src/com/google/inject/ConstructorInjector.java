@@ -62,11 +62,12 @@ class ConstructorInjector<T> implements Factory<T> {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private Constructor<T> findConstructorIn(Class<T> implementation) {
     Constructor<T> found = null;
-    for (Constructor<T> constructor : implementation.getDeclaredConstructors())
-    {
+    @SuppressWarnings("unchecked") // why doesn't it return the right thing?
+    Constructor<T>[] constructors
+        = (Constructor<T>[]) implementation.getDeclaredConstructors();
+    for (Constructor<T> constructor : constructors) {
       if (constructor.getAnnotation(Inject.class) != null) {
         if (found != null) {
           container.errorHandler.handle(
@@ -96,7 +97,7 @@ class ConstructorInjector<T> implements Factory<T> {
    * Construct an instance. Returns {@code Object} instead of {@code T} because
    * it may return a proxy.
    */
-  Object construct(InternalContext context, Class<? super T> expectedType) {
+  T construct(InternalContext context, Class<T> expectedType) {
     ConstructionContext<T> constructionContext
         = context.getConstructionContext(this);
 
@@ -120,7 +121,7 @@ class ConstructorInjector<T> implements Factory<T> {
       try {
         Object[] parameters
             = ContainerImpl.getParameters(context, parameterInjectors);
-        t = newInstance(parameters);
+        t = constructionProxy.newInstance(parameters);
         constructionContext.setProxyDelegates(t);
       }
       finally {
@@ -146,17 +147,11 @@ class ConstructorInjector<T> implements Factory<T> {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private T newInstance(Object[] parameters) throws InvocationTargetException {
-    return constructionProxy.newInstance(parameters);
-  }
-
   public T get() {
     try {
       return container.callInContext(new ContextualCallable<T>() {
-        @SuppressWarnings("unchecked")
         public T call(InternalContext context) {
-          return (T) construct(context, implementation);
+          return construct(context, implementation);
         }
       });
     }

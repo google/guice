@@ -28,7 +28,6 @@ import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -368,7 +367,7 @@ public final class ContainerBuilder extends SourceConsumer {
       return;
     }
 
-    Binding<? extends T> destination = getBinding(destinationKey);
+    Binding<? extends T> destination = container.getBinding(destinationKey);
     if (destination == null) {
       addError(builder.getSource(), ErrorMessages.LINK_DESTINATION_NOT_FOUND,
           destinationKey);
@@ -379,11 +378,6 @@ public final class ContainerBuilder extends SourceConsumer {
         builder.getSource(), destination.getInternalFactory());
 
     putBinding(binding);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> Binding<T> getBinding(Key<T> destinationKey) {
-    return (Binding<T>) container.internalBindings().get(destinationKey);
   }
 
   private void createBindings(boolean preload,
@@ -422,15 +416,9 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private <T> void createConstantBinding(ConstantBindingBuilder builder) {
+  private void createConstantBinding(ConstantBindingBuilder builder) {
     if (builder.hasValue()) {
-      Key<T> key = (Key<T>) builder.getKey();
-      InternalFactory<? extends T> factory
-          = (InternalFactory<? extends T>) builder.getInternalFactory();
-      Binding<?> binding
-          = Binding.newInstance(container, key, builder.getSource(), factory);
-      putBinding(binding);
+      putBinding(builder.createBinding(container));
     }
     else {
       addError(builder.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
@@ -698,9 +686,9 @@ public final class ContainerBuilder extends SourceConsumer {
       this.constructor = constructor;
     }
 
-    @SuppressWarnings("unchecked")
     public T get(InternalContext context) {
-      return (T) constructor.construct(context, key.getRawType());
+      // TODO: figure out if we can suppress this warning
+      return constructor.construct(context, (Class<T>) key.getRawType());
     }
 
     public String toString() {
@@ -710,34 +698,45 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
+  private static class BindingInfo<T> {
+    final Class<T> type;
+    final T value;
+    final String name;
+    final Object source;
+
+    BindingInfo(Class<T> type, T value, String name, Object source) {
+      this.type = type;
+      this.value = value;
+      this.name = name;
+      this.source = source;
+    }
+
+    Binding<T> createBinding(ContainerImpl container) {
+      Key<T> key = Key.get(type, name);
+      ConstantFactory<T> factory = new ConstantFactory<T>(value);
+      return Binding.newInstance(container, key, source, factory);
+    }
+  }
+
   /**
    * Builds a constant binding.
    */
   public class ConstantBindingBuilder {
 
+    BindingInfo<?> bindingInfo;
     final String name;
-    Class<?> type;
-    Object value;
     Object source = ContainerBuilder.UNKNOWN_SOURCE;
 
     ConstantBindingBuilder(String name) {
       this.name = name;
     }
 
-    Key<?> getKey() {
-      return Key.get(type, name);
-    }
-
     boolean hasValue() {
-      return type != null;
+      return bindingInfo != null;
     }
 
     Object getSource() {
       return source;
-    }
-
-    InternalFactory<?> getInternalFactory() {
-      return new ConstantFactory<Object>(value);
     }
 
     ConstantBindingBuilder from(Object source) {
@@ -819,12 +818,16 @@ public final class ContainerBuilder extends SourceConsumer {
      * Maps a constant value to the given type and name.
      */
     <T> void to(final Class<T> type, final T value) {
-      if (this.value != null) {
+      if (this.bindingInfo != null) {
         addError(source, ErrorMessages.CONSTANT_VALUE_ALREADY_SET);
       } else {
-        this.type = type;
-        this.value = value;
+        // TODO: we're sure name and source will have been set already, right?
+        this.bindingInfo = new BindingInfo<T>(type, value, name, source);
       }
+    }
+
+    public Binding<?> createBinding(ContainerImpl container) {
+      return bindingInfo.createBinding(container);
     }
   }
 
