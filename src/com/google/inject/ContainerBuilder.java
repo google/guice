@@ -28,7 +28,7 @@ import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-import java.lang.annotation.Annotation;
+
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -124,10 +124,10 @@ public final class ContainerBuilder extends SourceConsumer {
    * Registers a type to be validated for injection when we create the
    * container.
    */
-  void validate(final Object source, final Class<?> type) {
+  void requestValidation(final ErrorHandler errorHandler, final Class<?> type) {
     validations.add(new Validation() {
       public void run(final ContainerImpl container) {
-        container.withErrorHandler(new ConfigurationErrorHandler(source),
+        container.withErrorHandler(errorHandler,
             new Runnable() {
               public void run() {
                 container.getConstructor(type);
@@ -157,6 +157,7 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   public void intercept(Query<? super Class<?>> classQuery,
       Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
+    ensureNotCreated();
     proxyFactoryBuilder.intercept(classQuery, methodQuery, interceptors);
   }
 
@@ -166,6 +167,7 @@ public final class ContainerBuilder extends SourceConsumer {
    * references this name.
    */
   public void scope(String name, Scope scope) {
+    ensureNotCreated();
     if (scopes.containsKey(nonNull(name, "name"))) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
     }
@@ -307,7 +309,8 @@ public final class ContainerBuilder extends SourceConsumer {
     // Create the container.
     ensureNotCreated();
     Map<Key<?>, Binding<?>> bindings = new HashMap<Key<?>, Binding<?>>();
-    container = new ContainerImpl(proxyFactoryBuilder.create(), bindings);
+    container = new ContainerImpl(
+        proxyFactoryBuilder.create(), bindings, scopes);
 
     createConstantBindings();
 
@@ -497,10 +500,12 @@ public final class ContainerBuilder extends SourceConsumer {
   public class BindingBuilder<T> {
 
     Object source = ContainerBuilder.UNKNOWN_SOURCE;
+    ErrorHandler errorHandler = RuntimeErrorHandler.INSTANCE;
     Key<T> key;
     InternalFactory<? extends T> factory;
+    TypeLiteral<? extends T> implementation;
+    T instance;
     Scope scope;
-    String scopeName;
     boolean preload = false;
 
     BindingBuilder(Key<T> key) {
@@ -517,6 +522,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     BindingBuilder<T> from(Object source) {
       this.source = source;
+      this.errorHandler = new ConfigurationErrorHandler(source);
       return this;
     }
 
@@ -525,7 +531,7 @@ public final class ContainerBuilder extends SourceConsumer {
      */
     public BindingBuilder<T> named(String name) {
       if (!this.key.hasDefaultName()) {
-        addError(source, ErrorMessages.NAME_ALREADY_SET);
+        errorHandler.handle(ErrorMessages.NAME_ALREADY_SET);
       }
       this.key = this.key.named(name);
       return this;
@@ -549,26 +555,10 @@ public final class ContainerBuilder extends SourceConsumer {
      */
     public <I extends T> BindingBuilder<T> to(TypeLiteral<I> implementation) {
       ensureImplementationIsNotSet();
-      validate(source, implementation.getRawType());
+      requestValidation(errorHandler, implementation.getRawType());
+      this.implementation = implementation;
       this.factory = new DefaultFactory<I>(key, implementation);
-      setScopeFromType(implementation.getRawType());
       return this;
-    }
-
-    private void setScopeFromType(Class<?> implementation) {
-      for (Annotation annotation : implementation.getAnnotations()) {
-        Class<? extends Annotation> annotationType
-            = annotation.annotationType();
-        if (annotationType == Scoped.class) {
-          in(((Scoped) annotation).value());
-        }
-        else {
-          Scoped scoped = annotationType.getAnnotation(Scoped.class);
-          if (scoped != null) {
-            in(scoped.value());
-          }
-        }
-      }
     }
 
     /**
@@ -577,9 +567,7 @@ public final class ContainerBuilder extends SourceConsumer {
     public BindingBuilder<T> to(
         final ContextualFactory<? extends T> factory) {
       ensureImplementationIsNotSet();
-
       this.factory = new InternalToContextualFactoryAdapter<T>(factory);
-
       return this;
     }
 
@@ -597,8 +585,12 @@ public final class ContainerBuilder extends SourceConsumer {
      */
     public BindingBuilder<T> to(T instance) {
       ensureImplementationIsNotSet();
+      this.instance = nonNull(instance, "instance");
       this.factory = new ConstantFactory<T>(instance);
-      in(CONTAINER);
+      if (this.scope != null) {
+        errorHandler.handle(ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
+      }
+      this.scope = CONTAINER;
       return this;
     }
 
@@ -616,7 +608,7 @@ public final class ContainerBuilder extends SourceConsumer {
      */
     private void ensureImplementationIsNotSet() {
       if (factory != null) {
-        addError(source, ErrorMessages.IMPLEMENTATION_ALREADY_SET);
+        errorHandler.handle(ErrorMessages.IMPLEMENTATION_ALREADY_SET);
       }
     }
 
@@ -630,7 +622,7 @@ public final class ContainerBuilder extends SourceConsumer {
       // is fine for now.
       this.scope = scopes.get(nonNull(scopeName, "scope name"));
       if (this.scope == null) {
-        addError(source, ErrorMessages.SCOPE_NOT_FOUND, scopeName,
+        errorHandler.handle(ErrorMessages.SCOPE_NOT_FOUND, scopeName,
             scopes.keySet());
       }
       return this;
@@ -641,21 +633,19 @@ public final class ContainerBuilder extends SourceConsumer {
      */
     public BindingBuilder<T> in(Scope scope) {
       ensureScopeNotSet();
-
       this.scope = nonNull(scope, "scope");
       return this;
     }
 
-    /**
-     * Specifies container scope (i.e.&nbsp;one instance per container).
-     */
-    public BindingBuilder<T> inContainerScope() {
-      return in(CONTAINER);
-    }
-
     private void ensureScopeNotSet() {
+      // Scoping isn't allowed when we have only one instance.
+      if (this.instance != null) {
+        errorHandler.handle(ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
+        return;
+      }
+
       if (this.scope != null) {
-        addError(source, ErrorMessages.SCOPE_ALREADY_SET);
+        errorHandler.handle(ErrorMessages.SCOPE_ALREADY_SET);
       }
     }
 
@@ -680,14 +670,21 @@ public final class ContainerBuilder extends SourceConsumer {
         to(key.getType());
       }
 
-      // Default scope does nothing.
-      if (scope == null || scope == DEFAULT) {
-        return this.factory;
+      // Look for @Scoped on the implementation type.
+      if (implementation != null) {
+        Scope fromAnnotation = Scopes.getScopeForType(
+            implementation.getRawType(), scopes, errorHandler);
+        if (fromAnnotation != null) {
+          if (this.scope == null) {
+            this.scope = fromAnnotation;
+          } else {
+            logger.info("Overriding scope specified by annotation at "
+                + source + ".");
+          }
+        }
       }
 
-      Factory<T> scoped = scope.scope(this.key,
-          new FactoryToInternalFactoryAdapter<T>(container, this.factory));
-      return new InternalFactoryToFactoryAdapter<T>(scoped);
+      return Scopes.scope(this.key, container, this.factory, scope);
     }
 
     boolean isContainerScoped() {
@@ -909,7 +906,9 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Handles errors after the container is created.
    */
-  class RuntimeErrorHandler extends AbstractErrorHandler {
+  static class RuntimeErrorHandler extends AbstractErrorHandler {
+
+    static ErrorHandler INSTANCE = new RuntimeErrorHandler();
 
     public void handle(String message) {
       throw new ConfigurationException(message);

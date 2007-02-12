@@ -17,11 +17,15 @@
 package com.google.inject;
 
 /**
- * A scope which bound objects can reside in. Add a new scope using
- * {@link ContainerBuilder#scope} and reference it from bindings using its name.
+ * A scope which bound objects can reside in. Mapping scopes by name with
+ * {@link ContainerBuilder#scope} can help avoid compile time dependencies
+ * on the {@code Scope} implementation (if desired) and enable the use of the
+ * {@link Scoped} annotation.
  *
- * <p>Scope implementations should override {@link #toString} and include the
- * creator's {#toString} output. Doing so aids debugging.
+ * <p>Scope implementations should override {@link #toString} in the returned
+ * factory and include the creator's {#toString} output. Doing so aids
+ * debugging. They should also override their own {@link #toString}
+ * method.
  *
  * @author crazybob@google.com (Bob Lee)
  */

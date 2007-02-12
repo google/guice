@@ -85,13 +85,15 @@ class ContainerImpl implements Container {
   final Map<Key<?>, Binding<?>> bindings;
   final Map<TypeLiteral<?>, List<Binding<?>>> bindingsByType
       = new HashMap<TypeLiteral<?>, List<Binding<?>>>();
+  final Map<String, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
   ContainerImpl(ConstructionProxyFactory constructionProxyFactory,
-      Map<Key<?>, Binding<?>> bindings) {
+      Map<Key<?>, Binding<?>> bindings, Map<String, Scope> scopes) {
     this.constructionProxyFactory = constructionProxyFactory;
     this.bindings = bindings;
+    this.scopes = scopes;
   }
 
   /**
@@ -156,8 +158,12 @@ class ContainerImpl implements Container {
       return binding.getInternalFactory();
     }
 
+    Class<? super T> rawType = key.getType().getRawType();
+
+    // TODO: Can we use the type itself as an implementation?
+
     // Handle cases where T is a Factory<?>.
-    if (key.getType().getRawType().equals(Factory.class)) {
+    if (rawType.equals(Factory.class)) {
       Type factoryType = key.getType().getType();
       if (!(factoryType instanceof ParameterizedType)) {
         return null;
@@ -184,7 +190,7 @@ class ContainerImpl implements Container {
 
     // Auto[un]box primitives.
     Class<?> primitiveCounterpart
-        = PRIMITIVE_COUNTERPARTS.get(key.getType().getRawType());
+        = PRIMITIVE_COUNTERPARTS.get(rawType);
     if (primitiveCounterpart != null) {
       Binding<?> counterpartBinding
           = getBinding(Key.get(primitiveCounterpart, key.getName()));
@@ -201,8 +207,6 @@ class ContainerImpl implements Container {
       return null;
     }
 
-    Class<?> type = key.getRawType();
-
     // We don't need do pass in an InternalContext because we know this is
     // a ConstantFactory which will not use it.
     String value = stringBinding.getInternalFactory().get(null);
@@ -211,7 +215,7 @@ class ContainerImpl implements Container {
     // their own converters.
 
     // Do we need a primitive?
-    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(type);
+    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
     if (converter != null) {
       try {
         T t = converter.convert(member, key, value);
@@ -224,10 +228,10 @@ class ContainerImpl implements Container {
     }
 
     // Do we need an enum?
-    if (Enum.class.isAssignableFrom(type)) {
+    if (Enum.class.isAssignableFrom(rawType)) {
       T t;
       try {
-        t = (T) Enum.valueOf((Class) type, value);
+        t = (T) Enum.valueOf((Class) rawType, value);
       }
       catch (IllegalArgumentException e) {
         errorHandler.handle(createMessage(value, key, member, e.toString()));
@@ -237,7 +241,7 @@ class ContainerImpl implements Container {
     }
 
     // Do we need a class?
-    if (type == Class.class) {
+    if (rawType == Class.class) {
       try {
         return new ConstantFactory<T>((T) Class.forName(value));
       }
@@ -794,21 +798,6 @@ class ContainerImpl implements Container {
   @SuppressWarnings("unchecked")
   static <T> InternalFactory<T> invalidFactory() {
     return (InternalFactory<T>) INVALID_FACTORY;
-  }
-
-  private static class InvalidErrorHandler implements ErrorHandler {
-
-    public void handle(String message, Object... arguments) {
-      throw new AssertionError();
-    }
-
-    public void handle(String message) {
-      throw new AssertionError();
-    }
-
-    public void handle(Throwable t) {
-      throw new AssertionError();
-    }
   }
 
   public String toString() {

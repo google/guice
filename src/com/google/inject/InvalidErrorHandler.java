@@ -16,20 +16,18 @@
 
 package com.google.inject;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
-
 /**
- * Apply this to implementation classes when you want one instance per
- * container, as opposed to one instance per injection.
- *
  * @author crazybob@google.com (Bob Lee)
- */
-@Target(ElementType.TYPE)
-@Retention(RUNTIME)
-@Scoped(Scopes.CONTAINER_NAME)
-public @interface ContainerScoped {
+*/
+class InvalidErrorHandler extends AbstractErrorHandler {
 
+  static ErrorHandler INSTANCE = new InvalidErrorHandler();
+
+  public void handle(String message) {
+    throw new AssertionError(message);
+  }
+
+  public void handle(Throwable t) {
+    throw new AssertionError(t);
+  }
 }

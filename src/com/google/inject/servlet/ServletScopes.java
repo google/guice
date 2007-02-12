@@ -58,6 +58,10 @@ public class ServletScopes {
         }
       };
     }
+
+    public String toString() {
+      return REQUEST_NAME;
+    }
   };
 
   /**
@@ -85,6 +89,10 @@ public class ServletScopes {
           }
         }
       };
+    }
+
+    public String toString() {
+      return SESSION_NAME;
     }
   };
 }

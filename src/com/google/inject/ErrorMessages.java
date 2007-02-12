@@ -45,6 +45,9 @@ class ErrorMessages {
     }
   }
 
+  static final String SINGLE_INSTANCE_AND_SCOPE = "Setting the scope is not"
+      + " permitted when binding to a single instance.";
+
   static final String CONSTRUCTOR_RULES = "Classes must have either one (and"
       + " only one) constructor annotated with @Inject or a zero-argument"
       + " constructor.";
@@ -81,6 +84,10 @@ class ErrorMessages {
       + " implementation class with @Scoped, or by annotating the"
       + " implementation with with an annotation which is annotated with"
       + " @Scoped.";
+
+  static final String SCOPE_ALREADY_SET_BY_ANNOTATION = "Scope is set more than"
+      + " once by annotations on %s. @%s says the scope should be '%s'"
+      + " while @%s says it should be '%s'.";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
       + " than once.";

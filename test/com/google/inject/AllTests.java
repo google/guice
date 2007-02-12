@@ -46,8 +46,9 @@ public class AllTests {
     suite.addTestSuite(FactoryInjectionTest.class);
     suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ReflectionTest.class);
-    suite.addTestSuite(QueryTest.class);
+    suite.addTestSuite(ScopesTest.class);
 
+    suite.addTestSuite(QueryTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
 
