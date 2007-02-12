@@ -118,31 +118,11 @@ public final class ContainerBuilder extends SourceConsumer {
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
   }
 
-  final List<Validation> validations = new ArrayList<Validation>();
+  final List<CreationListener> creationListeners
+      = new ArrayList<CreationListener>();
 
-  /**
-   * Registers a type to be validated for injection when we create the
-   * container.
-   */
-  void requestValidation(final ErrorHandler errorHandler, final Class<?> type) {
-    validations.add(new Validation() {
-      public void run(final ContainerImpl container) {
-        container.withErrorHandler(errorHandler,
-            new Runnable() {
-              public void run() {
-                container.getConstructor(type);
-              }
-            });
-      }
-    });
-  }
-
-  /**
-   * A validation command to run after we create the container but before
-   * we return it to the client.
-   */
-  interface Validation {
-    void run(ContainerImpl container);
+  interface CreationListener {
+    void notify(ContainerImpl container);
   }
 
   /**
@@ -327,9 +307,8 @@ public final class ContainerBuilder extends SourceConsumer {
 
     stopwatch.resetAndLog(logger, "Binding indexing");
 
-    // Run validations.
-    for (Validation validation : validations) {
-      validation.run(container);
+    for (CreationListener creationListener : creationListeners) {
+      creationListener.notify(container);
     }
 
     stopwatch.resetAndLog(logger, "Validation");
@@ -553,11 +532,19 @@ public final class ContainerBuilder extends SourceConsumer {
      * the scope based on the @{@link Scoped} annotation on the implementation
      * class if present.
      */
-    public <I extends T> BindingBuilder<T> to(TypeLiteral<I> implementation) {
+    public <I extends T> BindingBuilder<T> to(
+        final TypeLiteral<I> implementation) {
       ensureImplementationIsNotSet();
-      requestValidation(errorHandler, implementation.getRawType());
       this.implementation = implementation;
-      this.factory = new DefaultFactory<I>(key, implementation);
+      final DefaultFactory<I> defaultFactory
+          = new DefaultFactory<I>(key, implementation);
+      this.factory = defaultFactory;
+      creationListeners.add(new CreationListener() {
+        public void notify(ContainerImpl container) {
+          defaultFactory.setConstructor(
+              container.getConstructor(implementation));
+        }
+      });
       return this;
     }
 
@@ -697,22 +684,22 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   private static class DefaultFactory<T> implements InternalFactory<T> {
 
-    volatile ConstructorInjector<T> constructor;
-
     private final TypeLiteral<T> implementation;
     private final Key<? super T> key;
 
-    public DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation) {
+    ConstructorInjector<T> constructor;
+
+    DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation) {
       this.key = key;
       this.implementation = implementation;
     }
 
+    void setConstructor(ConstructorInjector<T> constructor) {
+      this.constructor = constructor;
+    }
+
     @SuppressWarnings("unchecked")
     public T get(InternalContext context) {
-      if (constructor == null) {
-        this.constructor
-            = context.getContainerImpl().getConstructor(implementation);
-      }
       return (T) constructor.construct(context, key.getRawType());
     }
 
