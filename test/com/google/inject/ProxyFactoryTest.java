@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.ConstructionProxy;
-import static com.google.inject.query.Queries.*;
+import static com.google.inject.query.Matchers.*;
 import com.google.inject.Factory;
 
 import junit.framework.TestCase;

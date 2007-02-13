@@ -21,23 +21,22 @@ package com.google.inject.query;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Query<T> {
+public interface Matcher<T> {
 
   /**
-   * Returns {@code true} if this query matches {@code t}, {@code false}
-   * otherwise.
+   * Returns {@code true} if this matches {@code t}, {@code false} otherwise.
    */
   boolean matches(T t);
 
   /**
-   * Returns a query which returns {@code true} if both this and the given
-   * query return {@code true}.
+   * Returns a new matcher which returns {@code true} if both this and the
+   * given matcher return {@code true}.
    */
-  Query<T> and(Query<? super T> other);
+  Matcher<T> and(Matcher<? super T> other);
 
   /**
-   * Returns a query which returns {@code true} if either this or the given
-   * query return {@code true}.
+   * Returns a new matcher which returns {@code true} if either this or the
+   * given matcher return {@code true}.
    */
-  Query<T> or(Query<? super T> other);
+  Matcher<T> or(Matcher<? super T> other);
 }

@@ -23,15 +23,15 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 /**
- * Query implementations. Supports querying classes and methods.
+ * Matcher implementations. Supports matching classes and methods.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Queries {
+public class Matchers {
 
-  private Queries() {}
+  private Matchers() {}
 
-  static Query<Object> ANY = new AbstractQuery<Object>() {
+  static Matcher<Object> ANY = new AbstractMatcher<Object>() {
     public boolean matches(Object o) {
       return true;
     }
@@ -42,18 +42,18 @@ public class Queries {
   };
 
   /**
-   * Returns a query which matches any input.
+   * Returns a matcher which matches any input.
    */
-  public static Query<Object> any() {
+  public static Matcher<Object> any() {
     return ANY;
   }
 
   /**
-   * Inverts the given query.
+   * Inverts the given matcher.
    */
-  public static <T> Query<T> not(final Query<? super T> p) {
+  public static <T> Matcher<T> not(final Matcher<? super T> p) {
     Objects.nonNull(p, "p");
-    return new AbstractQuery<T>() {
+    return new AbstractMatcher<T>() {
       public boolean matches(T t) {
         return !p.matches(t);
       }
@@ -65,13 +65,13 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches elements (methods, classes, etc.)
+   * Returns a matcher which matches elements (methods, classes, etc.)
    * with a given annotation.
    */
-  public static Query<AnnotatedElement> annotatedWith(
+  public static Matcher<AnnotatedElement> annotatedWith(
       final Class<? extends Annotation> annotationType) {
     Objects.nonNull(annotationType, "annotation type");
-    return new AbstractQuery<AnnotatedElement>() {
+    return new AbstractMatcher<AnnotatedElement>() {
       public boolean matches(AnnotatedElement element) {
         Annotation annotation = element.getAnnotation(annotationType);
         return annotation != null;
@@ -84,12 +84,12 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches subclasses of the given type (as well as
+   * Returns a matcher which matches subclasses of the given type (as well as
    * the given type).
    */
-  public static Query<Class> subclassesOf(final Class<?> superclass) {
+  public static Matcher<Class> subclassesOf(final Class<?> superclass) {
     Objects.nonNull(superclass, "superclass");
-    return new AbstractQuery<Class>() {
+    return new AbstractMatcher<Class>() {
       public boolean matches(Class subclass) {
         return superclass.isAssignableFrom(subclass);
       }
@@ -101,11 +101,11 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches objects equal to the given object.
+   * Returns a matcher which matches objects equal to the given object.
    */
-  public static Query<Object> only(final Object o) {
+  public static Matcher<Object> only(final Object o) {
     Objects.nonNull(o, "o");
-    return new AbstractQuery<Object>() {
+    return new AbstractMatcher<Object>() {
       public boolean matches(Object other) {
         return o.equals(other);
       }
@@ -117,11 +117,11 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches only the given object.
+   * Returns a matcher which matches only the given object.
    */
-  public static Query<Object> identicalTo(final Object o) {
+  public static Matcher<Object> identicalTo(final Object o) {
     Objects.nonNull(o, "o");
-    return new AbstractQuery<Object>() {
+    return new AbstractMatcher<Object>() {
       public boolean matches(Object other) {
         return o == other;
       }
@@ -133,11 +133,11 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches classes in the given package.
+   * Returns a matcher which matches classes in the given package.
    */
-  public static Query<Class> inPackage(final Package p) {
+  public static Matcher<Class> inPackage(final Package p) {
     Objects.nonNull(p, "package");
-    return new AbstractQuery<Class>() {
+    return new AbstractMatcher<Class>() {
       public boolean matches(Class c) {
         return c.getPackage().equals(p);
       }
@@ -149,12 +149,12 @@ public class Queries {
   }
 
   /**
-   * Returns a query which matches methods with matching return types.
+   * Returns a matcher which matches methods with matching return types.
    */
-  public static Query<Method> returns(
-      final Query<? super Class<?>> returnType) {
-    Objects.nonNull(returnType, "return type query");
-    return new AbstractQuery<Method>() {
+  public static Matcher<Method> returns(
+      final Matcher<? super Class<?>> returnType) {
+    Objects.nonNull(returnType, "return type matcher");
+    return new AbstractMatcher<Method>() {
       public boolean matches(Method m) {
         return returnType.matches(m.getReturnType());
       }

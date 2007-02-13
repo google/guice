@@ -21,21 +21,21 @@ package com.google.inject.query;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class AbstractQuery<T> implements Query<T> {
+public abstract class AbstractMatcher<T> implements Matcher<T> {
 
-  public Query<T> and(final Query<? super T> other) {
-    return new AndQuery<T>(this, other);
+  public Matcher<T> and(final Matcher<? super T> other) {
+    return new AndMatcher<T>(this, other);
   }
 
-  public Query<T> or(Query<? super T> other) {
-    return new OrQuery<T>(this, other);
+  public Matcher<T> or(Matcher<? super T> other) {
+    return new OrMatcher<T>(this, other);
   }
 
-  static class AndQuery<T> extends AbstractQuery<T> {
+  static class AndMatcher<T> extends AbstractMatcher<T> {
 
-    final Query<? super T> a, b;
+    final Matcher<? super T> a, b;
 
-    public AndQuery(Query<? super T> a, Query<? super T> b) {
+    public AndMatcher(Matcher<? super T> a, Matcher<? super T> b) {
       this.a = a;
       this.b = b;
     }
@@ -45,11 +45,11 @@ public abstract class AbstractQuery<T> implements Query<T> {
     }
   }
 
-  static class OrQuery<T> extends AbstractQuery<T> {
+  static class OrMatcher<T> extends AbstractMatcher<T> {
 
-    final Query<? super T> a, b;
+    final Matcher<? super T> a, b;
 
-    public OrQuery(Query<? super T> a, Query<? super T> b) {
+    public OrMatcher(Matcher<? super T> a, Matcher<? super T> b) {
       this.a = a;
       this.b = b;
     }

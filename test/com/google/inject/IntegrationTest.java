@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.query.Queries.any;
+import static com.google.inject.query.Matchers.any;
 
 import junit.framework.TestCase;
 

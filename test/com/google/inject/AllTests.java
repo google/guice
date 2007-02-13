@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.query.QueryTest;
+import com.google.inject.query.MatcherTest;
 import com.google.inject.servlet.ServletTest;
 import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
@@ -51,7 +51,7 @@ public class AllTests {
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(InjectTest.class);
 
-    suite.addTestSuite(QueryTest.class);
+    suite.addTestSuite(MatcherTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
 

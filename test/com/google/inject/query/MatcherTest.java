@@ -16,7 +16,7 @@
 
 package com.google.inject.query;
 
-import static com.google.inject.query.Queries.*;
+import static com.google.inject.query.Matchers.*;
 
 import junit.framework.TestCase;
 
@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class QueryTest extends TestCase {
+public class MatcherTest extends TestCase {
 
   public void testAny() {
     assertTrue(any().matches(null));
@@ -45,7 +45,7 @@ public class QueryTest extends TestCase {
   public void testAnnotatedWith() {
     assertTrue(annotatedWith(Foo.class).matches(Bar.class));
     assertFalse(annotatedWith(Foo.class).matches(
-        QueryTest.class.getMethods()[0]));
+        MatcherTest.class.getMethods()[0]));
   }
 
   public void testSubclassesOf() {
@@ -66,14 +66,14 @@ public class QueryTest extends TestCase {
   }
 
   public void testInPackage() {
-    assertTrue(inPackage(Queries.class.getPackage())
-        .matches(QueryTest.class));
-    assertFalse(inPackage(Queries.class.getPackage())
+    assertTrue(inPackage(Matchers.class.getPackage())
+        .matches(MatcherTest.class));
+    assertFalse(inPackage(Matchers.class.getPackage())
         .matches(Object.class));
   }
 
   public void testReturns() throws NoSuchMethodException {
-    Query<Method> predicate = returns(only(String.class));
+    Matcher<Method> predicate = returns(only(String.class));
     assertTrue(predicate.matches(
         Object.class.getMethod("toString")));
     assertFalse(predicate.matches(

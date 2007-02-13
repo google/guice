@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.query.Query;
+import com.google.inject.query.Matcher;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +35,15 @@ class ProxyFactoryBuilder {
    * Applies the given method interceptor to the methods matched by the class
    * and method queries.
    *
-   * @param classQuery matches classes the interceptor should apply to. For
+   * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.
-   * @param methodQuery matches methods the interceptor should apply to. For
+   * @param methodMatcher matches methods the interceptor should apply to. For
    *     example: {@code annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
-  public ProxyFactoryBuilder intercept(Query<? super Class<?>> classQuery,
-      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
-    methodAspects.add(new MethodAspect(classQuery, methodQuery, interceptors));
+  public ProxyFactoryBuilder intercept(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+    methodAspects.add(new MethodAspect(classMatcher, methodMatcher, interceptors));
     return this;
   }
 

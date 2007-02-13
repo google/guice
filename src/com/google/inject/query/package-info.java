@@ -15,6 +15,6 @@
  */
 
 /**
- * A query API. Used to pick out methods to which to apply interceptors.
+ * A matcher API. Used to pick out methods to which to apply interceptors.
  */
 package com.google.inject.query;

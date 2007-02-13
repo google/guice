@@ -21,7 +21,7 @@ import static com.google.inject.Scopes.CONTAINER;
 import static com.google.inject.Scopes.CONTAINER_NAME;
 import static com.google.inject.Scopes.DEFAULT;
 import static com.google.inject.Scopes.DEFAULT_NAME;
-import com.google.inject.query.Query;
+import com.google.inject.query.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
 import com.google.inject.util.Objects;
@@ -129,16 +129,16 @@ public final class ContainerBuilder extends SourceConsumer {
    * Applies the given method interceptor to the methods matched by the class
    * and method queries.
    *
-   * @param classQuery matches classes the interceptor should apply to. For
+   * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.
-   * @param methodQuery matches methods the interceptor should apply to. For
+   * @param methodMatcher matches methods the interceptor should apply to. For
    *     example: {@code annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
-  public void intercept(Query<? super Class<?>> classQuery,
-      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
+  public void intercept(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
     ensureNotCreated();
-    proxyFactoryBuilder.intercept(classQuery, methodQuery, interceptors);
+    proxyFactoryBuilder.intercept(classMatcher, methodMatcher, interceptors);
   }
 
   /**

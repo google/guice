@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.query.Query;
+import com.google.inject.query.Matcher;
 import com.google.inject.util.Objects;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -24,30 +24,30 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Ties a query to a method interceptor.
+ * Ties a matcher to a method interceptor.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 class MethodAspect {
 
-  final Query<? super Class<?>> classQuery;
-  final Query<? super Method> methodQuery;
+  final Matcher<? super Class<?>> classMatcher;
+  final Matcher<? super Method> methodMatcher;
   final List<MethodInterceptor> interceptors;
 
-  MethodAspect(Query<? super Class<?>> classQuery,
-      Query<? super Method> methodQuery, MethodInterceptor... interceptors) {
-    this.classQuery = Objects.nonNull(classQuery, "class query");
-    this.methodQuery = Objects.nonNull(methodQuery, "method query");
+  MethodAspect(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+    this.classMatcher = Objects.nonNull(classMatcher, "class matcher");
+    this.methodMatcher = Objects.nonNull(methodMatcher, "method matcher");
     this.interceptors
         = Arrays.asList(Objects.nonNull(interceptors, "interceptors"));
   }
 
   boolean matches(Class<?> clazz) {
-    return classQuery.matches(clazz);
+    return classMatcher.matches(clazz);
   }
 
   boolean matches(Method method) {
-    return methodQuery.matches(method);
+    return methodMatcher.matches(method);
   }
 
   List<MethodInterceptor> interceptors() {
