@@ -90,9 +90,8 @@ class ErrorMessages {
       + " implementation with with an annotation which is annotated with"
       + " @Scoped.";
 
-  static final String SCOPE_ALREADY_SET_BY_ANNOTATION = "Scope is set more than"
-      + " once by annotations on %s. @%s says the scope should be '%s'"
-      + " while @%s says it should be '%s'.";
+  static final String DUPLICATE_ANNOTATIONS = "Duplicate @%s annotations found" 
+      + " on %s: %s and %s";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
       + " than once.";

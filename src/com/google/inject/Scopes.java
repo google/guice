@@ -16,7 +16,9 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Annotation;
+import com.google.inject.util.SurrogateAnnotations;
+import com.google.inject.util.DuplicateAnnotationException;
+
 import java.util.Map;
 
 /**
@@ -133,44 +135,17 @@ public class Scopes {
    */
   static String getScopeNameForType(Class<?> implementation,
       ErrorHandler errorHandler) {
-    // The first name and annotation type we come to. We hold on to the
-    // annotation type in case we need it in an error message.
-    String firstName = null;
-    Class<? extends Annotation> firstType = null;
-
-    for (Annotation annotation : implementation.getAnnotations()) {
-      // Look for @Scoped on the class itself and on annotations.
-      Scoped scoped = findScoped(annotation);
-
-      // If we found an @Scoped, record its value or an error if we already
-      // recorded a value.
-      if (scoped != null) {
-        String name = scoped.value();
-        Class<? extends Annotation> type = annotation.annotationType();
-        if (firstName == null) {
-          firstName = name;
-          firstType = type;
-        } else {
-          // Scope already set.
-          errorHandler.handle(ErrorMessages.SCOPE_ALREADY_SET_BY_ANNOTATION,
-              implementation, type.getSimpleName(), name,
-              firstType.getSimpleName(), firstName);
-        }
-      }
+    try {
+      Scoped scoped =
+          SurrogateAnnotations.findAnnotation(Scoped.class, implementation);
+      return scoped == null ? null : scoped.value();
+    } catch (DuplicateAnnotationException e) {
+      // Scope already set.
+      errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
+          Scoped.class.getSimpleName(), implementation, e.getFirst(),
+          e.getSecond());
+      return null;
     }
-
-    return firstName;
-  }
-
-  /**
-   * The given annotation may be an instance of {@code Scoped} or it may be
-   * annotated with {@code Scoped}.
-   */
-  static Scoped findScoped(Annotation annotation) {
-    Class<? extends Annotation> annotationType = annotation.annotationType();
-    return annotationType == Scoped.class
-        ? (Scoped) annotation
-        : annotationType.getAnnotation(Scoped.class);
   }
 
   /**
