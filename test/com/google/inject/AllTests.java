@@ -22,6 +22,7 @@ import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
+import com.google.inject.util.SurrogateAnnotationsTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -59,6 +60,7 @@ public class AllTests {
     suite.addTestSuite(ReferenceMapTest.class);
     suite.addTest(ReferenceMapTestSuite.suite());
     suite.addTestSuite(ReferenceCacheTest.class);
+    suite.addTestSuite(SurrogateAnnotationsTest.class);
 
     return suite;
   }
