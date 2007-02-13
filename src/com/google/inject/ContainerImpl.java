@@ -21,6 +21,8 @@ import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
+import com.google.inject.util.SurrogateAnnotations;
+import com.google.inject.util.DuplicateAnnotationException;
 
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -334,7 +336,15 @@ class ContainerImpl implements Container {
       InjectorFactory<M> injectorFactory) {
     for (M member : members) {
       if (isStatic(member) == statics) {
-        Inject inject = member.getAnnotation(Inject.class);
+        Inject inject = null;
+        try {
+          inject = SurrogateAnnotations.findAnnotation(Inject.class, member);
+        } catch (DuplicateAnnotationException e) {
+          errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
+              Inject.class.getSimpleName(), member, e.getFirst(),
+              e.getSecond());
+        }
+
         if (inject != null) {
           try {
             injectors.add(injectorFactory.create(this, member, inject.value()));
@@ -463,18 +473,27 @@ class ContainerImpl implements Container {
         = Arrays.asList(annotations).iterator();
     int index = 0;
     for (Type parameterType : parameterTypes) {
-      Inject annotation = findInject(annotationsIterator.next());
+      Annotation[] parameterAnnotations = annotationsIterator.next();
+      Inject inject = null;
+      try {
+        inject = SurrogateAnnotations.findAnnotation(Inject.class,
+            parameterAnnotations);
+      } catch (DuplicateAnnotationException e) {
+        errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
+            Inject.class.getSimpleName(), member, e.getFirst(),
+            e.getSecond());
+      }
 
       String name;
       if (defaultNameOverridden) {
         name = defaultName;
-        if (annotation != null) {
+        if (inject != null) {
           errorHandler.handle(
               ErrorMessages.NAME_ON_MEMBER_AND_PARAMETER, member);
         }
       }
       else {
-        name = annotation == null ? defaultName : annotation.value();
+        name = inject == null ? defaultName : inject.value();
       }
 
       Key<?> key = Key.get(parameterType, name);
@@ -495,18 +514,6 @@ class ContainerImpl implements Container {
     ExternalContext<T> externalContext
         = ExternalContext.newInstance(member, index, key, this);
     return new ParameterInjector<T>(externalContext, factory);
-  }
-
-  /**
-   * Finds the {@link Inject} annotation in an array of annotations.
-   */
-  Inject findInject(Annotation[] annotations) {
-    for (Annotation annotation : annotations) {
-      if (annotation.annotationType() == Inject.class) {
-        return Inject.class.cast(annotation);
-      }
-    }
-    return null;
   }
 
   static class MethodInjector implements Injector {

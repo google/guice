@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.util.SurrogateAnnotations;
+import com.google.inject.util.DuplicateAnnotationException;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -30,6 +33,9 @@ class ConstructorInjector<T> {
   final ContainerImpl.Injector[] injectors;
   final ContainerImpl.ParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
+
+  /** Annotation on the constructor. */
+  Inject inject;
 
   ConstructorInjector(ContainerImpl container, Class<T> implementation) {
     this.implementation = implementation;
@@ -53,7 +59,6 @@ class ConstructorInjector<T> {
   ContainerImpl.ParameterInjector<?>[] createParameterInjector(
       ContainerImpl container, Constructor<T> constructor) {
     try {
-      Inject inject = constructor.getAnnotation(Inject.class);
       return inject == null
           ? null // default constructor.
           : container.getParametersInjectors(
@@ -76,13 +81,23 @@ class ConstructorInjector<T> {
     Constructor<T>[] constructors
         = (Constructor<T>[]) implementation.getDeclaredConstructors();
     for (Constructor<T> constructor : constructors) {
-      if (constructor.getAnnotation(Inject.class) != null) {
+      Inject inject = null;
+      try {
+        inject = SurrogateAnnotations.findAnnotation(Inject.class, constructor);
+      } catch (DuplicateAnnotationException e) {
+        container.errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
+            Inject.class.getSimpleName(), constructor, e.getFirst(),
+            e.getSecond());
+      }
+
+      if (inject != null) {
         if (found != null) {
           container.errorHandler.handle(
               ErrorMessages.TOO_MANY_CONSTRUCTORS, implementation);
           return ContainerImpl.invalidConstructor();
         }
         found = constructor;
+        this.inject = inject;
       }
     }
     if (found != null) {

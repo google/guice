@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -26,11 +27,13 @@ import java.lang.annotation.Target;
 
 /**
  * <p>Annotates members and parameters which should have their value[s]
- * injected.
+ * injected. If applied to another annotation type, that annotation type
+ * can act as a surrogate and save you from having to repeat the dependency
+ * name over and over.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ METHOD, CONSTRUCTOR, FIELD, PARAMETER })
+@Target({ METHOD, CONSTRUCTOR, FIELD, PARAMETER, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 public @interface Inject {
 

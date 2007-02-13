@@ -33,9 +33,9 @@ import java.lang.reflect.AnnotatedElement;
 public class SurrogateAnnotations {
 
   /**
-   * Finds an annotation of the given type on the given element. Looks for
-   * the annotation directly on the element as well as on annotations on the
-   * element non-recursively.
+   * Finds an annotation of the given type on the given element. Looks for the
+   * annotation directly on the element as well as on other annotations on the
+   * element.
    *
    * @returns an instance of the annotation or {@code null} if none is found
    * @throws DuplicateAnnotationException if more than one annotation is found
@@ -43,10 +43,24 @@ public class SurrogateAnnotations {
   public static <A extends Annotation> A findAnnotation(
       Class<A> annotationType, AnnotatedElement element)
       throws DuplicateAnnotationException {
+    return findAnnotation(annotationType, element.getAnnotations());
+  }
+
+  /**
+   * Finds an annotation of the given type in the given array of annotations.
+   * Looks for the annotation in the array as well as on other annotations in
+   * the array.
+   *
+   * @returns an instance of the annotation or {@code null} if none is found
+   * @throws DuplicateAnnotationException if more than one annotation is found
+   */
+  public static <A extends Annotation> A findAnnotation(
+      Class<A> annotationType, Annotation[] annotations)
+      throws DuplicateAnnotationException {
     Annotation firstAnnotation = null;
     A firstFound = null;
 
-    for (Annotation annotation : element.getAnnotations()) {
+    for (Annotation annotation : annotations) {
       A found = findAnnotation(annotationType, annotation);
       if (found != null) {
         if (firstFound == null) {
