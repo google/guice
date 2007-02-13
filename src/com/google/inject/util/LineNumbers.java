@@ -32,7 +32,9 @@ public class LineNumbers
 
     /**
      * Reads line number information from the given class, if available.
+     * @param cls the class to read line number information from
      * @throws IllegalArgumentException if the bytecode for the class cannot be found
+     * @throws IOException if an error occurs while reading bytecode
      */
     public LineNumbers(Class cls) throws IOException {
         this.cls = cls;
@@ -77,7 +79,6 @@ public class LineNumbers
         private int line = -1;
         private String pendingMethod;
         private String name;
-        private boolean inStatic;
 
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             this.name = name;
@@ -86,7 +87,6 @@ public class LineNumbers
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             if ((access & Opcodes.ACC_PRIVATE) != 0)
                 return null;
-            inStatic = (access & Opcodes.ACC_STATIC) != 0;
             pendingMethod = name + desc;
             line = -1;
             return this;
