@@ -105,7 +105,6 @@ public class Scopes {
         scopes,
         errorHandler
     );
-
   }
 
   /**
@@ -184,7 +183,6 @@ public class Scopes {
     if (scope == null || scope == DEFAULT) {
       return creator;
     }
-
     Factory<T> scoped = scope.scope(key,
         new FactoryToInternalFactoryAdapter<T>(container, creator));
     return new InternalFactoryToFactoryAdapter<T>(scoped);

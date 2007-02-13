@@ -79,10 +79,11 @@ public class ScopesTest extends TestCase {
   public void testContainerScopedAnnotation()
       throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    ContainerBuilder.BindingBuilder<Singleton> bindingBuilder
+    Object bindingBuilder
         = builder.bind(Singleton.class);
     builder.create(false);
-    assertSame(Scopes.CONTAINER, bindingBuilder.scope);
+    assertSame(Scopes.CONTAINER,
+        ((ContainerBuilder.BindingBuilder<?>) bindingBuilder).scope);
   }
 
   @ContainerScoped
@@ -91,10 +92,11 @@ public class ScopesTest extends TestCase {
   public void testOverriddingAnnotation()
       throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    ContainerBuilder.BindingBuilder<Singleton> bindingBuilder
+    Object bindingBuilder
         = builder.bind(Singleton.class).in(Scopes.DEFAULT);
     builder.create(false);
-    assertSame(Scopes.DEFAULT, bindingBuilder.scope);
+    assertSame(Scopes.DEFAULT,
+        ((ContainerBuilder.BindingBuilder<?>) bindingBuilder).scope);
   }
 
   public void testBindingToInstanceWithScope() {

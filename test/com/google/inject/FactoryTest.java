@@ -52,7 +52,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.create(false);
 
-    A a = c.getCreator(A.class).get();
+    A a = c.getFactory(A.class).get();
 
     assertNotNull(a.negativeOne);
     assertTrue(a.initCalled);
@@ -80,7 +80,9 @@ public class FactoryTest extends TestCase {
     ContainerBuilder cb = new ContainerBuilder();
 
     // Called from getInstance().
-    cb.bind(Foo.class).to(createFactory(Foo.class, "default", null));
+    cb.bind(Foo.class)
+        .named("foo")
+        .to(createFactory(Foo.class, "foo", null));
 
     // Called during preloading.
     cb.bind(Bar.class)
@@ -88,12 +90,15 @@ public class FactoryTest extends TestCase {
         .to(createFactory(Bar.class, "fooBar", null))
         .in(Scopes.CONTAINER);
 
-    cb.bind(Tee.class).named("tee1")
+    cb.bind(Tee.class)
+        .named("tee1")
         .to(createFactory(Tee.class, "tee1",
             Bar.class.getDeclaredConstructor(Tee.class)));
 
-    cb.bind(Tee.class).named("tee2").to(
-        createFactory(Tee.class, "tee2", Bar.class.getDeclaredField("tee2")));
+    cb.bind(Tee.class)
+        .named("tee2")
+        .to(createFactory(Tee.class, "tee2",
+            Bar.class.getDeclaredField("tee2")));
 
     final Method execute = Tee.class.getDeclaredMethod(
         "execute", Bob.class, Bob.class);
@@ -104,7 +109,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.create(true);
 
-    Foo foo = c.getFactory(Key.get(Foo.class)).get();
+    Foo foo = c.getFactory(Key.get(Foo.class, "foo")).get();
 
     assertNotNull(foo.bar);
     assertNotNull(foo.bar.tee1);
@@ -122,7 +127,7 @@ public class FactoryTest extends TestCase {
         assertEquals(expectedMember, context.getMember());
         assertEquals(name, context.getKey().getName());
         assertEquals(type, context.getKey().getType().getType());
-        return context.getContainer().getCreator(type).get();
+        return context.getContainer().getFactory(type).get();
       }
     };
   }

@@ -75,12 +75,6 @@ public interface Container {
   void injectMembers(Object o);
 
   /**
-   * Gets a factory which injects the given class's constructor and creates new
-   * instances of {@code T}.
-   */
-  <T> Factory<T> getCreator(Class<T> implementation);
-
-  /**
    * Gets the factory bound to the given key.
    */
   <T> Factory<T> getFactory(Key<T> key);

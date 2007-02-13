@@ -24,27 +24,34 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstructorInjector<T> implements Factory<T> {
+class ConstructorInjector<T> {
 
   final Class<T> implementation;
   final ContainerImpl.Injector[] injectors;
   final ContainerImpl.ParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
-  private final ContainerImpl container;
-
   ConstructorInjector(ContainerImpl container, Class<T> implementation) {
-    this.container = container;
     this.implementation = implementation;
-    Constructor<T> constructor = findConstructorIn(implementation);
-    parameterInjectors = createParameterInjector(constructor);
+    Constructor<T> constructor = findConstructorIn(container, implementation);
+    parameterInjectors = createParameterInjector(container, constructor);
     injectors = container.injectors.get(implementation)
         .toArray(new ContainerImpl.Injector[0]);
     constructionProxy = container.constructionProxyFactory.get(constructor);
   }
 
+  /**
+   * Used to create an invalid injector.
+   */
+  private ConstructorInjector() {
+    implementation = null;
+    injectors = null;
+    parameterInjectors = null;
+    constructionProxy = null;
+  }
+
   ContainerImpl.ParameterInjector<?>[] createParameterInjector(
-      Constructor<T> constructor) {
+      ContainerImpl container, Constructor<T> constructor) {
     try {
       Inject inject = constructor.getAnnotation(Inject.class);
       return inject == null
@@ -62,7 +69,8 @@ class ConstructorInjector<T> implements Factory<T> {
     }
   }
 
-  private Constructor<T> findConstructorIn(Class<T> implementation) {
+  private Constructor<T> findConstructorIn(ContainerImpl container,
+      Class<T> implementation) {
     Constructor<T> found = null;
     @SuppressWarnings("unchecked") // why doesn't it return the right thing?
     Constructor<T>[] constructors
@@ -147,19 +155,18 @@ class ConstructorInjector<T> implements Factory<T> {
     }
   }
 
-  public T get() {
-    try {
-      return container.callInContext(new ContextualCallable<T>() {
-        public T call(InternalContext context) {
-          return construct(context, implementation);
-        }
-      });
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  /**
+   * Returns an invalid constructor. This enables us to keep running and
+   * reporting legitimate errors.
+   */
+  static <T> ConstructorInjector<T> invalidConstructor() {
+    return new ConstructorInjector<T>() {
+      T construct(InternalContext context, Class<T> expectedType) {
+        throw new UnsupportedOperationException();
+      }
+      public T get() {
+        throw new UnsupportedOperationException();
+      }
+    };
   }
 }

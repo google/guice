@@ -16,8 +16,6 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
-
 import junit.framework.TestCase;
 
 /**
@@ -59,7 +57,7 @@ public class ContainerTest extends TestCase {
 
   public void testInjection() throws ContainerCreationException {
     Container container = createFooContainer();
-    Foo foo = container.getCreator(Foo.class).get();
+    Foo foo = container.getFactory(Foo.class).get();
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -99,7 +97,7 @@ public class ContainerTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("i").to(5);
     Container container = builder.create(false);
-    IntegerWrapper iw = container.getCreator(IntegerWrapper.class).get();
+    IntegerWrapper iw = container.getFactory(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
@@ -181,7 +179,7 @@ public class ContainerTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create(false);
-    A a = container.getCreator(AImpl.class).get();
+    A a = container.getFactory(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 

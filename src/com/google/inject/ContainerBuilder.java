@@ -28,17 +28,18 @@ import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
+
+import org.aopalliance.intercept.MethodInterceptor;
+
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Logger;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
@@ -81,7 +82,7 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Keeps error messages in order and prevents duplicates.
    */
-  final Set<Message> errorMessages = new LinkedHashSet<Message>();
+  final Collection<Message> errorMessages = new ArrayList<Message>();
 
   private static final InternalFactory<Container> CONTAINER_FACTORY
       = new InternalFactory<Container>() {
@@ -528,9 +529,13 @@ public final class ContainerBuilder extends SourceConsumer {
           = new DefaultFactory<I>(key, implementation);
       this.factory = defaultFactory;
       creationListeners.add(new CreationListener() {
-        public void notify(ContainerImpl container) {
-          defaultFactory.setConstructor(
-              container.getConstructor(implementation));
+        public void notify(final ContainerImpl container) {
+          container.withErrorHandler(errorHandler, new Runnable() {
+            public void run() {
+              defaultFactory.setConstructor(
+                  container.getConstructor(implementation));
+            }
+          });
         }
       });
       return this;

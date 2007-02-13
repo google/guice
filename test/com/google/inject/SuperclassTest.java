@@ -27,7 +27,7 @@ public class SuperclassTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class);
     Container container = builder.create(false);
-    Factory<Sub> creator = container.getCreator(Sub.class);
+    Factory<Sub> creator = container.getFactory(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();
     sub = creator.get();

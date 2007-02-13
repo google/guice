@@ -52,6 +52,12 @@ public class ErrorHandlingTest {
     @Inject String s;
 
     @Inject("foo") void tee(String s, int i) {}
+
+    @Inject Invalid invalid;
+  }
+
+  static class Invalid {
+    Invalid(String s) {}
   }
 
   static class MyModule extends AbstractModule {
@@ -60,6 +66,7 @@ public class ErrorHandlingTest {
       bind(Foo.class);
       bind(Bar.class);
       bind(Tee.class);
+      bind(new TypeLiteral<List<String>>() {});
       bind(String.class).named("foo").in("foo");
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       requestStaticInjection(ErrorHandlingTest.class);

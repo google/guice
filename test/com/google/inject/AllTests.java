@@ -47,6 +47,7 @@ public class AllTests {
     suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
+    suite.addTestSuite(ImplicitBindingTest.class);
 
     suite.addTestSuite(QueryTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);

@@ -107,7 +107,7 @@ public class PerformanceComparison {
       });
 
       try {
-        fooFactory = builder.create(false).getCreator(Foo.class);
+        fooFactory = builder.create(false).getFactory(Foo.class);
       } catch (ContainerCreationException e) {
         throw new RuntimeException(e);
       }

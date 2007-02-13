@@ -20,6 +20,9 @@ import com.google.inject.spi.Message;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Thrown when errors occur while creating a {@link Container}. Includes a list
@@ -30,14 +33,21 @@ import java.util.Formatter;
  */
 public class ContainerCreationException extends Exception {
 
-  final Collection<Message> errorMessages;
+  final List<Message> errorMessages;
 
   /**
    * Constructs a new exception for the given errors.
    */
   public ContainerCreationException(Collection<Message> errorMessages) {
     super();
-    this.errorMessages = errorMessages;
+
+    // Sort the messages by source. 
+    this.errorMessages = new ArrayList<Message>(errorMessages);
+    Collections.sort(this.errorMessages, new Comparator<Message>() {
+      public int compare(Message a, Message b) {
+        return a.getSourceString().compareTo(b.getSourceString());
+      }
+    });
   }
 
   public String getMessage() {
@@ -48,7 +58,7 @@ public class ContainerCreationException extends Exception {
     Formatter fmt = new Formatter().format("Guice configuration errors:%n%n");
     int index = 1;
     for (Message errorMessage : errorMessages) {
-      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSource())
+      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSourceString())
          .format(" %s%n%n", errorMessage.getMessage());
     }
     return fmt.format("%s error[s]%n", errorMessages.size()).toString();

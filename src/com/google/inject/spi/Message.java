@@ -45,6 +45,18 @@ public class Message {
     return source;
   }
 
+  String sourceString = null;
+
+  /**
+   * Returns a string representation of the source object. 
+   */
+  public String getSourceString() {
+    if (sourceString == null) {
+      sourceString = source.toString();
+    }
+    return sourceString;
+  }
+
   /**
    * Gets the error message text.
    */
@@ -53,7 +65,7 @@ public class Message {
   }
 
   public String toString() {
-    return source + " " + message;
+    return getSourceString() + " " + message;
   }
 
   public int hashCode() {

@@ -41,7 +41,7 @@ public class IntegrationTest extends TestCase {
     assertTrue(foo.invoked);
     assertEquals(1, counter.count);
 
-    foo = container.getCreator(Foo.class).get();
+    foo = container.getFactory(Foo.class).get();
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(2, counter.count);

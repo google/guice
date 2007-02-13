@@ -67,8 +67,9 @@ class ConstructionContext<T> {
 
     if (!expectedType.isInterface()) {
       // TODO: Report better error.
-      throw new ConfigurationException(
-          expectedType.getName() + " is not an interface.");
+      throw new ConfigurationException("Tried proxying "
+          + expectedType.getName() + " to support a circular dependency, but"
+          + " it is not an interface.");
     }
 
     if (invocationHandlers == null) {
@@ -99,9 +100,10 @@ class ConstructionContext<T> {
     public Object invoke(Object proxy, Method method, Object[] args)
         throws Throwable {
       if (delegate == null) {
-        throw new IllegalStateException(
-            "Not finished constructing. Please don't call methods on this"
-                + " object until the caller's construction is complete.");
+        throw new IllegalStateException("This is a proxy used to support"
+            + " circular references involving constructors. The object we're"
+            + " proxying is not constructed yet. Please wait until after"
+            + " injection has completed to use this object.");
       }
 
       try {

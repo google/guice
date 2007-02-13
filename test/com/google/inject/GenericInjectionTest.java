@@ -31,7 +31,7 @@ public class GenericInjectionTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(new TypeLiteral<List<String>>() {}).to(names);
     Container container = builder.create(false);
-    Foo foo = container.getCreator(Foo.class).get();
+    Foo foo = container.getFactory(Foo.class).get();
     assertEquals(names, foo.names);
   }
 

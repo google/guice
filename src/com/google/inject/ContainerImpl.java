@@ -21,6 +21,10 @@ import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
+
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
@@ -39,8 +43,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastMethod;
 
 /**
  * Default {@link Container} implementation.
@@ -135,7 +137,7 @@ class ContainerImpl implements Container {
     this.errorHandler = errorHandler;
   }
 
-  <T> InternalFactory<? extends T> getFactory(Member member, Key<T> key) {
+  <T> InternalFactory<? extends T> getFactory(final Member member, Key<T> key) {
     // TODO: Clean up unchecked type warnings.
 
     // Do we have a factory for the specified type and name?
@@ -145,8 +147,6 @@ class ContainerImpl implements Container {
     }
 
     Class<? super T> rawType = key.getType().getRawType();
-
-    // TODO: Can we use the type itself as an implementation?
 
     // Handle cases where T is a Factory<?>.
     if (rawType.equals(Factory.class)) {
@@ -186,58 +186,85 @@ class ContainerImpl implements Container {
       }
     }
 
-    // Do we have a constant String factory of the same name?
+    // Can we convert from a String constant?
     Binding<String> stringBinding
         = getBinding(Key.get(String.class, key.getName()));
-    if (stringBinding == null || !stringBinding.isConstant()) {
+    if (stringBinding != null && stringBinding.isConstant()) {
+      // We don't need do pass in an InternalContext because we know this is
+      // a ConstantFactory which will not use it.
+      String value = stringBinding.getInternalFactory().get(null);
+
+      // TODO: Generalize everything below here and enable users to plug in
+      // their own converters.
+
+      // Do we need a primitive?
+      Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
+      if (converter != null) {
+        try {
+          T t = converter.convert(member, key, value);
+          return new ConstantFactory<T>(t);
+        }
+        catch (ConstantConversionException e) {
+          errorHandler.handle(e);
+          return invalidFactory();
+        }
+      }
+
+      // Do we need an enum?
+      if (Enum.class.isAssignableFrom(rawType)) {
+        T t;
+        try {
+          t = (T) Enum.valueOf((Class) rawType, value);
+        }
+        catch (IllegalArgumentException e) {
+          errorHandler.handle(createMessage(value, key, member, e.toString()));
+          return invalidFactory();
+        }
+        return new ConstantFactory<T>(t);
+      }
+
+      // Do we need a class?
+      if (rawType == Class.class) {
+        try {
+          // TODO: Make sure we use the right classloader.
+          return new ConstantFactory<T>((T) Class.forName(value));
+        }
+        catch (ClassNotFoundException e) {
+          errorHandler.handle(createMessage(value, key, member, e.toString()));
+          return invalidFactory();
+        }
+      }
+    }
+
+    // Don't try to inject primitives, arrays, enums, interfaces or abstract
+    // classes.
+    int modifiers = rawType.getModifiers();
+    if (rawType.isArray() || rawType.isEnum()
+        || Modifier.isAbstract(modifiers) || rawType.isPrimitive()) {
       return null;
     }
 
-    // We don't need do pass in an InternalContext because we know this is
-    // a ConstantFactory which will not use it.
-    String value = stringBinding.getInternalFactory().get(null);
-
-    // TODO: Generalize everything below here and enable users to plug in
-    // their own converters.
-
-    // Do we need a primitive?
-    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
-    if (converter != null) {
+    // Last resort: inject the type itself.
+    if (member != null) {
+      // If we're injecting into a member, include it in the error messages.
+      final ErrorHandler previous = this.errorHandler;
+      this.errorHandler = new AbstractErrorHandler() {
+        public void handle(String message) {
+          previous.handle("Error while injecting "
+              + ErrorMessages.convert(member) + ": " + message);
+        }
+        public void handle(Throwable t) {
+          previous.handle(t);
+        }
+      };
       try {
-        T t = converter.convert(member, key, value);
-        return new ConstantFactory<T>(t);
+        return (InternalFactory<? extends T>) getImplicitBinding(rawType);
       }
-      catch (ConstantConversionException e) {
-        errorHandler.handle(e);
-        return null;
+      finally {
+        this.errorHandler = previous;
       }
     }
-
-    // Do we need an enum?
-    if (Enum.class.isAssignableFrom(rawType)) {
-      T t;
-      try {
-        t = (T) Enum.valueOf((Class) rawType, value);
-      }
-      catch (IllegalArgumentException e) {
-        errorHandler.handle(createMessage(value, key, member, e.toString()));
-        return invalidFactory();
-      }
-      return new ConstantFactory<T>(t);
-    }
-
-    // Do we need a class?
-    if (rawType == Class.class) {
-      try {
-        return new ConstantFactory<T>((T) Class.forName(value));
-      }
-      catch (ClassNotFoundException e) {
-        errorHandler.handle(createMessage(value, key, member, e.toString()));
-        return invalidFactory();
-      }
-    }
-
-    return null;
+    return (InternalFactory<? extends T>) getImplicitBinding(rawType);
   }
 
   boolean isConstantType(Class<?> type) {
@@ -515,6 +542,7 @@ class ContainerImpl implements Container {
       if (implementation.isInterface()) {
         errorHandler.handle(
             ErrorMessages.CANNOT_INJECT_INTERFACE, implementation);
+        return ConstructorInjector.invalidConstructor();
       }
 
       return new ConstructorInjector(ContainerImpl.this, implementation);
@@ -588,10 +616,6 @@ class ContainerImpl implements Container {
     }
   }
 
-  public <T> Factory<T> getCreator(final Class<T> implementation) {
-    return getConstructor(implementation);
-  }
-
   public void injectMembers(final Object o) {
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
@@ -642,7 +666,7 @@ class ContainerImpl implements Container {
 
     if (factory == null) {
       throw new ConfigurationException(
-          "Missing binding to " + AbstractErrorHandler.convert(key) + ".");
+          "Missing binding to " + ErrorMessages.convert(key) + ".");
     }
 
     return new Factory<T>() {
@@ -799,6 +823,64 @@ class ContainerImpl implements Container {
      */
     T convert(Member member, Key<T> key, String value)
         throws ConstantConversionException;
+  }
+
+  Map<Class<?>, InternalFactory<?>> implicitBindings =
+      new HashMap<Class<?>, InternalFactory<?>>();
+
+  /**
+   * Gets a factory for the specified type. Used when an explicit binding
+   * was not made. Uses synchronization here so it's not necessary in the
+   * factory itself. Returns {@code null} if the type isn't injectable.
+   */
+  <T> InternalFactory<? extends T> getImplicitBinding(Class<T> type) {
+    synchronized (implicitBindings) {
+      @SuppressWarnings("unchecked")
+      InternalFactory<T> factory =
+          (InternalFactory<T>) implicitBindings.get(type);
+      if (factory != null) {
+        return factory;
+      }
+
+      // Create the factory.
+      ImplicitBinding<T> implicitBinding = new ImplicitBinding<T>(type);
+
+      // Scope the factory if necessary.
+      Scope scope = Scopes.getScopeForType(type, scopes, errorHandler);
+      InternalFactory<? extends T> scoped;
+      if (scope != null) {
+        scoped = Scopes.scope(Key.get(type), this, implicitBinding, scope);
+      } else {
+        scoped = implicitBinding;
+      }
+      implicitBindings.put(type, scoped);
+
+      // Look up the constructor. We do this separately to support circular
+      // dependencies.
+      ConstructorInjector<T> constructor = getConstructor(type);
+      implicitBinding.setConstructorInjector(constructor);
+
+      return scoped;
+    }
+  }
+
+  static class ImplicitBinding<T> implements InternalFactory<T> {
+
+    final Class<T> type;
+    ConstructorInjector<T> constructorInjector;
+
+    ImplicitBinding(Class<T> type) {
+      this.type = type;
+    }
+
+    void setConstructorInjector(
+        ConstructorInjector<T> constructorInjector) {
+      this.constructorInjector = constructorInjector;
+    }
+
+    public T get(InternalContext context) {
+      return constructorInjector.construct(context, type);
+    }
   }
 
   private static final InternalFactory<?> INVALID_FACTORY

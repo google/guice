@@ -20,12 +20,12 @@ import com.google.inject.Inject;
 
 import static com.opensymphony.xwork2.Action.SUCCESS;
 
-public class CounterAction {
+public class Count {
 
   final Counter counter;
 
   @Inject
-  public CounterAction(Counter counter) {
+  public Count(Counter counter) {
     this.counter = counter;
   }
 

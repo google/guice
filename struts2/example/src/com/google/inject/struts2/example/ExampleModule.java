@@ -26,6 +26,5 @@ import com.google.inject.AbstractModule;
 public class ExampleModule extends AbstractModule {
 
   protected void configure() {
-    bind(Counter.class);
   }
 }

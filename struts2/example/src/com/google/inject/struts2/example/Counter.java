@@ -19,7 +19,7 @@ package com.google.inject.struts2.example;
 import com.google.inject.servlet.SessionScoped;
 
 /**
- * Counts requests per session.
+ * Session-scoped counter.
  */
 @SessionScoped
 public class Counter {
@@ -27,7 +27,7 @@ public class Counter {
   int count = 0;
 
   /** Increments the count and returns the new value. */
-  public int increment() {
+  public synchronized int increment() {
     return count++;
   }
 }

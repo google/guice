@@ -25,7 +25,9 @@
           <root url="jar://$MODULE_DIR$/lib/xwork-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../struts/xwork/src/java" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

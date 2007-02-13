@@ -8,8 +8,8 @@
             value="com.google.inject.struts2.example.ExampleModule"/>
 
   <package name="default" extends="struts-default">
-    <action name="Counter"
-        class="com.google.inject.struts2.example.CounterAction">
+    <action name="Count"
+        class="com.google.inject.struts2.example.Count">
       <result>/WEB-INF/Counter.jsp</result>
     </action>      
   </package>

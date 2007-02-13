@@ -75,6 +75,10 @@ abstract class AbstractReferenceCache<K, V> extends ReferenceMap<K, V> {
         futures.remove(keyReference);
       }
     } else {
+      if (previous.winningThread() == Thread.currentThread()) {
+        throw new RuntimeException("Circular reference: " + key);
+      }
+
       // wait for winning thread.
       return previous.get();
     }
@@ -133,6 +137,12 @@ abstract class AbstractReferenceCache<K, V> extends ReferenceMap<K, V> {
 
     /** The result is a throwable. */
     private Throwable t;
+
+    private final Thread winningThread = Thread.currentThread();
+
+    Thread winningThread() {
+      return winningThread;
+    }
 
     V get() {
       if (!set) {

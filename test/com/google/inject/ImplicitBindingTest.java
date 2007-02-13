@@ -21,35 +21,24 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class NotRequiredTest extends TestCase {
+public class ImplicitBindingTest extends TestCase {
 
-  public void testProvided() throws ContainerCreationException {
+  public void testCircularDependency() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(Bar.class).to(BarImpl.class);
-    Container c = builder.create(false);
-    Foo foo = c.getFactory(Foo.class).get();
-    assertNotNull(foo.bar);
-    assertNotNull(foo.fromMethod);
-  }
-
-  public void testNotProvided() throws ContainerCreationException {
-    Container c = new ContainerBuilder().create(false);
-    Foo foo = c.getFactory(Foo.class).get();
-    assertNull(foo.bar);
-    assertNull(foo.fromMethod);
+    Container container = builder.create(true);
+    Foo foo = container.getInstance(Foo.class);
+    assertSame(foo, foo.bar.foo);
   }
 
   static class Foo {
-    @Inject(required=false) Bar bar;
-
-    Bar fromMethod;
-
-    @Inject(required=false) void setBar(Bar bar) {
-      fromMethod = bar;
-    }
+    @Inject Bar bar;
   }
 
-  interface Bar {}
-
-  static class BarImpl implements Bar {}
+  static class Bar {
+    final Foo foo;
+    @Inject
+    public Bar(Foo foo) {
+      this.foo = foo;
+    }
+  }
 }
