@@ -118,6 +118,7 @@
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <link href="http://aopalliance.sourceforge.net/doc"/>
+      <link href="http://java.sun.com/javase/6/docs/api"/>
     </javadoc>
   </target>
 
