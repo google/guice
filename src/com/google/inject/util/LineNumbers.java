@@ -32,10 +32,13 @@ public class LineNumbers
 
     /**
      * Reads line number information from the given class, if available.
+     * @throws IllegalArgumentException if the bytecode for the class cannot be found
      */
     public LineNumbers(Class cls) throws IOException {
         this.cls = cls;
         InputStream in = cls.getResourceAsStream("/" + cls.getName().replace('.', '/') + ".class");
+        if (in == null)
+            throw new IllegalArgumentException("Cannot find bytecode for " + cls);
         new ClassReader(in).accept(new LineNumberReader(), 0);
     }
 
