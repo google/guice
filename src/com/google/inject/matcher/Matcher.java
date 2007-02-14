@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.query;
+package com.google.inject.matcher;
 
 /**
  * Returns {@code true} or {@code false} for a given input.

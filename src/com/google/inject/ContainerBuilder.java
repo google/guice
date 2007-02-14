@@ -21,7 +21,7 @@ import static com.google.inject.Scopes.CONTAINER;
 import static com.google.inject.Scopes.CONTAINER_NAME;
 import static com.google.inject.Scopes.DEFAULT;
 import static com.google.inject.Scopes.DEFAULT_NAME;
-import com.google.inject.query.Matcher;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
 import com.google.inject.util.Objects;

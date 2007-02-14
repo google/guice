@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.query;
+package com.google.inject.matcher;
 
 /**
  * Implements {@code and()} and {@code or()}.

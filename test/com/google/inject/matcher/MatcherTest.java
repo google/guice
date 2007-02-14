@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.inject.query;
+package com.google.inject.matcher;
 
-import static com.google.inject.query.Matchers.*;
+import static com.google.inject.matcher.Matchers.*;
 
 import junit.framework.TestCase;
 

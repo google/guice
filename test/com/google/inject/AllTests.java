@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.query.MatcherTest;
+import com.google.inject.matcher.MatcherTest;
 import com.google.inject.servlet.ServletTest;
 import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;

@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.query.Matcher;
+import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;

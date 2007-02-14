@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.query;
+package com.google.inject.matcher;
 
 import com.google.inject.util.Objects;
 
