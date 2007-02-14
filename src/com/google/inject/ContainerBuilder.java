@@ -127,7 +127,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
   /**
    * Applies the given method interceptor to the methods matched by the class
-   * and method queries.
+   * and method matchers.
    *
    * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.

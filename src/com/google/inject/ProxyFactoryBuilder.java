@@ -33,7 +33,7 @@ class ProxyFactoryBuilder {
 
   /**
    * Applies the given method interceptor to the methods matched by the class
-   * and method queries.
+   * and method matchers.
    *
    * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.
@@ -42,8 +42,10 @@ class ProxyFactoryBuilder {
    * @param interceptors to apply
    */
   public ProxyFactoryBuilder intercept(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
-    methodAspects.add(new MethodAspect(classMatcher, methodMatcher, interceptors));
+      Matcher<? super Method> methodMatcher,
+      MethodInterceptor... interceptors) {
+    methodAspects.add(
+        new MethodAspect(classMatcher, methodMatcher, interceptors));
     return this;
   }
 
