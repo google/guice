@@ -5,10 +5,20 @@
     <buildFile url="file://$PROJECT_DIR$/build.xml">
       <additionalClassPath />
       <antReference projectDefault="true" />
-      <customJdkName value="" />
+      <customJdkName value="1.5" />
       <maximumHeapSize value="128" />
       <properties />
     </buildFile>
+  </component>
+  <component name="Build editor project-level loader">
+    <settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectPathChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectJdkChecker">
+        <setting name="getModuleJdks" value="rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAABA/QAAAAAAAAHg=" />
+      </class-settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.ClearOutputChecker" />
+    </settings>
   </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
@@ -105,6 +115,7 @@
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
     <option name="DEPLOY_AFTER_MAKE" value="0" />
+    <resourceExtensions />
     <wildcardResourcePatterns />
   </component>
   <component name="DataSourceManagerImpl" />
@@ -202,6 +213,13 @@
     <option name="FILTER_WARNINGS" value="false" />
     <option name="FILTER_INFO" value="true" />
     <option name="CUSTOM_FILTER" />
+  </component>
+  <component name="Mach integration configuration">
+    <pre-compile target="" enabled="false" />
+    <use-mach-for-java enabled="false" />
+    <mach-version version="alpha" />
+    <working-set enabled="false" targets="" />
+    <previous-paths />
   </component>
   <component name="Palette2">
     <group name="Swing">
