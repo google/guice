@@ -13,10 +13,10 @@
   <component name="Build editor project-level loader">
     <settings>
       <class-settings class="com.google.devtools.intellig.configcheck.ProjectPathChecker" />
-      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
       <class-settings class="com.google.devtools.intellig.configcheck.ProjectJdkChecker">
         <setting name="getModuleJdks" value="rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAABA/QAAAAAAAAHg=" />
       </class-settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
       <class-settings class="com.google.devtools.intellig.configcheck.ClearOutputChecker" />
     </settings>
   </component>
@@ -347,7 +347,7 @@
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="JDK 1.5.0_06" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
     <output url="file://$APPLICATION_HOME_DIR$/bin/classes" />
   </component>
   <component name="ProjectRunConfigurationManager" />
