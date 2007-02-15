@@ -178,7 +178,7 @@ public class ServletTest extends TestCase {
     builder.install(new ServletModule());
     builder.bind(InSession.class);
     builder.bind(InRequest.class);
-    return builder.create(false);
+    return builder.create();
   }
 
   @SessionScoped

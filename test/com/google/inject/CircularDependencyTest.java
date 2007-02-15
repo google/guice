@@ -29,7 +29,7 @@ public class CircularDependencyTest extends TestCase {
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.create(false);
+    Container container = builder.create();
     A a = container.getFactory(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }

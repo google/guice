@@ -18,7 +18,7 @@ package com.google.inject.name;
 
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.ForBinding;
+import com.google.inject.Binder;
 
 /**
  * Annotates named things.
@@ -26,7 +26,7 @@ import com.google.inject.ForBinding;
  * @author crazybob@google.com (Bob Lee)
  */
 @Retention(RUNTIME)
-@ForBinding
+@Binder
 public @interface Named {
   String value();
 }

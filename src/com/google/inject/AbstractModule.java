@@ -17,8 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
-import java.util.Map;
-import java.util.Properties;
 import java.lang.annotation.Annotation;
 
 /**
@@ -28,12 +26,14 @@ import java.lang.annotation.Annotation;
  * those found in {@link ContainerBuilder}. For example:
  *
  * <pre>
+ * import static com.google.inject.Names.named;
+ *
  * public class MyModule extends AbstractModule {
  *   protected void configure() {
  *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER);
  *     bind(BarImpl.class);
  *     link(Bar.class).to(BarImpl.class);
- *     bind("port").to(8080);
+ *     bindConstant(named("port")).to(8080);
  *   }
  * }
  * </pre>

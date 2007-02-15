@@ -26,7 +26,7 @@ public class SuperclassTest extends TestCase {
   public void testSuperclassInjection() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class);
-    Container container = builder.create(false);
+    Container container = builder.create();
     Factory<Sub> creator = container.getFactory(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();

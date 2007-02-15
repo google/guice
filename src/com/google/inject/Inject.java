@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -27,12 +26,9 @@ import java.lang.annotation.Target;
 /**
  * <p>Annotates members which should have their value[s] injected.
  *
- * <p>Also applies to other annotations which can be used with {@link Key}s and
- * at injection points.
- *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ METHOD, CONSTRUCTOR, FIELD, ANNOTATION_TYPE })
+@Target({ METHOD, CONSTRUCTOR, FIELD })
 @Retention(RUNTIME)
 public @interface Inject {
 

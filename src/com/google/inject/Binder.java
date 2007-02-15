@@ -16,26 +16,18 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
-import java.util.List;
-import java.util.Arrays;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * Annotates annotations which are used for binding. Only one such annotation
+ * may apply to a single injection point. You must also annotate binder
+ * annotations with {@code @Retention(RUNTIME)}. 
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-public class GenericInjectionTest extends TestCase {
-
-  public void testGenericInjection() throws ContainerCreationException {
-    List<String> names = Arrays.asList("foo", "bar", "bob");
-    ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(new TypeLiteral<List<String>>() {}).to(names);
-    Container container = builder.create();
-    Foo foo = container.getFactory(Foo.class).get();
-    assertEquals(names, foo.names);
-  }
-
-  static class Foo {
-    @Inject List<String> names;
-  }
-}
+@Target({ ElementType.ANNOTATION_TYPE })
+@Retention(RUNTIME)
+public @interface Binder {}

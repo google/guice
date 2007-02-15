@@ -25,7 +25,7 @@ public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    Container container = builder.create(true);
+    Container container = builder.create();
     Foo foo = container.getInstance(Foo.class);
     assertSame(foo, foo.bar.foo);
   }

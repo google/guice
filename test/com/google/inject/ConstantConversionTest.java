@@ -18,8 +18,6 @@ package com.google.inject;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -29,20 +27,16 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ConstantConversionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface NumericValue {}
+  @Binder @interface NumericValue {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface BooleanValue {}
+  @Binder @interface BooleanValue {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface EnumValue {}
+  @Binder @interface EnumValue {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface ClassName {}
+  @Binder @interface ClassName {}
 
   public static class Foo {
     @Inject @NumericValue Integer integerField;
@@ -71,7 +65,7 @@ public class ConstantConversionTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
-    Container container = builder.create(false);
+    Container container = builder.create();
     Simple simple = container.getFactory(Simple.class).get();
     assertEquals(5, simple.i);
   }
@@ -86,7 +80,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(BooleanValue.class).to("true");
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
-    Container c = b.create(false);
+    Container c = b.create();
     Foo foo = c.getFactory(Foo.class).get();
 
     checkNumbers(
@@ -117,7 +111,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidInteger() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create(false);
+    Container c = b.create();
     try {
       c.getFactory(InvalidInteger.class).get();
       fail();
@@ -131,7 +125,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidCharacter() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create(false);
+    Container c = b.create();
     try {
       c.getFactory(InvalidCharacter.class).get();
       fail();
@@ -145,7 +139,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidEnum() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create(false);
+    Container c = b.create();
     try {
       c.getFactory(InvalidEnum.class).get();
       fail();

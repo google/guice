@@ -34,7 +34,7 @@ public class IntegrationTest extends TestCase {
     ContainerBuilder containerBuilder = new ContainerBuilder();
     containerBuilder.bind(Foo.class);
     containerBuilder.intercept(any(), any(), counter);
-    Container container = containerBuilder.create(false);
+    Container container = containerBuilder.create();
 
     Foo foo = container.getFactory(Key.get(Foo.class)).get();
     foo.foo();

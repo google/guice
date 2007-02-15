@@ -53,7 +53,7 @@ public class FactoryTest extends TestCase {
       }
     });
 
-    Container c = cb.create(false);
+    Container c = cb.create();
 
     A a = c.getFactory(A.class).get();
 
@@ -80,31 +80,25 @@ public class FactoryTest extends TestCase {
   static class NegativeOne {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface FooAnnotation {}
+  @Binder @interface FooAnnotation {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface BarAnnotation {}
+  @Binder @interface BarAnnotation {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface TeeAnnotation1 {}
+  @Binder @interface TeeAnnotation1 {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface TeeAnnotation2 {}
+  @Binder @interface TeeAnnotation2 {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface BobAnnotation1 {}
+  @Binder @interface BobAnnotation1 {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface BobAnnotation2 {}
+  @Binder @interface BobAnnotation2 {}
 
   public void testInjection() throws Exception {
-    ContainerBuilder cb = new ContainerBuilder();
+    ContainerBuilder cb = new ContainerBuilder(Stage.PRODUCTION);
 
     // Called from getInstance().
     cb.bind(Foo.class)
@@ -134,7 +128,7 @@ public class FactoryTest extends TestCase {
     cb.bind(Bob.class).annotatedWith(BobAnnotation2.class).to(
         createFactory(Bob.class, BobAnnotation2.class, execute));
 
-    Container c = cb.create(true);
+    Container c = cb.create();
 
     Foo foo = c.getFactory(Key.get(Foo.class, FooAnnotation.class)).get();
 

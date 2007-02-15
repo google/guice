@@ -31,7 +31,7 @@ import java.lang.reflect.Type;
  *
  * <pre>
  *   {@literal @}Inject
- *   public void setService({@literal @}Transactional Service  cities) {
+ *   public void setService({@literal @}Transactional Service service) {
  *     ...
  *   }
  * </pre>
@@ -265,7 +265,7 @@ public abstract class Key<T> {
       ErrorHandler errorHandler) {
     Annotation found = null;
     for (Annotation annotation : annotations) {
-      if (annotation.annotationType().getAnnotation(ForBinding.class) != null) {
+      if (annotation.annotationType().getAnnotation(Binder.class) != null) {
         if (found == null) {
           found = annotation;
         } else {

@@ -29,7 +29,7 @@ public class FactoryInjectionTest extends TestCase {
     builder.bind(Bar.class);
     builder.bind(ContainerScoped.class).in(Scopes.CONTAINER);
 
-    Container container = builder.create(false);
+    Container container = builder.create();
 
     Foo foo = container.getFactory(Foo.class).get();
 

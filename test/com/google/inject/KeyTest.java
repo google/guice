@@ -32,8 +32,7 @@ public class KeyTest extends TestCase {
   public void foo(List<String> a, List<String> b) {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface Foo {}
+  @Binder @interface Foo {}
 
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);

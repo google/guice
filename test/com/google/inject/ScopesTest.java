@@ -18,11 +18,6 @@ package com.google.inject;
 
 import junit.framework.TestCase;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * @author crazybob@google.com (Bob Lee)
  */
@@ -33,7 +28,7 @@ public class ScopesTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     Object bindingBuilder
         = builder.bind(Singleton.class);
-    builder.create(false);
+    builder.create();
     assertSame(Scopes.CONTAINER,
         ((ContainerBuilder.BindingBuilder<?>) bindingBuilder).scope);
   }
@@ -46,7 +41,7 @@ public class ScopesTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     Object bindingBuilder
         = builder.bind(Singleton.class).in(Scopes.DEFAULT);
-    builder.create(false);
+    builder.create();
     assertSame(Scopes.DEFAULT,
         ((ContainerBuilder.BindingBuilder<?>) bindingBuilder).scope);
   }
@@ -55,7 +50,7 @@ public class ScopesTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Singleton.class).to(new Singleton()).in(Scopes.DEFAULT);
     try {
-      builder.create(false);
+      builder.create();
       fail();
     } catch (ContainerCreationException e) { /* expected */ }
   }

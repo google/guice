@@ -16,11 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.util.SurrogateAnnotations;
-import com.google.inject.util.DuplicateAnnotationException;
-
-import java.util.Map;
 import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * Built in scope implementations.
@@ -45,7 +42,7 @@ public class Scopes {
   };
 
   /**
-   * One instance per container.
+   * One instance per container. Also see {@code @}{@link ContainerScoped}.
    */
   public static final Scope CONTAINER = new Scope() {
     public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {

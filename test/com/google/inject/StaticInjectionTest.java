@@ -26,12 +26,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class StaticInjectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface I {}
+  @Binder @interface I {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface S {}
+  @Binder @interface S {}
 
   public void testInjectStatics() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
@@ -39,7 +37,7 @@ public class StaticInjectionTest extends TestCase {
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
-    Container c = builder.create(false);
+    Container c = builder.create();
 
     assertEquals("test", StaticInjectionTest.Static.s);
     assertEquals(5, StaticInjectionTest.Static.i);

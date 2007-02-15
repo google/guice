@@ -26,14 +26,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ReflectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface I {}
+  @Binder @interface I {}
 
   public void testNormalBinding() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     Foo foo = new Foo();
     builder.bind(Foo.class).to(foo);
-    Container container = builder.create(false);
+    Container container = builder.create();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getFactory().get());
     assertNotNull(fooBinding.getSource());
@@ -44,7 +43,7 @@ public class ReflectionTest extends TestCase {
   public void testConstantBinding() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.create(false);
+    Container container = builder.create();
     Binding<?> i = container.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getFactory().get());
     assertNotNull(i.getSource());
@@ -57,7 +56,7 @@ public class ReflectionTest extends TestCase {
     Bar bar = new Bar();
     builder.bind(Bar.class).to(bar);
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
-    Container container = builder.create(false);
+    Container container = builder.create();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getFactory().get());
     assertNotNull(fooBinding.getSource());

@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.servlet;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.Binder;
-
 /**
- * Apply this to field or parameters of type {@code Map<String, String[]>}
- * when you want the HTTP request parameter map to be injected.
- *
- * @author crazybob@google.com (Bob Lee)
+ * Servlet API scopes and bindings. Apply {@link
+ * com.google.inject.servlet.GuiceFilter} to any servlets which will use the
+ * servlet scopes. Install {@link com.google.inject.servlet.ServletModule}
+ * into your {@link com.google.inject.ContainerBuilder} to install everything
+ * at once.
  */
-@Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Binder
-public @interface RequestParameters {}
+package com.google.inject.servlet;

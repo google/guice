@@ -24,6 +24,11 @@ import java.lang.annotation.Annotation;
  * Injects dependencies into constructors, methods and fields annotated with
  * {@code @}{@link Inject}. Provides access to {@link Binding}s.
  *
+ * <p>Automatically converts constants as needed from {@code String} to any
+ * primitive type as well as {@code enum} and {@code Class<?>}. Automatically
+ * boxes and unboxes primitives. For example, in the absence of a binding to
+ * {@code int}, the container will look for a binding to {@code Integer}.
+ *
  * @author crazybob@google.com (Bob Lee)
  * @see ContainerBuilder
  */

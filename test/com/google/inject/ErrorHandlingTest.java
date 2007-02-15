@@ -28,7 +28,7 @@ public class ErrorHandlingTest {
   public static void main(String[] args) throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.install(new MyModule());
-    builder.create(true);
+    builder.create();
   }
 
   @Inject @Named("missing")
@@ -69,7 +69,7 @@ public class ErrorHandlingTest {
       bind(Bar.class);
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).annotatedWith(Names.annotationFor("foo")).in(
+      bind(String.class).annotatedWith(Names.named("foo")).in(
           Named.class);
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       requestStaticInjection(ErrorHandlingTest.class);

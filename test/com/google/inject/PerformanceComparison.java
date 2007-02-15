@@ -109,7 +109,7 @@ public class PerformanceComparison {
       });
 
       try {
-        fooFactory = builder.create(false).getFactory(Foo.class);
+        fooFactory = builder.create().getFactory(Foo.class);
       } catch (ContainerCreationException e) {
         throw new RuntimeException(e);
       }
@@ -231,10 +231,8 @@ public class PerformanceComparison {
   }
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface I {}
+  @Binder @interface I {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface S {}
+  @Binder @interface S {}
 }

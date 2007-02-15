@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 /**
  * Apply this to implementation classes when you want one instance per session.
  *
+ * @see com.google.inject.Scopes#CONTAINER
  * @author crazybob@google.com (Bob Lee)
  */
 @Target(ElementType.TYPE)

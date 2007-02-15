@@ -26,16 +26,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ContainerTest extends TestCase {
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface Other {}
+  @Binder @interface Other {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface S {}
+  @Binder @interface S {}
 
   @Retention(RUNTIME)
-  @ForBinding
-  @interface I {}
+  @Binder @interface I {}
 
   public void testFactoryMethods() throws ContainerCreationException {
     Singleton singleton = new Singleton();
@@ -46,7 +43,7 @@ public class ContainerTest extends TestCase {
     builder.bind(Singleton.class)
         .annotatedWith(Other.class)
         .to(other);
-    Container container = builder.create(true);
+    Container container = builder.create();
 
     assertSame(singleton,
         container.getFactory(Key.get(Singleton.class)).get());
@@ -97,7 +94,7 @@ public class ContainerTest extends TestCase {
       }
     });
 
-    return builder.create(false);
+    return builder.create();
   }
 
   public void testGetInstance() throws ContainerCreationException {
@@ -112,7 +109,7 @@ public class ContainerTest extends TestCase {
       throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.create(false);
+    Container container = builder.create();
     IntegerWrapper iw = container.getFactory(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
@@ -194,7 +191,7 @@ public class ContainerTest extends TestCase {
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.create(false);
+    Container container = builder.create();
     A a = container.getFactory(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
@@ -233,7 +230,7 @@ public class ContainerTest extends TestCase {
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(Static.class);
-    builder.create(false);
+    builder.create();
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);

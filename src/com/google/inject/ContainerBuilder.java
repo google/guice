@@ -33,27 +33,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
- * implementations. A binding implementation could be anything from a constant
- * value to an object in the HTTP session.
+ * implementations.
  *
- * <p>Not safe for concurrent use.
- *
- * <p>Default bindings include:
+ * <p>Creates several bindings by default:
  *
  * <ul>
  * <li>A {@code Factory<T>} for each binding of type {@code T}
  * <li>The {@link Container} iself
  * <li>The {@link Logger} for the class being injected
+ * <li>The {@link Stage} passed to the builder's constructor
  * </ul>
- *
- * <p>Converts constants as needed from {@code String} to any primitive type in
- * addition to {@code enum} and {@code Class<?>}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -75,6 +69,8 @@ public final class ContainerBuilder extends SourceConsumer {
       = new ArrayList<StaticInjection>();
 
   ContainerImpl container;
+
+  final Stage stage;
 
   /**
    * Keeps error messages in order and prevents duplicates.
@@ -104,14 +100,28 @@ public final class ContainerBuilder extends SourceConsumer {
 
   /**
    * Constructs a new builder.
+   *
+   * @param stage we're running in. If the stage is {@link Stage#PRODUCTION},
+   *  we will eagerly load container-scoped objects.
    */
-  public ContainerBuilder() {
+  public ContainerBuilder(Stage stage) {
     scope(ContainerScoped.class, CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
+    bind(Stage.class).to(stage);
 
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
+
+    this.stage = stage;
+  }
+
+  /**
+   * Constructs a new builder for a development environment (see
+   * {@link Stage#DEVELOPMENT}).
+   */
+  public ContainerBuilder() {
+    this(Stage.DEVELOPMENT);
   }
 
   final List<CreationListener> creationListeners
@@ -254,15 +264,11 @@ public final class ContainerBuilder extends SourceConsumer {
    * Creates a {@link Container} instance. Injects static members for classes
    * which were registered using {@link #requestStaticInjection(Class...)}.
    *
-   * @param preload If true, the container will load all container-scoped
-   *     bindings now. If false, the container will lazily load them. Eager
-   *     loading is appropriate for production use (catch errors early and take
-   *     any performance hit up front) while lazy loading can speed development.
    * @throws ContainerCreationException if configuration errors are found. The
    *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
-  public synchronized Container create(boolean preload)
+  public synchronized Container create()
       throws ContainerCreationException {
     stopwatch.resetAndLog(logger, "Configuration");
 
@@ -278,7 +284,7 @@ public final class ContainerBuilder extends SourceConsumer {
     final List<ContextualCallable<Void>> preloaders
         = new ArrayList<ContextualCallable<Void>>();
 
-    createBindings(preload, preloaders);
+    createBindings(preloaders);
     createLinkedBindings();
 
     stopwatch.resetAndLog(logger, "Binding creation");
@@ -361,14 +367,13 @@ public final class ContainerBuilder extends SourceConsumer {
     putBinding(binding);
   }
 
-  private void createBindings(boolean preload,
-      List<ContextualCallable<Void>> preloaders) {
+  private void createBindings(List<ContextualCallable<Void>> preloaders) {
     for (BindingBuilder<?> builder : bindingBuilders) {
-      createBinding(builder, preload, preloaders);
+      createBinding(builder, preloaders);
     }
   }
 
-  private <T> void createBinding(BindingBuilder<T> builder, boolean preload,
+  private <T> void createBinding(BindingBuilder<T> builder,
       List<ContextualCallable<Void>> preloaders) {
     final Key<T> key = builder.getKey();
     final InternalFactory<? extends T> factory
@@ -379,6 +384,7 @@ public final class ContainerBuilder extends SourceConsumer {
     putBinding(binding);
 
     // Register to preload if necessary.
+    boolean preload = stage == Stage.PRODUCTION;
     if (builder.isContainerScoped()) {
       if (preload || builder.shouldPreload()) {
         preloaders.add(new BindingPreloader(key, factory));

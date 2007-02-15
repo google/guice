@@ -31,21 +31,21 @@ public class PreloadingTest extends TestCase {
   }
 
   public void testPreloadSome() throws ContainerCreationException {
-    ContainerBuilder builder = createContainerBuilder();
-    builder.create(false);
+    ContainerBuilder builder = createContainerBuilder(Stage.DEVELOPMENT);
+    builder.create();
     assertEquals(1, Foo.count);
     assertEquals(0, Bar.count);
   }
 
   public void testPreloadAll() throws ContainerCreationException {
-    ContainerBuilder builder = createContainerBuilder();
-    builder.create(true);
+    ContainerBuilder builder = createContainerBuilder(Stage.PRODUCTION);
+    builder.create();
     assertEquals(1, Foo.count);
     assertEquals(1, Bar.count);
   }
 
-  private ContainerBuilder createContainerBuilder() {
-    ContainerBuilder builder = new ContainerBuilder();
+  private ContainerBuilder createContainerBuilder(Stage stage) {
+    ContainerBuilder builder = new ContainerBuilder(stage);
     builder.bind(Foo.class).in(CONTAINER).preload();
     builder.bind(Bar.class);
     return builder;
@@ -55,7 +55,7 @@ public class PreloadingTest extends TestCase {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class).preload();
     try {
-      builder.create(false);
+      builder.create();
       fail();
     } catch (ContainerCreationException e) { /* expected */ }
   }

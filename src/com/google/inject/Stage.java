@@ -16,26 +16,22 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
-import java.util.List;
-import java.util.Arrays;
-
 /**
+ * The stage we're running in.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-public class GenericInjectionTest extends TestCase {
+public enum Stage {
 
-  public void testGenericInjection() throws ContainerCreationException {
-    List<String> names = Arrays.asList("foo", "bar", "bob");
-    ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(new TypeLiteral<List<String>>() {}).to(names);
-    Container container = builder.create();
-    Foo foo = container.getFactory(Foo.class).get();
-    assertEquals(names, foo.names);
-  }
+  /**
+   * We want fast startup times and better error reporting at the expense of
+   * runtime performance and some up front error checking.
+   */
+  DEVELOPMENT,
 
-  static class Foo {
-    @Inject List<String> names;
-  }
+  /**
+   * We want to catch errors as early as possible and take performance hits
+   * up front.
+   */
+  PRODUCTION
 }

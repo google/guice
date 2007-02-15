@@ -26,14 +26,14 @@ public class NotRequiredTest extends TestCase {
   public void testProvided() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Bar.class).to(BarImpl.class);
-    Container c = builder.create(false);
+    Container c = builder.create();
     Foo foo = c.getFactory(Foo.class).get();
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
   }
 
   public void testNotProvided() throws ContainerCreationException {
-    Container c = new ContainerBuilder().create(false);
+    Container c = new ContainerBuilder().create();
     Foo foo = c.getFactory(Foo.class).get();
     assertNull(foo.bar);
     assertNull(foo.fromMethod);

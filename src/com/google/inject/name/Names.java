@@ -35,7 +35,7 @@ public class Names {
   /**
    * Creates a {@link Named} annotation with {@code name} as the value.
    */
-  public static Named annotationFor(String name) {
+  public static Named named(String name) {
     return new NamedImpl(name);
   }
 
