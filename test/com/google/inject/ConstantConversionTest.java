@@ -27,38 +27,49 @@ import java.util.HashMap;
 public class ConstantConversionTest extends TestCase {
 
   public static class Foo {
-    @Inject("#") Integer integerField;
-    @Inject("#") int primitiveIntField;
-    @Inject("#") Long longField;
-    @Inject("#") long primitiveLongField;
-    @Inject("boolean") Boolean booleanField;
-    @Inject("boolean") boolean primitiveBooleanField;
-    @Inject("#") Byte byteField;
-    @Inject("#") byte primitiveByteField;
-    @Inject("#") Short shortField;
-    @Inject("#") short primitiveShortField;
-    @Inject("#") Float floatField;
-    @Inject("#") float primitiveFloatField;
-    @Inject("#") Double doubleField;
-    @Inject("#") short primitiveDoubleField;
-    @Inject("enum") Bar enumField;
-    @Inject("class") Class<?> classField;
+    @Inject @Named("#") Integer integerField;
+    @Inject @Named("#") int primitiveIntField;
+    @Inject @Named("#") Long longField;
+    @Inject @Named("#") long primitiveLongField;
+    @Inject @Named("boolean") Boolean booleanField;
+    @Inject @Named("boolean") boolean primitiveBooleanField;
+    @Inject @Named("#") Byte byteField;
+    @Inject @Named("#") byte primitiveByteField;
+    @Inject @Named("#") Short shortField;
+    @Inject @Named("#") short primitiveShortField;
+    @Inject @Named("#") Float floatField;
+    @Inject @Named("#") float primitiveFloatField;
+    @Inject @Named("#") Double doubleField;
+    @Inject @Named("#") short primitiveDoubleField;
+    @Inject @Named("enum") Bar enumField;
+    @Inject @Named("class") Class<?> classField;
   }
 
   public enum Bar {
     TEE, BAZ, BOB;
   }
 
+  @Named("foo")
+  public void testNamed() throws NoSuchMethodException {
+    Named named = getClass().getMethod("testNamed").getAnnotation(Named.class);
+    assertEquals(named, new NamedImpl("foo"));
+    assertEquals(new NamedImpl("foo"), named);
+
+    assertEquals(Key.get(String.class, new NamedImpl("foo")),
+        Key.get(String.class, named));
+  }
+
   public void testOneConstantInjection() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind("#").to("5");
+    builder.bind(Simple.class);
     Container container = builder.create(false);
     Simple simple = container.getFactory(Simple.class).get();
     assertEquals(5, simple.i);
   }
 
   static class Simple {
-    @Inject("#") int i;
+    @Inject @Named("#") int i;
   }
 
   public void testConstantInjection() throws ContainerCreationException {
@@ -106,15 +117,11 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getFactory(InvalidInteger.class).get();
       fail();
-    } catch (ConfigurationException e) {
-      assertTrue(e.getMessage().contains(
-          "Error converting 'invalid' to Integer while injecting integerField "
-              + "with dependency named '#' in InvalidInteger. Reason:"));
-    }
+    } catch (ConfigurationException e) { /* expected */ }
   }
 
   public static class InvalidInteger {
-    @Inject("#") Integer integerField;
+    @Inject @Named("#") Integer integerField;
   }
 
   public void testInvalidCharacter() throws ContainerCreationException {
@@ -124,15 +131,11 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getFactory(InvalidCharacter.class).get();
       fail();
-    } catch (ConfigurationException e) {
-      assertTrue(e.getMessage().contains(
-          "Error converting 'invalid' to char while injecting foo "
-              + "with dependency named 'foo' in InvalidCharacter. Reason:"));
-    }
+    } catch (ConfigurationException e) { /* expected */ }
   }
 
   public static class InvalidCharacter {
-    @Inject("foo") char foo;
+    @Inject @Named("foo") char foo;
   }
 
   public void testInvalidEnum() throws ContainerCreationException {
@@ -142,14 +145,10 @@ public class ConstantConversionTest extends TestCase {
     try {
       c.getFactory(InvalidEnum.class).get();
       fail();
-    } catch (ConfigurationException e) {
-      assertTrue(e.getMessage().startsWith(
-          "Error converting 'invalid' to Bar while injecting foo "
-              + "with dependency named 'foo' in InvalidEnum. Reason:"));
-    }
+    } catch (ConfigurationException e) { /* expected */ }
   }
 
   public static class InvalidEnum {
-    @Inject("foo") Bar foo;
+    @Inject @Named("foo") Bar foo;
   }
 }

@@ -18,51 +18,11 @@ package com.google.inject;
 
 import java.util.List;
 import java.util.Map;
+import java.lang.annotation.Annotation;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
- * &#64;{@link Inject}.
- *
- * <p>When injecting a method or constructor, you can additionally annotate its
- * parameters with &#64;{@link Inject} and specify a dependency name. When a
- * parameter has no annotation, the container uses the name from the method or
- * constructor's &#64;{@link Inject} annotation respectively.
- *
- * <p>For example:
- *
- * <pre>
- *  class Foo {
- *
- *    // Inject the int constant named "i".
- *    &#64;Inject("i") int i;
- *
- *    // Inject the default implementation of Bar and the String constant
- *    // named "s".
- *    &#64;Inject Foo(Bar bar, @Inject("s") String s) {
- *      ...
- *    }
- *
- *    // Inject the default implementation of Baz and the Bob implementation
- *    // named "foo".
- *    &#64;Inject void initialize(Baz baz, @Inject("foo") Bob bob) {
- *      ...
- *    }
- *
- *    // Inject the default implementation of Tee.
- *    &#64;Inject void setTee(Tee tee) {
- *      ...
- *    }
- *  }
- * </pre>
- *
- * <p>To get an instance of {@code Foo}:
- *
- * <pre>
- *  Container c = ...;
- *  Key&lt;Foo> fooKey = Key.get(Foo.class);
- *  Factory&lt;Foo> fooFactory = c.getFactory(fooKey);
- *  Foo foo = fooFactory.get();
- * </pre>
+ * {@code @}{@link Inject}. Provides access to {@link Binding}s.
  *
  * @author crazybob@google.com (Bob Lee)
  * @see ContainerBuilder
@@ -120,22 +80,50 @@ public interface Container {
   <T> T getInstance(Key<T> key);
 
   /**
-   * Gets an instance from the factory bound to the given type and name.
+   * Gets an instance from the factory bound to the given type and annotation.
    */
-  <T> T getInstance(TypeLiteral<T> type, String name);
+  <T> T getInstance(TypeLiteral<T> type,
+      Annotation annotation);
 
   /**
-   * Gets an instance from the factory bound to the given type and name.
+   * Gets an instance from the factory bound to the given type and annotation.
    */
-  <T> T getInstance(Class<T> type, String name);
+  <T> T getInstance(Class<T> type,
+      Annotation annotation);
 
   /**
-   * Gets the factory bound to the given type and name.
+   * Gets the factory bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(Class<T> type, String name);
+  <T> Factory<T> getFactory(Class<T> type,
+      Annotation annotation);
 
   /**
-   * Gets the factory bound to the given type and name.
+   * Gets the factory bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(TypeLiteral<T> type, String name);
+  <T> Factory<T> getFactory(TypeLiteral<T> type,
+      Annotation annotation);
+
+  /**
+   * Gets an instance from the factory bound to the given type and annotation.
+   */
+  <T> T getInstance(TypeLiteral<T> type,
+      Class<? extends Annotation> annotationType);
+
+  /**
+   * Gets an instance from the factory bound to the given type and annotation.
+   */
+  <T> T getInstance(Class<T> type,
+      Class<? extends Annotation> annotationType);
+
+  /**
+   * Gets the factory bound to the given type and annotation.
+   */
+  <T> Factory<T> getFactory(Class<T> type,
+      Class<? extends Annotation> annotationType);
+
+  /**
+   * Gets the factory bound to the given type and annotation.
+   */
+  <T> Factory<T> getFactory(TypeLiteral<T> type,
+      Class<? extends Annotation> annotationType);
 }

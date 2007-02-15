@@ -14,41 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject;
+
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Object utilities.
+ * Annotates named things.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Objects {
-
-  /**
-   * Detects null values.
-   *
-   * @param t value
-   * @param message to display in the event of a null
-   * @return t
-   */
-  public static <T> T nonNull(T t, String message) {
-    if (t == null) {
-      throw new NullPointerException(message);
-    }
-    return t;
-  }
-
-  /**
-   * {@code null}-aware equals.
-   */
-  public static boolean equal(Object a, Object b) {
-    if (a == b) {
-      return true;
-    }
-
-    if (a == null || b == null) {
-      return false;
-    }
-
-    return a.equals(b);
-  }
+@Retention(RUNTIME)
+@ForBinding
+public @interface Named {
+  String value();
 }

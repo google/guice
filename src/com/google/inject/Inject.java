@@ -20,31 +20,28 @@ import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * <p>Annotates members and parameters which should have their value[s]
- * injected. If applied to another annotation type, that annotation type
- * can act as a surrogate and save you from having to repeat the dependency
- * name over and over.
+ * <p>Annotates members which should have their value[s] injected.
+ *
+ * <p>Also applies to other annotations which can be used with {@link Key}s and
+ * at injection points.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ METHOD, CONSTRUCTOR, FIELD, PARAMETER, ANNOTATION_TYPE })
+@Target({ METHOD, CONSTRUCTOR, FIELD, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 public @interface Inject {
 
   /**
-   * Dependency name. Defaults to {@link Key#DEFAULT_NAME}.
+   * Indicates whether injection at the target is optional or not. The default
+   * is {@code false}. Can be used on methods and fields. If a method has
+   * multiple parameters and one parameter binding is missing, the method
+   * won't be invoked at all. Not applicable to constructors or other
+   * annotations.
    */
-  String value() default Key.DEFAULT_NAME;
-
-  /**
-   * Whether or not injection is required. Applicable only to methods and fields
-   * (not constructors or parameters).
-   */
-  boolean required() default true;
+  boolean optional() default false;
 }

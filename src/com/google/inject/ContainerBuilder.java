@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.ContainerImpl.Injector;
+import com.google.inject.Key.AnnotationStrategy;
 import static com.google.inject.Scopes.CONTAINER;
 import static com.google.inject.Scopes.CONTAINER_NAME;
 import static com.google.inject.Scopes.DEFAULT;
@@ -24,13 +25,10 @@ import static com.google.inject.Scopes.DEFAULT_NAME;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
-import com.google.inject.util.Objects;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import com.google.inject.util.ToStringBuilder;
-
-import org.aopalliance.intercept.MethodInterceptor;
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
@@ -197,15 +196,33 @@ public final class ContainerBuilder extends SourceConsumer {
    */
   public ConstantBindingBuilder bind(String name) {
     ensureNotCreated();
-    return bind(name, source());
+    return bind(source(), Key.strategyFor(new NamedImpl(name)));
+  }
+
+  /**
+   * Binds a constant to the given annotation.
+   */
+  public ConstantBindingBuilder bind(Annotation annotation) {
+    ensureNotCreated();
+    return bind(source(), Key.strategyFor(annotation));
+  }
+
+  /**
+   * Binds a constant to the given annotation type.
+   */
+  public ConstantBindingBuilder bind(
+      Class<? extends Annotation> annotationType) {
+    ensureNotCreated();
+    return bind(source(), Key.strategyFor(annotationType));
   }
 
   /**
    * Binds a constant to the given name from the given source.
    */
-  private ConstantBindingBuilder bind(String name, Object source) {
+  private ConstantBindingBuilder bind(Object source,
+      AnnotationStrategy annotationStrategy) {
     ConstantBindingBuilder builder =
-        new ConstantBindingBuilder(Objects.nonNull(name, "name")).from(source);
+        new ConstantBindingBuilder(annotationStrategy).from(source);
     constantBindingBuilders.add(builder);
     return builder;
   }
@@ -219,7 +236,7 @@ public final class ContainerBuilder extends SourceConsumer {
     for (Map.Entry<String, String> entry : properties.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
-      bind(key, source).to(value);
+      bind(source, Key.strategyFor(new NamedImpl(key))).to(value);
     }
   }
 
@@ -232,7 +249,7 @@ public final class ContainerBuilder extends SourceConsumer {
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
       String key = (String) entry.getKey();
       String value = (String) entry.getValue();
-      bind(key, source).to(value);
+      bind(source, Key.strategyFor(new NamedImpl(key))).to(value);
     }
   }
 
@@ -495,13 +512,34 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     /**
-     * Sets the name of this binding.
+     * Binds to injection points annotated with {@code @Named(name)}.
      */
     public BindingBuilder<T> named(String name) {
-      if (!this.key.hasDefaultName()) {
-        errorHandler.handle(ErrorMessages.NAME_ALREADY_SET);
+      return annotatedWith(new NamedImpl(nonNull(name, "name")));
+    }
+
+    /**
+     * Specifies the annotation type for this binding.
+     */
+    public BindingBuilder<T> annotatedWith(
+        Class<? extends Annotation> annotationType) {
+      if (this.key.hasAnnotationType()) {
+        errorHandler.handle(ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
+      } else {
+        this.key = Key.get(this.key.getType(), annotationType);
       }
-      this.key = this.key.named(name);
+      return this;
+    }
+
+    /**
+     * Specifies an annotation for this binding.
+     */
+    public BindingBuilder<T> annotatedWith(Annotation annotation) {
+      if (this.key.hasAnnotationType()) {
+        errorHandler.handle(ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
+      } else {
+        this.key = Key.get(this.key.getType(), annotation);
+      }
       return this;
     }
 
@@ -704,20 +742,22 @@ public final class ContainerBuilder extends SourceConsumer {
   }
 
   private static class BindingInfo<T> {
+
     final Class<T> type;
     final T value;
-    final String name;
+    final AnnotationStrategy annotationStrategy;
     final Object source;
 
-    BindingInfo(Class<T> type, T value, String name, Object source) {
+    BindingInfo(Class<T> type, T value,
+        AnnotationStrategy annotationStrategy, Object source) {
       this.type = type;
       this.value = value;
-      this.name = name;
+      this.annotationStrategy = annotationStrategy;
       this.source = source;
     }
 
     Binding<T> createBinding(ContainerImpl container) {
-      Key<T> key = Key.get(type, name);
+      Key<T> key = Key.get(type, annotationStrategy);
       ConstantFactory<T> factory = new ConstantFactory<T>(value);
       return Binding.newInstance(container, key, source, factory);
     }
@@ -729,11 +769,11 @@ public final class ContainerBuilder extends SourceConsumer {
   public class ConstantBindingBuilder {
 
     BindingInfo<?> bindingInfo;
-    final String name;
+    final AnnotationStrategy annotationStrategy;
     Object source = ContainerBuilder.UNKNOWN_SOURCE;
 
-    ConstantBindingBuilder(String name) {
-      this.name = name;
+    ConstantBindingBuilder(AnnotationStrategy annotationStrategy) {
+      this.annotationStrategy = annotationStrategy;
     }
 
     boolean hasValue() {
@@ -826,8 +866,8 @@ public final class ContainerBuilder extends SourceConsumer {
       if (this.bindingInfo != null) {
         addError(source, ErrorMessages.CONSTANT_VALUE_ALREADY_SET);
       } else {
-        // TODO: we're sure name and source will have been set already, right?
-        this.bindingInfo = new BindingInfo<T>(type, value, name, source);
+        this.bindingInfo
+            = new BindingInfo<T>(type, value, annotationStrategy, source);
       }
     }
 

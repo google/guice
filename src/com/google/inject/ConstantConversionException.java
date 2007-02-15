@@ -37,15 +37,19 @@ class ConstantConversionException extends Exception {
 
   static String createMessage(String value, Key<?> key, Member member,
       String reason) {
+    String annotationMessage = key.hasAnnotationType()
+        ? " annotated with " + key.getAnnotationName()
+        : "";
+    
     return member == null
         ? "Error converting '" + value + "' to "
             + key.getRawType().getSimpleName()
-            + " while getting dependency named '" + key.getName()
-            + "'. Reason: " + reason
+            + " while getting binding value" + annotationMessage
+            + ". Reason: " + reason
         : "Error converting '" + value + "' to "
             + key.getRawType().getSimpleName() + " while injecting "
-            + member.getName() + " with dependency named '" + key.getName()
-            + "' in " + member.getDeclaringClass().getSimpleName()
+            + member.getName() + " with binding value" + annotationMessage
+            + " required by " + member.getDeclaringClass().getSimpleName()
             + ". Reason: " + reason;
   }
 }

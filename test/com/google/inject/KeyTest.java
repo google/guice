@@ -21,6 +21,8 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -28,6 +30,17 @@ import java.lang.reflect.Type;
 public class KeyTest extends TestCase {
 
   public void foo(List<String> a, List<String> b) {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface Foo {}
+
+  public void testOfType() {
+    Key<Object> k = Key.get(Object.class, Foo.class);
+    Key<Integer> ki = k.ofType(int.class);
+    assertEquals(int.class, ki.getRawType());
+    assertEquals(Foo.class, ki.getAnnotationType());
+  }
 
   public void testEquality() {
     assertEquals(

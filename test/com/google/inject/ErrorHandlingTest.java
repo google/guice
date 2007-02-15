@@ -29,7 +29,7 @@ public class ErrorHandlingTest {
     builder.create(true);
   }
 
-  @Inject("missing")
+  @Inject @Named("missing")
   static List<String> missing;
 
   static class Foo {
@@ -43,15 +43,15 @@ public class ErrorHandlingTest {
     // Invalid constructor.
     Bar(String s) {}
 
-    @Inject("numbers") void setNumbers(List<Integer> numbers) {}
+    @Inject @Named("numbers") void setNumbers(List<Integer> numbers) {}
 
-    @Inject("foo") void bar(@Inject String s) {}
+    @Inject void bar(@Named("foo") String s) {}
   }
 
   static class Tee {
     @Inject String s;
 
-    @Inject("foo") void tee(String s, int i) {}
+    @Inject @Named("foo") void tee(String s, int i) {}
 
     @Inject Invalid invalid;
   }
@@ -67,7 +67,7 @@ public class ErrorHandlingTest {
       bind(Bar.class);
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).named("foo").in("foo");
+      bind(String.class).annotatedWith(new NamedImpl("foo")).in("foo");
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       requestStaticInjection(ErrorHandlingTest.class);
     }

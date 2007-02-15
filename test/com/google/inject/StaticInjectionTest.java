@@ -37,11 +37,11 @@ public class StaticInjectionTest extends TestCase {
 
   static class Static {
 
-    @Inject("i") static int i;
+    @Inject @Named("i") static int i;
 
     static String s;
 
-    @Inject("s") static void setS(String s) {
+    @Inject static void setS(@Named("s") String s) {
       StaticInjectionTest.Static.s = s;
     }
   }

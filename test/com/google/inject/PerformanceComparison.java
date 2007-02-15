@@ -161,8 +161,8 @@ public class PerformanceComparison {
     String s;
     int i;
 
-    @Inject("i")
-    public void setI(int i) {
+    @Inject
+    public void setI(@Named("i") int i) {
       this.i = i;
     }
 
@@ -176,8 +176,8 @@ public class PerformanceComparison {
       this.copy = copy;
     }
 
-    @Inject("s")
-    public void setS(String s) {
+    @Inject
+    public void setS(@Named("s") String s) {
       this.s = s;
     }
   }
@@ -194,7 +194,7 @@ public class PerformanceComparison {
     final Tee tee;
 
     @Inject
-    public BarImpl(Tee tee, @Inject("i") int i) {
+    public BarImpl(Tee tee, @Named("i") int i) {
       this.tee = tee;
       this.i = i;
     }
@@ -219,7 +219,7 @@ public class PerformanceComparison {
     final String s;
 
     @Inject
-    public TeeImpl(@Inject("s") String s) {
+    public TeeImpl(@Named("s") String s) {
       this.s = s;
     }
 

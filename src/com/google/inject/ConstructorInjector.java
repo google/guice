@@ -16,9 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.util.SurrogateAnnotations;
-import com.google.inject.util.DuplicateAnnotationException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -33,9 +30,6 @@ class ConstructorInjector<T> {
   final ContainerImpl.Injector[] injectors;
   final ContainerImpl.ParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
-
-  /** Annotation on the constructor. */
-  Inject inject;
 
   ConstructorInjector(ContainerImpl container, Class<T> implementation) {
     this.implementation = implementation;
@@ -59,13 +53,12 @@ class ConstructorInjector<T> {
   ContainerImpl.ParameterInjector<?>[] createParameterInjector(
       ContainerImpl container, Constructor<T> constructor) {
     try {
-      return inject == null
+      return constructor.getParameterTypes().length == 0
           ? null // default constructor.
           : container.getParametersInjectors(
               constructor,
               constructor.getParameterAnnotations(),
-              constructor.getGenericParameterTypes(),
-              inject.value()
+              constructor.getGenericParameterTypes()
           );
     }
     catch (ContainerImpl.MissingDependencyException e) {
@@ -77,27 +70,17 @@ class ConstructorInjector<T> {
   private Constructor<T> findConstructorIn(ContainerImpl container,
       Class<T> implementation) {
     Constructor<T> found = null;
-    @SuppressWarnings("unchecked") // why doesn't it return the right thing?
+    @SuppressWarnings("unchecked")
     Constructor<T>[] constructors
         = (Constructor<T>[]) implementation.getDeclaredConstructors();
     for (Constructor<T> constructor : constructors) {
-      Inject inject = null;
-      try {
-        inject = SurrogateAnnotations.findAnnotation(Inject.class, constructor);
-      } catch (DuplicateAnnotationException e) {
-        container.errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
-            Inject.class.getSimpleName(), constructor, e.getFirst(),
-            e.getSecond());
-      }
-
-      if (inject != null) {
+      if (constructor.getAnnotation(Inject.class) != null) {
         if (found != null) {
           container.errorHandler.handle(
               ErrorMessages.TOO_MANY_CONSTRUCTORS, implementation);
           return ContainerImpl.invalidConstructor();
         }
         found = constructor;
-        this.inject = inject;
       }
     }
     if (found != null) {

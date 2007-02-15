@@ -17,11 +17,17 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ContainerTest extends TestCase {
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface Other {}
 
   public void testFactoryMethods() throws ContainerCreationException {
     Singleton singleton = new Singleton();
@@ -29,7 +35,9 @@ public class ContainerTest extends TestCase {
 
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Singleton.class).to(singleton);
-    builder.bind(Singleton.class).named("other").to(other);
+    builder.bind(Singleton.class)
+        .annotatedWith(Other.class)
+        .to(other);
     Container container = builder.create(true);
 
     assertSame(singleton,
@@ -43,14 +51,14 @@ public class ContainerTest extends TestCase {
         container.getInstance(new TypeLiteral<Singleton>() {}));
 
     assertSame(other,
-        container.getFactory(Key.get(Singleton.class, "other")).get());
-    assertSame(other, container.getFactory(Singleton.class, "other").get());
+        container.getFactory(Key.get(Singleton.class, Other.class)).get());
+    assertSame(other, container.getFactory(Singleton.class, Other.class).get());
     assertSame(other,
-        container.getFactory(new TypeLiteral<Singleton>() {}, "other").get());
-    assertSame(other, container.getInstance(Key.get(Singleton.class, "other")));
-    assertSame(other, container.getInstance(Singleton.class, "other"));
+        container.getFactory(new TypeLiteral<Singleton>() {}, Other.class).get());
+    assertSame(other, container.getInstance(Key.get(Singleton.class, Other.class)));
+    assertSame(other, container.getInstance(Singleton.class, Other.class));
     assertSame(other,
-        container.getInstance(new TypeLiteral<Singleton>() {}, "other"));
+        container.getInstance(new TypeLiteral<Singleton>() {}, Other.class));
   }
 
   static class Singleton {}
@@ -102,7 +110,7 @@ public class ContainerTest extends TestCase {
   }
 
   static class IntegerWrapper {
-    @Inject("i") Integer i;
+    @Inject @Named("i") Integer i;
   }
 
   static class Foo {
@@ -110,12 +118,12 @@ public class ContainerTest extends TestCase {
     @Inject Bar bar;
     @Inject Bar copy;
 
-    @Inject("s") String s;
+    @Inject @Named("s") String s;
 
     int i;
 
-    @Inject("i")
-    void setI(int i) {
+    @Inject
+    void setI(@Named("i") int i) {
       this.i = i;
     }
   }
@@ -129,7 +137,7 @@ public class ContainerTest extends TestCase {
   @ContainerScoped
   static class BarImpl implements Bar {
 
-    @Inject("i") int i;
+    @Inject @Named("i") int i;
 
     Tee tee;
 
@@ -159,7 +167,7 @@ public class ContainerTest extends TestCase {
     @Inject Bar bar;
 
     @Inject
-    TeeImpl(@Inject("s") String s) {
+    TeeImpl(@Named("s") String s) {
       this.s = s;
     }
 
@@ -225,11 +233,11 @@ public class ContainerTest extends TestCase {
 
   static class Static {
 
-    @Inject("i") static int i;
+    @Inject @Named("i") static int i;
 
     static String s;
 
-    @Inject("s") static void setS(String s) {
+    @Inject static void setS(@Named("s") String s) {
       Static.s = s;
     }
   }

@@ -40,11 +40,11 @@ public class NotRequiredTest extends TestCase {
   }
 
   static class Foo {
-    @Inject(required=false) Bar bar;
+    @Inject(optional=true) Bar bar;
 
     Bar fromMethod;
 
-    @Inject(required=false) void setBar(Bar bar) {
+    @Inject(optional=true) void setBar(Bar bar) {
       fromMethod = bar;
     }
   }

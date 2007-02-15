@@ -116,10 +116,10 @@ class ContainerImpl implements Container {
     return bindingsMultimap.getAll(type);
   }
 
-  <T> List<String> getNamesOfBindingsTo(TypeLiteral<T> type) {
+  <T> List<String> getNamesOfBindingAnnotations(TypeLiteral<T> type) {
     List<String> names = new ArrayList<String>();
     for (Binding<T> binding : findBindingsByType(type)) {
-      names.add(binding.getKey().getName());
+      names.add(binding.getKey().getAnnotationName());
     }
     return names;
   }
@@ -160,8 +160,7 @@ class ContainerImpl implements Container {
           = ((ParameterizedType) factoryType).getActualTypeArguments()[0];
 
       try {
-        final Factory<?> factory
-            = getFactory(Key.get(entryType, key.getName()));
+        final Factory<?> factory = getFactory(key.ofType(entryType));
         return new InternalFactory<T>() {
           @SuppressWarnings("unchecked")
           public T get(InternalContext context) {
@@ -171,7 +170,7 @@ class ContainerImpl implements Container {
       }
       catch (ConfigurationException e) {
         ErrorMessages.handleMissingBinding(errorHandler, member, key,
-            getNamesOfBindingsTo(key.getType()));
+            getNamesOfBindingAnnotations(key.getType()));
         return invalidFactory();
       }
     }
@@ -181,7 +180,7 @@ class ContainerImpl implements Container {
         = PRIMITIVE_COUNTERPARTS.get(rawType);
     if (primitiveCounterpart != null) {
       Binding<?> counterpartBinding
-          = getBinding(Key.get(primitiveCounterpart, key.getName()));
+          = getBinding(key.ofType(primitiveCounterpart));
       if (counterpartBinding != null) {
         return (InternalFactory<? extends T>)
             counterpartBinding.getInternalFactory();
@@ -189,8 +188,8 @@ class ContainerImpl implements Container {
     }
 
     // Can we convert from a String constant?
-    Binding<String> stringBinding
-        = getBinding(Key.get(String.class, key.getName()));
+    Key<String> stringKey = key.ofType(String.class);
+    Binding<String> stringBinding = getBinding(stringKey);
     if (stringBinding != null && stringBinding.isConstant()) {
       // We don't need do pass in an InternalContext because we know this is
       // a ConstantFactory which will not use it.
@@ -313,9 +312,9 @@ class ContainerImpl implements Container {
       List<Injector> injectors) {
     addInjectorsForMembers(Arrays.asList(methods), statics, injectors,
         new InjectorFactory<Method>() {
-          public Injector create(ContainerImpl container, Method method,
-              String name) throws MissingDependencyException {
-            return new MethodInjector(container, method, name);
+          public Injector create(ContainerImpl container, Method method)
+              throws MissingDependencyException {
+            return new MethodInjector(container, method);
           }
         });
   }
@@ -324,9 +323,9 @@ class ContainerImpl implements Container {
       List<Injector> injectors) {
     addInjectorsForMembers(Arrays.asList(fields), statics, injectors,
         new InjectorFactory<Field>() {
-          public Injector create(ContainerImpl container, Field field,
-              String name) throws MissingDependencyException {
-            return new FieldInjector(container, field, name);
+          public Injector create(ContainerImpl container, Field field)
+              throws MissingDependencyException {
+            return new FieldInjector(container, field);
           }
         });
   }
@@ -347,10 +346,10 @@ class ContainerImpl implements Container {
 
         if (inject != null) {
           try {
-            injectors.add(injectorFactory.create(this, member, inject.value()));
+            injectors.add(injectorFactory.create(this, member));
           }
           catch (MissingDependencyException e) {
-            if (inject.required()) {
+            if (!inject.optional()) {
               // TODO: Report errors for more than one parameter per member.
               e.handle(errorHandler);
             }
@@ -375,7 +374,7 @@ class ContainerImpl implements Container {
   }
 
   interface InjectorFactory<M extends Member & AnnotatedElement> {
-    Injector create(ContainerImpl container, M member, String name)
+    Injector create(ContainerImpl container, M member)
         throws MissingDependencyException;
   }
 
@@ -415,14 +414,15 @@ class ContainerImpl implements Container {
     final InternalFactory<?> factory;
     final ExternalContext<?> externalContext;
 
-    public FieldInjector(ContainerImpl container, Field field, String name)
+    public FieldInjector(ContainerImpl container, Field field)
         throws MissingDependencyException {
       this.field = field;
 
       // Ewwwww...
       field.setAccessible(true);
 
-      Key<?> key = Key.get(field.getGenericType(), name);
+      Key<?> key = Key.get(
+          field.getGenericType(), field, field.getAnnotations(), errorHandler);
       factory = container.getFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(key, field);
@@ -435,7 +435,8 @@ class ContainerImpl implements Container {
       ExternalContext<?> previous = context.getExternalContext();
       context.setExternalContext(externalContext);
       try {
-        field.set(o, factory.get(context));
+        Object value = factory.get(context);
+        field.set(o, value);
       }
       catch (IllegalAccessException e) {
         throw new AssertionError(e);
@@ -456,17 +457,8 @@ class ContainerImpl implements Container {
    */
   <M extends AccessibleObject & Member>
   ParameterInjector<?>[] getParametersInjectors(M member,
-      Annotation[][] annotations, Type[] parameterTypes, String defaultName)
+      Annotation[][] annotations, Type[] parameterTypes)
       throws MissingDependencyException {
-    boolean defaultNameOverridden = !defaultName.equals(Key.DEFAULT_NAME);
-
-    // We only carry over the name from the member level annotation to the
-    // parameters if there's only one parameter.
-    if (parameterTypes.length != 1 && defaultNameOverridden) {
-      errorHandler.handle(
-          ErrorMessages.NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS, member);
-    }
-
     ParameterInjector<?>[] parameterInjectors
         = new ParameterInjector<?>[parameterTypes.length];
     Iterator<Annotation[]> annotationsIterator
@@ -474,29 +466,8 @@ class ContainerImpl implements Container {
     int index = 0;
     for (Type parameterType : parameterTypes) {
       Annotation[] parameterAnnotations = annotationsIterator.next();
-      Inject inject = null;
-      try {
-        inject = SurrogateAnnotations.findAnnotation(Inject.class,
-            parameterAnnotations);
-      } catch (DuplicateAnnotationException e) {
-        errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
-            Inject.class.getSimpleName(), member, e.getFirst(),
-            e.getSecond());
-      }
-
-      String name;
-      if (defaultNameOverridden) {
-        name = defaultName;
-        if (inject != null) {
-          errorHandler.handle(
-              ErrorMessages.NAME_ON_MEMBER_AND_PARAMETER, member);
-        }
-      }
-      else {
-        name = inject == null ? defaultName : inject.value();
-      }
-
-      Key<?> key = Key.get(parameterType, name);
+      Key<?> key = Key.get(
+          parameterType, member, parameterAnnotations, errorHandler);
       parameterInjectors[index] = createParameterInjector(key, member, index);
       index++;
     }
@@ -521,14 +492,14 @@ class ContainerImpl implements Container {
     final FastMethod fastMethod;
     final ParameterInjector<?>[] parameterInjectors;
 
-    public MethodInjector(ContainerImpl container, Method method, String name)
+    public MethodInjector(ContainerImpl container, Method method)
         throws MissingDependencyException {
       FastClass fastClass = GuiceFastClass.create(method.getDeclaringClass());
       this.fastMethod = fastClass.getMethod(method);
       Type[] parameterTypes = method.getGenericParameterTypes();
       parameterInjectors = parameterTypes.length > 0
           ? container.getParametersInjectors(
-              method, method.getParameterAnnotations(), parameterTypes, name)
+              method, method.getParameterAnnotations(), parameterTypes)
           : null;
     }
 
@@ -632,20 +603,44 @@ class ContainerImpl implements Container {
     });
   }
 
-  public <T> T getInstance(TypeLiteral<T> type, String name) {
-    return getFactory(Key.get(type, name)).get();
+  public <T> T getInstance(TypeLiteral<T> type,
+      Annotation annotation) {
+    return getFactory(Key.get(type, annotation)).get();
   }
 
-  public <T> T getInstance(Class<T> type, String name) {
-    return getFactory(Key.get(type, name)).get();
+  public <T> T getInstance(Class<T> type,
+      Annotation annotation) {
+    return getFactory(Key.get(type, annotation)).get();
   }
 
-  public <T> Factory<T> getFactory(Class<T> type, String name) {
-    return getFactory(Key.get(type, name));
+  public <T> Factory<T> getFactory(Class<T> type,
+      Annotation annotation) {
+    return getFactory(Key.get(type, annotation));
   }
 
-  public <T> Factory<T> getFactory(TypeLiteral<T> type, String name) {
-    return getFactory(Key.get(type, name));
+  public <T> Factory<T> getFactory(TypeLiteral<T> type,
+      Annotation annotation) {
+    return getFactory(Key.get(type, annotation));
+  }
+
+  public <T> T getInstance(TypeLiteral<T> type,
+      Class<? extends Annotation> annotationType) {
+    return getFactory(Key.get(type, annotationType)).get();
+  }
+
+  public <T> T getInstance(Class<T> type,
+      Class<? extends Annotation> annotationType) {
+    return getFactory(Key.get(type, annotationType)).get();
+  }
+
+  public <T> Factory<T> getFactory(Class<T> type,
+      Class<? extends Annotation> annotationType) {
+    return getFactory(Key.get(type, annotationType));
+  }
+
+  public <T> Factory<T> getFactory(TypeLiteral<T> type,
+      Class<? extends Annotation> annotationType) {
+    return getFactory(Key.get(type, annotationType));
   }
 
   public <T> T getInstance(TypeLiteral<T> type) {
@@ -756,7 +751,7 @@ class ContainerImpl implements Container {
 
     void handle(ErrorHandler errorHandler) {
       ErrorMessages.handleMissingBinding(errorHandler, member, key,
-          getNamesOfBindingsTo(key.getType()));
+          getNamesOfBindingAnnotations(key.getType()));
     }
   }
 

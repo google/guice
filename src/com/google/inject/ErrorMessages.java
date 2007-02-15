@@ -36,8 +36,8 @@ class ErrorMessages {
           + " type were found.";
 
   private static final String MISSING_BINDING_BUT_OTHERS_EXIST =
-      "Binding to %s not found, but %s requires it. Names of other"
-          + " bindings to that type: %s";
+      "Binding to %s not found, but %s requires it. Annotations on other"
+          + " bindings to that type include: %s";
 
   static void handleMissingBinding(ErrorHandler errorHandler, Member member,
       Key<?> key, List<String> otherNames) {
@@ -76,7 +76,8 @@ class ErrorMessages {
   static final String CANNOT_INJECT_INTERFACE = "Injecting into interfaces is"
       + " not supported. Please use a concrete type instead of %s.";
 
-  static final String NAME_ALREADY_SET = "Binding name is set more than once.";
+  static final String ANNOTATION_ALREADY_SPECIFIED =
+      "More than one annotation type is specified for this binding.";
 
   static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
       + " than once.";
@@ -90,7 +91,7 @@ class ErrorMessages {
       + " implementation with with an annotation which is annotated with"
       + " @Scoped.";
 
-  static final String DUPLICATE_ANNOTATIONS = "Duplicate @%s annotations found" 
+  static final String DUPLICATE_ANNOTATIONS = "Duplicate binding annotations found"
       + " on %s: %s and %s";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
@@ -147,9 +148,9 @@ class ErrorMessages {
       },
       new Converter<Key>(Key.class) {
         public String toString(Key k) {
-          return k.hasDefaultName()
-              ? k.getType().toString()
-              : k.getType() + " named '" + k.getName() + "'";
+          return k.hasAnnotationType()
+              ? k.getType() + " annotated with " + k.getAnnotationName()
+              : k.getType().toString();
         }
       }
   );
