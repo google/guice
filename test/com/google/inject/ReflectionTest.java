@@ -17,11 +17,17 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ReflectionTest extends TestCase {
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface I {}
 
   public void testNormalBinding() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
@@ -37,12 +43,12 @@ public class ReflectionTest extends TestCase {
 
   public void testConstantBinding() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind("i").to(5);
+    builder.bindConstant(I.class).to(5);
     Container container = builder.create(false);
-    Binding<?> i = container.getBinding(Key.get(int.class, "i"));
+    Binding<?> i = container.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getFactory().get());
     assertNotNull(i.getSource());
-    assertEquals(Key.get(int.class, "i"), i.getKey());
+    assertEquals(Key.get(int.class, I.class), i.getKey());
     assertTrue(i.isConstant());
   }
 

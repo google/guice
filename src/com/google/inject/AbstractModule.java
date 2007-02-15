@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.util.Objects;
 import java.util.Map;
 import java.util.Properties;
+import java.lang.annotation.Annotation;
 
 /**
  * A support class for {@link Module Modules} which reduces repetition and
@@ -87,7 +88,8 @@ public abstract class AbstractModule implements Module {
   /**
    * @see ContainerBuilder#bind(TypeLiteral)
    */
-  protected <T> ContainerBuilder.BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+  protected <T> ContainerBuilder.BindingBuilder<T> bind(
+      TypeLiteral<T> typeLiteral) {
     return builder.bind(typeLiteral);
   }
 
@@ -106,31 +108,19 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#bind(String)
+   * @see ContainerBuilder#bindConstant(Class)
    */
-  protected ContainerBuilder.ConstantBindingBuilder bind(String name) {
-    return builder.bind(name);
+  protected ContainerBuilder.ConstantBindingBuilder bindConstant(
+      Class<? extends Annotation> annotationType) {
+    return builder.bindConstant(annotationType);
   }
 
   /**
-   * @see ContainerBuilder#bindProperties(java.util.Map)
+   * @see ContainerBuilder#bindConstant(java.lang.annotation.Annotation)
    */
-  protected void bindProperties(Map<String, String> properties) {
-    builder.bindProperties(properties);
-  }
-
-  /**
-   * @see ContainerBuilder#bindProperties(java.util.Properties)
-   */
-  protected void bindProperties(Properties properties) {
-    builder.bindProperties(properties);
-  }
-
-  /**
-   * @see ContainerBuilder#requestStaticInjection(Class[])
-   */
-  protected void requestStaticInjection(Class<?>... types) {
-    builder.requestStaticInjection(types);
+  protected ContainerBuilder.ConstantBindingBuilder bindConstant(
+      Annotation annotation) {
+    return builder.bindConstant(annotation);
   }
 
   /**
@@ -138,5 +128,12 @@ public abstract class AbstractModule implements Module {
    */
   protected void install(Module module) {
     builder.install(module);
+  }
+
+  /**
+   * @see ContainerBuilder#requestStaticInjection(Class[])
+   */
+  protected void requestStaticInjection(Class<?>... types) {
+    builder.requestStaticInjection(types);
   }
 }

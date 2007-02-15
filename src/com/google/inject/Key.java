@@ -95,26 +95,6 @@ public abstract class Key<T> {
    * parameter in the anonymous class's type hierarchy so we can reconstitute it
    * at runtime despite erasure.
    *
-   * <p>Example usage for a binding of type {@code Foo} annotated with
-   * {@code @Named("bar")}:
-   *
-   * <p>{@code new Key<Foo>("bar") {}}.
-   */
-  @SuppressWarnings("unchecked")
-  protected Key(String name) {
-    this.annotationStrategy = strategyFor(new NamedImpl(name));
-    this.typeLiteral
-        = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
-    this.hashCode = computeHashCode();
-  }
-
-  /**
-   * Constructs a new key. Derives the type from this class's type parameter.
-   *
-   * <p>Clients create an empty anonymous subclass. Doing so embeds the type
-   * parameter in the anonymous class's type hierarchy so we can reconstitute it
-   * at runtime despite erasure.
-   *
    * <p>Example usage for a binding of type {@code Foo}:
    *
    * <p>{@code new Key<Foo>() {}}.
@@ -227,13 +207,6 @@ public abstract class Key<T> {
   }
 
   /**
-   * Gets a key for an injection type and the annotation {@code Named(name)}.
-   */
-  public static <T> Key<T> get(Class<T> type, String name) {
-    return new SimpleKey<T>(type, strategyFor(new NamedImpl(name)));
-  }
-
-  /**
    * Gets a key for an injection type and an annotation.
    */
   public static <T> Key<T> get(Class<T> type, Annotation annotation) {
@@ -263,13 +236,6 @@ public abstract class Key<T> {
   }
 
   /**
-   * Gets a key for an injection type and the annotation {@code Named(name)}.
-   */
-  public static Key<?> get(Type type, String name) {
-    return new SimpleKey<Object>(type, strategyFor(new NamedImpl(name)));
-  }
-
-  /**
    * Gets a key for an injection type.
    */
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral) {
@@ -290,13 +256,6 @@ public abstract class Key<T> {
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral,
       Annotation annotation) {
     return new SimpleKey<T>(typeLiteral, strategyFor(annotation));
-  }
-
-  /**
-   * Gets a key for an injection type and the annotation {@code Named(name)}.
-   */
-  public static <T> Key<T> get(TypeLiteral<T> typeLiteral, String name) {
-    return new SimpleKey<T>(typeLiteral, strategyFor(new NamedImpl(name)));
   }
 
   /**

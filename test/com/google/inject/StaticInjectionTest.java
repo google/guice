@@ -17,16 +17,26 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class StaticInjectionTest extends TestCase {
 
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface I {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface S {}
+
   public void testInjectStatics() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind("s").to("test");
-    builder.bind("i").to(5);
+    builder.bindConstant(S.class).to("test");
+    builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
     Container c = builder.create(false);
@@ -37,11 +47,11 @@ public class StaticInjectionTest extends TestCase {
 
   static class Static {
 
-    @Inject @Named("i") static int i;
+    @Inject @I static int i;
 
     static String s;
 
-    @Inject static void setS(@Named("s") String s) {
+    @Inject static void setS(@S String s) {
       StaticInjectionTest.Static.s = s;
     }
   }

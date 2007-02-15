@@ -27,6 +27,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import java.text.DecimalFormat;
 import java.util.concurrent.Callable;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * A semi-useless microbenchmark. Spring and Guice constuct the same object
@@ -101,8 +103,8 @@ public class PerformanceComparison {
           bind(Tee.class).to(TeeImpl.class);
           bind(Bar.class).to(BarImpl.class);
           bind(Foo.class);
-          bind("i").to(5);
-          bind("s").to("test");
+          bindConstant(I.class).to(5);
+          bindConstant(S.class).to("test");
         }
       });
 
@@ -162,7 +164,7 @@ public class PerformanceComparison {
     int i;
 
     @Inject
-    public void setI(@Named("i") int i) {
+    public void setI(@I int i) {
       this.i = i;
     }
 
@@ -177,7 +179,7 @@ public class PerformanceComparison {
     }
 
     @Inject
-    public void setS(@Named("s") String s) {
+    public void setS(@S String s) {
       this.s = s;
     }
   }
@@ -194,7 +196,7 @@ public class PerformanceComparison {
     final Tee tee;
 
     @Inject
-    public BarImpl(Tee tee, @Named("i") int i) {
+    public BarImpl(Tee tee, @I int i) {
       this.tee = tee;
       this.i = i;
     }
@@ -219,7 +221,7 @@ public class PerformanceComparison {
     final String s;
 
     @Inject
-    public TeeImpl(@Named("s") String s) {
+    public TeeImpl(@S String s) {
       this.s = s;
     }
 
@@ -227,4 +229,12 @@ public class PerformanceComparison {
       return s;
     }
   }
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface I {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface S {}
 }

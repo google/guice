@@ -29,6 +29,14 @@ public class ContainerTest extends TestCase {
   @ForBinding
   @interface Other {}
 
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface S {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface I {}
+
   public void testFactoryMethods() throws ContainerCreationException {
     Singleton singleton = new Singleton();
     Singleton other = new Singleton();
@@ -84,8 +92,8 @@ public class ContainerTest extends TestCase {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
-        bind("s").to("test");
-        bind("i").to(5);
+        bindConstant(S.class).to("test");
+        bindConstant(I.class).to(5);
       }
     });
 
@@ -103,14 +111,14 @@ public class ContainerTest extends TestCase {
   public void testIntAndIntegerAreInterchangeable()
       throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind("i").to(5);
+    builder.bindConstant(I.class).to(5);
     Container container = builder.create(false);
     IntegerWrapper iw = container.getFactory(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
   static class IntegerWrapper {
-    @Inject @Named("i") Integer i;
+    @Inject @I Integer i;
   }
 
   static class Foo {
@@ -118,12 +126,12 @@ public class ContainerTest extends TestCase {
     @Inject Bar bar;
     @Inject Bar copy;
 
-    @Inject @Named("s") String s;
+    @Inject @S String s;
 
     int i;
 
     @Inject
-    void setI(@Named("i") int i) {
+    void setI(@I int i) {
       this.i = i;
     }
   }
@@ -137,7 +145,7 @@ public class ContainerTest extends TestCase {
   @ContainerScoped
   static class BarImpl implements Bar {
 
-    @Inject @Named("i") int i;
+    @Inject @I int i;
 
     Tee tee;
 
@@ -167,7 +175,7 @@ public class ContainerTest extends TestCase {
     @Inject Bar bar;
 
     @Inject
-    TeeImpl(@Named("s") String s) {
+    TeeImpl(@S String s) {
       this.s = s;
     }
 
@@ -222,8 +230,8 @@ public class ContainerTest extends TestCase {
 
   public void testInjectStatics() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind("s").to("test");
-    builder.bind("i").to(5);
+    builder.bindConstant(S.class).to("test");
+    builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(Static.class);
     builder.create(false);
 
@@ -233,11 +241,11 @@ public class ContainerTest extends TestCase {
 
   static class Static {
 
-    @Inject @Named("i") static int i;
+    @Inject @I static int i;
 
     static String s;
 
-    @Inject static void setS(@Named("s") String s) {
+    @Inject static void setS(@S String s) {
       Static.s = s;
     }
   }

@@ -44,8 +44,8 @@ public class KeyTest extends TestCase {
 
   public void testEquality() {
     assertEquals(
-      new Key<List<String>>("foo") {},
-      Key.get(new TypeLiteral<List<String>>() {}, "foo")
+      new Key<List<String>>(Foo.class) {},
+      Key.get(new TypeLiteral<List<String>>() {}, Foo.class)
     );
   }
 

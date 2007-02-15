@@ -20,6 +20,9 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Annotation;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -76,40 +79,64 @@ public class FactoryTest extends TestCase {
   static class One {}
   static class NegativeOne {}
 
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface FooAnnotation {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface BarAnnotation {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface TeeAnnotation1 {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface TeeAnnotation2 {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface BobAnnotation1 {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface BobAnnotation2 {}
+
   public void testInjection() throws Exception {
     ContainerBuilder cb = new ContainerBuilder();
 
     // Called from getInstance().
     cb.bind(Foo.class)
-        .named("foo")
-        .to(createFactory(Foo.class, "foo", null));
+        .annotatedWith(FooAnnotation.class)
+        .to(createFactory(Foo.class, FooAnnotation.class, null));
 
     // Called during preloading.
     cb.bind(Bar.class)
-        .named("fooBar")
-        .to(createFactory(Bar.class, "fooBar", null))
+        .annotatedWith(BarAnnotation.class)
+        .to(createFactory(Bar.class, BarAnnotation.class, null))
         .in(Scopes.CONTAINER);
 
     cb.bind(Tee.class)
-        .named("tee1")
-        .to(createFactory(Tee.class, "tee1",
+        .annotatedWith(TeeAnnotation1.class)
+        .to(createFactory(Tee.class, TeeAnnotation1.class,
             Bar.class.getDeclaredConstructor(Tee.class)));
 
     cb.bind(Tee.class)
-        .named("tee2")
-        .to(createFactory(Tee.class, "tee2",
+        .annotatedWith(TeeAnnotation2.class)
+        .to(createFactory(Tee.class, TeeAnnotation2.class,
             Bar.class.getDeclaredField("tee2")));
 
     final Method execute = Tee.class.getDeclaredMethod(
         "execute", Bob.class, Bob.class);
-    cb.bind(Bob.class).named("bob1").to(
-        createFactory(Bob.class, "bob1", execute));
-    cb.bind(Bob.class).named("bob2").to(
-        createFactory(Bob.class, "bob2", execute));
+    cb.bind(Bob.class).annotatedWith(BobAnnotation1.class).to(
+        createFactory(Bob.class, BobAnnotation1.class, execute));
+    cb.bind(Bob.class).annotatedWith(BobAnnotation2.class).to(
+        createFactory(Bob.class, BobAnnotation2.class, execute));
 
     Container c = cb.create(true);
 
-    Foo foo = c.getFactory(Key.get(Foo.class, "foo")).get();
+    Foo foo = c.getFactory(Key.get(Foo.class, FooAnnotation.class)).get();
 
     assertNotNull(foo.bar);
     assertNotNull(foo.bar.tee1);
@@ -121,11 +148,11 @@ public class FactoryTest extends TestCase {
   }
 
   <T> ContextualFactory<T> createFactory(
-      final Class<T> type, final String name, final Member expectedMember) {
+      final Class<T> type, final Class<? extends Annotation> annotationType,
+      final Member expectedMember) {
     return new ContextualFactory<T>() {
       public T get(Context context) {
         assertEquals(expectedMember, context.getMember());
-        //assertEquals(name, context.getKey().getName());
         assertEquals(type, context.getKey().getType().getType());
         return context.getContainer().getFactory(type).get();
       }
@@ -134,15 +161,15 @@ public class FactoryTest extends TestCase {
 
   static class Foo {
     final Bar bar;
-    @Inject Foo(@Named("fooBar") Bar bar) {
+    @Inject Foo(@BarAnnotation Bar bar) {
       this.bar = bar;
     }
   }
 
   static class Bar {
-    @Inject @Named("tee2") Tee tee2;
+    @Inject @TeeAnnotation2 Tee tee2;
     final Tee tee1;
-    @Inject Bar(@Named("tee1") Tee tee1) {
+    @Inject Bar(@TeeAnnotation1 Tee tee1) {
       this.tee1 = tee1;
     }
   }
@@ -150,8 +177,8 @@ public class FactoryTest extends TestCase {
   static class Tee {
     Bob bob1, bob2;
     @Inject void execute(
-        @Named("bob1") Bob bob1,
-        @Named("bob2") Bob bob2) {
+        @BobAnnotation1 Bob bob1,
+        @BobAnnotation2 Bob bob2) {
       this.bob1 = bob1;
       this.bob2 = bob2;
     }

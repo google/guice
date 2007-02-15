@@ -40,12 +40,6 @@ import javax.servlet.http.HttpSession;
  */
 public class ServletModule extends AbstractModule {
 
-  /**
-   * Name of the request parameters binding. The type is {@code
-   * Map<String, String[]>}.
-   */
-  public static final String REQUEST_PARAMETERS = "requestParameters";
-
   protected void configure() {
     // Scopes.
     scope(REQUEST_NAME, REQUEST);
@@ -80,7 +74,7 @@ public class ServletModule extends AbstractModule {
 
     // Bind request parameters.
     bind(new TypeLiteral<Map<String, String[]>>() {})
-        .named(REQUEST_PARAMETERS)
+        .annotatedWith(RequestParameters.class)
         .to(new Factory<Map<String, String[]>>() {
           @SuppressWarnings({"unchecked"})
           public Map<String, String[]> get() {

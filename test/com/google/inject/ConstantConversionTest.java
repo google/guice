@@ -20,48 +20,56 @@ import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ConstantConversionTest extends TestCase {
 
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface NumericValue {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface BooleanValue {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface EnumValue {}
+
+  @Retention(RUNTIME)
+  @ForBinding
+  @interface ClassName {}
+
   public static class Foo {
-    @Inject @Named("#") Integer integerField;
-    @Inject @Named("#") int primitiveIntField;
-    @Inject @Named("#") Long longField;
-    @Inject @Named("#") long primitiveLongField;
-    @Inject @Named("boolean") Boolean booleanField;
-    @Inject @Named("boolean") boolean primitiveBooleanField;
-    @Inject @Named("#") Byte byteField;
-    @Inject @Named("#") byte primitiveByteField;
-    @Inject @Named("#") Short shortField;
-    @Inject @Named("#") short primitiveShortField;
-    @Inject @Named("#") Float floatField;
-    @Inject @Named("#") float primitiveFloatField;
-    @Inject @Named("#") Double doubleField;
-    @Inject @Named("#") short primitiveDoubleField;
-    @Inject @Named("enum") Bar enumField;
-    @Inject @Named("class") Class<?> classField;
+    @Inject @NumericValue Integer integerField;
+    @Inject @NumericValue int primitiveIntField;
+    @Inject @NumericValue Long longField;
+    @Inject @NumericValue long primitiveLongField;
+    @Inject @BooleanValue Boolean booleanField;
+    @Inject @BooleanValue boolean primitiveBooleanField;
+    @Inject @NumericValue Byte byteField;
+    @Inject @NumericValue byte primitiveByteField;
+    @Inject @NumericValue Short shortField;
+    @Inject @NumericValue short primitiveShortField;
+    @Inject @NumericValue Float floatField;
+    @Inject @NumericValue float primitiveFloatField;
+    @Inject @NumericValue Double doubleField;
+    @Inject @NumericValue short primitiveDoubleField;
+    @Inject @EnumValue Bar enumField;
+    @Inject @ClassName Class<?> classField;
   }
 
   public enum Bar {
     TEE, BAZ, BOB;
   }
 
-  @Named("foo")
-  public void testNamed() throws NoSuchMethodException {
-    Named named = getClass().getMethod("testNamed").getAnnotation(Named.class);
-    assertEquals(named, new NamedImpl("foo"));
-    assertEquals(new NamedImpl("foo"), named);
-
-    assertEquals(Key.get(String.class, new NamedImpl("foo")),
-        Key.get(String.class, named));
-  }
-
   public void testOneConstantInjection() throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind("#").to("5");
+    builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
     Container container = builder.create(false);
     Simple simple = container.getFactory(Simple.class).get();
@@ -69,19 +77,15 @@ public class ConstantConversionTest extends TestCase {
   }
 
   static class Simple {
-    @Inject @Named("#") int i;
+    @Inject @NumericValue int i;
   }
 
   public void testConstantInjection() throws ContainerCreationException {
-    Map<String, String> properties = new HashMap<String, String>() {{
-      put("#", "5");
-      put("boolean", "true");
-      put("enum", "TEE");
-      put("class", Foo.class.getName());
-    }};
-
     ContainerBuilder b = new ContainerBuilder();
-    b.bindProperties(properties);
+    b.bindConstant(NumericValue.class).to("5");
+    b.bindConstant(BooleanValue.class).to("true");
+    b.bindConstant(EnumValue.class).to("TEE");
+    b.bindConstant(ClassName.class).to(Foo.class.getName());
     Container c = b.create(false);
     Foo foo = c.getFactory(Foo.class).get();
 
@@ -112,7 +116,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidInteger() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
-    b.bind("#").to("invalid");
+    b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create(false);
     try {
       c.getFactory(InvalidInteger.class).get();
@@ -121,12 +125,12 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public static class InvalidInteger {
-    @Inject @Named("#") Integer integerField;
+    @Inject @NumericValue Integer integerField;
   }
 
   public void testInvalidCharacter() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
-    b.bind("foo").to("invalid");
+    b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create(false);
     try {
       c.getFactory(InvalidCharacter.class).get();
@@ -135,12 +139,12 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public static class InvalidCharacter {
-    @Inject @Named("foo") char foo;
+    @Inject @NumericValue char foo;
   }
 
   public void testInvalidEnum() throws ContainerCreationException {
     ContainerBuilder b = new ContainerBuilder();
-    b.bind("foo").to("invalid");
+    b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create(false);
     try {
       c.getFactory(InvalidEnum.class).get();
@@ -149,6 +153,6 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public static class InvalidEnum {
-    @Inject @Named("foo") Bar foo;
+    @Inject @NumericValue Bar foo;
   }
 }

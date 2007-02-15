@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.name;
 
 import java.lang.annotation.Annotation;
 import com.google.inject.util.Objects;
+import com.google.inject.name.Named;
 
 class NamedImpl implements Named {
 

@@ -17,6 +17,8 @@
 package com.google.inject;
 
 import java.util.List;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -67,7 +69,7 @@ public class ErrorHandlingTest {
       bind(Bar.class);
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).annotatedWith(new NamedImpl("foo")).in("foo");
+      bind(String.class).annotatedWith(Names.annotationFor("foo")).in("foo");
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       requestStaticInjection(ErrorHandlingTest.class);
     }

@@ -192,17 +192,9 @@ public final class ContainerBuilder extends SourceConsumer {
   }
 
   /**
-   * Binds a constant to the given name.
-   */
-  public ConstantBindingBuilder bind(String name) {
-    ensureNotCreated();
-    return bind(source(), Key.strategyFor(new NamedImpl(name)));
-  }
-
-  /**
    * Binds a constant to the given annotation.
    */
-  public ConstantBindingBuilder bind(Annotation annotation) {
+  public ConstantBindingBuilder bindConstant(Annotation annotation) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotation));
   }
@@ -210,7 +202,7 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Binds a constant to the given annotation type.
    */
-  public ConstantBindingBuilder bind(
+  public ConstantBindingBuilder bindConstant(
       Class<? extends Annotation> annotationType) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotationType));
@@ -225,32 +217,6 @@ public final class ContainerBuilder extends SourceConsumer {
         new ConstantBindingBuilder(annotationStrategy).from(source);
     constantBindingBuilders.add(builder);
     return builder;
-  }
-
-  /**
-   * Binds a string constant for each property.
-   */
-  public void bindProperties(Map<String, String> properties) {
-    ensureNotCreated();
-    Object source = source();
-    for (Map.Entry<String, String> entry : properties.entrySet()) {
-      String key = entry.getKey();
-      String value = entry.getValue();
-      bind(source, Key.strategyFor(new NamedImpl(key))).to(value);
-    }
-  }
-
-  /**
-   * Binds a string constant for each property.
-   */
-  public void bindProperties(Properties properties) {
-    ensureNotCreated();
-    Object source = source();
-    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      String key = (String) entry.getKey();
-      String value = (String) entry.getValue();
-      bind(source, Key.strategyFor(new NamedImpl(key))).to(value);
-    }
   }
 
   /**
@@ -509,13 +475,6 @@ public final class ContainerBuilder extends SourceConsumer {
       this.source = source;
       this.errorHandler = new ConfigurationErrorHandler(source);
       return this;
-    }
-
-    /**
-     * Binds to injection points annotated with {@code @Named(name)}.
-     */
-    public BindingBuilder<T> named(String name) {
-      return annotatedWith(new NamedImpl(nonNull(name, "name")));
     }
 
     /**

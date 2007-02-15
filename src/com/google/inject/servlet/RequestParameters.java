@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.servlet;
 
 import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.google.inject.ForBinding;
 
 /**
- * Annotates named things.
+ * Apply this to field or parameters of type {@code Map<String, String[]>}
+ * when you want the HTTP request parameter map to be injected.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 @Retention(RUNTIME)
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @ForBinding
-public @interface Named {
-  String value();
-}
+public @interface RequestParameters {}
