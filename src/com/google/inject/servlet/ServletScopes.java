@@ -33,11 +33,6 @@ public class ServletScopes {
   private ServletScopes() {}
 
   /**
-   * Name of HTTP servlet request scope.
-   */
-  public static final String REQUEST_NAME = "REQUEST";
-
-  /**
    * HTTP servlet request scope.
    */
   public static final Scope REQUEST = new Scope() {
@@ -60,14 +55,9 @@ public class ServletScopes {
     }
 
     public String toString() {
-      return REQUEST_NAME;
+      return "ServletScopes.REQUEST";
     }
   };
-
-  /**
-   * Name of HTTP session scope.
-   */
-  public static final String SESSION_NAME = "SESSION";
 
   /**
    * HTTP session scope.
@@ -92,7 +82,7 @@ public class ServletScopes {
     }
 
     public String toString() {
-      return SESSION_NAME;
+      return "ServletScopes.SESSION";
     }
   };
 }
