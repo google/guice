@@ -50,6 +50,8 @@ class ErrorMessages {
     }
   }
 
+  static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";
+
   static final String SINGLE_INSTANCE_AND_SCOPE = "Setting the scope is not"
       + " permitted when binding to a single instance.";
 
@@ -63,7 +65,8 @@ class ErrorMessages {
   static final String TOO_MANY_CONSTRUCTORS = "More than one constructor"
       + " annotated with @Inject found in %s. " + CONSTRUCTOR_RULES;
 
-  static final String DUPLICATE_SCOPES = "A scope named '%s' already exists.";
+  static final String DUPLICATE_SCOPES = "Scope %s is already bound to %s."
+      + " Cannot bind %s.";
 
   static final String MISSING_CONSTANT_VALUE = "Missing constant value. Please"
       + " call to(...).";
@@ -82,17 +85,13 @@ class ErrorMessages {
   static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
       + " than once.";
 
-  static final String SCOPE_NOT_FOUND = "Scope named '%s' not found."
-      + " Available scope names: %s";
+  static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
 
-  static final String SCOPE_ALREADY_SET = "Scope is set more than once."
-      + " You can set the scope by calling in(...), by annotating the"
-      + " implementation class with @Scoped, or by annotating the"
-      + " implementation with with an annotation which is annotated with"
-      + " @Scoped.";
+  static final String DUPLICATE_ANNOTATIONS = "Duplicate binding annotations"
+      + " found on %s: %s and %s";
 
-  static final String DUPLICATE_ANNOTATIONS = "Duplicate binding annotations found"
-      + " on %s: %s and %s";
+  public static final String DUPLICATE_SCOPE_ANNOTATIONS = "Duplicate scope"
+      + " annotations found on %s: %s and %s";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
       + " than once.";

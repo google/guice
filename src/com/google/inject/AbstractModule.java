@@ -72,10 +72,11 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#scope(String, Scope)
+   * @see ContainerBuilder#scope(Class, Scope)
    */
-  protected void scope(String name, Scope scope) {
-    builder.scope(name, scope);
+  protected void scope(Class<? extends Annotation> scopeAnnotation,
+      Scope scope) {
+    builder.scope(scopeAnnotation, scope);
   }
 
   /**

@@ -42,8 +42,8 @@ public class ServletModule extends AbstractModule {
 
   protected void configure() {
     // Scopes.
-    scope(REQUEST_NAME, REQUEST);
-    scope(SESSION_NAME, SESSION);
+    scope(RequestScoped.class, REQUEST);
+    scope(SessionScoped.class, SESSION);
 
     // Bind request.
     Factory<HttpServletRequest> requestFactory =

@@ -28,47 +28,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class ScopesTest extends TestCase {
 
-  public void testScopedAnnotation() {
-    assertEquals("foo", Scopes.getScopeNameForType(AnnotatedWithScoped.class,
-        InvalidErrorHandler.INSTANCE));
-  }
-
-  @Scoped("foo")
-  static class AnnotatedWithScoped {}
-
-  public void testCustomAnnotation() {
-    assertEquals("custom", Scopes.getScopeNameForType(CustomAnnotated.class,
-        InvalidErrorHandler.INSTANCE));
-  }
-
-  @Target(ElementType.TYPE)
-  @Retention(RetentionPolicy.RUNTIME)
-  @Scoped("custom")
-  @interface CustomScoped {}
-
-  @CustomScoped
-  static class CustomAnnotated {}
-
-  public void testMultipleAnnotations() {
-    final String[] messageHolder = new String[1];
-    Scopes.getScopeNameForType(MultiplyAnnotated.class,
-        new AbstractErrorHandler() {
-          public void handle(String message) {
-            messageHolder[0] = message;
-          }
-
-          public void handle(Throwable t) {
-            fail();
-          }
-        });
-    String message = messageHolder[0];
-    assertNotNull(messageHolder[0]);
-  }
-
-  @Scoped("foo")
-  @CustomScoped
-  static class MultiplyAnnotated {}
-
   public void testContainerScopedAnnotation()
       throws ContainerCreationException {
     ContainerBuilder builder = new ContainerBuilder();

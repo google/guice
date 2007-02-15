@@ -69,7 +69,8 @@ public class ErrorHandlingTest {
       bind(Bar.class);
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).annotatedWith(Names.annotationFor("foo")).in("foo");
+      bind(String.class).annotatedWith(Names.annotationFor("foo")).in(
+          Named.class);
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       requestStaticInjection(ErrorHandlingTest.class);
     }

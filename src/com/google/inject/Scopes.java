@@ -20,6 +20,7 @@ import com.google.inject.util.SurrogateAnnotations;
 import com.google.inject.util.DuplicateAnnotationException;
 
 import java.util.Map;
+import java.lang.annotation.Annotation;
 
 /**
  * Built in scope implementations.
@@ -31,11 +32,6 @@ public class Scopes {
   private Scopes() {}
 
   /**
-   * Name of the default scope.
-   */
-  public static final String DEFAULT_NAME = "DEFAULT";
-
-  /**
    * The default scope, one instance per injection.
    */
   public static final Scope DEFAULT = new Scope() {
@@ -44,14 +40,9 @@ public class Scopes {
     }
 
     public String toString() {
-      return DEFAULT_NAME;
+      return "Scopes.DEFAULT";
     }
   };
-
-  /**
-   * Name of container scope.
-   */
-  public static final String CONTAINER_NAME = "CONTAINER";
 
   /**
    * One instance per container.
@@ -88,7 +79,7 @@ public class Scopes {
     }
 
     public String toString() {
-      return CONTAINER_NAME;
+      return "Scopes.CONTAINER";
     }
   };
 
@@ -101,51 +92,21 @@ public class Scopes {
    * @param errorHandler handles errors
    */
   static Scope getScopeForType(Class<?> implementation,
-      Map<String, Scope> scopes, ErrorHandler errorHandler) {
-    return getScopeForName(
-        getScopeNameForType(implementation, errorHandler),
-        scopes,
-        errorHandler
-    );
-  }
-
-  /**
-   * Finds scope for the given name. Returns {@code null} if the name is
-   * {@code null}. Otherwise, records an error if a scope isn't found.
-   */
-  static Scope getScopeForName(String name, Map<String, Scope> scopes,
+      Map<Class<? extends Annotation>, Scope> scopes,
       ErrorHandler errorHandler) {
-    // None found.
-    if (name == null) {
-      return null;
+    Scope found = null;
+    for (Annotation annotation : implementation.getAnnotations()) {
+      Scope scope = scopes.get(annotation.annotationType());
+      if (scope != null) {
+        if (found != null) {
+          errorHandler.handle(ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS,
+              implementation, found, scope);
+        } else {
+          found = scope;
+        }
+      }
     }
-
-    // Look up scope for name.
-    Scope scope = scopes.get(name);
-    if (scope == null) {
-      errorHandler.handle(
-          ErrorMessages.SCOPE_NOT_FOUND, name, scopes.keySet());
-    }
-    return scope;
-  }
-
-  /**
-   * Gets the scope name from annotations on the given type. Records errors if
-   * multiple names are found.
-   */
-  static String getScopeNameForType(Class<?> implementation,
-      ErrorHandler errorHandler) {
-    try {
-      Scoped scoped =
-          SurrogateAnnotations.findAnnotation(Scoped.class, implementation);
-      return scoped == null ? null : scoped.value();
-    } catch (DuplicateAnnotationException e) {
-      // Scope already set.
-      errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
-          Scoped.class.getSimpleName(), implementation, e.getFirst(),
-          e.getSecond());
-      return null;
-    }
+    return found;
   }
 
   /**

@@ -19,9 +19,6 @@ package com.google.inject;
 import com.google.inject.ContainerImpl.Injector;
 import com.google.inject.Key.AnnotationStrategy;
 import static com.google.inject.Scopes.CONTAINER;
-import static com.google.inject.Scopes.CONTAINER_NAME;
-import static com.google.inject.Scopes.DEFAULT;
-import static com.google.inject.Scopes.DEFAULT_NAME;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
@@ -71,7 +68,8 @@ public final class ContainerBuilder extends SourceConsumer {
       = new ArrayList<ConstantBindingBuilder>();
   final List<LinkedBindingBuilder<?>> linkedBindingBuilders
       = new ArrayList<LinkedBindingBuilder<?>>();
-  final Map<String, Scope> scopes = new HashMap<String, Scope>();
+  final Map<Class<? extends Annotation>, Scope> scopes =
+      new HashMap<Class<? extends Annotation>, Scope>();
 
   final List<StaticInjection> staticInjections
       = new ArrayList<StaticInjection>();
@@ -108,8 +106,7 @@ public final class ContainerBuilder extends SourceConsumer {
    * Constructs a new builder.
    */
   public ContainerBuilder() {
-    scope(DEFAULT_NAME, DEFAULT);
-    scope(CONTAINER_NAME, CONTAINER);
+    scope(ContainerScoped.class, CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
@@ -141,17 +138,17 @@ public final class ContainerBuilder extends SourceConsumer {
   }
 
   /**
-   * Adds a new scope. Maps a {@link Scope} instance to a given scope name.
-   * Scopes should be mapped before used in bindings. {@link Scoped#value()}
-   * references this name.
+   * Adds a new scope. Maps a {@link Scope} instance to a given annotation.
    */
-  public void scope(String name, Scope scope) {
+  public void scope(Class<? extends Annotation> annotationType, Scope scope) {
     ensureNotCreated();
-    if (scopes.containsKey(nonNull(name, "name"))) {
-      addError(source(), ErrorMessages.DUPLICATE_SCOPES, name);
+    Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
+    if (existing != null) {
+      addError(source(), ErrorMessages.DUPLICATE_SCOPES, existing,
+          annotationType, scope);
     }
     else {
-      scopes.put(nonNull(name, "name"), nonNull(scope, "scope"));
+      scopes.put(annotationType, nonNull(scope, "scope"));
     }
   }
 
@@ -505,8 +502,7 @@ public final class ContainerBuilder extends SourceConsumer {
     /**
      * Binds to instances of the given implementation class. The
      * {@link Container} will inject the implementation instances as well. Sets
-     * the scope based on the @{@link Scoped} annotation on the implementation
-     * class if present.
+     * the scope based on an annotation on the implementation class if present.
      */
     public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
       return to(TypeLiteral.get(implementation));
@@ -515,8 +511,7 @@ public final class ContainerBuilder extends SourceConsumer {
     /**
      * Binds to instances of the given implementation type. The
      * {@link Container} will inject the implementation instances as well. Sets
-     * the scope based on the @{@link Scoped} annotation on the implementation
-     * class if present.
+     * the scope based on an annotation on the implementation class if present.
      */
     public <I extends T> BindingBuilder<T> to(
         final TypeLiteral<I> implementation) {
@@ -590,17 +585,18 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     /**
-     * Specifies the scope. References the name passed to {@link #scope}.
+     * Specifies the scope. References the annotation passed to {@link
+     * ContainerBuilder#scope(Class, Scope)}.
      */
-    public BindingBuilder<T> in(String scopeName) {
+    public BindingBuilder<T> in(Class<? extends Annotation> scopeAnnotation) {
       ensureScopeNotSet();
 
       // We could defer this lookup to when we create the container, but this
       // is fine for now.
-      this.scope = scopes.get(nonNull(scopeName, "scope name"));
+      this.scope = scopes.get(nonNull(scopeAnnotation, "scope annotation"));
       if (this.scope == null) {
-        errorHandler.handle(ErrorMessages.SCOPE_NOT_FOUND, scopeName,
-            scopes.keySet());
+        errorHandler.handle(ErrorMessages.SCOPE_NOT_FOUND,
+            "@" + scopeAnnotation.getSimpleName());
       }
       return this;
     }

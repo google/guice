@@ -88,12 +88,13 @@ class ContainerImpl implements Container {
   final ConstructionProxyFactory constructionProxyFactory;
   final Map<Key<?>, Binding<?>> bindings;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Map<String, Scope> scopes;
+  final Map<Class<? extends Annotation>, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
   ContainerImpl(ConstructionProxyFactory constructionProxyFactory,
-      Map<Key<?>, Binding<?>> bindings, Map<String, Scope> scopes) {
+      Map<Key<?>, Binding<?>> bindings,
+      Map<Class<? extends Annotation>, Scope> scopes) {
     this.constructionProxyFactory = constructionProxyFactory;
     this.bindings = bindings;
     this.scopes = scopes;
@@ -119,7 +120,12 @@ class ContainerImpl implements Container {
   <T> List<String> getNamesOfBindingAnnotations(TypeLiteral<T> type) {
     List<String> names = new ArrayList<String>();
     for (Binding<T> binding : findBindingsByType(type)) {
-      names.add(binding.getKey().getAnnotationName());
+      Key<T> key = binding.getKey();
+      if (!key.hasAnnotationType()) {
+        names.add("[no annotation]");
+      } else {
+        names.add(key.getAnnotationName());
+      }
     }
     return names;
   }

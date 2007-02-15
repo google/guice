@@ -29,7 +29,4 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RUNTIME)
-@Scoped(Scopes.CONTAINER_NAME)
-public @interface ContainerScoped {
-
-}
+public @interface ContainerScoped {}

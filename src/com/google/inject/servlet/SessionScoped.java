@@ -16,8 +16,6 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.Scoped;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,5 +28,4 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Scoped(ServletScopes.SESSION_NAME)
 public @interface SessionScoped {}
