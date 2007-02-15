@@ -20,9 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Factory;
 import com.google.inject.TypeLiteral;
 import static com.google.inject.servlet.ServletScopes.REQUEST;
-import static com.google.inject.servlet.ServletScopes.REQUEST_NAME;
 import static com.google.inject.servlet.ServletScopes.SESSION;
-import static com.google.inject.servlet.ServletScopes.SESSION_NAME;
 
 import java.util.Map;
 
