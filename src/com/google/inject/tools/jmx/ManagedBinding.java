@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.name;
+package com.google.inject.tools.jmx;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.Binder;
+import com.google.inject.Binding;
 
-/**
- * Annotates named things.
- *
- * @author crazybob@google.com (Bob Lee)
- */
-@Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Binder
-public @interface Named {
-  String value();
+class ManagedBinding implements ManagedBindingMBean {
+
+  final Binding binding;
+
+  ManagedBinding(Binding binding) {
+    this.binding = binding;
+  }
+
+  public String getSource() {
+    return binding.getSource().toString();
+  }
+
+  public String getKey() {
+    return binding.getKey().toString();
+  }
+
+  public String getFactory() {
+    return binding.getFactory().toString();
+  }
 }

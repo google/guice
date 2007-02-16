@@ -46,10 +46,14 @@ public class ServletModule extends AbstractModule {
     // Bind request.
     Factory<HttpServletRequest> requestFactory =
         new Factory<HttpServletRequest>() {
-      public HttpServletRequest get() {
-        return GuiceFilter.getRequest();
-      }
-    };
+          public HttpServletRequest get() {
+            return GuiceFilter.getRequest();
+          }
+
+          public String toString() {
+            return "RequestFactory";
+          }
+        };
     bind(HttpServletRequest.class).to(requestFactory);
     bind(ServletRequest.class).to(requestFactory);
 
@@ -58,6 +62,10 @@ public class ServletModule extends AbstractModule {
         new Factory<HttpServletResponse>() {
           public HttpServletResponse get() {
             return GuiceFilter.getResponse();
+          }
+
+          public String toString() {
+            return "ResponseFactory";
           }
         };
     bind(HttpServletResponse.class).to(responseFactory);
@@ -68,6 +76,10 @@ public class ServletModule extends AbstractModule {
       public HttpSession get() {
         return GuiceFilter.getRequest().getSession();
       }
+
+      public String toString() {
+        return "SessionFactory";
+      }
     });
 
     // Bind request parameters.
@@ -77,6 +89,10 @@ public class ServletModule extends AbstractModule {
           @SuppressWarnings({"unchecked"})
           public Map<String, String[]> get() {
             return GuiceFilter.getRequest().getParameterMap();
+          }
+
+          public String toString() {
+            return "RequestParametersFactory";
           }
         });
   }

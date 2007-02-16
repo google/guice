@@ -47,7 +47,7 @@ class NamedImpl implements Named {
   }
 
   public String toString() {
-    return "@Named(\"" + value + "\")";
+    return "@" + Named.class.getName() + "(value=" + value + ")";
   }
 
   public Class<? extends Annotation> annotationType() {

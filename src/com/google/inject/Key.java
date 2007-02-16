@@ -143,6 +143,13 @@ public abstract class Key<T> {
     return annotationStrategy.getAnnotationType();
   }
 
+  /**
+   * Gets the annotation.
+   */
+  public Annotation getAnnotation() {
+    return annotationStrategy.getAnnotation();
+  }
+
   boolean hasAnnotationType() {
     return annotationStrategy.getAnnotationType() != null;
   }
@@ -443,7 +450,7 @@ public abstract class Key<T> {
     }
 
     public String toString() {
-      return annotationType.toString();
+      return "@" + annotationType.getName();
     }
   }
 }

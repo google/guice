@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.name;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.Binder;
+package com.google.inject.tools.jmx;
 
 /**
- * Annotates named things.
+ * JMX interface to bindings.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Binder
-public @interface Named {
-  String value();
+public interface ManagedBindingMBean {
+
+  /**
+   * Gets the source of this binding.
+   */
+  String getSource();
+
+  /**
+   * Gets the factory to which this binding is bound.
+   */
+  String getFactory();
+
+  /**
+   * Gets the binding key.
+   */
+  String getKey();
 }

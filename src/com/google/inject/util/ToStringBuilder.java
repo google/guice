@@ -47,6 +47,6 @@ public class ToStringBuilder {
   }
 
   public String toString() {
-    return name + map.toString();
+    return name + map.toString().replace('{', '[').replace('}', ']');
   }
 }

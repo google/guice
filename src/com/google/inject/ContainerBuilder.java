@@ -82,6 +82,10 @@ public final class ContainerBuilder extends SourceConsumer {
     public Container get(InternalContext context) {
       return context.getContainer();
     }
+
+    public String toString() {
+      return "ContainerFactory";
+    }
   };
 
   private static final InternalFactory<Logger> LOGGER_FACTORY
@@ -91,6 +95,10 @@ public final class ContainerBuilder extends SourceConsumer {
       return member == null
           ? Logger.getAnonymousLogger()
           : Logger.getLogger(member.getDeclaringClass().getName());
+    }
+
+    public String toString() {
+      return "LoggerFactory";
     }
   };
 

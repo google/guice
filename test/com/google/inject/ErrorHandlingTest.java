@@ -45,7 +45,7 @@ public class ErrorHandlingTest {
     // Invalid constructor.
     Bar(String s) {}
 
-    @Inject @Named("numbers") void setNumbers(List<Integer> numbers) {}
+    @Inject void setNumbers(@Named("numbers") List<Integer> numbers) {}
 
     @Inject void bar(@Named("foo") String s) {}
   }
@@ -53,7 +53,7 @@ public class ErrorHandlingTest {
   static class Tee {
     @Inject String s;
 
-    @Inject @Named("foo") void tee(String s, int i) {}
+    @Inject void tee(String s, int i) {}
 
     @Inject Invalid invalid;
   }

@@ -693,6 +693,10 @@ class ContainerImpl implements Container {
           }
         });
       }
+
+      public String toString() {
+        return factory.toString();
+      }
     };
   }
 
