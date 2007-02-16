@@ -52,14 +52,12 @@ public class Manager {
       Container container) {
     // Register each binding independently.
     for (Binding<?> binding : container.getBindings().values()) {
+      // Construct the name manually so we can ensure proper ordering of the
+      // key/value pairs.
       StringBuilder name = new StringBuilder();
-
       name.append(domain).append(":");
-
       Key<?> key = binding.getKey();
-
       name.append("type=").append(quote(key.getType().toString()));
-
       Annotation annotation = key.getAnnotation();
       if (annotation != null) {
         name.append(",annotation=").append(quote(annotation.toString()));

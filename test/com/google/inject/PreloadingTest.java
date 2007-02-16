@@ -46,14 +46,14 @@ public class PreloadingTest extends TestCase {
 
   private ContainerBuilder createContainerBuilder(Stage stage) {
     ContainerBuilder builder = new ContainerBuilder(stage);
-    builder.bind(Foo.class).in(CONTAINER).preload();
+    builder.bind(Foo.class).in(CONTAINER).eagerly();
     builder.bind(Bar.class);
     return builder;
   }
 
   public void testInvalidPreload() {
     ContainerBuilder builder = new ContainerBuilder();
-    builder.bind(Foo.class).preload();
+    builder.bind(Foo.class).eagerly();
     try {
       builder.create();
       fail();

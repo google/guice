@@ -24,7 +24,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Annotates annotations which are used for binding. Only one such annotation
  * may apply to a single injection point. You must also annotate binder
- * annotations with {@code @Retention(RUNTIME)}. 
+ * annotations with {@code @Retention(RUNTIME)}. For example:
+ *
+ * <pre>
+ *   {@code @}Retention(RUNTIME)
+ *   {@code @}Target({ FIELD, PARAMETER })
+ *   {@code @}Binder
+ *   public {@code @}interface Transactional {}
+ * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */

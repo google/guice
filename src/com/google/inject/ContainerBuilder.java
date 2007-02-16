@@ -641,7 +641,7 @@ public final class ContainerBuilder extends SourceConsumer {
      * container. Useful for application initialization logic. Currently only
      * supported for container-scoped bindings.
      */
-    public BindingBuilder<T> preload() {
+    public BindingBuilder<T> eagerly() {
       this.preload = true;
       return this;
     }
