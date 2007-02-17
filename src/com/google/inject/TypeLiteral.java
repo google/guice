@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.inject.util.Objects.nonNull;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
@@ -41,6 +42,7 @@ public abstract class TypeLiteral<T> {
 
   final Class<? super T> rawType;
   final Type type;
+  final int hashCode;
 
   /**
    * Constructs a new type literal. Derives represented class from type
@@ -54,15 +56,17 @@ public abstract class TypeLiteral<T> {
   protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
     this.rawType = (Class<? super T>) getRawType(type);
+    this.hashCode = hashCode(type);
   }
 
   /**
    * Unsafe. Constructs a type literal manually.
    */
   @SuppressWarnings("unchecked")
-  private TypeLiteral(Type type) {
+  TypeLiteral(Type type) {
     this.rawType = (Class<? super T>) getRawType(nonNull(type, "type"));
     this.type = type;
+    this.hashCode = hashCode(type);
   }
 
   /**
@@ -122,7 +126,7 @@ public abstract class TypeLiteral<T> {
   }
 
   public int hashCode() {
-    return type.hashCode();
+    return this.hashCode;
   }
 
   public boolean equals(Object o) {
@@ -132,8 +136,9 @@ public abstract class TypeLiteral<T> {
     if (!(o instanceof TypeLiteral<?>)) {
       return false;
     }
-    TypeLiteral<?> t = (TypeLiteral<?>) o;
-    return type.equals(t.type);
+    TypeLiteral<?> other = (TypeLiteral<?>) o;
+
+    return equals(type, other.type);
   }
 
   public String toString() {
@@ -167,5 +172,63 @@ public abstract class TypeLiteral<T> {
     public SimpleTypeLiteral(Type type) {
       super(type);
     }
+  }
+
+  static int hashCode(Type type) {
+    if (type instanceof ParameterizedType) {
+      ParameterizedType p = (ParameterizedType) type;
+      int h = p.getRawType().hashCode();
+      for (Type argument : p.getActualTypeArguments()) {
+        h = h * 31 + hashCode(argument);
+      }
+      return h;
+    }
+
+    if (type instanceof Class) {
+      // Class specifies hashCode().
+      return type.hashCode();
+    }
+
+    // This isn't a type we support. Could be a generic array type, wildcard
+    // type, etc.
+    return type.hashCode();
+  }
+
+  static boolean equals(Type a, Type b) {
+    if (a instanceof Class) {
+      // Class already specifies equals().
+      return a.equals(b);
+    }
+
+    if (a instanceof ParameterizedType) {
+      if (!(b instanceof ParameterizedType)) {
+        return false;
+      }
+
+      ParameterizedType pa = (ParameterizedType) a;
+      ParameterizedType pb = (ParameterizedType) b;
+
+      if (!pa.getRawType().equals(pb.getRawType())) {
+        return false;
+      }
+
+      Type[] aa = pa.getActualTypeArguments();
+      Type[] ba = pb.getActualTypeArguments();
+      if (aa.length != ba.length) {
+        return false;
+      }
+
+      for (int i = 0; i < aa.length; i++) {
+        if (!equals(aa[i], ba[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    // This isn't a type we support. Could be a generic array type, wildcard
+    // type, etc.
+    return false;
   }
 }

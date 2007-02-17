@@ -19,11 +19,19 @@ package com.google.inject;
 import junit.framework.TestCase;
 
 import java.util.List;
+import java.lang.reflect.Type;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class TypeLiteralTest extends TestCase {
+
+  public void testWithParameterizedTypeImpl() {
+    TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
+    TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
+        new TypeWithArgument(List.class, String.class)) {};
+    assertEquals(a, b);
+  }
 
   public void testEquality() {
     TypeLiteral<List<String>> t1 = new TypeLiteral<List<String>>() {};

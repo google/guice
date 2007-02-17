@@ -40,7 +40,7 @@ public class Names {
   }
 
   /**
-   * Binds a string constant for each property.
+   * Creates a constant binding to {@code @Named(key)} for each property.
    */
   public static void bindProperties(ContainerBuilder builder,
       Map<String, String> properties) {
@@ -53,7 +53,7 @@ public class Names {
   }
 
   /**
-   * Binds a string constant for each property.
+   * Creates a constant binding to {@code @Named(key)} for each property.
    */
   public static void bindProperties(ContainerBuilder builder,
       Properties properties) {
