@@ -21,11 +21,11 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class CustomFactoryTest extends TestCase {
+public class GeneratorTest extends TestCase {
 
-  public void testFooFactory() throws ContainerCreationException {
+  public void testFooGenerator() throws ContainerCreationException {
     ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toFactory(FooFactory.class);
+    cb.bind(Foo.class).toGenerator(FooGenerator.class);
     Container c = cb.create();
 
     Foo a = c.getInstance(Foo.class);
@@ -38,41 +38,10 @@ public class CustomFactoryTest extends TestCase {
     assertNotSame(a.bar, b.bar);
   }
 
-  public void testContainerScopedFooFactory()
+  public void testContainerScopedFooGenerator()
       throws ContainerCreationException {
     ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toFactory(ContainerScopedFooFactory.class);
-    Container c = cb.create();
-
-    Foo a = c.getInstance(Foo.class);
-    Foo b = c.getInstance(Foo.class);
-
-    assertEquals(0, a.i);
-    assertEquals(1, b.i);
-    assertNotNull(a.bar);
-    assertNotNull(b.bar);
-    assertSame(a.bar, b.bar);
-  }
-
-  public void testContextualFooFactory() throws ContainerCreationException {
-    ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toContextualFactory(ContextualFooFactory.class);
-    Container c = cb.create();
-
-    Foo a = c.getInstance(Foo.class);
-    Foo b = c.getInstance(Foo.class);
-
-    assertEquals(0, a.i);
-    assertEquals(0, b.i);
-    assertNotNull(a.bar);
-    assertNotNull(b.bar);
-    assertNotSame(a.bar, b.bar);
-  }
-
-  public void testContextualContainerScopedFooFactory()
-      throws ContainerCreationException {
-    ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toContextualFactory(ContainerScopedContextualFooFactory.class);
+    cb.bind(Foo.class).toGenerator(ContainerScopedFooGenerator.class);
     Container c = cb.create();
 
     Foo a = c.getInstance(Foo.class);
@@ -97,48 +66,17 @@ public class CustomFactoryTest extends TestCase {
     }
   }
 
-  static class FooFactory implements Factory<Foo> {
+  static class FooGenerator implements Generator<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public FooFactory(Bar bar) {
+    public FooGenerator(Bar bar) {
       this.bar = bar;
     }
 
-    public Foo get() {
-      return new Foo(this.bar, count++);
-    }
-  }
-
-  @ContainerScoped
-  static class ContainerScopedFooFactory implements Factory<Foo> {
-
-    final Bar bar;
-    int count = 0;
-
-    @Inject
-    public ContainerScopedFooFactory(Bar bar) {
-      this.bar = bar;
-    }
-
-    public Foo get() {
-      return new Foo(this.bar, count++);
-    }
-  }
-
-  static class ContextualFooFactory implements ContextualFactory<Foo> {
-
-    final Bar bar;
-    int count = 0;
-
-    @Inject
-    public ContextualFooFactory(Bar bar) {
-      this.bar = bar;
-    }
-
-    public Foo get(Context context) {
+    public Foo generate(Context context) {
       assertNull(context.getMember());
       assertEquals(-1, context.getParameterIndex());
       assertEquals(Foo.class, context.getKey().getRawType());
@@ -147,18 +85,17 @@ public class CustomFactoryTest extends TestCase {
   }
 
   @ContainerScoped
-  static class ContainerScopedContextualFooFactory
-      implements ContextualFactory<Foo> {
+  static class ContainerScopedFooGenerator implements Generator<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public ContainerScopedContextualFooFactory(Bar bar) {
+    public ContainerScopedFooGenerator(Bar bar) {
       this.bar = bar;
     }
 
-    public Foo get(Context context) {
+    public Foo generate(Context context) {
       assertNull(context.getMember());
       assertEquals(-1, context.getParameterIndex());
       assertEquals(Foo.class, context.getKey().getRawType());

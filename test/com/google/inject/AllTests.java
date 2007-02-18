@@ -49,7 +49,7 @@ public class AllTests {
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
-    suite.addTestSuite(CustomFactoryTest.class);
+    suite.addTestSuite(GeneratorTest.class);
 
     suite.addTestSuite(MatcherTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);

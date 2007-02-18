@@ -17,16 +17,22 @@
 package com.google.inject;
 
 /**
- * Gets instances of {@code T}.
- *
  * @author crazybob@google.com (Bob Lee)
- */
-public interface ContextualFactory<T> {
+*/
+class InternalFactoryToGeneratorAdapter<T> implements InternalFactory<T> {
 
-  /**
-   * Gets an instance of {@code T}.
-   *
-   * @param context of this call
-   */
-  T get(Context context);
+  private final Generator<? extends T> factory;
+
+  public InternalFactoryToGeneratorAdapter(
+      Generator<? extends T> factory) {
+    this.factory = factory;
+  }
+
+  public T get(InternalContext context) {
+    return factory.generate(context.getExternalContext());
+  }
+
+  public String toString() {
+    return factory.toString();
+  }
 }

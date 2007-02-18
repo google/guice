@@ -32,22 +32,22 @@ public class FactoryTest extends TestCase {
   public void testParameterIndex() throws ContainerCreationException {
     ContainerBuilder cb = new ContainerBuilder();
 
-    cb.bind(Zero.class).to(new ContextualFactory<Zero>() {
-      public Zero get(Context context) {
+    cb.bind(Zero.class).to(new Generator<Zero>() {
+      public Zero generate(Context context) {
         assertEquals(0, context.getParameterIndex());
         return new Zero();
       }
     });
 
-    cb.bind(One.class).to(new ContextualFactory<One>() {
-      public One get(Context context) {
+    cb.bind(One.class).to(new Generator<One>() {
+      public One generate(Context context) {
         assertEquals(1, context.getParameterIndex());
         return new One();
       }
     });
 
-    cb.bind(NegativeOne.class).to(new ContextualFactory<NegativeOne>() {
-      public NegativeOne get(Context context) {
+    cb.bind(NegativeOne.class).to(new Generator<NegativeOne>() {
+      public NegativeOne generate(Context context) {
         assertEquals(-1, context.getParameterIndex());
         return new NegativeOne();
       }
@@ -141,11 +141,11 @@ public class FactoryTest extends TestCase {
     assertNotNull(foo.bar.tee2.bob2);
   }
 
-  <T> ContextualFactory<T> createFactory(
+  <T> Generator<T> createFactory(
       final Class<T> type, final Class<? extends Annotation> annotationType,
       final Member expectedMember) {
-    return new ContextualFactory<T>() {
-      public T get(Context context) {
+    return new Generator<T>() {
+      public T generate(Context context) {
         assertEquals(expectedMember, context.getMember());
         assertEquals(type, context.getKey().getType().getType());
         return context.getContainer().getFactory(type).get();
