@@ -32,7 +32,7 @@ public class Scopes {
    * The default scope, one instance per injection.
    */
   public static final Scope DEFAULT = new Scope() {
-    public <T> Factory<T> scope(Key<T> key, Factory<T> creator) {
+    public <T> Locator<T> scope(Key<T> key, Locator<T> creator) {
       return creator;
     }
 
@@ -45,8 +45,8 @@ public class Scopes {
    * One instance per container. Also see {@code @}{@link ContainerScoped}.
    */
   public static final Scope CONTAINER = new Scope() {
-    public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
-      return new Factory<T>() {
+    public <T> Locator<T> scope(Key<T> key, final Locator<T> creator) {
+      return new Locator<T>() {
 
         private volatile T instance;
 
@@ -116,8 +116,8 @@ public class Scopes {
     if (scope == null || scope == DEFAULT) {
       return creator;
     }
-    Factory<T> scoped = scope.scope(key,
-        new FactoryToInternalFactoryAdapter<T>(container, creator));
-    return new InternalFactoryToFactoryAdapter<T>(scoped);
+    Locator<T> scoped = scope.scope(key,
+        new LocatorToInternalFactoryAdapter<T>(container, creator));
+    return new InternalFactoryToLocatorAdapter<T>(scoped);
   }
 }

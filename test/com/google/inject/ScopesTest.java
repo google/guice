@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 public class ScopesTest extends TestCase {
 
   public void testContainerScopedAnnotation()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     Object bindingBuilder
         = builder.bind(Singleton.class);
@@ -37,7 +37,7 @@ public class ScopesTest extends TestCase {
   static class Singleton {}
 
   public void testOverriddingAnnotation()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     Object bindingBuilder
         = builder.bind(Singleton.class).in(Scopes.DEFAULT);
@@ -52,6 +52,6 @@ public class ScopesTest extends TestCase {
     try {
       builder.create();
       fail();
-    } catch (ContainerCreationException e) { /* expected */ }
+    } catch (CreationException e) { /* expected */ }
   }
 }

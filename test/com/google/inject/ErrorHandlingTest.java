@@ -25,7 +25,7 @@ import com.google.inject.name.Names;
  */
 public class ErrorHandlingTest {
 
-  public static void main(String[] args) throws ContainerCreationException {
+  public static void main(String[] args) throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.install(new MyModule());
     builder.create();

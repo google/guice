@@ -61,12 +61,12 @@ public class ConstantConversionTest extends TestCase {
     TEE, BAZ, BOB;
   }
 
-  public void testOneConstantInjection() throws ContainerCreationException {
+  public void testOneConstantInjection() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
     Container container = builder.create();
-    Simple simple = container.getFactory(Simple.class).get();
+    Simple simple = container.getLocator(Simple.class).get();
     assertEquals(5, simple.i);
   }
 
@@ -74,14 +74,14 @@ public class ConstantConversionTest extends TestCase {
     @Inject @NumericValue int i;
   }
 
-  public void testConstantInjection() throws ContainerCreationException {
+  public void testConstantInjection() throws CreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("5");
     b.bindConstant(BooleanValue.class).to("true");
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
     Container c = b.create();
-    Foo foo = c.getFactory(Foo.class).get();
+    Foo foo = c.getLocator(Foo.class).get();
 
     checkNumbers(
       foo.integerField,
@@ -108,12 +108,12 @@ public class ConstantConversionTest extends TestCase {
     }
   }
 
-  public void testInvalidInteger() throws ContainerCreationException {
+  public void testInvalidInteger() throws CreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create();
     try {
-      c.getFactory(InvalidInteger.class).get();
+      c.getLocator(InvalidInteger.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -122,12 +122,12 @@ public class ConstantConversionTest extends TestCase {
     @Inject @NumericValue Integer integerField;
   }
 
-  public void testInvalidCharacter() throws ContainerCreationException {
+  public void testInvalidCharacter() throws CreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create();
     try {
-      c.getFactory(InvalidCharacter.class).get();
+      c.getLocator(InvalidCharacter.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -136,12 +136,12 @@ public class ConstantConversionTest extends TestCase {
     @Inject @NumericValue char foo;
   }
 
-  public void testInvalidEnum() throws ContainerCreationException {
+  public void testInvalidEnum() throws CreationException {
     ContainerBuilder b = new ContainerBuilder();
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.create();
     try {
-      c.getFactory(InvalidEnum.class).get();
+      c.getLocator(InvalidEnum.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }

@@ -38,12 +38,10 @@
  * <dd>The object that Guice passes into your {@link com.google.inject.Module}
  *     to collect these bindings.
  *
- * <dt>{@link com.google.inject.Factory} and
- *     {@link com.google.inject.Generator}
+ * <dt>{@link com.google.inject.Generator}
  * <dd>The interface you will implement when you need to customize exactly how
- *     Guice creates instances for a particular binding.  These differ only in
- *     whether a {@link com.google.inject.Context} is made available to the
- *     factory.
+ *     Guice creates instances for a particular binding.
+ *
  * <dt>{@link com.google.inject.Container}
  * <dd>An object which creates and manages all the instances that make
  *     up your application.  It is created by a

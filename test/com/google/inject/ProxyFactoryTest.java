@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.ConstructionProxy;
 import static com.google.inject.matcher.Matchers.*;
-import com.google.inject.Factory;
+import com.google.inject.Locator;
 
 import junit.framework.TestCase;
 
@@ -42,7 +42,7 @@ public class ProxyFactoryTest extends TestCase {
     builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
-    Factory<Simple> creator = factory.getFactory(Simple.class);
+    Locator<Simple> creator = factory.getFactory(Simple.class);
 
     Simple simple = creator.get();
     simple.invoke();

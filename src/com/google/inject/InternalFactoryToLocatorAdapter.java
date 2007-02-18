@@ -19,19 +19,19 @@ package com.google.inject;
 /**
  * @author crazybob@google.com (Bob Lee)
 */
-class InternalFactoryToFactoryAdapter<T> implements InternalFactory<T> {
+class InternalFactoryToLocatorAdapter<T> implements InternalFactory<T> {
 
-  private final Factory<? extends T> factory;
+  private final Locator<? extends T> locator;
 
-  public InternalFactoryToFactoryAdapter(Factory<? extends T> factory) {
-    this.factory = factory;
+  public InternalFactoryToLocatorAdapter(Locator<? extends T> locator) {
+    this.locator = locator;
   }
   
   public T get(InternalContext context) {
-    return factory.get();
+    return locator.get();
   }
 
   public String toString() {
-    return factory.toString();
+    return locator.toString();
   }
 }

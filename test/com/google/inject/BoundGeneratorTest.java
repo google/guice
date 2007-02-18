@@ -21,9 +21,9 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class GeneratorTest extends TestCase {
+public class BoundGeneratorTest extends TestCase {
 
-  public void testFooGenerator() throws ContainerCreationException {
+  public void testFooGenerator() throws CreationException {
     ContainerBuilder cb = new ContainerBuilder();
     cb.bind(Foo.class).toGenerator(FooGenerator.class);
     Container c = cb.create();
@@ -39,7 +39,7 @@ public class GeneratorTest extends TestCase {
   }
 
   public void testContainerScopedFooGenerator()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder cb = new ContainerBuilder();
     cb.bind(Foo.class).toGenerator(ContainerScopedFooGenerator.class);
     Container c = cb.create();

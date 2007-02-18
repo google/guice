@@ -23,11 +23,11 @@ import junit.framework.TestCase;
  */
 public class SuperclassTest extends TestCase {
 
-  public void testSuperclassInjection() throws ContainerCreationException {
+  public void testSuperclassInjection() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(Foo.class);
     Container container = builder.create();
-    Factory<Sub> creator = container.getFactory(Sub.class);
+    Locator<Sub> creator = container.getLocator(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();
     sub = creator.get();

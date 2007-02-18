@@ -31,7 +31,7 @@ public class StaticInjectionTest extends TestCase {
   @Retention(RUNTIME)
   @Binder @interface S {}
 
-  public void testInjectStatics() throws ContainerCreationException {
+  public void testInjectStatics() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);

@@ -50,7 +50,7 @@ class ErrorMessages {
     }
   }
 
-  static final String CANNOT_BIND_TO_FACTORY = "Binding to Factory<?> is not"
+  static final String CANNOT_BIND_TO_LOCATOR = "Binding to Locator<?> is not"
       + " allowed.";
 
   static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";

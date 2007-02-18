@@ -34,7 +34,7 @@ class ManagedBinding implements ManagedBindingMBean {
     return binding.getKey().toString();
   }
 
-  public String getFactory() {
-    return binding.getFactory().toString();
+  public String getLocator() {
+    return binding.getLocator().toString();
   }
 }

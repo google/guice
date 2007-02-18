@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.inject.Container;
 import com.google.inject.ContainerBuilder;
-import com.google.inject.ContainerCreationException;
+import com.google.inject.CreationException;
 import com.google.inject.Key;
 
 import junit.framework.TestCase;
@@ -45,7 +45,7 @@ import javax.servlet.http.HttpSession;
 public class ServletTest extends TestCase {
 
   public void testNewRequestObject()
-      throws ContainerCreationException, IOException, ServletException {
+      throws CreationException, IOException, ServletException {
     final Container container = createContainer();
 
     GuiceFilter filter = new GuiceFilter();
@@ -75,7 +75,7 @@ public class ServletTest extends TestCase {
   }
 
   public void testExistingRequestObject()
-      throws ContainerCreationException, IOException, ServletException {
+      throws CreationException, IOException, ServletException {
     final Container container = createContainer();
 
     GuiceFilter filter = new GuiceFilter();
@@ -106,7 +106,7 @@ public class ServletTest extends TestCase {
   }
 
   public void testNewSessionObject()
-      throws ContainerCreationException, IOException, ServletException {
+      throws CreationException, IOException, ServletException {
     final Container container = createContainer();
 
     GuiceFilter filter = new GuiceFilter();
@@ -139,7 +139,7 @@ public class ServletTest extends TestCase {
   }
 
   public void testExistingSessionObject()
-      throws ContainerCreationException, IOException, ServletException {
+      throws CreationException, IOException, ServletException {
     final Container container = createContainer();
 
     GuiceFilter filter = new GuiceFilter();
@@ -173,7 +173,7 @@ public class ServletTest extends TestCase {
     assertTrue(invoked[0]);
   }
 
-  private Container createContainer() throws ContainerCreationException {
+  private Container createContainer() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.install(new ServletModule());
     builder.bind(InSession.class);

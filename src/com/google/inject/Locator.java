@@ -17,14 +17,14 @@
 package com.google.inject;
 
 /**
- * Gets instances of {@code T}.
+ * Locates bound instances of {@code T}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Factory<T> {
+public interface Locator<T> {
 
   /**
-   * Gets an instance of {@code T}.
+   * Locates an instance of {@code T}.
    */
   T get();
 }

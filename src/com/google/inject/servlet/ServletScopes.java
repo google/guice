@@ -17,7 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Scope;
-import com.google.inject.Factory;
+import com.google.inject.Locator;
 import com.google.inject.Key;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +36,9 @@ public class ServletScopes {
    * HTTP servlet request scope.
    */
   public static final Scope REQUEST = new Scope() {
-    public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
+    public <T> Locator<T> scope(Key<T> key, final Locator<T> creator) {
       final String name = key.toString();
-      return new Factory<T>() {
+      return new Locator<T>() {
         public T get() {
           HttpServletRequest request = GuiceFilter.getRequest();
           synchronized (request) {
@@ -63,9 +63,9 @@ public class ServletScopes {
    * HTTP session scope.
    */
   public static final Scope SESSION = new Scope() {
-    public <T> Factory<T> scope(Key<T> key, final Factory<T> creator) {
+    public <T> Locator<T> scope(Key<T> key, final Locator<T> creator) {
       final String name = key.toString();
-      return new Factory<T>() {
+      return new Locator<T>() {
         public T get() {
           HttpSession session = GuiceFilter.getRequest().getSession();
           synchronized (session) {

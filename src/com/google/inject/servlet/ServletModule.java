@@ -17,7 +17,6 @@
 package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Factory;
 import com.google.inject.TypeLiteral;
 import com.google.inject.Generator;
 import com.google.inject.Context;

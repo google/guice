@@ -94,7 +94,7 @@ public class PerformanceComparison {
   };
 
   static final Callable<Foo> juiceFactory = new Callable<Foo>() {
-    final Factory<Foo> fooFactory;
+    final Locator<Foo> fooLocator;
     {
       ContainerBuilder builder = new ContainerBuilder();
 
@@ -109,14 +109,14 @@ public class PerformanceComparison {
       });
 
       try {
-        fooFactory = builder.create().getFactory(Foo.class);
-      } catch (ContainerCreationException e) {
+        fooLocator = builder.create().getLocator(Foo.class);
+      } catch (CreationException e) {
         throw new RuntimeException(e);
       }
     }
 
     public Foo call() throws Exception {
-      return fooFactory.get();
+      return fooLocator.get();
     }
   };
 

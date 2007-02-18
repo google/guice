@@ -17,11 +17,11 @@
 package com.google.inject;
 
 /**
- * A scope which bound objects can reside in.
+ * A scope which bound objects can reside in. Scopes a given {@link Locator}.
  *
  * <p>Scope implementations should override {@code toString()} in the returned
- * factory and include the creator's {@code toString()} output. Doing so aids
- * debugging. They should also override their own {@code toString()}
+ * locator and include the unscoped locator's {@code toString()} output. Doing
+ * so aids debugging. They should also override their own {@code toString()}
  * method.
  *
  * @author crazybob@google.com (Bob Lee)
@@ -29,14 +29,16 @@ package com.google.inject;
 public interface Scope {
 
   /**
-   * Scopes a factory. The returned factory returns objects from this scope. If
-   * an object does not exist in this scope, the factory can use the given
-   * creator to create one.
+   * Scopes a locator. The returned locator returns objects from this scope. If
+   * an object does not exist in this scope, the locator can use the given
+   * unscoped locator to retrieve one.
    *
    * @param key binding key
-   * @param creator creates new instances as needed
-   * @return a new factory which only delegates to the given factory when an
-   *     instance of the requested object doesn't already exist in the scope
+   * @param unscoped locates an instance when one doesn't already exist in this
+   *  scope.
+   * @return a new locator which only delegates to the given unscoped locator
+   *  when an instance of the requested object doesn't already exist in this
+   *  scope
    */
-  public <T> Factory<T> scope(Key<T> key, Factory<T> creator);
+  public <T> Locator<T> scope(Key<T> key, Locator<T> unscoped);
 }

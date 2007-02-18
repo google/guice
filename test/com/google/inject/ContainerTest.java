@@ -34,7 +34,7 @@ public class ContainerTest extends TestCase {
   @Retention(RUNTIME)
   @Binder @interface I {}
 
-  public void testFactoryMethods() throws ContainerCreationException {
+  public void testLocatorMethods() throws CreationException {
     Singleton singleton = new Singleton();
     Singleton other = new Singleton();
 
@@ -46,20 +46,20 @@ public class ContainerTest extends TestCase {
     Container container = builder.create();
 
     assertSame(singleton,
-        container.getFactory(Key.get(Singleton.class)).get());
-    assertSame(singleton, container.getFactory(Singleton.class).get());
+        container.getLocator(Key.get(Singleton.class)).get());
+    assertSame(singleton, container.getLocator(Singleton.class).get());
     assertSame(singleton,
-        container.getFactory(new TypeLiteral<Singleton>() {}).get());
+        container.getLocator(new TypeLiteral<Singleton>() {}).get());
     assertSame(singleton, container.getInstance(Key.get(Singleton.class)));
     assertSame(singleton, container.getInstance(Singleton.class));
     assertSame(singleton,
         container.getInstance(new TypeLiteral<Singleton>() {}));
 
     assertSame(other,
-        container.getFactory(Key.get(Singleton.class, Other.class)).get());
-    assertSame(other, container.getFactory(Singleton.class, Other.class).get());
+        container.getLocator(Key.get(Singleton.class, Other.class)).get());
+    assertSame(other, container.getLocator(Singleton.class, Other.class).get());
     assertSame(other,
-        container.getFactory(new TypeLiteral<Singleton>() {}, Other.class).get());
+        container.getLocator(new TypeLiteral<Singleton>() {}, Other.class).get());
     assertSame(other, container.getInstance(Key.get(Singleton.class, Other.class)));
     assertSame(other, container.getInstance(Singleton.class, Other.class));
     assertSame(other,
@@ -68,9 +68,9 @@ public class ContainerTest extends TestCase {
 
   static class Singleton {}
 
-  public void testInjection() throws ContainerCreationException {
+  public void testInjection() throws CreationException {
     Container container = createFooContainer();
-    Foo foo = container.getFactory(Foo.class).get();
+    Foo foo = container.getLocator(Foo.class).get();
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -82,7 +82,7 @@ public class ContainerTest extends TestCase {
     assertSame(foo.bar, foo.bar.getTee().getBar());
   }
 
-  private Container createFooContainer() throws ContainerCreationException {
+  private Container createFooContainer() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
 
     builder.install(new AbstractModule() {
@@ -97,20 +97,20 @@ public class ContainerTest extends TestCase {
     return builder.create();
   }
 
-  public void testGetInstance() throws ContainerCreationException {
+  public void testGetInstance() throws CreationException {
     Container container = createFooContainer();
 
-    Bar bar = container.getFactory(Key.get(Bar.class)).get();
+    Bar bar = container.getLocator(Key.get(Bar.class)).get();
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }
 
   public void testIntAndIntegerAreInterchangeable()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(I.class).to(5);
     Container container = builder.create();
-    IntegerWrapper iw = container.getFactory(IntegerWrapper.class).get();
+    IntegerWrapper iw = container.getLocator(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
@@ -186,13 +186,13 @@ public class ContainerTest extends TestCase {
   }
 
   public void testCircularlyDependentConstructors()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create();
-    A a = container.getFactory(AImpl.class).get();
+    A a = container.getLocator(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 
@@ -225,7 +225,7 @@ public class ContainerTest extends TestCase {
     }
   }
 
-  public void testInjectStatics() throws ContainerCreationException {
+  public void testInjectStatics() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);

@@ -28,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class IntegrationTest extends TestCase {
 
-  public void testIntegration() throws ContainerCreationException {
+  public void testIntegration() throws CreationException {
     CountingInterceptor counter = new CountingInterceptor();
 
     ContainerBuilder containerBuilder = new ContainerBuilder();
@@ -36,12 +36,12 @@ public class IntegrationTest extends TestCase {
     containerBuilder.intercept(any(), any(), counter);
     Container container = containerBuilder.create();
 
-    Foo foo = container.getFactory(Key.get(Foo.class)).get();
+    Foo foo = container.getLocator(Key.get(Foo.class)).get();
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(1, counter.count);
 
-    foo = container.getFactory(Foo.class).get();
+    foo = container.getLocator(Foo.class).get();
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(2, counter.count);

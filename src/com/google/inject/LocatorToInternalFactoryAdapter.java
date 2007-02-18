@@ -19,13 +19,13 @@ package com.google.inject;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-class FactoryToInternalFactoryAdapter<T> implements Factory<T> {
+class LocatorToInternalFactoryAdapter<T> implements Locator<T> {
 
   private final ContainerImpl container;
 
   private final InternalFactory<? extends T> internalFactory;
 
-  public FactoryToInternalFactoryAdapter(ContainerImpl container,
+  public LocatorToInternalFactoryAdapter(ContainerImpl container,
       InternalFactory<? extends T> internalFactory) {
     this.container = container;
     this.internalFactory = internalFactory;

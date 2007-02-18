@@ -29,9 +29,9 @@ public interface ManagedBindingMBean {
   String getSource();
 
   /**
-   * Gets the factory to which this binding is bound.
+   * Gets the locator to which this binding is bound.
    */
-  String getFactory();
+  String getLocator();
 
   /**
    * Gets the binding key.

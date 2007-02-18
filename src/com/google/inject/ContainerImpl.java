@@ -158,20 +158,20 @@ class ContainerImpl implements Container {
     Class<? super T> rawType = key.getType().getRawType();
 
     // Handle cases where T is a Factory<?>.
-    if (rawType.equals(Factory.class)) {
-      Type factoryType = key.getType().getType();
-      if (!(factoryType instanceof ParameterizedType)) {
+    if (rawType.equals(Locator.class)) {
+      Type locatorType = key.getType().getType();
+      if (!(locatorType instanceof ParameterizedType)) {
         return null;
       }
       Type entryType
-          = ((ParameterizedType) factoryType).getActualTypeArguments()[0];
+          = ((ParameterizedType) locatorType).getActualTypeArguments()[0];
 
       try {
-        final Factory<?> factory = getFactory(key.ofType(entryType));
+        final Locator<?> locator = getLocator(key.ofType(entryType));
         return new InternalFactory<T>() {
           @SuppressWarnings("unchecked")
           public T get(InternalContext context) {
-            return (T) factory;
+            return (T) locator;
           }
         };
       }
@@ -612,65 +612,65 @@ class ContainerImpl implements Container {
 
   public <T> T getInstance(TypeLiteral<T> type,
       Annotation annotation) {
-    return getFactory(Key.get(type, annotation)).get();
+    return getLocator(Key.get(type, annotation)).get();
   }
 
   public <T> T getInstance(Class<T> type,
       Annotation annotation) {
-    return getFactory(Key.get(type, annotation)).get();
+    return getLocator(Key.get(type, annotation)).get();
   }
 
-  public <T> Factory<T> getFactory(Class<T> type,
+  public <T> Locator<T> getLocator(Class<T> type,
       Annotation annotation) {
-    return getFactory(Key.get(type, annotation));
+    return getLocator(Key.get(type, annotation));
   }
 
-  public <T> Factory<T> getFactory(TypeLiteral<T> type,
+  public <T> Locator<T> getLocator(TypeLiteral<T> type,
       Annotation annotation) {
-    return getFactory(Key.get(type, annotation));
+    return getLocator(Key.get(type, annotation));
   }
 
   public <T> T getInstance(TypeLiteral<T> type,
       Class<? extends Annotation> annotationType) {
-    return getFactory(Key.get(type, annotationType)).get();
+    return getLocator(Key.get(type, annotationType)).get();
   }
 
   public <T> T getInstance(Class<T> type,
       Class<? extends Annotation> annotationType) {
-    return getFactory(Key.get(type, annotationType)).get();
+    return getLocator(Key.get(type, annotationType)).get();
   }
 
-  public <T> Factory<T> getFactory(Class<T> type,
+  public <T> Locator<T> getLocator(Class<T> type,
       Class<? extends Annotation> annotationType) {
-    return getFactory(Key.get(type, annotationType));
+    return getLocator(Key.get(type, annotationType));
   }
 
-  public <T> Factory<T> getFactory(TypeLiteral<T> type,
+  public <T> Locator<T> getLocator(TypeLiteral<T> type,
       Class<? extends Annotation> annotationType) {
-    return getFactory(Key.get(type, annotationType));
+    return getLocator(Key.get(type, annotationType));
   }
 
   public <T> T getInstance(TypeLiteral<T> type) {
-    return getFactory(Key.get(type)).get();
+    return getLocator(Key.get(type)).get();
   }
 
   public <T> T getInstance(Class<T> type) {
-    return getFactory(Key.get(type)).get();
+    return getLocator(Key.get(type)).get();
   }
 
   public <T> T getInstance(Key<T> key) {
-    return getFactory(key).get();
+    return getLocator(key).get();
   }
 
-  public <T> Factory<T> getFactory(Class<T> type) {
-    return getFactory(Key.get(type));
+  public <T> Locator<T> getLocator(Class<T> type) {
+    return getLocator(Key.get(type));
   }
 
-  public <T> Factory<T> getFactory(TypeLiteral<T> type) {
-    return getFactory(Key.get(type));
+  public <T> Locator<T> getLocator(TypeLiteral<T> type) {
+    return getLocator(Key.get(type));
   }
 
-  public <T> Factory<T> getFactory(final Key<T> key) {
+  public <T> Locator<T> getLocator(final Key<T> key) {
     final InternalFactory<? extends T> factory = getInternalFactory(null, key);
 
     if (factory == null) {
@@ -678,7 +678,7 @@ class ContainerImpl implements Container {
           "Missing binding to " + ErrorMessages.convert(key) + ".");
     }
 
-    return new Factory<T>() {
+    return new Locator<T>() {
       public T get() {
         return callInContext(new ContextualCallable<T>() {
           public T call(InternalContext context) {

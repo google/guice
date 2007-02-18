@@ -19,7 +19,7 @@ package com.google.inject;
 import com.google.inject.util.ToStringBuilder;
 
 /**
- * A binding from a {@link Key} (type and name) to an implementation.
+ * A binding from a {@link Key} (type and name) to an instance locator.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -53,16 +53,16 @@ public class Binding<T> {
     return source;
   }
 
-  volatile Factory<T> factory;
+  volatile Locator<T> locator;
 
   /**
-   * Gets the factory which returns instances of {@code T}.
+   * Gets the locator which returns instances of {@code T}.
    */
-  public Factory<T> getFactory() {
-    if (factory == null) {
-      factory = container.getFactory(key);
+  public Locator<T> getLocator() {
+    if (locator == null) {
+      locator = container.getLocator(key);
     }
-    return factory;
+    return locator;
   }
 
   InternalFactory<? extends T> getInternalFactory() {
@@ -85,7 +85,7 @@ public class Binding<T> {
     return new ToStringBuilder(Binding.class)
         .add("key", key)
         .add("source", source)
-        .add("factory", internalFactory)
+        .add("locator", internalFactory)
         .toString();
   }
 }

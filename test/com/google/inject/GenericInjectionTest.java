@@ -26,12 +26,12 @@ import java.util.Arrays;
  */
 public class GenericInjectionTest extends TestCase {
 
-  public void testGenericInjection() throws ContainerCreationException {
+  public void testGenericInjection() throws CreationException {
     List<String> names = Arrays.asList("foo", "bar", "bob");
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(new TypeLiteral<List<String>>() {}).to(names);
     Container container = builder.create();
-    Foo foo = container.getFactory(Foo.class).get();
+    Foo foo = container.getLocator(Foo.class).get();
     assertEquals(names, foo.names);
   }
 

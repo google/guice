@@ -43,7 +43,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * <p>Creates several bindings by default:
  *
  * <ul>
- * <li>A {@code Factory<T>} for each binding of type {@code T}
+ * <li>A {@code Locator<T>} for each binding of type {@code T}
  * <li>The {@link Container} iself
  * <li>The {@link Logger} for the class being injected
  * <li>The {@link Stage} passed to the builder's constructor
@@ -84,7 +84,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     public String toString() {
-      return "ContainerFactory";
+      return "Locator<Container>";
     }
   };
 
@@ -98,7 +98,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     public String toString() {
-      return "LoggerFactory";
+      return "Locator<Logger>";
     }
   };
 
@@ -288,12 +288,12 @@ public final class ContainerBuilder extends SourceConsumer {
    * Creates a {@link Container} instance. Injects static members for classes
    * which were registered using {@link #requestStaticInjection(Class...)}.
    *
-   * @throws ContainerCreationException if configuration errors are found. The
+   * @throws CreationException if configuration errors are found. The
    *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
   public synchronized Container create()
-      throws ContainerCreationException {
+      throws CreationException {
     stopwatch.resetAndLog(logger, "Configuration");
 
     // Create the container.
@@ -331,7 +331,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     // Blow up if we encountered errors.
     if (!errorMessages.isEmpty()) {
-      throw new ContainerCreationException(errorMessages);
+      throw new CreationException(errorMessages);
     }
 
     // Switch to runtime error handling.
@@ -451,9 +451,9 @@ public final class ContainerBuilder extends SourceConsumer {
     Map<Key<?>, Binding<?>> bindings = container.internalBindings();
     Binding<?> original = bindings.get(key);
 
-    // Binding to Factory<?> is not allowed.
-    if (key.getRawType().equals(Factory.class)) {
-      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_FACTORY);
+    // Binding to Locator<?> is not allowed.
+    if (key.getRawType().equals(Locator.class)) {
+      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_LOCATOR);
       return;
     }
 
@@ -555,18 +555,9 @@ public final class ContainerBuilder extends SourceConsumer {
       ensureImplementationIsNotSet();
       this.implementation = implementation;
       final DefaultFactory<I> defaultFactory
-          = new DefaultFactory<I>(key, implementation);
+          = new DefaultFactory<I>(key, implementation, errorHandler);
       this.factory = defaultFactory;
-      creationListeners.add(new CreationListener() {
-        public void notify(final ContainerImpl container) {
-          container.withErrorHandler(errorHandler, new Runnable() {
-            public void run() {
-              defaultFactory.setConstructor(
-                  container.getConstructor(implementation));
-            }
-          });
-        }
-      });
+      creationListeners.add(defaultFactory);
       return this;
     }
 
@@ -625,10 +616,10 @@ public final class ContainerBuilder extends SourceConsumer {
         final Key<? extends Generator<T>> generatorKey) {
       ensureImplementationIsNotSet();
 
-      final BoundGenerator<T> delegatingFactory =
+      final BoundGenerator<T> boundGenerator =
           new BoundGenerator<T>(generatorKey, errorHandler);
-      creationListeners.add(delegatingFactory);
-      this.factory = delegatingFactory;
+      creationListeners.add(boundGenerator);
+      this.factory = boundGenerator;
 
       return this;
     }
@@ -763,20 +754,28 @@ public final class ContainerBuilder extends SourceConsumer {
   /**
    * Injects new instances of the specified implementation class.
    */
-  private static class DefaultFactory<T> implements InternalFactory<T> {
+  private static class DefaultFactory<T> implements InternalFactory<T>,
+      CreationListener {
 
     private final TypeLiteral<T> implementation;
     private final Key<? super T> key;
+    private final ErrorHandler errorHandler;
 
     ConstructorInjector<T> constructor;
 
-    DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation) {
+    DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation,
+        ErrorHandler errorHandler) {
       this.key = key;
       this.implementation = implementation;
+      this.errorHandler = errorHandler;
     }
 
-    void setConstructor(ConstructorInjector<T> constructor) {
-      this.constructor = constructor;
+    public void notify(final ContainerImpl container) {
+      container.withErrorHandler(errorHandler, new Runnable() {
+        public void run() {
+          constructor = container.getConstructor(implementation);
+        }
+      });
     }
 
     public T get(InternalContext context) {
@@ -785,7 +784,7 @@ public final class ContainerBuilder extends SourceConsumer {
     }
 
     public String toString() {
-      return new ToStringBuilder(Factory.class)
+      return new ToStringBuilder(Locator.class)
           .add("implementation", implementation)
           .toString();
     }

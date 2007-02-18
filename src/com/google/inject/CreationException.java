@@ -31,14 +31,14 @@ import java.util.Comparator;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ContainerCreationException extends Exception {
+public class CreationException extends Exception {
 
   final List<Message> errorMessages;
 
   /**
    * Constructs a new exception for the given errors.
    */
-  public ContainerCreationException(Collection<Message> errorMessages) {
+  public CreationException(Collection<Message> errorMessages) {
     super();
 
     // Sort the messages by source. 

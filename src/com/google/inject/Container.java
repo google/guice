@@ -40,9 +40,9 @@ public interface Container {
   void injectMembers(Object o);
 
   /**
-   * Gets the factory bound to the given key.
+   * Gets the locator bound to the given key.
    */
-  <T> Factory<T> getFactory(Key<T> key);
+  <T> Locator<T> getLocator(Key<T> key);
 
   /**
    * Gets all bindings.
@@ -60,75 +60,71 @@ public interface Container {
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
   /**
-   * Gets the factory bound to the given type.
+   * Gets the locator bound to the given type.
    */
-  <T> Factory<T> getFactory(Class<T> type);
+  <T> Locator<T> getLocator(Class<T> type);
 
   /**
-   * Gets the factory bound to the given type.
+   * Gets the locator bound to the given type.
    */
-  <T> Factory<T> getFactory(TypeLiteral<T> type);
+  <T> Locator<T> getLocator(TypeLiteral<T> type);
 
   /**
-   * Gets an instance from the factory bound to the given type.
+   * Gets an instance from the locator bound to the given type.
    */
   <T> T getInstance(TypeLiteral<T> type);
 
   /**
-   * Gets an instance from the factory bound to the given type.
+   * Gets an instance from the locator bound to the given type.
    */
   <T> T getInstance(Class<T> type);
 
   /**
-   * Gets an instance from the factory bound to the given key.
+   * Gets an instance from the locator bound to the given key.
    */
   <T> T getInstance(Key<T> key);
 
   /**
-   * Gets an instance from the factory bound to the given type and annotation.
+   * Gets an instance from the locator bound to the given type and annotation.
    */
-  <T> T getInstance(TypeLiteral<T> type,
-      Annotation annotation);
+  <T> T getInstance(TypeLiteral<T> type, Annotation annotation);
 
   /**
-   * Gets an instance from the factory bound to the given type and annotation.
+   * Gets an instance from the locator bound to the given type and annotation.
    */
-  <T> T getInstance(Class<T> type,
-      Annotation annotation);
+  <T> T getInstance(Class<T> type, Annotation annotation);
 
   /**
-   * Gets the factory bound to the given type and annotation.
+   * Gets the locator bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(Class<T> type,
-      Annotation annotation);
+  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
 
   /**
-   * Gets the factory bound to the given type and annotation.
+   * Gets the locator bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(TypeLiteral<T> type,
-      Annotation annotation);
+  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
 
   /**
-   * Gets an instance from the factory bound to the given type and annotation.
+   * Gets an instance from the locator bound to the given type and annotation.
    */
   <T> T getInstance(TypeLiteral<T> type,
       Class<? extends Annotation> annotationType);
 
   /**
-   * Gets an instance from the factory bound to the given type and annotation.
+   * Gets an instance from the locator bound to the given type and annotation.
    */
   <T> T getInstance(Class<T> type,
       Class<? extends Annotation> annotationType);
 
   /**
-   * Gets the factory bound to the given type and annotation.
+   * Gets the locator bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(Class<T> type,
+  <T> Locator<T> getLocator(Class<T> type,
       Class<? extends Annotation> annotationType);
 
   /**
-   * Gets the factory bound to the given type and annotation.
+   * Gets the locator bound to the given type and annotation.
    */
-  <T> Factory<T> getFactory(TypeLiteral<T> type,
+  <T> Locator<T> getLocator(TypeLiteral<T> type,
       Class<? extends Annotation> annotationType);
 }

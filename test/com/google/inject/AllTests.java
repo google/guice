@@ -42,14 +42,14 @@ public class AllTests {
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(StaticInjectionTest.class);
     suite.addTestSuite(NotRequiredTest.class);
-    suite.addTestSuite(FactoryTest.class);
+    suite.addTestSuite(GeneratorTest.class);
     suite.addTestSuite(SuperclassTest.class);
-    suite.addTestSuite(FactoryInjectionTest.class);
+    suite.addTestSuite(LocatorInjectionTest.class);
     suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
-    suite.addTestSuite(GeneratorTest.class);
+    suite.addTestSuite(BoundGeneratorTest.class);
 
     suite.addTestSuite(MatcherTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);

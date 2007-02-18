@@ -24,13 +24,13 @@ import junit.framework.TestCase;
 public class CircularDependencyTest extends TestCase {
 
   public void testCircularlyDependentConstructors()
-      throws ContainerCreationException {
+      throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.create();
-    A a = container.getFactory(AImpl.class).get();
+    A a = container.getLocator(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 

@@ -28,37 +28,37 @@ public class ReflectionTest extends TestCase {
   @Retention(RUNTIME)
   @Binder @interface I {}
 
-  public void testNormalBinding() throws ContainerCreationException {
+  public void testNormalBinding() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     Foo foo = new Foo();
     builder.bind(Foo.class).to(foo);
     Container container = builder.create();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
-    assertSame(foo, fooBinding.getFactory().get());
+    assertSame(foo, fooBinding.getLocator().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
     assertFalse(fooBinding.isConstant());
   }
 
-  public void testConstantBinding() throws ContainerCreationException {
+  public void testConstantBinding() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     builder.bindConstant(I.class).to(5);
     Container container = builder.create();
     Binding<?> i = container.getBinding(Key.get(int.class, I.class));
-    assertEquals(5, i.getFactory().get());
+    assertEquals(5, i.getLocator().get());
     assertNotNull(i.getSource());
     assertEquals(Key.get(int.class, I.class), i.getKey());
     assertTrue(i.isConstant());
   }
 
-  public void testLinkedBinding() throws ContainerCreationException {
+  public void testLinkedBinding() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
     Bar bar = new Bar();
     builder.bind(Bar.class).to(bar);
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
     Container container = builder.create();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
-    assertSame(bar, fooBinding.getFactory().get());
+    assertSame(bar, fooBinding.getLocator().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
     assertFalse(fooBinding.isConstant());

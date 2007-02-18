@@ -21,9 +21,9 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class FactoryInjectionTest extends TestCase {
+public class LocatorInjectionTest extends TestCase {
 
-  public void testFactoryInjection() throws ContainerCreationException {
+  public void testLocatorInjection() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();
 
     builder.bind(Bar.class);
@@ -31,20 +31,20 @@ public class FactoryInjectionTest extends TestCase {
 
     Container container = builder.create();
 
-    Foo foo = container.getFactory(Foo.class).get();
+    Foo foo = container.getLocator(Foo.class).get();
 
-    Bar bar = foo.barFactory.get();
+    Bar bar = foo.barLocator.get();
     assertNotNull(bar);
-    assertNotSame(bar, foo.barFactory.get());
+    assertNotSame(bar, foo.barLocator.get());
 
-    ContainerScoped containerScoped = foo.containerScopedFactory.get();
+    ContainerScoped containerScoped = foo.containerScopedLocator.get();
     assertNotNull(containerScoped);
-    assertSame(containerScoped, foo.containerScopedFactory.get());
+    assertSame(containerScoped, foo.containerScopedLocator.get());
   }
 
   static class Foo {
-    @Inject Factory<Bar> barFactory;
-    @Inject Factory<ContainerScoped> containerScopedFactory;
+    @Inject Locator<Bar> barLocator;
+    @Inject Locator<ContainerScoped> containerScopedLocator;
   }
 
   static class Bar {}
