@@ -19,12 +19,12 @@ package com.google.inject;
 /**
  * @author crazybob@google.com (Bob Lee)
 */
-class InternalFactoryToGeneratorAdapter<T> implements InternalFactory<T> {
+class InternalFactoryToFactoryAdapter<T> implements InternalFactory<T> {
 
-  private final Generator<? extends T> factory;
+  private final Factory<? extends T> factory;
 
-  public InternalFactoryToGeneratorAdapter(
-      Generator<? extends T> factory) {
+  public InternalFactoryToFactoryAdapter(
+      Factory<? extends T> factory) {
     this.factory = factory;
   }
 

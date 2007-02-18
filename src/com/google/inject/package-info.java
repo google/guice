@@ -38,7 +38,7 @@
  * <dd>The object that Guice passes into your {@link com.google.inject.Module}
  *     to collect these bindings.
  *
- * <dt>{@link com.google.inject.Generator}
+ * <dt>{@link com.google.inject.Factory}
  * <dd>The interface you will implement when you need to customize exactly how
  *     Guice creates instances for a particular binding.
  *

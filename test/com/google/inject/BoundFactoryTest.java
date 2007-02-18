@@ -21,11 +21,11 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class BoundGeneratorTest extends TestCase {
+public class BoundFactoryTest extends TestCase {
 
-  public void testFooGenerator() throws CreationException {
+  public void testFooFactory() throws CreationException {
     ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toGenerator(FooGenerator.class);
+    cb.bind(Foo.class).toFactory(FooFactory.class);
     Container c = cb.create();
 
     Foo a = c.getInstance(Foo.class);
@@ -38,10 +38,10 @@ public class BoundGeneratorTest extends TestCase {
     assertNotSame(a.bar, b.bar);
   }
 
-  public void testContainerScopedFooGenerator()
+  public void testContainerScopedFooFactory()
       throws CreationException {
     ContainerBuilder cb = new ContainerBuilder();
-    cb.bind(Foo.class).toGenerator(ContainerScopedFooGenerator.class);
+    cb.bind(Foo.class).toFactory(ContainerScopedFooFactory.class);
     Container c = cb.create();
 
     Foo a = c.getInstance(Foo.class);
@@ -66,13 +66,13 @@ public class BoundGeneratorTest extends TestCase {
     }
   }
 
-  static class FooGenerator implements Generator<Foo> {
+  static class FooFactory implements Factory<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public FooGenerator(Bar bar) {
+    public FooFactory(Bar bar) {
       this.bar = bar;
     }
 
@@ -85,13 +85,13 @@ public class BoundGeneratorTest extends TestCase {
   }
 
   @ContainerScoped
-  static class ContainerScopedFooGenerator implements Generator<Foo> {
+  static class ContainerScopedFooFactory implements Factory<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public ContainerScopedFooGenerator(Bar bar) {
+    public ContainerScopedFooFactory(Bar bar) {
       this.bar = bar;
     }
 

@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import com.google.inject.Generator;
+import com.google.inject.Factory;
 import com.google.inject.Context;
 import static com.google.inject.servlet.ServletScopes.REQUEST;
 import static com.google.inject.servlet.ServletScopes.SESSION;
@@ -45,8 +45,8 @@ public class ServletModule extends AbstractModule {
     scope(SessionScoped.class, SESSION);
 
     // Bind request.
-    Generator<HttpServletRequest> requestGenerator =
-        new Generator<HttpServletRequest>() {
+    Factory<HttpServletRequest> requestFactory =
+        new Factory<HttpServletRequest>() {
           public HttpServletRequest generate(Context context) {
             return GuiceFilter.getRequest();
           }
@@ -55,12 +55,12 @@ public class ServletModule extends AbstractModule {
             return "RequestFactory";
           }
         };
-    bind(HttpServletRequest.class).to(requestGenerator);
-    bind(ServletRequest.class).to(requestGenerator);
+    bind(HttpServletRequest.class).to(requestFactory);
+    bind(ServletRequest.class).to(requestFactory);
 
     // Bind response.
-    Generator<HttpServletResponse> responseGenerator =
-        new Generator<HttpServletResponse>() {
+    Factory<HttpServletResponse> responseFactory =
+        new Factory<HttpServletResponse>() {
           public HttpServletResponse generate(Context context) {
             return GuiceFilter.getResponse();
           }
@@ -69,11 +69,11 @@ public class ServletModule extends AbstractModule {
             return "ResponseFactory";
           }
         };
-    bind(HttpServletResponse.class).to(responseGenerator);
-    bind(ServletResponse.class).to(responseGenerator);
+    bind(HttpServletResponse.class).to(responseFactory);
+    bind(ServletResponse.class).to(responseFactory);
 
     // Bind session.
-    bind(HttpSession.class).to(new Generator<HttpSession>() {
+    bind(HttpSession.class).to(new Factory<HttpSession>() {
       public HttpSession generate(Context context) {
         return GuiceFilter.getRequest().getSession();
       }
@@ -86,7 +86,7 @@ public class ServletModule extends AbstractModule {
     // Bind request parameters.
     bind(new TypeLiteral<Map<String, String[]>>() {})
         .annotatedWith(RequestParameters.class)
-        .to(new Generator<Map<String, String[]>>() {
+        .to(new Factory<Map<String, String[]>>() {
               @SuppressWarnings({"unchecked"})
               public Map<String, String[]> generate(Context context) {
                 return GuiceFilter.getRequest().getParameterMap();

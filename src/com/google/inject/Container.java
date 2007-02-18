@@ -40,11 +40,6 @@ public interface Container {
   void injectMembers(Object o);
 
   /**
-   * Gets the locator bound to the given key.
-   */
-  <T> Locator<T> getLocator(Key<T> key);
-
-  /**
    * Gets all bindings.
    */
   Map<Key<?>, Binding<?>> getBindings();
@@ -58,16 +53,6 @@ public interface Container {
    * Finds all bindings to the given type.
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
-
-  /**
-   * Gets the locator bound to the given type.
-   */
-  <T> Locator<T> getLocator(Class<T> type);
-
-  /**
-   * Gets the locator bound to the given type.
-   */
-  <T> Locator<T> getLocator(TypeLiteral<T> type);
 
   /**
    * Gets an instance from the locator bound to the given type.
@@ -95,16 +80,6 @@ public interface Container {
   <T> T getInstance(Class<T> type, Annotation annotation);
 
   /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
-
-  /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
-
-  /**
    * Gets an instance from the locator bound to the given type and annotation.
    */
   <T> T getInstance(TypeLiteral<T> type,
@@ -115,6 +90,31 @@ public interface Container {
    */
   <T> T getInstance(Class<T> type,
       Class<? extends Annotation> annotationType);
+
+  /**
+   * Gets the locator bound to the given key.
+   */
+  <T> Locator<T> getLocator(Key<T> key);
+
+  /**
+   * Gets the locator bound to the given type.
+   */
+  <T> Locator<T> getLocator(Class<T> type);
+
+  /**
+   * Gets the locator bound to the given type.
+   */
+  <T> Locator<T> getLocator(TypeLiteral<T> type);
+
+  /**
+   * Gets the locator bound to the given type and annotation.
+   */
+  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
+
+  /**
+   * Gets the locator bound to the given type and annotation.
+   */
+  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
 
   /**
    * Gets the locator bound to the given type and annotation.

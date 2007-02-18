@@ -21,7 +21,7 @@ package com.google.inject;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Generator<T> {
+public interface Factory<T> {
 
   /**
    * Generates an instance of {@code T} given the context of the injection.
