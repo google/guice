@@ -289,7 +289,7 @@ public abstract class Key<T> {
    * Returns a new key of the specified type with the same annotation as this
    * key.
    */
-  public <T> Key<T> ofType(Class<T> type) {
+  <T> Key<T> ofType(Class<T> type) {
     return new SimpleKey<T>(type, annotationStrategy);
   }
 
@@ -297,7 +297,7 @@ public abstract class Key<T> {
    * Returns a new key of the specified type with the same annotation as this
    * key.
    */
-  public Key<?> ofType(Type type) {
+  Key<?> ofType(Type type) {
     return new SimpleKey<Object>(type, annotationStrategy);
   }
 
@@ -305,7 +305,7 @@ public abstract class Key<T> {
    * Returns a new key of the specified type with the same annotation as this
    * key.
    */
-  public <T> Key<T> ofType(TypeLiteral<T> type) {
+  <T> Key<T> ofType(TypeLiteral<T> type) {
     return new SimpleKey<T>(type, annotationStrategy);
   }
 

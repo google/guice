@@ -583,9 +583,39 @@ public final class ContainerBuilder extends SourceConsumer {
     /**
      * Binds to instances from the given factory.
      */
-    BindingBuilder<T> to(final InternalFactory<? extends T> factory) {
+    BindingBuilder<T> to(InternalFactory<? extends T> factory) {
       ensureImplementationIsNotSet();
       this.factory = factory;
+      return this;
+    }
+
+    /**
+     * Binds to instances from the given factory.
+     */
+    public BindingBuilder<T> toFactory(
+        final Class<? extends Factory<T>> factoryClass) {
+      ensureImplementationIsNotSet();
+
+      final DelegatingFactory<T> delegatingFactory =
+          new DelegatingFactory<T>(factoryClass, errorHandler);
+      creationListeners.add(delegatingFactory);
+      this.factory = delegatingFactory;
+
+      return this;
+    }
+
+    /**
+     * Binds to instances from the given factory.
+     */
+    public BindingBuilder<T> toContextualFactory(
+        final Class<? extends ContextualFactory<T>> factoryClass) {
+      ensureImplementationIsNotSet();
+
+      final ContextualDelegatingFactory<T> delegatingFactory =
+          new ContextualDelegatingFactory<T>(factoryClass, errorHandler);
+      creationListeners.add(delegatingFactory);
+      this.factory = delegatingFactory;
+
       return this;
     }
 
@@ -676,6 +706,72 @@ public final class ContainerBuilder extends SourceConsumer {
 
     boolean isContainerScoped() {
       return this.scope == Scopes.CONTAINER;
+    }
+  }
+
+  private static class DelegatingFactorySupport<F> implements CreationListener {
+
+    final Class<? extends F> factoryClass;
+    final ErrorHandler errorHandler;
+    private InternalFactory<? extends F> factoryFactory;
+
+    public DelegatingFactorySupport(Class<? extends F> factoryClass,
+        ErrorHandler errorHandler) {
+      this.factoryClass = factoryClass;
+      this.errorHandler = errorHandler;
+    }
+
+    public void notify(final ContainerImpl container) {
+      container.withErrorHandler(errorHandler, new Runnable() {
+        public void run() {
+          factoryFactory = container.getInternalFactory(
+              null, Key.get(factoryClass));
+        }
+      });
+    }
+
+    protected InternalFactory<? extends F> getFactoryFactory() {
+      return factoryFactory;
+    }
+
+    public String toString() {
+      return factoryClass.getName();
+    }
+  }
+
+  /**
+   * Delegates to a custom factory which is also bound in the container.
+   */
+  private static class DelegatingFactory<T>
+      extends DelegatingFactorySupport<Factory<? extends T>>
+      implements InternalFactory<T> {
+
+    public DelegatingFactory(
+        Class<? extends Factory<? extends T>> factoryClass,
+        ErrorHandler errorHandler) {
+      super(factoryClass, errorHandler);
+    }
+
+    public T get(InternalContext context) {
+      return getFactoryFactory().get(context).get();
+    }
+  }
+
+  /**
+   * Delegates to a custom factory which is also bound in the container.
+   */
+  private static class ContextualDelegatingFactory<T>
+      extends DelegatingFactorySupport<ContextualFactory<? extends T>>
+      implements InternalFactory<T> {
+
+    public ContextualDelegatingFactory(
+        Class<? extends ContextualFactory<? extends T>> factoryClass,
+        ErrorHandler errorHandler) {
+      super(factoryClass, errorHandler);
+    }
+
+    public T get(InternalContext context) {
+      return getFactoryFactory().get(context).get(context.getExternalContext());
     }
   }
 

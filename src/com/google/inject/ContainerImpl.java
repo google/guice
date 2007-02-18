@@ -145,7 +145,8 @@ class ContainerImpl implements Container {
     this.errorHandler = errorHandler;
   }
 
-  <T> InternalFactory<? extends T> getFactory(final Member member, Key<T> key) {
+  <T> InternalFactory<? extends T> getInternalFactory(
+      final Member member, Key<T> key) {
     // TODO: Clean up unchecked type warnings.
 
     // Do we have a factory for the specified type and name?
@@ -429,7 +430,7 @@ class ContainerImpl implements Container {
 
       Key<?> key = Key.get(
           field.getGenericType(), field, field.getAnnotations(), errorHandler);
-      factory = container.getFactory(field, key);
+      factory = container.getInternalFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(key, field);
       }
@@ -483,7 +484,7 @@ class ContainerImpl implements Container {
 
   <T> ParameterInjector<T> createParameterInjector(Key<T> key, Member member,
       int index) throws MissingDependencyException {
-    InternalFactory<? extends T> factory = getFactory(member, key);
+    InternalFactory<? extends T> factory = getInternalFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(key, member);
     }
@@ -670,7 +671,7 @@ class ContainerImpl implements Container {
   }
 
   public <T> Factory<T> getFactory(final Key<T> key) {
-    final InternalFactory<? extends T> factory = getFactory(null, key);
+    final InternalFactory<? extends T> factory = getInternalFactory(null, key);
 
     if (factory == null) {
       throw new ConfigurationException(

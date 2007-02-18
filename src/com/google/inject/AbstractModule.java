@@ -17,7 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.util.Objects;
+import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A support class for {@link Module Modules} which reduces repetition and
@@ -136,5 +139,16 @@ public abstract class AbstractModule implements Module {
    */
   protected void requestStaticInjection(Class<?>... types) {
     builder.requestStaticInjection(types);
+  }
+
+  /**
+   * @see ContainerBuilder#intercept(com.google.inject.matcher.Matcher,
+   *  com.google.inject.matcher.Matcher,
+   *  org.aopalliance.intercept.MethodInterceptor[])
+   */
+  protected void intercept(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher,
+      MethodInterceptor... interceptors) {
+    builder.intercept(classMatcher, methodMatcher, interceptors);
   }
 }
