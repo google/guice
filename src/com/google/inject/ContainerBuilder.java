@@ -207,6 +207,22 @@ public final class ContainerBuilder extends SourceConsumer {
   }
 
   /**
+   * Links the given type to another key effectively creating an alias for a
+   * binding.
+   */
+  public <T> LinkedBindingBuilder<T> link(Class<T> type) {
+    return link(Key.get(type));
+  }
+
+  /**
+   * Links the given type to another key effectively creating an alias for a
+   * binding.
+   */
+  public <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type) {
+    return link(Key.get(type));
+  }
+
+  /**
    * Binds a constant to the given annotation.
    */
   public ConstantBindingBuilder bindConstant(Annotation annotation) {
@@ -987,6 +1003,20 @@ public final class ContainerBuilder extends SourceConsumer {
       } else {
         this.destination = destination;
       }
+    }
+
+    /**
+     * Links to another binding with the given type.
+     */
+    public void to(Class<? extends T> destination) {
+      to(Key.get(destination));
+    }
+
+    /**
+     * Links to another binding with the given type.
+     */
+    public void to(TypeLiteral<? extends T> destination) {
+      to(Key.get(destination));
     }
   }
 
