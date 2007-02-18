@@ -28,5 +28,5 @@ public interface Factory<T> {
    *
    * @param context of this injection
    */
-  T generate(Context context);
+  T get(Context context);
 }

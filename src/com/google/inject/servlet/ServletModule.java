@@ -47,7 +47,7 @@ public class ServletModule extends AbstractModule {
     // Bind request.
     Factory<HttpServletRequest> requestFactory =
         new Factory<HttpServletRequest>() {
-          public HttpServletRequest generate(Context context) {
+          public HttpServletRequest get(Context context) {
             return GuiceFilter.getRequest();
           }
 
@@ -61,7 +61,7 @@ public class ServletModule extends AbstractModule {
     // Bind response.
     Factory<HttpServletResponse> responseFactory =
         new Factory<HttpServletResponse>() {
-          public HttpServletResponse generate(Context context) {
+          public HttpServletResponse get(Context context) {
             return GuiceFilter.getResponse();
           }
 
@@ -74,7 +74,7 @@ public class ServletModule extends AbstractModule {
 
     // Bind session.
     bind(HttpSession.class).to(new Factory<HttpSession>() {
-      public HttpSession generate(Context context) {
+      public HttpSession get(Context context) {
         return GuiceFilter.getRequest().getSession();
       }
 
@@ -88,7 +88,7 @@ public class ServletModule extends AbstractModule {
         .annotatedWith(RequestParameters.class)
         .to(new Factory<Map<String, String[]>>() {
               @SuppressWarnings({"unchecked"})
-              public Map<String, String[]> generate(Context context) {
+              public Map<String, String[]> get(Context context) {
                 return GuiceFilter.getRequest().getParameterMap();
               }
 

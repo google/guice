@@ -746,7 +746,7 @@ public final class ContainerBuilder extends SourceConsumer {
     public T get(InternalContext context) {
       return factoryFactory
           .get(context)
-          .generate(context.getExternalContext());
+          .get(context.getExternalContext());
     }
   }
 

@@ -76,7 +76,7 @@ public class BoundFactoryTest extends TestCase {
       this.bar = bar;
     }
 
-    public Foo generate(Context context) {
+    public Foo get(Context context) {
       assertNull(context.getMember());
       assertEquals(-1, context.getParameterIndex());
       assertEquals(Foo.class, context.getKey().getRawType());
@@ -95,7 +95,7 @@ public class BoundFactoryTest extends TestCase {
       this.bar = bar;
     }
 
-    public Foo generate(Context context) {
+    public Foo get(Context context) {
       assertNull(context.getMember());
       assertEquals(-1, context.getParameterIndex());
       assertEquals(Foo.class, context.getKey().getRawType());

@@ -29,7 +29,7 @@ class InternalFactoryToFactoryAdapter<T> implements InternalFactory<T> {
   }
 
   public T get(InternalContext context) {
-    return factory.generate(context.getExternalContext());
+    return factory.get(context.getExternalContext());
   }
 
   public String toString() {
