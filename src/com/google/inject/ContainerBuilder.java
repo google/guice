@@ -434,6 +434,13 @@ public final class ContainerBuilder extends SourceConsumer {
     Key<?> key = binding.getKey();
     Map<Key<?>, Binding<?>> bindings = container.internalBindings();
     Binding<?> original = bindings.get(key);
+
+    // Binding to Factory<?> is not allowed.
+    if (key.getRawType().equals(Factory.class)) {
+      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_FACTORY);
+      return;
+    }
+
     if (bindings.containsKey(key)) {
       addError(binding.getSource(), ErrorMessages.BINDING_ALREADY_SET, key,
           original.getSource());

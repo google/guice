@@ -50,6 +50,9 @@ class ErrorMessages {
     }
   }
 
+  static final String CANNOT_BIND_TO_FACTORY = "Binding to Factory<?> is not"
+      + " allowed.";
+
   static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";
 
   static final String SINGLE_INSTANCE_AND_SCOPE = "Setting the scope is not"
