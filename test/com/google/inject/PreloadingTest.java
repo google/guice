@@ -45,18 +45,9 @@ public class PreloadingTest extends TestCase {
 
   private BinderImpl createBinder(Stage stage) {
     BinderImpl builder = new BinderImpl(stage);
-    builder.bind(Foo.class).in(CONTAINER).eagerly();
+    builder.bind(Foo.class).eagerlyInContainer();
     builder.bind(Bar.class);
     return builder;
-  }
-
-  public void testInvalidPreload() {
-    BinderImpl builder = new BinderImpl();
-    builder.bind(Foo.class).eagerly();
-    try {
-      builder.createContainer();
-      fail();
-    } catch (CreationException e) { /* expected */ }
   }
 
   static class Foo {

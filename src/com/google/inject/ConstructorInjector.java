@@ -75,7 +75,14 @@ class ConstructorInjector<T> {
     Constructor<T>[] constructors
         = (Constructor<T>[]) implementation.getDeclaredConstructors();
     for (Constructor<T> constructor : constructors) {
-      if (constructor.getAnnotation(Inject.class) != null) {
+      Inject inject = constructor.getAnnotation(Inject.class);
+      if (inject != null) {
+        if (inject.optional()) {
+          container.errorHandler.handle(
+              StackTraceElements.forMember(constructor),
+              ErrorMessages.OPTIONAL_CONSTRUCTOR);
+        }
+
         if (found != null) {
           container.errorHandler.handle(
               StackTraceElements.forMember(found),

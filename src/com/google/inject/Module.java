@@ -17,21 +17,20 @@
 package com.google.inject;
 
 /**
- * A module contributes a set of configurations, typically interface bindings,
- * to a {@link Binder} which will later be used to create a {@link Container}.
- * Implementing this interface is the standard means for encapsulating and
- * reusing configuration logic. Your Module classes can use a more streamlined
- * syntax by extending {@link AbstractModule} rather than implementing this
- * interface directly.
+ * A module contributes a set of binding configurations, typically interface
+ * bindings, to a {@link Binder} which is later used to create a {@link
+ * Container}. Implementing this interface is the standard means for
+ * encapsulating and reusing configuration logic.
+ *
+ * <p>Your Module classes can use a more streamlined syntax by extending
+ * {@link AbstractModule} rather than implementing this interface directly.
  *
  * @since 1.0
  */
 public interface Module {
 
   /**
-   * Contributes bindings and other configurations to a container builder, so
-   * that the resulting {@link Container} will include this module properly set
-   * up.
+   * Contributes bindings and other configurations to a {@code Binder}.
    */
   void configure(Binder binder);
 }

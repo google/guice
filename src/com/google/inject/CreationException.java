@@ -61,7 +61,7 @@ public class CreationException extends Exception {
       fmt.format("%s) Error at %s:%n", index++, errorMessage.getSourceString())
          .format(" %s%n%n", errorMessage.getMessage());
     }
-    return fmt.format("%s error[s]%n", errorMessages.size()).toString();
+    return fmt.format("%s error[s]", errorMessages.size()).toString();
   }
 
   /**
@@ -69,10 +69,5 @@ public class CreationException extends Exception {
    */
   public Collection<Message> getErrorMessages() {
     return Collections.unmodifiableCollection(errorMessages);
-  }
-
-  public synchronized Throwable fillInStackTrace() {
-    // We don't care about this stack trace.
-    return null;
   }
 }

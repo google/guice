@@ -55,7 +55,7 @@ public class Names {
             for (Map.Entry<String, String> entry : properties.entrySet()) {
               String key = entry.getKey();
               String value = entry.getValue();
-              binder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+              binder.bind(Key.get(String.class, new NamedImpl(key))).toInstance(value);
             }
           }
         });
@@ -73,7 +73,7 @@ public class Names {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
               String key = (String) entry.getKey();
               String value = (String) entry.getValue();
-              binder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+              binder.bind(Key.get(String.class, new NamedImpl(key))).toInstance(value);
             }
           }
         });

@@ -31,21 +31,21 @@ public class FactoryTest extends TestCase {
   public void testParameterIndex() throws CreationException {
     BinderImpl cb = new BinderImpl();
 
-    cb.bind(Zero.class).to(new Factory<Zero>() {
+    cb.bind(Zero.class).toFactory(new Factory<Zero>() {
       public Zero get(Context context) {
         assertEquals(0, context.getParameterIndex());
         return new Zero();
       }
     });
 
-    cb.bind(One.class).to(new Factory<One>() {
+    cb.bind(One.class).toFactory(new Factory<One>() {
       public One get(Context context) {
         assertEquals(1, context.getParameterIndex());
         return new One();
       }
     });
 
-    cb.bind(NegativeOne.class).to(new Factory<NegativeOne>() {
+    cb.bind(NegativeOne.class).toFactory(new Factory<NegativeOne>() {
       public NegativeOne get(Context context) {
         assertEquals(-1, context.getParameterIndex());
         return new NegativeOne();
@@ -102,29 +102,29 @@ public class FactoryTest extends TestCase {
     // Called from getInstance().
     cb.bind(Foo.class)
         .annotatedWith(FooAnnotation.class)
-        .to(createFactory(Foo.class, FooAnnotation.class, null));
+        .toFactory(createFactory(Foo.class, FooAnnotation.class, null));
 
     // Called during preloading.
     cb.bind(Bar.class)
         .annotatedWith(BarAnnotation.class)
-        .to(createFactory(Bar.class, BarAnnotation.class, null))
+        .toFactory(createFactory(Bar.class, BarAnnotation.class, null))
         .in(Scopes.CONTAINER);
 
     cb.bind(Tee.class)
         .annotatedWith(TeeAnnotation1.class)
-        .to(createFactory(Tee.class, TeeAnnotation1.class,
+        .toFactory(createFactory(Tee.class, TeeAnnotation1.class,
             Bar.class.getDeclaredConstructor(Tee.class)));
 
     cb.bind(Tee.class)
         .annotatedWith(TeeAnnotation2.class)
-        .to(createFactory(Tee.class, TeeAnnotation2.class,
+        .toFactory(createFactory(Tee.class, TeeAnnotation2.class,
             Bar.class.getDeclaredField("tee2")));
 
     final Method execute = Tee.class.getDeclaredMethod(
         "execute", Bob.class, Bob.class);
-    cb.bind(Bob.class).annotatedWith(BobAnnotation1.class).to(
+    cb.bind(Bob.class).annotatedWith(BobAnnotation1.class).toFactory(
         createFactory(Bob.class, BobAnnotation1.class, execute));
-    cb.bind(Bob.class).annotatedWith(BobAnnotation2.class).to(
+    cb.bind(Bob.class).annotatedWith(BobAnnotation2.class).toFactory(
         createFactory(Bob.class, BobAnnotation2.class, execute));
 
     Container c = cb.createContainer();

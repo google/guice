@@ -28,7 +28,7 @@ public class GenericInjectionTest extends TestCase {
   public void testGenericInjection() throws CreationException {
     List<String> names = Arrays.asList("foo", "bar", "bob");
     BinderImpl builder = new BinderImpl();
-    builder.bind(new TypeLiteral<List<String>>() {}).to(names);
+    builder.bind(new TypeLiteral<List<String>>() {}).toInstance(names);
     Container container = builder.createContainer();
     Foo foo = container.getLocator(Foo.class).get();
     assertEquals(names, foo.names);

@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.binder;
 
-import junit.framework.TestCase;
+import java.lang.annotation.Annotation;
 
 /**
+ * Specifies the annotation of this binding. 
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ImplicitBindingTest extends TestCase {
+public interface BindingAnnotationBuilder<T> {
 
-  public void testCircularDependency() throws CreationException {
-    Container container = Guice.createContainer();
-    Foo foo = container.getLocator(Foo.class).get();
-    assertSame(foo, foo.bar.foo);
-  }
+  /**
+   * Specifies the marker annotation type for this binding.
+   */
+  BindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType);
 
-  static class Foo {
-    @Inject Bar bar;
-  }
-
-  static class Bar {
-    final Foo foo;
-    @Inject
-    public Bar(Foo foo) {
-      this.foo = foo;
-    }
-  }
+  /**
+   * Specifies an annotation value for this binding.
+   */
+  BindingBuilder<T> annotatedWith(Annotation annotation);
 }

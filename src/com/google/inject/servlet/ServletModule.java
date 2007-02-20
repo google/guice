@@ -41,8 +41,8 @@ public class ServletModule extends AbstractModule {
 
   protected void configure() {
     // Scopes.
-    scope(RequestScoped.class, REQUEST);
-    scope(SessionScoped.class, SESSION);
+    bindScope(RequestScoped.class, REQUEST);
+    bindScope(SessionScoped.class, SESSION);
 
     // Bind request.
     Factory<HttpServletRequest> requestFactory =
@@ -55,8 +55,8 @@ public class ServletModule extends AbstractModule {
             return "RequestFactory";
           }
         };
-    bind(HttpServletRequest.class).to(requestFactory);
-    bind(ServletRequest.class).to(requestFactory);
+    bind(HttpServletRequest.class).toFactory(requestFactory);
+    bind(ServletRequest.class).toFactory(requestFactory);
 
     // Bind response.
     Factory<HttpServletResponse> responseFactory =
@@ -69,11 +69,11 @@ public class ServletModule extends AbstractModule {
             return "ResponseFactory";
           }
         };
-    bind(HttpServletResponse.class).to(responseFactory);
-    bind(ServletResponse.class).to(responseFactory);
+    bind(HttpServletResponse.class).toFactory(responseFactory);
+    bind(ServletResponse.class).toFactory(responseFactory);
 
     // Bind session.
-    bind(HttpSession.class).to(new Factory<HttpSession>() {
+    bind(HttpSession.class).toFactory(new Factory<HttpSession>() {
       public HttpSession get(Context context) {
         return GuiceFilter.getRequest().getSession();
       }
@@ -86,7 +86,7 @@ public class ServletModule extends AbstractModule {
     // Bind request parameters.
     bind(new TypeLiteral<Map<String, String[]>>() {})
         .annotatedWith(RequestParameters.class)
-        .to(new Factory<Map<String, String[]>>() {
+        .toFactory(new Factory<Map<String, String[]>>() {
               @SuppressWarnings({"unchecked"})
               public Map<String, String[]> get(Context context) {
                 return GuiceFilter.getRequest().getParameterMap();

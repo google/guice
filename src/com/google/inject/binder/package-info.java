@@ -14,30 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject;
-
-import junit.framework.TestCase;
-
 /**
- * @author crazybob@google.com (Bob Lee)
+ * Interface which make up {@link com.google.inject.Binder}'s
+ * domain-specific language (DSL).
  */
-public class ImplicitBindingTest extends TestCase {
-
-  public void testCircularDependency() throws CreationException {
-    Container container = Guice.createContainer();
-    Foo foo = container.getLocator(Foo.class).get();
-    assertSame(foo, foo.bar.foo);
-  }
-
-  static class Foo {
-    @Inject Bar bar;
-  }
-
-  static class Bar {
-    final Foo foo;
-    @Inject
-    public Bar(Foo foo) {
-      this.foo = foo;
-    }
-  }
-}
+package com.google.inject.binder;

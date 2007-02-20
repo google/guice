@@ -2,6 +2,7 @@ package com.google.inject;
 
 import com.google.inject.BinderImpl.CreationListener;
 import com.google.inject.binder.BindingBuilder;
+import com.google.inject.binder.BindingScopeBuilder;
 import com.google.inject.util.Objects;
 import com.google.inject.util.ToStringBuilder;
 import java.lang.annotation.Annotation;
@@ -58,28 +59,27 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public <I extends T> BindingBuilderImpl<T> to(Class<I> implementation) {
+  public BindingScopeBuilder to(Class<? extends T> implementation) {
     return to(TypeLiteral.get(implementation));
   }
 
-  public <I extends T> BindingBuilderImpl<T> to(
-      final TypeLiteral<I> implementation) {
+  public BindingScopeBuilder to(TypeLiteral<? extends T> implementation) {
     ensureImplementationIsNotSet();
     this.implementation = implementation;
-    final DefaultFactory<I> defaultFactory
-        = new DefaultFactory<I>(key, implementation, source);
+    final DefaultFactory<? extends T> defaultFactory
+        = new DefaultFactory<T>(key, implementation, source);
     this.factory = defaultFactory;
     binder.creationListeners.add(defaultFactory);
     return this;
   }
 
-  public BindingBuilderImpl<T> to(Factory<? extends T> factory) {
+  public BindingScopeBuilder toFactory(Factory<? extends T> factory) {
     ensureImplementationIsNotSet();
     this.factory = new InternalFactoryToFactoryAdapter<T>(factory);
     return this;
   }
 
-  public BindingBuilderImpl<T> to(T instance) {
+  public void toInstance(T instance) {
     ensureImplementationIsNotSet();
     this.instance = Objects.nonNull(instance, "instance");
     this.factory = new ConstantFactory<T>(instance);
@@ -87,7 +87,6 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
       binder.addError(source, ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
     }
     this.scope = Scopes.CONTAINER;
-    return this;
   }
 
   /**
@@ -100,17 +99,17 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   }
 
   public BindingBuilderImpl<T> toFactory(
-      final Class<? extends Factory<T>> factoryType) {
+      Class<? extends Factory<? extends T>> factoryType) {
     return toFactory(Key.get(factoryType));
   }
 
   public BindingBuilderImpl<T> toFactory(
-      final TypeLiteral<? extends Factory<T>> factoryType) {
+      TypeLiteral<? extends Factory<? extends T>> factoryType) {
     return toFactory(Key.get(factoryType));
   }
 
   public BindingBuilderImpl<T> toFactory(
-      final Key<? extends Factory<T>> factoryKey) {
+      Key<? extends Factory<? extends T>> factoryKey) {
     ensureImplementationIsNotSet();
 
     final BoundFactory<T> boundFactory =
@@ -130,25 +129,23 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public BindingBuilderImpl<T> in(Class<? extends Annotation> scopeAnnotation) {
+  public void in(Class<? extends Annotation> scopeAnnotation) {
     // this method not test-covered
-
     ensureScopeNotSet();
 
     // We could defer this lookup to when we create the container, but this
     // is fine for now.
-    this.scope = binder.scopes.get(Objects.nonNull(scopeAnnotation, "scope annotation"));
+    this.scope = binder.scopes.get(
+        Objects.nonNull(scopeAnnotation, "scope annotation"));
     if (this.scope == null) {
       binder.addError(source, ErrorMessages.SCOPE_NOT_FOUND,
           "@" + scopeAnnotation.getSimpleName());
     }
-    return this;
   }
 
-  public BindingBuilderImpl<T> in(Scope scope) {
+  public void in(Scope scope) {
     ensureScopeNotSet();
     this.scope = Objects.nonNull(scope, "scope");
-    return this;
   }
 
   private void ensureScopeNotSet() {
@@ -163,17 +160,16 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public BindingBuilderImpl<T> eagerly() {
+  public void eagerlyInContainer() {
+    in(Scopes.CONTAINER);
     this.preload = true;
-    return this;
   }
 
   boolean shouldPreload() {
     return preload;
   }
 
-  InternalFactory<? extends T> getInternalFactory(
-      final ContainerImpl container) {
+  InternalFactory<? extends T> getInternalFactory(ContainerImpl container) {
     // If an implementation wasn't specified, use the injection type.
     if (this.factory == null) {
       to(key.getType());
@@ -243,13 +239,13 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   private static class DefaultFactory<T> implements InternalFactory<T>,
       CreationListener {
 
-    private final TypeLiteral<T> implementation;
-    private final Key<? super T> key;
+    private final TypeLiteral<? extends T> implementation;
+    private final Key<T> key;
     private final Object source;
 
-    ConstructorInjector<T> constructor;
+    ConstructorInjector<? extends T> constructor;
 
-    DefaultFactory(Key<? super T> key, TypeLiteral<T> implementation,
+    DefaultFactory(Key<T> key, TypeLiteral<? extends T> implementation,
         Object source) {
       this.key = key;
       this.implementation = implementation;
@@ -265,8 +261,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
 
     public T get(InternalContext context) {
-      // TODO: figure out if we can suppress this warning
-      return constructor.construct(context, (Class<T>) key.getRawType());
+      return constructor.construct(context, (Class) key.getRawType());
     }
 
     public String toString() {

@@ -27,10 +27,10 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * A support class for {@link Module Modules} which reduces repetition and
- * results in a more readable configuration. Simply extends this class,
- * implement {@link #configure()}, and call the inherited methods which mirror
- * those found in {@link Binder}. For example:
+ * A support class for {@link Module}s which reduces repetition and results in
+ * a more readable configuration. Simply extend this class, implement {@link
+ * #configure()}, and call the inherited methods which mirror those found in
+ * {@link Binder}. For example:
  *
  * <pre>
  * import static com.google.inject.Names.named;
@@ -76,16 +76,16 @@ public abstract class AbstractModule implements Module {
   protected abstract void configure();
 
   /**
-   * Gets the builder.
+   * Gets direct access to the underlying {@code Binder}.
    */
-  protected Binder builder() {
+  protected Binder binder() {
     return builder;
   }
 
   /**
    * @see Binder#bindScope(Class, Scope)
    */
-  protected void scope(Class<? extends Annotation> scopeAnnotation,
+  protected void bindScope(Class<? extends Annotation> scopeAnnotation,
       Scope scope) {
     builder.bindScope(scopeAnnotation, scope);
   }
@@ -100,8 +100,7 @@ public abstract class AbstractModule implements Module {
   /**
    * @see Binder#bind(TypeLiteral)
    */
-  protected <T> BindingBuilder<T> bind(
-      TypeLiteral<T> typeLiteral) {
+  protected <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return builder.bind(typeLiteral);
   }
 
@@ -117,6 +116,20 @@ public abstract class AbstractModule implements Module {
    */
   protected <T> LinkedBindingBuilder<T> link(Key<T> key) {
     return builder.link(key);
+  }
+
+  /**
+   * @see Binder#link(Class)
+   */
+  public <T> LinkedBindingBuilder<T> link(Class<T> type) {
+    return builder.link(type);
+  }
+
+  /**
+   * @see Binder#link(TypeLiteral)
+   */
+  public <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type) {
+    return builder.link(type);
   }
 
   /**
@@ -154,7 +167,7 @@ public abstract class AbstractModule implements Module {
    *  com.google.inject.matcher.Matcher,
    *  org.aopalliance.intercept.MethodInterceptor[])
    */
-  protected void intercept(Matcher<? super Class<?>> classMatcher,
+  protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor... interceptors) {
     builder.bindInterceptor(classMatcher, methodMatcher, interceptors);

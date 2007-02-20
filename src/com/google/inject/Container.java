@@ -22,25 +22,36 @@ import java.util.Map;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
- * {@code @}{@link Inject}. Provides access to {@link Binding}s.
+ * {@code @}{@link Inject}. Iterates explicit {@link Binding}s.
  *
- * <p>Automatically converts constants as needed from {@code String} to any
- * primitive type as well as {@code enum} and {@code Class<?>}. Automatically
- * boxes and unboxes primitives. For example, in the absence of a binding to
- * {@code int}, the container will look for a binding to {@code Integer}.
+ * <p>Automatically converts constant values as needed from {@code String} to
+ * any primitive type in addition to {@code enum} and {@code Class<?>}.
+ * Automatically boxes and unboxes primitives. For example, in the absence of
+ * a binding to {@code int}, the container will look for a binding to {@code
+ * Integer}.
+ *
+ * <p>Contains several default bindings:
+ *
+ * <ul>
+ * <li>This {@link Container}
+ * <li>A {@code Locator<T>} for each binding of type {@code T}
+ * <li>The {@link java.util.logging.Logger} for the class being injected
+ * <li>The {@link Stage} specified when this container was created
+ * </ul>
  *
  * @author crazybob@google.com (Bob Lee)
- * @see Binder
+ * @see Guice
  */
 public interface Container {
 
   /**
    * Injects dependencies into the fields and methods of an existing object.
+   * Does not inject the constructor.
    */
   void injectMembers(Object o);
 
   /**
-   * Gets all bindings.
+   * Gets all explicit bindings.
    */
   Map<Key<?>, Binding<?>> getBindings();
 
@@ -54,42 +65,42 @@ public interface Container {
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
-  /**
-   * Gets an instance from the locator bound to the given type.
-   */
-  <T> T getInstance(TypeLiteral<T> type);
-
-  /**
-   * Gets an instance from the locator bound to the given type.
-   */
-  <T> T getInstance(Class<T> type);
-
-  /**
-   * Gets an instance from the locator bound to the given key.
-   */
-  <T> T getInstance(Key<T> key);
-
-  /**
-   * Gets an instance from the locator bound to the given type and annotation.
-   */
-  <T> T getInstance(TypeLiteral<T> type, Annotation annotation);
-
-  /**
-   * Gets an instance from the locator bound to the given type and annotation.
-   */
-  <T> T getInstance(Class<T> type, Annotation annotation);
-
-  /**
-   * Gets an instance from the locator bound to the given type and annotation.
-   */
-  <T> T getInstance(TypeLiteral<T> type,
-      Class<? extends Annotation> annotationType);
-
-  /**
-   * Gets an instance from the locator bound to the given type and annotation.
-   */
-  <T> T getInstance(Class<T> type,
-      Class<? extends Annotation> annotationType);
+//  /**
+//   * Gets an instance from the locator bound to the given type.
+//   */
+//  <T> T getInstance(TypeLiteral<T> type);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given type.
+//   */
+//  <T> T getInstance(Class<T> type);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given key.
+//   */
+//  <T> T getInstance(Key<T> key);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given type and annotation.
+//   */
+//  <T> T getInstance(TypeLiteral<T> type, Annotation annotation);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given type and annotation.
+//   */
+//  <T> T getInstance(Class<T> type, Annotation annotation);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given type and annotation.
+//   */
+//  <T> T getInstance(TypeLiteral<T> type,
+//      Class<? extends Annotation> annotationType);
+//
+//  /**
+//   * Gets an instance from the locator bound to the given type and annotation.
+//   */
+//  <T> T getInstance(Class<T> type,
+//      Class<? extends Annotation> annotationType);
 
   /**
    * Gets the locator bound to the given key.
@@ -101,30 +112,30 @@ public interface Container {
    */
   <T> Locator<T> getLocator(Class<T> type);
 
-  /**
-   * Gets the locator bound to the given type.
-   */
-  <T> Locator<T> getLocator(TypeLiteral<T> type);
-
-  /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
-
-  /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
-
-  /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(Class<T> type,
-      Class<? extends Annotation> annotationType);
-
-  /**
-   * Gets the locator bound to the given type and annotation.
-   */
-  <T> Locator<T> getLocator(TypeLiteral<T> type,
-      Class<? extends Annotation> annotationType);
+//  /**
+//   * Gets the locator bound to the given type.
+//   */
+//  <T> Locator<T> getLocator(TypeLiteral<T> type);
+//
+//  /**
+//   * Gets the locator bound to the given type and annotation.
+//   */
+//  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
+//
+//  /**
+//   * Gets the locator bound to the given type and annotation.
+//   */
+//  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
+//
+//  /**
+//   * Gets the locator bound to the given type and annotation.
+//   */
+//  <T> Locator<T> getLocator(Class<T> type,
+//      Class<? extends Annotation> annotationType);
+//
+//  /**
+//   * Gets the locator bound to the given type and annotation.
+//   */
+//  <T> Locator<T> getLocator(TypeLiteral<T> type,
+//      Class<? extends Annotation> annotationType);
 }

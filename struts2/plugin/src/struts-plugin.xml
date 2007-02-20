@@ -11,6 +11,6 @@
         class="com.google.inject.struts2.GuiceObjectFactory"/>
 
   <!--  Make the Guice object factory the automatic default -->
-  <constant name="struts.objectFactory" value="guice" /> 
+  <constant name="struts.objectFactory" value="guice" />
 
 </struts>

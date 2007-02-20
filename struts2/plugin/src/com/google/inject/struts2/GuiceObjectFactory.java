@@ -17,8 +17,9 @@
 package com.google.inject.struts2;
 
 import com.google.inject.Container;
-import com.google.inject.ContainerBuilder;
 import com.google.inject.Module;
+import com.google.inject.Guice;
+import com.google.inject.AbstractModule;
 import com.google.inject.servlet.ServletModule;
 
 import com.opensymphony.xwork2.ActionInvocation;
@@ -38,15 +39,11 @@ public class GuiceObjectFactory extends ObjectFactory {
   static final Logger logger =
       Logger.getLogger(GuiceObjectFactory.class.getName());
 
-  ContainerBuilder builder = new ContainerBuilder();
+  Module module;
   Container container;
   boolean developmentMode = false;
 
-  public GuiceObjectFactory() {
-    // Configure default servlet bindings.
-    builder.install(new ServletModule());
-  }
-
+  @Override
   public boolean isNoArgConstructorRequired() {
     return false;
   }
@@ -54,14 +51,11 @@ public class GuiceObjectFactory extends ObjectFactory {
   @Inject(value = "guice.module", required = false)
   void setModule(String moduleClassName) {
     try {
-      // Instantiate user's module and install it.
+      // Instantiate user's module.
       @SuppressWarnings({"unchecked"})
       Class<? extends Module> moduleClass =
           (Class<? extends Module>) Class.forName(moduleClassName);
-
-      Module module = moduleClass.newInstance();
-
-      module.configure(builder);
+      this.module = moduleClass.newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -80,18 +74,20 @@ public class GuiceObjectFactory extends ObjectFactory {
     synchronized (this) {
       if (container == null) {
         // We can only bind each class once.
-        if (boundClasses.add(clazz)) {
+        if (!boundClasses.contains(clazz)) {
           try {
+            // Calling these methods now helps us detect ClassNotFoundErrors
+            // early.
             clazz.getDeclaredFields();
             clazz.getDeclaredMethods();
+
+            boundClasses.add(clazz);
           } catch (Throwable t) {
             // Struts should still work even though some classes aren't in the
             // classpath. It appears we always get the exception here when
             // this is the case.
             return clazz;
           }
-
-          builder.bind(clazz);
         }
       }
     }
@@ -104,7 +100,17 @@ public class GuiceObjectFactory extends ObjectFactory {
       if (container == null) {
         try {
           logger.info("Creating container...");
-          container = builder.create(!developmentMode);
+          this.container = Guice.createContainer(new AbstractModule() {
+            protected void configure() {
+              install(new ServletModule());
+
+              // Tell the container about all the action classes, etc., so it
+              // can validate them at startup.
+              for (Class<?> boundClass : boundClasses) {
+                bind(boundClass);
+              }
+            }
+          });
         } catch (Throwable t) {
           t.printStackTrace();
           System.exit(1);
@@ -113,7 +119,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       }
     }
 
-    return container.getInstance(clazz);
+    return container.getLocator(clazz).get();
   }
 
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,

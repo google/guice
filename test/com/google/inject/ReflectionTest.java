@@ -31,7 +31,7 @@ public class ReflectionTest extends TestCase {
   public void testNormalBinding() throws CreationException {
     BinderImpl builder = new BinderImpl();
     Foo foo = new Foo();
-    builder.bind(Foo.class).to(foo);
+    builder.bind(Foo.class).toInstance(foo);
     Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getLocator().get());
@@ -54,7 +54,7 @@ public class ReflectionTest extends TestCase {
   public void testLinkedBinding() throws CreationException {
     BinderImpl builder = new BinderImpl();
     Bar bar = new Bar();
-    builder.bind(Bar.class).to(bar);
+    builder.bind(Bar.class).toInstance(bar);
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
     Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));

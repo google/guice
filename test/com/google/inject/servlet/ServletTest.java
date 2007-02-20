@@ -59,7 +59,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertTrue(container.getInstance(InRequest.class) instanceof InRequest);
+        assertNotNull(container.getLocator(InRequest.class).get());
       }
     };
 
@@ -89,8 +89,8 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertSame(inRequest, container.getInstance(InRequest.class));
-        assertSame(inRequest, container.getInstance(InRequest.class));
+        assertSame(inRequest, container.getLocator(InRequest.class).get());
+        assertSame(inRequest, container.getLocator(InRequest.class).get());
       }
     };
 
@@ -123,7 +123,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertTrue(container.getInstance(InSession.class) instanceof InSession);
+        assertNotNull(container.getLocator(InSession.class).get());
       }
     };
 
@@ -157,8 +157,8 @@ public class ServletTest extends TestCase {
         invoked[0] = true;
         assertSame(request, servletRequest);
 
-        assertSame(inSession, container.getInstance(InSession.class));
-        assertSame(inSession, container.getInstance(InSession.class));
+        assertSame(inSession, container.getLocator(InSession.class).get());
+        assertSame(inSession, container.getLocator(InSession.class).get());
       }
     };
 

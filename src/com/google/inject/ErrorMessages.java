@@ -52,6 +52,9 @@ class ErrorMessages {
     }
   }
 
+  static final String OPTIONAL_CONSTRUCTOR = "@Inject(optional=true) is"
+      + " not allowed on constructors.";
+
   static final String CONSTANT_CONVERSION_ERROR = "Error converting String"
       + " constant bound at %s to %s: %s";
 

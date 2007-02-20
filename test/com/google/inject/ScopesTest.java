@@ -26,11 +26,10 @@ public class ScopesTest extends TestCase {
   public void testContainerScopedAnnotation()
       throws CreationException {
     BinderImpl builder = new BinderImpl();
-    Object bindingBuilder
+    BindingBuilderImpl<Singleton> bindingBuilder
         = builder.bind(Singleton.class);
     builder.createContainer();
-    assertSame(Scopes.CONTAINER,
-        ((BindingBuilderImpl<?>) bindingBuilder).scope);
+    assertSame(Scopes.CONTAINER, bindingBuilder.scope);
   }
 
   @ContainerScoped
@@ -39,19 +38,10 @@ public class ScopesTest extends TestCase {
   public void testOverriddingAnnotation()
       throws CreationException {
     BinderImpl builder = new BinderImpl();
-    Object bindingBuilder
-        = builder.bind(Singleton.class).in(Scopes.DEFAULT);
+    BindingBuilderImpl<Singleton> bindingBuilder
+        = builder.bind(Singleton.class);
+    bindingBuilder.in(Scopes.DEFAULT);
     builder.createContainer();
-    assertSame(Scopes.DEFAULT,
-        ((BindingBuilderImpl<?>) bindingBuilder).scope);
-  }
-
-  public void testBindingToInstanceWithScope() {
-    BinderImpl builder = new BinderImpl();
-    builder.bind(Singleton.class).to(new Singleton()).in(Scopes.DEFAULT);
-    try {
-      builder.createContainer();
-      fail();
-    } catch (CreationException e) { /* expected */ }
+    assertSame(Scopes.DEFAULT, bindingBuilder.scope);
   }
 }

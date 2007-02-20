@@ -39,14 +39,6 @@ import org.aopalliance.intercept.MethodInterceptor;
  * Builds a dependency injection {@link Container}. Binds {@link Key}s to
  * implementations.
  *
- * <p>Creates several bindings by default:
- *
- * <ul>
- * <li>A {@code Locator<T>} for each binding of type {@code T}
- * <li>The {@link Container} iself
- * <li>The {@link Logger} for the class being injected
- * <li>The {@link Stage} passed to the builder's constructor
- * </ul>
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -121,7 +113,7 @@ class BinderImpl implements Binder {
 
     bind(Container.class).to(CONTAINER_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
-    bind(Stage.class).to(stage);
+    bind(Stage.class).toInstance(stage);
 
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
 

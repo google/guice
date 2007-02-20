@@ -9,19 +9,19 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * TODO
+ * Used by {@link Module} implementations to configure bindings.
  */
 public interface Binder {
 
   /**
-   * Applies the given method interceptor to the methods matched by the class
-   * and method matchers.
+   * Binds a method interceptor to methods matched by class and method
+   * matchers.
    *
    * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.
    * @param methodMatcher matches methods the interceptor should apply to. For
    *     example: {@code annotatedWith(Transactional.class)}.
-   * @param interceptors to apply
+   * @param interceptors to bind
    */
   void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors);
@@ -29,29 +29,46 @@ public interface Binder {
   /**
    * Binds a scope to an annotation.
    */
-  void bindScope(Class<? extends Annotation> annotationType,
-          Scope scope);
+  void bindScope(Class<? extends Annotation> annotationType, Scope scope);
 
   /**
-   * Binds the given key.
+   * Creates a binding to a key.
    */
   <T> BindingBuilder<T> bind(Key<T> key);
 
   /**
-   * Binds the given type.
+   * Creates a binding to a type.
    */
   <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral);
 
-  <T> BindingBuilder<T> bind(Class<T> clazz);
+  /**
+   * Creates a binding to a type.
+   */
+  <T> BindingBuilder<T> bind(Class<T> type);
 
+  /**
+   * Links a key to another binding.
+   */
   <T> LinkedBindingBuilder<T> link(Key<T> key);
 
+  /**
+   * Links a type to another binding.
+   */
   <T> LinkedBindingBuilder<T> link(Class<T> type);
 
+  /**
+   * Links a type to another binding.
+   */
   <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type);
 
+  /**
+   * Binds a constant value to an annotation.
+   */
   ConstantBindingBuilder bindConstant(Annotation annotation);
 
+  /**
+   * Binds a constant value to an annotation.
+   */
   ConstantBindingBuilder bindConstant(
       Class<? extends Annotation> annotationType);
 
@@ -63,5 +80,8 @@ public interface Binder {
    */
   void requestStaticInjection(Class<?>... types);
 
+  /**
+   * Uses the given module to configure more bindings.
+   */
   void install(Module module);
 }

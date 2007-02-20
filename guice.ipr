@@ -346,6 +346,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/struts2/example/struts2-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" filepath="$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
