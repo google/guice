@@ -96,7 +96,7 @@ public class PerformanceComparison {
     {
       Container container;
       try {
-        container = Guice.newContainer(new AbstractModule() {
+        container = Guice.createContainer(new AbstractModule() {
           protected void configure() {
             bind(Tee.class).to(TeeImpl.class);
             bind(Bar.class).to(BarImpl.class);

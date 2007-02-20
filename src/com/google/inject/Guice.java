@@ -3,23 +3,34 @@ package com.google.inject;
 import java.util.Arrays;
 
 /**
- * Javadoc.
- *
- * @author Kevin Bourrillion (kevinb9n@gmail.com)
+ * TODO
  */
-public class Guice {
+public final class Guice {
 
-  public static Container newContainer(Module... modules)
+  public static Container createContainer(Module... modules)
       throws CreationException {
-    return newContainer(Arrays.asList(modules));
+    return createContainer(Arrays.asList(modules));
   }
 
-  public static Container newContainer(Iterable<Module> modules)
+  public static Container createContainer(Iterable<Module> modules)
       throws CreationException {
-    BinderImpl binder = new BinderImpl();
+    return createContainer(Stage.DEVELOPMENT, modules);
+  }
+
+  public static Container createContainer(Stage stage, Module... modules)
+      throws CreationException {
+    return createContainer(stage, Arrays.asList(modules));
+  }
+
+  public static Container createContainer(Stage stage, Iterable<Module> modules)
+      throws CreationException {
+    BinderImpl binder = new BinderImpl(stage);
     for (Module module : modules) {
       binder.install(module);
     }
     return binder.createContainer();
+
   }
+
+  private Guice() {}
 }

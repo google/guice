@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws CreationException {
-    Container container = Guice.newContainer();
+    Container container = Guice.createContainer();
     Foo foo = container.getInstance(Foo.class);
     assertSame(foo, foo.bar.foo);
   }

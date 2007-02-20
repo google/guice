@@ -101,7 +101,7 @@ public class Manager {
     }
 
     Module module = (Module) Class.forName(args[0]).newInstance();
-    Container container = Guice.newContainer(module);
+    Container container = Guice.createContainer(module);
 
     manage(args[0], container);
 

@@ -9,9 +9,7 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Javadoc.
- *
- * @author Kevin Bourrillion (kevinb9n@gmail.com)
+ * TODO
  */
 public interface Binder {
 

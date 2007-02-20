@@ -33,7 +33,7 @@ public class NotRequiredTest extends TestCase {
   }
 
   public void testNotProvided() throws CreationException {
-    Container c = Guice.newContainer();
+    Container c = Guice.createContainer();
     Foo foo = c.getLocator(Foo.class).get();
     assertNull(foo.bar);
     assertNull(foo.fromMethod);

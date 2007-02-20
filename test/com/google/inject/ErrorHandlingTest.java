@@ -28,7 +28,7 @@ import java.util.List;
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
-    Guice.newContainer(new MyModule());
+    Guice.createContainer(new MyModule());
   }
 
   @Inject @Named("missing")

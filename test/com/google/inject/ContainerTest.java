@@ -83,7 +83,7 @@ public class ContainerTest extends TestCase {
   }
 
   private Container createFooContainer() throws CreationException {
-    return Guice.newContainer(new AbstractModule() {
+    return Guice.createContainer(new AbstractModule() {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
