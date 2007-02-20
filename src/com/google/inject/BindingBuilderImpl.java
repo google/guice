@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * Binds a {@link com.google.inject.Key} to an implementation in a given scope.
  */
-public class BindingBuilderImpl<T> implements BindingBuilder<T> {
+class BindingBuilderImpl<T> implements BindingBuilder<T> {
 
   private static final Logger logger
       = Logger.getLogger(BindingBuilderImpl.class.getName());

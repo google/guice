@@ -6,7 +6,7 @@ import com.google.inject.binder.ConstantBindingBuilder;
 /**
    * Builds a constant binding.
  */
-public class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
+class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
 
   BindingInfo<?> bindingInfo;
   final AnnotationStrategy annotationStrategy;
