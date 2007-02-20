@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.binder.BindingBuilder;
+import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.util.Objects;
 import java.lang.annotation.Annotation;
@@ -85,14 +88,14 @@ public abstract class AbstractModule implements Module {
   /**
    * @see BinderImpl#bind(Key)
    */
-  protected <T> BinderImpl.BindingBuilder<T> bind(Key<T> key) {
+  protected <T> BindingBuilder<T> bind(Key<T> key) {
     return builder.bind(key);
   }
 
   /**
    * @see BinderImpl#bind(TypeLiteral)
    */
-  protected <T> BinderImpl.BindingBuilder<T> bind(
+  protected <T> BindingBuilder<T> bind(
       TypeLiteral<T> typeLiteral) {
     return builder.bind(typeLiteral);
   }
@@ -100,21 +103,21 @@ public abstract class AbstractModule implements Module {
   /**
    * @see BinderImpl#bind(Class)
    */
-  protected <T> BinderImpl.BindingBuilder<T> bind(Class<T> clazz) {
+  protected <T> BindingBuilder<T> bind(Class<T> clazz) {
     return builder.bind(clazz);
   }
 
   /**
    * @see BinderImpl#link(Key)
    */
-  protected <T> BinderImpl.LinkedBindingBuilder<T> link(Key<T> key) {
+  protected <T> LinkedBindingBuilder<T> link(Key<T> key) {
     return builder.link(key);
   }
 
   /**
    * @see BinderImpl#bindConstant(Class)
    */
-  protected BinderImpl.ConstantBindingBuilder bindConstant(
+  protected ConstantBindingBuilder bindConstant(
       Class<? extends Annotation> annotationType) {
     return builder.bindConstant(annotationType);
   }
@@ -122,7 +125,7 @@ public abstract class AbstractModule implements Module {
   /**
    * @see BinderImpl#bindConstant(java.lang.annotation.Annotation)
    */
-  protected BinderImpl.ConstantBindingBuilder bindConstant(
+  protected ConstantBindingBuilder bindConstant(
       Annotation annotation) {
     return builder.bindConstant(annotation);
   }

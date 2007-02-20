@@ -30,7 +30,7 @@ public class ScopesTest extends TestCase {
         = builder.bind(Singleton.class);
     builder.createContainer();
     assertSame(Scopes.CONTAINER,
-        ((BinderImpl.BindingBuilder<?>) bindingBuilder).scope);
+        ((BindingBuilderImpl<?>) bindingBuilder).scope);
   }
 
   @ContainerScoped
@@ -43,7 +43,7 @@ public class ScopesTest extends TestCase {
         = builder.bind(Singleton.class).in(Scopes.DEFAULT);
     builder.createContainer();
     assertSame(Scopes.DEFAULT,
-        ((BinderImpl.BindingBuilder<?>) bindingBuilder).scope);
+        ((BindingBuilderImpl<?>) bindingBuilder).scope);
   }
 
   public void testBindingToInstanceWithScope() {
