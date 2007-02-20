@@ -21,7 +21,7 @@ import com.google.inject.Key.AnnotationStrategy;
 import static com.google.inject.Scopes.CONTAINER;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.SourceConsumer;
+import com.google.inject.spi.SourceProviders;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
 import java.lang.annotation.Annotation;
@@ -50,7 +50,11 @@ import org.aopalliance.intercept.MethodInterceptor;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class BinderImpl extends SourceConsumer implements Binder {
+class BinderImpl implements Binder {
+
+  static {
+    SourceProviders.skip(BinderImpl.class);
+  }
 
   private static final Logger logger
       = Logger.getLogger(BinderImpl.class.getName());
@@ -141,13 +145,11 @@ public final class BinderImpl extends SourceConsumer implements Binder {
 
   public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
-    ensureNotCreated();
     proxyFactoryBuilder.intercept(classMatcher, methodMatcher, interceptors);
   }
 
   public void bindScope(Class<? extends Annotation> annotationType,
       Scope scope) {
-    ensureNotCreated();
     Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
     if (existing != null) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, existing,
@@ -159,7 +161,6 @@ public final class BinderImpl extends SourceConsumer implements Binder {
   }
 
   public <T> BindingBuilderImpl<T> bind(Key<T> key) {
-    ensureNotCreated();
     BindingBuilderImpl<T> builder = new BindingBuilderImpl<T>(this, key, source());
     bindingBuilders.add(builder);
     return builder;
@@ -174,7 +175,6 @@ public final class BinderImpl extends SourceConsumer implements Binder {
   }
 
   public <T> LinkedBindingBuilderImpl<T> link(Key<T> key) {
-    ensureNotCreated();
     LinkedBindingBuilderImpl<T> builder =
         new LinkedBindingBuilderImpl<T>(this, key).from(source());
     linkedBindingBuilders.add(builder);
@@ -192,13 +192,11 @@ public final class BinderImpl extends SourceConsumer implements Binder {
   }
 
   public ConstantBindingBuilderImpl bindConstant(Annotation annotation) {
-    ensureNotCreated();
     return bind(source(), Key.strategyFor(annotation));
   }
 
   public ConstantBindingBuilderImpl bindConstant(
       Class<? extends Annotation> annotationType) {
-    ensureNotCreated();
     return bind(source(), Key.strategyFor(annotationType));
   }
 
@@ -243,12 +241,10 @@ public final class BinderImpl extends SourceConsumer implements Binder {
    *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
-  public synchronized Container createContainer()
-      throws CreationException {
+  Container createContainer() throws CreationException {
     stopwatch.resetAndLog(logger, "Configuration");
 
     // Create the container.
-    ensureNotCreated();
     Map<Key<?>, Binding<?>> bindings = new HashMap<Key<?>, Binding<?>>();
     container = new ContainerImpl(
         proxyFactoryBuilder.create(), bindings, scopes);
@@ -409,16 +405,10 @@ public final class BinderImpl extends SourceConsumer implements Binder {
   }
 
   /**
-   * Currently we only support creating one Container instance per builder. If
-   * we want to support creating more than one container per builder, we should
-   * move to a "factory factory" model where we create a factory instance per
-   * Container. Right now, one factory instance would be shared across all the
-   * containers, which means container-scoped objects would be shared, etc.
+   * Gets the current source.
    */
-  private void ensureNotCreated() {
-    if (container != null) {
-      throw new IllegalStateException("Container already created.");
-    }
+  Object source() {
+    return SourceProviders.defaultSource();    
   }
 
   ErrorHandler configurationErrorHandler = new AbstractErrorHandler() {

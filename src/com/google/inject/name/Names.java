@@ -17,9 +17,8 @@
 package com.google.inject.name;
 
 import com.google.inject.Binder;
-import com.google.inject.BinderImpl;
 import com.google.inject.Key;
-import com.google.inject.spi.DefaultSourceProvider;
+import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.SourceProvider;
 import java.util.Map;
 import java.util.Properties;
@@ -33,6 +32,10 @@ public class Names {
 
   private Names() {}
 
+  static {
+    SourceProviders.skip(Names.class);
+  }
+
   /**
    * Creates a {@link Named} annotation with {@code name} as the value.
    */
@@ -43,35 +46,49 @@ public class Names {
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(BinderImpl binder,
-      Map<String, String> properties) {
-    skipNames(binder);
-    for (Map.Entry<String, String> entry : properties.entrySet()) {
-      String key = entry.getKey();
-      String value = entry.getValue();
-      ((Binder) binder).bind(
-          Key.get(String.class, new NamedImpl(key))).to(value);
-    }
+  public static void bindProperties(final Binder binder,
+      final Map<String, String> properties) {
+    SourceProviders.withDefault(
+        new SimpleSourceProvider(SourceProviders.defaultSource()),
+        new Runnable() {
+          public void run() {
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+              String key = entry.getKey();
+              String value = entry.getValue();
+              binder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+            }
+          }
+        });
   }
 
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(BinderImpl binder,
-      Properties properties) {
-    skipNames(binder);
-    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      String key = (String) entry.getKey();
-      String value = (String) entry.getValue();
-      ((Binder) binder).bind(
-          Key.get(String.class, new NamedImpl(key))).to(value);
-    }
+  public static void bindProperties(final Binder binder,
+      final Properties properties) {
+    SourceProviders.withDefault(
+        new SimpleSourceProvider(SourceProviders.defaultSource()),
+        new Runnable() {
+          public void run() {
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+              String key = (String) entry.getKey();
+              String value = (String) entry.getValue();
+              binder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+            }
+          }
+        });
   }
 
-  private static void skipNames(BinderImpl builder) {
-    SourceProvider sourceProvider = builder.getSourceProvider();
-    if (sourceProvider instanceof DefaultSourceProvider) {
-      ((DefaultSourceProvider) sourceProvider).skip(Names.class);
+  static class SimpleSourceProvider implements SourceProvider {
+
+    final Object source;
+
+    SimpleSourceProvider(Object source) {
+      this.source = source;
+    }
+
+    public Object source() {
+      return source;
     }
   }
 }

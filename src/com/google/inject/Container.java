@@ -30,7 +30,7 @@ import java.util.Map;
  * {@code int}, the container will look for a binding to {@code Integer}.
  *
  * @author crazybob@google.com (Bob Lee)
- * @see BinderImpl
+ * @see Binder
  */
 public interface Container {
 

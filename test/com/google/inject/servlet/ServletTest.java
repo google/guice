@@ -16,10 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.BinderImpl;
 import com.google.inject.Container;
 import com.google.inject.CreationException;
 import com.google.inject.Key;
+import com.google.inject.Guice;
+import com.google.inject.AbstractModule;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -170,11 +171,13 @@ public class ServletTest extends TestCase {
   }
 
   private Container createContainer() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.install(new ServletModule());
-    builder.bind(InSession.class);
-    builder.bind(InRequest.class);
-    return builder.createContainer();
+    return Guice.createContainer(new AbstractModule() {
+      protected void configure() {
+        install(new ServletModule());
+        bind(InSession.class);
+        bind(InRequest.class);
+      }
+    });
   }
 
   @SessionScoped
