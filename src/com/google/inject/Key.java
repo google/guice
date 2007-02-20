@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.util.ToStringBuilder;
 import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.ToStringBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
@@ -83,6 +83,7 @@ public abstract class Key<T> {
    */
   @SuppressWarnings("unchecked")
   protected Key(Annotation annotation) {
+    // no usages, not test-covered
     this.annotationStrategy = strategyFor(annotation);
     this.typeLiteral
         = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
@@ -161,6 +162,7 @@ public abstract class Key<T> {
       return annotation.toString();
     }
 
+    // not test-covered
     return annotationStrategy.getAnnotationType().toString();
   }
 
@@ -302,14 +304,6 @@ public abstract class Key<T> {
     return new SimpleKey<Object>(type, annotationStrategy);
   }
 
-  /**
-   * Returns a new key of the specified type with the same annotation as this
-   * key.
-   */
-  <T> Key<T> ofType(TypeLiteral<T> type) {
-    return new SimpleKey<T>(type, annotationStrategy);
-  }
-
   private static class SimpleKey<T> extends Key<T> {
 
     private SimpleKey(Type type, AnnotationStrategy annotationStrategy) {
@@ -382,6 +376,7 @@ public abstract class Key<T> {
     return new AnnotationTypeStrategy(annotationType, null);
   }
 
+  // this class not test-covered
   static class AnnotationInstanceStrategy implements AnnotationStrategy {
 
     final Annotation annotation;

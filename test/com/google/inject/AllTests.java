@@ -23,7 +23,6 @@ import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
 import com.google.inject.util.ReferenceMapTestSuite;
 import com.google.inject.util.SurrogateAnnotationsTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -35,33 +34,35 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTestSuite(TypeLiteralTest.class);
-    suite.addTestSuite(KeyTest.class);
+    suite.addTestSuite(BoundFactoryTest.class);
+    suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(ConstantConversionTest.class);
     suite.addTestSuite(ContainerTest.class);
-    suite.addTestSuite(CircularDependencyTest.class);
-    suite.addTestSuite(StaticInjectionTest.class);
-    suite.addTestSuite(NotRequiredTest.class);
     suite.addTestSuite(FactoryTest.class);
-    suite.addTestSuite(SuperclassTest.class);
+    suite.addTestSuite(GenericInjectionTest.class);
+    suite.addTestSuite(ImplicitBindingTest.class);
+    suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LocatorInjectionTest.class);
+    suite.addTestSuite(NotRequiredTest.class);
     suite.addTestSuite(PreloadingTest.class);
+    suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
-    suite.addTestSuite(ImplicitBindingTest.class);
-    suite.addTestSuite(BoundFactoryTest.class);
+    suite.addTestSuite(StaticInjectionTest.class);
+    suite.addTestSuite(SuperclassTest.class);
+    suite.addTestSuite(TypeLiteralTest.class);
 
     suite.addTestSuite(MatcherTest.class);
-    suite.addTestSuite(ProxyFactoryTest.class);
-    suite.addTestSuite(IntegrationTest.class);
 
     suite.addTestSuite(ServletTest.class);
 
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
+    suite.addTestSuite(ReferenceCacheTest.class);
     suite.addTestSuite(ReferenceMapTest.class);
     suite.addTest(ReferenceMapTestSuite.suite());
-    suite.addTestSuite(ReferenceCacheTest.class);
     suite.addTestSuite(SurrogateAnnotationsTest.class);
+
+    suite.addTestSuite(IntegrationTest.class);
 
     return suite;
   }

@@ -35,10 +35,6 @@ class InternalContext {
     this.container = container;
   }
 
-  public Container getContainer() {
-    return container;
-  }
-
   ContainerImpl getContainerImpl() {
     return container;
   }

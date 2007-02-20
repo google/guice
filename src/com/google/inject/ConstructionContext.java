@@ -107,6 +107,7 @@ class ConstructionContext<T> {
       }
 
       try {
+        // This appears to be not test-covered
         return method.invoke(delegate, args);
       }
       catch (IllegalAccessException e) {

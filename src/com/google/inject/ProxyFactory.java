@@ -116,6 +116,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
     }
     if (!anyMatched) {
+      // not test-covered
       return defaultFactory.get(constructor);
     }
 

@@ -16,18 +16,11 @@
 
 package com.google.inject;
 
-import static com.google.inject.ConstantConversionException.createMessage;
 import com.google.inject.util.GuiceFastClass;
 import com.google.inject.util.ReferenceCache;
+import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
-import com.google.inject.util.SurrogateAnnotations;
-import com.google.inject.util.DuplicateAnnotationException;
-import com.google.inject.util.StackTraceElements;
-
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastMethod;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
@@ -46,6 +39,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 
 /**
  * Default {@link Container} implementation.
@@ -115,10 +110,12 @@ class ContainerImpl implements Container {
     bindingsMultimap.put(binding.getKey().getType(), binding);
   }
 
+  // not test-covered
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
     return bindingsMultimap.getAll(type);
   }
 
+  // not test-covered
   <T> List<String> getNamesOfBindingAnnotations(TypeLiteral<T> type) {
     List<String> names = new ArrayList<String>();
     for (Binding<T> binding : findBindingsByType(type)) {
@@ -166,7 +163,7 @@ class ContainerImpl implements Container {
     if (rawType.equals(Locator.class)) {
       Type locatorType = key.getType().getType();
       if (!(locatorType instanceof ParameterizedType)) {
-        return null;
+        return null; // is this right? not test-covered
       }
       Type entryType
           = ((ParameterizedType) locatorType).getActualTypeArguments()[0];
@@ -268,12 +265,14 @@ class ContainerImpl implements Container {
         }
       };
       try {
+        // note: intelliJ thinks this cast is superfluous, but is it?
         return (InternalFactory<? extends T>) getImplicitBinding(rawType);
       }
       finally {
         this.errorHandler = previous;
       }
     }
+    // note: intelliJ thinks this cast is superfluous, but is it?
     return (InternalFactory<? extends T>) getImplicitBinding(rawType);
   }
 
@@ -287,12 +286,6 @@ class ContainerImpl implements Container {
         rawType,
         e.getMessage());
     return invalidFactory();
-  }
-
-  boolean isConstantType(Class<?> type) {
-    return PRIMITIVE_CONVERTERS.containsKey(type)
-        || Enum.class.isAssignableFrom(type)
-        || type == Class.class;
   }
 
   /**
@@ -371,6 +364,7 @@ class ContainerImpl implements Container {
     return bindings;
   }
 
+  // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
     return Collections.unmodifiableMap(bindings);
   }
@@ -602,6 +596,7 @@ class ContainerImpl implements Container {
     }
   }
 
+  // Not test-covered
   public void injectMembers(final Object o) {
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
@@ -610,6 +605,8 @@ class ContainerImpl implements Container {
       }
     });
   }
+
+  // Next 4 methods not test-covered and have no usages
 
   public <T> T getInstance(TypeLiteral<T> type,
       Annotation annotation) {

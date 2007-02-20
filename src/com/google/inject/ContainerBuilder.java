@@ -80,7 +80,7 @@ public final class ContainerBuilder extends SourceConsumer {
   private static final InternalFactory<Container> CONTAINER_FACTORY
       = new InternalFactory<Container>() {
     public Container get(InternalContext context) {
-      return context.getContainer();
+      return context.getContainerImpl();
     }
 
     public String toString() {
@@ -90,6 +90,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
   private static final InternalFactory<Logger> LOGGER_FACTORY
       = new InternalFactory<Logger>() {
+    // not test-covered?
     public Logger get(InternalContext context) {
       Member member = context.getExternalContext().getMember();
       return member == null
@@ -206,6 +207,8 @@ public final class ContainerBuilder extends SourceConsumer {
     linkedBindingBuilders.add(builder);
     return builder;
   }
+
+  // Next three methods not test-covered?
 
   /**
    * Links the given type to another key effectively creating an alias for a
@@ -438,16 +441,6 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  void putFactory(Object source, Map<Key<?>, InternalFactory<?>> factories,
-      Key<?> key, InternalFactory<?> factory) {
-    if (factories.containsKey(key)) {
-      addError(source, ErrorMessages.BINDING_ALREADY_SET, key);
-    }
-    else {
-      factories.put(key, factory);
-    }
-  }
-
   void putBinding(Binding<?> binding) {
     Key<?> key = binding.getKey();
     Map<Key<?>, Binding<?>> bindings = container.internalBindings();
@@ -527,6 +520,7 @@ public final class ContainerBuilder extends SourceConsumer {
       if (this.key.hasAnnotationType()) {
         addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
       } else {
+        // not test-covered?
         this.key = Key.get(this.key.getType(), annotation);
       }
       return this;
@@ -634,6 +628,8 @@ public final class ContainerBuilder extends SourceConsumer {
      * ContainerBuilder#bindScope(Class, Scope)}.
      */
     public BindingBuilder<T> in(Class<? extends Annotation> scopeAnnotation) {
+      // this method not test-covered
+
       ensureScopeNotSet();
 
       // We could defer this lookup to when we create the container, but this
