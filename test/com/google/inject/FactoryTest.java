@@ -29,25 +29,25 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 public class FactoryTest extends TestCase {
 
-  public void testParameterIndex() throws ContainerCreationException {
+  public void testParameterIndex() throws CreationException {
     ContainerBuilder cb = new ContainerBuilder();
 
-    cb.bind(Zero.class).to(new Generator<Zero>() {
-      public Zero generate(Context context) {
+    cb.bind(Zero.class).to(new Factory<Zero>() {
+      public Zero get(Context context) {
         assertEquals(0, context.getParameterIndex());
         return new Zero();
       }
     });
 
-    cb.bind(One.class).to(new Generator<One>() {
-      public One generate(Context context) {
+    cb.bind(One.class).to(new Factory<One>() {
+      public One get(Context context) {
         assertEquals(1, context.getParameterIndex());
         return new One();
       }
     });
 
-    cb.bind(NegativeOne.class).to(new Generator<NegativeOne>() {
-      public NegativeOne generate(Context context) {
+    cb.bind(NegativeOne.class).to(new Factory<NegativeOne>() {
+      public NegativeOne get(Context context) {
         assertEquals(-1, context.getParameterIndex());
         return new NegativeOne();
       }
@@ -55,7 +55,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.create();
 
-    A a = c.getFactory(A.class).get();
+    A a = c.getLocator(A.class).get();
 
     assertNotNull(a.negativeOne);
     assertTrue(a.initCalled);
@@ -130,7 +130,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.create();
 
-    Foo foo = c.getFactory(Key.get(Foo.class, FooAnnotation.class)).get();
+    Foo foo = c.getLocator(Key.get(Foo.class, FooAnnotation.class)).get();
 
     assertNotNull(foo.bar);
     assertNotNull(foo.bar.tee1);
@@ -141,14 +141,14 @@ public class FactoryTest extends TestCase {
     assertNotNull(foo.bar.tee2.bob2);
   }
 
-  <T> Generator<T> createFactory(
+  <T> Factory<T> createFactory(
       final Class<T> type, final Class<? extends Annotation> annotationType,
       final Member expectedMember) {
-    return new Generator<T>() {
-      public T generate(Context context) {
+    return new Factory<T>() {
+      public T get(Context context) {
         assertEquals(expectedMember, context.getMember());
         assertEquals(type, context.getKey().getType().getType());
-        return context.getContainer().getFactory(type).get();
+        return context.getContainer().getLocator(type).get();
       }
     };
   }
