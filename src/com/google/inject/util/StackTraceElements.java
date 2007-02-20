@@ -51,13 +51,16 @@ public class StackTraceElements {
     Integer lineNumber = lineNumbers.getLineNumber(member);
     StackTraceElement element = new StackTraceElement(
       declaringClass.getName(), member.getName(), lineNumbers.getSource(),
-        lineNumber == null ? 0 : lineNumber);
+        lineNumber == null ? lineNumbers.getFirstLine() : lineNumber);
     return element;
   }
 
   public static Object forType(Class<?> implementation) {
     LineNumbers lineNumbers = lineNumbersCache.get(implementation);
     return new StackTraceElement(
-        implementation.getName(), "<init>", lineNumbers.getSource(), 0);
+        implementation.getName(),
+        "<none>",
+        lineNumbers.getSource(),
+        lineNumbers.getFirstLine());
   }
 }

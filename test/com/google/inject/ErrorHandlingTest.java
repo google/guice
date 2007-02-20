@@ -19,6 +19,8 @@ package com.google.inject;
 import java.util.List;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.servlet.SessionScoped;
+import com.google.inject.servlet.ServletModule;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -62,8 +64,14 @@ public class ErrorHandlingTest {
     Invalid(String s) {}
   }
 
+  @ContainerScoped
+  @SessionScoped
+  static class TooManyScopes {
+  }
+
   static class MyModule extends AbstractModule {
     protected void configure() {
+      install(new ServletModule());
       bind(Runnable.class);
       bind(Foo.class);
       bind(Bar.class);
@@ -72,6 +80,7 @@ public class ErrorHandlingTest {
       bind(String.class).annotatedWith(Names.named("foo")).in(
           Named.class);
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
+      bind(TooManyScopes.class);
       requestStaticInjection(ErrorHandlingTest.class);
     }
   }
