@@ -38,7 +38,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return key;
   }
 
-  public BindingBuilder<T> annotatedWith(
+  public BindingBuilderImpl<T> annotatedWith(
       Class<? extends Annotation> annotationType) {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
@@ -48,7 +48,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingBuilder<T> annotatedWith(Annotation annotation) {
+  public BindingBuilderImpl<T> annotatedWith(Annotation annotation) {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
     } else {
@@ -58,11 +58,11 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public <I extends T> BindingBuilder<T> to(Class<I> implementation) {
+  public <I extends T> BindingBuilderImpl<T> to(Class<I> implementation) {
     return to(TypeLiteral.get(implementation));
   }
 
-  public <I extends T> BindingBuilder<T> to(
+  public <I extends T> BindingBuilderImpl<T> to(
       final TypeLiteral<I> implementation) {
     ensureImplementationIsNotSet();
     this.implementation = implementation;
@@ -73,13 +73,13 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingBuilder<T> to(Factory<? extends T> factory) {
+  public BindingBuilderImpl<T> to(Factory<? extends T> factory) {
     ensureImplementationIsNotSet();
     this.factory = new InternalFactoryToFactoryAdapter<T>(factory);
     return this;
   }
 
-  public BindingBuilder<T> to(T instance) {
+  public BindingBuilderImpl<T> to(T instance) {
     ensureImplementationIsNotSet();
     this.instance = Objects.nonNull(instance, "instance");
     this.factory = new ConstantFactory<T>(instance);
@@ -93,23 +93,23 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   /**
    * Binds to instances from the given factory.
    */
-  BindingBuilder<T> to(InternalFactory<? extends T> factory) {
+  BindingBuilderImpl<T> to(InternalFactory<? extends T> factory) {
     ensureImplementationIsNotSet();
     this.factory = factory;
     return this;
   }
 
-  public BindingBuilder<T> toFactory(
+  public BindingBuilderImpl<T> toFactory(
       final Class<? extends Factory<T>> factoryType) {
     return toFactory(Key.get(factoryType));
   }
 
-  public BindingBuilder<T> toFactory(
+  public BindingBuilderImpl<T> toFactory(
       final TypeLiteral<? extends Factory<T>> factoryType) {
     return toFactory(Key.get(factoryType));
   }
 
-  public BindingBuilder<T> toFactory(
+  public BindingBuilderImpl<T> toFactory(
       final Key<? extends Factory<T>> factoryKey) {
     ensureImplementationIsNotSet();
 
@@ -130,7 +130,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public BindingBuilder<T> in(Class<? extends Annotation> scopeAnnotation) {
+  public BindingBuilderImpl<T> in(Class<? extends Annotation> scopeAnnotation) {
     // this method not test-covered
 
     ensureScopeNotSet();
@@ -145,7 +145,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingBuilder<T> in(Scope scope) {
+  public BindingBuilderImpl<T> in(Scope scope) {
     ensureScopeNotSet();
     this.scope = Objects.nonNull(scope, "scope");
     return this;
@@ -163,7 +163,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public BindingBuilder<T> eagerly() {
+  public BindingBuilderImpl<T> eagerly() {
     this.preload = true;
     return this;
   }

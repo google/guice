@@ -37,14 +37,14 @@ public interface Binder {
   /**
    * Binds the given key.
    */
-  <T> BindingBuilderImpl<T> bind(Key<T> key);
+  <T> BindingBuilder<T> bind(Key<T> key);
 
   /**
    * Binds the given type.
    */
   <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral);
 
-  <T> BindingBuilderImpl<T> bind(Class<T> clazz);
+  <T> BindingBuilder<T> bind(Class<T> clazz);
 
   <T> LinkedBindingBuilder<T> link(Key<T> key);
 

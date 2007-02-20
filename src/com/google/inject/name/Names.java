@@ -16,6 +16,7 @@
 
 package com.google.inject.name;
 
+import com.google.inject.Binder;
 import com.google.inject.BinderImpl;
 import com.google.inject.Key;
 import com.google.inject.spi.DefaultSourceProvider;
@@ -42,26 +43,28 @@ public class Names {
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(BinderImpl builder,
+  public static void bindProperties(BinderImpl binder,
       Map<String, String> properties) {
-    skipNames(builder);
+    skipNames(binder);
     for (Map.Entry<String, String> entry : properties.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
-      builder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+      ((Binder) binder).bind(
+          Key.get(String.class, new NamedImpl(key))).to(value);
     }
   }
 
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(BinderImpl builder,
+  public static void bindProperties(BinderImpl binder,
       Properties properties) {
-    skipNames(builder);
+    skipNames(binder);
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
       String key = (String) entry.getKey();
       String value = (String) entry.getValue();
-      builder.bind(Key.get(String.class, new NamedImpl(key))).to(value);
+      ((Binder) binder).bind(
+          Key.get(String.class, new NamedImpl(key))).to(value);
     }
   }
 

@@ -19,9 +19,6 @@ package com.google.inject;
 import com.google.inject.ContainerImpl.Injector;
 import com.google.inject.Key.AnnotationStrategy;
 import static com.google.inject.Scopes.CONTAINER;
-import com.google.inject.binder.BindingBuilder;
-import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceConsumer;
@@ -168,7 +165,7 @@ public final class BinderImpl extends SourceConsumer implements Binder {
     return builder;
   }
 
-  public <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+  public <T> BindingBuilderImpl<T> bind(TypeLiteral<T> typeLiteral) {
     return bind(Key.get(typeLiteral));
   }
 
@@ -176,7 +173,7 @@ public final class BinderImpl extends SourceConsumer implements Binder {
     return bind(Key.get(clazz));
   }
 
-  public <T> LinkedBindingBuilder<T> link(Key<T> key) {
+  public <T> LinkedBindingBuilderImpl<T> link(Key<T> key) {
     ensureNotCreated();
     LinkedBindingBuilderImpl<T> builder =
         new LinkedBindingBuilderImpl<T>(this, key).from(source());
@@ -186,26 +183,26 @@ public final class BinderImpl extends SourceConsumer implements Binder {
 
   // Next three methods not test-covered?
 
-  public <T> LinkedBindingBuilder<T> link(Class<T> type) {
+  public <T> LinkedBindingBuilderImpl<T> link(Class<T> type) {
     return link(Key.get(type));
   }
 
-  public <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type) {
+  public <T> LinkedBindingBuilderImpl<T> link(TypeLiteral<T> type) {
     return link(Key.get(type));
   }
 
-  public ConstantBindingBuilder bindConstant(Annotation annotation) {
+  public ConstantBindingBuilderImpl bindConstant(Annotation annotation) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotation));
   }
 
-  public ConstantBindingBuilder bindConstant(
+  public ConstantBindingBuilderImpl bindConstant(
       Class<? extends Annotation> annotationType) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotationType));
   }
 
-  private ConstantBindingBuilder bind(Object source,
+  private ConstantBindingBuilderImpl bind(Object source,
       AnnotationStrategy annotationStrategy) {
     ConstantBindingBuilderImpl builder =
         new ConstantBindingBuilderImpl(this, annotationStrategy).from(source);
