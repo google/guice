@@ -112,7 +112,7 @@
     <mkdir dir="${build.dir}/javadoc"/>
     <javadoc packagenames="${javadoc.packagenames}"
          destdir="${build.dir}/javadoc"
-         author="true"
+         author="false"
          protected="true"
          windowtitle="Guice 1.0 API">
       <sourcepath>
