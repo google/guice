@@ -18,6 +18,7 @@ package com.google.inject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import com.google.inject.util.StackTraceElements;
 
 /**
  * Injects constructors.
@@ -77,7 +78,8 @@ class ConstructorInjector<T> {
       if (constructor.getAnnotation(Inject.class) != null) {
         if (found != null) {
           container.errorHandler.handle(
-              ErrorMessages.TOO_MANY_CONSTRUCTORS, implementation);
+              StackTraceElements.forMember(found),
+              ErrorMessages.TOO_MANY_CONSTRUCTORS);
           return ContainerImpl.invalidConstructor();
         }
         found = constructor;
@@ -94,7 +96,10 @@ class ConstructorInjector<T> {
     }
     catch (NoSuchMethodException e) {
       container.errorHandler.handle(
-          ErrorMessages.MISSING_CONSTRUCTOR, implementation);
+          StackTraceElements.forMember(
+              implementation.getDeclaredConstructors()[0]),
+          ErrorMessages.MISSING_CONSTRUCTOR,
+          implementation);
       return ContainerImpl.invalidConstructor();
     }
   }

@@ -23,10 +23,10 @@ package com.google.inject;
  */
 abstract class AbstractErrorHandler implements ErrorHandler {
 
-  public final void handle(String message, Object... arguments) {
+  public final void handle(Object source, String message, Object... arguments) {
     for (int i = 0; i < arguments.length; i++) {
       arguments[i] = ErrorMessages.convert(arguments[i]);
     }
-    handle(String.format(message, arguments));
+    handle(source, String.format(message, arguments));
   }
 }

@@ -23,11 +23,7 @@ class InvalidErrorHandler extends AbstractErrorHandler {
 
   static ErrorHandler INSTANCE = new InvalidErrorHandler();
 
-  public void handle(String message) {
+  public void handle(Object source, String message) {
     throw new AssertionError(message);
-  }
-
-  public void handle(Throwable t) {
-    throw new AssertionError(t);
   }
 }

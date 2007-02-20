@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Collection;
 import java.util.Arrays;
+import com.google.inject.util.StackTraceElements;
 
 /**
  * Error message templates.
@@ -32,23 +33,27 @@ import java.util.Arrays;
 class ErrorMessages {
 
   private static final String MISSING_BINDING =
-      "Binding to %s not found, but %s requires it. No bindings to that"
+      "Binding to %s not found. No bindings to that"
           + " type were found.";
 
   private static final String MISSING_BINDING_BUT_OTHERS_EXIST =
-      "Binding to %s not found, but %s requires it. Annotations on other"
+      "Binding to %s not found. Annotations on other"
           + " bindings to that type include: %s";
 
   static void handleMissingBinding(ErrorHandler errorHandler, Member member,
       Key<?> key, List<String> otherNames) {
     if (otherNames.isEmpty()) {
-      errorHandler.handle(MISSING_BINDING, key, member);
+      errorHandler.handle(StackTraceElements.forMember(member),
+          MISSING_BINDING, key);
     }
     else {
-      errorHandler.handle(
-          MISSING_BINDING_BUT_OTHERS_EXIST, key, member, otherNames);
+      errorHandler.handle(StackTraceElements.forMember(member),
+          MISSING_BINDING_BUT_OTHERS_EXIST, key, otherNames);
     }
   }
+
+  static final String CONSTANT_CONVERSION_ERROR = "Error converting String"
+      + " constant bound at %s to %s: %s";
 
   static final String CANNOT_BIND_TO_LOCATOR = "Binding to Locator<?> is not"
       + " allowed.";
@@ -65,8 +70,8 @@ class ErrorMessages {
   static final String MISSING_CONSTRUCTOR = "Could not find a suitable"
       + " constructor in %s. " + CONSTRUCTOR_RULES;
 
-  static final String TOO_MANY_CONSTRUCTORS = "More than one constructor"
-      + " annotated with @Inject found in %s. " + CONSTRUCTOR_RULES;
+  static final String TOO_MANY_CONSTRUCTORS = "Found more than one constructor"
+      + " annotated with @Inject. " + CONSTRUCTOR_RULES;
 
   static final String DUPLICATE_SCOPES = "Scope %s is already bound to %s."
       + " Cannot bind %s.";
@@ -90,11 +95,11 @@ class ErrorMessages {
 
   static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
 
-  static final String DUPLICATE_ANNOTATIONS = "Duplicate binding annotations"
-      + " found on %s: %s and %s";
+  static final String DUPLICATE_ANNOTATIONS = "Found more than one annotation"
+      + " annotated with @Binder: %s and %s";
 
-  public static final String DUPLICATE_SCOPE_ANNOTATIONS = "Duplicate scope"
-      + " annotations found on %s: %s and %s";
+  public static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
+      + " annotation was found: %s and %s";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
       + " than once.";

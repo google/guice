@@ -18,6 +18,7 @@ package com.google.inject;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import com.google.inject.util.StackTraceElements;
 
 /**
  * Built in scope implementations.
@@ -96,8 +97,8 @@ public class Scopes {
       Scope scope = scopes.get(annotation.annotationType());
       if (scope != null) {
         if (found != null) {
-          errorHandler.handle(ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS,
-              implementation, found, scope);
+          errorHandler.handle(StackTraceElements.forType(implementation),
+              ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS, found, scope);
         } else {
           found = scope;
         }

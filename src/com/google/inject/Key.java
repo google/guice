@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.ToStringBuilder;
+import com.google.inject.util.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
@@ -276,8 +277,8 @@ public abstract class Key<T> {
         if (found == null) {
           found = annotation;
         } else {
-          errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS, member,
-              found, annotation);
+          errorHandler.handle(StackTraceElements.forMember(member),
+              ErrorMessages.DUPLICATE_ANNOTATIONS, found, annotation);
         }
       }
     }

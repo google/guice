@@ -23,6 +23,7 @@ import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
 import com.google.inject.util.SurrogateAnnotations;
 import com.google.inject.util.DuplicateAnnotationException;
+import com.google.inject.util.StackTraceElements;
 
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -91,6 +92,7 @@ class ContainerImpl implements Container {
   final Map<Class<? extends Annotation>, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
+  Object defaultSource = "[unknown source]";
 
   ContainerImpl(ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, Binding<?>> bindings,
@@ -130,14 +132,17 @@ class ContainerImpl implements Container {
     return names;
   }
 
-  void withErrorHandler(ErrorHandler errorHandler, Runnable runnable) {
-    ErrorHandler previous = this.errorHandler;
-    this.errorHandler = errorHandler;
+  /**
+   * This is only used during container building.
+   */
+  void withDefaultSource(Object defaultSource, Runnable runnable) {
+    Object previous = this.defaultSource;
+    this.defaultSource = defaultSource;
     try {
       runnable.run();
     }
     finally {
-      this.errorHandler = previous;
+      this.defaultSource = previous;
     }
   }
 
@@ -213,8 +218,8 @@ class ContainerImpl implements Container {
           return new ConstantFactory<T>(t);
         }
         catch (ConstantConversionException e) {
-          errorHandler.handle(e);
-          return invalidFactory();
+          return handleConstantConversionError(
+              member, stringBinding, rawType, e);
         }
       }
 
@@ -225,8 +230,8 @@ class ContainerImpl implements Container {
           t = (T) Enum.valueOf((Class) rawType, value);
         }
         catch (IllegalArgumentException e) {
-          errorHandler.handle(createMessage(value, key, member, e.toString()));
-          return invalidFactory();
+          return handleConstantConversionError(
+              member, stringBinding, rawType, e);
         }
         return new ConstantFactory<T>(t);
       }
@@ -238,8 +243,8 @@ class ContainerImpl implements Container {
           return new ConstantFactory<T>((T) Class.forName(value));
         }
         catch (ClassNotFoundException e) {
-          errorHandler.handle(createMessage(value, key, member, e.toString()));
-          return invalidFactory();
+          return handleConstantConversionError(
+              member, stringBinding, rawType, e);
         }
       }
     }
@@ -257,12 +262,9 @@ class ContainerImpl implements Container {
       // If we're injecting into a member, include it in the error messages.
       final ErrorHandler previous = this.errorHandler;
       this.errorHandler = new AbstractErrorHandler() {
-        public void handle(String message) {
-          previous.handle("Error while injecting "
-              + ErrorMessages.convert(member) + ": " + message);
-        }
-        public void handle(Throwable t) {
-          previous.handle(t);
+        public void handle(Object source, String message) {
+          previous.handle(source, "Error while injecting at "
+              + StackTraceElements.forMember(member) + ": " + message);
         }
       };
       try {
@@ -273,6 +275,18 @@ class ContainerImpl implements Container {
       }
     }
     return (InternalFactory<? extends T>) getImplicitBinding(rawType);
+  }
+
+  private <T> InternalFactory<T> handleConstantConversionError(
+      Member member, Binding<String> stringBinding, Class<?> rawType,
+      Exception e) {
+    errorHandler.handle(
+        StackTraceElements.forMember(member),
+        ErrorMessages.CONSTANT_CONVERSION_ERROR,
+        stringBinding.getSource(),
+        rawType,
+        e.getMessage());
+    return invalidFactory();
   }
 
   boolean isConstantType(Class<?> type) {
@@ -287,11 +301,6 @@ class ContainerImpl implements Container {
   final Map<Class<?>, List<Injector>> injectors
       = new ReferenceCache<Class<?>, List<Injector>>() {
     protected List<Injector> create(Class<?> key) {
-      if (key.isInterface()) {
-        errorHandler.handle(ErrorMessages.CANNOT_INJECT_INTERFACE, key);
-        return Collections.emptyList();
-      }
-
       List<Injector> injectors = new ArrayList<Injector>();
       addInjectors(key, injectors);
       return injectors;
@@ -342,15 +351,7 @@ class ContainerImpl implements Container {
       InjectorFactory<M> injectorFactory) {
     for (M member : members) {
       if (isStatic(member) == statics) {
-        Inject inject = null;
-        try {
-          inject = SurrogateAnnotations.findAnnotation(Inject.class, member);
-        } catch (DuplicateAnnotationException e) {
-          errorHandler.handle(ErrorMessages.DUPLICATE_ANNOTATIONS,
-              Inject.class.getSimpleName(), member, e.getFirst(),
-              e.getSecond());
-        }
-
+        Inject inject = member.getAnnotation(Inject.class);
         if (inject != null) {
           try {
             injectors.add(injectorFactory.create(this, member));
@@ -525,7 +526,7 @@ class ContainerImpl implements Container {
     @SuppressWarnings("unchecked")
     protected ConstructorInjector<?> create(Class<?> implementation) {
       if (implementation.isInterface()) {
-        errorHandler.handle(
+        errorHandler.handle(defaultSource,
             ErrorMessages.CANNOT_INJECT_INTERFACE, implementation);
         return ConstructorInjector.invalidConstructor();
       }

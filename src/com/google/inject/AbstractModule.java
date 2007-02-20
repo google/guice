@@ -75,11 +75,11 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#scope(Class, Scope)
+   * @see ContainerBuilder#bindScope(Class, Scope)
    */
   protected void scope(Class<? extends Annotation> scopeAnnotation,
       Scope scope) {
-    builder.scope(scopeAnnotation, scope);
+    builder.bindScope(scopeAnnotation, scope);
   }
 
   /**

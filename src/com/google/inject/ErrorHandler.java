@@ -26,15 +26,10 @@ interface ErrorHandler {
   /**
    * Handles an error.
    */
-  void handle(String message);
+  void handle(Object source, String message);
 
   /**
    * Handles an error.
    */
-  void handle(String message, Object... arguments);
-
-  /**
-   * Handles an error.
-   */
-  void handle(Throwable t);
+  void handle(Object source, String message, Object... arguments);
 }
