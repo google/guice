@@ -16,13 +16,12 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Annotation;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -80,22 +79,22 @@ public class FactoryTest extends TestCase {
   static class NegativeOne {}
 
   @Retention(RUNTIME)
-  @Binder @interface FooAnnotation {}
+  @BindingAnnotation @interface FooAnnotation {}
 
   @Retention(RUNTIME)
-  @Binder @interface BarAnnotation {}
+  @BindingAnnotation @interface BarAnnotation {}
 
   @Retention(RUNTIME)
-  @Binder @interface TeeAnnotation1 {}
+  @BindingAnnotation @interface TeeAnnotation1 {}
 
   @Retention(RUNTIME)
-  @Binder @interface TeeAnnotation2 {}
+  @BindingAnnotation @interface TeeAnnotation2 {}
 
   @Retention(RUNTIME)
-  @Binder @interface BobAnnotation1 {}
+  @BindingAnnotation @interface BobAnnotation1 {}
 
   @Retention(RUNTIME)
-  @Binder @interface BobAnnotation2 {}
+  @BindingAnnotation @interface BobAnnotation2 {}
 
   public void testInjection() throws Exception {
     ContainerBuilder cb = new ContainerBuilder(Stage.PRODUCTION);

@@ -17,11 +17,11 @@
 package com.google.inject.tools.jmx;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.ContainerScoped;
 import com.google.inject.Key;
-import com.google.inject.servlet.ServletModule;
 import com.google.inject.name.Names;
+import com.google.inject.servlet.ServletModule;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -39,8 +39,7 @@ public class JmxTest {
 
   static class Bar {}
 
-  @Binder
-  @Retention(RUNTIME)
+  @BindingAnnotation @Retention(RUNTIME)
   @interface Transactional {}
 
   public static void main(String[] args) throws Exception {

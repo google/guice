@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -26,7 +26,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ReflectionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @Binder @interface I {}
+  @BindingAnnotation @interface I {}
 
   public void testNormalBinding() throws CreationException {
     ContainerBuilder builder = new ContainerBuilder();

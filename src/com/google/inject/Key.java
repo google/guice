@@ -275,7 +275,7 @@ public abstract class Key<T> {
       ErrorHandler errorHandler) {
     Annotation found = null;
     for (Annotation annotation : annotations) {
-      if (annotation.annotationType().getAnnotation(Binder.class) != null) {
+      if (annotation.annotationType().getAnnotation(BindingAnnotation.class) != null) {
         if (found == null) {
           found = annotation;
         } else {

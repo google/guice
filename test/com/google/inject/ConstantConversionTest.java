@@ -16,10 +16,9 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -27,16 +26,16 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ConstantConversionTest extends TestCase {
 
   @Retention(RUNTIME)
-  @Binder @interface NumericValue {}
+  @BindingAnnotation @interface NumericValue {}
 
   @Retention(RUNTIME)
-  @Binder @interface BooleanValue {}
+  @BindingAnnotation @interface BooleanValue {}
 
   @Retention(RUNTIME)
-  @Binder @interface EnumValue {}
+  @BindingAnnotation @interface EnumValue {}
 
   @Retention(RUNTIME)
-  @Binder @interface ClassName {}
+  @BindingAnnotation @interface ClassName {}
 
   public static class Foo {
     @Inject @NumericValue Integer integerField;

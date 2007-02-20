@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.google.inject.BindingAnnotation;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.Binder;
+import java.lang.annotation.Target;
 
 /**
  * Apply this to field or parameters of type {@code Map<String, String[]>}
@@ -30,5 +30,5 @@ import com.google.inject.Binder;
  */
 @Retention(RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Binder
+@BindingAnnotation
 public @interface RequestParameters {}

@@ -16,11 +16,11 @@
 
 package com.google.inject.name;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.google.inject.BindingAnnotation;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import com.google.inject.Binder;
+import java.lang.annotation.Target;
 
 /**
  * Annotates named things.
@@ -29,7 +29,7 @@ import com.google.inject.Binder;
  */
 @Retention(RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Binder
+@BindingAnnotation
 public @interface Named {
   String value();
 }

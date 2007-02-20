@@ -16,13 +16,12 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
-import java.util.List;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -32,7 +31,7 @@ public class KeyTest extends TestCase {
   public void foo(List<String> a, List<String> b) {}
 
   @Retention(RUNTIME)
-  @Binder @interface Foo {}
+  @BindingAnnotation @interface Foo {}
 
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);

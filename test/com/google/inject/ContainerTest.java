@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -26,13 +26,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ContainerTest extends TestCase {
 
   @Retention(RUNTIME)
-  @Binder @interface Other {}
+  @BindingAnnotation @interface Other {}
 
   @Retention(RUNTIME)
-  @Binder @interface S {}
+  @BindingAnnotation @interface S {}
 
   @Retention(RUNTIME)
-  @Binder @interface I {}
+  @BindingAnnotation @interface I {}
 
   public void testLocatorMethods() throws CreationException {
     Singleton singleton = new Singleton();

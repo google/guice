@@ -16,14 +16,14 @@
 
 package com.google.inject;
 
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import com.google.inject.util.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Collection;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Arrays;
-import com.google.inject.util.StackTraceElements;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Error message templates.
@@ -96,7 +96,7 @@ class ErrorMessages {
   static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
 
   static final String DUPLICATE_ANNOTATIONS = "Found more than one annotation"
-      + " annotated with @Binder: %s and %s";
+      + " annotated with @BindingAnnotation: %s and %s";
 
   public static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
       + " annotation was found: %s and %s";

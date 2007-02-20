@@ -42,14 +42,6 @@
  * <dd>The interface you will implement when you need to customize exactly how
  *     Guice creates instances for a particular binding.
  *
- * <dt>{@link com.google.inject.Container}
- * <dd>An object which creates and manages all the instances that make
- *     up your application.  It is created by a
- *     {@link com.google.inject.ContainerBuilder} after each of your
- *     {@link com.google.inject.Module Modules} has been allowed to contribute
- *     its bindings.  In most cases you will never need to interact directly
- *     with the container -- which is the main distinguishing feature of the
- *     Dependency Injection pattern from its rival, Service Locator.
  * </dl>
  *
  */
