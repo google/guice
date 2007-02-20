@@ -94,23 +94,21 @@ public class PerformanceComparison {
   static final Callable<Foo> juiceFactory = new Callable<Foo>() {
     final Locator<Foo> fooLocator;
     {
-      ContainerBuilder builder = new ContainerBuilder();
-
-      builder.install(new AbstractModule() {
-        protected void configure() {
-          bind(Tee.class).to(TeeImpl.class);
-          bind(Bar.class).to(BarImpl.class);
-          bind(Foo.class);
-          bindConstant(I.class).to(5);
-          bindConstant(S.class).to("test");
-        }
-      });
-
+      Container container;
       try {
-        fooLocator = builder.create().getLocator(Foo.class);
+        container = Guice.newContainer(new AbstractModule() {
+          protected void configure() {
+            bind(Tee.class).to(TeeImpl.class);
+            bind(Bar.class).to(BarImpl.class);
+            bind(Foo.class);
+            bindConstant(I.class).to(5);
+            bindConstant(S.class).to("test");
+          }
+        });
       } catch (CreationException e) {
         throw new RuntimeException(e);
       }
+      fooLocator = container.getLocator(Foo.class);
     }
 
     public Foo call() throws Exception {

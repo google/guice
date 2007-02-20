@@ -46,7 +46,7 @@ import net.sf.cglib.reflect.FastMethod;
  * Default {@link Container} implementation.
  *
  * @author crazybob@google.com (Bob Lee)
- * @see ContainerBuilder
+ * @see BinderImpl
  */
 class ContainerImpl implements Container {
 

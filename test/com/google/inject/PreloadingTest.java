@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import static com.google.inject.Scopes.CONTAINER;
-
 import junit.framework.TestCase;
 
 /**
@@ -31,31 +30,31 @@ public class PreloadingTest extends TestCase {
   }
 
   public void testPreloadSome() throws CreationException {
-    ContainerBuilder builder = createContainerBuilder(Stage.DEVELOPMENT);
-    builder.create();
+    BinderImpl builder = createBinder(Stage.DEVELOPMENT);
+    builder.createContainer();
     assertEquals(1, Foo.count);
     assertEquals(0, Bar.count);
   }
 
   public void testPreloadAll() throws CreationException {
-    ContainerBuilder builder = createContainerBuilder(Stage.PRODUCTION);
-    builder.create();
+    BinderImpl builder = createBinder(Stage.PRODUCTION);
+    builder.createContainer();
     assertEquals(1, Foo.count);
     assertEquals(1, Bar.count);
   }
 
-  private ContainerBuilder createContainerBuilder(Stage stage) {
-    ContainerBuilder builder = new ContainerBuilder(stage);
+  private BinderImpl createBinder(Stage stage) {
+    BinderImpl builder = new BinderImpl(stage);
     builder.bind(Foo.class).in(CONTAINER).eagerly();
     builder.bind(Bar.class);
     return builder;
   }
 
   public void testInvalidPreload() {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(Foo.class).eagerly();
     try {
-      builder.create();
+      builder.createContainer();
       fail();
     } catch (CreationException e) { /* expected */ }
   }

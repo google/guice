@@ -29,10 +29,10 @@ public class ReflectionTest extends TestCase {
   @BindingAnnotation @interface I {}
 
   public void testNormalBinding() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     Foo foo = new Foo();
     builder.bind(Foo.class).to(foo);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getLocator().get());
     assertNotNull(fooBinding.getSource());
@@ -41,9 +41,9 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testConstantBinding() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Binding<?> i = container.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getLocator().get());
     assertNotNull(i.getSource());
@@ -52,11 +52,11 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testLinkedBinding() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     Bar bar = new Bar();
     builder.bind(Bar.class).to(bar);
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getLocator().get());
     assertNotNull(fooBinding.getSource());

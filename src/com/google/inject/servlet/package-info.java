@@ -18,7 +18,7 @@
  * Servlet API scopes and bindings. Apply {@link
  * com.google.inject.servlet.GuiceFilter} to any servlets which will use the
  * servlet scopes. Install {@link com.google.inject.servlet.ServletModule}
- * into your {@link com.google.inject.ContainerBuilder} to install everything
+ * into your {@link com.google.inject.BinderImpl} to install everything
  * at once.
  */
 package com.google.inject.servlet;

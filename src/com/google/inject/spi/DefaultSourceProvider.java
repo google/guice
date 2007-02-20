@@ -17,14 +17,13 @@
 package com.google.inject.spi;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.ContainerBuilder;
-
-import java.util.Set;
-import java.util.HashSet;
+import com.google.inject.BinderImpl;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * A source provider which returns {@code ContainerBuilder}'s caller's {@code
+ * A source provider which returns {@code Binder}'s caller's {@code
  * StackTraceElement}.
  * 
  * @author crazybob@google.com (Bob Lee)
@@ -32,7 +31,7 @@ import java.util.Arrays;
 public class DefaultSourceProvider implements SourceProvider {
 
   final Set<String> skippedClassNames = new HashSet<String>(Arrays.asList(
-      ContainerBuilder.class.getName(),
+      BinderImpl.class.getName(),
       AbstractModule.class.getName(),
       DefaultSourceProvider.class.getName(),
       SourceConsumer.class.getName()

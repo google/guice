@@ -61,10 +61,10 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testOneConstantInjection() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Simple simple = container.getLocator(Simple.class).get();
     assertEquals(5, simple.i);
   }
@@ -74,12 +74,12 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testConstantInjection() throws CreationException {
-    ContainerBuilder b = new ContainerBuilder();
+    BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("5");
     b.bindConstant(BooleanValue.class).to("true");
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
-    Container c = b.create();
+    Container c = b.createContainer();
     Foo foo = c.getLocator(Foo.class).get();
 
     checkNumbers(
@@ -108,9 +108,9 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidInteger() throws CreationException {
-    ContainerBuilder b = new ContainerBuilder();
+    BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create();
+    Container c = b.createContainer();
     try {
       c.getLocator(InvalidInteger.class).get();
       fail();
@@ -122,9 +122,9 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidCharacter() throws CreationException {
-    ContainerBuilder b = new ContainerBuilder();
+    BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create();
+    Container c = b.createContainer();
     try {
       c.getLocator(InvalidCharacter.class).get();
       fail();
@@ -136,9 +136,9 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidEnum() throws CreationException {
-    ContainerBuilder b = new ContainerBuilder();
+    BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.create();
+    Container c = b.createContainer();
     try {
       c.getLocator(InvalidEnum.class).get();
       fail();

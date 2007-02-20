@@ -24,9 +24,9 @@ import junit.framework.TestCase;
 public class SuperclassTest extends TestCase {
 
   public void testSuperclassInjection() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(Foo.class);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Locator<Sub> creator = container.getLocator(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();

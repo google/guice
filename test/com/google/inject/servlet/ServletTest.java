@@ -16,28 +16,24 @@
 
 package com.google.inject.servlet;
 
+import com.google.inject.BinderImpl;
 import com.google.inject.Container;
-import com.google.inject.ContainerBuilder;
 import com.google.inject.CreationException;
 import com.google.inject.Key;
-
-import junit.framework.TestCase;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -174,11 +170,11 @@ public class ServletTest extends TestCase {
   }
 
   private Container createContainer() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.install(new ServletModule());
     builder.bind(InSession.class);
     builder.bind(InRequest.class);
-    return builder.create();
+    return builder.createContainer();
   }
 
   @SessionScoped

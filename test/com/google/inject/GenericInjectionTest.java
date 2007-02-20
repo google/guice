@@ -16,10 +16,9 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -28,9 +27,9 @@ public class GenericInjectionTest extends TestCase {
 
   public void testGenericInjection() throws CreationException {
     List<String> names = Arrays.asList("foo", "bar", "bob");
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(new TypeLiteral<List<String>>() {}).to(names);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     Foo foo = container.getLocator(Foo.class).get();
     assertEquals(names, foo.names);
   }

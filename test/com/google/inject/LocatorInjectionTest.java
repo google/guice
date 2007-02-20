@@ -24,12 +24,12 @@ import junit.framework.TestCase;
 public class LocatorInjectionTest extends TestCase {
 
   public void testLocatorInjection() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
 
     builder.bind(Bar.class);
     builder.bind(ContainerScoped.class).in(Scopes.CONTAINER);
 
-    Container container = builder.create();
+    Container container = builder.createContainer();
 
     Foo foo = container.getLocator(Foo.class).get();
 

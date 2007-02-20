@@ -16,12 +16,12 @@
 
 package com.google.inject.name;
 
+import com.google.inject.BinderImpl;
+import com.google.inject.Key;
+import com.google.inject.spi.DefaultSourceProvider;
+import com.google.inject.spi.SourceProvider;
 import java.util.Map;
 import java.util.Properties;
-import com.google.inject.Key;
-import com.google.inject.ContainerBuilder;
-import com.google.inject.spi.SourceProvider;
-import com.google.inject.spi.DefaultSourceProvider;
 
 /**
  * Utility methods for use with {@code @}{@link Named}.
@@ -42,7 +42,7 @@ public class Names {
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(ContainerBuilder builder,
+  public static void bindProperties(BinderImpl builder,
       Map<String, String> properties) {
     skipNames(builder);
     for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -55,7 +55,7 @@ public class Names {
   /**
    * Creates a constant binding to {@code @Named(key)} for each property.
    */
-  public static void bindProperties(ContainerBuilder builder,
+  public static void bindProperties(BinderImpl builder,
       Properties properties) {
     skipNames(builder);
     for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -65,7 +65,7 @@ public class Names {
     }
   }
 
-  private static void skipNames(ContainerBuilder builder) {
+  private static void skipNames(BinderImpl builder) {
     SourceProvider sourceProvider = builder.getSourceProvider();
     if (sourceProvider instanceof DefaultSourceProvider) {
       ((DefaultSourceProvider) sourceProvider).skip(Names.class);

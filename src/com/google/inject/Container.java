@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-import java.lang.annotation.Annotation;
 
 /**
  * Injects dependencies into constructors, methods and fields annotated with
@@ -30,7 +30,7 @@ import java.lang.annotation.Annotation;
  * {@code int}, the container will look for a binding to {@code Integer}.
  *
  * @author crazybob@google.com (Bob Lee)
- * @see ContainerBuilder
+ * @see BinderImpl
  */
 public interface Container {
 

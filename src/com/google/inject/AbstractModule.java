@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.util.Objects;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.util.Objects;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -26,7 +26,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * A support class for {@link Module Modules} which reduces repetition and
  * results in a more readable configuration. Simply extends this class,
  * implement {@link #configure()}, and call the inherited methods which mirror
- * those found in {@link ContainerBuilder}. For example:
+ * those found in {@link BinderImpl}. For example:
  *
  * <pre>
  * import static com.google.inject.Names.named;
@@ -45,9 +45,9 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public abstract class AbstractModule implements Module {
 
-  ContainerBuilder builder;
+  Binder builder;
 
-  public final synchronized void configure(ContainerBuilder builder) {
+  public final synchronized void configure(BinderImpl builder) {
     try {
       if (this.builder != null) {
         throw new IllegalStateException("Re-entry is not allowed.");
@@ -63,19 +63,19 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * Configures a {@link ContainerBuilder} via the exposed methods.
+   * Configures a {@link BinderImpl} via the exposed methods.
    */
   protected abstract void configure();
 
   /**
    * Gets the builder.
    */
-  protected ContainerBuilder builder() {
+  protected Binder builder() {
     return builder;
   }
 
   /**
-   * @see ContainerBuilder#bindScope(Class, Scope)
+   * @see BinderImpl#bindScope(Class, Scope)
    */
   protected void scope(Class<? extends Annotation> scopeAnnotation,
       Scope scope) {
@@ -83,72 +83,72 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see ContainerBuilder#bind(Key)
+   * @see BinderImpl#bind(Key)
    */
-  protected <T> ContainerBuilder.BindingBuilder<T> bind(Key<T> key) {
+  protected <T> BinderImpl.BindingBuilder<T> bind(Key<T> key) {
     return builder.bind(key);
   }
 
   /**
-   * @see ContainerBuilder#bind(TypeLiteral)
+   * @see BinderImpl#bind(TypeLiteral)
    */
-  protected <T> ContainerBuilder.BindingBuilder<T> bind(
+  protected <T> BinderImpl.BindingBuilder<T> bind(
       TypeLiteral<T> typeLiteral) {
     return builder.bind(typeLiteral);
   }
 
   /**
-   * @see ContainerBuilder#bind(Class)
+   * @see BinderImpl#bind(Class)
    */
-  protected <T> ContainerBuilder.BindingBuilder<T> bind(Class<T> clazz) {
+  protected <T> BinderImpl.BindingBuilder<T> bind(Class<T> clazz) {
     return builder.bind(clazz);
   }
 
   /**
-   * @see ContainerBuilder#link(Key)
+   * @see BinderImpl#link(Key)
    */
-  protected <T> ContainerBuilder.LinkedBindingBuilder<T> link(Key<T> key) {
+  protected <T> BinderImpl.LinkedBindingBuilder<T> link(Key<T> key) {
     return builder.link(key);
   }
 
   /**
-   * @see ContainerBuilder#bindConstant(Class)
+   * @see BinderImpl#bindConstant(Class)
    */
-  protected ContainerBuilder.ConstantBindingBuilder bindConstant(
+  protected BinderImpl.ConstantBindingBuilder bindConstant(
       Class<? extends Annotation> annotationType) {
     return builder.bindConstant(annotationType);
   }
 
   /**
-   * @see ContainerBuilder#bindConstant(java.lang.annotation.Annotation)
+   * @see BinderImpl#bindConstant(java.lang.annotation.Annotation)
    */
-  protected ContainerBuilder.ConstantBindingBuilder bindConstant(
+  protected BinderImpl.ConstantBindingBuilder bindConstant(
       Annotation annotation) {
     return builder.bindConstant(annotation);
   }
 
   /**
-   * @see ContainerBuilder#install(Module)
+   * @see BinderImpl#install(Module)
    */
   protected void install(Module module) {
     builder.install(module);
   }
 
   /**
-   * @see ContainerBuilder#requestStaticInjection(Class[])
+   * @see BinderImpl#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {
     builder.requestStaticInjection(types);
   }
 
   /**
-   * @see ContainerBuilder#intercept(com.google.inject.matcher.Matcher,
+   * @see BinderImpl#bindInterceptor(com.google.inject.matcher.Matcher,
    *  com.google.inject.matcher.Matcher,
    *  org.aopalliance.intercept.MethodInterceptor[])
    */
   protected void intercept(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor... interceptors) {
-    builder.intercept(classMatcher, methodMatcher, interceptors);
+    builder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
 }

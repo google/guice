@@ -32,12 +32,12 @@ public class StaticInjectionTest extends TestCase {
   @BindingAnnotation @interface S {}
 
   public void testInjectStatics() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
-    Container c = builder.create();
+    Container c = builder.createContainer();
 
     assertEquals("test", StaticInjectionTest.Static.s);
     assertEquals(5, StaticInjectionTest.Static.i);

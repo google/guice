@@ -17,7 +17,7 @@
 package com.google.inject.spi;
 
 /**
- * Provides source objects to the {@link com.google.inject.ContainerBuilder}.
+ * Provides source objects to the {@link com.google.inject.BinderImpl}.
  * A source object is any object which points back to the current location
  * within the configuration. Guice uses source objects in error messages
  * and associates them with bindings.

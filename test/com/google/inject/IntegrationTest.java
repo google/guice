@@ -17,9 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.any;
-
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -31,10 +29,10 @@ public class IntegrationTest extends TestCase {
   public void testIntegration() throws CreationException {
     CountingInterceptor counter = new CountingInterceptor();
 
-    ContainerBuilder containerBuilder = new ContainerBuilder();
-    containerBuilder.bind(Foo.class);
-    containerBuilder.intercept(any(), any(), counter);
-    Container container = containerBuilder.create();
+    BinderImpl binder = new BinderImpl();
+    binder.bind(Foo.class);
+    binder.bindInterceptor(any(), any(), counter);
+    Container container = binder.createContainer();
 
     Foo foo = container.getLocator(Key.get(Foo.class)).get();
     foo.foo();

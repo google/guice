@@ -51,10 +51,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class ContainerBuilder extends SourceConsumer {
+public final class BinderImpl extends SourceConsumer implements Binder {
 
   private static final Logger logger
-      = Logger.getLogger(ContainerBuilder.class.getName());
+      = Logger.getLogger(BinderImpl.class.getName());
 
   final List<BindingBuilder<?>> bindingBuilders
       = new ArrayList<BindingBuilder<?>>();
@@ -113,7 +113,7 @@ public final class ContainerBuilder extends SourceConsumer {
    * @param stage we're running in. If the stage is {@link Stage#PRODUCTION},
    *  we will eagerly load container-scoped objects.
    */
-  public ContainerBuilder(Stage stage) {
+  public BinderImpl(Stage stage) {
     bindScope(ContainerScoped.class, CONTAINER);
 
     bind(Container.class).to(CONTAINER_FACTORY);
@@ -129,7 +129,7 @@ public final class ContainerBuilder extends SourceConsumer {
    * Constructs a new builder for a development environment (see
    * {@link Stage#DEVELOPMENT}).
    */
-  public ContainerBuilder() {
+  public BinderImpl() {
     this(Stage.DEVELOPMENT);
   }
 
@@ -140,25 +140,12 @@ public final class ContainerBuilder extends SourceConsumer {
     void notify(ContainerImpl container);
   }
 
-  /**
-   * Applies the given method interceptor to the methods matched by the class
-   * and method matchers.
-   *
-   * @param classMatcher matches classes the interceptor should apply to. For
-   *     example: {@code only(Runnable.class)}.
-   * @param methodMatcher matches methods the interceptor should apply to. For
-   *     example: {@code annotatedWith(Transactional.class)}.
-   * @param interceptors to apply
-   */
-  public void intercept(Matcher<? super Class<?>> classMatcher,
+  public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
     ensureNotCreated();
     proxyFactoryBuilder.intercept(classMatcher, methodMatcher, interceptors);
   }
 
-  /**
-   * Binds a scope to an annotation.
-   */
   public void bindScope(Class<? extends Annotation> annotationType,
       Scope scope) {
     ensureNotCreated();
@@ -172,9 +159,6 @@ public final class ContainerBuilder extends SourceConsumer {
     }
   }
 
-  /**
-   * Binds the given key.
-   */
   public <T> BindingBuilder<T> bind(Key<T> key) {
     ensureNotCreated();
     BindingBuilder<T> builder = new BindingBuilder<T>(key, source());
@@ -182,24 +166,14 @@ public final class ContainerBuilder extends SourceConsumer {
     return builder;
   }
 
-  /**
-   * Binds the given type.
-   */
   public <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return bind(Key.get(typeLiteral));
   }
 
-  /**
-   * Binds the given type.
-   */
   public <T> BindingBuilder<T> bind(Class<T> clazz) {
     return bind(Key.get(clazz));
   }
 
-  /**
-   * Links the given key to another key effectively creating an alias for a
-   * binding.
-   */
   public <T> LinkedBindingBuilder<T> link(Key<T> key) {
     ensureNotCreated();
     LinkedBindingBuilder<T> builder =
@@ -210,42 +184,25 @@ public final class ContainerBuilder extends SourceConsumer {
 
   // Next three methods not test-covered?
 
-  /**
-   * Links the given type to another key effectively creating an alias for a
-   * binding.
-   */
   public <T> LinkedBindingBuilder<T> link(Class<T> type) {
     return link(Key.get(type));
   }
 
-  /**
-   * Links the given type to another key effectively creating an alias for a
-   * binding.
-   */
   public <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type) {
     return link(Key.get(type));
   }
 
-  /**
-   * Binds a constant to the given annotation.
-   */
   public ConstantBindingBuilder bindConstant(Annotation annotation) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotation));
   }
 
-  /**
-   * Binds a constant to the given annotation type.
-   */
   public ConstantBindingBuilder bindConstant(
       Class<? extends Annotation> annotationType) {
     ensureNotCreated();
     return bind(source(), Key.strategyFor(annotationType));
   }
 
-  /**
-   * Binds a constant to the given name from the given source.
-   */
   private ConstantBindingBuilder bind(Object source,
       AnnotationStrategy annotationStrategy) {
     ConstantBindingBuilder builder =
@@ -254,19 +211,10 @@ public final class ContainerBuilder extends SourceConsumer {
     return builder;
   }
 
-  /**
-   * Upon successful creation, the {@link Container} will inject static fields
-   * and methods in the given classes.
-   *
-   * @param types for which static members will be injected
-   */
   public void requestStaticInjection(Class<?>... types) {
     staticInjections.add(new StaticInjection(source(), types));
   }
 
-  /**
-   * Applies the given module to this builder.
-   */
   public void install(Module module) {
     module.configure(this);
   }
@@ -296,7 +244,7 @@ public final class ContainerBuilder extends SourceConsumer {
    *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
-  public synchronized Container create()
+  public synchronized Container createContainer()
       throws CreationException {
     stopwatch.resetAndLog(logger, "Configuration");
 
@@ -625,7 +573,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     /**
      * Specifies the scope. References the annotation passed to {@link
-     * ContainerBuilder#bindScope(Class, Scope)}.
+     * BinderImpl#bindScope(Class, Scope)}.
      */
     public BindingBuilder<T> in(Class<? extends Annotation> scopeAnnotation) {
       // this method not test-covered
@@ -810,7 +758,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     BindingInfo<?> bindingInfo;
     final AnnotationStrategy annotationStrategy;
-    Object source = ContainerBuilder.UNKNOWN_SOURCE;
+    Object source = UNKNOWN_SOURCE;
 
     ConstantBindingBuilder(AnnotationStrategy annotationStrategy) {
       this.annotationStrategy = annotationStrategy;
@@ -923,7 +871,7 @@ public final class ContainerBuilder extends SourceConsumer {
 
     final Key<T> key;
     Key<? extends T> destination;
-    Object source = ContainerBuilder.UNKNOWN_SOURCE;
+    Object source = UNKNOWN_SOURCE;
 
     LinkedBindingBuilder(Key<T> key) {
       this.key = key;

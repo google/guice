@@ -18,7 +18,7 @@ package com.google.inject.tools.jmx;
 
 import com.google.inject.Binding;
 import com.google.inject.Container;
-import com.google.inject.ContainerBuilder;
+import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import java.lang.annotation.Annotation;
@@ -101,10 +101,7 @@ public class Manager {
     }
 
     Module module = (Module) Class.forName(args[0]).newInstance();
-
-    ContainerBuilder builder = new ContainerBuilder();
-    builder.install(module);
-    Container container = builder.create();
+    Container container = Guice.newContainer(module);
 
     manage(args[0], container);
 

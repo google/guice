@@ -24,16 +24,16 @@ import junit.framework.TestCase;
 public class NotRequiredTest extends TestCase {
 
   public void testProvided() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(Bar.class).to(BarImpl.class);
-    Container c = builder.create();
+    Container c = builder.createContainer();
     Foo foo = c.getLocator(Foo.class).get();
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
   }
 
   public void testNotProvided() throws CreationException {
-    Container c = new ContainerBuilder().create();
+    Container c = Guice.newContainer();
     Foo foo = c.getLocator(Foo.class).get();
     assertNull(foo.bar);
     assertNull(foo.fromMethod);

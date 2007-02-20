@@ -34,7 +34,7 @@
  *     instructions for how Guice should handle injection -- for a particular
  *     set of interfaces.
  *
- * <dt>{@link com.google.inject.ContainerBuilder}
+ * <dt>{@link BinderImpl}
  * <dd>The object that Guice passes into your {@link com.google.inject.Module}
  *     to collect these bindings.
  *

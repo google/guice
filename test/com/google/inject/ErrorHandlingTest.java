@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import java.util.List;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.google.inject.servlet.SessionScoped;
 import com.google.inject.servlet.ServletModule;
+import com.google.inject.servlet.SessionScoped;
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -28,9 +28,7 @@ import com.google.inject.servlet.ServletModule;
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
-    builder.install(new MyModule());
-    builder.create();
+    Guice.newContainer(new MyModule());
   }
 
   @Inject @Named("missing")

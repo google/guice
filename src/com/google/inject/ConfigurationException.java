@@ -17,7 +17,7 @@
 package com.google.inject;
 
 /**
- * Thrown when the {@link ContainerBuilder} is misconfigured.
+ * Thrown when the {@link BinderImpl} is misconfigured.
  *
  * @author crazybob@google.com (Bob Lee)
  */

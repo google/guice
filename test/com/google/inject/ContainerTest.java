@@ -38,12 +38,12 @@ public class ContainerTest extends TestCase {
     Singleton singleton = new Singleton();
     Singleton other = new Singleton();
 
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(Singleton.class).to(singleton);
     builder.bind(Singleton.class)
         .annotatedWith(Other.class)
         .to(other);
-    Container container = builder.create();
+    Container container = builder.createContainer();
 
     assertSame(singleton,
         container.getLocator(Key.get(Singleton.class)).get());
@@ -83,9 +83,7 @@ public class ContainerTest extends TestCase {
   }
 
   private Container createFooContainer() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
-
-    builder.install(new AbstractModule() {
+    return Guice.newContainer(new AbstractModule() {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
@@ -93,8 +91,6 @@ public class ContainerTest extends TestCase {
         bindConstant(I.class).to(5);
       }
     });
-
-    return builder.create();
   }
 
   public void testGetInstance() throws CreationException {
@@ -107,9 +103,9 @@ public class ContainerTest extends TestCase {
 
   public void testIntAndIntegerAreInterchangeable()
       throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.create();
+    Container container = builder.createContainer();
     IntegerWrapper iw = container.getLocator(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
@@ -187,11 +183,11 @@ public class ContainerTest extends TestCase {
 
   public void testCircularlyDependentConstructors()
       throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.create();
+    Container container = builder.createContainer();
     A a = container.getLocator(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
@@ -226,11 +222,11 @@ public class ContainerTest extends TestCase {
   }
 
   public void testInjectStatics() throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(Static.class);
-    builder.create();
+    builder.createContainer();
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);

@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * A module contributes a set of configurations, typically interface bindings,
- * to a {@link ContainerBuilder} which will later create a {@link Container}.
+ * to a {@link BinderImpl} which will later create a {@link Container}.
  * Implementing this interface is the standard means for encapsulating and
  * reusing configuration logic. Your Module classes can use a more streamlined
  * syntax by extending {@link AbstractModule} rather than implementing this
@@ -33,5 +33,5 @@ public interface Module {
    * that the resulting {@link Container} will include this module properly set
    * up.
    */
-  void configure(ContainerBuilder builder);
+  void configure(BinderImpl builder);
 }

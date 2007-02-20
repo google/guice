@@ -24,9 +24,9 @@ import junit.framework.TestCase;
 public class BoundFactoryTest extends TestCase {
 
   public void testFooFactory() throws CreationException {
-    ContainerBuilder cb = new ContainerBuilder();
+    BinderImpl cb = new BinderImpl();
     cb.bind(Foo.class).toFactory(FooFactory.class);
-    Container c = cb.create();
+    Container c = cb.createContainer();
 
     Foo a = c.getInstance(Foo.class);
     Foo b = c.getInstance(Foo.class);
@@ -40,9 +40,9 @@ public class BoundFactoryTest extends TestCase {
 
   public void testContainerScopedFooFactory()
       throws CreationException {
-    ContainerBuilder cb = new ContainerBuilder();
+    BinderImpl cb = new BinderImpl();
     cb.bind(Foo.class).toFactory(ContainerScopedFooFactory.class);
-    Container c = cb.create();
+    Container c = cb.createContainer();
 
     Foo a = c.getInstance(Foo.class);
     Foo b = c.getInstance(Foo.class);

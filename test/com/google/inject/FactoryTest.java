@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 public class FactoryTest extends TestCase {
 
   public void testParameterIndex() throws CreationException {
-    ContainerBuilder cb = new ContainerBuilder();
+    BinderImpl cb = new BinderImpl();
 
     cb.bind(Zero.class).to(new Factory<Zero>() {
       public Zero get(Context context) {
@@ -52,7 +52,7 @@ public class FactoryTest extends TestCase {
       }
     });
 
-    Container c = cb.create();
+    Container c = cb.createContainer();
 
     A a = c.getLocator(A.class).get();
 
@@ -97,7 +97,7 @@ public class FactoryTest extends TestCase {
   @BindingAnnotation @interface BobAnnotation2 {}
 
   public void testInjection() throws Exception {
-    ContainerBuilder cb = new ContainerBuilder(Stage.PRODUCTION);
+    BinderImpl cb = new BinderImpl(Stage.PRODUCTION);
 
     // Called from getInstance().
     cb.bind(Foo.class)
@@ -127,7 +127,7 @@ public class FactoryTest extends TestCase {
     cb.bind(Bob.class).annotatedWith(BobAnnotation2.class).to(
         createFactory(Bob.class, BobAnnotation2.class, execute));
 
-    Container c = cb.create();
+    Container c = cb.createContainer();
 
     Foo foo = c.getLocator(Key.get(Foo.class, FooAnnotation.class)).get();
 

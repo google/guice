@@ -25,11 +25,11 @@ public class CircularDependencyTest extends TestCase {
 
   public void testCircularlyDependentConstructors()
       throws CreationException {
-    ContainerBuilder builder = new ContainerBuilder();
+    BinderImpl builder = new BinderImpl();
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.create();
+    Container container = builder.createContainer();
     A a = container.getLocator(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
