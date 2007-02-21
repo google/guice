@@ -19,6 +19,8 @@ package com.google.inject;
 import static com.google.inject.util.Objects.nonNull;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -94,20 +96,26 @@ public abstract class TypeLiteral<T> {
       return (Class<?>) type;
     }
     else {
-      // type is a parameterized type.
-      if (!(type instanceof ParameterizedType)) {
-        unexpectedType(type, ParameterizedType.class);
-      }
-      ParameterizedType parameterizedType = (ParameterizedType) type;
+      if (type instanceof ParameterizedType) {
+        ParameterizedType parameterizedType = (ParameterizedType) type;
 
-      // I'm not exactly sure why getRawType() returns Type instead of Class.
-      // Neal isn't either but suspects some pathological case related
-      // to nested classes exists.
-      Type rawType = parameterizedType.getRawType();
-      if (!(rawType instanceof Class<?>)) {
-        unexpectedType(rawType, Class.class);
+        // I'm not exactly sure why getRawType() returns Type instead of Class.
+        // Neal isn't either but suspects some pathological case related
+        // to nested classes exists.
+        Type rawType = parameterizedType.getRawType();
+        if (!(rawType instanceof Class<?>)) {
+          throw unexpectedType(rawType, Class.class);
+        }
+        return (Class<?>) rawType;
       }
-      return (Class<?>) rawType;
+
+      if (type instanceof GenericArrayType) {
+        // TODO: Is this sufficient?
+        return Object[].class;
+      }
+
+      // type is a parameterized type.
+      throw unexpectedType(type, ParameterizedType.class);
     }
   }
 
@@ -147,8 +155,8 @@ public abstract class TypeLiteral<T> {
         : type.toString();
   }
 
-  static void unexpectedType(Type type, Class<?> expected) {
-    throw new AssertionError(
+  static AssertionError unexpectedType(Type type, Class<?> expected) {
+    return new AssertionError(
         "Unexpected type. Expected: " + expected.getName()
         + ", got: " + type.getClass().getName()
         + ", for type literal: " + type.toString() + ".");
@@ -189,6 +197,10 @@ public abstract class TypeLiteral<T> {
       return type.hashCode();
     }
 
+    if (type instanceof GenericArrayType) {
+      return hashCode(((GenericArrayType) type).getGenericComponentType()) * 31;
+    }
+
     // This isn't a type we support. Could be a generic array type, wildcard
     // type, etc.
     return type.hashCode();
@@ -225,6 +237,17 @@ public abstract class TypeLiteral<T> {
       }
 
       return true;
+    }
+
+    if (a instanceof GenericArrayType) {
+      if (!(b instanceof GenericArrayType)) {
+        return false;
+      }
+
+      return equals(
+          ((GenericArrayType) a).getGenericComponentType(),
+          ((GenericArrayType) b).getGenericComponentType()
+      );
     }
 
     // This isn't a type we support. Could be a generic array type, wildcard

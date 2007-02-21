@@ -84,4 +84,9 @@ public interface Binder {
    * Uses the given module to configure more bindings.
    */
   void install(Module module);
+
+  /**
+   * Gets the current stage.
+   */
+  Stage currentStage();
 }

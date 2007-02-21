@@ -58,4 +58,13 @@ public class TypeLiteralTest extends TestCase {
       fail();
     } catch (RuntimeException e) { /* expected */ }
   }
+
+  public void testTypesInvolvingArraysForEquality() {
+    TypeLiteral<String[]> stringArray = new TypeLiteral<String[]>() {};
+    assertEquals(stringArray, new TypeLiteral<String[]>() {});
+
+    TypeLiteral<List<String[]>> listOfStringArray
+        = new TypeLiteral<List<String[]>>() {};
+    assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {});
+  }
 }

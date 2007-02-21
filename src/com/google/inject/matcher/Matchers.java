@@ -84,6 +84,26 @@ public class Matchers {
   }
 
   /**
+   * Returns a matcher which matches elements (methods, classes, etc.)
+   * with a given annotation.
+   */
+  public static Matcher<AnnotatedElement> annotatedWith(
+      final Annotation annotation) {
+    Objects.nonNull(annotation, "annotation");
+    return new AbstractMatcher<AnnotatedElement>() {
+      public boolean matches(AnnotatedElement element) {
+        Annotation fromElement
+            = element.getAnnotation(annotation.annotationType());
+        return fromElement != null && annotation.equals(fromElement);
+      }
+
+      public String toString() {
+        return "annotatedWith(" + annotation + ")";
+      }
+    };
+  }
+
+  /**
    * Returns a matcher which matches subclasses of the given type (as well as
    * the given type).
    */

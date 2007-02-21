@@ -128,6 +128,10 @@ class BinderImpl implements Binder {
     this(Stage.DEVELOPMENT);
   }
 
+  public Stage currentStage() {
+    return stage;
+  }
+
   final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
 
