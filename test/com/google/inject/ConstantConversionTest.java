@@ -18,7 +18,10 @@ package com.google.inject;
 
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.Properties;
 import junit.framework.TestCase;
+import com.google.inject.name.Names;
+import com.google.inject.name.Named;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -147,5 +150,17 @@ public class ConstantConversionTest extends TestCase {
 
   public static class InvalidEnum {
     @Inject @NumericValue Bar foo;
+  }
+
+  public void testToInstanceIsTreatedLikeConstant() throws CreationException {
+    BinderImpl b = new BinderImpl();
+    b.bind(String.class).toInstance("5");
+    b.bind(LongHolder.class);
+    Container c = b.createContainer();
+  }
+
+  static class LongHolder {
+    @Inject
+    LongHolder(long foo) {}
   }
 }

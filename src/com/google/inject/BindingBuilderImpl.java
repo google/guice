@@ -86,7 +86,6 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     if (this.scope != null) {
       binder.addError(source, ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
     }
-    this.scope = Scopes.CONTAINER;
   }
 
   /**
