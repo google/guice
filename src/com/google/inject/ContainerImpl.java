@@ -443,6 +443,12 @@ class ContainerImpl implements Container {
       catch (IllegalAccessException e) {
         throw new AssertionError(e);
       }
+      catch (ConfigurationException e) {
+        throw e;
+      }
+      catch (Throwable throwable) {
+        throw new LocationException(externalContext, throwable);
+      }
       finally {
         context.setExternalContext(previous);
       }
@@ -565,6 +571,12 @@ class ContainerImpl implements Container {
       context.setExternalContext(externalContext);
       try {
         return factory.get(context);
+      }
+      catch (ConfigurationException e) {
+        throw e;
+      }
+      catch (Throwable throwable) {
+        throw new LocationException(externalContext, throwable);
       }
       finally {
         context.setExternalContext(previous);

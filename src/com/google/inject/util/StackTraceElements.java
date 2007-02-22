@@ -16,11 +16,12 @@
 
 package com.google.inject.util;
 
-import java.lang.reflect.Method;
+import static com.google.inject.util.ReferenceType.SOFT;
+import static com.google.inject.util.ReferenceType.WEAK;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.util.Map;
-import java.io.IOException;
-import static com.google.inject.util.ReferenceType.*;
 
 /**
  * Creates stack trace elements for members.
@@ -49,8 +50,10 @@ public class StackTraceElements {
     Class declaringClass = member.getDeclaringClass();
     LineNumbers lineNumbers = lineNumbersCache.get(declaringClass);
     Integer lineNumber = lineNumbers.getLineNumber(member);
+    String memberName
+        = member instanceof Constructor ? "<init>" : member.getName();
     StackTraceElement element = new StackTraceElement(
-      declaringClass.getName(), member.getName(), lineNumbers.getSource(),
+      declaringClass.getName(), memberName, lineNumbers.getSource(),
         lineNumber == null ? lineNumbers.getFirstLine() : lineNumber);
     return element;
   }

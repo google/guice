@@ -124,6 +124,9 @@ class ErrorMessages {
   static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
       + " container-scoped bindings.";
 
+  static final String EXCEPTION_WHILE_CREATING = "Error while locating"
+      + " instance%n  bound to %s%n  for member at %s";
+  
   static Object convert(Object o) {
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {
