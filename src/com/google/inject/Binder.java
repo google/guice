@@ -89,4 +89,13 @@ public interface Binder {
    * Gets the current stage.
    */
   Stage currentStage();
+
+  /**
+   * Records an error message which will be presented to the user at a later
+   * time. Unlike throwing an exception, this enable us to continue
+   * configuring the container and discover more errors. Uses {@link
+   * String#format(String, Object[])} to insert the arguments into the
+   * message.
+   */
+  void addError(String message, Object... arguments);
 }

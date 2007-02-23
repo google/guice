@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import com.google.inject.servlet.ServletScopes;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -40,8 +41,8 @@ public class ScopesTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     BindingBuilderImpl<Singleton> bindingBuilder
         = builder.bind(Singleton.class);
-    bindingBuilder.in(Scopes.DEFAULT);
+    bindingBuilder.in(ServletScopes.REQUEST);
     builder.createContainer();
-    assertSame(Scopes.DEFAULT, bindingBuilder.scope);
+    assertSame(ServletScopes.REQUEST, bindingBuilder.scope);
   }
 }

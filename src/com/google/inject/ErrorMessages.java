@@ -52,6 +52,9 @@ class ErrorMessages {
     }
   }
 
+  static final String MISSING_SCOPE_ANNOTATION = "Please annotate %s with"
+      + " @ScopeAnnotation.";
+
   static final String OPTIONAL_CONSTRUCTOR = "@Inject(optional=true) is"
       + " not allowed on constructors.";
 

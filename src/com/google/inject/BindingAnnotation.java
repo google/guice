@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
 
 /**
  * Annotates annotations which are used for binding. Only one such annotation
@@ -35,6 +36,6 @@ import java.lang.annotation.Target;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target({ ElementType.ANNOTATION_TYPE })
+@Target(ANNOTATION_TYPE)
 @Retention(RUNTIME)
 public @interface BindingAnnotation {}

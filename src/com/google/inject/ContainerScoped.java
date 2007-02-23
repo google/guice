@@ -29,4 +29,5 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RUNTIME)
+@ScopeAnnotation
 public @interface ContainerScoped {}

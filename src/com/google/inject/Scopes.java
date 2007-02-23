@@ -30,19 +30,6 @@ public class Scopes {
   private Scopes() {}
 
   /**
-   * The default scope, one instance per injection.
-   */
-  public static final Scope DEFAULT = new Scope() {
-    public <T> Locator<T> scope(Key<T> key, Locator<T> creator) {
-      return creator;
-    }
-
-    public String toString() {
-      return "Scopes.DEFAULT";
-    }
-  };
-
-  /**
    * One instance per container. Also see {@code @}{@link ContainerScoped}.
    */
   public static final Scope CONTAINER = new Scope() {
@@ -92,19 +79,31 @@ public class Scopes {
   static Scope getScopeForType(Class<?> implementation,
       Map<Class<? extends Annotation>, Scope> scopes,
       ErrorHandler errorHandler) {
-    Scope found = null;
+    Class<? extends Annotation> found = null;
     for (Annotation annotation : implementation.getAnnotations()) {
-      Scope scope = scopes.get(annotation.annotationType());
-      if (scope != null) {
+      if (isScopeAnnotation(annotation)) {
         if (found != null) {
-          errorHandler.handle(StackTraceElements.forType(implementation),
-              ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS, found, scope);
+          errorHandler.handle(
+              StackTraceElements.forType(implementation),
+              ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS,
+              "@" + found.getSimpleName(),
+              "@" + annotation.annotationType().getSimpleName()
+          );
         } else {
-          found = scope;
+          found = annotation.annotationType();
         }
       }
     }
-    return found;
+
+    return scopes.get(found);
+  }
+
+  static boolean isScopeAnnotation(Annotation annotation) {
+    return isScopeAnnotation(annotation.annotationType());
+  }
+
+  static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
+    return annotationType.isAnnotationPresent(ScopeAnnotation.class);
   }
 
   /**
@@ -113,8 +112,8 @@ public class Scopes {
   static <T> InternalFactory<? extends T> scope(Key<T> key,
       ContainerImpl container, InternalFactory<? extends T> creator,
       Scope scope) {
-    // Default scope does nothing.
-    if (scope == null || scope == DEFAULT) {
+    // No scope does nothing.
+    if (scope == null) {
       return creator;
     }
     Locator<T> scoped = scope.scope(key,

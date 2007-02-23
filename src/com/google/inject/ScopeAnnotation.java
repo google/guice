@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-package com.google.inject.servlet;
+package com.google.inject;
 
+import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import com.google.inject.ScopeAnnotation;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
 /**
- * Apply this to implementation classes when you want one instance per request.
+ * Annotates annotations which are used for scoping. Only one such annotation
+ * may apply to a single implementation class. You must also annotate scope
+ * annotations with {@code @Retention(RUNTIME)}. For example:
+ *
+ * <pre>
+ *   {@code @}Retention(RUNTIME)
+ *   {@code @}Target(TYPE)
+ *   {@code @}ScopeAnnotation
+ *   public {@code @}interface SessionScoped {}
+ * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@ScopeAnnotation
-public @interface RequestScoped {}
+@Target(ANNOTATION_TYPE)
+@Retention(RUNTIME)
+public @interface ScopeAnnotation {}

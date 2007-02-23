@@ -146,6 +146,12 @@ class BinderImpl implements Binder {
 
   public void bindScope(Class<? extends Annotation> annotationType,
       Scope scope) {
+    if (!Scopes.isScopeAnnotation(annotationType)) {
+      addError(source(), ErrorMessages.MISSING_SCOPE_ANNOTATION,
+          "@" + annotationType.getSimpleName());
+      // Go ahead and bind anyway so we don't get collateral errors.
+    }
+
     Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
     if (existing != null) {
       addError(source(), ErrorMessages.DUPLICATE_SCOPES, existing,
@@ -155,6 +161,8 @@ class BinderImpl implements Binder {
       scopes.put(annotationType, nonNull(scope, "scope"));
     }
   }
+
+
 
   public <T> BindingBuilderImpl<T> bind(Key<T> key) {
     BindingBuilderImpl<T> builder = new BindingBuilderImpl<T>(this, key, source());
@@ -210,6 +218,10 @@ class BinderImpl implements Binder {
 
   public void install(Module module) {
     module.configure(this);
+  }
+
+  public void addError(String message, Object... arguments) {
+    configurationErrorHandler.handle(source(), message, arguments);
   }
 
   void addError(Object source, String message, Object... arguments) {
