@@ -17,6 +17,8 @@
 package com.google.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 import com.google.inject.util.StackTraceElements;
 

@@ -52,7 +52,10 @@ class ErrorMessages {
     }
   }
 
-  static final String MISSING_SCOPE_ANNOTATION = "Please annotate %s with"
+  static final String MISSING_RUNTIME_RETENTION = "Please annotate with"
+      + " @Retention(RUNTIME). Bound at %s.";;
+
+  static final String MISSING_SCOPE_ANNOTATION = "Please annotate with"
       + " @ScopeAnnotation.";
 
   static final String OPTIONAL_CONSTRUCTOR = "@Inject(optional=true) is"

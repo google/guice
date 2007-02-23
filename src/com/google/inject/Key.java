@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.ToStringBuilder;
+import com.google.inject.util.Annotations;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
@@ -357,8 +358,10 @@ public abstract class Key<T> {
    */
   static AnnotationStrategy strategyFor(Annotation annotation) {
     nonNull(annotation, "annotation");
-    return isMarker(annotation.annotationType())
-        ? new AnnotationTypeStrategy(annotation.annotationType(), annotation)
+    Class<? extends Annotation> annotationType = annotation.annotationType();
+    ensureRetainedAtRuntime(annotationType);
+    return isMarker(annotationType)
+        ? new AnnotationTypeStrategy(annotationType, annotation)
         : new AnnotationInstanceStrategy(annotation);
   }
 
@@ -368,12 +371,25 @@ public abstract class Key<T> {
   static AnnotationStrategy strategyFor(
       Class<? extends Annotation> annotationType) {
     nonNull(annotationType, "annotation type");
+
     if (!isMarker(annotationType)) {
       throw new IllegalArgumentException(annotationType.getName()
         + " is not a marker annotation, i.e. it has attributes. Please"
         + " use an Annotation instance or a marker annotation instead.");
     }
+
+    ensureRetainedAtRuntime(annotationType);
+
     return new AnnotationTypeStrategy(annotationType, null);
+  }
+
+  private static void ensureRetainedAtRuntime(
+      Class<? extends Annotation> annotationType) {
+    if (!Annotations.isRetainedAtRuntime(annotationType)) {
+      throw new IllegalArgumentException(annotationType.getName()
+          + " is not retained at runtime."
+          + " Please annotate it with @Retention(RUNTIME).");
+    }
   }
 
   // this class not test-covered

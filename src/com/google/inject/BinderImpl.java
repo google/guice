@@ -24,6 +24,8 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.Stopwatch;
+import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.Annotations;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -147,9 +149,14 @@ class BinderImpl implements Binder {
   public void bindScope(Class<? extends Annotation> annotationType,
       Scope scope) {
     if (!Scopes.isScopeAnnotation(annotationType)) {
-      addError(source(), ErrorMessages.MISSING_SCOPE_ANNOTATION,
-          "@" + annotationType.getSimpleName());
+      addError(StackTraceElements.forType(annotationType),
+          ErrorMessages.MISSING_SCOPE_ANNOTATION);
       // Go ahead and bind anyway so we don't get collateral errors.
+    }
+
+    if (!Annotations.isRetainedAtRuntime(annotationType)) {
+      addError(StackTraceElements.forType(annotationType),
+          ErrorMessages.MISSING_RUNTIME_RETENTION, source());
     }
 
     Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
@@ -162,10 +169,9 @@ class BinderImpl implements Binder {
     }
   }
 
-
-
   public <T> BindingBuilderImpl<T> bind(Key<T> key) {
-    BindingBuilderImpl<T> builder = new BindingBuilderImpl<T>(this, key, source());
+    BindingBuilderImpl<T> builder =
+        new BindingBuilderImpl<T>(this, key, source());
     bindingBuilders.add(builder);
     return builder;
   }

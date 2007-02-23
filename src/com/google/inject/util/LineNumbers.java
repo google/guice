@@ -34,7 +34,7 @@ public class LineNumbers {
   private final Class cls;
   private Map<String, Integer> lines = new HashMap<String, Integer>();
   private String source;
-  private int firstLine = 0;
+  private int firstLine = Integer.MAX_VALUE;
 
   /**
    * Reads line number information from the given class, if available.
@@ -84,7 +84,7 @@ public class LineNumbers {
    * Gets the first line number.
    */
   public int getFirstLine() {
-    return firstLine;
+    return firstLine == Integer.MAX_VALUE ? 1 : firstLine;
   }
 
   private static String getKey(Member member) {
@@ -125,7 +125,7 @@ public class LineNumbers {
     }
 
     public void visitLineNumber(int line, Label start) {
-      if (firstLine == 0) {
+      if (line < firstLine) {
         firstLine = line;
       }
 

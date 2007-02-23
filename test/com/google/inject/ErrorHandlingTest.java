@@ -32,7 +32,7 @@ public class ErrorHandlingTest {
   }
 
   @Inject @Named("missing")
-  static List<String> missing;
+  static List<String> missing = null;
 
   static class Foo {
     @Inject
@@ -67,6 +67,8 @@ public class ErrorHandlingTest {
   static class TooManyScopes {
   }
 
+  @interface BadScope {}
+
   static class MyModule extends AbstractModule {
     protected void configure() {
       install(new ServletModule());
@@ -75,10 +77,10 @@ public class ErrorHandlingTest {
       bind(Bar.class);
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).annotatedWith(Names.named("foo")).in(
-          Named.class);
+      bind(String.class).annotatedWith(Names.named("foo")).in(Named.class);
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
+      bindScope(BadScope.class, Scopes.CONTAINER);
       requestStaticInjection(ErrorHandlingTest.class);
     }
   }

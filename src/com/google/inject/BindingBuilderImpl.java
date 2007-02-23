@@ -5,6 +5,8 @@ import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.BindingScopeBuilder;
 import com.google.inject.util.Objects;
 import com.google.inject.util.ToStringBuilder;
+import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.Annotations;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 
@@ -44,7 +46,13 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
     } else {
-      this.key = Key.get(this.key.getType(), annotationType);
+      if (!Annotations.isRetainedAtRuntime(annotationType)) {
+        binder.addError(StackTraceElements.forType(annotationType),
+            ErrorMessages.MISSING_RUNTIME_RETENTION, binder.source());
+      }
+      else {
+        this.key = Key.get(this.key.getType(), annotationType);
+      }
     }
     return this;
   }
@@ -53,8 +61,14 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
     } else {
-      // not test-covered?
-      this.key = Key.get(this.key.getType(), annotation);
+      if (!Annotations.isRetainedAtRuntime(annotation.annotationType())) {
+        binder.addError(StackTraceElements.forType(annotation.annotationType()),
+            ErrorMessages.MISSING_RUNTIME_RETENTION, binder.source());
+      }
+      else {
+        // not test-covered?
+        this.key = Key.get(this.key.getType(), annotation);
+      }
     }
     return this;
   }
