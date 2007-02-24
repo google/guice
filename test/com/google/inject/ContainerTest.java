@@ -242,4 +242,32 @@ public class ContainerTest extends TestCase {
       Static.s = s;
     }
   }
+
+  public void testPrivateInjection() throws CreationException {
+    Container container = Guice.createContainer(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toInstance("foo");
+        bind(int.class).toInstance(5);
+      }
+    });
+
+    Private p = container.getLocator(Private.class).get();
+    assertEquals("foo", p.fromConstructor);
+    assertEquals(5, p.fromMethod);
+  }
+
+  static class Private {
+    String fromConstructor;
+    int fromMethod;
+
+    @Inject
+    private Private(String fromConstructor) {
+      this.fromConstructor = fromConstructor;
+    }
+
+    @Inject
+    private void setInt(int i) {
+      this.fromMethod = i;
+    }
+  }
 }

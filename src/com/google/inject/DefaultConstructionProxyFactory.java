@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.util.GuiceFastClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 
@@ -31,7 +32,26 @@ import net.sf.cglib.reflect.FastConstructor;
  */
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
-  public <T> ConstructionProxy<T> get(Constructor<T> constructor) {
+  public <T> ConstructionProxy<T> get(final Constructor<T> constructor) {
+    // We can't use FastConstructor if the constructor is private.
+    if (Modifier.isPrivate(constructor.getModifiers())) {
+      constructor.setAccessible(true);
+      return new ConstructionProxy<T>() {
+        public T newInstance(Object... arguments) throws
+            InvocationTargetException {
+          try {
+            return constructor.newInstance(arguments);
+          }
+          catch (InstantiationException e) {
+            throw new RuntimeException(e);
+          }
+          catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+          }
+        }
+      };
+    }
+
     Class<T> classToConstruct = constructor.getDeclaringClass();
     FastClass fastClass = GuiceFastClass.create(classToConstruct);
     final FastConstructor fastConstructor

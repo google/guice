@@ -497,13 +497,33 @@ class ContainerImpl implements Container {
 
   static class MethodInjector implements Injector {
 
-    final FastMethod fastMethod;
+    final MethodInvoker methodInvoker;
     final ParameterInjector<?>[] parameterInjectors;
 
-    public MethodInjector(ContainerImpl container, Method method)
+    public MethodInjector(ContainerImpl container, final Method method)
         throws MissingDependencyException {
-      FastClass fastClass = GuiceFastClass.create(method.getDeclaringClass());
-      this.fastMethod = fastClass.getMethod(method);
+      // We can't use FastMethod if the method is private.
+      if (Modifier.isPrivate(method.getModifiers())) {
+        method.setAccessible(true);
+        this.methodInvoker = new MethodInvoker() {
+          public Object invoke(Object target, Object... parameters) throws
+              IllegalAccessException, InvocationTargetException {
+            return method.invoke(target, parameters);
+          }
+        };
+      }
+      else {
+        FastClass fastClass = GuiceFastClass.create(method.getDeclaringClass());
+        final FastMethod fastMethod = fastClass.getMethod(method);
+
+        this.methodInvoker = new MethodInvoker() {
+          public Object invoke(Object target, Object... parameters)
+          throws IllegalAccessException, InvocationTargetException {
+            return fastMethod.invoke(target, parameters);
+          }
+        };
+      }
+
       Type[] parameterTypes = method.getGenericParameterTypes();
       parameterInjectors = parameterTypes.length > 0
           ? container.getParametersInjectors(
@@ -513,12 +533,20 @@ class ContainerImpl implements Container {
 
     public void inject(InternalContext context, Object o) {
       try {
-        fastMethod.invoke(o, getParameters(context, parameterInjectors));
+        methodInvoker.invoke(o, getParameters(context, parameterInjectors));
       }
       catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  /**
+   * Invokes a method.
+   */
+  interface MethodInvoker {
+    Object invoke(Object target, Object... parameters) throws
+        IllegalAccessException, InvocationTargetException;
   }
 
   final Map<Class<?>, ConstructorInjector> constructors
