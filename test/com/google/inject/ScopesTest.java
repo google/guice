@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
-import com.google.inject.servlet.ServletScopes;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -36,13 +35,19 @@ public class ScopesTest extends TestCase {
   @ContainerScoped
   static class Singleton {}
 
+  Scope scope = new Scope() {
+    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+      return unscoped;
+    }
+  };
+
   public void testOverriddingAnnotation()
       throws CreationException {
     BinderImpl builder = new BinderImpl();
     BindingBuilderImpl<Singleton> bindingBuilder
         = builder.bind(Singleton.class);
-    bindingBuilder.in(ServletScopes.REQUEST);
+    bindingBuilder.in(scope);
     builder.createContainer();
-    assertSame(ServletScopes.REQUEST, bindingBuilder.scope);
+    assertSame(scope, bindingBuilder.scope);
   }
 }

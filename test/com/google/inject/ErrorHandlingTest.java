@@ -18,9 +18,11 @@ package com.google.inject;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.google.inject.servlet.ServletModule;
-import com.google.inject.servlet.SessionScoped;
 import java.util.List;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -63,15 +65,19 @@ public class ErrorHandlingTest {
   }
 
   @ContainerScoped
-  @SessionScoped
+  @GoodScope
   static class TooManyScopes {
   }
+
+  @Target(ElementType.TYPE)
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  @interface GoodScope {}
 
   @interface BadScope {}
 
   static class MyModule extends AbstractModule {
     protected void configure() {
-      install(new ServletModule());
       bind(Runnable.class);
       bind(Foo.class);
       bind(Bar.class);

@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.matcher.MatcherTest;
-import com.google.inject.servlet.ServletTest;
 import com.google.inject.util.FinalizableReferenceQueueTest;
 import com.google.inject.util.ReferenceCacheTest;
 import com.google.inject.util.ReferenceMapTest;
@@ -54,8 +53,6 @@ public class AllTests {
     suite.addTestSuite(BindingAnnotationTest.class);
 
     suite.addTestSuite(MatcherTest.class);
-
-    suite.addTestSuite(ServletTest.class);
 
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(ReferenceCacheTest.class);

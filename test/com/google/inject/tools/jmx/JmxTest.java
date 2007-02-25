@@ -21,7 +21,6 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.ContainerScoped;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
-import com.google.inject.servlet.ServletModule;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -56,7 +55,7 @@ public class JmxTest {
           .to(FooImpl.class);
       bindConstant(Names.named("port")).to(8080);
       link(Key.get(Object.class)).to(Key.get(Bar.class));
-      install(new ServletModule());
+//      install(new ServletModule());
     }
   }
 }
