@@ -62,10 +62,10 @@ class ProxyFactory implements ConstructionProxyFactory {
    * exceptions in {@link RuntimeException} including
    * {@link InvocationTargetException}.
    */
-  public <T> Locator<T> getFactory(Class<T> type) throws NoSuchMethodException {
+  public <T> Provider<T> getFactory(Class<T> type) throws NoSuchMethodException {
     final ConstructionProxy<T> constructionProxy
         = createConstructionProxy(type.getDeclaredConstructor());
-    return new Locator<T>() {
+    return new Provider<T>() {
       public T get() {
         try {
           return constructionProxy.newInstance();

@@ -17,10 +17,10 @@
 package com.google.inject;
 
 /**
- * A scope which bound objects can reside in. Scopes a given {@link Locator}.
+ * A scope which bound objects can reside in. Scopes a given {@link Provider}.
  *
  * <p>Scope implementations should override {@code toString()} in the returned
- * locator and include the unscoped locator's {@code toString()} output. Doing
+ * provider and include the unscoped provider's {@code toString()} output. Doing
  * so aids debugging. They should also override their own {@code toString()}
  * method.
  *
@@ -29,16 +29,16 @@ package com.google.inject;
 public interface Scope {
 
   /**
-   * Scopes a locator. The returned locator returns objects from this scope. If
-   * an object does not exist in this scope, the locator can use the given
-   * unscoped locator to retrieve one.
+   * Scopes a provider. The returned locator returns objects from this scope. If
+   * an object does not exist in this scope, the provider can use the given
+   * unscoped provider to retrieve one.
    *
    * @param key binding key
    * @param unscoped locates an instance when one doesn't already exist in this
    *  scope.
-   * @return a new locator which only delegates to the given unscoped locator
+   * @return a new provider which only delegates to the given unscoped provider
    *  when an instance of the requested object doesn't already exist in this
    *  scope
    */
-  public <T> Locator<T> scope(Key<T> key, Locator<T> unscoped);
+  public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped);
 }

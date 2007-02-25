@@ -17,14 +17,21 @@
 package com.google.inject;
 
 /**
- * Locates bound instances of {@code T}.
- *
  * @author crazybob@google.com (Bob Lee)
- */
-public interface Locator<T> {
+*/
+class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
-  /**
-   * Locates an instance of {@code T}.
-   */
-  T get();
+  private final Provider<? extends T> provider;
+
+  public InternalFactoryToProviderAdapter(Provider<? extends T> provider) {
+    this.provider = provider;
+  }
+  
+  public T get(InternalContext context) {
+    return provider.get();
+  }
+
+  public String toString() {
+    return provider.toString();
+  }
 }

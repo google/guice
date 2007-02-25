@@ -25,7 +25,7 @@ public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws CreationException {
     Container container = Guice.createContainer();
-    Foo foo = container.getLocator(Foo.class).get();
+    Foo foo = container.getProvider(Foo.class).get();
     assertSame(foo, foo.bar.foo);
   }
 

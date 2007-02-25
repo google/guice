@@ -18,20 +18,28 @@ package com.google.inject;
 
 /**
  * @author crazybob@google.com (Bob Lee)
-*/
-class InternalFactoryToLocatorAdapter<T> implements InternalFactory<T> {
+ */
+class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
-  private final Locator<? extends T> locator;
+  private final ContainerImpl container;
 
-  public InternalFactoryToLocatorAdapter(Locator<? extends T> locator) {
-    this.locator = locator;
+  private final InternalFactory<? extends T> internalFactory;
+
+  public ProviderToInternalFactoryAdapter(ContainerImpl container,
+      InternalFactory<? extends T> internalFactory) {
+    this.container = container;
+    this.internalFactory = internalFactory;
   }
-  
-  public T get(InternalContext context) {
-    return locator.get();
+
+  public T get() {
+    return container.callInContext(new ContextualCallable<T>() {
+      public T call(InternalContext context) {
+        return internalFactory.get(context);
+      }
+    });
   }
 
   public String toString() {
-    return locator.toString();
+    return internalFactory.toString();
   }
 }

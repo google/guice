@@ -17,29 +17,14 @@
 package com.google.inject;
 
 /**
+ * Provides instances of {@code T}.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-class LocatorToInternalFactoryAdapter<T> implements Locator<T> {
+public interface Provider<T> {
 
-  private final ContainerImpl container;
-
-  private final InternalFactory<? extends T> internalFactory;
-
-  public LocatorToInternalFactoryAdapter(ContainerImpl container,
-      InternalFactory<? extends T> internalFactory) {
-    this.container = container;
-    this.internalFactory = internalFactory;
-  }
-
-  public T get() {
-    return container.callInContext(new ContextualCallable<T>() {
-      public T call(InternalContext context) {
-        return internalFactory.get(context);
-      }
-    });
-  }
-
-  public String toString() {
-    return internalFactory.toString();
-  }
+  /**
+   * Provides an instance of {@code T}.
+   */
+  T get();
 }

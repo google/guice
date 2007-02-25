@@ -18,10 +18,7 @@ package com.google.inject;
 
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.util.Properties;
 import junit.framework.TestCase;
-import com.google.inject.name.Names;
-import com.google.inject.name.Named;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -68,7 +65,7 @@ public class ConstantConversionTest extends TestCase {
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
     Container container = builder.createContainer();
-    Simple simple = container.getLocator(Simple.class).get();
+    Simple simple = container.getProvider(Simple.class).get();
     assertEquals(5, simple.i);
   }
 
@@ -83,7 +80,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
     Container c = b.createContainer();
-    Foo foo = c.getLocator(Foo.class).get();
+    Foo foo = c.getProvider(Foo.class).get();
 
     checkNumbers(
       foo.integerField,
@@ -115,7 +112,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.createContainer();
     try {
-      c.getLocator(InvalidInteger.class).get();
+      c.getProvider(InvalidInteger.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -129,7 +126,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.createContainer();
     try {
-      c.getLocator(InvalidCharacter.class).get();
+      c.getProvider(InvalidCharacter.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -143,7 +140,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Container c = b.createContainer();
     try {
-      c.getLocator(InvalidEnum.class).get();
+      c.getProvider(InvalidEnum.class).get();
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }

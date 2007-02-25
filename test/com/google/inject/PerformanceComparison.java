@@ -92,7 +92,7 @@ public class PerformanceComparison {
   };
 
   static final Callable<Foo> juiceFactory = new Callable<Foo>() {
-    final Locator<Foo> fooLocator;
+    final Provider<Foo> fooProvider;
     {
       Container container;
       try {
@@ -108,11 +108,11 @@ public class PerformanceComparison {
       } catch (CreationException e) {
         throw new RuntimeException(e);
       }
-      fooLocator = container.getLocator(Foo.class);
+      fooProvider = container.getProvider(Foo.class);
     }
 
     public Foo call() throws Exception {
-      return fooLocator.get();
+      return fooProvider.get();
     }
   };
 

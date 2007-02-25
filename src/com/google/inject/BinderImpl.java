@@ -81,7 +81,7 @@ class BinderImpl implements Binder {
     }
 
     public String toString() {
-      return "Locator<Container>";
+      return "Provider<Container>";
     }
   };
 
@@ -96,7 +96,7 @@ class BinderImpl implements Binder {
     }
 
     public String toString() {
-      return "Locator<Logger>";
+      return "Provider<Logger>";
     }
   };
 
@@ -403,9 +403,9 @@ class BinderImpl implements Binder {
     Map<Key<?>, Binding<?>> bindings = container.internalBindings();
     Binding<?> original = bindings.get(key);
 
-    // Binding to Locator<?> is not allowed.
-    if (key.getRawType().equals(Locator.class)) {
-      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_LOCATOR);
+    // Binding to Provider<?> is not allowed.
+    if (key.getRawType().equals(Provider.class)) {
+      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_PROVIDER);
       return;
     }
 

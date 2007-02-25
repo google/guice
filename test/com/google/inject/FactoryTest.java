@@ -54,7 +54,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.createContainer();
 
-    A a = c.getLocator(A.class).get();
+    A a = c.getProvider(A.class).get();
 
     assertNotNull(a.negativeOne);
     assertTrue(a.initCalled);
@@ -129,7 +129,7 @@ public class FactoryTest extends TestCase {
 
     Container c = cb.createContainer();
 
-    Foo foo = c.getLocator(Key.get(Foo.class, FooAnnotation.class)).get();
+    Foo foo = c.getProvider(Key.get(Foo.class, FooAnnotation.class)).get();
 
     assertNotNull(foo.bar);
     assertNotNull(foo.bar.tee1);
@@ -147,7 +147,7 @@ public class FactoryTest extends TestCase {
       public T get(Context context) {
         assertEquals(expectedMember, context.getMember());
         assertEquals(type, context.getKey().getType().getType());
-        return context.getContainer().getLocator(type).get();
+        return context.getContainer().getProvider(type).get();
       }
     };
   }

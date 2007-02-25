@@ -34,7 +34,7 @@ public class ContainerTest extends TestCase {
   @Retention(RUNTIME)
   @BindingAnnotation @interface I {}
 
-  public void testLocatorMethods() throws CreationException {
+  public void testProviderMethods() throws CreationException {
     Singleton singleton = new Singleton();
     Singleton other = new Singleton();
 
@@ -46,31 +46,18 @@ public class ContainerTest extends TestCase {
     Container container = builder.createContainer();
 
     assertSame(singleton,
-        container.getLocator(Key.get(Singleton.class)).get());
-    assertSame(singleton, container.getLocator(Singleton.class).get());
-//    assertSame(singleton,
-//        container.getLocator(new TypeLiteral<Singleton>() {}).get());
-//    assertSame(singleton, container.getInstance(Key.get(Singleton.class)));
-//    assertSame(singleton, container.getInstance(Singleton.class));
-//    assertSame(singleton,
-//        container.getInstance(new TypeLiteral<Singleton>() {}));
+        container.getProvider(Key.get(Singleton.class)).get());
+    assertSame(singleton, container.getProvider(Singleton.class).get());
 
     assertSame(other,
-        container.getLocator(Key.get(Singleton.class, Other.class)).get());
-//    assertSame(other, container.getLocator(Singleton.class, Other.class).get());
-//    assertSame(other,
-//        container.getLocator(new TypeLiteral<Singleton>() {}, Other.class).get());
-//    assertSame(other, container.getInstance(Key.get(Singleton.class, Other.class)));
-//    assertSame(other, container.getInstance(Singleton.class, Other.class));
-//    assertSame(other,
-//        container.getInstance(new TypeLiteral<Singleton>() {}, Other.class));
+        container.getProvider(Key.get(Singleton.class, Other.class)).get());
   }
 
   static class Singleton {}
 
   public void testInjection() throws CreationException {
     Container container = createFooContainer();
-    Foo foo = container.getLocator(Foo.class).get();
+    Foo foo = container.getProvider(Foo.class).get();
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -96,7 +83,7 @@ public class ContainerTest extends TestCase {
   public void testGetInstance() throws CreationException {
     Container container = createFooContainer();
 
-    Bar bar = container.getLocator(Key.get(Bar.class)).get();
+    Bar bar = container.getProvider(Key.get(Bar.class)).get();
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }
@@ -106,7 +93,7 @@ public class ContainerTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
     Container container = builder.createContainer();
-    IntegerWrapper iw = container.getLocator(IntegerWrapper.class).get();
+    IntegerWrapper iw = container.getProvider(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
@@ -188,7 +175,7 @@ public class ContainerTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Container container = builder.createContainer();
-    A a = container.getLocator(AImpl.class).get();
+    A a = container.getProvider(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 
@@ -251,7 +238,7 @@ public class ContainerTest extends TestCase {
       }
     });
 
-    Private p = container.getLocator(Private.class).get();
+    Private p = container.getProvider(Private.class).get();
     assertEquals("foo", p.fromConstructor);
     assertEquals(5, p.fromMethod);
   }

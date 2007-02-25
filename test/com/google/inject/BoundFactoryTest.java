@@ -28,8 +28,8 @@ public class BoundFactoryTest extends TestCase {
     cb.bind(Foo.class).toFactory(FooFactory.class);
     Container c = cb.createContainer();
 
-    Foo a = c.getLocator(Foo.class).get();
-    Foo b = c.getLocator(Foo.class).get();
+    Foo a = c.getProvider(Foo.class).get();
+    Foo b = c.getProvider(Foo.class).get();
 
     assertEquals(0, a.i);
     assertEquals(0, b.i);
@@ -44,8 +44,8 @@ public class BoundFactoryTest extends TestCase {
     cb.bind(Foo.class).toFactory(ContainerScopedFooFactory.class);
     Container c = cb.createContainer();
 
-    Foo a = c.getLocator(Foo.class).get();
-    Foo b = c.getLocator(Foo.class).get();
+    Foo a = c.getProvider(Foo.class).get();
+    Foo b = c.getProvider(Foo.class).get();
 
     assertEquals(0, a.i);
     assertEquals(1, b.i);

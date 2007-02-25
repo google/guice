@@ -17,8 +17,6 @@
 package com.google.inject;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 import com.google.inject.util.StackTraceElements;
 
@@ -35,8 +33,8 @@ public class Scopes {
    * One instance per container. Also see {@code @}{@link ContainerScoped}.
    */
   public static final Scope CONTAINER = new Scope() {
-    public <T> Locator<T> scope(Key<T> key, final Locator<T> creator) {
-      return new Locator<T>() {
+    public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
+      return new Provider<T>() {
 
         private volatile T instance;
 
@@ -118,8 +116,8 @@ public class Scopes {
     if (scope == null) {
       return creator;
     }
-    Locator<T> scoped = scope.scope(key,
-        new LocatorToInternalFactoryAdapter<T>(container, creator));
-    return new InternalFactoryToLocatorAdapter<T>(scoped);
+    Provider<T> scoped = scope.scope(key,
+        new ProviderToInternalFactoryAdapter<T>(container, creator));
+    return new InternalFactoryToProviderAdapter<T>(scoped);
   }
 }

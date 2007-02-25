@@ -30,7 +30,7 @@ public class GenericInjectionTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bind(new TypeLiteral<List<String>>() {}).toInstance(names);
     Container container = builder.createContainer();
-    Foo foo = container.getLocator(Foo.class).get();
+    Foo foo = container.getProvider(Foo.class).get();
     assertEquals(names, foo.names);
   }
 

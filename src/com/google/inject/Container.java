@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ import java.util.Map;
  *
  * <ul>
  * <li>This {@link Container}
- * <li>A {@code Locator<T>} for each binding of type {@code T}
+ * <li>A {@code Provider<T>} for each binding of type {@code T}
  * <li>The {@link java.util.logging.Logger} for the class being injected
  * <li>The {@link Stage} specified when this container was created
  * </ul>
@@ -65,77 +64,13 @@ public interface Container {
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
-//  /**
-//   * Gets an instance from the locator bound to the given type.
-//   */
-//  <T> T getInstance(TypeLiteral<T> type);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given type.
-//   */
-//  <T> T getInstance(Class<T> type);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given key.
-//   */
-//  <T> T getInstance(Key<T> key);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given type and annotation.
-//   */
-//  <T> T getInstance(TypeLiteral<T> type, Annotation annotation);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given type and annotation.
-//   */
-//  <T> T getInstance(Class<T> type, Annotation annotation);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given type and annotation.
-//   */
-//  <T> T getInstance(TypeLiteral<T> type,
-//      Class<? extends Annotation> annotationType);
-//
-//  /**
-//   * Gets an instance from the locator bound to the given type and annotation.
-//   */
-//  <T> T getInstance(Class<T> type,
-//      Class<? extends Annotation> annotationType);
+  /**
+   * Gets the provider bound to the given key.
+   */
+  <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * Gets the locator bound to the given key.
+   * Gets the provider bound to the given type.
    */
-  <T> Locator<T> getLocator(Key<T> key);
-
-  /**
-   * Gets the locator bound to the given type.
-   */
-  <T> Locator<T> getLocator(Class<T> type);
-
-//  /**
-//   * Gets the locator bound to the given type.
-//   */
-//  <T> Locator<T> getLocator(TypeLiteral<T> type);
-//
-//  /**
-//   * Gets the locator bound to the given type and annotation.
-//   */
-//  <T> Locator<T> getLocator(Class<T> type, Annotation annotation);
-//
-//  /**
-//   * Gets the locator bound to the given type and annotation.
-//   */
-//  <T> Locator<T> getLocator(TypeLiteral<T> type, Annotation annotation);
-//
-//  /**
-//   * Gets the locator bound to the given type and annotation.
-//   */
-//  <T> Locator<T> getLocator(Class<T> type,
-//      Class<? extends Annotation> annotationType);
-//
-//  /**
-//   * Gets the locator bound to the given type and annotation.
-//   */
-//  <T> Locator<T> getLocator(TypeLiteral<T> type,
-//      Class<? extends Annotation> annotationType);
+  <T> Provider<T> getProvider(Class<T> type);
 }

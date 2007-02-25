@@ -34,12 +34,12 @@ public class IntegrationTest extends TestCase {
     binder.bindInterceptor(any(), any(), counter);
     Container container = binder.createContainer();
 
-    Foo foo = container.getLocator(Key.get(Foo.class)).get();
+    Foo foo = container.getProvider(Key.get(Foo.class)).get();
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(1, counter.count);
 
-    foo = container.getLocator(Foo.class).get();
+    foo = container.getProvider(Foo.class).get();
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(2, counter.count);

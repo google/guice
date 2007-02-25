@@ -34,7 +34,7 @@ public class ReflectionTest extends TestCase {
     builder.bind(Foo.class).toInstance(foo);
     Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
-    assertSame(foo, fooBinding.getLocator().get());
+    assertSame(foo, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
     assertTrue(fooBinding.isConstant());
@@ -45,7 +45,7 @@ public class ReflectionTest extends TestCase {
     builder.bindConstant(I.class).to(5);
     Container container = builder.createContainer();
     Binding<?> i = container.getBinding(Key.get(int.class, I.class));
-    assertEquals(5, i.getLocator().get());
+    assertEquals(5, i.getProvider().get());
     assertNotNull(i.getSource());
     assertEquals(Key.get(int.class, I.class), i.getKey());
     assertTrue(i.isConstant());
@@ -58,7 +58,7 @@ public class ReflectionTest extends TestCase {
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
     Container container = builder.createContainer();
     Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
-    assertSame(bar, fooBinding.getLocator().get());
+    assertSame(bar, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
     assertTrue(fooBinding.isConstant());

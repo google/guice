@@ -278,7 +278,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
 
     public String toString() {
-      return new ToStringBuilder(Locator.class)
+      return new ToStringBuilder(Provider.class)
           .add("implementation", implementation)
           .toString();
     }

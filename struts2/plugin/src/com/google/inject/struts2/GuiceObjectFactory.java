@@ -119,7 +119,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       }
     }
 
-    return container.getLocator(clazz).get();
+    return container.getProvider(clazz).get();
   }
 
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,

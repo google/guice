@@ -27,7 +27,7 @@ public class SuperclassTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bind(Foo.class);
     Container container = builder.createContainer();
-    Locator<Sub> creator = container.getLocator(Sub.class);
+    Provider<Sub> creator = container.getProvider(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();
     sub = creator.get();
