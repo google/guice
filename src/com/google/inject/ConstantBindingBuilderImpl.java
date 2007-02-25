@@ -83,7 +83,7 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
     }
   }
 
-  Binding<?> createBinding(ContainerImpl container) {
+  BindingImpl<?> createBinding(ContainerImpl container) {
     return bindingInfo.createBinding(container);
   }
 
@@ -102,10 +102,10 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
       this.source = source;
     }
 
-    Binding<T> createBinding(ContainerImpl container) {
+    BindingImpl<T> createBinding(ContainerImpl container) {
       Key<T> key = Key.get(type, annotationStrategy);
       ConstantFactory<T> factory = new ConstantFactory<T>(value);
-      return Binding.newInstance(container, key, source, factory);
+      return BindingImpl.newInstance(container, key, source, factory);
     }
   }
 }

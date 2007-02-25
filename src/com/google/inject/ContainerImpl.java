@@ -82,7 +82,7 @@ class ContainerImpl implements Container {
       = new PrimitiveConverters();
 
   final ConstructionProxyFactory constructionProxyFactory;
-  final Map<Key<?>, Binding<?>> bindings;
+  final Map<Key<?>, BindingImpl<?>> bindings;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<Class<? extends Annotation>, Scope> scopes;
 
@@ -90,7 +90,7 @@ class ContainerImpl implements Container {
   Object defaultSource = "[unknown source]";
 
   ContainerImpl(ConstructionProxyFactory constructionProxyFactory,
-      Map<Key<?>, Binding<?>> bindings,
+      Map<Key<?>, BindingImpl<?>> bindings,
       Map<Class<? extends Annotation>, Scope> scopes) {
     this.constructionProxyFactory = constructionProxyFactory;
     this.bindings = bindings;
@@ -101,18 +101,19 @@ class ContainerImpl implements Container {
    * Indexes bindings by type.
    */
   void index() {
-    for (Binding<?> binding : bindings.values()) {
+    for (BindingImpl<?> binding : bindings.values()) {
       index(binding);
     }
   }
 
-  <T> void index(Binding<T> binding) {
+  <T> void index(BindingImpl<T> binding) {
     bindingsMultimap.put(binding.getKey().getType(), binding);
   }
 
   // not test-covered
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-    return bindingsMultimap.getAll(type);
+    return Collections.<Binding<T>>unmodifiableList(
+        bindingsMultimap.getAll(type));
   }
 
   // not test-covered
@@ -152,7 +153,7 @@ class ContainerImpl implements Container {
     // TODO: Clean up unchecked type warnings.
 
     // Do we have a factory for the specified type and name?
-    Binding<T> binding = getBinding(key);
+    BindingImpl<T> binding = getBinding(key);
     if (binding != null) {
       return binding.getInternalFactory();
     }
@@ -188,7 +189,7 @@ class ContainerImpl implements Container {
     Class<?> primitiveCounterpart
         = PRIMITIVE_COUNTERPARTS.get(rawType);
     if (primitiveCounterpart != null) {
-      Binding<?> counterpartBinding
+      BindingImpl<?> counterpartBinding
           = getBinding(key.ofType(primitiveCounterpart));
       if (counterpartBinding != null) {
         return (InternalFactory<? extends T>)
@@ -198,7 +199,7 @@ class ContainerImpl implements Container {
 
     // Can we convert from a String constant?
     Key<String> stringKey = key.ofType(String.class);
-    Binding<String> stringBinding = getBinding(stringKey);
+    BindingImpl<String> stringBinding = getBinding(stringKey);
     if (stringBinding != null && stringBinding.isConstant()) {
       // We don't need do pass in an InternalContext because we know this is
       // a ConstantFactory which will not use it.
@@ -360,19 +361,18 @@ class ContainerImpl implements Container {
     }
   }
 
-  Map<Key<?>, Binding<?>> internalBindings() {
+  Map<Key<?>, BindingImpl<?>> internalBindings() {
     return bindings;
   }
 
   // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
-    return Collections.unmodifiableMap(bindings);
+    return Collections.<Key<?>, Binding<?>>unmodifiableMap(bindings);
   }
 
-  // TODO: try to get rid of the warning
   @SuppressWarnings("unchecked")
-  public <T> Binding<T> getBinding(Key<T> key) {
-    return (Binding<T>) bindings.get(key);
+  public <T> BindingImpl<T> getBinding(Key<T> key) {
+    return (BindingImpl<T>) bindings.get(key);
   }
 
   interface InjectorFactory<M extends Member & AnnotatedElement> {
@@ -385,28 +385,28 @@ class ContainerImpl implements Container {
   }
 
   private static class BindingsMultimap {
-    private final Map<TypeLiteral<?>, List<? extends Binding<?>>> map
-        = new HashMap<TypeLiteral<?>, List<? extends Binding<?>>>();
+    private final Map<TypeLiteral<?>, List<? extends BindingImpl<?>>> map
+        = new HashMap<TypeLiteral<?>, List<? extends BindingImpl<?>>>();
 
-    public <T> void put(TypeLiteral<T> type, Binding<T> binding) {
-      List<Binding<T>> bindingsForThisType = getFromMap(type);
+    public <T> void put(TypeLiteral<T> type, BindingImpl<T> binding) {
+      List<BindingImpl<T>> bindingsForThisType = getFromMap(type);
       if (bindingsForThisType == null) {
-        bindingsForThisType = new ArrayList<Binding<T>>();
+        bindingsForThisType = new ArrayList<BindingImpl<T>>();
         // We only put matching entries into the map
         map.put(type, bindingsForThisType);
       }
       bindingsForThisType.add(binding);
     }
 
-    public <T> List<Binding<T>> getAll(TypeLiteral<T> type) {
-      List<Binding<T>> list = getFromMap(type);
-      return list == null ? Collections.<Binding<T>>emptyList() : list;
+    public <T> List<BindingImpl<T>> getAll(TypeLiteral<T> type) {
+      List<BindingImpl<T>> list = getFromMap(type);
+      return list == null ? Collections.<BindingImpl<T>>emptyList() : list;
     }
 
     // safe because we only put matching entries into the map
     @SuppressWarnings("unchecked")
-    private <T> List<Binding<T>> getFromMap(TypeLiteral<T> type) {
-      return (List<Binding<T>>) map.get(type);
+    private <T> List<BindingImpl<T>> getFromMap(TypeLiteral<T> type) {
+      return (List<BindingImpl<T>>) map.get(type);
     }
   }
 

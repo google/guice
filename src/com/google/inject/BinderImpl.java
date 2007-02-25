@@ -259,7 +259,7 @@ class BinderImpl implements Binder {
     stopwatch.resetAndLog(logger, "Configuration");
 
     // Create the container.
-    Map<Key<?>, Binding<?>> bindings = new HashMap<Key<?>, Binding<?>>();
+    Map<Key<?>, BindingImpl<?>> bindings = new HashMap<Key<?>, BindingImpl<?>>();
     container = new ContainerImpl(
         proxyFactoryBuilder.create(), bindings, scopes);
     container.setErrorHandler(configurationErrorHandler);
@@ -340,14 +340,14 @@ class BinderImpl implements Binder {
       return;
     }
 
-    Binding<? extends T> destination = container.getBinding(destinationKey);
+    BindingImpl<? extends T> destination = container.getBinding(destinationKey);
     if (destination == null) {
       addError(builder.getSource(), ErrorMessages.LINK_DESTINATION_NOT_FOUND,
           destinationKey);
       return;
     }
 
-    Binding<?> binding = Binding.newInstance(container, builder.getKey(),
+    BindingImpl<?> binding = BindingImpl.newInstance(container, builder.getKey(),
         builder.getSource(), destination.getInternalFactory());
 
     putBinding(binding);
@@ -364,8 +364,8 @@ class BinderImpl implements Binder {
     final Key<T> key = builder.getKey();
     final InternalFactory<? extends T> factory
         = builder.getInternalFactory(container);
-    Binding<?> binding
-        = Binding.newInstance(container, key, builder.getSource(), factory);
+    BindingImpl<?> binding
+        = BindingImpl.newInstance(container, key, builder.getSource(), factory);
 
     putBinding(binding);
 
@@ -398,9 +398,9 @@ class BinderImpl implements Binder {
     }
   }
 
-  void putBinding(Binding<?> binding) {
+  void putBinding(BindingImpl<?> binding) {
     Key<?> key = binding.getKey();
-    Map<Key<?>, Binding<?>> bindings = container.internalBindings();
+    Map<Key<?>, BindingImpl<?>> bindings = container.internalBindings();
     Binding<?> original = bindings.get(key);
 
     // Binding to Provider<?> is not allowed.

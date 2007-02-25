@@ -16,11 +16,11 @@
 
 package com.google.inject.tools.jmx;
 
-import com.google.inject.Binding;
 import com.google.inject.Container;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Binding;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;

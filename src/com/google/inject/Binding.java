@@ -16,76 +16,26 @@
 
 package com.google.inject;
 
-import com.google.inject.util.ToStringBuilder;
-
 /**
  * A binding from a {@link Key} (type and name) to a provider.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Binding<T> {
-
-  final ContainerImpl container;
-  final Key<T> key;
-  final Object source;
-  final InternalFactory<? extends T> internalFactory;
-
-  Binding(ContainerImpl container, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory) {
-    this.container = container;
-    this.key = key;
-    this.source = source;
-    this.internalFactory = internalFactory;
-  }
+public interface Binding<T> {
 
   /**
    * Gets the key for this binding.
    */
-  public Key<T> getKey() {
-    return key;
-  }
+  Key<T> getKey();
 
   /**
    * Gets the source object, an arbitrary object which points back to the
    * configuration which resulted in this binding.
    */
-  public Object getSource() {
-    return source;
-  }
-
-  volatile Provider<T> provider;
+  Object getSource();
 
   /**
    * Gets the provider which returns instances of {@code T}.
    */
-  public Provider<T> getProvider() {
-    if (provider == null) {
-      provider = container.getProvider(key);
-    }
-    return provider;
-  }
-
-  InternalFactory<? extends T> getInternalFactory() {
-    return internalFactory;
-  }
-
-  static <T> Binding<T> newInstance(ContainerImpl container, Key<T> key,
-      Object source, InternalFactory<? extends T> internalFactory) {
-    return new Binding<T>(container, key, source, internalFactory);
-  }
-
-  /**
-   * Is this a constant binding?
-   */
-  boolean isConstant() {
-    return internalFactory instanceof ConstantFactory<?>;
-  }
-
-  public String toString() {
-    return new ToStringBuilder(Binding.class)
-        .add("key", key)
-        .add("source", source)
-        .add("provider", internalFactory)
-        .toString();
-  }
+  Provider<T> getProvider();
 }

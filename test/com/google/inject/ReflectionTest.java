@@ -37,7 +37,6 @@ public class ReflectionTest extends TestCase {
     assertSame(foo, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
-    assertTrue(fooBinding.isConstant());
   }
 
   public void testConstantBinding() throws CreationException {
@@ -48,7 +47,6 @@ public class ReflectionTest extends TestCase {
     assertEquals(5, i.getProvider().get());
     assertNotNull(i.getSource());
     assertEquals(Key.get(int.class, I.class), i.getKey());
-    assertTrue(i.isConstant());
   }
 
   public void testLinkedBinding() throws CreationException {
@@ -61,7 +59,6 @@ public class ReflectionTest extends TestCase {
     assertSame(bar, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
-    assertTrue(fooBinding.isConstant());
   }
 
   static class Foo {}
