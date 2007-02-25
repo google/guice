@@ -47,12 +47,22 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
     } else {
-      if (!Annotations.isRetainedAtRuntime(annotationType)) {
+      boolean retainedAtRuntime =
+          Annotations.isRetainedAtRuntime(annotationType);
+      boolean bindingAnnotation = Key.isBindingAnnotation(annotationType);
+
+      if (!retainedAtRuntime) {
         binder.addError(StackTraceElements.forType(annotationType),
             ErrorMessages.MISSING_RUNTIME_RETENTION, binder.source());
       }
-      else {
-        this.key = Key.get(this.key.getType(), annotationType);
+
+      if (!bindingAnnotation) {
+        binder.addError(StackTraceElements.forType(annotationType),
+            ErrorMessages.MISSING_BINDING_ANNOTATION, binder.source());
+      }
+
+      if (retainedAtRuntime && bindingAnnotation) {
+        this.key = Key.get(this.key.getTypeLiteral(), annotationType);
       }
     }
     return this;
@@ -62,13 +72,24 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     if (this.key.hasAnnotationType()) {
       binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
     } else {
-      if (!Annotations.isRetainedAtRuntime(annotation.annotationType())) {
-        binder.addError(StackTraceElements.forType(annotation.annotationType()),
+      Class<? extends Annotation> annotationType = annotation.annotationType();
+
+      boolean retainedAtRuntime =
+          Annotations.isRetainedAtRuntime(annotationType);
+      boolean bindingAnnotation = Key.isBindingAnnotation(annotationType);
+
+      if (!retainedAtRuntime) {
+        binder.addError(StackTraceElements.forType(annotationType),
             ErrorMessages.MISSING_RUNTIME_RETENTION, binder.source());
       }
-      else {
-        // not test-covered?
-        this.key = Key.get(this.key.getType(), annotation);
+
+      if (!bindingAnnotation) {
+        binder.addError(StackTraceElements.forType(annotationType),
+            ErrorMessages.MISSING_BINDING_ANNOTATION, binder.source());
+      }
+
+      if (retainedAtRuntime && bindingAnnotation) {
+        this.key = Key.get(this.key.getTypeLiteral(), annotation);
       }
     }
     return this;
@@ -183,7 +204,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   InternalFactory<? extends T> getInternalFactory(ContainerImpl container) {
     // If an implementation wasn't specified, use the injection type.
     if (this.factory == null) {
-      to(key.getType());
+      to(key.getTypeLiteral());
     }
 
     // Look for @Scoped on the implementation type.

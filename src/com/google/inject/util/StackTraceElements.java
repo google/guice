@@ -62,7 +62,7 @@ public class StackTraceElements {
     LineNumbers lineNumbers = lineNumbersCache.get(implementation);
     return new StackTraceElement(
         implementation.getName(),
-        "",
+        "class",
         lineNumbers.getSource(),
         lineNumbers.getFirstLine());
   }

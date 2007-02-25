@@ -55,8 +55,11 @@ class ErrorMessages {
   static final String ERROR_INJECTING_MEMBERS = "An error occurred while"
       + " injecting members of %s. See log for details. Error message: %s";
 
+  static final String MISSING_BINDING_ANNOTATION = "Please annotate with"
+      + " @BindingAnnotation. Bound at %s.";
+
   static final String MISSING_RUNTIME_RETENTION = "Please annotate with"
-      + " @Retention(RUNTIME). Bound at %s.";;
+      + " @Retention(RUNTIME). Bound at %s.";
 
   static final String MISSING_SCOPE_ANNOTATION = "Please annotate with"
       + " @ScopeAnnotation.";
@@ -171,8 +174,8 @@ class ErrorMessages {
       new Converter<Key>(Key.class) {
         public String toString(Key k) {
           return k.hasAnnotationType()
-              ? k.getType() + " annotated with " + k.getAnnotationName()
-              : k.getType().toString();
+              ? k.getTypeLiteral() + " annotated with " + k.getAnnotationName()
+              : k.getTypeLiteral().toString();
         }
       }
   );

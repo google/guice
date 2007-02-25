@@ -135,7 +135,7 @@ public abstract class Key<T> {
   /**
    * Gets the key type.
    */
-  public TypeLiteral<T> getType() {
+  public TypeLiteral<T> getTypeLiteral() {
     return typeLiteral;
   }
 
@@ -305,6 +305,22 @@ public abstract class Key<T> {
     return new SimpleKey<Object>(type, annotationStrategy);
   }
 
+  /**
+   * Returns true if this key has annotation attributes.
+   * @return
+   */
+  boolean hasAttributes() {
+    return annotationStrategy.hasAttributes();
+  }
+
+  /**
+   * Returns this key without annotation attributes, i.e. with only the
+   * annotation type.
+   */
+  Key<T> withoutAttributes() {
+    return new SimpleKey<T>(typeLiteral, annotationStrategy.withoutAttributes());
+  }
+
   private static class SimpleKey<T> extends Key<T> {
 
     private SimpleKey(Type type, AnnotationStrategy annotationStrategy) {
@@ -321,9 +337,19 @@ public abstract class Key<T> {
 
     Annotation getAnnotation();
     Class<? extends Annotation> getAnnotationType();
+    boolean hasAttributes();
+    AnnotationStrategy withoutAttributes();
   }
 
   static final AnnotationStrategy NULL_STRATEGY = new AnnotationStrategy() {
+
+    public boolean hasAttributes() {
+      return false;
+    }
+
+    public AnnotationStrategy withoutAttributes() {
+      throw new UnsupportedOperationException("Key already has no attributes.");
+    }
 
     public Annotation getAnnotation() {
       return null;
@@ -360,9 +386,8 @@ public abstract class Key<T> {
     nonNull(annotation, "annotation");
     Class<? extends Annotation> annotationType = annotation.annotationType();
     ensureRetainedAtRuntime(annotationType);
-    return isMarker(annotationType)
-        ? new AnnotationTypeStrategy(annotationType, annotation)
-        : new AnnotationInstanceStrategy(annotation);
+    ensureIsBindingAnnotation(annotationType);
+    return new AnnotationInstanceStrategy(annotation);
   }
 
   /**
@@ -371,15 +396,8 @@ public abstract class Key<T> {
   static AnnotationStrategy strategyFor(
       Class<? extends Annotation> annotationType) {
     nonNull(annotationType, "annotation type");
-
-    if (!isMarker(annotationType)) {
-      throw new IllegalArgumentException(annotationType.getName()
-        + " is not a marker annotation, i.e. it has attributes. Please"
-        + " use an Annotation instance or a marker annotation instead.");
-    }
-
     ensureRetainedAtRuntime(annotationType);
-
+    ensureIsBindingAnnotation(annotationType);
     return new AnnotationTypeStrategy(annotationType, null);
   }
 
@@ -392,6 +410,15 @@ public abstract class Key<T> {
     }
   }
 
+  private static void ensureIsBindingAnnotation(
+      Class<? extends Annotation> annotationType) {
+    if (!isBindingAnnotation(annotationType)) {
+      throw new IllegalArgumentException(annotationType.getName()
+          + " is not a binding annotation."
+          + " Please annotate it with @BindingAnnotation.");
+    }
+  }
+
   // this class not test-covered
   static class AnnotationInstanceStrategy implements AnnotationStrategy {
 
@@ -399,6 +426,14 @@ public abstract class Key<T> {
 
     AnnotationInstanceStrategy(Annotation annotation) {
       this.annotation = nonNull(annotation, "annotation");
+    }
+
+    public boolean hasAttributes() {
+      return true;
+    }
+
+    public AnnotationStrategy withoutAttributes() {
+      return new AnnotationTypeStrategy(getAnnotationType(), annotation);
     }
 
     public Annotation getAnnotation() {
@@ -440,6 +475,14 @@ public abstract class Key<T> {
       this.annotation = annotation;
     }
 
+    public boolean hasAttributes() {
+      return false;
+    }
+
+    public AnnotationStrategy withoutAttributes() {
+      throw new UnsupportedOperationException("Key already has no attributes.");
+    }
+
     public Annotation getAnnotation() {
       return annotation;
     }
@@ -464,5 +507,14 @@ public abstract class Key<T> {
     public String toString() {
       return "@" + annotationType.getName();
     }
+  }
+
+  static boolean isBindingAnnotation(Annotation annotation) {
+    return isBindingAnnotation(annotation.annotationType());
+  }
+
+  static boolean isBindingAnnotation(
+      Class<? extends Annotation> annotationType) {
+    return annotationType.isAnnotationPresent(BindingAnnotation.class);
   }
 }

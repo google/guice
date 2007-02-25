@@ -57,7 +57,7 @@ public class Manager {
       StringBuilder name = new StringBuilder();
       name.append(domain).append(":");
       Key<?> key = binding.getKey();
-      name.append("type=").append(quote(key.getType().toString()));
+      name.append("type=").append(quote(key.getTypeLiteral().toString()));
       Annotation annotation = key.getAnnotation();
       if (annotation != null) {
         name.append(",annotation=").append(quote(annotation.toString()));

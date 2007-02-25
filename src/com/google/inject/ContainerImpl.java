@@ -107,7 +107,7 @@ class ContainerImpl implements Container {
   }
 
   <T> void index(BindingImpl<T> binding) {
-    bindingsMultimap.put(binding.getKey().getType(), binding);
+    bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
   }
 
   // not test-covered
@@ -158,16 +158,17 @@ class ContainerImpl implements Container {
       return binding.getInternalFactory();
     }
 
-    Class<? super T> rawType = key.getType().getRawType();
+    Class<? super T> rawType = key.getTypeLiteral().getRawType();
 
-    // Handle cases where T is a Factory<?>.
+    // Handle cases where T is a Provider<?>.
     if (rawType.equals(Provider.class)) {
-      Type provderType = key.getType().getType();
-      if (!(provderType instanceof ParameterizedType)) {
-        return null; // is this right? not test-covered
+      Type providerType = key.getTypeLiteral().getType();
+      if (!(providerType instanceof ParameterizedType)) {
+        // Raw Provider.
+        return null;
       }
       Type entryType
-          = ((ParameterizedType) provderType).getActualTypeArguments()[0];
+          = ((ParameterizedType) providerType).getActualTypeArguments()[0];
 
       try {
         final Provider<?> provider = getProvider(key.ofType(entryType));
@@ -179,8 +180,15 @@ class ContainerImpl implements Container {
         };
       }
       catch (ConfigurationException e) {
+        // Look for a factory bound to a key without annotation attributes if
+        // necessary.
+        if (key.hasAttributes()) {
+          return getInternalFactory(member, key.withoutAttributes());
+        }
+
+        // End of the road.
         ErrorMessages.handleMissingBinding(errorHandler, member, key,
-            getNamesOfBindingAnnotations(key.getType()));
+            getNamesOfBindingAnnotations(key.getTypeLiteral()));
         return invalidFactory();
       }
     }
@@ -196,6 +204,10 @@ class ContainerImpl implements Container {
             counterpartBinding.getInternalFactory();
       }
     }
+
+    // TODO: Should we try to convert from a String first, or should we look
+    // for a binding to the annotation type sans attributes? Right now, we
+    // convert from a String.
 
     // Can we convert from a String constant?
     Key<String> stringKey = key.ofType(String.class);
@@ -252,6 +264,24 @@ class ContainerImpl implements Container {
     int modifiers = rawType.getModifiers();
     if (rawType.isArray() || rawType.isEnum()
         || Modifier.isAbstract(modifiers) || rawType.isPrimitive()) {
+      // Look for a factory bound to a key without annotation attributes if
+      // necessary.
+      if (key.hasAttributes()) {
+        return getInternalFactory(member, key.withoutAttributes());
+      }
+
+      return null;
+    }
+
+    // We don't want to implicitly inject a member if we have a binding
+    // annotation.
+    if (key.hasAnnotationType()) {
+      // Look for a factory bound to a key without annotation attributes if
+      // necessary.
+      if (key.hasAttributes()) {
+        return getInternalFactory(member, key.withoutAttributes());
+      }
+
       return null;
     }
 
@@ -743,7 +773,7 @@ class ContainerImpl implements Container {
 
     void handle(ErrorHandler errorHandler) {
       ErrorMessages.handleMissingBinding(errorHandler, member, key,
-          getNamesOfBindingAnnotations(key.getType()));
+          getNamesOfBindingAnnotations(key.getTypeLiteral()));
     }
   }
 
