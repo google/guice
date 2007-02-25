@@ -45,8 +45,6 @@
     </copy>
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="${build.dir}" 
-        includes="doc/**/*"/>
-      <fileset dir="${build.dir}" 
         includes="javadoc/**/*"/>
     </copy>
 
@@ -117,6 +115,7 @@
          windowtitle="Guice 1.0 API">
       <sourcepath>
         <pathelement location="${src.dir}"/>
+        <pathelement location="${servlet.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <link href="http://aopalliance.sourceforge.net/doc"/>
