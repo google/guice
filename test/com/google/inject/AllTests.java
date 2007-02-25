@@ -34,11 +34,10 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTestSuite(BoundFactoryTest.class);
+    suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(ConstantConversionTest.class);
     suite.addTestSuite(ContainerTest.class);
-    suite.addTestSuite(FactoryTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(KeyTest.class);

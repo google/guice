@@ -23,7 +23,7 @@ import java.lang.reflect.Member;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Context {
+interface Context {
 
   /**
    * Gets the {@link Container}.

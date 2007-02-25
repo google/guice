@@ -447,7 +447,7 @@ class ContainerImpl implements Container {
         throw e;
       }
       catch (Throwable throwable) {
-        throw new LocationException(externalContext, throwable);
+        throw new ProvisionException(externalContext, throwable);
       }
       finally {
         context.setExternalContext(previous);
@@ -604,7 +604,7 @@ class ContainerImpl implements Container {
         throw e;
       }
       catch (Throwable throwable) {
-        throw new LocationException(externalContext, throwable);
+        throw new ProvisionException(externalContext, throwable);
       }
       finally {
         context.setExternalContext(previous);

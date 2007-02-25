@@ -87,9 +87,9 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingScopeBuilder toFactory(Factory<? extends T> factory) {
+  public BindingScopeBuilder toProvider(Provider<? extends T> provider) {
     ensureImplementationIsNotSet();
-    this.factory = new InternalFactoryToFactoryAdapter<T>(factory);
+    this.factory = new InternalFactoryToProviderAdapter<T>(provider);
     return this;
   }
 
@@ -111,24 +111,24 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingBuilderImpl<T> toFactory(
-      Class<? extends Factory<? extends T>> factoryType) {
-    return toFactory(Key.get(factoryType));
+  public BindingBuilderImpl<T> toProvider(
+      Class<? extends Provider<? extends T>> providerType) {
+    return toProvider(Key.get(providerType));
   }
 
   public BindingBuilderImpl<T> toFactory(
-      TypeLiteral<? extends Factory<? extends T>> factoryType) {
-    return toFactory(Key.get(factoryType));
+      TypeLiteral<? extends Provider<? extends T>> providerType) {
+    return toProvider(Key.get(providerType));
   }
 
-  public BindingBuilderImpl<T> toFactory(
-      Key<? extends Factory<? extends T>> factoryKey) {
+  public BindingBuilderImpl<T> toProvider(
+      Key<? extends Provider<? extends T>> providerKey) {
     ensureImplementationIsNotSet();
 
-    final BoundFactory<T> boundFactory =
-        new BoundFactory<T>(factoryKey, source);
-    binder.creationListeners.add(boundFactory);
-    this.factory = boundFactory;
+    final BoundProviderFactory<T> boundProviderFactory =
+        new BoundProviderFactory<T>(providerKey, source);
+    binder.creationListeners.add(boundProviderFactory);
+    this.factory = boundProviderFactory;
 
     return this;
   }
@@ -213,36 +213,34 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   /**
    * Delegates to a custom factory which is also bound in the container.
    */
-  private static class BoundFactory<T>
+  private static class BoundProviderFactory<T>
       implements InternalFactory<T>, CreationListener {
 
-    final Key<? extends Factory<? extends T>> factoryKey;
+    final Key<? extends Provider<? extends T>> providerKey;
     final Object source;
-    private InternalFactory<? extends Factory<? extends T>> factoryFactory;
+    private InternalFactory<? extends Provider<? extends T>> providerFactory;
 
-    public BoundFactory(
-        Key<? extends Factory<? extends T>> factoryKey,
+    public BoundProviderFactory(
+        Key<? extends Provider<? extends T>> providerKey,
         Object source) {
-      this.factoryKey = factoryKey;
+      this.providerKey = providerKey;
       this.source = source;
     }
 
     public void notify(final ContainerImpl container) {
       container.withDefaultSource(source, new Runnable() {
         public void run() {
-          factoryFactory = container.getInternalFactory(null, factoryKey);
+          providerFactory = container.getInternalFactory(null, providerKey);
         }
       });
     }
 
     public String toString() {
-      return factoryKey.toString();
+      return providerKey.toString();
     }
 
     public T get(InternalContext context) {
-      return factoryFactory
-          .get(context)
-          .get(context.getExternalContext());
+      return providerFactory.get(context).get();
     }
   }
 

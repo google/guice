@@ -18,8 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import com.google.inject.Factory;
-import com.google.inject.Context;
+import com.google.inject.Provider;
 import static com.google.inject.servlet.ServletScopes.REQUEST;
 import static com.google.inject.servlet.ServletScopes.SESSION;
 
@@ -45,55 +44,55 @@ public class ServletModule extends AbstractModule {
     bindScope(SessionScoped.class, SESSION);
 
     // Bind request.
-    Factory<HttpServletRequest> requestFactory =
-        new Factory<HttpServletRequest>() {
-          public HttpServletRequest get(Context context) {
+    Provider<HttpServletRequest> requestProvider =
+        new Provider<HttpServletRequest>() {
+          public HttpServletRequest get() {
             return GuiceFilter.getRequest();
           }
 
           public String toString() {
-            return "RequestFactory";
+            return "RequestProvider";
           }
         };
-    bind(HttpServletRequest.class).toFactory(requestFactory);
-    bind(ServletRequest.class).toFactory(requestFactory);
+    bind(HttpServletRequest.class).toProvider(requestProvider);
+    bind(ServletRequest.class).toProvider(requestProvider);
 
     // Bind response.
-    Factory<HttpServletResponse> responseFactory =
-        new Factory<HttpServletResponse>() {
-          public HttpServletResponse get(Context context) {
+    Provider<HttpServletResponse> responseProvider =
+        new Provider<HttpServletResponse>() {
+          public HttpServletResponse get() {
             return GuiceFilter.getResponse();
           }
 
           public String toString() {
-            return "ResponseFactory";
+            return "ResponseProvider";
           }
         };
-    bind(HttpServletResponse.class).toFactory(responseFactory);
-    bind(ServletResponse.class).toFactory(responseFactory);
+    bind(HttpServletResponse.class).toProvider(responseProvider);
+    bind(ServletResponse.class).toProvider(responseProvider);
 
     // Bind session.
-    bind(HttpSession.class).toFactory(new Factory<HttpSession>() {
-      public HttpSession get(Context context) {
+    bind(HttpSession.class).toProvider(new Provider<HttpSession>() {
+      public HttpSession get() {
         return GuiceFilter.getRequest().getSession();
       }
 
       public String toString() {
-        return "SessionFactory";
+        return "SessionProvider";
       }
     });
 
     // Bind request parameters.
     bind(new TypeLiteral<Map<String, String[]>>() {})
         .annotatedWith(RequestParameters.class)
-        .toFactory(new Factory<Map<String, String[]>>() {
+        .toProvider(new Provider<Map<String, String[]>>() {
               @SuppressWarnings({"unchecked"})
-              public Map<String, String[]> get(Context context) {
+              public Map<String, String[]> get() {
                 return GuiceFilter.getRequest().getParameterMap();
               }
 
               public String toString() {
-                return "RequestParametersFactory";
+                return "RequestParametersProvider";
               }
             });
   }

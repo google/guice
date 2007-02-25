@@ -21,11 +21,11 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class BoundFactoryTest extends TestCase {
+public class BoundProviderTest extends TestCase {
 
-  public void testFooFactory() throws CreationException {
+  public void testFooProvider() throws CreationException {
     BinderImpl cb = new BinderImpl();
-    cb.bind(Foo.class).toFactory(FooFactory.class);
+    cb.bind(Foo.class).toProvider(FooProvider.class);
     Container c = cb.createContainer();
 
     Foo a = c.getProvider(Foo.class).get();
@@ -38,10 +38,10 @@ public class BoundFactoryTest extends TestCase {
     assertNotSame(a.bar, b.bar);
   }
 
-  public void testContainerScopedFooFactory()
+  public void testContainerScopedFooProvider()
       throws CreationException {
     BinderImpl cb = new BinderImpl();
-    cb.bind(Foo.class).toFactory(ContainerScopedFooFactory.class);
+    cb.bind(Foo.class).toProvider(ContainerScopedFooProvider.class);
     Container c = cb.createContainer();
 
     Foo a = c.getProvider(Foo.class).get();
@@ -66,39 +66,33 @@ public class BoundFactoryTest extends TestCase {
     }
   }
 
-  static class FooFactory implements Factory<Foo> {
+  static class FooProvider implements Provider<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public FooFactory(Bar bar) {
+    public FooProvider(Bar bar) {
       this.bar = bar;
     }
 
-    public Foo get(Context context) {
-      assertNull(context.getMember());
-      assertEquals(-1, context.getParameterIndex());
-      assertEquals(Foo.class, context.getKey().getRawType());
+    public Foo get() {
       return new Foo(this.bar, count++);
     }
   }
 
   @ContainerScoped
-  static class ContainerScopedFooFactory implements Factory<Foo> {
+  static class ContainerScopedFooProvider implements Provider<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public ContainerScopedFooFactory(Bar bar) {
+    public ContainerScopedFooProvider(Bar bar) {
       this.bar = bar;
     }
 
-    public Foo get(Context context) {
-      assertNull(context.getMember());
-      assertEquals(-1, context.getParameterIndex());
-      assertEquals(Foo.class, context.getKey().getRawType());
+    public Foo get() {
       return new Foo(this.bar, count++);
     }
   }
