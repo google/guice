@@ -52,6 +52,9 @@ class ErrorMessages {
     }
   }
 
+  static final String ERROR_INJECTING_MEMBERS = "An error occurred while"
+      + " injecting members of %s. See log for details. Error message: %s";
+
   static final String MISSING_RUNTIME_RETENTION = "Please annotate with"
       + " @Retention(RUNTIME). Bound at %s.";;
 

@@ -257,4 +257,32 @@ public class ContainerTest extends TestCase {
       this.fromMethod = i;
     }
   }
+
+  public void testProtectedInjection() throws CreationException {
+    Container container = Guice.createContainer(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toInstance("foo");
+        bind(int.class).toInstance(5);
+      }
+    });
+
+    Protected p = container.getProvider(Protected.class).get();
+    assertEquals("foo", p.fromConstructor);
+    assertEquals(5, p.fromMethod);
+  }
+
+  static class Protected {
+    String fromConstructor;
+    int fromMethod;
+
+    @Inject
+    protected Protected(String fromConstructor) {
+      this.fromConstructor = fromConstructor;
+    }
+
+    @Inject
+    protected void setInt(int i) {
+      this.fromMethod = i;
+    }
+  }
 }

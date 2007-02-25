@@ -50,6 +50,7 @@ public class AllTests {
     suite.addTestSuite(StaticInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
+    suite.addTestSuite(BoundInstanceInjectionTest.class);
 
     suite.addTestSuite(MatcherTest.class);
 

@@ -9,6 +9,7 @@ import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Annotations;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Binds a {@link com.google.inject.Key} to an implementation in a given scope.
@@ -87,16 +88,11 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingScopeBuilder toProvider(Provider<? extends T> provider) {
-    ensureImplementationIsNotSet();
-    this.factory = new InternalFactoryToProviderAdapter<T>(provider);
-    return this;
-  }
-
   public void toInstance(T instance) {
     ensureImplementationIsNotSet();
     this.instance = Objects.nonNull(instance, "instance");
     this.factory = new ConstantFactory<T>(instance);
+    registerInstanceForInjection(instance);
     if (this.scope != null) {
       binder.addError(source, ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
     }
@@ -111,13 +107,15 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingBuilderImpl<T> toProvider(
-      Class<? extends Provider<? extends T>> providerType) {
-    return toProvider(Key.get(providerType));
+  public BindingScopeBuilder toProvider(Provider<? extends T> provider) {
+    ensureImplementationIsNotSet();
+    this.factory = new InternalFactoryToProviderAdapter<T>(provider);
+    registerInstanceForInjection(provider);
+    return this;
   }
 
-  public BindingBuilderImpl<T> toFactory(
-      TypeLiteral<? extends Provider<? extends T>> providerType) {
+  public BindingBuilderImpl<T> toProvider(
+      Class<? extends Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
@@ -242,6 +240,22 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     public T get(InternalContext context) {
       return providerFactory.get(context).get();
     }
+  }
+
+  void registerInstanceForInjection(final Object o) {
+    binder.creationListeners.add(new CreationListener() {
+      public void notify(ContainerImpl container) {
+        try {
+          container.injectMembers(o);
+        }
+        catch (Exception e) {
+          logger.log(Level.SEVERE, "An error occurred while injecting"
+              + " members of an object during container creation.", e);
+          binder.addError(
+              source, ErrorMessages.ERROR_INJECTING_MEMBERS, o, e.getMessage());
+        }
+      }
+    });
   }
 
   /**

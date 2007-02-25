@@ -503,7 +503,8 @@ class ContainerImpl implements Container {
     public MethodInjector(ContainerImpl container, final Method method)
         throws MissingDependencyException {
       // We can't use FastMethod if the method is private.
-      if (Modifier.isPrivate(method.getModifiers())) {
+      if (Modifier.isPrivate(method.getModifiers())
+          || Modifier.isProtected(method.getModifiers())) {
         method.setAccessible(true);
         this.methodInvoker = new MethodInvoker() {
           public Object invoke(Object target, Object... parameters) throws

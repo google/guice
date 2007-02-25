@@ -33,8 +33,9 @@ import net.sf.cglib.reflect.FastConstructor;
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
   public <T> ConstructionProxy<T> get(final Constructor<T> constructor) {
-    // We can't use FastConstructor if the constructor is private.
-    if (Modifier.isPrivate(constructor.getModifiers())) {
+    // We can't use FastConstructor if the constructor is private or protected.
+    if (Modifier.isPrivate(constructor.getModifiers())
+        || Modifier.isProtected(constructor.getModifiers())) {
       constructor.setAccessible(true);
       return new ConstructionProxy<T>() {
         public T newInstance(Object... arguments) throws
