@@ -4,13 +4,6 @@
 
 <struts>
 
-  <!--  These are temporary until I figure out why IntelliJ isn't including
-    my plugin config in the classpath. -->
-  <bean type="com.opensymphony.xwork2.ObjectFactory"
-        name="guice"
-        class="com.google.inject.struts2.GuiceObjectFactory"/>
-  <constant name="struts.objectFactory" value="guice" />
-
   <constant name="guice.module"
             value="com.google.inject.struts2.example.ExampleModule"/>
 

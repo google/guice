@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<project name="common">
+
+  <property file="build.properties"/>
+
+  <target name="compile" description="Compile Java source.">
+    <mkdir dir="${build.dir}/classes"/>
+    <javac srcdir="${src.dir}"
+         debug="on"
+         destdir="${build.dir}/classes">
+      <classpath refid="compile.classpath"/>
+    </javac>
+    <copy toDir="${build.dir}/classes">
+      <fileset dir="${src.dir}" excludes="**/*.java"/>
+    </copy>
+  </target>
+
+  <target name="test.compile" 
+      depends="compile"
+      description="Compile test source.">
+    <mkdir dir="${build.dir}/test"/>
+    <javac srcdir="${test.dir}"
+         debug="on"
+         destdir="${build.dir}/test">
+      <classpath path="${build.dir}/classes"/>
+      <classpath refid="compile.classpath"/>
+    </javac>
+    <copy toDir="${build.dir}/test">
+      <fileset dir="${test.dir}" excludes="**/*.java"/>
+    </copy>
+  </target>
+
+  <target name="test"
+      depends="test.compile"
+      description="Execute JUnit tests.">
+    <java fork="true" 
+        classname="junit.textui.TestRunner"
+        failonerror="true"
+        taskname="junit">
+      <classpath>
+        <pathelement location="${build.dir}/test"/>
+        <pathelement location="${build.dir}/classes"/>
+        <path refid="compile.classpath"/>
+      </classpath>
+      <arg value="${test.class}"/>    
+    </java>
+  </target>
+  
+  <target name="clean"
+      description="Remove generated files.">
+    <delete dir="${build.dir}"/>
+  </target>
+  
+</project>

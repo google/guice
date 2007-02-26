@@ -2,25 +2,12 @@
 
 <project name="guice" default="compile">
 
-  <property file="build.properties"/>
+  <import file="common.xml"/>
 
   <path id="compile.classpath">
     <fileset dir="${lib.dir}" includes="*.jar"/>
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
   </path>
-
-  <target name="compile"
-      description="Compile Java source.">
-    <mkdir dir="${build.dir}/classes"/>
-    <javac srcdir="${src.dir}"
-         debug="on"
-         destdir="${build.dir}/classes">
-      <classpath refid="compile.classpath"/>
-    </javac>
-    <copy toDir="${build.dir}/classes">
-      <fileset dir="${src.dir}" excludes="**/*.java"/>
-    </copy>
-  </target>
 
   <target name="jar" depends="compile"
        description="Build jar.">
@@ -38,14 +25,23 @@
 
   <target name="dist" depends="jar, javadoc"
        description="Build entire distribution.">
+    <ant antfile="servlet/build.xml" target="jar" inheritAll="false"/>
+    <ant antfile="struts2/plugin/build.xml" target="jar" inheritAll="false"/>
+   
+    <copy toDir="${build.dir}/dist"> 
+      <fileset dir="servlet/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist"> 
+      <fileset dir="struts2/plugin/build" includes="*.jar"/>
+    </copy>
+    
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="${lib.dir}" 
         includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="${build.dir}" 
-        includes="javadoc/**/*"/>
+      <fileset dir="${build.dir}" includes="javadoc/**/*"/>
     </copy>
 
     <zip destfile="${build.dir}/guice-${version}.zip"
@@ -53,37 +49,6 @@
     <zip destfile="${build.dir}/guice-${version}-src.zip"
       basedir="." 
       excludes="build/**/*,build,.svn,.svn/**/*,**/.svn,classes,classes/**/*"/>
-  </target>
-  
-  <target name="test.compile" 
-      depends="compile"
-      description="Compile test source.">
-    <mkdir dir="${build.dir}/test"/>
-    <javac srcdir="${test.dir}"
-         debug="on"
-         destdir="${build.dir}/test">
-      <classpath path="${build.dir}/classes"/>
-      <classpath refid="compile.classpath"/>
-    </javac>
-    <copy toDir="${build.dir}/test">
-      <fileset dir="${test.dir}" excludes="**/*.java"/>
-    </copy>
-  </target>
-
-  <target name="test"
-      depends="test.compile"
-      description="Execute JUnit tests.">
-    <java fork="true" 
-        classname="junit.textui.TestRunner"
-        failonerror="true"
-        taskname="junit">
-      <classpath>
-        <pathelement location="${build.dir}/test"/>
-        <pathelement location="${build.dir}/classes"/>
-        <path refid="compile.classpath"/>
-      </classpath>
-      <arg value="com.google.inject.AllTests"/>    
-    </java>
   </target>
   
   <target name="test.dist"
@@ -118,14 +83,19 @@
         <pathelement location="${servlet.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
+      <classpath>
+        <fileset dir="servlet/lib/build" includes="*.jar"/>
+      </classpath>
       <link href="http://aopalliance.sourceforge.net/doc"/>
       <link href="http://java.sun.com/javase/6/docs/api"/>
     </javadoc>
   </target>
 
-  <target name="clean"
+  <target name="clean.all"
+      depends="clean"
       description="Remove generated files.">
-    <delete dir="${build.dir}"/>
+    <ant dir="servlet" antfile="build.xml" target="clean"/>
+    <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
   </target>
   
 </project>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<project name="guice-struts2-example">
+
+  <import file="../../common.xml"/>
+  
+  <property file="build.properties"/>
+  
+  <path id="compile.classpath">
+    <fileset dir="${lib.dir}" includes="*.jar"/>
+    <fileset dir="../../build/dist" includes="*.jar"/>
+  </path>
+
+</project>
