@@ -17,15 +17,13 @@
 package com.google.inject;
 
 /**
- * A module contributes a set of binding configurations, typically interface
- * bindings, to a {@link Binder} which is later used to create a {@link
- * Container}. Implementing this interface is the standard means for
- * encapsulating and reusing configuration logic.
+ * A module contributes a set of configuration data, typically interface
+ * bindings, which will be used to create a {@link Container}. A guice-based
+ * application is ultimately composed of little but a set of Modules and some
+ * bootstrapping code.
  *
  * <p>Your Module classes can use a more streamlined syntax by extending
  * {@link AbstractModule} rather than implementing this interface directly.
- *
- * @since 1.0
  */
 public interface Module {
 

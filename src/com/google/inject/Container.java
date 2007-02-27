@@ -20,26 +20,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Injects dependencies into constructors, methods and fields annotated with
- * {@code @}{@link Inject}. Iterates explicit {@link Binding}s.
+ * The container fulfills requests for the object instances that make up your
+ * application, always ensuring that these instances are properly injected
+ * before they are returned.  The container is the heart of the Guice framework,
+ * although you don't typically interact with it directly very often.  This
+ * "behind-the-scenes" operation is what distinguishes the Dependency Injection
+ * pattern from its cousin, Service Locator.
  *
- * <p>Automatically converts constant values as needed from {@code String} to
- * any primitive type in addition to {@code enum} and {@code Class<?>}.
- * Automatically boxes and unboxes primitives. For example, in the absence of
- * a binding to {@code int}, the container will look for a binding to {@code
- * Integer}.
+ * <p>The Container API has a few additional features: it allows pre-constructed
+ * instances to have their fields and methods injected, and offers programmatic
+ * introspection to support tool development.
  *
  * <p>Contains several default bindings:
  *
  * <ul>
- * <li>This {@link Container}
+ * <li>This {@link Container} instance itself
  * <li>A {@code Provider<T>} for each binding of type {@code T}
  * <li>The {@link java.util.logging.Logger} for the class being injected
  * <li>The {@link Stage} specified when this container was created
  * </ul>
  *
+ * Containers are created using the facade class {@link Guice}.
+ *
  * @author crazybob@google.com (Bob Lee)
- * @see Guice
  */
 public interface Container {
 

@@ -9,7 +9,11 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Used by {@link Module} implementations to configure bindings.
+ * Collect configuration data (primarily <i>bindings</i>) from one or more
+ * modules, so that this collected information may then be used to construct a
+ * new container. There is no public API to create an instance of this 
+ * interface; instead, your {@link Module} implementations will simply have one
+ * passed in automatically.
  */
 public interface Binder {
 

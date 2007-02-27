@@ -17,12 +17,14 @@
 package com.google.inject;
 
 /**
- * A scope which bound objects can reside in. Scopes a given {@link Provider}.
+ * A scope is a level of visibility that instances provided by Guice may have.
+ * By default, instances created by the Guice container have <i>no scope</i>,
+ * meaning they have no visibility -- guice creates them, injects them once,
+ * then immediately forgets them.  Associating a scope with a particular binding
+ * allows the created instance to be "remembered" and possibly used again for
+ * other injections.
  *
- * <p>Scope implementations should override {@code toString()} in the returned
- * provider and include the unscoped provider's {@code toString()} output. Doing
- * so aids debugging. They should also override their own {@code toString()}
- * method.
+ * @see Scopes#CONTAINER
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -33,6 +35,10 @@ public interface Scope {
    * an object does not exist in this scope, the provider can use the given
    * unscoped provider to retrieve one.
    *
+   * <p>Scope implementations are strongly encouraged to override
+   * {@link Object#toString} in the returned provider and include the backing
+   * provider's {@code toString()} output.
+   *
    * @param key binding key
    * @param unscoped locates an instance when one doesn't already exist in this
    *  scope.
@@ -41,4 +47,11 @@ public interface Scope {
    *  scope
    */
   public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped);
+
+  /**
+   * A short but useful description of this scope.  For comparison, the standard
+   * scopes that ship with guice use the descriptions {@code "Scopes.CONTAINER"},
+   * {@code "ServletScopes.SESSION"} and {@code "ServletScopes.REQUEST"}.
+   */
+  String toString();
 }

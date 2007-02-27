@@ -17,25 +17,28 @@
 package com.google.inject;
 
 /**
- * A binding from a {@link Key} (type and name) to a provider.
+ * A mapping from a key (type and optional annotation) to a provider of
+ * instances of that type.  This interface is part of the container
+ * introspection API and is intended primary for use by tools.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface Binding<T> {
 
   /**
-   * Gets the key for this binding.
+   * Returns the key for this binding.
    */
   Key<T> getKey();
 
   /**
-   * Gets the source object, an arbitrary object which points back to the
-   * configuration which resulted in this binding.
+   * Returns an arbitrary object containing information about the "place" where
+   * this binding was configured. Used by guice in the production of descriptive
+   * error messages.
    */
   Object getSource();
 
   /**
-   * Gets the provider which returns instances of {@code T}.
+   * Returns the provider guice uses to fulfill requests for this binding.
    */
   Provider<T> getProvider();
 }
