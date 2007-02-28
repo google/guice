@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.util.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.util.Map;
-import com.google.inject.util.StackTraceElements;
 
 /**
  * Built in scope implementations.
@@ -30,9 +30,9 @@ public class Scopes {
   private Scopes() {}
 
   /**
-   * One instance per container. Also see {@code @}{@link ContainerScoped}.
+   * One instance per Injector. Also see {@code @}{@link Singleton}.
    */
-  public static final Scope CONTAINER = new Scope() {
+  public static final Scope SINGLETON = new Scope() {
     public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
 
@@ -48,7 +48,7 @@ public class Scopes {
              * Maybe one of these days we will identify independent graphs of
              * objects and offer to load them in parallel.
              */
-            synchronized (Container.class) {
+            synchronized (Injector.class) {
               if (instance == null) {
                 instance = creator.get();
               }
@@ -64,7 +64,7 @@ public class Scopes {
     }
 
     public String toString() {
-      return "Scopes.CONTAINER";
+      return "Scopes.SINGLETON";
     }
   };
 
@@ -110,14 +110,14 @@ public class Scopes {
    * Scopes an internal factory.
    */
   static <T> InternalFactory<? extends T> scope(Key<T> key,
-      ContainerImpl container, InternalFactory<? extends T> creator,
+      InjectorImpl injector, InternalFactory<? extends T> creator,
       Scope scope) {
     // No scope does nothing.
     if (scope == null) {
       return creator;
     }
     Provider<T> scoped = scope.scope(key,
-        new ProviderToInternalFactoryAdapter<T>(container, creator));
+        new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(scoped);
   }
 }

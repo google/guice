@@ -21,18 +21,18 @@ package com.google.inject;
  */
 class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
-  private final ContainerImpl container;
+  private final InjectorImpl injector;
 
   private final InternalFactory<? extends T> internalFactory;
 
-  public ProviderToInternalFactoryAdapter(ContainerImpl container,
+  public ProviderToInternalFactoryAdapter(InjectorImpl injector,
       InternalFactory<? extends T> internalFactory) {
-    this.container = container;
+    this.injector = injector;
     this.internalFactory = internalFactory;
   }
 
   public T get() {
-    return container.callInContext(new ContextualCallable<T>() {
+    return injector.callInContext(new ContextualCallable<T>() {
       public T call(InternalContext context) {
         return internalFactory.get(context);
       }

@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.Container;
-import com.google.inject.CreationException;
-import com.google.inject.Key;
-import com.google.inject.Guice;
 import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -43,7 +43,7 @@ public class ServletTest extends TestCase {
 
   public void testNewRequestObject()
       throws CreationException, IOException, ServletException {
-    final Container container = createContainer();
+    final Injector injector = createInjector();
 
     GuiceFilter filter = new GuiceFilter();
 
@@ -59,7 +59,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertNotNull(container.getProvider(InRequest.class).get());
+        assertNotNull(injector.getProvider(InRequest.class).get());
       }
     };
 
@@ -73,7 +73,7 @@ public class ServletTest extends TestCase {
 
   public void testExistingRequestObject()
       throws CreationException, IOException, ServletException {
-    final Container container = createContainer();
+    final Injector injector = createInjector();
 
     GuiceFilter filter = new GuiceFilter();
 
@@ -89,8 +89,8 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertSame(inRequest, container.getProvider(InRequest.class).get());
-        assertSame(inRequest, container.getProvider(InRequest.class).get());
+        assertSame(inRequest, injector.getProvider(InRequest.class).get());
+        assertSame(inRequest, injector.getProvider(InRequest.class).get());
       }
     };
 
@@ -104,7 +104,7 @@ public class ServletTest extends TestCase {
 
   public void testNewSessionObject()
       throws CreationException, IOException, ServletException {
-    final Container container = createContainer();
+    final Injector injector = createInjector();
 
     GuiceFilter filter = new GuiceFilter();
 
@@ -123,7 +123,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertNotNull(container.getProvider(InSession.class).get());
+        assertNotNull(injector.getProvider(InSession.class).get());
       }
     };
 
@@ -137,7 +137,7 @@ public class ServletTest extends TestCase {
 
   public void testExistingSessionObject()
       throws CreationException, IOException, ServletException {
-    final Container container = createContainer();
+    final Injector injector = createInjector();
 
     GuiceFilter filter = new GuiceFilter();
 
@@ -157,8 +157,8 @@ public class ServletTest extends TestCase {
         invoked[0] = true;
         assertSame(request, servletRequest);
 
-        assertSame(inSession, container.getProvider(InSession.class).get());
-        assertSame(inSession, container.getProvider(InSession.class).get());
+        assertSame(inSession, injector.getProvider(InSession.class).get());
+        assertSame(inSession, injector.getProvider(InSession.class).get());
       }
     };
 
@@ -170,8 +170,8 @@ public class ServletTest extends TestCase {
     assertTrue(invoked[0]);
   }
 
-  private Container createContainer() throws CreationException {
-    return Guice.createContainer(new AbstractModule() {
+  private Injector createInjector() throws CreationException {
+    return Guice.createInjector(new AbstractModule() {
       protected void configure() {
         install(new ServletModule());
         bind(InSession.class);

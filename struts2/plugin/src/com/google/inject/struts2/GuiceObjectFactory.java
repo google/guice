@@ -16,19 +16,17 @@
 
 package com.google.inject.struts2;
 
-import com.google.inject.Container;
-import com.google.inject.Module;
-import com.google.inject.Guice;
 import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.servlet.ServletModule;
-
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
 import com.opensymphony.xwork2.config.entities.InterceptorConfig;
 import com.opensymphony.xwork2.inject.Inject;
 import com.opensymphony.xwork2.interceptor.Interceptor;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +38,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       Logger.getLogger(GuiceObjectFactory.class.getName());
 
   Module module;
-  Container container;
+  Injector injector;
   boolean developmentMode = false;
 
   @Override
@@ -72,7 +70,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     Class<?> clazz = super.getClassInstance(name);
 
     synchronized (this) {
-      if (container == null) {
+      if (injector == null) {
         // We can only bind each class once.
         if (!boundClasses.contains(clazz)) {
           try {
@@ -97,14 +95,14 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   public Object buildBean(Class clazz, Map extraContext) {
     synchronized (this) {
-      if (container == null) {
+      if (injector == null) {
         try {
-          logger.info("Creating container...");
-          this.container = Guice.createContainer(new AbstractModule() {
+          logger.info("Creating injector...");
+          this.injector = Guice.createInjector(new AbstractModule() {
             protected void configure() {
               install(new ServletModule());
 
-              // Tell the container about all the action classes, etc., so it
+              // Tell the injector about all the action classes, etc., so it
               // can validate them at startup.
               for (Class<?> boundClass : boundClasses) {
                 bind(boundClass);
@@ -115,11 +113,11 @@ public class GuiceObjectFactory extends ObjectFactory {
           t.printStackTrace();
           System.exit(1);
         }
-        logger.info("Container created successfully.");
+        logger.info("Injector created successfully.");
       }
     }
 
-    return container.getProvider(clazz).get();
+    return injector.getProvider(clazz).get();
   }
 
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
@@ -131,7 +129,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     }
 
     // Defer the creation of interceptors so that we don't have to create the
-    // container until we've bound all the actions. This enables us to
+    // injector until we've bound all the actions. This enables us to
     // validate all the dependencies at once.
     return new LazyLoadedInterceptor(interceptorConfig, interceptorRefParams);
   }

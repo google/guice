@@ -18,8 +18,8 @@ package com.google.inject.tools.jmx;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.ContainerScoped;
 import com.google.inject.Key;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -33,7 +33,7 @@ public class JmxTest {
 
   static class FooImpl implements Foo {}
 
-  @ContainerScoped
+  @Singleton
   static class TransactionalFoo implements Foo {}
 
   static class Bar {}

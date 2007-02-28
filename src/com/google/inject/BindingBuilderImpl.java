@@ -3,13 +3,13 @@ package com.google.inject;
 import com.google.inject.BinderImpl.CreationListener;
 import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.BindingScopeBuilder;
-import com.google.inject.util.Objects;
-import com.google.inject.util.ToStringBuilder;
-import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Annotations;
+import com.google.inject.util.Objects;
+import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.ToStringBuilder;
 import java.lang.annotation.Annotation;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Binds a {@link com.google.inject.Key} to an implementation in a given scope.
@@ -165,7 +165,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     // this method not test-covered
     ensureScopeNotSet();
 
-    // We could defer this lookup to when we create the container, but this
+    // We could defer this lookup to when we create the Injector, but this
     // is fine for now.
     this.scope = binder.scopes.get(
         Objects.nonNull(scopeAnnotation, "scope annotation"));
@@ -192,8 +192,8 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public void eagerlyInContainer() {
-    in(Scopes.CONTAINER);
+  public void eagerly() {
+    in(Scopes.SINGLETON);
     this.preload = true;
   }
 
@@ -201,7 +201,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return preload;
   }
 
-  InternalFactory<? extends T> getInternalFactory(ContainerImpl container) {
+  InternalFactory<? extends T> getInternalFactory(InjectorImpl injector) {
     // If an implementation wasn't specified, use the injection type.
     if (this.factory == null) {
       to(key.getTypeLiteral());
@@ -222,15 +222,15 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
       }
     }
 
-    return Scopes.scope(this.key, container, this.factory, scope);
+    return Scopes.scope(this.key, injector, this.factory, scope);
   }
 
-  boolean isContainerScoped() {
-    return this.scope == Scopes.CONTAINER;
+  boolean isSingletonScoped() {
+    return this.scope == Scopes.SINGLETON;
   }
 
   /**
-   * Delegates to a custom factory which is also bound in the container.
+   * Delegates to a custom factory which is also bound in the injector.
    */
   private static class BoundProviderFactory<T>
       implements InternalFactory<T>, CreationListener {
@@ -246,10 +246,10 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
       this.source = source;
     }
 
-    public void notify(final ContainerImpl container) {
-      container.withDefaultSource(source, new Runnable() {
+    public void notify(final InjectorImpl injector) {
+      injector.withDefaultSource(source, new Runnable() {
         public void run() {
-          providerFactory = container.getInternalFactory(null, providerKey);
+          providerFactory = injector.getInternalFactory(null, providerKey);
         }
       });
     }
@@ -265,13 +265,13 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
 
   void registerInstanceForInjection(final Object o) {
     binder.creationListeners.add(new CreationListener() {
-      public void notify(ContainerImpl container) {
+      public void notify(InjectorImpl injector) {
         try {
-          container.injectMembers(o);
+          injector.injectMembers(o);
         }
         catch (Exception e) {
           logger.log(Level.SEVERE, "An error occurred while injecting"
-              + " members of an object during container creation.", e);
+              + " members of an object during Injector creation.", e);
           binder.addError(
               source, ErrorMessages.ERROR_INJECTING_MEMBERS, o, e.getMessage());
         }
@@ -298,10 +298,10 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
       this.source = source;
     }
 
-    public void notify(final ContainerImpl container) {
-      container.withDefaultSource(source, new Runnable() {
+    public void notify(final InjectorImpl injector) {
+      injector.withDefaultSource(source, new Runnable() {
         public void run() {
-          constructor = container.getConstructor(implementation);
+          constructor = injector.getConstructor(implementation);
         }
       });
     }

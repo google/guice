@@ -29,8 +29,8 @@ public class CircularDependencyTest extends TestCase {
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.createContainer();
-    A a = container.getProvider(AImpl.class).get();
+    Injector injector = builder.createInjector();
+    A a = injector.getProvider(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 
@@ -38,7 +38,7 @@ public class CircularDependencyTest extends TestCase {
     B getB();
   }
 
-  @ContainerScoped
+  @Singleton
   static class AImpl implements A {
     final B b;
     @Inject public AImpl(B b) {

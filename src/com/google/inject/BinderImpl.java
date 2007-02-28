@@ -16,16 +16,16 @@
 
 package com.google.inject;
 
-import com.google.inject.ContainerImpl.Injector;
+import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.Key.AnnotationStrategy;
-import static com.google.inject.Scopes.CONTAINER;
+import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
-import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.util.Stopwatch;
-import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Annotations;
+import static com.google.inject.util.Objects.nonNull;
+import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.Stopwatch;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Builds a dependency injection {@link Container}. Binds {@link Key}s to
+ * Builds a dependency injection {@link Injector}. Binds {@link Key}s to
  * implementations.
  *
  *
@@ -65,7 +65,7 @@ class BinderImpl implements Binder {
   final List<StaticInjection> staticInjections
       = new ArrayList<StaticInjection>();
 
-  ContainerImpl container;
+  InjectorImpl injector;
 
   final Stage stage;
 
@@ -74,14 +74,14 @@ class BinderImpl implements Binder {
    */
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
-  private static final InternalFactory<Container> CONTAINER_FACTORY
-      = new InternalFactory<Container>() {
-    public Container get(InternalContext context) {
-      return context.getContainerImpl();
+  private static final InternalFactory<Injector> INJECTOR_FACTORY
+      = new InternalFactory<Injector>() {
+    public Injector get(InternalContext context) {
+      return context.getInjectorImpl();
     }
 
     public String toString() {
-      return "Provider<Container>";
+      return "Provider<Injector>";
     }
   };
 
@@ -108,12 +108,12 @@ class BinderImpl implements Binder {
    * Constructs a new builder.
    *
    * @param stage we're running in. If the stage is {@link Stage#PRODUCTION},
-   *  we will eagerly load container-scoped objects.
+   *  we will eagerly load singletons.
    */
   public BinderImpl(Stage stage) {
-    bindScope(ContainerScoped.class, CONTAINER);
+    bindScope(Singleton.class, SINGLETON);
 
-    bind(Container.class).to(CONTAINER_FACTORY);
+    bind(Injector.class).to(INJECTOR_FACTORY);
     bind(Logger.class).to(LOGGER_FACTORY);
     bind(Stage.class).toInstance(stage);
 
@@ -138,7 +138,7 @@ class BinderImpl implements Binder {
       = new ArrayList<CreationListener>();
 
   interface CreationListener {
-    void notify(ContainerImpl container);
+    void notify(InjectorImpl injector);
   }
 
   public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
@@ -292,25 +292,24 @@ class BinderImpl implements Binder {
   final Stopwatch stopwatch = new Stopwatch();
 
   /**
-   * Creates a {@link Container} instance. Injects static members for classes
+   * Creates a {@link Injector} instance. Injects static members for classes
    * which were registered using {@link #requestStaticInjection(Class...)}.
    *
    * @throws CreationException if configuration errors are found. The
    *     expectation is that the application will log this exception and exit.
    * @throws IllegalStateException if called more than once
    */
-  Container createContainer() throws CreationException {
+  Injector createInjector() throws CreationException {
     stopwatch.resetAndLog(logger, "Configuration");
 
-    // Create the container.
     Map<Key<?>, BindingImpl<?>> bindings = new HashMap<Key<?>, BindingImpl<?>>();
-    container = new ContainerImpl(
+    injector = new InjectorImpl(
         proxyFactoryBuilder.create(), bindings, scopes);
-    container.setErrorHandler(configurationErrorHandler);
+    injector.setErrorHandler(configurationErrorHandler);
 
     createConstantBindings();
 
-    // Commands to execute before returning the Container instance.
+    // Commands to execute before returning the Injector instance.
     final List<ContextualCallable<Void>> preloaders
         = new ArrayList<ContextualCallable<Void>>();
 
@@ -319,18 +318,18 @@ class BinderImpl implements Binder {
 
     stopwatch.resetAndLog(logger, "Binding creation");
 
-    container.index();
+    injector.index();
 
     stopwatch.resetAndLog(logger, "Binding indexing");
 
     for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(container);
+      creationListener.notify(injector);
     }
 
     stopwatch.resetAndLog(logger, "Validation");
 
     for (StaticInjection staticInjection : staticInjections) {
-      staticInjection.createInjectors(container);
+      staticInjection.createMemberInjectors(injector);
     }
 
     stopwatch.resetAndLog(logger, "Static validation");
@@ -341,26 +340,26 @@ class BinderImpl implements Binder {
     }
 
     // Switch to runtime error handling.
-    container.setErrorHandler(new RuntimeErrorHandler());
+    injector.setErrorHandler(new RuntimeErrorHandler());
 
     // Inject static members.
     for (StaticInjection staticInjection : staticInjections) {
-      staticInjection.runInjectors(container);
+      staticInjection.runMemberInjectors(injector);
     }
 
     stopwatch.resetAndLog(logger, "Static member injection");
 
     // Run preloading commands.
-    runPreloaders(container, preloaders);
+    runPreloaders(injector, preloaders);
 
     stopwatch.resetAndLog(logger, "Preloading");
 
-    return container;
+    return injector;
   }
 
-  private void runPreloaders(ContainerImpl container,
+  private void runPreloaders(InjectorImpl injector,
       final List<ContextualCallable<Void>> preloaders) {
-    container.callInContext(new ContextualCallable<Void>() {
+    injector.callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) {
         for (ContextualCallable<Void> preloader : preloaders) {
           preloader.call(context);
@@ -384,14 +383,14 @@ class BinderImpl implements Binder {
       return;
     }
 
-    BindingImpl<? extends T> destination = container.getBinding(destinationKey);
+    BindingImpl<? extends T> destination = injector.getBinding(destinationKey);
     if (destination == null) {
       addError(builder.getSource(), ErrorMessages.LINK_DESTINATION_NOT_FOUND,
           destinationKey);
       return;
     }
 
-    BindingImpl<?> binding = BindingImpl.newInstance(container, builder.getKey(),
+    BindingImpl<?> binding = BindingImpl.newInstance(injector, builder.getKey(),
         builder.getSource(), destination.getInternalFactory());
 
     putBinding(binding);
@@ -407,15 +406,15 @@ class BinderImpl implements Binder {
       List<ContextualCallable<Void>> preloaders) {
     final Key<T> key = builder.getKey();
     final InternalFactory<? extends T> factory
-        = builder.getInternalFactory(container);
+        = builder.getInternalFactory(injector);
     BindingImpl<?> binding
-        = BindingImpl.newInstance(container, key, builder.getSource(), factory);
+        = BindingImpl.newInstance(injector, key, builder.getSource(), factory);
 
     putBinding(binding);
 
     // Register to preload if necessary.
     boolean preload = stage == Stage.PRODUCTION;
-    if (builder.isContainerScoped()) {
+    if (builder.isSingletonScoped()) {
       if (preload || builder.shouldPreload()) {
         preloaders.add(new BindingPreloader(key, factory));
       }
@@ -435,7 +434,7 @@ class BinderImpl implements Binder {
 
   private void createConstantBinding(ConstantBindingBuilderImpl builder) {
     if (builder.hasValue()) {
-      putBinding(builder.createBinding(container));
+      putBinding(builder.createBinding(injector));
     }
     else {
       addError(builder.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
@@ -444,7 +443,7 @@ class BinderImpl implements Binder {
 
   void putBinding(BindingImpl<?> binding) {
     Key<?> key = binding.getKey();
-    Map<Key<?>, BindingImpl<?>> bindings = container.internalBindings();
+    Map<Key<?>, BindingImpl<?>> bindings = injector.internalBindings();
     Binding<?> original = bindings.get(key);
 
     // Binding to Provider<?> is not allowed.
@@ -477,7 +476,7 @@ class BinderImpl implements Binder {
   };
 
   /**
-   * Handles errors after the container is created.
+   * Handles errors after the injector is created.
    */
   static class RuntimeErrorHandler extends AbstractErrorHandler {
 
@@ -495,31 +494,32 @@ class BinderImpl implements Binder {
 
     final Object source;
     final Class<?>[] types;
-    final List<Injector> injectors = new ArrayList<Injector>();
+    final List<SingleMemberInjector> memberInjectors
+        = new ArrayList<SingleMemberInjector>();
 
     public StaticInjection(Object source, Class<?>[] types) {
       this.source = source;
       this.types = types;
     }
 
-    void createInjectors(final ContainerImpl container) {
-      container.withDefaultSource(source,
+    void createMemberInjectors(final InjectorImpl injector) {
+      injector.withDefaultSource(source,
           new Runnable() {
             public void run() {
               for (Class<?> clazz : types) {
-                container.addInjectorsForFields(
-                    clazz.getDeclaredFields(), true, injectors);
-                container.addInjectorsForMethods(
-                    clazz.getDeclaredMethods(), true, injectors);
+                injector.addSingleInjectorsForFields(
+                    clazz.getDeclaredFields(), true, memberInjectors);
+                injector.addSingleInjectorsForMethods(
+                    clazz.getDeclaredMethods(), true, memberInjectors);
               }
             }
           });
     }
 
-    void runInjectors(ContainerImpl container) {
-      container.callInContext(new ContextualCallable<Void>() {
+    void runMemberInjectors(InjectorImpl injector) {
+      injector.callInContext(new ContextualCallable<Void>() {
         public Void call(InternalContext context) {
-          for (Injector injector : injectors) {
+          for (SingleMemberInjector injector : memberInjectors) {
             injector.inject(context, null);
           }
           return null;
@@ -540,7 +540,7 @@ class BinderImpl implements Binder {
 
     public Void call(InternalContext context) {
       ExternalContext<?> externalContext
-          = ExternalContext.newInstance(null, key, context.getContainerImpl());
+          = ExternalContext.newInstance(null, key, context.getInjectorImpl());
       context.setExternalContext(externalContext);
       try {
         factory.get(context);

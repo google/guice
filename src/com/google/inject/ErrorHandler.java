@@ -17,7 +17,7 @@
 package com.google.inject;
 
 /**
- * Handles errors in the container.
+ * Handles errors in the Injector.
  *
  * @author crazybob@google.com (Bob Lee)
  */

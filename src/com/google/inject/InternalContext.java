@@ -27,16 +27,16 @@ import java.util.Map;
  */
 class InternalContext {
 
-  final ContainerImpl container;
+  final InjectorImpl injector;
   Map<Object, ConstructionContext<?>> constructionContexts;
   ExternalContext<?> externalContext;
 
-  InternalContext(ContainerImpl container) {
-    this.container = container;
+  InternalContext(InjectorImpl injector) {
+    this.injector = injector;
   }
 
-  ContainerImpl getContainerImpl() {
-    return container;
+  InjectorImpl getInjectorImpl() {
+    return injector;
   }
 
   @SuppressWarnings("unchecked")

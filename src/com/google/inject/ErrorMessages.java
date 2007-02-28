@@ -134,7 +134,7 @@ class ErrorMessages {
       + " from the member-level @Inject or remove @Inject from the parameter.";
 
   static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
-      + " container-scoped bindings.";
+      + " singleton-scoped bindings.";
 
   static final String EXCEPTION_WHILE_CREATING = "Error while locating"
       + " instance%n  bound to %s%n  for member at %s";

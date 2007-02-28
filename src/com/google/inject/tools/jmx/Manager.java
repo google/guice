@@ -16,11 +16,11 @@
 
 package com.google.inject.tools.jmx;
 
-import com.google.inject.Container;
+import com.google.inject.Binding;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Binding;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
@@ -35,23 +35,23 @@ import javax.management.ObjectName;
 public class Manager {
 
   /**
-   * Registers the bindings for the container with the platform MBean server.
+   * Registers all the bindings of an Injector with the platform MBean server.
    * Consider using the name of your root {@link Module} class as the domain.
    */
   public static void manage(
       String domain,
-      Container container) {
-    manage(ManagementFactory.getPlatformMBeanServer(), domain, container);
+      Injector injector) {
+    manage(ManagementFactory.getPlatformMBeanServer(), domain, injector);
   }
 
   /**
-   * Registers the bindings for the container with the given MBean server.
+   * Registers all the bindings of an Injector with the given MBean server.
    * Consider using the name of your root {@link Module} class as the domain.
    */
   public static void manage(MBeanServer server, String domain,
-      Container container) {
+      Injector injector) {
     // Register each binding independently.
-    for (Binding<?> binding : container.getBindings().values()) {
+    for (Binding<?> binding : injector.getBindings().values()) {
       // Construct the name manually so we can ensure proper ordering of the
       // key/value pairs.
       StringBuilder name = new StringBuilder();
@@ -101,9 +101,9 @@ public class Manager {
     }
 
     Module module = (Module) Class.forName(args[0]).newInstance();
-    Container container = Guice.createContainer(module);
+    Injector injector = Guice.createInjector(module);
 
-    manage(args[0], container);
+    manage(args[0], injector);
 
     System.out.println("Press Ctrl+C to exit...");
 

@@ -43,12 +43,12 @@ import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
 /**
- * Default {@link Container} implementation.
+ * Default {@link Injector} implementation.
  *
  * @author crazybob@google.com (Bob Lee)
  * @see BinderImpl
  */
-class ContainerImpl implements Container {
+class InjectorImpl implements Injector {
 
   /**
    * Maps between primitive types and their wrappers and vice versa.
@@ -89,7 +89,7 @@ class ContainerImpl implements Container {
   ErrorHandler errorHandler = new InvalidErrorHandler();
   Object defaultSource = "[unknown source]";
 
-  ContainerImpl(ConstructionProxyFactory constructionProxyFactory,
+  InjectorImpl(ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, BindingImpl<?>> bindings,
       Map<Class<? extends Annotation>, Scope> scopes) {
     this.constructionProxyFactory = constructionProxyFactory;
@@ -131,7 +131,7 @@ class ContainerImpl implements Container {
   }
 
   /**
-   * This is only used during container building.
+   * This is only used during Injector building.
    */
   void withDefaultSource(Object defaultSource, Runnable runnable) {
     Object previous = this.defaultSource;
@@ -322,10 +322,11 @@ class ContainerImpl implements Container {
   /**
    * Field and method injectors.
    */
-  final Map<Class<?>, List<Injector>> injectors
-      = new ReferenceCache<Class<?>, List<Injector>>() {
-    protected List<Injector> create(Class<?> key) {
-      List<Injector> injectors = new ArrayList<Injector>();
+  final Map<Class<?>, List<SingleMemberInjector>> injectors
+      = new ReferenceCache<Class<?>, List<SingleMemberInjector>>() {
+    protected List<SingleMemberInjector> create(Class<?> key) {
+      List<SingleMemberInjector> injectors
+          = new ArrayList<SingleMemberInjector>();
       addInjectors(key, injectors);
       return injectors;
     }
@@ -335,7 +336,7 @@ class ContainerImpl implements Container {
    * Recursively adds injectors for fields and methods from the given class to
    * the given list. Injects parent classes before sub classes.
    */
-  void addInjectors(Class clazz, List<Injector> injectors) {
+  void addInjectors(Class clazz, List<SingleMemberInjector> injectors) {
     if (clazz == Object.class) {
       return;
     }
@@ -344,35 +345,35 @@ class ContainerImpl implements Container {
     addInjectors(clazz.getSuperclass(), injectors);
 
     // TODO (crazybob): Filter out overridden members.
-    addInjectorsForFields(clazz.getDeclaredFields(), false, injectors);
-    addInjectorsForMethods(clazz.getDeclaredMethods(), false, injectors);
+    addSingleInjectorsForFields(clazz.getDeclaredFields(), false, injectors);
+    addSingleInjectorsForMethods(clazz.getDeclaredMethods(), false, injectors);
   }
 
-  void addInjectorsForMethods(Method[] methods, boolean statics,
-      List<Injector> injectors) {
+  void addSingleInjectorsForMethods(Method[] methods, boolean statics,
+      List<SingleMemberInjector> injectors) {
     addInjectorsForMembers(Arrays.asList(methods), statics, injectors,
-        new InjectorFactory<Method>() {
-          public Injector create(ContainerImpl container, Method method)
-              throws MissingDependencyException {
-            return new MethodInjector(container, method);
+        new SingleInjectorFactory<Method>() {
+          public SingleMemberInjector create(InjectorImpl injector,
+              Method method) throws MissingDependencyException {
+            return new SingleMethodInjector(injector, method);
           }
         });
   }
 
-  void addInjectorsForFields(Field[] fields, boolean statics,
-      List<Injector> injectors) {
+  void addSingleInjectorsForFields(Field[] fields, boolean statics,
+      List<SingleMemberInjector> injectors) {
     addInjectorsForMembers(Arrays.asList(fields), statics, injectors,
-        new InjectorFactory<Field>() {
-          public Injector create(ContainerImpl container, Field field)
-              throws MissingDependencyException {
-            return new FieldInjector(container, field);
+        new SingleInjectorFactory<Field>() {
+          public SingleMemberInjector create(InjectorImpl injector,
+              Field field) throws MissingDependencyException {
+            return new SingleFieldInjector(injector, field);
           }
         });
   }
 
   <M extends Member & AnnotatedElement> void addInjectorsForMembers(
-      List<M> members, boolean statics, List<Injector> injectors,
-      InjectorFactory<M> injectorFactory) {
+      List<M> members, boolean statics, List<SingleMemberInjector> injectors,
+      SingleInjectorFactory<M> injectorFactory) {
     for (M member : members) {
       if (isStatic(member) == statics) {
         Inject inject = member.getAnnotation(Inject.class);
@@ -405,8 +406,8 @@ class ContainerImpl implements Container {
     return (BindingImpl<T>) bindings.get(key);
   }
 
-  interface InjectorFactory<M extends Member & AnnotatedElement> {
-    Injector create(ContainerImpl container, M member)
+  interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
+    SingleMemberInjector create(InjectorImpl injector, M member)
         throws MissingDependencyException;
   }
 
@@ -440,13 +441,13 @@ class ContainerImpl implements Container {
     }
   }
 
-  class FieldInjector implements Injector {
+  class SingleFieldInjector implements SingleMemberInjector {
 
     final Field field;
     final InternalFactory<?> factory;
     final ExternalContext<?> externalContext;
 
-    public FieldInjector(ContainerImpl container, Field field)
+    public SingleFieldInjector(InjectorImpl injector, Field field)
         throws MissingDependencyException {
       this.field = field;
 
@@ -455,12 +456,12 @@ class ContainerImpl implements Container {
 
       Key<?> key = Key.get(
           field.getGenericType(), field, field.getAnnotations(), errorHandler);
-      factory = container.getInternalFactory(field, key);
+      factory = injector.getInternalFactory(field, key);
       if (factory == null) {
         throw new MissingDependencyException(key, field);
       }
 
-      this.externalContext = ExternalContext.newInstance(field, key, container);
+      this.externalContext = ExternalContext.newInstance(field, key, injector);
     }
 
     public void inject(InternalContext context, Object o) {
@@ -494,11 +495,11 @@ class ContainerImpl implements Container {
    * @return injections
    */
   <M extends AccessibleObject & Member>
-  ParameterInjector<?>[] getParametersInjectors(M member,
+  SingleParameterInjector<?>[] getParametersInjectors(M member,
       Annotation[][] annotations, Type[] parameterTypes)
       throws MissingDependencyException {
-    ParameterInjector<?>[] parameterInjectors
-        = new ParameterInjector<?>[parameterTypes.length];
+    SingleParameterInjector<?>[] parameterInjectors
+        = new SingleParameterInjector<?>[parameterTypes.length];
     Iterator<Annotation[]> annotationsIterator
         = Arrays.asList(annotations).iterator();
     int index = 0;
@@ -513,8 +514,8 @@ class ContainerImpl implements Container {
     return parameterInjectors;
   }
 
-  <T> ParameterInjector<T> createParameterInjector(Key<T> key, Member member,
-      int index) throws MissingDependencyException {
+  <T> SingleParameterInjector<T> createParameterInjector(
+      Key<T> key, Member member, int index) throws MissingDependencyException {
     InternalFactory<? extends T> factory = getInternalFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(key, member);
@@ -522,15 +523,15 @@ class ContainerImpl implements Container {
 
     ExternalContext<T> externalContext
         = ExternalContext.newInstance(member, index, key, this);
-    return new ParameterInjector<T>(externalContext, factory);
+    return new SingleParameterInjector<T>(externalContext, factory);
   }
 
-  static class MethodInjector implements Injector {
+  static class SingleMethodInjector implements SingleMemberInjector {
 
     final MethodInvoker methodInvoker;
-    final ParameterInjector<?>[] parameterInjectors;
+    final SingleParameterInjector<?>[] parameterInjectors;
 
-    public MethodInjector(ContainerImpl container, final Method method)
+    public SingleMethodInjector(InjectorImpl injector, final Method method)
         throws MissingDependencyException {
       // We can't use FastMethod if the method is private.
       if (Modifier.isPrivate(method.getModifiers())
@@ -557,7 +558,7 @@ class ContainerImpl implements Container {
 
       Type[] parameterTypes = method.getGenericParameterTypes();
       parameterInjectors = parameterTypes.length > 0
-          ? container.getParametersInjectors(
+          ? injector.getParametersInjectors(
               method, method.getParameterAnnotations(), parameterTypes)
           : null;
     }
@@ -590,7 +591,7 @@ class ContainerImpl implements Container {
         return ConstructorInjector.invalidConstructor();
       }
 
-      return new ConstructorInjector(ContainerImpl.this, implementation);
+      return new ConstructorInjector(InjectorImpl.this, implementation);
     }
   };
 
@@ -614,12 +615,12 @@ class ContainerImpl implements Container {
     }
   }
 
-  static class ParameterInjector<T> {
+  static class SingleParameterInjector<T> {
 
     final ExternalContext<T> externalContext;
     final InternalFactory<? extends T> factory;
 
-    public ParameterInjector(ExternalContext<T> externalContext,
+    public SingleParameterInjector(ExternalContext<T> externalContext,
         InternalFactory<? extends T> factory) {
       this.externalContext = externalContext;
       this.factory = factory;
@@ -648,7 +649,7 @@ class ContainerImpl implements Container {
    * values.
    */
   static Object[] getParameters(InternalContext context,
-      ParameterInjector[] parameterInjectors) {
+      SingleParameterInjector[] parameterInjectors) {
     if (parameterInjectors == null) {
       return null;
     }
@@ -661,8 +662,8 @@ class ContainerImpl implements Container {
   }
 
   void injectMembers(Object o, InternalContext context) {
-    List<Injector> injectorsForClass = injectors.get(o.getClass());
-    for (Injector injector : injectorsForClass) {
+    List<SingleMemberInjector> injectorsForClass = injectors.get(o.getClass());
+    for (SingleMemberInjector injector : injectorsForClass) {
       injector.inject(context, o);
     }
   }
@@ -695,7 +696,7 @@ class ContainerImpl implements Container {
           public T call(InternalContext context) {
             ExternalContext<?> previous = context.getExternalContext();
             context.setExternalContext(
-                ExternalContext.newInstance(null, key, ContainerImpl.this));
+                ExternalContext.newInstance(null, key, InjectorImpl.this));
             try {
               return factory.get(context);
             }
@@ -757,7 +758,7 @@ class ContainerImpl implements Container {
   /**
    * Injects a field or method in a given object.
    */
-  interface Injector {
+  interface SingleMemberInjector {
     void inject(InternalContext context, Object o);
   }
 
@@ -896,7 +897,7 @@ class ContainerImpl implements Container {
         implicitBindings.remove(type);
         throw new AssertionError(t);
       }
-
+      
       return scoped;
     }
   }
@@ -933,7 +934,7 @@ class ContainerImpl implements Container {
   }
 
   public String toString() {
-    return new ToStringBuilder(Container.class)
+    return new ToStringBuilder(Injector.class)
         .add("bindings", bindings)
         .toString();
   }

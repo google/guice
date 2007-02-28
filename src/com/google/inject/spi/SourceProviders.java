@@ -16,9 +16,9 @@
 
 package com.google.inject.spi;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Collections;
 
 /**
  * Provides access to the default {@link SourceProvider} implementation and
@@ -41,8 +41,7 @@ public class SourceProviders {
 
   /**
    * Instructs stacktrace-based providers to skip the given class in the stack
-   * trace when
-   * determining the source. Use this to keep the container builder from
+   * trace when determining the source. Use this to keep the binder from
    * logging utility methods as the sources of bindings (i.e. it will skip to
    * the utility methods' callers instead).
    *

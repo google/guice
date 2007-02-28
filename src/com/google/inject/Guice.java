@@ -3,7 +3,7 @@ package com.google.inject;
 import java.util.Arrays;
 
 /**
- * The entry point to the Guice framework. Creates {@link Container}s from
+ * The entry point to the Guice framework. Creates {@link Injector}s from
  * {@link Module}s.
  */
 public final class Guice {
@@ -11,40 +11,40 @@ public final class Guice {
   private Guice() {}
 
   /**
-   * Creates a {@code Container} from {@code Module}s.
+   * Creates an injector for the given set of modules.
    */
-  public static Container createContainer(Module... modules)
+  public static Injector createInjector(Module... modules)
       throws CreationException {
-    return createContainer(Arrays.asList(modules));
+    return createInjector(Arrays.asList(modules));
   }
 
   /**
-   * Creates a {@code Container} from {@code Module}s.
+   * Creates an injector for the given set of modules.
    */
-  public static Container createContainer(Iterable<Module> modules)
+  public static Injector createInjector(Iterable<Module> modules)
       throws CreationException {
-    return createContainer(Stage.DEVELOPMENT, modules);
+    return createInjector(Stage.DEVELOPMENT, modules);
   }
 
   /**
-   * Creates a {@code Container} from {@code Module}s in a given development
-   * {@link Stage}.
+   * Creates an injector for the given set of modules, in a given development
+   * stage.
    */
-  public static Container createContainer(Stage stage, Module... modules)
+  public static Injector createInjector(Stage stage, Module... modules)
       throws CreationException {
-    return createContainer(stage, Arrays.asList(modules));
+    return createInjector(stage, Arrays.asList(modules));
   }
 
   /**
-   * Creates a {@code Container} from {@code Module}s in a given development
-   * {@link Stage}.
+   * Creates an injector for the given set of modules, in a given development
+   * stage.
    */
-  public static Container createContainer(Stage stage, Iterable<Module> modules)
+  public static Injector createInjector(Stage stage, Iterable<Module> modules)
       throws CreationException {
     BinderImpl binder = new BinderImpl(stage);
     for (Module module : modules) {
       binder.install(module);
     }
-    return binder.createContainer();
+    return binder.createInjector();
   }
 }

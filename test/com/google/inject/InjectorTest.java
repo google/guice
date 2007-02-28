@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class ContainerTest extends TestCase {
+public class InjectorTest extends TestCase {
 
   @Retention(RUNTIME)
   @BindingAnnotation @interface Other {}
@@ -35,29 +35,29 @@ public class ContainerTest extends TestCase {
   @BindingAnnotation @interface I {}
 
   public void testProviderMethods() throws CreationException {
-    Singleton singleton = new Singleton();
-    Singleton other = new Singleton();
+    SampleSingleton singleton = new SampleSingleton();
+    SampleSingleton other = new SampleSingleton();
 
     BinderImpl builder = new BinderImpl();
-    builder.bind(Singleton.class).toInstance(singleton);
-    builder.bind(Singleton.class)
+    builder.bind(SampleSingleton.class).toInstance(singleton);
+    builder.bind(SampleSingleton.class)
         .annotatedWith(Other.class)
         .toInstance(other);
-    Container container = builder.createContainer();
+    Injector injector = builder.createInjector();
 
     assertSame(singleton,
-        container.getProvider(Key.get(Singleton.class)).get());
-    assertSame(singleton, container.getProvider(Singleton.class).get());
+        injector.getProvider(Key.get(SampleSingleton.class)).get());
+    assertSame(singleton, injector.getProvider(SampleSingleton.class).get());
 
     assertSame(other,
-        container.getProvider(Key.get(Singleton.class, Other.class)).get());
+        injector.getProvider(Key.get(SampleSingleton.class, Other.class)).get());
   }
 
-  static class Singleton {}
+  static class SampleSingleton {}
 
   public void testInjection() throws CreationException {
-    Container container = createFooContainer();
-    Foo foo = container.getProvider(Foo.class).get();
+    Injector injector = createFooInjector();
+    Foo foo = injector.getProvider(Foo.class).get();
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -69,8 +69,8 @@ public class ContainerTest extends TestCase {
     assertSame(foo.bar, foo.bar.getTee().getBar());
   }
 
-  private Container createFooContainer() throws CreationException {
-    return Guice.createContainer(new AbstractModule() {
+  private Injector createFooInjector() throws CreationException {
+    return Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
@@ -81,9 +81,9 @@ public class ContainerTest extends TestCase {
   }
 
   public void testGetInstance() throws CreationException {
-    Container container = createFooContainer();
+    Injector injector = createFooInjector();
 
-    Bar bar = container.getProvider(Key.get(Bar.class)).get();
+    Bar bar = injector.getProvider(Key.get(Bar.class)).get();
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }
@@ -92,8 +92,8 @@ public class ContainerTest extends TestCase {
       throws CreationException {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.createContainer();
-    IntegerWrapper iw = container.getProvider(IntegerWrapper.class).get();
+    Injector injector = builder.createInjector();
+    IntegerWrapper iw = injector.getProvider(IntegerWrapper.class).get();
     assertEquals(5, (int) iw.i);
   }
 
@@ -122,7 +122,7 @@ public class ContainerTest extends TestCase {
     int getI();
   }
 
-  @ContainerScoped
+  @Singleton
   static class BarImpl implements Bar {
 
     @Inject @I int i;
@@ -174,8 +174,8 @@ public class ContainerTest extends TestCase {
     builder.bind(A.class).to(AImpl.class);
     builder.bind(B.class).to(BImpl.class);
 
-    Container container = builder.createContainer();
-    A a = container.getProvider(AImpl.class).get();
+    Injector injector = builder.createInjector();
+    A a = injector.getProvider(AImpl.class).get();
     assertNotNull(a.getB().getA());
   }
 
@@ -183,7 +183,7 @@ public class ContainerTest extends TestCase {
     B getB();
   }
 
-  @ContainerScoped
+  @Singleton
   static class AImpl implements A {
     final B b;
     @Inject public AImpl(B b) {
@@ -213,7 +213,7 @@ public class ContainerTest extends TestCase {
     builder.bindConstant(S.class).to("test");
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(Static.class);
-    builder.createContainer();
+    builder.createInjector();
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);
@@ -231,14 +231,14 @@ public class ContainerTest extends TestCase {
   }
 
   public void testPrivateInjection() throws CreationException {
-    Container container = Guice.createContainer(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(String.class).toInstance("foo");
         bind(int.class).toInstance(5);
       }
     });
 
-    Private p = container.getProvider(Private.class).get();
+    Private p = injector.getProvider(Private.class).get();
     assertEquals("foo", p.fromConstructor);
     assertEquals(5, p.fromMethod);
   }
@@ -259,14 +259,14 @@ public class ContainerTest extends TestCase {
   }
 
   public void testProtectedInjection() throws CreationException {
-    Container container = Guice.createContainer(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(String.class).toInstance("foo");
         bind(int.class).toInstance(5);
       }
     });
 
-    Protected p = container.getProvider(Protected.class).get();
+    Protected p = injector.getProvider(Protected.class).get();
     assertEquals("foo", p.fromConstructor);
     assertEquals(5, p.fromMethod);
   }

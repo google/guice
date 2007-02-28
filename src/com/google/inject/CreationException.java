@@ -17,15 +17,15 @@
 package com.google.inject;
 
 import com.google.inject.spi.Message;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
 
 /**
- * Thrown when errors occur while creating a {@link Container}. Includes a list
+ * Thrown when errors occur while creating a {@link Injector}. Includes a list
  * of encountered errors. Typically, a client should catch this exception, log
  * it, and stop execution.
  *

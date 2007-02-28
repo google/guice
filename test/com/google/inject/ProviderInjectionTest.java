@@ -27,27 +27,27 @@ public class ProviderInjectionTest extends TestCase {
     BinderImpl builder = new BinderImpl();
 
     builder.bind(Bar.class);
-    builder.bind(ContainerScoped.class).in(Scopes.CONTAINER);
+    builder.bind(SampleSingleton.class).in(Scopes.SINGLETON);
 
-    Container container = builder.createContainer();
+    Injector injector = builder.createInjector();
 
-    Foo foo = container.getProvider(Foo.class).get();
+    Foo foo = injector.getProvider(Foo.class).get();
 
     Bar bar = foo.barProvider.get();
     assertNotNull(bar);
     assertNotSame(bar, foo.barProvider.get());
 
-    ContainerScoped containerScoped = foo.containerScopedProvider.get();
-    assertNotNull(containerScoped);
-    assertSame(containerScoped, foo.containerScopedProvider.get());
+    SampleSingleton singleton = foo.singletonProvider.get();
+    assertNotNull(singleton);
+    assertSame(singleton, foo.singletonProvider.get());
   }
 
   static class Foo {
     @Inject Provider<Bar> barProvider;
-    @Inject Provider<ContainerScoped> containerScopedProvider;
+    @Inject Provider<SampleSingleton> singletonProvider;
   }
 
   static class Bar {}
 
-  static class ContainerScoped {}
+  static class SampleSingleton {}
 }

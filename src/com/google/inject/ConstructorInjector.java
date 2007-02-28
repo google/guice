@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.util.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import com.google.inject.util.StackTraceElements;
 
 /**
  * Injects constructors.
@@ -28,17 +28,17 @@ import com.google.inject.util.StackTraceElements;
 class ConstructorInjector<T> {
 
   final Class<T> implementation;
-  final ContainerImpl.Injector[] injectors;
-  final ContainerImpl.ParameterInjector<?>[] parameterInjectors;
+  final InjectorImpl.SingleMemberInjector[] memberInjectors;
+  final InjectorImpl.SingleParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
-  ConstructorInjector(ContainerImpl container, Class<T> implementation) {
+  ConstructorInjector(InjectorImpl injector, Class<T> implementation) {
     this.implementation = implementation;
-    Constructor<T> constructor = findConstructorIn(container, implementation);
-    parameterInjectors = createParameterInjector(container, constructor);
-    injectors = container.injectors.get(implementation)
-        .toArray(new ContainerImpl.Injector[0]);
-    constructionProxy = container.constructionProxyFactory.get(constructor);
+    Constructor<T> constructor = findConstructorIn(injector, implementation);
+    parameterInjectors = createParameterInjector(injector, constructor);
+    memberInjectors = injector.injectors.get(implementation)
+        .toArray(new InjectorImpl.SingleMemberInjector[0]);
+    constructionProxy = injector.constructionProxyFactory.get(constructor);
   }
 
   /**
@@ -46,29 +46,29 @@ class ConstructorInjector<T> {
    */
   private ConstructorInjector() {
     implementation = null;
-    injectors = null;
+    memberInjectors = null;
     parameterInjectors = null;
     constructionProxy = null;
   }
 
-  ContainerImpl.ParameterInjector<?>[] createParameterInjector(
-      ContainerImpl container, Constructor<T> constructor) {
+  InjectorImpl.SingleParameterInjector<?>[] createParameterInjector(
+      InjectorImpl injector, Constructor<T> constructor) {
     try {
       return constructor.getParameterTypes().length == 0
           ? null // default constructor.
-          : container.getParametersInjectors(
+          : injector.getParametersInjectors(
               constructor,
               constructor.getParameterAnnotations(),
               constructor.getGenericParameterTypes()
           );
     }
-    catch (ContainerImpl.MissingDependencyException e) {
-      e.handle(container.errorHandler);
+    catch (InjectorImpl.MissingDependencyException e) {
+      e.handle(injector.errorHandler);
       return null;
     }
   }
 
-  private Constructor<T> findConstructorIn(ContainerImpl container,
+  private Constructor<T> findConstructorIn(InjectorImpl injector,
       Class<T> implementation) {
     Constructor<T> found = null;
     @SuppressWarnings("unchecked")
@@ -78,16 +78,16 @@ class ConstructorInjector<T> {
       Inject inject = constructor.getAnnotation(Inject.class);
       if (inject != null) {
         if (inject.optional()) {
-          container.errorHandler.handle(
+          injector.errorHandler.handle(
               StackTraceElements.forMember(constructor),
               ErrorMessages.OPTIONAL_CONSTRUCTOR);
         }
 
         if (found != null) {
-          container.errorHandler.handle(
+          injector.errorHandler.handle(
               StackTraceElements.forMember(found),
               ErrorMessages.TOO_MANY_CONSTRUCTORS);
-          return ContainerImpl.invalidConstructor();
+          return InjectorImpl.invalidConstructor();
         }
         found = constructor;
       }
@@ -102,12 +102,12 @@ class ConstructorInjector<T> {
       return implementation.getDeclaredConstructor();
     }
     catch (NoSuchMethodException e) {
-      container.errorHandler.handle(
+      injector.errorHandler.handle(
           StackTraceElements.forMember(
               implementation.getDeclaredConstructors()[0]),
           ErrorMessages.MISSING_CONSTRUCTOR,
           implementation);
-      return ContainerImpl.invalidConstructor();
+      return InjectorImpl.invalidConstructor();
     }
   }
 
@@ -138,7 +138,7 @@ class ConstructorInjector<T> {
       constructionContext.startConstruction();
       try {
         Object[] parameters
-            = ContainerImpl.getParameters(context, parameterInjectors);
+            = InjectorImpl.getParameters(context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
         constructionContext.setProxyDelegates(t);
       }
@@ -151,7 +151,7 @@ class ConstructorInjector<T> {
       constructionContext.setCurrentReference(t);
 
       // Inject fields and methods.
-      for (ContainerImpl.Injector injector : injectors) {
+      for (InjectorImpl.SingleMemberInjector injector : memberInjectors) {
         injector.inject(context, t);
       }
 

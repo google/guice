@@ -18,11 +18,11 @@ package com.google.inject;
 
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import java.util.List;
-import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -30,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
-    Guice.createContainer(new MyModule());
+    Guice.createInjector(new MyModule());
   }
 
   @Inject @Named("missing")
@@ -64,8 +64,7 @@ public class ErrorHandlingTest {
     Invalid(String s) {}
   }
 
-  @ContainerScoped
-  @GoodScope
+  @Singleton @GoodScope
   static class TooManyScopes {
   }
 
@@ -86,7 +85,7 @@ public class ErrorHandlingTest {
       bind(String.class).annotatedWith(Names.named("foo")).in(Named.class);
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
-      bindScope(BadScope.class, Scopes.CONTAINER);
+      bindScope(BadScope.class, Scopes.SINGLETON);
       requestStaticInjection(ErrorHandlingTest.class);
     }
   }

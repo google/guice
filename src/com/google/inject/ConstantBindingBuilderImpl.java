@@ -83,8 +83,8 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
     }
   }
 
-  BindingImpl<?> createBinding(ContainerImpl container) {
-    return bindingInfo.createBinding(container);
+  BindingImpl<?> createBinding(InjectorImpl injector) {
+    return bindingInfo.createBinding(injector);
   }
 
   private static class BindingInfo<T> {
@@ -102,10 +102,10 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
       this.source = source;
     }
 
-    BindingImpl<T> createBinding(ContainerImpl container) {
+    BindingImpl<T> createBinding(InjectorImpl injector) {
       Key<T> key = Key.get(type, annotationStrategy);
       ConstantFactory<T> factory = new ConstantFactory<T>(value);
-      return BindingImpl.newInstance(container, key, source, factory);
+      return BindingImpl.newInstance(injector, key, source, factory);
     }
   }
 }

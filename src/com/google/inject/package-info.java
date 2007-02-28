@@ -16,9 +16,8 @@
 
 /**
  * <i>Google Guice</i> (pronounced "juice") is an ultra-lightweight dependency
- * injection container.  Please refer to the Guice
- * <a href="">User's
- * Guide</a>
+ * injection tool.  Please refer to the Guice
+ * <a href="http://docs.google.com/Doc?id=dd2fhx4z_5df5hw8">User's Guide</a>
  * for a gentle introduction.
  *
  * <p>The principal public APIs in this package are:
@@ -40,8 +39,7 @@
  *
  * <dt>{@link com.google.inject.Provider}
  * <dd>The interface you will implement when you need to customize exactly how
- *     Guice creates instances for a particular binding. Also the interface
- *     used to retrieve instances of a binding from the {@code Container}.
+ *     Guice creates instances for a particular binding.
  *
  * </dl>
  *

@@ -64,8 +64,8 @@ public class ConstantConversionTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
-    Container container = builder.createContainer();
-    Simple simple = container.getProvider(Simple.class).get();
+    Injector injector = builder.createInjector();
+    Simple simple = injector.getProvider(Simple.class).get();
     assertEquals(5, simple.i);
   }
 
@@ -79,7 +79,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(BooleanValue.class).to("true");
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
-    Container c = b.createContainer();
+    Injector c = b.createInjector();
     Foo foo = c.getProvider(Foo.class).get();
 
     checkNumbers(
@@ -110,7 +110,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidInteger() throws CreationException {
     BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.createContainer();
+    Injector c = b.createInjector();
     try {
       c.getProvider(InvalidInteger.class).get();
       fail();
@@ -124,7 +124,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidCharacter() throws CreationException {
     BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.createContainer();
+    Injector c = b.createInjector();
     try {
       c.getProvider(InvalidCharacter.class).get();
       fail();
@@ -138,7 +138,7 @@ public class ConstantConversionTest extends TestCase {
   public void testInvalidEnum() throws CreationException {
     BinderImpl b = new BinderImpl();
     b.bindConstant(NumericValue.class).to("invalid");
-    Container c = b.createContainer();
+    Injector c = b.createInjector();
     try {
       c.getProvider(InvalidEnum.class).get();
       fail();
@@ -153,7 +153,7 @@ public class ConstantConversionTest extends TestCase {
     BinderImpl b = new BinderImpl();
     b.bind(String.class).toInstance("5");
     b.bind(LongHolder.class);
-    Container c = b.createContainer();
+    Injector c = b.createInjector();
   }
 
   static class LongHolder {

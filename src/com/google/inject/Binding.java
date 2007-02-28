@@ -18,8 +18,8 @@ package com.google.inject;
 
 /**
  * A mapping from a key (type and optional annotation) to a provider of
- * instances of that type.  This interface is part of the container
- * introspection API and is intended primary for use by tools.
+ * instances of that type.  This interface is part of the Injector
+ * Introspection API and is intended primary for use by tools.
  *
  * @author crazybob@google.com (Bob Lee)
  */

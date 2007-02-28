@@ -20,8 +20,8 @@ import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.util.Objects;
 import com.google.inject.spi.SourceProviders;
+import com.google.inject.util.Objects;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -37,7 +37,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *
  * public class MyModule extends AbstractModule {
  *   protected void configure() {
- *     bind(Foo.class).to(FooImpl.class).in(Scopes.CONTAINER);
+ *     bind(Foo.class).to(FooImpl.class).in(Scopes.SINGLETON);
  *     bind(BarImpl.class);
  *     link(Bar.class).to(BarImpl.class);
  *     bindConstant(named("port")).to(8080);

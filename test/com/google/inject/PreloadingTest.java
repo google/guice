@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import static com.google.inject.Scopes.CONTAINER;
 import junit.framework.TestCase;
 
 /**
@@ -31,21 +30,21 @@ public class PreloadingTest extends TestCase {
 
   public void testPreloadSome() throws CreationException {
     BinderImpl builder = createBinder(Stage.DEVELOPMENT);
-    builder.createContainer();
+    builder.createInjector();
     assertEquals(1, Foo.count);
     assertEquals(0, Bar.count);
   }
 
   public void testPreloadAll() throws CreationException {
     BinderImpl builder = createBinder(Stage.PRODUCTION);
-    builder.createContainer();
+    builder.createInjector();
     assertEquals(1, Foo.count);
     assertEquals(1, Bar.count);
   }
 
   private BinderImpl createBinder(Stage stage) {
     BinderImpl builder = new BinderImpl(stage);
-    builder.bind(Foo.class).eagerlyInContainer();
+    builder.bind(Foo.class).eagerly();
     builder.bind(Bar.class);
     return builder;
   }
@@ -57,7 +56,7 @@ public class PreloadingTest extends TestCase {
     }
   }
 
-  @ContainerScoped
+  @Singleton
   static class Bar {
     static int count = 0;
     public Bar() {

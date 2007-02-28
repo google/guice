@@ -11,7 +11,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 /**
  * Collect configuration data (primarily <i>bindings</i>) from one or more
  * modules, so that this collected information may then be used to construct a
- * new container. There is no public API to create an instance of this 
+ * new {@link Injector}. There is no public API to create an instance of this
  * interface; instead, your {@link Module} implementations will simply have one
  * passed in automatically.
  */
@@ -77,7 +77,7 @@ public interface Binder {
       Class<? extends Annotation> annotationType);
 
   /**
-   * Upon successful creation, the {@link Container} will inject static fields
+   * Upon successful creation, the {@link Injector} will inject static fields
    * and methods in the given classes.
    *
    * @param types for which static members will be injected
@@ -97,7 +97,7 @@ public interface Binder {
   /**
    * Records an error message which will be presented to the user at a later
    * time. Unlike throwing an exception, this enable us to continue
-   * configuring the container and discover more errors. Uses {@link
+   * configuring the Injector and discover more errors. Uses {@link
    * String#format(String, Object[])} to insert the arguments into the
    * message.
    */

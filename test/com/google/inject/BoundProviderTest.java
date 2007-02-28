@@ -26,7 +26,7 @@ public class BoundProviderTest extends TestCase {
   public void testFooProvider() throws CreationException {
     BinderImpl cb = new BinderImpl();
     cb.bind(Foo.class).toProvider(FooProvider.class);
-    Container c = cb.createContainer();
+    Injector c = cb.createInjector();
 
     Foo a = c.getProvider(Foo.class).get();
     Foo b = c.getProvider(Foo.class).get();
@@ -38,11 +38,10 @@ public class BoundProviderTest extends TestCase {
     assertNotSame(a.bar, b.bar);
   }
 
-  public void testContainerScopedFooProvider()
-      throws CreationException {
+  public void testSingletonFooProvider() throws CreationException {
     BinderImpl cb = new BinderImpl();
-    cb.bind(Foo.class).toProvider(ContainerScopedFooProvider.class);
-    Container c = cb.createContainer();
+    cb.bind(Foo.class).toProvider(SingletonFooProvider.class);
+    Injector c = cb.createInjector();
 
     Foo a = c.getProvider(Foo.class).get();
     Foo b = c.getProvider(Foo.class).get();
@@ -81,14 +80,14 @@ public class BoundProviderTest extends TestCase {
     }
   }
 
-  @ContainerScoped
-  static class ContainerScopedFooProvider implements Provider<Foo> {
+  @Singleton
+  static class SingletonFooProvider implements Provider<Foo> {
 
     final Bar bar;
     int count = 0;
 
     @Inject
-    public ContainerScopedFooProvider(Bar bar) {
+    public SingletonFooProvider(Bar bar) {
       this.bar = bar;
     }
 

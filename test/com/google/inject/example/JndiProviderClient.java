@@ -17,9 +17,9 @@
 package com.google.inject.example;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Container;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import static com.google.inject.example.JndiProvider.fromJndi;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -28,7 +28,7 @@ import javax.sql.DataSource;
 class JndiProviderClient {
 
   public static void main(String[] args) throws CreationException {
-    Container container = Guice.createContainer(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
 // Bind Context to the default InitialContext.
 bind(Context.class).to(InitialContext.class);

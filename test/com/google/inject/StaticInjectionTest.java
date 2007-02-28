@@ -37,7 +37,7 @@ public class StaticInjectionTest extends TestCase {
     builder.bindConstant(I.class).to(5);
     builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
-    Container c = builder.createContainer();
+    Injector c = builder.createInjector();
 
     assertEquals("test", StaticInjectionTest.Static.s);
     assertEquals(5, StaticInjectionTest.Static.i);

@@ -94,9 +94,9 @@ public class PerformanceComparison {
   static final Callable<Foo> juiceFactory = new Callable<Foo>() {
     final Provider<Foo> fooProvider;
     {
-      Container container;
+      Injector injector;
       try {
-        container = Guice.createContainer(new AbstractModule() {
+        injector = Guice.createInjector(new AbstractModule() {
           protected void configure() {
             bind(Tee.class).to(TeeImpl.class);
             bind(Bar.class).to(BarImpl.class);
@@ -108,7 +108,7 @@ public class PerformanceComparison {
       } catch (CreationException e) {
         throw new RuntimeException(e);
       }
-      fooProvider = container.getProvider(Foo.class);
+      fooProvider = injector.getProvider(Foo.class);
     }
 
     public Foo call() throws Exception {
@@ -211,7 +211,7 @@ public class PerformanceComparison {
     String getS();
   }
 
-  @ContainerScoped
+  @Singleton
   public static class TeeImpl implements Tee {
 
     final String s;

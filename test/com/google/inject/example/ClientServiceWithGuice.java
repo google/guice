@@ -3,10 +3,10 @@
 package com.google.inject.example;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Container;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -66,7 +66,7 @@ public static class MockService implements Service {
 public static void main(String[] args) throws CreationException {
   new ClientServiceWithGuice().testClient();
 
-  Container container = Guice.createContainer(new ServiceModule());
-  Client client = container.getProvider(Client.class).get();
+  Injector injector = Guice.createInjector(new ServiceModule());
+  Client client = injector.getProvider(Client.class).get();
 }
 }

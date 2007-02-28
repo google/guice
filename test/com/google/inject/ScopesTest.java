@@ -23,17 +23,16 @@ import junit.framework.TestCase;
  */
 public class ScopesTest extends TestCase {
 
-  public void testContainerScopedAnnotation()
-      throws CreationException {
+  public void testSingletonAnnotation() throws CreationException {
     BinderImpl builder = new BinderImpl();
-    BindingBuilderImpl<Singleton> bindingBuilder
-        = builder.bind(Singleton.class);
-    builder.createContainer();
-    assertSame(Scopes.CONTAINER, bindingBuilder.scope);
+    BindingBuilderImpl<SampleSingleton> bindingBuilder
+        = builder.bind(SampleSingleton.class);
+    builder.createInjector();
+    assertSame(Scopes.SINGLETON, bindingBuilder.scope);
   }
 
-  @ContainerScoped
-  static class Singleton {}
+  @Singleton
+  static class SampleSingleton {}
 
   Scope scope = new Scope() {
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
@@ -44,10 +43,10 @@ public class ScopesTest extends TestCase {
   public void testOverriddingAnnotation()
       throws CreationException {
     BinderImpl builder = new BinderImpl();
-    BindingBuilderImpl<Singleton> bindingBuilder
-        = builder.bind(Singleton.class);
+    BindingBuilderImpl<SampleSingleton> bindingBuilder
+        = builder.bind(SampleSingleton.class);
     bindingBuilder.in(scope);
-    builder.createContainer();
+    builder.createInjector();
     assertSame(scope, bindingBuilder.scope);
   }
 }

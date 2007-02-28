@@ -29,8 +29,8 @@ public class GenericInjectionTest extends TestCase {
     List<String> names = Arrays.asList("foo", "bar", "bob");
     BinderImpl builder = new BinderImpl();
     builder.bind(new TypeLiteral<List<String>>() {}).toInstance(names);
-    Container container = builder.createContainer();
-    Foo foo = container.getProvider(Foo.class).get();
+    Injector injector = builder.createInjector();
+    Foo foo = injector.getProvider(Foo.class).get();
     assertEquals(names, foo.names);
   }
 

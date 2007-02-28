@@ -22,12 +22,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * Apply this to implementation classes when you want one instance per
- * container, as opposed to one instance per injection.
+ * Apply this to implementation classes when you want only one instance (per
+ * binding, per Injector) to be reused for all injections for that binding.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 @Target(ElementType.TYPE)
 @Retention(RUNTIME)
 @ScopeAnnotation
-public @interface ContainerScoped {}
+public @interface Singleton {}

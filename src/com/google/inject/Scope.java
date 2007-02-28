@@ -18,13 +18,13 @@ package com.google.inject;
 
 /**
  * A scope is a level of visibility that instances provided by Guice may have.
- * By default, instances created by the Guice container have <i>no scope</i>,
- * meaning they have no visibility -- guice creates them, injects them once,
- * then immediately forgets them.  Associating a scope with a particular binding
- * allows the created instance to be "remembered" and possibly used again for
- * other injections.
+ * By default, an instance created by the {@link Injector} has <i>no scope</i>,
+ * meaning it has no visibility -- the Injector creates it, injects it once
+ * into the class that required it, then immediately forgets it.  Associating a
+ * scope with a particular binding allows the created instance to be
+ * "remembered" and possibly used again for other injections.
  *
- * @see Scopes#CONTAINER
+ * @see Scopes#SINGLETON
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -50,8 +50,9 @@ public interface Scope {
 
   /**
    * A short but useful description of this scope.  For comparison, the standard
-   * scopes that ship with guice use the descriptions {@code "Scopes.CONTAINER"},
-   * {@code "ServletScopes.SESSION"} and {@code "ServletScopes.REQUEST"}.
+   * scopes that ship with guice use the descriptions
+   * {@code "Scopes.SINGLETON"}, {@code "ServletScopes.SESSION"} and
+   * {@code "ServletScopes.REQUEST"}.
    */
   String toString();
 }

@@ -20,31 +20,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The container fulfills requests for the object instances that make up your
+ * Fulfills requests for the object instances that make up your
  * application, always ensuring that these instances are properly injected
- * before they are returned.  The container is the heart of the Guice framework,
+ * before they are returned.  The Injector is the heart of the Guice framework,
  * although you don't typically interact with it directly very often.  This
  * "behind-the-scenes" operation is what distinguishes the Dependency Injection
  * pattern from its cousin, Service Locator.
  *
- * <p>The Container API has a few additional features: it allows pre-constructed
+ * <p>The Injector API has a few additional features: it allows pre-constructed
  * instances to have their fields and methods injected, and offers programmatic
  * introspection to support tool development.
  *
  * <p>Contains several default bindings:
  *
  * <ul>
- * <li>This {@link Container} instance itself
+ * <li>This {@link Injector} instance itself
  * <li>A {@code Provider<T>} for each binding of type {@code T}
  * <li>The {@link java.util.logging.Logger} for the class being injected
- * <li>The {@link Stage} specified when this container was created
+ * <li>The {@link Stage} in which the Injector was created
  * </ul>
  *
- * Containers are created using the facade class {@link Guice}.
+ * Injectors are created using the facade class {@link Guice}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Container {
+public interface Injector {
 
   /**
    * Injects dependencies into the fields and methods of an existing object.

@@ -26,9 +26,9 @@ import java.lang.reflect.Member;
 interface Context {
 
   /**
-   * Gets the {@link Container}.
+   * Gets the {@link Injector}.
    */
-  Container getContainer();
+  Injector getInjector();
 
   /**
    * Gets the field, method or constructor which is being injected. Returns

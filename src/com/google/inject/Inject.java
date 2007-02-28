@@ -25,17 +25,17 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates members of your implementation class (constructors, methods
- * and fields) into which the container should inject references or
- * values. The Container fulfills injection requests for:
+ * and fields) into which the {@link Injector} should inject references or
+ * values. The Injector fulfills injection requests for:
  *
  * <ul>
  * <li>Every instance it constructs. The class being constructed must have
  * exactly one of its constructors marked with {@code @Inject} or must have a
- * constructor taking no parameters. The container then proceeds to perform
+ * constructor taking no parameters. The Injector then proceeds to perform
  * method and field injections.
  * 
- * <li>Pre-constructed instances passed to {@link Container#injectMembers}.
- * In this case any injectable constructor is, of course, ignored.
+ * <li>Pre-constructed instances passed to {@link Injector#injectMembers}.
+ * In this case all constructors are, of course, ignored.
  *
  * <li>Static fields and methods of classes which any {@link Module} has
  * specifically requested static injection for, using
@@ -52,13 +52,13 @@ import java.lang.annotation.Target;
 public @interface Inject {
 
   /**
-   * If true, and the appropriate binding is not present in the container,
-   * the container will skip injection of this method or field rather than
+   * If true, and the appropriate binding is not found,
+   * the Injector will skip injection of this method or field rather than
    * produce an error. When applied to a field, any default value already
    * assigned to the field will remain (guice will not actively null out the
    * field). When applied to a method, the method will only be invoked if
    * bindings for <i>all</i> parameters are found. When applied to a
-   * constructor, an error will result upon container creation.
+   * constructor, an error will result upon Injector creation.
    */
   boolean optional() default false;
 }

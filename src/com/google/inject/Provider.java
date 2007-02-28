@@ -30,15 +30,15 @@ package com.google.inject;
  * instance injected, rather than having a {@code T} injected directly.  This
  * may give you access to multiple instances, instances you wish to safely
  * mutate and discard, instances which are out of scope (e.g. using a
- * request-scoped object from within a container-scoped object), or instances
- * you don't want to initialize until they are absolutely needed.
+ * {@code @RequestScoped} object from within a {@code @SessionScoped} object),
+ * or instances you don't want to initialize until they are absolutely needed.
  *
  * <li>A custom {@link Scope} is implemented as a decorator of
  * {@code Provider<T>}, which decides when to delegate to the backing provider
  * and when to provide the instance some other way.
  *
- * <li>The {@link Container} offers access to the {@code Provider<T>} it uses
- * to fulfill requests for a given key, via the {@link Container#getProvider}
+ * <li>The {@link Injector} offers access to the {@code Provider<T>} it uses
+ * to fulfill requests for a given key, via the {@link Injector#getProvider}
  * methods.
  * </ul>
  *

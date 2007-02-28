@@ -16,10 +16,9 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -28,7 +27,7 @@ public class BindingAnnotationTest extends TestCase {
 
   public void testAnnotationWithValueMatchesKeyWithTypeOnly() throws
       CreationException {
-    Container c = Guice.createContainer(new AbstractModule() {
+    Injector c = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bindConstant(Blue.class).to("foo");
         bind(Foo.class);

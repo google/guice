@@ -23,14 +23,14 @@ import com.google.inject.util.ToStringBuilder;
  */
 class BindingImpl<T> implements Binding<T> {
 
-  final ContainerImpl container;
+  final InjectorImpl injector;
   final Key<T> key;
   final Object source;
   final InternalFactory<? extends T> internalFactory;
 
-  BindingImpl(ContainerImpl container, Key<T> key, Object source,
+  BindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory) {
-    this.container = container;
+    this.injector = injector;
     this.key = key;
     this.source = source;
     this.internalFactory = internalFactory;
@@ -48,7 +48,7 @@ class BindingImpl<T> implements Binding<T> {
 
   public Provider<T> getProvider() {
     if (provider == null) {
-      provider = container.getProvider(key);
+      provider = injector.getProvider(key);
     }
     return provider;
   }
@@ -57,9 +57,9 @@ class BindingImpl<T> implements Binding<T> {
     return internalFactory;
   }
 
-  static <T> BindingImpl<T> newInstance(ContainerImpl container, Key<T> key,
+  static <T> BindingImpl<T> newInstance(InjectorImpl injector, Key<T> key,
       Object source, InternalFactory<? extends T> internalFactory) {
-    return new BindingImpl<T>(container, key, source, internalFactory);
+    return new BindingImpl<T>(injector, key, source, internalFactory);
   }
 
   /**

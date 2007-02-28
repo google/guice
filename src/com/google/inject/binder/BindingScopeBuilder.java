@@ -16,8 +16,8 @@
 
 package com.google.inject.binder;
 
-import java.lang.annotation.Annotation;
 import com.google.inject.Scope;
+import java.lang.annotation.Annotation;
 
 /**
  * Specifies the scope for a binding.
@@ -38,9 +38,9 @@ public interface BindingScopeBuilder {
   void in(Scope scope);
 
   /**
-   * Instructs the {@link com.google.inject.Container} to eagerly load this
-   * container-scoped binding upon creation. Useful for application
+   * Instructs the {@link com.google.inject.Injector} to eagerly initialize this
+   * singleton-scoped binding upon creation. Useful for application
    * initialization logic.
    */
-  void eagerlyInContainer();
+  void eagerly();
 }

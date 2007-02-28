@@ -32,8 +32,8 @@ public class ReflectionTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     Foo foo = new Foo();
     builder.bind(Foo.class).toInstance(foo);
-    Container container = builder.createContainer();
-    Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
+    Injector injector = builder.createInjector();
+    Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
@@ -42,8 +42,8 @@ public class ReflectionTest extends TestCase {
   public void testConstantBinding() throws CreationException {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
-    Container container = builder.createContainer();
-    Binding<?> i = container.getBinding(Key.get(int.class, I.class));
+    Injector injector = builder.createInjector();
+    Binding<?> i = injector.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getProvider().get());
     assertNotNull(i.getSource());
     assertEquals(Key.get(int.class, I.class), i.getKey());
@@ -54,8 +54,8 @@ public class ReflectionTest extends TestCase {
     Bar bar = new Bar();
     builder.bind(Bar.class).toInstance(bar);
     builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
-    Container container = builder.createContainer();
-    Binding<Foo> fooBinding = container.getBinding(Key.get(Foo.class));
+    Injector injector = builder.createInjector();
+    Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());

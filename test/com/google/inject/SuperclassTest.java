@@ -26,8 +26,8 @@ public class SuperclassTest extends TestCase {
   public void testSuperclassInjection() throws CreationException {
     BinderImpl builder = new BinderImpl();
     builder.bind(Foo.class);
-    Container container = builder.createContainer();
-    Provider<Sub> creator = container.getProvider(Sub.class);
+    Injector injector = builder.createInjector();
+    Provider<Sub> creator = injector.getProvider(Sub.class);
     Sub sub = creator.get();
     sub = creator.get();
     sub = creator.get();

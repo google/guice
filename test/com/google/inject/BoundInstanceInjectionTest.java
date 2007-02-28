@@ -26,7 +26,7 @@ public class BoundInstanceInjectionTest extends TestCase {
   public void testInstancesAreInjected() throws CreationException {
     final O o = new O();
 
-    Container container = Guice.createContainer(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(O.class).toInstance(o);
         bind(int.class).toInstance(5);
@@ -45,7 +45,7 @@ public class BoundInstanceInjectionTest extends TestCase {
   }
 
   public void testProvidersAreInjected() throws CreationException {
-    Container container = Guice.createContainer(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(O.class).toProvider(new Provider<O>() {
           @Inject int i;
@@ -59,7 +59,7 @@ public class BoundInstanceInjectionTest extends TestCase {
       }
     });
 
-    assertEquals(5, container.getProvider(O.class).get().fromMethod);
+    assertEquals(5, injector.getProvider(O.class).get().fromMethod);
   }
 
 }
