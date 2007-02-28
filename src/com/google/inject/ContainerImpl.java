@@ -877,12 +877,25 @@ class ContainerImpl implements Container {
       } else {
         scoped = implicitBinding;
       }
+
       implicitBindings.put(type, scoped);
 
-      // Look up the constructor. We do this separately to support circular
-      // dependencies.
-      ConstructorInjector<T> constructor = getConstructor(type);
-      implicitBinding.setConstructorInjector(constructor);
+      try {
+        // Look up the constructor. We do this separately from constructions to
+        // support circular dependencies.
+        ConstructorInjector<T> constructor = getConstructor(type);
+        implicitBinding.setConstructorInjector(constructor);
+      }
+      catch (RuntimeException e) {
+        // Clean up state.
+        implicitBindings.remove(type);
+        throw e;
+      }
+      catch (Throwable t) {
+        // Clean up state.
+        implicitBindings.remove(type);
+        throw new AssertionError(t);
+      }
 
       return scoped;
     }
