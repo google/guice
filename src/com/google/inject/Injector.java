@@ -76,4 +76,16 @@ public interface Injector {
    * Gets the provider bound to the given type.
    */
   <T> Provider<T> getProvider(Class<T> type);
+
+  /**
+   * Gets an instance bound to the given key; equivalent to
+   * {@code getProvider(key).get()}.
+   */
+  <T> T getInstance(Key<T> key);
+
+  /**
+   * Gets an instance bound to the given type; equivalent to
+   * {@code getProvider(type).get()}.
+   */
+  <T> T getInstance(Class<T> type);
 }

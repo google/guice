@@ -25,7 +25,7 @@ public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws CreationException {
     Injector injector = Guice.createInjector();
-    Foo foo = injector.getProvider(Foo.class).get();
+    Foo foo = injector.getInstance(Foo.class);
     assertSame(foo, foo.bar.foo);
   }
 

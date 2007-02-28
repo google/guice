@@ -65,7 +65,7 @@ public class ConstantConversionTest extends TestCase {
     builder.bindConstant(NumericValue.class).to("5");
     builder.bind(Simple.class);
     Injector injector = builder.createInjector();
-    Simple simple = injector.getProvider(Simple.class).get();
+    Simple simple = injector.getInstance(Simple.class);
     assertEquals(5, simple.i);
   }
 
@@ -80,7 +80,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(EnumValue.class).to("TEE");
     b.bindConstant(ClassName.class).to(Foo.class.getName());
     Injector c = b.createInjector();
-    Foo foo = c.getProvider(Foo.class).get();
+    Foo foo = c.getInstance(Foo.class);
 
     checkNumbers(
       foo.integerField,
@@ -112,7 +112,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
-      c.getProvider(InvalidInteger.class).get();
+      c.getInstance(InvalidInteger.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -126,7 +126,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
-      c.getProvider(InvalidCharacter.class).get();
+      c.getInstance(InvalidCharacter.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -140,7 +140,7 @@ public class ConstantConversionTest extends TestCase {
     b.bindConstant(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
-      c.getProvider(InvalidEnum.class).get();
+      c.getInstance(InvalidEnum.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }

@@ -28,8 +28,8 @@ public class BoundProviderTest extends TestCase {
     cb.bind(Foo.class).toProvider(FooProvider.class);
     Injector c = cb.createInjector();
 
-    Foo a = c.getProvider(Foo.class).get();
-    Foo b = c.getProvider(Foo.class).get();
+    Foo a = c.getInstance(Foo.class);
+    Foo b = c.getInstance(Foo.class);
 
     assertEquals(0, a.i);
     assertEquals(0, b.i);
@@ -43,8 +43,8 @@ public class BoundProviderTest extends TestCase {
     cb.bind(Foo.class).toProvider(SingletonFooProvider.class);
     Injector c = cb.createInjector();
 
-    Foo a = c.getProvider(Foo.class).get();
-    Foo b = c.getProvider(Foo.class).get();
+    Foo a = c.getInstance(Foo.class);
+    Foo b = c.getInstance(Foo.class);
 
     assertEquals(0, a.i);
     assertEquals(1, b.i);

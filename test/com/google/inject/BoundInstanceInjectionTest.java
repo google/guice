@@ -59,7 +59,7 @@ public class BoundInstanceInjectionTest extends TestCase {
       }
     });
 
-    assertEquals(5, injector.getProvider(O.class).get().fromMethod);
+    assertEquals(5, injector.getInstance(O.class).fromMethod);
   }
 
 }

@@ -713,6 +713,14 @@ class InjectorImpl implements Injector {
     };
   }
 
+  public <T> T getInstance(Key<T> key) {
+    return getProvider(key).get();
+  }
+
+  public <T> T getInstance(Class<T> type) {
+    return getProvider(type).get();
+  }
+
   final ThreadLocal<InternalContext[]> localContext
       = new ThreadLocal<InternalContext[]>() {
     protected InternalContext[] initialValue() {

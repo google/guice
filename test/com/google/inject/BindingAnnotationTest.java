@@ -34,7 +34,7 @@ public class BindingAnnotationTest extends TestCase {
       }
     });
 
-    Foo foo = c.getProvider(Foo.class).get();
+    Foo foo = c.getInstance(Foo.class);
 
     assertEquals("foo", foo.s);
   }

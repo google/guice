@@ -34,12 +34,12 @@ public class IntegrationTest extends TestCase {
     binder.bindInterceptor(any(), any(), counter);
     Injector injector = binder.createInjector();
 
-    Foo foo = injector.getProvider(Key.get(Foo.class)).get();
+    Foo foo = injector.getInstance(Key.get(Foo.class));
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(1, counter.count);
 
-    foo = injector.getProvider(Foo.class).get();
+    foo = injector.getInstance(Foo.class);
     foo.foo();
     assertTrue(foo.invoked);
     assertEquals(2, counter.count);

@@ -27,14 +27,14 @@ public class NotRequiredTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bind(Bar.class).to(BarImpl.class);
     Injector c = builder.createInjector();
-    Foo foo = c.getProvider(Foo.class).get();
+    Foo foo = c.getInstance(Foo.class);
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
   }
 
   public void testNotProvided() throws CreationException {
     Injector c = Guice.createInjector();
-    Foo foo = c.getProvider(Foo.class).get();
+    Foo foo = c.getInstance(Foo.class);
     assertNull(foo.bar);
     assertNull(foo.fromMethod);
   }

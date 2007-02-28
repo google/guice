@@ -59,7 +59,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertNotNull(injector.getProvider(InRequest.class).get());
+        assertNotNull(injector.getInstance(InRequest.class));
       }
     };
 
@@ -89,8 +89,8 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertSame(inRequest, injector.getProvider(InRequest.class).get());
-        assertSame(inRequest, injector.getProvider(InRequest.class).get());
+        assertSame(inRequest, injector.getInstance(InRequest.class));
+        assertSame(inRequest, injector.getInstance(InRequest.class));
       }
     };
 
@@ -123,7 +123,7 @@ public class ServletTest extends TestCase {
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
-        assertNotNull(injector.getProvider(InSession.class).get());
+        assertNotNull(injector.getInstance(InSession.class));
       }
     };
 
@@ -157,8 +157,8 @@ public class ServletTest extends TestCase {
         invoked[0] = true;
         assertSame(request, servletRequest);
 
-        assertSame(inSession, injector.getProvider(InSession.class).get());
-        assertSame(inSession, injector.getProvider(InSession.class).get());
+        assertSame(inSession, injector.getInstance(InSession.class));
+        assertSame(inSession, injector.getInstance(InSession.class));
       }
     };
 

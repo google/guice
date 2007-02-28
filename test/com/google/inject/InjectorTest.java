@@ -46,18 +46,18 @@ public class InjectorTest extends TestCase {
     Injector injector = builder.createInjector();
 
     assertSame(singleton,
-        injector.getProvider(Key.get(SampleSingleton.class)).get());
-    assertSame(singleton, injector.getProvider(SampleSingleton.class).get());
+        injector.getInstance(Key.get(SampleSingleton.class)));
+    assertSame(singleton, injector.getInstance(SampleSingleton.class));
 
     assertSame(other,
-        injector.getProvider(Key.get(SampleSingleton.class, Other.class)).get());
+        injector.getInstance(Key.get(SampleSingleton.class, Other.class)));
   }
 
   static class SampleSingleton {}
 
   public void testInjection() throws CreationException {
     Injector injector = createFooInjector();
-    Foo foo = injector.getProvider(Foo.class).get();
+    Foo foo = injector.getInstance(Foo.class);
 
     assertEquals("test", foo.s);
     assertEquals("test", foo.bar.getTee().getS());
@@ -83,7 +83,7 @@ public class InjectorTest extends TestCase {
   public void testGetInstance() throws CreationException {
     Injector injector = createFooInjector();
 
-    Bar bar = injector.getProvider(Key.get(Bar.class)).get();
+    Bar bar = injector.getInstance(Key.get(Bar.class));
     assertEquals("test", bar.getTee().getS());
     assertEquals(5, bar.getI());
   }
@@ -93,7 +93,7 @@ public class InjectorTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(I.class).to(5);
     Injector injector = builder.createInjector();
-    IntegerWrapper iw = injector.getProvider(IntegerWrapper.class).get();
+    IntegerWrapper iw = injector.getInstance(IntegerWrapper.class);
     assertEquals(5, (int) iw.i);
   }
 
@@ -175,7 +175,7 @@ public class InjectorTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Injector injector = builder.createInjector();
-    A a = injector.getProvider(AImpl.class).get();
+    A a = injector.getInstance(AImpl.class);
     assertNotNull(a.getB().getA());
   }
 
@@ -238,7 +238,7 @@ public class InjectorTest extends TestCase {
       }
     });
 
-    Private p = injector.getProvider(Private.class).get();
+    Private p = injector.getInstance(Private.class);
     assertEquals("foo", p.fromConstructor);
     assertEquals(5, p.fromMethod);
   }
@@ -266,7 +266,7 @@ public class InjectorTest extends TestCase {
       }
     });
 
-    Protected p = injector.getProvider(Protected.class).get();
+    Protected p = injector.getInstance(Protected.class);
     assertEquals("foo", p.fromConstructor);
     assertEquals(5, p.fromMethod);
   }

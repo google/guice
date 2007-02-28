@@ -117,7 +117,7 @@ public class GuiceObjectFactory extends ObjectFactory {
       }
     }
 
-    return injector.getProvider(clazz).get();
+    return injector.getInstance(clazz);
   }
 
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,

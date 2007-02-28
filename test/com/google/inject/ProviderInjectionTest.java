@@ -31,7 +31,7 @@ public class ProviderInjectionTest extends TestCase {
 
     Injector injector = builder.createInjector();
 
-    Foo foo = injector.getProvider(Foo.class).get();
+    Foo foo = injector.getInstance(Foo.class);
 
     Bar bar = foo.barProvider.get();
     assertNotNull(bar);
