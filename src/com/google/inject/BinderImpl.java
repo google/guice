@@ -31,9 +31,12 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -453,14 +456,36 @@ class BinderImpl implements Binder {
     }
   }
 
+  private static Set<Class<?>> FORBIDDEN_TYPES = forbiddenTypes();
+
+  private static Set<Class<?>> forbiddenTypes() {
+    Set<Class<?>> set = new HashSet<Class<?>>();
+    Collections.addAll(set,
+
+        // It's unfortunate that we have to maintain a blacklist of specific
+        // classes, but we can't easily block the whole package because of
+        // all our unit tests.
+
+        AbstractModule.class,
+        Binder.class,
+        Binding.class,
+        Key.class,
+        Module.class,
+        Provider.class,
+        Scope.class,
+        TypeLiteral.class);
+    return Collections.unmodifiableSet(set);
+  }
+
   void putBinding(BindingImpl<?> binding) {
     Key<?> key = binding.getKey();
     Map<Key<?>, BindingImpl<?>> bindings = injector.internalBindings();
     Binding<?> original = bindings.get(key);
 
-    // Binding to Provider<?> is not allowed.
-    if (key.getRawType().equals(Provider.class)) {
-      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_PROVIDER);
+    Class<?> rawType = key.getRawType();
+    if (FORBIDDEN_TYPES.contains(rawType)) {
+      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_GUICE_TYPE,
+          rawType.getSimpleName());
       return;
     }
 

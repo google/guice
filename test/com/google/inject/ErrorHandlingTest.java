@@ -101,6 +101,8 @@ public class ErrorHandlingTest {
       } catch (Exception e) {
         addError(e);
       }
+
+      bind(Module.class).toInstance(this);
     }
   }
 }

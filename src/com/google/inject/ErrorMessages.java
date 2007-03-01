@@ -80,8 +80,8 @@ class ErrorMessages {
   static final String CONSTANT_CONVERSION_ERROR = "Error converting String"
       + " constant bound at %s to %s: %s";
 
-  static final String CANNOT_BIND_TO_PROVIDER = "Binding to Provider<?> is not"
-      + " allowed.";
+  static final String CANNOT_BIND_TO_GUICE_TYPE = "Binding to core guice" 
+      + " framework type is not allowed: %s.";
 
   static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";
 
