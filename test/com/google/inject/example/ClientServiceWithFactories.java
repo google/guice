@@ -23,6 +23,8 @@ import static junit.framework.Assert.assertTrue;
  */
 public class ClientServiceWithFactories {
 
+// 72 lines
+
 public interface Service {
   void go();
 }
@@ -33,45 +35,48 @@ public static class ServiceImpl implements Service {
   }
 }
 
-public static abstract class ServiceFactory {
+public interface Factory<T> {
+  T get();
+}
 
-  public abstract Service getService();
+public static class ServiceFactory {
 
-  static ServiceFactory instance = new DefaultServiceFactory();
+  private ServiceFactory() {}
 
-  public static ServiceFactory getInstance() {
+  private static Factory<Service> instance = new Factory<Service>() {
+    private final Service service = new ServiceImpl();
+    public Service get() {
+      return service;
+    }
+  };
+
+  public static Factory<Service> getInstance() {
     return instance;
   }
 
-  public static void setInstance(ServiceFactory serviceFactory) {
+  public static void setInstance(Factory<Service> serviceFactory) {
     instance = serviceFactory;
   }
 }
 
-public static class DefaultServiceFactory extends ServiceFactory {
-  public Service getService() {
-    return new ServiceImpl();
-  }
-}
+public static class Client {
 
-static class Client {
-
-  final Service service;
-
-  Client() {
-    this.service = ServiceFactory.getInstance().getService();
-  }
-
-  void go() {
+  public void go() {
+    Factory<Service> factory = ServiceFactory.getInstance();
+    Service service = factory.get();
     service.go();
   }
 }
 
 public void testClient() {
-  ServiceFactory previous = ServiceFactory.getInstance();
+  Factory<Service> previous = ServiceFactory.getInstance();
   try {
-    MockService mock = new MockService();
-    ServiceFactory.setInstance(new SingletonServiceFactory(mock));
+    final MockService mock = new MockService();
+    ServiceFactory.setInstance(new Factory<Service>() {
+      public Service get() {
+        return mock;
+      }
+    });
     Client client = new Client();
     client.go();
     assertTrue(mock.isGone());
@@ -83,7 +88,7 @@ public void testClient() {
 
 public static class MockService implements Service {
 
-  boolean gone = false;
+  private boolean gone = false;
 
   public void go() {
     gone = true;
@@ -94,20 +99,7 @@ public static class MockService implements Service {
   }
 }
 
-public static class SingletonServiceFactory extends ServiceFactory {
-
-  final Service service;
-
-  public SingletonServiceFactory(Service service) {
-    this.service = service;
+  public static void main(String[] args) {
+    new ClientServiceWithFactories().testClient();
   }
-
-  public Service getService() {
-    return this.service;
-  }
-}
-
-public static void main(String[] args) {
-  new ClientServiceWithFactories().testClient();
-}
 }

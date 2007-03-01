@@ -16,34 +16,40 @@
 
 package com.google.inject.example;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Scopes;
 import static junit.framework.Assert.assertTrue;
+import com.google.inject.example.ClientServiceWithFactories.Service;
+import com.google.inject.example.ClientServiceWithFactories.Factory;
+import com.google.inject.example.ClientServiceWithFactories.ServiceImpl;
+import com.google.inject.example.ClientServiceWithFactories.ServiceFactory;
+import com.google.inject.example.ClientServiceWithFactories.MockService;
+import com.google.inject.example.ClientServiceWithFactories.Client;
+import junit.framework.Assert;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class ClientServiceWithGuice {
+public class ClientServiceWithDependencyInjection {
 
-// 48 lines
+// 62 lines
 
 public interface Service {
   void go();
 }
 
-public static class ServiceImpl implements Service {
+public static class ServiceImpl implements ClientServiceWithDependencyInjection.Service {
   public void go() {
     // ...
   }
 }
 
-public static class MyModule extends AbstractModule {
-  protected void configure() {
-    bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
+public static class ServiceFactory {
+
+  private ServiceFactory() {}
+
+  private static final Service service = new ServiceImpl();
+
+  public static Service getInstance() {
+    return service;
   }
 }
 
@@ -51,13 +57,22 @@ public static class Client {
 
   private final Service service;
 
-  @Inject
   public Client(Service service) {
     this.service = service;
   }
 
   public void go() {
     service.go();
+  }
+}
+
+public static class ClientFactory {
+
+  private ClientFactory() {}
+
+  public static Client getInstance() {
+    Service service = ServiceFactory.getInstance();
+    return new Client(service);
   }
 }
 
@@ -81,9 +96,7 @@ public static class MockService implements Service {
   }
 }
 
-public static void main(String[] args) throws CreationException {
-  new ClientServiceWithGuice().testClient();
-  Injector injector = Guice.createInjector(new MyModule());
-  Client client = injector.getInstance(Client.class);
-}
+  public static void main(String[] args) {
+    new ClientServiceWithDependencyInjection().testClient();
+  }
 }

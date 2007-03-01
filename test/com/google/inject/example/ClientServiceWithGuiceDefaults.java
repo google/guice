@@ -16,34 +16,31 @@
 
 package com.google.inject.example;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.CreationException;
 import com.google.inject.Injector;
-import com.google.inject.Scopes;
-import static junit.framework.Assert.assertTrue;
+import com.google.inject.Guice;
+import com.google.inject.DefaultImplementation;
+import com.google.inject.Singleton;
+import com.google.inject.example.ClientServiceWithGuice.MyModule;
+import junit.framework.Assert;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class ClientServiceWithGuice {
+public class ClientServiceWithGuiceDefaults {
 
-// 48 lines
+// 44 lines
 
+@DefaultImplementation(ServiceImpl.class)
 public interface Service {
   void go();
 }
 
-public static class ServiceImpl implements Service {
+@Singleton
+public static class ServiceImpl implements ClientServiceWithGuiceDefaults.Service {
   public void go() {
     // ...
-  }
-}
-
-public static class MyModule extends AbstractModule {
-  protected void configure() {
-    bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
   }
 }
 
@@ -65,7 +62,7 @@ public void testClient() {
   MockService mock = new MockService();
   Client client = new Client(mock);
   client.go();
-  assertTrue(mock.isGone());
+  Assert.assertTrue(mock.isGone());
 }
 
 public static class MockService implements Service {
@@ -82,8 +79,8 @@ public static class MockService implements Service {
 }
 
 public static void main(String[] args) throws CreationException {
-  new ClientServiceWithGuice().testClient();
+  new ClientServiceWithGuiceDefaults().testClient();
   Injector injector = Guice.createInjector(new MyModule());
-  Client client = injector.getInstance(Client.class);
+  Client client = injector.getProvider(Client.class).get();
 }
 }
