@@ -130,7 +130,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
 
   public BindingScopeBuilder toProvider(Provider<? extends T> provider) {
     ensureImplementationIsNotSet();
-    this.factory = new InternalFactoryToProviderAdapter<T>(provider);
+    this.factory = new InternalFactoryToProviderAdapter<T>(provider, source);
     registerInstanceForInjection(provider);
     return this;
   }

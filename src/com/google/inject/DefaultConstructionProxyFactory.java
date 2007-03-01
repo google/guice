@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.util.GuiceFastClass;
+import com.google.inject.util.Objects;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -40,6 +41,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       return new ConstructionProxy<T>() {
         public T newInstance(Object... arguments) throws
             InvocationTargetException {
+          Objects.assertNoNulls(arguments);
           try {
             return constructor.newInstance(arguments);
           }
@@ -61,6 +63,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
+        Objects.assertNoNulls(arguments);
         return (T) fastConstructor.newInstance(arguments);
       }
     };

@@ -51,4 +51,20 @@ public class Objects {
 
     return a.equals(b);
   }
+
+  /**
+   * We use this as a sanity check immediately before injecting into a method
+   * or constructor, to make sure we aren't supplying a null.  This should never
+   * happen because we should have caught the problem earlier.  Perhaps this 
+   * should be used with Java asserts...
+   */
+  public static void assertNoNulls(Object[] objects) {
+    if (objects != null) { // hmm. weird.
+      for (Object object : objects) {
+        if (object == null) {
+          throw new AssertionError();
+        }
+      }
+    }
+  }
 }

@@ -16,19 +16,35 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.SourceProviders;
+import com.google.inject.util.Objects;
+
 /**
  * @author crazybob@google.com (Bob Lee)
 */
 class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
   private final Provider<? extends T> provider;
+  private final Object source;
 
   public InternalFactoryToProviderAdapter(Provider<? extends T> provider) {
-    this.provider = provider;
+    this(provider, SourceProviders.UNKNOWN_SOURCE);
+  }
+
+  public InternalFactoryToProviderAdapter(
+      Provider<? extends T> provider, Object source) {
+    this.provider = Objects.nonNull(provider, "provider");
+    this.source = Objects.nonNull(source, "source");
   }
   
   public T get(InternalContext context) {
-    return provider.get();
+    T provided = provider.get();
+    if (provided != null) {
+      return provided;
+    }
+    String message = String.format(ErrorMessages.NULL_PROVIDED, source);
+    throw new ProvisionException(context.getExternalContext(),
+        new NullPointerException(message));
   }
 
   public String toString() {

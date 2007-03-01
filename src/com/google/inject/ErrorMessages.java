@@ -149,6 +149,9 @@ class ErrorMessages {
   static final String EXCEPTION_WHILE_CREATING = "Error while locating"
       + " instance%n  bound to %s%n  for member at %s";
   
+  static final String NULL_PROVIDED = "Null value returned by custom provider"
+      + " at %s";
+
   static Object convert(Object o) {
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {

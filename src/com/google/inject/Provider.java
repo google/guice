@@ -49,7 +49,7 @@ package com.google.inject;
 public interface Provider<T> {
 
   /**
-   * Provides an instance of {@code T}.
+   * Provides an instance of {@code T}.  Must never return null.
    */
   T get();
 }

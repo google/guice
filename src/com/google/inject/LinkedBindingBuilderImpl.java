@@ -1,6 +1,7 @@
 package com.google.inject;
 
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.spi.SourceProviders;
 
 /**
  * Links one binding to another.
@@ -9,7 +10,7 @@ class LinkedBindingBuilderImpl<T> implements LinkedBindingBuilder<T> {
 
   final Key<T> key;
   Key<? extends T> destination;
-  Object source = BinderImpl.UNKNOWN_SOURCE;
+  Object source = SourceProviders.UNKNOWN_SOURCE;
   private BinderImpl binder;
 
   LinkedBindingBuilderImpl(BinderImpl binder, Key<T> key) {

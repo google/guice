@@ -30,6 +30,8 @@ public class SourceProviders {
 
   private SourceProviders() {}
 
+  public static final Object UNKNOWN_SOURCE = "[unknown source]";
+  
   static final SourceProvider DEFAULT_INSTANCE = new StacktraceSourceProvider();
 
   static Set<String> skippedClassNames = Collections.emptySet();

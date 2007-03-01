@@ -35,7 +35,7 @@ public class Message {
   }
 
   public Message(String message) {
-    this("[unknown source]", message);
+    this(SourceProviders.UNKNOWN_SOURCE, message);
   }
 
   /**

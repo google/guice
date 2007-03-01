@@ -2,6 +2,7 @@ package com.google.inject;
 
 import com.google.inject.Key.AnnotationStrategy;
 import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.spi.SourceProviders;
 
 /**
    * Builds a constant binding.
@@ -10,7 +11,7 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
 
   BindingInfo<?> bindingInfo;
   final AnnotationStrategy annotationStrategy;
-  Object source = BinderImpl.UNKNOWN_SOURCE;
+  Object source = SourceProviders.UNKNOWN_SOURCE;
   private BinderImpl binder;
 
   ConstantBindingBuilderImpl(BinderImpl binder, AnnotationStrategy annotationStrategy) {

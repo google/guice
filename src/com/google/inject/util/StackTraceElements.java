@@ -16,6 +16,7 @@
 
 package com.google.inject.util;
 
+import com.google.inject.spi.SourceProviders;
 import static com.google.inject.util.ReferenceType.SOFT;
 import static com.google.inject.util.ReferenceType.WEAK;
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class StackTraceElements {
 
   public static Object forMember(Member member) {
     if (member == null) {
-      return "[unknown source]";  
+      return SourceProviders.UNKNOWN_SOURCE;
     }
 
     Class declaringClass = member.getDeclaringClass();

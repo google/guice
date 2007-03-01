@@ -16,7 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.SourceProviders;
 import com.google.inject.util.GuiceFastClass;
+import com.google.inject.util.Objects;
 import com.google.inject.util.ReferenceCache;
 import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Strings;
@@ -87,7 +89,7 @@ class InjectorImpl implements Injector {
   final Map<Class<? extends Annotation>, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
-  Object defaultSource = "[unknown source]";
+  Object defaultSource = SourceProviders.UNKNOWN_SOURCE;
 
   InjectorImpl(ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, BindingImpl<?>> bindings,
@@ -469,6 +471,9 @@ class InjectorImpl implements Injector {
       context.setExternalContext(externalContext);
       try {
         Object value = factory.get(context);
+        if (value == null) {
+          throw new AssertionError(); // we should have prevented this
+        }
         field.set(o, value);
       }
       catch (IllegalAccessException e) {
@@ -540,6 +545,7 @@ class InjectorImpl implements Injector {
         this.methodInvoker = new MethodInvoker() {
           public Object invoke(Object target, Object... parameters) throws
               IllegalAccessException, InvocationTargetException {
+            Objects.assertNoNulls(parameters);
             return method.invoke(target, parameters);
           }
         };
@@ -551,6 +557,7 @@ class InjectorImpl implements Injector {
         this.methodInvoker = new MethodInvoker() {
           public Object invoke(Object target, Object... parameters)
           throws IllegalAccessException, InvocationTargetException {
+            Objects.assertNoNulls(parameters);
             return fastMethod.invoke(target, parameters);
           }
         };

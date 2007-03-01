@@ -30,7 +30,41 @@ import java.util.List;
 public class ErrorHandlingTest {
 
   public static void main(String[] args) throws CreationException {
-    Guice.createInjector(new MyModule());
+    try {
+      Guice.createInjector(new MyModule());
+    }
+    catch (CreationException e) {
+      e.printStackTrace();
+      System.err.println("--");
+    }
+
+    Injector bad = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toProvider(new Provider<String>() {
+          public String get() {
+            return null;
+          }
+        });
+      }
+    });
+    try {
+      bad.getInstance(String.class);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.err.println("--");
+    }
+    try {
+      bad.getInstance(NeedsString.class);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.err.println("--");
+    }
+  }
+
+  static class NeedsString {
+    @Inject String mofo;
   }
 
   @Inject @Named("missing")

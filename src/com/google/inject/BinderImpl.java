@@ -104,8 +104,6 @@ class BinderImpl implements Binder {
     }
   };
 
-  static final String UNKNOWN_SOURCE = "[unknown source]";
-
   final ProxyFactoryBuilder proxyFactoryBuilder;
 
   /**
