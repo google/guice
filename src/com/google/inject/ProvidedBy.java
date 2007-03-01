@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface DefaultProvider {
+public @interface ProvidedBy {
 
   /**
    * The implementation type.

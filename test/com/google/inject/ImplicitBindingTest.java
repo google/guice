@@ -40,4 +40,39 @@ public class ImplicitBindingTest extends TestCase {
       this.foo = foo;
     }
   }
+
+  public void testDefaultImplementation() {
+    Injector injector = Guice.createInjector();
+    I i = injector.getInstance(I.class);
+    i.go();
+  }
+
+  @ImplementedBy(IImpl.class)
+  interface I {
+    void go();
+  }
+
+  static class IImpl implements I {
+    public void go() {}
+  }
+
+  public void testDefaultProvider() {
+    Injector injector = Guice.createInjector();
+    Provided provided = injector.getInstance(Provided.class);
+    provided.go();
+  }
+
+  @ProvidedBy(ProvidedProvider.class)
+  interface Provided {
+    void go();
+  }
+
+  static class ProvidedProvider implements Provider<Provided> {
+    public Provided get() {
+      return new Provided() {
+        public void go() {}
+      };
+    }
+  }
+
 }

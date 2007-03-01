@@ -33,7 +33,11 @@ public class NotRequiredTest extends TestCase {
   }
 
   public void testNotProvided() throws CreationException {
-    Injector c = Guice.createInjector();
+    Injector c = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class);
+      }
+    });
     Foo foo = c.getInstance(Foo.class);
     assertNull(foo.bar);
     assertNull(foo.fromMethod);

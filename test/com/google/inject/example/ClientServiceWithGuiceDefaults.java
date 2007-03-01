@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
 import com.google.inject.Guice;
-import com.google.inject.DefaultImplementation;
+import com.google.inject.ImplementedBy;
 import com.google.inject.Singleton;
 import com.google.inject.example.ClientServiceWithGuice.MyModule;
 import junit.framework.Assert;
@@ -32,7 +32,7 @@ public class ClientServiceWithGuiceDefaults {
 
 // 44 lines
 
-@DefaultImplementation(ServiceImpl.class)
+@ImplementedBy(ServiceImpl.class)
 public interface Service {
   void go();
 }

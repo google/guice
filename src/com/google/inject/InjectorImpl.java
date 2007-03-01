@@ -875,10 +875,10 @@ class InjectorImpl implements Injector {
   <T> InternalFactory<? extends T> getImplicitBinding(Member member,
       final Class<T> type) {
     // Look for @DefaultImplementation.
-    DefaultImplementation defaultImplementation =
-        type.getAnnotation(DefaultImplementation.class);
-    if (defaultImplementation != null) {
-      Class<?> implementationType = defaultImplementation.value();
+    ImplementedBy implementedBy =
+        type.getAnnotation(ImplementedBy.class);
+    if (implementedBy != null) {
+      Class<?> implementationType = implementedBy.value();
 
       // Make sure it's not the same type. TODO: Can we check for deeper loops?
       if (implementationType == type) {
@@ -899,9 +899,9 @@ class InjectorImpl implements Injector {
     }
 
     // Look for @DefaultProvider.
-    DefaultProvider defaultProvider = type.getAnnotation(DefaultProvider.class);
-    if (defaultProvider != null) {
-      final Class<? extends Provider<?>> providerType = defaultProvider.value();
+    ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
+    if (providedBy != null) {
+      final Class<? extends Provider<?>> providerType = providedBy.value();
 
       // Make sure it's not the same type. TODO: Can we check for deeper loops?
       if (providerType == type) {

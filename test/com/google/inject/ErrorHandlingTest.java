@@ -109,6 +109,9 @@ public class ErrorHandlingTest {
 
   @interface BadScope {}
 
+  @ImplementedBy(String.class)
+  interface I {}
+
   static class MyModule extends AbstractModule {
     protected void configure() {
       bind(Runnable.class);
@@ -137,6 +140,7 @@ public class ErrorHandlingTest {
       }
 
       bind(Module.class).toInstance(this);
+      bind(I.class);
     }
   }
 }

@@ -28,7 +28,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface DefaultImplementation {
+public @interface ImplementedBy {
 
   /**
    * The implementation type.
