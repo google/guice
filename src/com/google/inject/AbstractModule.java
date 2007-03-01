@@ -156,6 +156,20 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
+   * @see Binder#addError(String, Object[])
+   */
+  protected void addError(String message, Object... arguments) {
+    builder.addError(message, arguments);
+  }
+
+  /**
+   * @see Binder#addError(Throwable) 
+   */
+  protected void addError(Throwable t) {
+    builder.addError(t);
+  }
+
+  /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {

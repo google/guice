@@ -102,4 +102,12 @@ public interface Binder {
    * message.
    */
   void addError(String message, Object... arguments);
+
+  /**
+   * Records an exception, the full details of which will be logged, and the
+   * message of which will be presented to the user at a later
+   * time. If your Module calls something that you worry may fail, you should
+   * catch the exception and pass it into this.
+   */
+  void addError(Throwable t);
 }

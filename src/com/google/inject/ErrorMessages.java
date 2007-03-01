@@ -52,8 +52,18 @@ class ErrorMessages {
     }
   }
 
-  static final String ERROR_INJECTING_MEMBERS = "An error occurred while"
-      + " injecting members of %s. See log for details. Error message: %s";
+  static final String ERROR_INJECTING_MEMBERS = "An error of type %s occurred"
+      + " while injecting members of %s. Error message: %s";
+
+  static final String ERROR_INJECTING_MEMBERS_SEE_LOG = "An error of type %s"
+      + " occurred while injecting members of %s. See log for details. Error"
+      + " message: %s";
+
+  static final String EXCEPTION_REPORTED_BY_MODULE = "An error of type %s was"
+      + " caught and reported. Error message: %s";
+
+  static final String EXCEPTION_REPORTED_BY_MODULE_SEE_LOG = "An error of type" 
+      + " %s was caught and reported. See log for details. Error message: %s";
 
   static final String MISSING_BINDING_ANNOTATION = "Please annotate with"
       + " @BindingAnnotation. Bound at %s.";

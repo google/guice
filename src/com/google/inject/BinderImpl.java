@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -272,6 +273,17 @@ class BinderImpl implements Binder {
 
   public void addError(String message, Object... arguments) {
     configurationErrorHandler.handle(source(), message, arguments);
+  }
+
+  public void addError(Throwable t) {
+    Object source = source();
+    String className = t.getClass().getSimpleName();
+    String message = t.getMessage();
+    String logMessage = String.format(
+        ErrorMessages.EXCEPTION_REPORTED_BY_MODULE, className, message);
+    logger.log(Level.INFO, logMessage, t);
+    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG,
+        className, message);
   }
 
   void addError(Object source, String message, Object... arguments) {

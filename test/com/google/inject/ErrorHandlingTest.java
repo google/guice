@@ -86,7 +86,21 @@ public class ErrorHandlingTest {
       link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
       bindScope(BadScope.class, Scopes.SINGLETON);
+      bind(Object.class).toInstance(new Object() {
+        @Inject void foo() {
+          throw new RuntimeException();
+        }
+      });
       requestStaticInjection(ErrorHandlingTest.class);
+
+      addError("I don't like %s", "you");
+      
+      Object o = "2";
+      try {
+        Integer i = (Integer) o;
+      } catch (Exception e) {
+        addError(e);
+      }
     }
   }
 }

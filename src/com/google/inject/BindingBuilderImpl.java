@@ -270,10 +270,13 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
           injector.injectMembers(o);
         }
         catch (Exception e) {
-          logger.log(Level.SEVERE, "An error occurred while injecting"
-              + " members of an object during Injector creation.", e);
-          binder.addError(
-              source, ErrorMessages.ERROR_INJECTING_MEMBERS, o, e.getMessage());
+          String className = e.getClass().getSimpleName();
+          String message = e.getMessage();
+          String logMessage = String.format(
+              ErrorMessages.ERROR_INJECTING_MEMBERS, className, o, message);
+          logger.log(Level.INFO, logMessage, e);
+          binder.addError(source, ErrorMessages.ERROR_INJECTING_MEMBERS_SEE_LOG,
+              className, o, message);
         }
       }
     });
