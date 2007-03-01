@@ -135,14 +135,6 @@ class ErrorMessages {
   static final String BINDING_ALREADY_SET = "A binding to %s was already"
       + " configured at %s.";
 
-  static final String NAME_ON_MEMBER_WITH_MULTIPLE_PARAMS = "Member-level"
-      + " @Inject name is not allowed when the member has more than one"
-      + " parameter: %s";
-
-  static final String NAME_ON_MEMBER_AND_PARAMETER = "Ambiguous binding name"
-      + " between @Inject on member and parameter: %s. Please remove the name"
-      + " from the member-level @Inject or remove @Inject from the parameter.";
-
   static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
       + " singleton-scoped bindings.";
 
