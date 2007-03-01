@@ -261,11 +261,9 @@ class InjectorImpl implements Injector {
       }
     }
 
-    // Don't try to inject primitives, arrays, enums, interfaces or abstract
-    // classes.
+    // Don't try to inject primitives, arrays, or enums.
     int modifiers = rawType.getModifiers();
-    if (rawType.isArray() || rawType.isEnum()
-        || Modifier.isAbstract(modifiers) || rawType.isPrimitive()) {
+    if (rawType.isArray() || rawType.isEnum() || rawType.isPrimitive()) {
       // Look for a factory bound to a key without annotation attributes if
       // necessary.
       if (key.hasAttributes()) {
@@ -299,14 +297,15 @@ class InjectorImpl implements Injector {
       };
       try {
         // note: intelliJ thinks this cast is superfluous, but is it?
-        return (InternalFactory<? extends T>) getImplicitBinding(rawType);
+        return (InternalFactory<? extends T>) getImplicitBinding(member,
+            rawType);
       }
       finally {
         this.errorHandler = previous;
       }
     }
     // note: intelliJ thinks this cast is superfluous, but is it?
-    return (InternalFactory<? extends T>) getImplicitBinding(rawType);
+    return (InternalFactory<? extends T>) getImplicitBinding(member, rawType);
   }
 
   private <T> InternalFactory<T> handleConstantConversionError(
@@ -594,7 +593,7 @@ class InjectorImpl implements Injector {
     protected ConstructorInjector<?> create(Class<?> implementation) {
       if (implementation.isInterface()) {
         errorHandler.handle(defaultSource,
-            ErrorMessages.CANNOT_INJECT_INTERFACE, implementation);
+            ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
         return ConstructorInjector.invalidConstructor();
       }
 
@@ -873,7 +872,72 @@ class InjectorImpl implements Injector {
    * was not made. Uses synchronization here so it's not necessary in the
    * factory itself. Returns {@code null} if the type isn't injectable.
    */
-  <T> InternalFactory<? extends T> getImplicitBinding(Class<T> type) {
+  <T> InternalFactory<? extends T> getImplicitBinding(Member member,
+      final Class<T> type) {
+    // Look for @DefaultImplementation.
+    DefaultImplementation defaultImplementation =
+        type.getAnnotation(DefaultImplementation.class);
+    if (defaultImplementation != null) {
+      Class<?> implementationType = defaultImplementation.value();
+
+      // Make sure it's not the same type. TODO: Can we check for deeper loops?
+      if (implementationType == type) {
+        errorHandler.handle(StackTraceElements.forType(type),
+            ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE, type);
+        return invalidFactory();
+      }
+
+      // Make sure implementationType extends type.
+      if (!type.isAssignableFrom(implementationType)) {
+        errorHandler.handle(StackTraceElements.forType(type),
+            ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
+        return invalidFactory();
+      }
+
+      return (InternalFactory<T>) getInternalFactory(
+          member, Key.get(implementationType));      
+    }
+
+    // Look for @DefaultProvider.
+    DefaultProvider defaultProvider = type.getAnnotation(DefaultProvider.class);
+    if (defaultProvider != null) {
+      final Class<? extends Provider<?>> providerType = defaultProvider.value();
+
+      // Make sure it's not the same type. TODO: Can we check for deeper loops?
+      if (providerType == type) {
+        errorHandler.handle(StackTraceElements.forType(type),
+            ErrorMessages.RECURSIVE_PROVIDER_TYPE, type);
+        return invalidFactory();
+      }
+
+      // TODO: Make sure the provided type extends type. We at least check
+      // the type at runtime below.
+
+      InternalFactory<? extends Provider<?>> providerFactory
+          = getInternalFactory(member, Key.get(providerType));
+      Key<? extends Provider<?>> providerKey = Key.get(providerType);
+      return (InternalFactory<T>) new BoundProviderFactory(
+          providerKey, providerFactory, StackTraceElements.forType(type)) {
+        public Object get(InternalContext context) {
+          Object o = super.get(context);
+          try {
+            return type.cast(o);
+          } catch (ClassCastException e) {
+            errorHandler.handle(StackTraceElements.forType(type),
+                ErrorMessages.SUBTYPE_NOT_PROVIDED, providerType, type);
+            throw new AssertionError();
+          }
+        }
+      };
+    }
+
+    // TODO: Method interceptors could actually enable us to implement
+    // abstract types. Should we remove this restriction?
+    if (Modifier.isAbstract(type.getModifiers())) {
+      return null;
+    }
+
+    // Inject the class itself.
     synchronized (implicitBindings) {
       @SuppressWarnings("unchecked")
       InternalFactory<T> factory =
@@ -919,11 +983,11 @@ class InjectorImpl implements Injector {
 
   static class ImplicitBinding<T> implements InternalFactory<T> {
 
-    final Class<T> type;
+    final Class<T> implementation;
     ConstructorInjector<T> constructorInjector;
 
-    ImplicitBinding(Class<T> type) {
-      this.type = type;
+    ImplicitBinding(Class<T> implementation) {
+      this.implementation = implementation;
     }
 
     void setConstructorInjector(
@@ -932,7 +996,7 @@ class InjectorImpl implements Injector {
     }
 
     public T get(InternalContext context) {
-      return constructorInjector.construct(context, type);
+      return constructorInjector.construct(context, implementation);
     }
   }
 

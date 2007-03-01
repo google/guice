@@ -16,15 +16,22 @@
 
 package com.google.inject;
 
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 /**
- * A pointer to the default provider implementation for a type.
+ * A pointer to the default provider  for a type.
  *
  * @author crazybob@google.com (Bob Lee)
  */
+@Retention(RUNTIME)
+@Target(TYPE)
 public @interface DefaultProvider {
 
   /**
    * The implementation type.
    */
-  Class<?> value();
+  Class<? extends Provider<?>> value();
 }

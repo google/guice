@@ -245,40 +245,6 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this.scope == Scopes.SINGLETON;
   }
 
-  /**
-   * Delegates to a custom factory which is also bound in the injector.
-   */
-  private static class BoundProviderFactory<T>
-      implements InternalFactory<T>, CreationListener {
-
-    final Key<? extends Provider<? extends T>> providerKey;
-    final Object source;
-    private InternalFactory<? extends Provider<? extends T>> providerFactory;
-
-    public BoundProviderFactory(
-        Key<? extends Provider<? extends T>> providerKey,
-        Object source) {
-      this.providerKey = providerKey;
-      this.source = source;
-    }
-
-    public void notify(final InjectorImpl injector) {
-      injector.withDefaultSource(source, new Runnable() {
-        public void run() {
-          providerFactory = injector.getInternalFactory(null, providerKey);
-        }
-      });
-    }
-
-    public String toString() {
-      return providerKey.toString();
-    }
-
-    public T get(InternalContext context) {
-      return providerFactory.get(context).get();
-    }
-  }
-
   void registerInstanceForInjection(final Object o) {
     binder.creationListeners.add(new CreationListener() {
       public void notify(InjectorImpl injector) {

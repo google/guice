@@ -52,6 +52,17 @@ class ErrorMessages {
     }
   }
 
+  static final String SUBTYPE_NOT_PROVIDED
+      = "%s doesn't provide instances of %s.";
+
+  static final String NOT_A_SUBTYPE = "%s doesn't extend %s.";
+
+  static final String RECURSIVE_IMPLEMENTATION_TYPE = "@DefaultImplementation"
+      + " points to the same class it annotates.";
+
+  static final String RECURSIVE_PROVIDER_TYPE = "@DefaultProvider"
+      + " points to the same class it annotates.";
+
   static final String ERROR_INJECTING_MEMBERS = "An error of type %s occurred"
       + " while injecting members of %s. Error message: %s";
 
@@ -109,8 +120,9 @@ class ErrorMessages {
 
   static final String LINK_DESTINATION_NOT_FOUND = "Binding to %s not found.";
 
-  static final String CANNOT_INJECT_INTERFACE = "Injecting into interfaces is"
-      + " not supported. Please use a concrete type instead of %s.";
+  static final String CANNOT_INJECT_ABSTRACT_TYPE =
+      "Injecting into abstract types is not supported. Please use a concrete"
+          + " type instead of %s.";
 
   static final String ANNOTATION_ALREADY_SPECIFIED =
       "More than one annotation type is specified for this binding.";
@@ -142,7 +154,7 @@ class ErrorMessages {
       + " instance%n  bound to %s%n  for member at %s";
   
   static final String NULL_PROVIDED = "Null value returned by custom provider"
-      + " at %s";
+      + " bound at %s";
 
   static Object convert(Object o) {
     for (Converter<?> converter : converters) {
