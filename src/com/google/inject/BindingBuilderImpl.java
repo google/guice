@@ -215,7 +215,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     }
   }
 
-  public void eagerly() {
+  public void asEagerSingleton() {
     in(Scopes.SINGLETON);
     this.preload = true;
   }

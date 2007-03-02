@@ -44,7 +44,7 @@ public class PreloadingTest extends TestCase {
 
   private BinderImpl createBinder(Stage stage) {
     BinderImpl builder = new BinderImpl(stage);
-    builder.bind(Foo.class).eagerly();
+    builder.bind(Foo.class).asEagerSingleton();
     builder.bind(Bar.class);
     return builder;
   }

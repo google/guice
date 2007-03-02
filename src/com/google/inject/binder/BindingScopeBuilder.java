@@ -42,5 +42,5 @@ public interface BindingScopeBuilder {
    * singleton-scoped binding upon creation. Useful for application
    * initialization logic.
    */
-  void eagerly();
+  void asEagerSingleton();
 }
