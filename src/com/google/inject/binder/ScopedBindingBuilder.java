@@ -24,7 +24,7 @@ import java.lang.annotation.Annotation;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface BindingScopeBuilder {
+public interface ScopedBindingBuilder {
 
   /**
    * Specifies the scope. References the annotation passed to {@link

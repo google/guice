@@ -16,8 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.util.Objects;
@@ -92,21 +93,21 @@ public abstract class AbstractModule implements Module {
   /**
    * @see Binder#bind(Key)
    */
-  protected <T> BindingBuilder<T> bind(Key<T> key) {
+  protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
     return builder.bind(key);
   }
 
   /**
    * @see Binder#bind(TypeLiteral)
    */
-  protected <T> BindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+  protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return builder.bind(typeLiteral);
   }
 
   /**
    * @see Binder#bind(Class)
    */
-  protected <T> BindingBuilder<T> bind(Class<T> clazz) {
+  protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
     return builder.bind(clazz);
   }
 

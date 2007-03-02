@@ -17,7 +17,7 @@
 package com.google.inject.binder;
 
 /**
- * Javadoc.
+ * Binds to a constant value.
  */
 public interface ConstantBindingBuilder {
 

@@ -19,19 +19,20 @@ package com.google.inject.binder;
 import java.lang.annotation.Annotation;
 
 /**
- * Specifies the annotation of this binding. 
+ * Specifies the annotation for a binding. 
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface BindingAnnotationBuilder<T> {
+public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 
   /**
    * Specifies the marker annotation type for this binding.
    */
-  BindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType);
+  LinkedBindingBuilder<T> annotatedWith(
+      Class<? extends Annotation> annotationType);
 
   /**
    * Specifies an annotation value for this binding.
    */
-  BindingBuilder<T> annotatedWith(Annotation annotation);
+  LinkedBindingBuilder<T> annotatedWith(Annotation annotation);
 }

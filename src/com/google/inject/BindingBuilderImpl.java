@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.BinderImpl.CreationListener;
-import com.google.inject.binder.BindingBuilder;
-import com.google.inject.binder.BindingScopeBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.util.Annotations;
 import com.google.inject.util.Objects;
 import com.google.inject.util.StackTraceElements;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Binds a {@link com.google.inject.Key} to an implementation in a given scope.
  */
-class BindingBuilderImpl<T> implements BindingBuilder<T> {
+class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
   private static final Logger logger
       = Logger.getLogger(BindingBuilderImpl.class.getName());
@@ -110,15 +110,15 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingScopeBuilder to(Class<? extends T> implementation) {
+  public ScopedBindingBuilder to(Class<? extends T> implementation) {
     return to(TypeLiteral.get(implementation));
   }
 
-  public BindingScopeBuilder to(TypeLiteral<? extends T> implementation) {
+  public ScopedBindingBuilder to(TypeLiteral<? extends T> implementation) {
     return to(Key.get(implementation));
   }
 
-  public BindingScopeBuilder to(Key<? extends T> targetKey) {
+  public ScopedBindingBuilder to(Key<? extends T> targetKey) {
     ensureImplementationIsNotSet();
 
     if (key.equals(targetKey)) {
@@ -151,7 +151,7 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
     return this;
   }
 
-  public BindingScopeBuilder toProvider(Provider<? extends T> provider) {
+  public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
     ensureImplementationIsNotSet();
     this.factory = new InternalFactoryToProviderAdapter<T>(provider, source);
     registerInstanceForInjection(provider);
