@@ -28,20 +28,19 @@ import com.google.inject.TypeLiteral;
 public interface BindingImplementationBuilder<T> {
 
   /**
-   * Binds to instances of the given implementation class. The {@link
-   * com.google.inject.Injector} will inject {@code implementation} as
-   * well. Sets the scope based on an annotation on the implementation
-   * class if present.
+   * Binds to another binding with the specified type.
    */
   BindingScopeBuilder to(Class<? extends T> implementation);
 
   /**
-   * Binds to instances of the given implementation class. The {@link
-   * com.google.inject.Injector} will inject {@code implementation} as
-   * well. Sets the scope based on an annotation on the implementation
-   * class if present.
+   * Binds to another binding with the specified type.
    */
   BindingScopeBuilder to(TypeLiteral<? extends T> implementation);
+
+  /**
+   * Binds to another binding with the specified key. 
+   */
+  BindingScopeBuilder to(Key<? extends T> targetKey);
 
   /**
    * Binds to the given instance. The Injector will automatically inject the

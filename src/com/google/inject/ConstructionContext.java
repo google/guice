@@ -60,7 +60,7 @@ class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  T createProxy(Class<T> expectedType) {
+  Object createProxy(Class<?> expectedType) {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).

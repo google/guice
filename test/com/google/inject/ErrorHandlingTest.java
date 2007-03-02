@@ -120,7 +120,7 @@ public class ErrorHandlingTest {
       bind(Tee.class);
       bind(new TypeLiteral<List<String>>() {});
       bind(String.class).annotatedWith(Names.named("foo")).in(Named.class);
-      link(Key.get(Runnable.class)).to(Key.get(Runnable.class));
+      bind(Key.get(Runnable.class)).to(Key.get(Runnable.class));
       bind(TooManyScopes.class);
       bindScope(BadScope.class, Scopes.SINGLETON);
       bind(Object.class).toInstance(new Object() {

@@ -115,7 +115,7 @@ class ConstructorInjector<T> {
    * Construct an instance. Returns {@code Object} instead of {@code T} because
    * it may return a proxy.
    */
-  T construct(InternalContext context, Class<T> expectedType) {
+  Object construct(InternalContext context, Class<?> expectedType) {
     ConstructionContext<T> constructionContext
         = context.getConstructionContext(this);
 
@@ -171,7 +171,7 @@ class ConstructorInjector<T> {
    */
   static <T> ConstructorInjector<T> invalidConstructor() {
     return new ConstructorInjector<T>() {
-      T construct(InternalContext context, Class<T> expectedType) {
+      Object construct(InternalContext context, Class<?> expectedType) {
         throw new UnsupportedOperationException();
       }
       public T get() {

@@ -30,7 +30,7 @@ public class CircularDependencyTest extends TestCase {
     builder.bind(B.class).to(BImpl.class);
 
     Injector injector = builder.createInjector();
-    A a = injector.getInstance(AImpl.class);
+    A a = injector.getInstance(A.class);
     assertNotNull(a.getB().getA());
   }
 

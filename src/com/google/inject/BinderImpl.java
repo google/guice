@@ -61,8 +61,6 @@ class BinderImpl implements Binder {
       = new ArrayList<BindingBuilderImpl<?>>();
   final List<ConstantBindingBuilderImpl> constantBindingBuilders
       = new ArrayList<ConstantBindingBuilderImpl>();
-  final List<LinkedBindingBuilderImpl<?>> linkedBindingBuilders
-      = new ArrayList<LinkedBindingBuilderImpl<?>>();
   final Map<Class<? extends Annotation>, Scope> scopes =
       new HashMap<Class<? extends Annotation>, Scope>();
 
@@ -73,9 +71,6 @@ class BinderImpl implements Binder {
 
   final Stage stage;
 
-  /**
-   * Keeps error messages in order and prevents duplicates.
-   */
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
   private static final InternalFactory<Injector> INJECTOR_FACTORY
@@ -159,6 +154,7 @@ class BinderImpl implements Binder {
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
       addError(StackTraceElements.forType(annotationType),
           ErrorMessages.MISSING_RUNTIME_RETENTION, source());
+      // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
@@ -184,23 +180,6 @@ class BinderImpl implements Binder {
 
   public <T> BindingBuilderImpl<T> bind(Class<T> clazz) {
     return bind(Key.get(clazz));
-  }
-
-  public <T> LinkedBindingBuilderImpl<T> link(Key<T> key) {
-    LinkedBindingBuilderImpl<T> builder =
-        new LinkedBindingBuilderImpl<T>(this, key).from(source());
-    linkedBindingBuilders.add(builder);
-    return builder;
-  }
-
-  // Next three methods not test-covered?
-
-  public <T> LinkedBindingBuilderImpl<T> link(Class<T> type) {
-    return link(Key.get(type));
-  }
-
-  public <T> LinkedBindingBuilderImpl<T> link(TypeLiteral<T> type) {
-    return link(Key.get(type));
   }
 
   public ConstantBindingBuilderImpl bindConstant(Annotation annotation) {
@@ -279,12 +258,11 @@ class BinderImpl implements Binder {
   public void addError(Throwable t) {
     Object source = source();
     String className = t.getClass().getSimpleName();
-    String message = t.getMessage();
+    String message = ErrorMessages.getRootMessage(t);
     String logMessage = String.format(
-        ErrorMessages.EXCEPTION_REPORTED_BY_MODULE, className, message);
+        ErrorMessages.EXCEPTION_REPORTED_BY_MODULE, message);
     logger.log(Level.INFO, logMessage, t);
-    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG,
-        className, message);
+    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG, message);
   }
 
   void addError(Object source, String message, Object... arguments) {
@@ -327,7 +305,6 @@ class BinderImpl implements Binder {
         = new ArrayList<ContextualCallable<Void>>();
 
     createBindings(preloaders);
-    createLinkedBindings();
 
     stopwatch.resetAndLog(logger, "Binding creation");
 
@@ -380,33 +357,6 @@ class BinderImpl implements Binder {
         return null;
       }
     });
-  }
-
-  private void createLinkedBindings() {
-    for (LinkedBindingBuilderImpl<?> builder : linkedBindingBuilders) {
-      createLinkedBinding(builder);
-    }
-  }
-
-  private <T> void createLinkedBinding(LinkedBindingBuilderImpl<T> builder) {
-    // TODO: Support linking to a later-declared link?
-    Key<? extends T> destinationKey = builder.getDestination();
-    if (destinationKey == null) {
-      addError(builder.getSource(), ErrorMessages.MISSING_LINK_DESTINATION);
-      return;
-    }
-
-    BindingImpl<? extends T> destination = injector.getBinding(destinationKey);
-    if (destination == null) {
-      addError(builder.getSource(), ErrorMessages.LINK_DESTINATION_NOT_FOUND,
-          destinationKey);
-      return;
-    }
-
-    BindingImpl<?> binding = BindingImpl.newInstance(injector, builder.getKey(),
-        builder.getSource(), destination.getInternalFactory());
-
-    putBinding(binding);
   }
 
   private void createBindings(List<ContextualCallable<Void>> preloaders) {

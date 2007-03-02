@@ -63,18 +63,18 @@ class ErrorMessages {
   static final String RECURSIVE_PROVIDER_TYPE = "@DefaultProvider"
       + " points to the same class it annotates.";
 
-  static final String ERROR_INJECTING_MEMBERS = "An error of type %s occurred"
+  static final String ERROR_INJECTING_MEMBERS = "An error occurred"
       + " while injecting members of %s. Error message: %s";
 
   static final String ERROR_INJECTING_MEMBERS_SEE_LOG = "An error of type %s"
       + " occurred while injecting members of %s. See log for details. Error"
       + " message: %s";
 
-  static final String EXCEPTION_REPORTED_BY_MODULE = "An error of type %s was"
-      + " caught and reported. Error message: %s";
+  static final String EXCEPTION_REPORTED_BY_MODULE = "An exception was"
+      + " caught and reported. Message: %s";
 
-  static final String EXCEPTION_REPORTED_BY_MODULE_SEE_LOG = "An error of type" 
-      + " %s was caught and reported. See log for details. Error message: %s";
+  static final String EXCEPTION_REPORTED_BY_MODULE_SEE_LOG = "An exception"
+      + " was caught and reported. See log for details. Message: %s";
 
   static final String MISSING_BINDING_ANNOTATION = "Please annotate with"
       + " @BindingAnnotation. Bound at %s.";
@@ -115,11 +115,6 @@ class ErrorMessages {
   static final String MISSING_CONSTANT_VALUE = "Missing constant value. Please"
       + " call to(...).";
 
-  static final String MISSING_LINK_DESTINATION = "Missing link destination."
-      + " Please call to(Key<?>).";
-
-  static final String LINK_DESTINATION_NOT_FOUND = "Binding to %s not found.";
-
   static final String CANNOT_INJECT_ABSTRACT_TYPE =
       "Injecting into abstract types is not supported. Please use a concrete"
           + " type instead of %s.";
@@ -135,14 +130,13 @@ class ErrorMessages {
   static final String DUPLICATE_ANNOTATIONS = "Found more than one annotation"
       + " annotated with @BindingAnnotation: %s and %s";
 
-  public static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
+  static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
       + " annotation was found: %s and %s";
 
   static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
       + " than once.";
 
-  static final String LINK_DESTINATION_ALREADY_SET = "Link destination is"
-      + " set more than once.";
+  static final String RECURSIVE_BINDING = "Binding points to itself.";
 
   static final String BINDING_ALREADY_SET = "A binding to %s was already"
       + " configured at %s.";
@@ -155,6 +149,13 @@ class ErrorMessages {
   
   static final String NULL_PROVIDED = "Null value returned by custom provider"
       + " bound at %s";
+
+  static String getRootMessage(Throwable t) {
+    Throwable cause = t.getCause();
+    return cause == null
+        ? t.toString()
+        : getRootMessage(cause);
+  }
 
   static Object convert(Object o) {
     for (Converter<?> converter : converters) {

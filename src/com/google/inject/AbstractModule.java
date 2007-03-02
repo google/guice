@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.util.Objects;
@@ -109,27 +108,6 @@ public abstract class AbstractModule implements Module {
    */
   protected <T> BindingBuilder<T> bind(Class<T> clazz) {
     return builder.bind(clazz);
-  }
-
-  /**
-   * @see Binder#link(Key)
-   */
-  protected <T> LinkedBindingBuilder<T> link(Key<T> key) {
-    return builder.link(key);
-  }
-
-  /**
-   * @see Binder#link(Class)
-   */
-  public <T> LinkedBindingBuilder<T> link(Class<T> type) {
-    return builder.link(type);
-  }
-
-  /**
-   * @see Binder#link(TypeLiteral)
-   */
-  public <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type) {
-    return builder.link(type);
   }
 
   /**

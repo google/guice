@@ -168,46 +168,6 @@ public class InjectorTest extends TestCase {
     }
   }
 
-  public void testCircularlyDependentConstructors()
-      throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bind(A.class).to(AImpl.class);
-    builder.bind(B.class).to(BImpl.class);
-
-    Injector injector = builder.createInjector();
-    A a = injector.getInstance(AImpl.class);
-    assertNotNull(a.getB().getA());
-  }
-
-  interface A {
-    B getB();
-  }
-
-  @Singleton
-  static class AImpl implements A {
-    final B b;
-    @Inject public AImpl(B b) {
-      this.b = b;
-    }
-    public B getB() {
-      return b;
-    }
-  }
-
-  interface B {
-    A getA();
-  }
-
-  static class BImpl implements B {
-    final A a;
-    @Inject public BImpl(A a) {
-      this.a = a;
-    }
-    public A getA() {
-      return a;
-    }
-  }
-
   public void testInjectStatics() throws CreationException {
     BinderImpl builder = new BinderImpl();
     builder.bindConstant(S.class).to("test");

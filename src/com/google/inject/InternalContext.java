@@ -63,6 +63,10 @@ class InternalContext {
     return (ExternalContext<T>) externalContext;
   }
 
+  Class<?> getExpectedType() {
+    return externalContext.getKey().getRawType();
+  }
+
   void setExternalContext(ExternalContext<?> externalContext) {
     this.externalContext = externalContext;
   }

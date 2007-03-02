@@ -24,11 +24,10 @@ import junit.framework.TestCase;
 public class ScopesTest extends TestCase {
 
   public void testSingletonAnnotation() throws CreationException {
-    BinderImpl builder = new BinderImpl();
+    BinderImpl binder = new BinderImpl();
     BindingBuilderImpl<SampleSingleton> bindingBuilder
-        = builder.bind(SampleSingleton.class);
-    builder.createInjector();
-    assertSame(Scopes.SINGLETON, bindingBuilder.scope);
+        = binder.bind(SampleSingleton.class);
+    binder.createInjector();
   }
 
   @Singleton

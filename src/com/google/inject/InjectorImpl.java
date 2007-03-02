@@ -298,14 +298,15 @@ class InjectorImpl implements Injector {
       try {
         // note: intelliJ thinks this cast is superfluous, but is it?
         return (InternalFactory<? extends T>) getImplicitBinding(member,
-            rawType);
+            rawType, null);
       }
       finally {
         this.errorHandler = previous;
       }
     }
     // note: intelliJ thinks this cast is superfluous, but is it?
-    return (InternalFactory<? extends T>) getImplicitBinding(member, rawType);
+    return (InternalFactory<? extends T>) getImplicitBinding(member, rawType,
+        null);
   }
 
   private <T> InternalFactory<T> handleConstantConversionError(
@@ -873,7 +874,7 @@ class InjectorImpl implements Injector {
    * factory itself. Returns {@code null} if the type isn't injectable.
    */
   <T> InternalFactory<? extends T> getImplicitBinding(Member member,
-      final Class<T> type) {
+      final Class<T> type, Scope scope) {
     // Look for @DefaultImplementation.
     ImplementedBy implementedBy =
         type.getAnnotation(ImplementedBy.class);
@@ -950,7 +951,13 @@ class InjectorImpl implements Injector {
       ImplicitBinding<T> implicitBinding = new ImplicitBinding<T>(type);
 
       // Scope the factory if necessary.
-      Scope scope = Scopes.getScopeForType(type, scopes, errorHandler);
+
+      // If we don't have a scope from the configuration, look for one on
+      // the type.
+      if (scope == null) {
+        scope = Scopes.getScopeForType(type, scopes, errorHandler);
+      }
+
       InternalFactory<? extends T> scoped;
       if (scope != null) {
         scoped = Scopes.scope(Key.get(type), this, implicitBinding, scope);
@@ -996,7 +1003,8 @@ class InjectorImpl implements Injector {
     }
 
     public T get(InternalContext context) {
-      return constructorInjector.construct(context, implementation);
+      return (T) constructorInjector.construct(context,
+          context.getExpectedType());
     }
   }
 

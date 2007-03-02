@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.inject.binder.BindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -65,21 +64,6 @@ public interface Binder {
    * Creates a binding to a type.
    */
   <T> BindingBuilder<T> bind(Class<T> type);
-
-  /**
-   * Links a key to another binding.
-   */
-  <T> LinkedBindingBuilder<T> link(Key<T> key);
-
-  /**
-   * Links a type to another binding.
-   */
-  <T> LinkedBindingBuilder<T> link(Class<T> type);
-
-  /**
-   * Links a type to another binding.
-   */
-  <T> LinkedBindingBuilder<T> link(TypeLiteral<T> type);
 
   /**
    * Binds a constant value to an annotation.

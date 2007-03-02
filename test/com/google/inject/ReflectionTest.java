@@ -53,7 +53,7 @@ public class ReflectionTest extends TestCase {
     BinderImpl builder = new BinderImpl();
     Bar bar = new Bar();
     builder.bind(Bar.class).toInstance(bar);
-    builder.link(Key.get(Foo.class)).to(Key.get(Bar.class));
+    builder.bind(Key.get(Foo.class)).to(Key.get(Bar.class));
     Injector injector = builder.createInjector();
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getProvider().get());

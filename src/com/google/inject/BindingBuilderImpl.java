@@ -38,7 +38,6 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   final Object source;
   Key<T> key;
   InternalFactory<? extends T> factory;
-  TypeLiteral<? extends T> implementation;
   T instance;
   Scope scope;
   boolean preload = false;
@@ -116,12 +115,20 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   }
 
   public BindingScopeBuilder to(TypeLiteral<? extends T> implementation) {
+    return to(Key.get(implementation));
+  }
+
+  public BindingScopeBuilder to(Key<? extends T> targetKey) {
     ensureImplementationIsNotSet();
-    this.implementation = implementation;
-    final DefaultFactory<? extends T> defaultFactory
-        = new DefaultFactory<T>(key, implementation, source);
-    this.factory = defaultFactory;
-    binder.creationListeners.add(defaultFactory);
+
+    if (key.equals(targetKey)) {
+      binder.addError(source, ErrorMessages.RECURSIVE_BINDING);
+    }
+
+    final FactoryProxy<? extends T> factoryProxy =
+        new FactoryProxy<T>(key, targetKey, source);
+    this.factory = factoryProxy;
+    binder.creationListeners.add(factoryProxy);
     return this;
   }
 
@@ -218,24 +225,21 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   }
 
   InternalFactory<? extends T> getInternalFactory(InjectorImpl injector) {
-    // If an implementation wasn't specified, use the injection type.
-    if (this.factory == null) {
-      to(key.getTypeLiteral());
-    }
+    if (this.factory == null && !key.hasAnnotationType()) {
+      // Try an implicit binding.
+      final ImplicitImplementation<T> implicitImplementation =
+          new ImplicitImplementation<T>(key, scope, source);
+      binder.creationListeners.add(implicitImplementation);
 
-    // Look for @Scoped on the implementation type.
-    if (implementation != null) {
-      Scope fromAnnotation = Scopes.getScopeForType(
-          implementation.getRawType(), binder.scopes,
-          binder.configurationErrorHandler);
-      if (fromAnnotation != null) {
-        if (this.scope == null) {
-          this.scope = fromAnnotation;
-        } else {
-          logger.info("Overriding scope specified by annotation at "
-              + source + ".");
-        }
+      // We need to record the scope. If it's singleton, we'll preload in prod.
+      if (this.scope == null) {
+        // We can ignore errors because the error will already have been
+        // recorded.
+        this.scope = Scopes.getScopeForType(
+            key.getTypeLiteral().getRawType(), binder.scopes, IGNORE_ERRORS);
       }
+
+      return implicitImplementation;
     }
 
     return Scopes.scope(this.key, injector, this.factory, scope);
@@ -253,9 +257,9 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
         }
         catch (Exception e) {
           String className = e.getClass().getSimpleName();
-          String message = e.getMessage();
+          String message = ErrorMessages.getRootMessage(e);
           String logMessage = String.format(
-              ErrorMessages.ERROR_INJECTING_MEMBERS, className, o, message);
+              ErrorMessages.ERROR_INJECTING_MEMBERS, o, message);
           logger.log(Level.INFO, logMessage, e);
           binder.addError(source, ErrorMessages.ERROR_INJECTING_MEMBERS_SEE_LOG,
               className, o, message);
@@ -265,40 +269,81 @@ class BindingBuilderImpl<T> implements BindingBuilder<T> {
   }
 
   /**
-   * Injects new instances of the specified implementation class.
+   * A placeholder which enables us to swap in the real factory once the
+   * container is created.
    */
-  private static class DefaultFactory<T> implements InternalFactory<T>,
+  private static class FactoryProxy<T> implements InternalFactory<T>,
       CreationListener {
 
-    private final TypeLiteral<? extends T> implementation;
     private final Key<T> key;
+    private final Key<? extends T> targetKey;
     private final Object source;
 
-    ConstructorInjector<? extends T> constructor;
+    InternalFactory<? extends T> targetFactory;
 
-    DefaultFactory(Key<T> key, TypeLiteral<? extends T> implementation,
-        Object source) {
+    FactoryProxy(Key<T> key, Key<? extends T> targetKey, Object source) {
       this.key = key;
-      this.implementation = implementation;
+      this.targetKey = targetKey;
       this.source = source;
     }
 
     public void notify(final InjectorImpl injector) {
       injector.withDefaultSource(source, new Runnable() {
         public void run() {
-          constructor = injector.getConstructor(implementation);
+          targetFactory = injector.getInternalFactory(null, targetKey);
         }
       });
     }
 
     public T get(InternalContext context) {
-      return constructor.construct(context, (Class) key.getRawType());
+      return targetFactory.get(context);
     }
 
     public String toString() {
-      return new ToStringBuilder(Provider.class)
-          .add("implementation", implementation)
+      return new ToStringBuilder(FactoryProxy.class)
+          .add("key", key)
+          .add("provider", targetFactory)
           .toString();
     }
   }
+
+  private static class ImplicitImplementation<T> implements InternalFactory<T>,
+      CreationListener {
+
+    private final Key<T> key;
+    private final Object source;
+    private final Scope scope;
+    InternalFactory<? extends T> implicitFactory;
+
+    ImplicitImplementation(Key<T> key, Scope scope, Object source) {
+      this.key = key;
+      this.scope = scope;
+      this.source = source;
+    }
+
+    public void notify(final InjectorImpl injector) {
+      injector.withDefaultSource(source, new Runnable() {
+        public void run() {
+          implicitFactory = injector.getImplicitBinding(null,
+              (Class) key.getTypeLiteral().getRawType(), scope);
+        }
+      });
+    }
+
+    public T get(InternalContext context) {
+      return implicitFactory.get(context);
+    }
+
+    public String toString() {
+      return new ToStringBuilder(FactoryProxy.class)
+          .add("key", key)
+          .add("provider", implicitFactory)
+          .toString();
+    }
+  }
+
+  static ErrorHandler IGNORE_ERRORS = new ErrorHandler() {
+    public void handle(Object source, String message) {}
+    public void handle(Object source, String message, Object... arguments) {}
+  };
 }
