@@ -347,6 +347,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
       <module fileurl="file://$PROJECT_DIR$/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/struts2/example/struts2-example.iml" />
       <module fileurl="file://$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" filepath="$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" />
     </modules>

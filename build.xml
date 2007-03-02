@@ -26,10 +26,14 @@
   <target name="dist" depends="jar, javadoc"
        description="Build entire distribution.">
     <ant antfile="servlet/build.xml" target="jar" inheritAll="false"/>
+    <ant antfile="spring/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="struts2/plugin/build.xml" target="jar" inheritAll="false"/>
    
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="servlet/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist"> 
+      <fileset dir="spring/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="struts2/plugin/build" includes="*.jar"/>
@@ -95,6 +99,7 @@
       depends="clean"
       description="Remove generated files.">
     <ant dir="servlet" antfile="build.xml" target="clean"/>
+    <ant dir="spring" antfile="build.xml" target="clean"/>
     <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
   </target>
   
