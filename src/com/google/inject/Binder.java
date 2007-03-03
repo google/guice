@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
@@ -25,11 +25,35 @@ import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Collect configuration data (primarily <i>bindings</i>) from one or more
- * modules, so that this collected information may then be used to construct a
- * new {@link Injector}. There is no public API to create an instance of this
- * interface; instead, your {@link Module} implementations will simply have one
- * passed in automatically.
+ * Collects configuration information (primarily <i>bindings</i>) which will be
+ * used to create an {@link Injector}.  Guice provides this object to your
+ * application's {@link Module} implementors so they may each contribute their
+ * own settings.
+ *
+ * The bindings contributed to an Injector are what control how the
+ * Injector resolves injection requests.  A binding is uniquely identified
+ * within an Injector by the combination of a Java type and an <i>optional</i>
+ * annotation value.  It matches this key to one of:
+ *
+ * <ul>
+ * <li>Another binding, which this binding's key is now "aliased to"
+ * <li>Another binding, which references a {@link Provider} for this key
+ * <li>A preconstructed instance which should be used to fulfill requests for
+ *     this binding
+ * <li>A preconstructed instance which should be used as the {@link Provider} to
+ *     fulfill requests for this binding
+ * </ul>
+ *
+ * In addition, a binding may have an associated scope specifier, such as
+ * {@link Scopes#SINGLETON}, and singleton bindings may specify eager or lazy
+ * initialization.
+ *
+ * <p>See the user's guide appendix, "How the Injector resolves injection
+ * requests" to better understand the effects of bindings.
+ *
+ * After an Injector has been created, its bindings may be examined using
+ * methods like {@link Injector#getBinding(Key)}, but this read-only
+ * {@link Binding} type is not used when <i>creating</i> the bindings.
  */
 public interface Binder {
 
