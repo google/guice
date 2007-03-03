@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 public class ImplicitBindingTest extends TestCase {
 
   public void testCircularDependency() throws CreationException {
-    Injector injector = Guice.createInjector();
+    Injector injector = Guice.createEmptyInjector();
     Foo foo = injector.getInstance(Foo.class);
     assertSame(foo, foo.bar.foo);
   }
@@ -42,7 +42,7 @@ public class ImplicitBindingTest extends TestCase {
   }
 
   public void testDefaultImplementation() {
-    Injector injector = Guice.createInjector();
+    Injector injector = Guice.createEmptyInjector();
     I i = injector.getInstance(I.class);
     i.go();
   }
@@ -57,7 +57,7 @@ public class ImplicitBindingTest extends TestCase {
   }
 
   public void testDefaultProvider() {
-    Injector injector = Guice.createInjector();
+    Injector injector = Guice.createEmptyInjector();
     Provided provided = injector.getInstance(Provided.class);
     provided.go();
   }

@@ -15,7 +15,6 @@
  */
 
 /**
- * Interfaces which make up {@link com.google.inject.Binder}'s
- * expression language.
+ * JNDI integration
  */
-package com.google.inject.binder;
+package com.google.inject.jndi;

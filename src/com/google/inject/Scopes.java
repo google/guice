@@ -30,7 +30,7 @@ public class Scopes {
   private Scopes() {}
 
   /**
-   * One instance per Injector. Also see {@code @}{@link Singleton}.
+   * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
    */
   public static final Scope SINGLETON = new Scope() {
     public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {

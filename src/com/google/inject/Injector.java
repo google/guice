@@ -27,9 +27,9 @@ import java.util.Map;
  * "behind-the-scenes" operation is what distinguishes the Dependency Injection
  * pattern from its cousin, Service Locator.
  *
- * <p>The Injector API has a few additional features: it allows pre-constructed
- * instances to have their fields and methods injected, and offers programmatic
- * introspection to support tool development.
+ * <p>The {@code Injector} API has a few additional features: it allows
+ * pre-constructed instances to have their fields and methods injected and
+ * offers programmatic introspection to support tool development.
  *
  * <p>Contains several default bindings:
  *

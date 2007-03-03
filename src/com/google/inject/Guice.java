@@ -29,11 +29,9 @@ public final class Guice {
   /**
    * Creates an injector with no explicit bindings.
    */
-  public static Injector createInjector() {
+  public static Injector createEmptyInjector() {
     try {
-      return createInjector(new Module() {
-        public void configure(Binder binder) {}
-      });
+      return createInjector();
     }
     catch (CreationException e) {
       throw new AssertionError(e);

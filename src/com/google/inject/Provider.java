@@ -18,13 +18,13 @@ package com.google.inject;
 
 /**
  * Simply, any object capable of providing instances of type {@code T}.
- * Providers are used in numerous ways by the guice framework:
+ * Providers are used in numerous ways by the Guice framework:
  *
  * <ul>
  * <li>When the default means for obtaining instances (an injectable or
  * parameterless constructor) is insufficient for a particular binding, the
- * module can specify a custom Provider instead, to control exactly how guice
- * creates or obtains instances for the binding.
+ * module can specify a custom {@code Provider} instead, to control exactly how
+ * Guice creates or obtains instances for the binding.
  *
  * <li>An implementation class may always choose to have a {@code Provider<T>}
  * instance injected, rather than having a {@code T} injected directly.  This
@@ -49,7 +49,7 @@ package com.google.inject;
 public interface Provider<T> {
 
   /**
-   * Provides an instance of {@code T}.  Must never return null.
+   * Provides an instance of {@code T}. Must never return {@code null}.
    */
   T get();
 }

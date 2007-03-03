@@ -85,6 +85,7 @@
       <sourcepath>
         <pathelement location="${src.dir}"/>
         <pathelement location="${servlet.src.dir}"/>
+        <pathelement location="${spring.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <classpath>
@@ -92,6 +93,7 @@
       </classpath>
       <link href="http://aopalliance.sourceforge.net/doc"/>
       <link href="http://java.sun.com/javase/6/docs/api"/>
+      <link href="http://www.springframework.org/docs/api/"/>
     </javadoc>
   </target>
 

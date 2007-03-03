@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates members of your implementation class (constructors, methods
- * and fields) into which the {@link Injector} should inject references or
- * values. The Injector fulfills injection requests for:
+ * and fields) into which the {@link Injector} should inject values.
+ * The Injector fulfills injection requests for:
  *
  * <ul>
  * <li>Every instance it constructs. The class being constructed must have
@@ -34,7 +34,9 @@ import java.lang.annotation.Target;
  * constructor taking no parameters. The Injector then proceeds to perform
  * method and field injections.
  * 
- * <li>Pre-constructed instances passed to {@link Injector#injectMembers}.
+ * <li>Pre-constructed instances passed to {@link Injector#injectMembers},
+ * {@link com.google.inject.binder.LinkedBindingBuilder#toInstance(Object)} and
+ * {@link com.google.inject.binder.LinkedBindingBuilder#toProvider(Provider)}.
  * In this case all constructors are, of course, ignored.
  *
  * <li>Static fields and methods of classes which any {@link Module} has

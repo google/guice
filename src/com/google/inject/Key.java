@@ -28,7 +28,7 @@ import java.lang.reflect.Type;
  * Binding key consisting of an injection type and an optional annotation.
  * Matches the type and annotation at a point of injection.
  *
- * <p>For example, {@code Key.get(Service.class, Transactional.class) {}} will
+ * <p>For example, {@code Key.get(Service.class, Transactional.class)} will
  * match:
  *
  * <pre>

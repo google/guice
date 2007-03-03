@@ -18,8 +18,8 @@ package com.google.inject;
 
 /**
  * A mapping from a key (type and optional annotation) to a provider of
- * instances of that type.  This interface is part of the Injector
- * Introspection API and is intended primary for use by tools.
+ * instances of that type.  This interface is part of the {@link Injector}
+ * introspection API and is intended primary for use by tools.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -31,9 +31,9 @@ public interface Binding<T> {
   Key<T> getKey();
 
   /**
-   * Returns an arbitrary object containing information about the "place" where
-   * this binding was configured. Used by guice in the production of descriptive
-   * error messages.
+   * Returns an arbitrary object containing information about the "place"
+   * where this binding was configured. Used by Guice in the production of
+   * descriptive error messages.
    */
   Object getSource();
 

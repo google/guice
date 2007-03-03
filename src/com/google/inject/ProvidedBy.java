@@ -22,7 +22,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * A pointer to the default provider  for a type.
+ * A pointer to the default provider type for a type.
  *
  * @author crazybob@google.com (Bob Lee)
  */
