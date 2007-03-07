@@ -23,7 +23,7 @@ import static junit.framework.Assert.assertTrue;
  */
 public class ClientServiceWithFactories {
 
-// 72 lines
+// 58 lines
 
 public interface Service {
   void go();
@@ -35,48 +35,34 @@ public static class ServiceImpl implements Service {
   }
 }
 
-public interface Factory<T> {
-  T get();
-}
-
 public static class ServiceFactory {
 
   private ServiceFactory() {}
 
-  private static Factory<Service> instance = new Factory<Service>() {
-    private final Service service = new ServiceImpl();
-    public Service get() {
-      return service;
-    }
-  };
+  private static Service instance = new ServiceImpl();
 
-  public static Factory<Service> getInstance() {
+  public static Service getInstance() {
     return instance;
   }
 
-  public static void setInstance(Factory<Service> serviceFactory) {
-    instance = serviceFactory;
+  public static void setInstance(Service service) {
+    instance = service;
   }
 }
 
 public static class Client {
 
   public void go() {
-    Factory<Service> factory = ServiceFactory.getInstance();
-    Service service = factory.get();
+    Service service = ServiceFactory.getInstance();
     service.go();
   }
 }
 
 public void testClient() {
-  Factory<Service> previous = ServiceFactory.getInstance();
+  Service previous = ServiceFactory.getInstance();
   try {
     final MockService mock = new MockService();
-    ServiceFactory.setInstance(new Factory<Service>() {
-      public Service get() {
-        return mock;
-      }
-    });
+    ServiceFactory.setInstance(mock);
     Client client = new Client();
     client.go();
     assertTrue(mock.isGone());
