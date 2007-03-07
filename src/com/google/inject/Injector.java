@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Fulfills requests for the object instances that make up your
- * application, always ensuring that these instances are properly injected
- * before they are returned.  The Injector is the heart of the Guice framework,
- * although you don't typically interact with it directly very often.  This
- * "behind-the-scenes" operation is what distinguishes the Dependency Injection
- * pattern from its cousin, Service Locator.
+ * Fulfills requests for the object instances that make up your application,
+ * always ensuring that these instances are properly injected before they are
+ * returned. The {@code Injector} is the heart of the Guice framework,
+ * although you don't typically interact with it directly very often. This
+ * "behind-the-scenes" operation is what distinguishes the dependency
+ * injection pattern from its cousin, service locator.
  *
  * <p>The {@code Injector} API has a few additional features: it allows
  * pre-constructed instances to have their fields and methods injected and

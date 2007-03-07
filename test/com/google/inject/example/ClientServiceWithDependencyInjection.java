@@ -17,12 +17,6 @@
 package com.google.inject.example;
 
 import static junit.framework.Assert.assertTrue;
-import com.google.inject.example.ClientServiceWithFactories.Service;
-import com.google.inject.example.ClientServiceWithFactories.Factory;
-import com.google.inject.example.ClientServiceWithFactories.ServiceImpl;
-import com.google.inject.example.ClientServiceWithFactories.ServiceFactory;
-import com.google.inject.example.ClientServiceWithFactories.MockService;
-import com.google.inject.example.ClientServiceWithFactories.Client;
 import junit.framework.Assert;
 
 /**

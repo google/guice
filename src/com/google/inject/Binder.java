@@ -26,34 +26,36 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
- * used to create an {@link Injector}.  Guice provides this object to your
- * application's {@link Module} implementors so they may each contribute their
- * own settings.
+ * used to create an {@link Injector}. Guice provides this object to your
+ * application's {@link Module}s so they may each contribute
+ * their own bindings.
  *
- * The bindings contributed to an Injector are what control how the
- * Injector resolves injection requests.  A binding is uniquely identified
- * within an Injector by the combination of a Java type and an <i>optional</i>
- * annotation value.  It matches this key to one of:
+ * <p>The bindings contributed by {@code Module}s define how the {@code
+ * Injector} resolves dependencies. A {@link Key} consisting of a type
+ * and optional annotation uniquely identifies a binding within an {@code
+ * Injector}.
+ *
+ * <p>You may bind from a key to:
  *
  * <ul>
  * <li>Another binding, which this binding's key is now "aliased to"
  * <li>Another binding, which references a {@link Provider} for this key
- * <li>A preconstructed instance which should be used to fulfill requests for
- *     this binding
- * <li>A preconstructed instance which should be used as the {@link Provider} to
- *     fulfill requests for this binding
+ * <li>A preconstructed instance
+ * <li>A preconstructed instance which should be used as the {@link Provider}
+ *   for this binding
  * </ul>
  *
- * In addition, a binding may have an associated scope specifier, such as
+ * <p>In addition, a binding may have an associated scope, such as
  * {@link Scopes#SINGLETON}, and singleton bindings may specify eager or lazy
  * initialization.
  *
- * <p>See the user's guide appendix, "How the Injector resolves injection
- * requests" to better understand the effects of bindings.
+ * <p>See the users' guide appendix, "How the Injector resolves injection
+ * requests," to better understand binding resolution.
  *
- * After an Injector has been created, its bindings may be examined using
- * methods like {@link Injector#getBinding(Key)}, but this read-only
- * {@link Binding} type is not used when <i>creating</i> the bindings.
+ * <p>After an {@code Injector} has been created, its bindings may be
+ * examined using methods like {@link Injector#getBinding(Key)}, but this
+ * read-only {@link Binding} type is not used when <i>creating</i> the
+ * bindings.
  */
 public interface Binder {
 

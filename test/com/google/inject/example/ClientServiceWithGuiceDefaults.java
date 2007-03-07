@@ -22,7 +22,6 @@ import com.google.inject.Injector;
 import com.google.inject.Guice;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Singleton;
-import com.google.inject.example.ClientServiceWithGuice.MyModule;
 import junit.framework.Assert;
 
 /**
@@ -80,7 +79,7 @@ public static class MockService implements Service {
 
 public static void main(String[] args) throws CreationException {
   new ClientServiceWithGuiceDefaults().testClient();
-  Injector injector = Guice.createInjector(new MyModule());
+  Injector injector = Guice.createInjector();
   Client client = injector.getProvider(Client.class).get();
 }
 }

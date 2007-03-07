@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class CreationException extends Exception {
+public class CreationException extends RuntimeException {
 
   final List<Message> errorMessages;
 

@@ -19,8 +19,8 @@ package com.google.inject;
 /**
  * A module contributes configuration information, typically interface
  * bindings, which will be used to create an {@link Injector}. A guice-based
- * application is ultimately composed of little more than a set of Modules
- * and some bootstrapping code.
+ * application is ultimately composed of little more than a set of
+ * {@code Module}s and some bootstrapping code.
  *
  * <p>Your Module classes can use a more streamlined syntax by extending
  * {@link AbstractModule} rather than implementing this interface directly.

@@ -29,46 +29,49 @@ public final class Guice {
   /**
    * Creates an injector with no explicit bindings.
    */
-  public static Injector createEmptyInjector() {
-    try {
-      return createInjector();
-    }
-    catch (CreationException e) {
-      throw new AssertionError(e);
-    }
+  static Injector createEmptyInjector() {
+    return createInjector();
   }
 
   /**
    * Creates an injector for the given set of modules.
+   *
+   * @throws CreationException from which you can retrieve the individual error
+   *  messages
    */
-  public static Injector createInjector(Module... modules)
-      throws CreationException {
+  public static Injector createInjector(Module... modules) {
     return createInjector(Arrays.asList(modules));
   }
 
   /**
    * Creates an injector for the given set of modules.
+   *
+   * @throws CreationException from which you can retrieve the individual error
+   *  messages
    */
-  public static Injector createInjector(Iterable<Module> modules)
-      throws CreationException {
+  public static Injector createInjector(Iterable<Module> modules) {
     return createInjector(Stage.DEVELOPMENT, modules);
   }
 
   /**
    * Creates an injector for the given set of modules, in a given development
    * stage.
+   *
+   * @throws CreationException from which you can retrieve the individual error
+   *  messages.
    */
-  public static Injector createInjector(Stage stage, Module... modules)
-      throws CreationException {
+  public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
   }
 
   /**
    * Creates an injector for the given set of modules, in a given development
    * stage.
+   *
+   * @throws CreationException from which you can retrieve the individual error
+   *  messages.
    */
-  public static Injector createInjector(Stage stage, Iterable<Module> modules)
-      throws CreationException {
+  public static Injector createInjector(Stage stage, Iterable<Module> modules) {
     BinderImpl binder = new BinderImpl(stage);
     for (Module module : modules) {
       binder.install(module);
