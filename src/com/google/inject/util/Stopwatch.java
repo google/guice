@@ -28,7 +28,7 @@ public class Stopwatch {
   long start = System.currentTimeMillis();
 
   /**
-   * Resets and returns ellapsed time.
+   * Resets and returns elapsed time in milliseconds.
    */
   public long reset() {
     long now = System.currentTimeMillis();
@@ -40,9 +40,9 @@ public class Stopwatch {
   }
 
   /**
-   * Resets and logs ellapsed time.
+   * Resets and logs elapsed time in milliseconds.
    */
   public void resetAndLog(Logger logger, String label) {
-    logger.info(label + ": " + reset() + "ms");
+    logger.fine(label + ": " + reset() + "ms");
   }
 }
