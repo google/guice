@@ -3,7 +3,7 @@
 <project name="common">
 
   <property file="build.properties"/>
-  <property name="version" value="1.0rc3"/>
+  <property name="version" value="1.0"/>
   
   <target name="compile" description="Compile Java source.">
     <mkdir dir="${build.dir}/classes"/>
