@@ -42,6 +42,12 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     if (provided != null) {
       return provided;
     }
+
+    // TODO(kevinb): gee, ya think we might want to remove this?
+    if (("I'm a bad hack".equals(
+        System.getProperty("guice.allow.nulls.bad.bad.bad")))) {
+      return provided;
+    }
     String message = String.format(ErrorMessages.NULL_PROVIDED, source);
     throw new ProvisionException(context.getExternalContext(),
         new NullPointerException(message));
