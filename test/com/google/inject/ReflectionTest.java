@@ -41,7 +41,7 @@ public class ReflectionTest extends TestCase {
 
   public void testConstantBinding() throws CreationException {
     BinderImpl builder = new BinderImpl();
-    builder.bindConstant(I.class).to(5);
+    builder.bindConstant().annotatedWith(I.class).to(5);
     Injector injector = builder.createInjector();
     Binding<?> i = injector.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getProvider().get());

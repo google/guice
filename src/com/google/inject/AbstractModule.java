@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.util.Objects;
@@ -112,19 +113,10 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#bindConstant(Class)
+   * @see Binder#bindConstant()
    */
-  protected ConstantBindingBuilder bindConstant(
-      Class<? extends Annotation> annotationType) {
-    return builder.bindConstant(annotationType);
-  }
-
-  /**
-   * @see Binder#bindConstant(java.lang.annotation.Annotation)
-   */
-  protected ConstantBindingBuilder bindConstant(
-      Annotation annotation) {
-    return builder.bindConstant(annotation);
+  protected AnnotatedConstantBindingBuilder bindConstant() {
+    return builder.bindConstant();
   }
 
   /**

@@ -74,8 +74,8 @@ public class InjectorTest extends TestCase {
       protected void configure() {
         bind(Bar.class).to(BarImpl.class);
         bind(Tee.class).to(TeeImpl.class);
-        bindConstant(S.class).to("test");
-        bindConstant(I.class).to(5);
+        bindConstant().annotatedWith(S.class).to("test");
+        bindConstant().annotatedWith(I.class).to(5);
       }
     });
   }
@@ -91,7 +91,7 @@ public class InjectorTest extends TestCase {
   public void testIntAndIntegerAreInterchangeable()
       throws CreationException {
     BinderImpl builder = new BinderImpl();
-    builder.bindConstant(I.class).to(5);
+    builder.bindConstant().annotatedWith(I.class).to(5);
     Injector injector = builder.createInjector();
     IntegerWrapper iw = injector.getInstance(IntegerWrapper.class);
     assertEquals(5, (int) iw.i);
@@ -170,8 +170,8 @@ public class InjectorTest extends TestCase {
 
   public void testInjectStatics() throws CreationException {
     BinderImpl builder = new BinderImpl();
-    builder.bindConstant(S.class).to("test");
-    builder.bindConstant(I.class).to(5);
+    builder.bindConstant().annotatedWith(S.class).to("test");
+    builder.bindConstant().annotatedWith(I.class).to(5);
     builder.requestStaticInjection(Static.class);
     builder.createInjector();
 

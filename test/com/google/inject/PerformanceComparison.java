@@ -101,8 +101,8 @@ public class PerformanceComparison {
             bind(Tee.class).to(TeeImpl.class);
             bind(Bar.class).to(BarImpl.class);
             bind(Foo.class);
-            bindConstant(I.class).to(5);
-            bindConstant(S.class).to("test");
+            bindConstant().annotatedWith(I.class).to(5);
+            bindConstant().annotatedWith(S.class).to("test");
           }
         });
       } catch (CreationException e) {

@@ -33,8 +33,8 @@ public class StaticInjectionTest extends TestCase {
 
   public void testInjectStatics() throws CreationException {
     BinderImpl builder = new BinderImpl();
-    builder.bindConstant(S.class).to("test");
-    builder.bindConstant(I.class).to(5);
+    builder.bindConstant().annotatedWith(S.class).to("test");
+    builder.bindConstant().annotatedWith(I.class).to(5);
     builder.requestStaticInjection(StaticInjectionTest.Static.class);
 
     Injector c = builder.createInjector();

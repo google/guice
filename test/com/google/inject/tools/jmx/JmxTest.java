@@ -53,7 +53,7 @@ public class JmxTest {
       bind(Foo.class)
           .annotatedWith(Transactional.class)
           .to(FooImpl.class);
-      bindConstant(Names.named("port")).to(8080);
+      bindConstant().annotatedWith(Names.named("port")).to(8080);
       bind(Key.get(Object.class)).to(Key.get(Bar.class));
 //      install(new ServletModule());
     }

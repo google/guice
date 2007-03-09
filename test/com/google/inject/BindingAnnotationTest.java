@@ -29,7 +29,7 @@ public class BindingAnnotationTest extends TestCase {
       CreationException {
     Injector c = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bindConstant(Blue.class).to("foo");
+        bindConstant().annotatedWith(Blue.class).to("foo");
         bind(Foo.class);
       }
     });

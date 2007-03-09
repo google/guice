@@ -120,7 +120,7 @@ class ErrorMessages {
           + " type instead of %s.";
 
   static final String ANNOTATION_ALREADY_SPECIFIED =
-      "More than one annotation type is specified for this binding.";
+      "More than one annotation is specified for this binding.";
 
   static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
       + " than once.";

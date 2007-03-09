@@ -184,65 +184,11 @@ class BinderImpl implements Binder {
     return bind(Key.get(clazz));
   }
 
-  public ConstantBindingBuilderImpl bindConstant(Annotation annotation) {
-    Class<? extends Annotation> annotationType = annotation.annotationType();
-
-    Object source = source();
-
-    boolean retainedAtRuntime =
-        Annotations.isRetainedAtRuntime(annotationType);
-    boolean bindingAnnotation = Key.isBindingAnnotation(annotationType);
-
-    if (!retainedAtRuntime) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_RUNTIME_RETENTION, source);
-    }
-
-    if (!bindingAnnotation) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_BINDING_ANNOTATION, source);
-    }
-
-    if (!retainedAtRuntime || !bindingAnnotation) {
-      // We purposefully don't save this builder anywhere.
-      return new ConstantBindingBuilderImpl(this, Key.NULL_STRATEGY);
-    }
-
-    return bind(source, Key.strategyFor(annotation));
-  }
-
-  public ConstantBindingBuilderImpl bindConstant(
-      Class<? extends Annotation> annotationType) {
-    Object source = source();
-
-    boolean retainedAtRuntime =
-        Annotations.isRetainedAtRuntime(annotationType);
-    boolean bindingAnnotation = Key.isBindingAnnotation(annotationType);
-
-    if (!retainedAtRuntime) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_RUNTIME_RETENTION, source);
-    }
-
-    if (!bindingAnnotation) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_BINDING_ANNOTATION, source);
-    }
-
-    if (!retainedAtRuntime || !bindingAnnotation) {
-      // We purposefully don't save this builder anywhere.
-      return new ConstantBindingBuilderImpl(this, Key.NULL_STRATEGY);
-    }
-
-    return bind(source, Key.strategyFor(annotationType));
-  }
-
-  private ConstantBindingBuilderImpl bind(Object source,
-      AnnotationStrategy annotationStrategy) {
-    ConstantBindingBuilderImpl builder =
-        new ConstantBindingBuilderImpl(this, annotationStrategy).from(source);
-    constantBindingBuilders.add(builder);
-    return builder;
+  public ConstantBindingBuilderImpl bindConstant() {
+    ConstantBindingBuilderImpl constantBuilder
+        = new ConstantBindingBuilderImpl(this, source());
+    constantBindingBuilders.add(constantBuilder);
+    return constantBuilder;
   }
 
   public void requestStaticInjection(Class<?>... types) {

@@ -62,7 +62,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testOneConstantInjection() throws CreationException {
     BinderImpl builder = new BinderImpl();
-    builder.bindConstant(NumericValue.class).to("5");
+    builder.bindConstant().annotatedWith(NumericValue.class).to("5");
     builder.bind(Simple.class);
     Injector injector = builder.createInjector();
     Simple simple = injector.getInstance(Simple.class);
@@ -75,10 +75,10 @@ public class ConstantConversionTest extends TestCase {
 
   public void testConstantInjection() throws CreationException {
     BinderImpl b = new BinderImpl();
-    b.bindConstant(NumericValue.class).to("5");
-    b.bindConstant(BooleanValue.class).to("true");
-    b.bindConstant(EnumValue.class).to("TEE");
-    b.bindConstant(ClassName.class).to(Foo.class.getName());
+    b.bindConstant().annotatedWith(NumericValue.class).to("5");
+    b.bindConstant().annotatedWith(BooleanValue.class).to("true");
+    b.bindConstant().annotatedWith(EnumValue.class).to("TEE");
+    b.bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
     Injector c = b.createInjector();
     Foo foo = c.getInstance(Foo.class);
 
@@ -109,7 +109,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidInteger() throws CreationException {
     BinderImpl b = new BinderImpl();
-    b.bindConstant(NumericValue.class).to("invalid");
+    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
       c.getInstance(InvalidInteger.class);
@@ -123,7 +123,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidCharacter() throws CreationException {
     BinderImpl b = new BinderImpl();
-    b.bindConstant(NumericValue.class).to("invalid");
+    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
       c.getInstance(InvalidCharacter.class);
@@ -137,7 +137,7 @@ public class ConstantConversionTest extends TestCase {
 
   public void testInvalidEnum() throws CreationException {
     BinderImpl b = new BinderImpl();
-    b.bindConstant(NumericValue.class).to("invalid");
+    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
     Injector c = b.createInjector();
     try {
       c.getInstance(InvalidEnum.class);

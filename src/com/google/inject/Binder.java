@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -95,13 +96,7 @@ public interface Binder {
   /**
    * Binds a constant value to an annotation.
    */
-  ConstantBindingBuilder bindConstant(Annotation annotation);
-
-  /**
-   * Binds a constant value to an annotation.
-   */
-  ConstantBindingBuilder bindConstant(
-      Class<? extends Annotation> annotationType);
+  AnnotatedConstantBindingBuilder bindConstant();
 
   /**
    * Upon successful creation, the {@link Injector} will inject static fields

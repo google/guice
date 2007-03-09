@@ -18,21 +18,63 @@ package com.google.inject;
 
 import com.google.inject.Key.AnnotationStrategy;
 import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.spi.SourceProviders;
+import com.google.inject.util.Annotations;
+import com.google.inject.util.StackTraceElements;
+import com.google.inject.util.Objects;
+import java.lang.annotation.Annotation;
 
 /**
    * Builds a constant binding.
  */
-class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
+class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
+    ConstantBindingBuilder {
 
   BindingInfo<?> bindingInfo;
-  final AnnotationStrategy annotationStrategy;
-  Object source = SourceProviders.UNKNOWN_SOURCE;
+  AnnotationStrategy annotationStrategy;
+  final Object source;
   private BinderImpl binder;
 
-  ConstantBindingBuilderImpl(BinderImpl binder, AnnotationStrategy annotationStrategy) {
+  ConstantBindingBuilderImpl(BinderImpl binder, Object source) {
     this.binder = binder;
-    this.annotationStrategy = annotationStrategy;
+    this.source = source;
+  }
+
+  public ConstantBindingBuilder annotatedWith(
+      Class<? extends Annotation> annotationType) {
+    Objects.nonNull(annotationType, "annotation type");
+    validateAnnotation(annotationType);
+    annotationStrategy = Key.strategyFor(annotationType);
+    return this;
+  }
+
+  public ConstantBindingBuilder annotatedWith(Annotation annotation) {
+    Objects.nonNull(annotation, "annotation");
+    validateAnnotation(annotation.annotationType());
+    annotationStrategy = Key.strategyFor(annotation);
+    return this;
+  }
+
+  void validateAnnotation(Class<? extends Annotation> annotationType) {
+    if (annotationStrategy != null) {
+      binder.addError(source, ErrorMessages.ANNOTATION_ALREADY_SPECIFIED);
+      return;
+    }
+
+    boolean retainedAtRuntime =
+        Annotations.isRetainedAtRuntime(annotationType);
+    boolean bindingAnnotation = Key.isBindingAnnotation(annotationType);
+
+    if (!retainedAtRuntime) {
+      binder.addError(StackTraceElements.forType(annotationType),
+          ErrorMessages.MISSING_RUNTIME_RETENTION, source);
+    }
+
+    if (!bindingAnnotation) {
+      binder.addError(StackTraceElements.forType(annotationType),
+          ErrorMessages.MISSING_BINDING_ANNOTATION, source);
+    }
   }
 
   boolean hasValue() {
@@ -41,11 +83,6 @@ class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
 
   Object getSource() {
     return source;
-  }
-
-  ConstantBindingBuilderImpl from(Object source) {
-    this.source = source;
-    return this;
   }
 
   public void to(String value) {
