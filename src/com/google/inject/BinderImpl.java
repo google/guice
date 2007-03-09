@@ -133,6 +133,8 @@ class BinderImpl implements Binder {
 
   final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
+  final List<CreationListener> instanceInjectors
+      = new ArrayList<CreationListener>();
 
   interface CreationListener {
     void notify(InjectorImpl injector);
@@ -338,6 +340,13 @@ class BinderImpl implements Binder {
     }
 
     stopwatch.resetAndLog(logger, "Static member injection");
+
+    // Inject pre-existing instances.
+    for (CreationListener instanceInjector : instanceInjectors) {
+      instanceInjector.notify(injector);
+    }
+
+    stopwatch.resetAndLog(logger, "Instance injection");
 
     // Run preloading commands.
     runPreloaders(injector, preloaders);

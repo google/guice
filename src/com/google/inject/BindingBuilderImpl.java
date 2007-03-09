@@ -250,7 +250,7 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
   }
 
   void registerInstanceForInjection(final Object o) {
-    binder.creationListeners.add(new CreationListener() {
+    binder.instanceInjectors.add(new CreationListener() {
       public void notify(InjectorImpl injector) {
         try {
           injector.injectMembers(o);

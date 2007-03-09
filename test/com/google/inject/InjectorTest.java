@@ -245,4 +245,20 @@ public class InjectorTest extends TestCase {
       this.fromMethod = i;
     }
   }
+
+  public void testInstanceInjectionHappensAfterFactoriesAreSetUp() {
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Object.class).toInstance(new Object() {
+          @Inject Runnable r;
+        });
+
+        bind(Runnable.class).to(MyRunnable.class);
+      }
+    });
+  }
+
+  static class MyRunnable implements Runnable {
+   public void run() {}
+  }  
 }
