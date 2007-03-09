@@ -26,6 +26,8 @@ import com.google.inject.Injector;
 import com.google.inject.Guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import static com.google.inject.spring.SpringIntegration.*;
 
 /**
@@ -33,7 +35,7 @@ import static com.google.inject.spring.SpringIntegration.*;
  */
 public class SpringIntegrationTest extends TestCase {
 
-  public void testSpringIntegration() throws CreationException {
+  public void testBindFromSpring() throws CreationException {
     final DefaultListableBeanFactory beanFactory
         = new DefaultListableBeanFactory();
 
@@ -62,6 +64,38 @@ public class SpringIntegrationTest extends TestCase {
     assertNotNull(injector.getInstance(Prototype.class));
     assertNotSame(injector.getInstance(Prototype.class),
         injector.getInstance(Prototype.class));
+  }
+
+  public void testBindAll() throws CreationException {
+    final DefaultListableBeanFactory beanFactory
+        = new DefaultListableBeanFactory();
+
+    RootBeanDefinition singleton
+        = new RootBeanDefinition(Singleton.class);
+    beanFactory.registerBeanDefinition("singleton", singleton);
+
+    RootBeanDefinition prototype
+        = new RootBeanDefinition(Prototype.class, false);
+    beanFactory.registerBeanDefinition("prototype", prototype);
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        SpringIntegration.bindAll(binder(), beanFactory);
+      }
+    });
+
+    Key<Singleton> singletonKey
+        = Key.get(Singleton.class, Names.named("singleton"));
+    Key<Prototype> prototypeKey
+        = Key.get(Prototype.class, Names.named("prototype"));
+
+    assertNotNull(injector.getInstance(singletonKey));
+    assertSame(injector.getInstance(singletonKey),
+        injector.getInstance(singletonKey));
+
+    assertNotNull(injector.getInstance(prototypeKey));
+    assertNotSame(injector.getInstance(prototypeKey),
+        injector.getInstance(prototypeKey));
   }
 
   static class Singleton {}

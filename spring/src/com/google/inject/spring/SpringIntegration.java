@@ -16,30 +16,73 @@
 
 package com.google.inject.spring;
 
+import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.Provider;
 import com.google.inject.Inject;
+import com.google.inject.Binder;
+import com.google.inject.name.Names;
+import com.google.inject.spi.SourceProviders;
+import com.google.inject.util.Objects;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
- * Integrates Guice with Spring. Requires a binding to
- * {@link org.springframework.beans.factory.BeanFactory}.
+ * Integrates Guice with Spring.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public class SpringIntegration {
 
+  static {
+    SourceProviders.skip(SpringIntegration.class);
+  }
+
   private SpringIntegration() {}
 
   /**
    * Creates a provider which looks up objects from Spring using the given name.
-   * Example usage:
+   * Expects a binding to {@link
+   * org.springframework.beans.factory.BeanFactory}. Example usage:
    *
    * <pre>
-   * bind(DataSource.class).toProvider(fromSpring(DataSource.class, "dataSource"));
+   * bind(DataSource.class)
+   *   .toProvider(fromSpring(DataSource.class, "dataSource"));
    * </pre>
    */
   public static <T> Provider<T> fromSpring(Class<T> type, String name) {
-    return new SpringProvider<T>(type, name);
+    return new InjectableSpringProvider<T>(type, name);
+  }
+
+  /**
+   * Binds all Spring beans from the given factory by name. For a Spring bean
+   * named "foo", this method creates a binding to the bean's type and
+   * {@code @Named("foo")}.
+   *
+   * @see com.google.inject.name.Named
+   * @see com.google.inject.name.Names#named(String) 
+   */
+  public static void bindAll(Binder binder, ListableBeanFactory beanFactory) {
+    for (String name : beanFactory.getBeanDefinitionNames()) {
+      Class<?> type = beanFactory.getType(name);
+      bindBean(binder, beanFactory, name, type);
+    }
+  }
+
+  static <T> void bindBean(Binder binder, ListableBeanFactory beanFactory,
+      String name, Class<T> type) {
+    SpringProvider<T> provider
+        = SpringProvider.newInstance(type, name);
+    try {
+      provider.initialize(beanFactory);
+    }
+    catch (Exception e) {
+      binder.addError(e);
+      return;
+    }
+
+    binder.bind(type)
+        .annotatedWith(Names.named(name))
+        .toProvider(provider);
   }
 
   static class SpringProvider<T> implements Provider<T> {
@@ -50,11 +93,14 @@ public class SpringIntegration {
     final String name;
 
     public SpringProvider(Class<T> type, String name) {
-      this.type = type;
-      this.name = name;
+      this.type = nonNull(type, "type");
+      this.name = nonNull(name, "name");
     }
 
-    @Inject
+    static <T> SpringProvider<T> newInstance(Class<T> type, String name) {
+      return new SpringProvider<T>(type, name);
+    }
+
     void initialize(BeanFactory beanFactory) {
       this.beanFactory = beanFactory;
       if (!beanFactory.isTypeMatch(name, type)) {
@@ -75,6 +121,19 @@ public class SpringIntegration {
         instance = type.cast(beanFactory.getBean(name));
       }
       return instance;
+    }
+  }
+
+  static class InjectableSpringProvider<T> extends SpringProvider<T> {
+
+    InjectableSpringProvider(Class<T> type, String name) {
+      super(type, name);
+    }
+
+    @Inject
+    @Override
+    void initialize(BeanFactory beanFactory) {
+      super.initialize(beanFactory);
     }
   }
 }
