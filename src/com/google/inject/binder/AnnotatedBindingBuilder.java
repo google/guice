@@ -26,7 +26,7 @@ import java.lang.annotation.Annotation;
 public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 
   /**
-   * Specifies the marker annotation type for this binding.
+   * Specifies an annotation type for this binding.
    */
   LinkedBindingBuilder<T> annotatedWith(
       Class<? extends Annotation> annotationType);

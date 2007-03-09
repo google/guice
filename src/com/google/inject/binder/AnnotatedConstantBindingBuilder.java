@@ -26,7 +26,7 @@ import java.lang.annotation.Annotation;
 public interface AnnotatedConstantBindingBuilder {
 
   /**
-   * Specifies the marker annotation type for this binding.
+   * Specifies an annotation type for this binding.
    */
   ConstantBindingBuilder annotatedWith(
       Class<? extends Annotation> annotationType);
