@@ -39,7 +39,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   
   public T get(InternalContext context) {
     T provided = provider.get();
-    if (provided != null || allowNullsBadBadBad) {
+    if (provided != null || allowNullsBadBadBad()) {
       return provided;
     }
     String message = String.format(ErrorMessages.NULL_PROVIDED, source);
@@ -52,7 +52,8 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   }
 
   // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad =
-      "I'm a bad hack".equals(
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(
           System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  }
 }
