@@ -39,13 +39,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   
   public T get(InternalContext context) {
     T provided = provider.get();
-    if (provided != null) {
-      return provided;
-    }
-
-    // TODO(kevinb): gee, ya think we might want to remove this?
-    if (("I'm a bad hack".equals(
-        System.getProperty("guice.allow.nulls.bad.bad.bad")))) {
+    if (provided != null || allowNullsBadBadBad) {
       return provided;
     }
     String message = String.format(ErrorMessages.NULL_PROVIDED, source);
@@ -56,4 +50,9 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   public String toString() {
     return provider.toString();
   }
+
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static final boolean allowNullsBadBadBad =
+      "I'm a bad hack".equals(
+          System.getProperty("guice.allow.nulls.bad.bad.bad"));
 }

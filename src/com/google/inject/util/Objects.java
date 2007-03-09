@@ -59,9 +59,7 @@ public class Objects {
    * should be used with Java asserts...
    */
   public static void assertNoNulls(Object[] objects) {
-    // TODO(kevinb): gee, ya think we might want to remove this?
-    if (("I'm a bad hack".equals(
-        System.getProperty("guice.allow.nulls.bad.bad.bad")))) {
+    if (allowNullsBadBadBad) {
       return;
     }
     if (objects != null) { // hmm. weird.
@@ -72,4 +70,9 @@ public class Objects {
       }
     }
   }
+
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static final boolean allowNullsBadBadBad =
+      "I'm a bad hack".equals(
+          System.getProperty("guice.allow.nulls.bad.bad.bad"));
 }
