@@ -19,20 +19,20 @@ package com.google.inject.binder;
 import java.lang.annotation.Annotation;
 
 /**
- * Specifies the annotation for a constant binding.
+ * See the EDSL examples at {@link com.google.inject.Binder}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface AnnotatedConstantBindingBuilder {
 
   /**
-   * Specifies an annotation type for this binding.
+   * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   ConstantBindingBuilder annotatedWith(
       Class<? extends Annotation> annotationType);
 
   /**
-   * Specifies an annotation value for this binding.
+   * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   ConstantBindingBuilder annotatedWith(Annotation annotation);
 }

@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleMemberInjector;
-import com.google.inject.Key.AnnotationStrategy;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
@@ -44,7 +43,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 /**
  * Builds a dependency injection {@link Injector}. Binds {@link Key}s to
  * implementations.
- *
  *
  * @author crazybob@google.com (Bob Lee)
  */

@@ -20,27 +20,27 @@ import com.google.inject.Scope;
 import java.lang.annotation.Annotation;
 
 /**
- * Specifies the scope for a binding.
+ * See the EDSL examples at {@link com.google.inject.Binder}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface ScopedBindingBuilder {
 
   /**
-   * Specifies the scope. References the annotation passed to {@link
-   * com.google.inject.Binder#bindScope(Class, com.google.inject.Scope)}.
+   * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   void in(Class<? extends Annotation> scopeAnnotation);
 
   /**
-   * Specifies the scope.
+   * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   void in(Scope scope);
 
   /**
    * Instructs the {@link com.google.inject.Injector} to eagerly initialize this
    * singleton-scoped binding upon creation. Useful for application
-   * initialization logic.
+   * initialization logic.  See the EDSL examples at
+   * {@link com.google.inject.Binder}.
    */
   void asEagerSingleton();
 }
