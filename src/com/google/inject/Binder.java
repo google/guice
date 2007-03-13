@@ -55,10 +55,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  *     bind(Service.class).to(ServiceImpl.class);</pre>
  *
  * Specifies that a request for a {@code Service} instance with no binding
- * annotations should be treated as if it were a request for a {@code MyImpl}
- * instance. This <i>overrides</i> the function of any
+ * annotations should be treated as if it were a request for a
+ * {@code ServiceImpl} instance. This <i>overrides</i> the function of any
  * {@link ImplementedBy @ImplementedBy} or {@link ProvidedBy @ProvidedBy}
- * annotations found on {@code MyInterface}, since Guice will have already
+ * annotations found on {@code Service}, since Guice will have already
  * "moved on" to {@code ServiceImpl} before it reaches the point when it starts
  * looking for these annotations.
  *
