@@ -24,7 +24,6 @@ import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.Strings;
 import com.google.inject.util.ToStringBuilder;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -499,8 +498,7 @@ class InjectorImpl implements Injector {
    * @param parameterTypes parameter types
    * @return injections
    */
-  <M extends AccessibleObject & Member>
-  SingleParameterInjector<?>[] getParametersInjectors(M member,
+  SingleParameterInjector<?>[] getParametersInjectors(Member member,
       Annotation[][] annotations, Type[] parameterTypes)
       throws MissingDependencyException {
     SingleParameterInjector<?>[] parameterInjectors
