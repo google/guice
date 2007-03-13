@@ -123,10 +123,10 @@ Collects configuration information (primarily <i>bindings</i>) which will be
      bind(Service.class).to(ServiceImpl.class);</pre>
 
  Specifies that a request for a <code>Service</code> instance with no binding
- annotations should be treated as if it were a request for a <code>MyImpl</code>
+ annotations should be treated as if it were a request for a <code>ServiceImpl</code>
  instance. This <i>overrides</i> the function of any
  <A HREF="../../../com/google/inject/ImplementedBy.html" title="annotation in com.google.inject"><CODE>@ImplementedBy</CODE></A> or <A HREF="../../../com/google/inject/ProvidedBy.html" title="annotation in com.google.inject"><CODE>@ProvidedBy</CODE></A>
- annotations found on <code>MyInterface</code>, since Guice will have already
+ annotations found on <code>Service</code>, since Guice will have already
  "moved on" to <code>ServiceImpl</code> before it reaches the point when it starts
  looking for these annotations.
 
