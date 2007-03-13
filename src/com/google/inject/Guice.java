@@ -21,23 +21,39 @@ import java.util.Arrays;
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
  * {@link Module}s.
+ *
+ * <p>Guice supports a model of development that draws clear boundaries between
+ * APIs, Implementations of these APIs, Modules which configure these
+ * implementations, and finally Applications which consist of a collection of
+ * Modules. It is the Application, which typically defines your {@code main()}
+ * method, that bootstraps the Guice Injector using the {@code Guice} class, as
+ * in this example:
+ * <pre>
+ *     public class FooApplication {
+ *       public static void main(String[] args) {
+ *         Injector injector = Guice.createInjector(
+ *             new ModuleA(),
+ *             new ModuleB(),
+ *             . . .
+ *             new FooApplicationFlagsModule(args)
+ *         );
+ *
+ *         // Now just bootstrap the application and you're done
+ *         MyStartClass starter = injector.getInstance(MyStartClass.class);
+ *         starter.runApplication();
+ *       }
+ *     }
+ * </pre>
  */
 public final class Guice {
 
   private Guice() {}
 
   /**
-   * Creates an injector with no explicit bindings.
-   */
-  static Injector createEmptyInjector() {
-    return createInjector();
-  }
-
-  /**
    * Creates an injector for the given set of modules.
    *
-   * @throws CreationException from which you can retrieve the individual error
-   *  messages
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
    */
   public static Injector createInjector(Module... modules) {
     return createInjector(Arrays.asList(modules));
@@ -46,8 +62,8 @@ public final class Guice {
   /**
    * Creates an injector for the given set of modules.
    *
-   * @throws CreationException from which you can retrieve the individual error
-   *  messages
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
    */
   public static Injector createInjector(Iterable<Module> modules) {
     return createInjector(Stage.DEVELOPMENT, modules);
@@ -57,8 +73,8 @@ public final class Guice {
    * Creates an injector for the given set of modules, in a given development
    * stage.
    *
-   * @throws CreationException from which you can retrieve the individual error
-   *  messages.
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
    */
   public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
@@ -68,8 +84,8 @@ public final class Guice {
    * Creates an injector for the given set of modules, in a given development
    * stage.
    *
-   * @throws CreationException from which you can retrieve the individual error
-   *  messages.
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
    */
   public static Injector createInjector(Stage stage, Iterable<Module> modules) {
     BinderImpl binder = new BinderImpl(stage);

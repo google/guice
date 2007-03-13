@@ -18,7 +18,7 @@ package com.google.inject;
 
 /**
  * A module contributes configuration information, typically interface
- * bindings, which will be used to create an {@link Injector}. A guice-based
+ * bindings, which will be used to create an {@link Injector}. A Guice-based
  * application is ultimately composed of little more than a set of
  * {@code Module}s and some bootstrapping code.
  *
@@ -28,7 +28,8 @@ package com.google.inject;
 public interface Module {
 
   /**
-   * Contributes bindings and other configurations to a {@code Binder}.
+   * Contributes bindings and other configurations for this module to a
+   * {@code Binder}.
    */
   void configure(Binder binder);
 }

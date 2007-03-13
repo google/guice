@@ -48,44 +48,63 @@ public interface Injector {
 
   /**
    * Injects dependencies into the fields and methods of an existing object.
-   * Does not inject the constructor.
+   * Ignores the presence or absence of an injectable constructor.
+   *
+   * <p>Whenever Guice creates an instance, it performs this injection
+   * automatically (after first performing constructor injection), so if you're
+   * able to let Guice create all your objects for you, you'll never need to
+   * use this method.
    */
   void injectMembers(Object o);
 
   /**
-   * Gets all explicit bindings.
+   * Gets all explicit bindings.  This method is part of the Injector
+   * Introspection API and is primarily intended for use by tools.
    */
   Map<Key<?>, Binding<?>> getBindings();
 
   /**
-   * Gets a binding for the given key.
+   * Gets a binding for the given key.  This method is part of the Injector
+   * Introspection API and is primarily intended for use by tools.
    */
   <T> Binding<T> getBinding(Key<T> key);
 
   /**
-   * Finds all bindings to the given type.
+   * Finds all bindings to the given type.  This method is part of the Injector
+   * Introspection API and is primarily intended for use by tools.
+
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
   /**
-   * Gets the provider bound to the given key.
+   * Returns the provider used to obtain instances for the given injection key.
+   * The process of determining this result is known as "injection resolution".
+   * When feasible, it's generally preferable to avoid using this method, in
+   * favor of having Guice inject your dependencies ahead of time.
    */
   <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * Gets the provider bound to the given type.
+   * Returns the provider used to obtain instances for the given type.
+   * The process of determining this result is known as "injection resolution".
+   * When feasible, it's generally preferable to avoid using this method, in
+   * favor of having Guice inject your dependencies ahead of time.
    */
   <T> Provider<T> getProvider(Class<T> type);
 
   /**
-   * Gets an instance bound to the given key; equivalent to
-   * {@code getProvider(key).get()}.
+   * Returns the appropriate instance for the given injection key; equivalent to
+   * {@code getProvider(key).get()}. When feasible, it's generally preferable to
+   * avoid using this method, in favor of having Guice inject your dependencies
+   * ahead of time.
    */
   <T> T getInstance(Key<T> key);
 
   /**
-   * Gets an instance bound to the given type; equivalent to
-   * {@code getProvider(type).get()}.
+   * Returns the appropriate instance for the given type; equivalent to
+   * {@code getProvider(type).get()}. When feasible, it's generally preferable
+   * to avoid using this method, in favor of having Guice inject your
+   * dependencies ahead of time.
    */
   <T> T getInstance(Class<T> type);
 }
