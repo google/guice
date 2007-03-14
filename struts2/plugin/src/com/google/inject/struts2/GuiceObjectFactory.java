@@ -20,6 +20,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.ScopeAnnotation;
+import com.google.inject.Binder;
 import com.google.inject.servlet.ServletModule;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
@@ -30,7 +32,10 @@ import com.opensymphony.xwork2.interceptor.Interceptor;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.lang.annotation.Annotation;
 
 public class GuiceObjectFactory extends ObjectFactory {
 
@@ -38,8 +43,10 @@ public class GuiceObjectFactory extends ObjectFactory {
       Logger.getLogger(GuiceObjectFactory.class.getName());
 
   Module module;
-  Injector injector;
+  volatile Injector injector;
   boolean developmentMode = false;
+  List<ProvidedInterceptor> interceptors
+      = new ArrayList<ProvidedInterceptor>();
 
   @Override
   public boolean isNoArgConstructorRequired() {
@@ -94,44 +101,75 @@ public class GuiceObjectFactory extends ObjectFactory {
   }
 
   public Object buildBean(Class clazz, Map extraContext) {
-    synchronized (this) {
-      if (injector == null) {
-        try {
-          logger.info("Creating injector...");
-          this.injector = Guice.createInjector(new AbstractModule() {
-            protected void configure() {
-              install(new ServletModule());
-
-              // Tell the injector about all the action classes, etc., so it
-              // can validate them at startup.
-              for (Class<?> boundClass : boundClasses) {
-                bind(boundClass);
-              }
-            }
-          });
-        } catch (Throwable t) {
-          t.printStackTrace();
-          System.exit(1);
+    if (injector == null) {
+      synchronized (this) {
+        if (injector == null) {
+          createInjector();
         }
-        logger.info("Injector created successfully.");
       }
     }
 
     return injector.getInstance(clazz);
   }
 
+  private void createInjector() {
+    try {
+      logger.info("Creating injector...");
+      this.injector = Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          // Install default servlet bindings.
+          install(new ServletModule());
+
+          // Install user's module.
+          if (module != null) {
+            logger.info("Installing " + module + "...");
+            install(module);
+          }
+          else {
+            logger.info("No module found. Set 'guice.module' to a Module "
+                + "class name if you'd like to use one.");
+          }
+
+          // Tell the injector about all the action classes, etc., so it
+          // can validate them at startup.
+          for (Class<?> boundClass : boundClasses) {
+            // TODO: Set source from Struts XML.
+            bind(boundClass);
+          }
+
+          // Validate the interceptor class.
+          for (ProvidedInterceptor interceptor : interceptors) {
+            interceptor.validate(binder());
+          }
+        }
+      });
+
+      // Inject interceptors.
+      for (ProvidedInterceptor interceptor : interceptors) {
+        interceptor.inject();
+      }
+
+    } catch (Throwable t) {
+      t.printStackTrace();
+      System.exit(1);
+    }
+    logger.info("Injector created successfully.");
+  }
+
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
       Map interceptorRefParams) throws ConfigurationException {
+    // Ensure the interceptor class is present.
+    Class<? extends Interceptor> interceptorClass;
     try {
-      getClassInstance(interceptorConfig.getClassName());
+      interceptorClass = getClassInstance(interceptorConfig.getClassName());
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
 
-    // Defer the creation of interceptors so that we don't have to create the
-    // injector until we've bound all the actions. This enables us to
-    // validate all the dependencies at once.
-    return new LazyLoadedInterceptor(interceptorConfig, interceptorRefParams);
+    ProvidedInterceptor providedInterceptor = new ProvidedInterceptor(
+        interceptorConfig, interceptorRefParams, interceptorClass);
+    interceptors.add(providedInterceptor);
+    return providedInterceptor;
   }
 
   Interceptor superBuildInterceptor(InterceptorConfig interceptorConfig,
@@ -139,28 +177,41 @@ public class GuiceObjectFactory extends ObjectFactory {
     return super.buildInterceptor(interceptorConfig, interceptorRefParams);
   }
 
-  class LazyLoadedInterceptor implements Interceptor {
+  class ProvidedInterceptor implements Interceptor {
 
     final InterceptorConfig config;
     final Map params;
+    final Class<? extends Interceptor> interceptorClass;
+    Interceptor delegate;
 
-    LazyLoadedInterceptor(InterceptorConfig config, Map params) {
+    ProvidedInterceptor(InterceptorConfig config, Map params,
+        Class<? extends Interceptor> interceptorClass) {
       this.config = config;
       this.params = params;
+      this.interceptorClass = interceptorClass;
     }
 
-    Interceptor delegate = null;
-
-    synchronized Interceptor getDelegate() {
-      if (delegate == null) {
-        delegate = superBuildInterceptor(config, params);
-        delegate.init();
+    void validate(Binder binder) {
+      // TODO: Set source from Struts XML.
+      if (hasScope(interceptorClass)) {
+        binder.addError("Scoping interceptors is not currently supported."
+            + " Please remove the scope annotation from "
+            + interceptorClass.getName() + ".");
       }
-      return delegate;
+
+      // Make sure it implements Interceptor.
+      if (!Interceptor.class.isAssignableFrom(interceptorClass)) {
+        binder.addError(interceptorClass.getName() + " must implement "
+          + Interceptor.class.getName() + ".");
+      }
+    }
+
+    void inject() {
+      delegate = superBuildInterceptor(config, params);
     }
 
     public void destroy() {
-      getDelegate().destroy();
+      delegate.destroy();
     }
 
     public void init() {
@@ -168,7 +219,21 @@ public class GuiceObjectFactory extends ObjectFactory {
     }
 
     public String intercept(ActionInvocation invocation) throws Exception {
-      return getDelegate().intercept(invocation);
+      return delegate.intercept(invocation);
     }
+  }
+
+  /**
+   * Returns true if the given class has a scope annotation.
+   */
+  private static boolean hasScope(
+      Class<? extends Interceptor> interceptorClass) {
+    for (Annotation annotation : interceptorClass.getAnnotations()) {
+      if (annotation.annotationType()
+          .isAnnotationPresent(ScopeAnnotation.class)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -26,5 +26,6 @@ import com.google.inject.AbstractModule;
 public class ExampleModule extends AbstractModule {
 
   protected void configure() {
+    bind(Service.class).to(ServiceImpl.class);
   }
 }

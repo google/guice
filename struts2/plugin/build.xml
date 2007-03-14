@@ -2,6 +2,7 @@
 
 <project name="guice-struts2-plugin" basedir="." default="jar">
 
+  <property name="version" value="1.0.1"/>
   <import file="../../common.xml"/>
   
   <path id="compile.classpath">

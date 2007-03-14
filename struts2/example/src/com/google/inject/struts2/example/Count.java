@@ -23,10 +23,13 @@ import static com.opensymphony.xwork2.Action.SUCCESS;
 public class Count {
 
   final Counter counter;
+  final Service service;
+  String message;
 
   @Inject
-  public Count(Counter counter) {
+  public Count(Counter counter, Service service) {
     this.counter = counter;
+    this.service = service;
   }
 
   public String execute() {
@@ -35,5 +38,17 @@ public class Count {
 
   public int getCount() {
     return counter.increment();
+  }
+
+  public String getStatus() {
+    return service.getStatus();
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 }
