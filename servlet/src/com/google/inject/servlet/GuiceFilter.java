@@ -16,8 +16,8 @@
 
 package com.google.inject.servlet;
 
+import com.google.inject.OutOfScopeException;
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -60,8 +60,10 @@ public class GuiceFilter implements Filter {
   static Context getContext() {
     Context context = localContext.get();
     if (context == null) {
-      throw new RuntimeException("Please apply " + GuiceFilter.class.getName()
-          + " to any request which uses servlet scopes.");
+      throw new OutOfScopeException("Cannot access scoped object. Either we"
+          + " are not currently inside an HTTP Servlet request, or you may"
+          + " have forgotten to apply " + GuiceFilter.class.getName()
+          + " as a servlet filter for this request.");
     }
     return context;
   }

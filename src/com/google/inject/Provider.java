@@ -50,6 +50,9 @@ public interface Provider<T> {
 
   /**
    * Provides an instance of {@code T}. Must never return {@code null}.
+   *
+   * @throws OutOfScopeException when an attempt is made to access a scoped
+   *     object while the scope in question is not currently active
    */
   T get();
 }

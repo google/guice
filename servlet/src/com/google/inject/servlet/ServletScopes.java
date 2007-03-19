@@ -16,10 +16,9 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.Scope;
-import com.google.inject.Provider;
 import com.google.inject.Key;
-
+import com.google.inject.Provider;
+import com.google.inject.Scope;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 

@@ -69,6 +69,25 @@ public class Scopes {
   };
 
   /**
+   * No scope; the same as not applying any scope at all.  Each time the
+   * Injector obtains an instance of an object with "no scope", it injects this
+   * instance then immediately forgets it.  When the next request for the same
+   * binding arrives it will need to obtain the instance over again.
+   *
+   * <p>This exists only in case a class has been annotated with a scope
+   * annotation such as {@link Singleton @Singleton}, and you need to override
+   * this to "no scope" in your binding.
+   */
+  public static final Scope NO_SCOPE = new Scope() {
+    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+      return unscoped;
+    }
+    public String toString() {
+      return "Scopes.NO_SCOPE";
+    }
+  };
+
+  /**
    * Gets the scope for a type based on its annotations. Returns {@code null}
    * if none specified.
    *

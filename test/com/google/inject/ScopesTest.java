@@ -27,25 +27,22 @@ public class ScopesTest extends TestCase {
     BinderImpl binder = new BinderImpl();
     BindingBuilderImpl<SampleSingleton> bindingBuilder
         = binder.bind(SampleSingleton.class);
-    binder.createInjector();
+    Injector injector = binder.createInjector();
+    assertSame(
+        injector.getInstance(SampleSingleton.class),
+        injector.getInstance(SampleSingleton.class));
   }
 
   @Singleton
   static class SampleSingleton {}
 
-  Scope scope = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-      return unscoped;
-    }
-  };
-
   public void testOverriddingAnnotation()
       throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    BindingBuilderImpl<SampleSingleton> bindingBuilder
-        = builder.bind(SampleSingleton.class);
-    bindingBuilder.in(scope);
-    builder.createInjector();
-    assertSame(scope, bindingBuilder.scope);
+    BinderImpl binder = new BinderImpl();
+    binder.bind(SampleSingleton.class).in(Scopes.NO_SCOPE);
+    Injector injector = binder.createInjector();
+    assertNotSame(
+        injector.getInstance(SampleSingleton.class),
+        injector.getInstance(SampleSingleton.class));
   }
 }
