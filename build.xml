@@ -17,7 +17,7 @@
     <jarjar jarfile="${build.dir}/dist/guice-${version}.jar">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="lib/build/cglib-nodep-2.2_beta1.jar"/>
-      <zipfileset src="lib/build/asm-3.0.jar"/>
+      <zipfileset src="lib/build/asm-2.2.3.jar"/>
       <rule pattern="net.sf.cglib.**" result="com.google.inject.cglib.@1"/>
       <rule pattern="org.objectweb.asm.**" result="com.google.inject.asm.@1"/>
       <zap pattern="net.sf.cglib.beans.**"/>
