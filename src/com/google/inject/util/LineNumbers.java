@@ -51,7 +51,7 @@ public class LineNumbers {
     if (in == null) {
       throw new IllegalArgumentException("Cannot find bytecode for " + cls);
     }
-    new ClassReader(in).accept(new LineNumberReader(), 0);
+    new ClassReader(in).accept(new LineNumberReader(), false);
   }
 
   /**
@@ -95,11 +95,19 @@ public class LineNumbers {
       return member.getName() + Type.getMethodDescriptor((Method) member);
     }
     else {
-      return "<init>" + Type.getConstructorDescriptor((Constructor) member);
+      return "<init>" + getConstructorDescriptor((Constructor) member);
     }
   }
 
-  private class LineNumberReader implements ClassVisitor, MethodVisitor {
+  public static String getConstructorDescriptor(Constructor c) {
+    StringBuilder sb = new StringBuilder();
+    sb.append('(');
+    for (Class param : c.getParameterTypes())
+        sb.append(Type.getDescriptor(param));
+    return sb.append(")V").toString();
+  }
+
+  private class LineNumberReader implements ClassVisitor, MethodVisitor, AnnotationVisitor {
 
     private int line = -1;
     private String pendingMethod;
@@ -163,16 +171,30 @@ public class LineNumbers {
     }
 
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-      return null;
+      return this;
+    }
+
+    public AnnotationVisitor visitAnnotation(String name, String desc) {
+      return this;
     }
 
     public AnnotationVisitor visitAnnotationDefault() {
-      return null;
+      return this;
     }
 
     public AnnotationVisitor visitParameterAnnotation(int parameter,
         String desc, boolean visible) {
-      return null;
+      return this;
+    }
+
+    public AnnotationVisitor visitArray(String name) {
+      return this;
+    }
+
+    public void visitEnum(String name, String desc, String value) {
+    }
+
+    public void visit(String name, Object value) {
     }
 
     public void visitCode() {
