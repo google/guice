@@ -50,6 +50,10 @@ public class ServletScopes {
             return t;
           }
         }
+
+        public String toString() {
+          return creator.toString();
+        }
       };
     }
 
@@ -76,6 +80,9 @@ public class ServletScopes {
             }
             return t;
           }
+        }
+        public String toString() {
+          return creator.toString();
         }
       };
     }
