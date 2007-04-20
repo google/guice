@@ -64,15 +64,17 @@ public interface Injector {
   Map<Key<?>, Binding<?>> getBindings();
 
   /**
-   * Gets a binding for the given key.  This method is part of the Injector
-   * Introspection API and is primarily intended for use by tools.
+   * Gets a binding for the given key, or null if no binding for this key is
+   * found.  Note that if this key references an implementation class that can
+   * be implicitly bound, this method may return null, but may later return the
+   * implicit binding after it has been loaded. This method is part of the
+   * Injector Introspection API and is primarily intended for use by tools.
    */
   <T> Binding<T> getBinding(Key<T> key);
 
   /**
-   * Finds all bindings to the given type.  This method is part of the Injector
+   * Finds all bindings to the given type. This method is part of the Injector
    * Introspection API and is primarily intended for use by tools.
-
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
