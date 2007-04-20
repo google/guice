@@ -595,10 +595,20 @@ class InjectorImpl implements Injector {
             ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
         return ConstructorInjector.invalidConstructor();
       }
+      if (isInnerClass(implementation)) {
+        errorHandler.handle(defaultSource,
+            ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
+        return ConstructorInjector.invalidConstructor();
+      }
 
       return new ConstructorInjector(InjectorImpl.this, implementation);
     }
   };
+
+  private static boolean isInnerClass(Class<?> c) {
+    return c.getEnclosingClass() != null
+        && !Modifier.isStatic(c.getModifiers());
+  }
 
   /**
    * A placeholder. This enables us to continue processing and gather more

@@ -115,12 +115,15 @@ class ErrorMessages {
   static final String MISSING_CONSTANT_VALUE = "Missing constant value. Please"
       + " call to(...).";
 
-  static final String CANNOT_INJECT_ABSTRACT_TYPE =
-      "Injecting into abstract types is not supported. Please use a concrete"
-          + " type instead of %s.";
+  static final String CANNOT_INJECT_ABSTRACT_TYPE = "Injecting into abstract"
+      + " types is not supported. Please use a concrete type instead of %s.";
 
-  static final String ANNOTATION_ALREADY_SPECIFIED =
-      "More than one annotation is specified for this binding.";
+  static final String CANNOT_INJECT_INNER_CLASS = "Injecting into inner"
+      + " classes is not supported.  Please use a static class (top-level or"
+      + " nested) instead.";
+
+  static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
+      + " is specified for this binding.";
 
   static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
       + " than once.";
