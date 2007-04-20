@@ -19,10 +19,8 @@ package com.google.inject.util;
 import static com.google.inject.util.ReferenceType.SOFT;
 import static com.google.inject.util.ReferenceType.STRONG;
 import static com.google.inject.util.ReferenceType.WEAK;
-
-import junit.framework.TestCase;
-
 import java.util.concurrent.CountDownLatch;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

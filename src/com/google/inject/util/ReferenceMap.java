@@ -17,7 +17,6 @@
 package com.google.inject.util;
 
 import static com.google.inject.util.ReferenceType.STRONG;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

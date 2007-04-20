@@ -19,12 +19,10 @@ package com.google.inject.util;
 import static com.google.inject.util.ReferenceType.SOFT;
 import static com.google.inject.util.ReferenceType.STRONG;
 import static com.google.inject.util.ReferenceType.WEAK;
-
-import junit.framework.TestCase;
-
 import java.lang.ref.Reference;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentMap;
+import junit.framework.TestCase;
 
 /**
  * Tests for {@link ReferenceMap}.

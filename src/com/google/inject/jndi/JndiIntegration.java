@@ -16,8 +16,8 @@
 
 package com.google.inject.jndi;
 
-import com.google.inject.Provider;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import javax.naming.Context;
 import javax.naming.NamingException;
 

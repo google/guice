@@ -17,7 +17,6 @@
 package com.google.inject.struts2.example;
 
 import com.google.inject.Inject;
-
 import static com.opensymphony.xwork2.Action.SUCCESS;
 
 public class Count {

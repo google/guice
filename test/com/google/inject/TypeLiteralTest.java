@@ -16,10 +16,8 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
 import java.util.List;
-import java.lang.reflect.Type;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

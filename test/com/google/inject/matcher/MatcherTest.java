@@ -16,13 +16,17 @@
 
 package com.google.inject.matcher;
 
-import static com.google.inject.matcher.Matchers.*;
-
-import junit.framework.TestCase;
-
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.inPackage;
+import static com.google.inject.matcher.Matchers.not;
+import static com.google.inject.matcher.Matchers.only;
+import static com.google.inject.matcher.Matchers.returns;
+import static com.google.inject.matcher.Matchers.subclassesOf;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

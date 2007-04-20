@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
+import com.google.inject.util.Annotations;
 import static com.google.inject.util.Objects.nonNull;
 import com.google.inject.util.StackTraceElements;
 import com.google.inject.util.ToStringBuilder;
-import com.google.inject.util.Annotations;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;

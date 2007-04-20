@@ -17,13 +17,11 @@
 package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
 import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import static com.google.inject.servlet.ServletScopes.REQUEST;
 import static com.google.inject.servlet.ServletScopes.SESSION;
-
 import java.util.Map;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;

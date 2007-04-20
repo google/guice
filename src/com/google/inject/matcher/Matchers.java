@@ -17,7 +17,6 @@
 package com.google.inject.matcher;
 
 import com.google.inject.util.Objects;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;

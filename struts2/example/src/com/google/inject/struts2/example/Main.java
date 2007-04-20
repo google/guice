@@ -18,8 +18,8 @@ package com.google.inject.struts2.example;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
  * Starts the example web server on port 8080. Run from "./struts2/example".

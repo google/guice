@@ -17,7 +17,6 @@
 package com.google.inject.util;
 
 import net.sf.cglib.reflect.FastClass;
-import com.google.inject.util.GuiceNamingPolicy;
 
 /**
  * Gives Guice classes custom names.

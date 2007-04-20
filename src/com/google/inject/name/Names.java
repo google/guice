@@ -18,8 +18,8 @@ package com.google.inject.name;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.SourceProvider;
+import com.google.inject.spi.SourceProviders;
 import java.util.Map;
 import java.util.Properties;
 

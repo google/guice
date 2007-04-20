@@ -17,7 +17,6 @@
 package com.google.inject.example;
 
 import static junit.framework.Assert.assertTrue;
-import junit.framework.Assert;
 
 /**
  * @author crazybob@google.com (Bob Lee)

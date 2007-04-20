@@ -16,8 +16,8 @@
 
 package com.google.inject.util;
 
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Helps with {@code toString()} methods.

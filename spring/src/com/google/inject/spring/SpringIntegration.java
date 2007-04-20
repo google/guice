@@ -16,13 +16,12 @@
 
 package com.google.inject.spring;
 
-import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.Provider;
-import com.google.inject.Inject;
 import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.util.Objects;
+import static com.google.inject.util.Objects.nonNull;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 

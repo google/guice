@@ -16,11 +16,10 @@
 
 package com.google.inject;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
-import static java.lang.annotation.ElementType.*;
 
 /**
  * Annotates annotations which are used for binding. Only one such annotation

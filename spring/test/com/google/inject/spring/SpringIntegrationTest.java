@@ -16,19 +16,17 @@
 
 package com.google.inject.spring;
 
-import junit.framework.TestCase;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.BeanFactory;
-import com.google.inject.PerformanceComparison.TeeImpl;
-import com.google.inject.Injector;
-import com.google.inject.Guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
-import static com.google.inject.spring.SpringIntegration.*;
+import static com.google.inject.spring.SpringIntegration.fromSpring;
+import junit.framework.TestCase;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author crazybob@google.com (Bob Lee)

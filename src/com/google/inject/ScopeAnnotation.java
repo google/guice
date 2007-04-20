@@ -16,12 +16,10 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 
 /**
  * Annotates annotations which are used for scoping. Only one such annotation

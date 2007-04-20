@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.BinderImpl.CreationListener;
-import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.util.Annotations;
 import com.google.inject.util.Objects;
 import com.google.inject.util.StackTraceElements;

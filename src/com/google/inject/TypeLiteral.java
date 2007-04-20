@@ -17,11 +17,9 @@
 package com.google.inject;
 
 import static com.google.inject.util.Objects.nonNull;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to

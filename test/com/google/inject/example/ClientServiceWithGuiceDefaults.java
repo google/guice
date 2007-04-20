@@ -16,11 +16,11 @@
 
 package com.google.inject.example;
 
-import com.google.inject.Inject;
 import com.google.inject.CreationException;
-import com.google.inject.Injector;
 import com.google.inject.Guice;
 import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import junit.framework.Assert;
 
