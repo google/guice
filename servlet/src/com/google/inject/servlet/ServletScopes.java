@@ -52,7 +52,7 @@ public class ServletScopes {
         }
 
         public String toString() {
-          return creator.toString();
+          return String.format("%s[%s]", creator, REQUEST);
         }
       };
     }
@@ -82,7 +82,7 @@ public class ServletScopes {
           }
         }
         public String toString() {
-          return creator.toString();
+          return String.format("%s[%s]", creator, SESSION);
         }
       };
     }
