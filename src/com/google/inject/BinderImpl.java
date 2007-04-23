@@ -65,6 +65,8 @@ class BinderImpl implements Binder {
   final List<StaticInjection> staticInjections
       = new ArrayList<StaticInjection>();
 
+  final Set<Module> modulesInstalled = new HashSet<Module>();
+
   InjectorImpl injector;
 
   final Stage stage;
@@ -194,7 +196,9 @@ class BinderImpl implements Binder {
   }
 
   public void install(Module module) {
-    module.configure(this);
+    if (modulesInstalled.add(module)) {
+      module.configure(this);
+    }
   }
 
   public void addError(String message, Object... arguments) {

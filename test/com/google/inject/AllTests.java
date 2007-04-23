@@ -39,6 +39,7 @@ public class AllTests {
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(KeyTest.class);
+    suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(NotRequiredTest.class);
     suite.addTestSuite(PreloadingTest.class);
