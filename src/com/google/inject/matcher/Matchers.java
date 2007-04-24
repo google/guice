@@ -18,6 +18,8 @@ package com.google.inject.matcher;
 
 import com.google.inject.util.Objects;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
@@ -63,6 +65,15 @@ public class Matchers {
     };
   }
 
+  private static void checkForRuntimeRetention(
+      Class<? extends Annotation> annotationType) {
+    Retention retention = annotationType.getAnnotation(Retention.class);
+    if (retention == null || retention.value() != RetentionPolicy.RUNTIME) {
+      throw new IllegalArgumentException("Annotation "
+          + annotationType.getSimpleName() + " is missing RUNTIME retention");
+    }
+  }
+
   /**
    * Returns a matcher which matches elements (methods, classes, etc.)
    * with a given annotation.
@@ -70,6 +81,7 @@ public class Matchers {
   public static Matcher<AnnotatedElement> annotatedWith(
       final Class<? extends Annotation> annotationType) {
     Objects.nonNull(annotationType, "annotation type");
+    checkForRuntimeRetention(annotationType);
     return new AbstractMatcher<AnnotatedElement>() {
       public boolean matches(AnnotatedElement element) {
         Annotation annotation = element.getAnnotation(annotationType);
@@ -89,6 +101,7 @@ public class Matchers {
   public static Matcher<AnnotatedElement> annotatedWith(
       final Annotation annotation) {
     Objects.nonNull(annotation, "annotation");
+    checkForRuntimeRetention(annotation.annotationType());
     return new AbstractMatcher<AnnotatedElement>() {
       public boolean matches(AnnotatedElement element) {
         Annotation fromElement

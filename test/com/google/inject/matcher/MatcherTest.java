@@ -50,6 +50,12 @@ public class MatcherTest extends TestCase {
     assertTrue(annotatedWith(Foo.class).matches(Bar.class));
     assertFalse(annotatedWith(Foo.class).matches(
         MatcherTest.class.getMethods()[0]));
+
+    try {
+      annotatedWith(Baz.class).matches(Car.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+    }
   }
 
   public void testSubclassesOf() {
@@ -91,4 +97,9 @@ public class MatcherTest extends TestCase {
 
   @Foo
   static class Bar {}
+
+  @interface Baz {}
+
+  @Baz
+  static class Car {}
 }
