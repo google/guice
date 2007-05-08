@@ -207,12 +207,12 @@ class BinderImpl implements Binder {
 
   public void addError(Throwable t) {
     Object source = source();
-    String className = t.getClass().getSimpleName();
     String message = ErrorMessages.getRootMessage(t);
     String logMessage = String.format(
         ErrorMessages.EXCEPTION_REPORTED_BY_MODULE, message);
     logger.log(Level.INFO, logMessage, t);
-    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG, message);
+    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG,
+        message);
   }
 
   void addError(Object source, String message, Object... arguments) {
@@ -492,5 +492,63 @@ class BinderImpl implements Binder {
         context.setExternalContext(null);
       }
     }
+  }
+
+  public <T> Provider<T> getProvider(Key<T> key) {
+    ProviderProxy<T> providerProxy = new ProviderProxy<T>(source(), key);
+    creationListeners.add(providerProxy);
+    return providerProxy;
+  }
+
+  public <T> Provider<T> getProvider(Class<T> type) {
+    return getProvider(Key.get(type));
+  }
+
+  /**
+   * A reference to a provider which can be filled in once the Injector has
+   * been created.
+   */
+  static class ProviderProxy<T> implements Provider<T>, CreationListener {
+
+    final Object source;
+    final Key<T> key;
+
+    // We don't have to synchronize access to this field because it doesn't
+    // change after the Injector has been created.
+    Provider<T> delegate = illegalProvider();
+
+    public ProviderProxy(Object source, Key<T> key) {
+      this.source = source;
+      this.key = key;
+    }
+
+    public void notify(final InjectorImpl injector) {
+      injector.withDefaultSource(source, new Runnable() {
+        public void run() {
+          try {
+            delegate = injector.getProvider(key);
+          }
+          catch (ConfigurationException e) {
+            ErrorMessages.handleMissingBinding(injector, source, key);
+          }
+        }
+      });
+    }
+
+    public T get() {
+      return delegate.get();
+    }
+  }
+
+  static final Provider<Object> ILLEGAL_PROVIDER = new Provider<Object>() {
+    public Object get() {
+      throw new IllegalStateException("This provider cannot be used until the"
+          + " Injector has been created.");
+    }
+  };
+
+  @SuppressWarnings("unchecked")
+  static <T> Provider<T> illegalProvider() {
+    return (Provider<T>) ILLEGAL_PROVIDER;
   }
 }

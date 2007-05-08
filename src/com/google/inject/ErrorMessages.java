@@ -40,14 +40,21 @@ class ErrorMessages {
       "Binding to %s not found. Annotations on other"
           + " bindings to that type include: %s";
 
-  static void handleMissingBinding(ErrorHandler errorHandler, Member member,
-      Key<?> key, List<String> otherNames) {
+  static void handleMissingBinding(InjectorImpl injector, Object source,
+      Key<?> key) {
+    ErrorHandler errorHandler = injector.errorHandler;
+    List<String> otherNames =
+        injector.getNamesOfBindingAnnotations(key.getTypeLiteral());
+
+    if (source instanceof Member) {
+      source = StackTraceElements.forMember((Member) source);
+    }
+
     if (otherNames.isEmpty()) {
-      errorHandler.handle(StackTraceElements.forMember(member),
-          MISSING_BINDING, key);
+      errorHandler.handle(source, MISSING_BINDING, key);
     }
     else {
-      errorHandler.handle(StackTraceElements.forMember(member),
+      errorHandler.handle(source,
           MISSING_BINDING_BUT_OTHERS_EXIST, key, otherNames);
     }
   }

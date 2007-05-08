@@ -44,7 +44,7 @@ import java.util.Map;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Injector {
+public interface Injector extends ProviderLocator {
 
   /**
    * Injects dependencies into the fields and methods of an existing object.
@@ -79,16 +79,16 @@ public interface Injector {
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
   /**
-   * Returns the provider used to obtain instances for the given injection key.
-   * The process of determining this result is known as "injection resolution".
+   * {@inheritDoc}
+   *
    * When feasible, it's generally preferable to avoid using this method, in
    * favor of having Guice inject your dependencies ahead of time.
    */
   <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * Returns the provider used to obtain instances for the given type.
-   * The process of determining this result is known as "injection resolution".
+   * {@inheritDoc}
+   *
    * When feasible, it's generally preferable to avoid using this method, in
    * favor of having Guice inject your dependencies ahead of time.
    */

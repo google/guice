@@ -20,6 +20,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -106,7 +107,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * 
  * <p>Besides {@link Singleton}/{@link Scopes#SINGLETON}, there are
  * servlet-specific scopes available in
- * {@link com.google.inject.servlet.ServletScopes}, and your Modules can
+ * {@code com.google.inject.servlet.ServletScopes}, and your Modules can
  * contribute their own custom scopes for use here as well.
  *
  * <pre>
@@ -182,7 +183,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Binder {
+public interface Binder extends ProviderLocator {
 
   /**
    * Binds a method interceptor to methods matched by class and method
@@ -256,4 +257,22 @@ public interface Binder {
    * catch the exception and pass it into this.
    */
   void addError(Throwable t);
+
+  /**
+   * {@inheritDoc}
+   *
+   * The returned will not be valid until the {@link Injector} has been
+   * created. The provider will throw an {@code IllegalStateException} if you
+   * try to use it beforehand.
+   */
+  <T> Provider<T> getProvider(Key<T> key);
+
+  /**
+   * {@inheritDoc}
+   *
+   * The returned will not be valid until the {@link Injector} has been
+   * created. The provider will throw an {@code IllegalStateException} if you
+   * try to use it beforehand.
+   */
+  <T> Provider<T> getProvider(Class<T> type);
 }

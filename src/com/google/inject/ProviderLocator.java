@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,22 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
 /**
- * @author crazybob@google.com (Bob Lee)
+ * Finds providers.
  */
-public class BindingBuilderTest extends TestCase {
+public interface ProviderLocator {
 
-  public void testStackTraceElement() {
-    System.err.println(new Throwable().getStackTrace()[0]);
-  }
+  /**
+   * Returns the provider used to obtain instances for the given injection key.
+   *
+   * @param key which identifies the desired provider
+   */
+  <T> Provider<T> getProvider(Key<T> key);
+
+  /**
+   * Returns the provider used to obtain instances for the given injection type.
+   *
+   * @param type which identifies the desired provider
+   */
+  <T> Provider<T> getProvider(Class<T> type);
 }

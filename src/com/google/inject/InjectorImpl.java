@@ -188,8 +188,7 @@ class InjectorImpl implements Injector {
         }
 
         // End of the road.
-        ErrorMessages.handleMissingBinding(errorHandler, member, key,
-            getNamesOfBindingAnnotations(key.getTypeLiteral()));
+        ErrorMessages.handleMissingBinding(this, member, key);
         return invalidFactory();
       }
     }
@@ -796,8 +795,7 @@ class InjectorImpl implements Injector {
     }
 
     void handle(ErrorHandler errorHandler) {
-      ErrorMessages.handleMissingBinding(errorHandler, member, key,
-          getNamesOfBindingAnnotations(key.getTypeLiteral()));
+      ErrorMessages.handleMissingBinding(InjectorImpl.this, member, key);
     }
   }
 
