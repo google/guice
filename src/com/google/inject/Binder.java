@@ -183,7 +183,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Binder extends ProviderLocator {
+public interface Binder {
 
   /**
    * Binds a method interceptor to methods matched by class and method
@@ -259,8 +259,7 @@ public interface Binder extends ProviderLocator {
   void addError(Throwable t);
 
   /**
-   * {@inheritDoc}
-   *
+   * Returns the provider used to obtain instances for the given injection key.
    * The returned will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.
@@ -268,8 +267,7 @@ public interface Binder extends ProviderLocator {
   <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * {@inheritDoc}
-   *
+   * Returns the provider used to obtain instances for the given injection type.
    * The returned will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.

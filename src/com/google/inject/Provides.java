@@ -16,22 +16,19 @@
 
 package com.google.inject;
 
+import java.lang.annotation.Target;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * Finds providers.
+ * Annotates methods which can be used as providers. Guice will pass
+ * dependencies to the method as parameters.
+ *
+ * @author crazybob@google.com (Bob Lee)
  */
-public interface ProviderLocator {
-
-  /**
-   * Returns the provider used to obtain instances for the given injection key.
-   *
-   * @param key which identifies the desired provider
-   */
-  <T> Provider<T> getProvider(Key<T> key);
-
-  /**
-   * Returns the provider used to obtain instances for the given injection type.
-   *
-   * @param type which identifies the desired provider
-   */
-  <T> Provider<T> getProvider(Class<T> type);
-}
+@Target({ ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Provides {}

@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @ScopeAnnotation
 public @interface RequestScoped {}

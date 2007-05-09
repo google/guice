@@ -42,6 +42,7 @@ public class AllTests {
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
+    suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(NotRequiredTest.class);
     suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);

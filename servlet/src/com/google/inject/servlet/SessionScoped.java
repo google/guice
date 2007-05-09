@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * @see com.google.inject.Scopes#SINGLETON
  * @author crazybob@google.com (Bob Lee)
  */
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @ScopeAnnotation
 public @interface SessionScoped {}

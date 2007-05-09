@@ -281,7 +281,7 @@ public abstract class Key<T> {
           found = annotation;
         } else {
           errorHandler.handle(StackTraceElements.forMember(member),
-              ErrorMessages.DUPLICATE_ANNOTATIONS, found, annotation);
+              ErrorMessages.DUPLICATE_BINDING_ANNOTATIONS, found, annotation);
         }
       }
     }
@@ -387,6 +387,11 @@ public abstract class Key<T> {
     Class<? extends Annotation> annotationType = annotation.annotationType();
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
+
+    if (annotationType.getDeclaredMethods().length == 0) {
+      return new AnnotationTypeStrategy(annotationType, annotation);
+    }
+
     return new AnnotationInstanceStrategy(annotation);
   }
 

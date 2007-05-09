@@ -53,20 +53,20 @@ public abstract class AbstractModule implements Module {
     SourceProviders.skip(AbstractModule.class);
   }
 
-  Binder builder;
+  Binder binder;
 
   public final synchronized void configure(Binder builder) {
     try {
-      if (this.builder != null) {
+      if (this.binder != null) {
         throw new IllegalStateException("Re-entry is not allowed.");
       }
-      this.builder = Objects.nonNull(builder, "builder");
+      this.binder = Objects.nonNull(builder, "builder");
 
       configure();
 
     }
     finally {
-      this.builder = null;
+      this.binder = null;
     }
   }
 
@@ -79,7 +79,7 @@ public abstract class AbstractModule implements Module {
    * Gets direct access to the underlying {@code Binder}.
    */
   protected Binder binder() {
-    return builder;
+    return binder;
   }
 
   /**
@@ -87,63 +87,63 @@ public abstract class AbstractModule implements Module {
    */
   protected void bindScope(Class<? extends Annotation> scopeAnnotation,
       Scope scope) {
-    builder.bindScope(scopeAnnotation, scope);
+    binder.bindScope(scopeAnnotation, scope);
   }
 
   /**
    * @see Binder#bind(Key)
    */
   protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-    return builder.bind(key);
+    return binder.bind(key);
   }
 
   /**
    * @see Binder#bind(TypeLiteral)
    */
   protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    return builder.bind(typeLiteral);
+    return binder.bind(typeLiteral);
   }
 
   /**
    * @see Binder#bind(Class)
    */
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return builder.bind(clazz);
+    return binder.bind(clazz);
   }
 
   /**
    * @see Binder#bindConstant()
    */
   protected AnnotatedConstantBindingBuilder bindConstant() {
-    return builder.bindConstant();
+    return binder.bindConstant();
   }
 
   /**
    * @see Binder#install(Module)
    */
   protected void install(Module module) {
-    builder.install(module);
+    binder.install(module);
   }
 
   /**
    * @see Binder#addError(String, Object[])
    */
   protected void addError(String message, Object... arguments) {
-    builder.addError(message, arguments);
+    binder.addError(message, arguments);
   }
 
   /**
    * @see Binder#addError(Throwable) 
    */
   protected void addError(Throwable t) {
-    builder.addError(t);
+    binder.addError(t);
   }
 
   /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {
-    builder.requestStaticInjection(types);
+    binder.requestStaticInjection(types);
   }
 
   /**
@@ -154,6 +154,20 @@ public abstract class AbstractModule implements Module {
   protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor... interceptors) {
-    builder.bindInterceptor(classMatcher, methodMatcher, interceptors);
+    binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
+  }
+
+  /**
+   * @see Binder#getProvider(Key)
+   */
+  public <T> Provider<T> getProvider(Key<T> key) {
+    return binder.getProvider(key);
+  }
+
+  /**
+   * @see Binder#getProvider(Class)
+   */
+  public <T> Provider<T> getProvider(Class<T> type) {
+    return binder.getProvider(type);
   }
 }

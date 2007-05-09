@@ -137,8 +137,9 @@ class ErrorMessages {
 
   static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
 
-  static final String DUPLICATE_ANNOTATIONS = "Found more than one annotation"
-      + " annotated with @BindingAnnotation: %s and %s";
+  static final String DUPLICATE_BINDING_ANNOTATIONS =
+      "Found more than one annotation annotated with @BindingAnnotation:"
+          + " %s and %s";
 
   static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
       + " annotation was found: %s and %s";
