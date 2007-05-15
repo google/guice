@@ -19,9 +19,9 @@ package com.google.inject;
 import com.google.inject.Key.AnnotationStrategy;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.util.Annotations;
-import com.google.inject.util.Objects;
-import com.google.inject.util.StackTraceElements;
+import com.google.inject.internal.Annotations;
+import com.google.inject.internal.Objects;
+import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 
 /**

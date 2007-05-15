@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.util.StackTraceElements;
+import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;

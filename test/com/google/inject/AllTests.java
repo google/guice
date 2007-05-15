@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.FinalizableReferenceQueueTest;
+import com.google.inject.internal.ReferenceCacheTest;
+import com.google.inject.internal.ReferenceMapTest;
+import com.google.inject.internal.ReferenceMapTestSuite;
 import com.google.inject.matcher.MatcherTest;
-import com.google.inject.util.FinalizableReferenceQueueTest;
-import com.google.inject.util.ReferenceCacheTest;
-import com.google.inject.util.ReferenceMapTest;
-import com.google.inject.util.ReferenceMapTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

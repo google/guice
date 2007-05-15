@@ -14,35 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
-import java.util.logging.Logger;
+import java.lang.ref.WeakReference;
 
 /**
- * Enables simple performance monitoring.
+ * Weak reference with a {@link FinalizableReference#finalizeReferent()} method
+ * which a background thread invokes after the garbage collector reclaims the
+ * referent. This is a simpler alternative to using a
+ * {@link java.lang.ref.ReferenceQueue}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Stopwatch {
+public abstract class FinalizableWeakReference<T> extends WeakReference<T>
+    implements FinalizableReference {
 
-  long start = System.currentTimeMillis();
-
-  /**
-   * Resets and returns elapsed time in milliseconds.
-   */
-  public long reset() {
-    long now = System.currentTimeMillis();
-    try {
-      return now - start;
-    } finally {
-      start = now;
-    }
-  }
-
-  /**
-   * Resets and logs elapsed time in milliseconds.
-   */
-  public void resetAndLog(Logger logger, String label) {
-    logger.fine(label + ": " + reset() + "ms");
+  protected FinalizableWeakReference(T referent) {
+    super(referent, FinalizableReferenceQueue.getInstance());
   }
 }

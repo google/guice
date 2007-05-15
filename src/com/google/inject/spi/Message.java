@@ -16,7 +16,7 @@
 
 package com.google.inject.spi;
 
-import static com.google.inject.util.Objects.nonNull;
+import static com.google.inject.internal.Objects.nonNull;
 
 /**
  * A message. Contains a source pointing to the code which resulted

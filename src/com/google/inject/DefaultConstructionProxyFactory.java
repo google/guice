@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.util.GuiceFastClass;
-import com.google.inject.util.Objects;
+import com.google.inject.internal.GuiceFastClass;
+import com.google.inject.internal.Objects;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;

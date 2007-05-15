@@ -16,13 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.GuiceFastClass;
+import com.google.inject.internal.Objects;
+import com.google.inject.internal.ReferenceCache;
+import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.Strings;
+import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.util.GuiceFastClass;
-import com.google.inject.util.Objects;
-import com.google.inject.util.ReferenceCache;
-import com.google.inject.util.StackTraceElements;
-import com.google.inject.util.Strings;
-import com.google.inject.util.ToStringBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;

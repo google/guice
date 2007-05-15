@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
 /**
  * Reference type. Used to specify what type of reference to keep to a

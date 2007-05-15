@@ -16,7 +16,7 @@
 
 package com.google.inject.matcher;
 
-import com.google.inject.util.Objects;
+import com.google.inject.internal.Objects;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

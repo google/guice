@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.util.GuiceFastClass;
-import com.google.inject.util.GuiceNamingPolicy;
-import com.google.inject.util.Objects;
-import com.google.inject.util.ReferenceCache;
+import com.google.inject.internal.GuiceFastClass;
+import com.google.inject.internal.GuiceNamingPolicy;
+import com.google.inject.internal.Objects;
+import com.google.inject.internal.ReferenceCache;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

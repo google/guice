@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

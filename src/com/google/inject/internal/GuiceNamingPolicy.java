@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
 import net.sf.cglib.core.NamingPolicy;
 import net.sf.cglib.core.Predicate;

@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Objects;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.util.Objects;
 
 /**
  * @author crazybob@google.com (Bob Lee)

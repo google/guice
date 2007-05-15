@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
-
-import net.sf.cglib.reflect.FastClass;
+package com.google.inject.internal;
 
 /**
- * Gives Guice classes custom names.
+ * Package-private interface implemented by references that have code to run
+ * after garbage collection of their referents.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class GuiceFastClass {
+interface FinalizableReference {
 
-  public static FastClass create(Class type) {
-    return create(type.getClassLoader(), type);
-  }
-
-  public static FastClass create(ClassLoader loader, Class type) {
-    FastClass.Generator generator = new FastClass.Generator();
-    generator.setType(type);
-    generator.setClassLoader(loader);
-    generator.setNamingPolicy(new GuiceNamingPolicy());
-    return generator.create();
-  }
+  /**
+   * Invoked on a background thread after the referent has been garbage
+   * collected.
+   */
+  void finalizeReferent();
 }

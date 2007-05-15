@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 
 /**
- * Weak reference with a {@link FinalizableReference#finalizeReferent()} method
+ * Soft reference with a {@link FinalizableReference#finalizeReferent()} method
  * which a background thread invokes after the garbage collector reclaims the
  * referent. This is a simpler alternative to using a
  * {@link java.lang.ref.ReferenceQueue}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class FinalizableWeakReference<T> extends WeakReference<T>
+public abstract class FinalizableSoftReference<T> extends SoftReference<T>
     implements FinalizableReference {
 
-  protected FinalizableWeakReference(T referent) {
+  protected FinalizableSoftReference(T referent) {
     super(referent, FinalizableReferenceQueue.getInstance());
   }
 }

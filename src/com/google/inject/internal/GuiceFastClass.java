@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,26 @@
  * limitations under the License.
  */
 
-/**
- * <i>Guice</i> (sounds like like "juice")
- */
+package com.google.inject.internal;
 
-package com.google.inject.util;
+import net.sf.cglib.reflect.FastClass;
+
+/**
+ * Gives Guice classes custom names.
+ *
+ * @author crazybob@google.com (Bob Lee)
+ */
+public class GuiceFastClass {
+
+  public static FastClass create(Class type) {
+    return create(type.getClassLoader(), type);
+  }
+
+  public static FastClass create(ClassLoader loader, Class type) {
+    FastClass.Generator generator = new FastClass.Generator();
+    generator.setType(type);
+    generator.setClassLoader(loader);
+    generator.setNamingPolicy(new GuiceNamingPolicy());
+    return generator.create();
+  }
+}

@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.util.ToStringBuilder;
+import com.google.inject.internal.ToStringBuilder;
 
 /**
  * @author crazybob@google.com (Bob Lee)

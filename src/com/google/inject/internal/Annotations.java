@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Package-private interface implemented by references that have code to run
- * after garbage collection of their referents.
+ * Annotation utilities.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface FinalizableReference {
+public class Annotations {
 
   /**
-   * Invoked on a background thread after the referent has been garbage
-   * collected.
+   * Returns true if the given annotation is retained at runtime.
    */
-  void finalizeReferent();
+  public static boolean isRetainedAtRuntime(
+      Class<? extends Annotation> annotationType) {
+    Retention retention = annotationType.getAnnotation(Retention.class);
+    return !(retention == null || retention.value() != RetentionPolicy.RUNTIME);
+  }
 }

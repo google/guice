@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
-import static com.google.inject.util.ReferenceType.SOFT;
-import static com.google.inject.util.ReferenceType.STRONG;
-import static com.google.inject.util.ReferenceType.WEAK;
+import static com.google.inject.internal.ReferenceType.SOFT;
+import static com.google.inject.internal.ReferenceType.STRONG;
+import static com.google.inject.internal.ReferenceType.WEAK;
 import java.lang.ref.Reference;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentMap;

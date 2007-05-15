@@ -16,7 +16,7 @@
 
 package com.google.inject.name;
 
-import com.google.inject.util.Objects;
+import com.google.inject.internal.Objects;
 import java.lang.annotation.Annotation;
 
 class NamedImpl implements Named {

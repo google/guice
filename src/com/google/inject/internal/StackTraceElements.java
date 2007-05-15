@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
+import static com.google.inject.internal.ReferenceType.SOFT;
+import static com.google.inject.internal.ReferenceType.WEAK;
 import com.google.inject.spi.SourceProviders;
-import static com.google.inject.util.ReferenceType.SOFT;
-import static com.google.inject.util.ReferenceType.WEAK;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;

@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.util.Objects;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;

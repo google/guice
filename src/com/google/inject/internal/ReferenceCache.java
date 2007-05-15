@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
-import static com.google.inject.util.ReferenceType.STRONG;
+import static com.google.inject.internal.ReferenceType.STRONG;
 
 /**
  * Extends {@link ReferenceMap} to support lazy loading values by overriding

@@ -16,15 +16,15 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.util.StackTraceElements;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creates bindings to methods annotated with {@link

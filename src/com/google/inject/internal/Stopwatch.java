@@ -14,22 +14,35 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
+package com.google.inject.internal;
 
-import java.lang.ref.SoftReference;
+import java.util.logging.Logger;
 
 /**
- * Soft reference with a {@link FinalizableReference#finalizeReferent()} method
- * which a background thread invokes after the garbage collector reclaims the
- * referent. This is a simpler alternative to using a
- * {@link java.lang.ref.ReferenceQueue}.
+ * Enables simple performance monitoring.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class FinalizableSoftReference<T> extends SoftReference<T>
-    implements FinalizableReference {
+public class Stopwatch {
 
-  protected FinalizableSoftReference(T referent) {
-    super(referent, FinalizableReferenceQueue.getInstance());
+  long start = System.currentTimeMillis();
+
+  /**
+   * Resets and returns elapsed time in milliseconds.
+   */
+  public long reset() {
+    long now = System.currentTimeMillis();
+    try {
+      return now - start;
+    } finally {
+      start = now;
+    }
+  }
+
+  /**
+   * Resets and logs elapsed time in milliseconds.
+   */
+  public void resetAndLog(Logger logger, String label) {
+    logger.fine(label + ": " + reset() + "ms");
   }
 }

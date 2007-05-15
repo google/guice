@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.util.Objects.nonNull;
+import static com.google.inject.internal.Objects.nonNull;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

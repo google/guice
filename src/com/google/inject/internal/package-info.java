@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject.util;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
- * Annotation utilities.
- *
- * @author crazybob@google.com (Bob Lee)
+ * <i>Guice</i> (sounds like like "juice")
  */
-public class Annotations {
 
-  /**
-   * Returns true if the given annotation is retained at runtime.
-   */
-  public static boolean isRetainedAtRuntime(
-      Class<? extends Annotation> annotationType) {
-    Retention retention = annotationType.getAnnotation(Retention.class);
-    return !(retention == null || retention.value() != RetentionPolicy.RUNTIME);
-  }
-}
+package com.google.inject.internal;

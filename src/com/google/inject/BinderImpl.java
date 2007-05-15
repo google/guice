@@ -18,13 +18,13 @@ package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import static com.google.inject.Scopes.SINGLETON;
+import com.google.inject.internal.Annotations;
+import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.Stopwatch;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.util.Annotations;
-import static com.google.inject.util.Objects.nonNull;
-import com.google.inject.util.StackTraceElements;
-import com.google.inject.util.Stopwatch;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
