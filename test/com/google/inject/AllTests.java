@@ -21,6 +21,7 @@ import com.google.inject.internal.ReferenceCacheTest;
 import com.google.inject.internal.ReferenceMapTest;
 import com.google.inject.internal.ReferenceMapTestSuite;
 import com.google.inject.matcher.MatcherTest;
+import com.google.inject.util.ProvidersTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -62,6 +63,8 @@ public class AllTests {
     suite.addTest(ReferenceMapTestSuite.suite());
 
     suite.addTestSuite(IntegrationTest.class);
+
+    suite.addTestSuite(ProvidersTest.class);
 
     return suite;
   }
