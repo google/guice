@@ -18,22 +18,22 @@ package com.google.inject;
 
 /**
  * A scope is a level of visibility that instances provided by Guice may have.
- * By default, an instance created by the {@link Injector} has <i>no
- * scope</i>, meaning it has no state from the framework's perspective -- the
+ * By default, an instance created by the {@link Injector} has <i>no scope</i>,
+ * meaning it has no state from the framework's perspective -- the
  * {@code Injector} creates it, injects it once into the class that required it,
- * and then immediately forgets it. Associating a scope with a particular binding
- * allows the created instance to be "remembered" and possibly used again for
- * other injections.
+ * and then immediately forgets it. Associating a scope with a particular
+ * binding allows the created instance to be "remembered" and possibly used
+ * again for other injections.
  *
- * @see Scopes#SINGLETON
+ * <p>An example of a scope is {@link Scopes#SINGLETON}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface Scope {
 
   /**
-   * Scopes a provider. The returned locator returns objects from this scope. If
-   * an object does not exist in this scope, the provider can use the given
+   * Scopes a provider. The returned provider returns objects from this scope.
+   * If an object does not exist in this scope, the provider can use the given
    * unscoped provider to retrieve one.
    *
    * <p>Scope implementations are strongly encouraged to override
