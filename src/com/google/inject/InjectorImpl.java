@@ -22,6 +22,7 @@ import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.Strings;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.introspect.Resolver;
 import com.google.inject.spi.SourceProviders;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -857,6 +858,10 @@ class InjectorImpl implements Injector {
         throw new AssertionError(e);
       }
     }
+  }
+
+  public Resolver getResolver() {
+    throw new UnsupportedOperationException();
   }
 
   /**

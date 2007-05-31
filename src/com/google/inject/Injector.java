@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.introspect.Resolver;
 import java.util.List;
 import java.util.Map;
 
@@ -107,4 +108,11 @@ public interface Injector {
    * dependencies ahead of time.
    */
   <T> T getInstance(Class<T> type);
+
+  /**
+   * Returns the resolver used by this injector to resolve injection requests.
+   * This method is part of the Injector Introspection API and is primarily
+   * intended for use by tools.
+   */
+  Resolver getResolver();
 }
