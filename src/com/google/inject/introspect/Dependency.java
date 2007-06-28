@@ -14,4 +14,9 @@ public interface Dependency<T> {
   Key<T> getKey();
 
   boolean usesProviderInjection();
+
+  InjectionStyle getInjectionStyle();
+
+  // put this enum somewhere else?
+  enum InjectionStyle { FIELD, METHOD, CONSTRUCTOR }
 }

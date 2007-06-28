@@ -29,8 +29,8 @@ public interface Implementation<T> {
     CONSTRUCTOR,
 
     /**
-     * Guice invokes a user-supplied Provider to obtain instances for this
-     * implementation.
+     * Guice will resolve a Provider key to an instance, then use this provider
+     * instance to provide the current implementation.
      */
     PROVIDER,
 
@@ -63,7 +63,7 @@ public interface Implementation<T> {
    * @throws IllegalStateException if {@link #getProvisionStrategy()} is not
    *     {@link ProvisionStrategy#PROVIDER}.
    */
-  Implementation<? extends Provider<? extends T>> getCustomProvider();
+  Implementation<? extends Provider<? extends T>> getProvider();
 
   /**
    * Returns the scope applied to this implementation, or null if there is none.
