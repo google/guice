@@ -53,4 +53,12 @@ public class BinderTest extends TestCase {
       assertEquals(1, e.getErrorMessages().size());
     }
   }
+
+//  public void testBindInterfaceWithoutImplementation() {
+//    Guice.createInjector(new AbstractModule() {
+//      protected void configure() {
+//        bind(Runnable.class);
+//      }
+//    }).getInstance(Runnable.class);
+//  }
 }

@@ -52,6 +52,16 @@ public class PerformanceComparison {
 
       System.err.println();
     }
+
+    System.err.println("Concurrent:");
+
+    for (int i2 = 0; i2 < 10; i2++) {
+      concurrentlyIterate(springFactory, "Spring:  ");
+      concurrentlyIterate(juiceFactory,  "Guice:   ");
+      concurrentlyIterate(byHandFactory, "By Hand: ");
+
+      System.err.println();
+    }
   }
 
   static final Callable<Foo> springFactory = new Callable<Foo>() {
@@ -141,13 +151,65 @@ public class PerformanceComparison {
 
   static final DecimalFormat format = new DecimalFormat();
 
-  static void iterate(Callable<Foo> callable, String label) throws Exception {
+  static void iterate(Callable<Foo> callable, String label) {
     int count = 100000;
+
     long time = System.currentTimeMillis();
+
     for (int i = 0; i < count; i++) {
-      callable.call();
+      try {
+        callable.call();
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
+
     time = System.currentTimeMillis() - time;
+
+    System.err.println(label
+        + format.format(count * 1000 / time) + " creations/s");
+  }
+
+  static void concurrentlyIterate(final Callable<Foo> callable, String label) {
+    int threadCount = 10;
+    final int count = 10000;
+
+    Thread[] threads = new Thread[threadCount];
+
+    for (int i = 0; i < threadCount; i++) {
+      threads[i] = new Thread() {
+        public void run() {
+          for (int i = 0; i < count; i++) {
+            try {
+              validate(callable);
+            }
+            catch (Exception e) {
+              throw new RuntimeException(e);
+            }
+          }
+        }
+      };
+    }
+
+
+    long time = System.currentTimeMillis();
+
+    for (int i = 0; i < threadCount; i++) {
+      threads[i].start();
+    }
+
+    for (int i = 0; i < threadCount; i++) {
+      try {
+        threads[i].join();
+      }
+      catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    time = System.currentTimeMillis() - time;
+
     System.err.println(label
         + format.format(count * 1000 / time) + " creations/s");
   }
