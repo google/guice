@@ -18,6 +18,7 @@ package com.google.inject;
 
 import java.lang.reflect.Member;
 import java.util.LinkedHashMap;
+import com.google.inject.internal.Objects;
 
 /**
  * An immutable snapshot of the current context which is safe to expose to
@@ -31,13 +32,15 @@ class ExternalContext<T> implements Context {
   final Key<T> key;
   final InjectorImpl injector;
   final int parameterIndex;
+  final Nullability nullability;
 
-  public ExternalContext(Member member, int paramterIndex, Key<T> key,
-      InjectorImpl injector) {
+  public ExternalContext(Member member, int paramterIndex,
+      Nullability nullability, Key<T> key, InjectorImpl injector) {
     this.member = member;
+    this.parameterIndex = paramterIndex;
+    this.nullability = Objects.nonNull(nullability, "nullability");
     this.key = key;
     this.injector = injector;
-    this.parameterIndex = paramterIndex;
   }
 
   public Key<?> getKey() {
@@ -56,6 +59,10 @@ class ExternalContext<T> implements Context {
     return parameterIndex;
   }
 
+  public Nullability getNullability() {
+    return nullability;
+  }
+
   public String toString() {
     return "Context" + new LinkedHashMap<String, Object>() {{
       put("member", member);
@@ -64,13 +71,14 @@ class ExternalContext<T> implements Context {
     }}.toString();
   }
 
-  static <T> ExternalContext<T> newInstance(
-      Member member, Key<T> key, InjectorImpl injector) {
-    return new ExternalContext<T>(member, -1, key, injector);
+  static <T> ExternalContext<T> newInstance(Member member,
+      Nullability nullability, Key<T> key, InjectorImpl injector) {
+    return new ExternalContext<T>(member, -1, nullability, key, injector);
   }
 
   static <T> ExternalContext<T> newInstance(Member member, int parameterIndex,
-      Key<T> key, InjectorImpl injector) {
-    return new ExternalContext<T>(member, parameterIndex, key, injector);
+      Nullability nullability, Key<T> key, InjectorImpl injector) {
+    return new ExternalContext<T>(member, parameterIndex, nullability, key,
+        injector);
   }
 }

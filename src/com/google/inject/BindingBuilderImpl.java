@@ -134,8 +134,8 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
   public void toInstance(T instance) {
     ensureImplementationIsNotSet();
-    this.instance = Objects.nonNull(instance, "instance");
-    this.factory = new ConstantFactory<T>(instance);
+    this.instance = instance;
+    this.factory = new ConstantFactory<T>(instance, source);
     registerInstanceForInjection(instance);
     if (this.scope != null) {
       binder.addError(source, ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);

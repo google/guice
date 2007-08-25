@@ -57,6 +57,6 @@ class BoundProviderFactory<T>
   }
 
   public T get(InternalContext context) {
-    return providerFactory.get(context).get();
+    return context.sanitize(providerFactory.get(context).get(), source);
   }
 }

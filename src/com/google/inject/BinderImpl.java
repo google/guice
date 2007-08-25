@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Nullability.NULLABLE;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.internal.Annotations;
@@ -482,7 +483,8 @@ class BinderImpl implements Binder {
 
     public Void call(InternalContext context) {
       ExternalContext<?> externalContext
-          = ExternalContext.newInstance(null, key, context.getInjectorImpl());
+          = ExternalContext.newInstance(null, NULLABLE, key,
+              context.getInjectorImpl());
       context.setExternalContext(externalContext);
       try {
         factory.get(context);

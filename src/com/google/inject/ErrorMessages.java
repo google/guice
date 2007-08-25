@@ -158,8 +158,11 @@ class ErrorMessages {
   static final String EXCEPTION_WHILE_CREATING = "Error while locating"
       + " instance%n  bound to %s%n  for member at %s";
   
-  static final String NULL_PROVIDED = "Null value returned by custom provider"
-      + " bound at %s";
+  static final String CANNOT_INJECT_NULL_INTO_MEMBER =
+      "Null value returned by binding at %s, but %s is not @Nullable";
+
+  static final String CANNOT_INJECT_NULL =
+      "Null value returned by binding at %s";
 
   static String getRootMessage(Throwable t) {
     Throwable cause = t.getCause();

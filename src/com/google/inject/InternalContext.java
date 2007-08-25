@@ -18,6 +18,7 @@ package com.google.inject;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.google.inject.spi.SourceProviders;
 
 /**
  * Internal context. Used to coordinate injections and support circular
@@ -69,5 +70,29 @@ class InternalContext {
 
   void setExternalContext(ExternalContext<?> externalContext) {
     this.externalContext = externalContext;
+  }
+
+  /**
+   * Perform sanity checks on the specified value before returning it.
+   */
+  <T> T sanitize(T value, Object source) {
+    if (value != null
+        || getExternalContext().getNullability() == Nullability.NULLABLE 
+        || allowNullsBadBadBad()) {
+      return value;
+    }
+
+    String message = getExternalContext().getMember() != null
+        ? String.format(ErrorMessages.CANNOT_INJECT_NULL_INTO_MEMBER, source,
+            getExternalContext().getMember())
+        : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
+    throw new ProvisionException(externalContext,
+        new NullPointerException(message));
+  }
+
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(
+          System.getProperty("guice.allow.nulls.bad.bad.bad"));
   }
 }

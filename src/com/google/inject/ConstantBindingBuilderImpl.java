@@ -157,7 +157,7 @@ class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
 
     BindingImpl<T> createBinding(InjectorImpl injector) {
       Key<T> key = Key.get(type, annotationStrategy);
-      ConstantFactory<T> factory = new ConstantFactory<T>(value);
+      ConstantFactory<T> factory = new ConstantFactory<T>(value, source);
       return BindingImpl.newInstance(injector, key, source, factory);
     }
   }

@@ -47,4 +47,10 @@ interface Context {
    * Gets the binding key for the object currently being retrieved.
    */
   Key<?> getKey();
+
+  /**
+   * Returns an enum describing whether values injected into this context can
+   * be {@code null}.
+   */
+  Nullability getNullability();
 }

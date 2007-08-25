@@ -214,9 +214,10 @@ class InjectorImpl implements Injector {
     Key<String> stringKey = key.ofType(String.class);
     BindingImpl<String> stringBinding = getBinding(stringKey);
     if (stringBinding != null && stringBinding.isConstant()) {
-      // We don't need do pass in an InternalContext because we know this is
-      // a ConstantFactory which will not use it.
-      String value = stringBinding.getInternalFactory().get(null);
+      InternalContext context = new InternalContext(this);
+      context.setExternalContext(ExternalContext.newInstance(
+          member, Nullability.NOT_NULLABLE, key, this));
+      String value = stringBinding.getInternalFactory().get(context);
 
       // TODO: Generalize everything below here and enable users to plug in
       // their own converters.
@@ -226,7 +227,7 @@ class InjectorImpl implements Injector {
       if (converter != null) {
         try {
           T t = converter.convert(member, key, value);
-          return new ConstantFactory<T>(t);
+          return new ConstantFactory<T>(t, defaultSource);
         }
         catch (ConstantConversionException e) {
           return handleConstantConversionError(
@@ -244,14 +245,14 @@ class InjectorImpl implements Injector {
           return handleConstantConversionError(
               member, stringBinding, rawType, e);
         }
-        return new ConstantFactory<T>(t);
+        return new ConstantFactory<T>(t, defaultSource);
       }
 
       // Do we need a class?
       if (rawType == Class.class) {
         try {
           // TODO: Make sure we use the right classloader.
-          return new ConstantFactory<T>((T) Class.forName(value));
+          return new ConstantFactory<T>((T) Class.forName(value), defaultSource);
         }
         catch (ClassNotFoundException e) {
           return handleConstantConversionError(
@@ -285,27 +286,24 @@ class InjectorImpl implements Injector {
     }
 
     // Last resort: inject the type itself.
-    if (member != null) {
-      // If we're injecting into a member, include it in the error messages.
-      final ErrorHandler previous = this.errorHandler;
-      this.errorHandler = new AbstractErrorHandler() {
-        public void handle(Object source, String message) {
-          previous.handle(source, "Error while injecting at "
-              + StackTraceElements.forMember(member) + ": " + message);
-        }
-      };
-      try {
-        // note: intelliJ thinks this cast is superfluous, but is it?
-        return (InternalFactory<? extends T>) getImplicitBinding(member,
-            rawType, null);
+    final ErrorHandler previous = this.errorHandler;
+    try {
+      if (member != null) {
+        // If we're injecting into a member, include it in the error messages.
+        this.errorHandler = new AbstractErrorHandler() {
+          public void handle(Object source, String message) {
+            previous.handle(source, "Error while injecting at "
+                + StackTraceElements.forMember(member) + ": " + message);
+          }
+        };
       }
-      finally {
-        this.errorHandler = previous;
-      }
+      // note: intelliJ thinks this cast is superfluous, but is it?
+      return (InternalFactory<? extends T>) getImplicitBinding(member, rawType,
+          null);
     }
-    // note: intelliJ thinks this cast is superfluous, but is it?
-    return (InternalFactory<? extends T>) getImplicitBinding(member, rawType,
-        null);
+    finally {
+      this.errorHandler = previous;
+    }
   }
 
   private <T> InternalFactory<T> handleConstantConversionError(
@@ -462,7 +460,8 @@ class InjectorImpl implements Injector {
         throw new MissingDependencyException(key, field);
       }
 
-      this.externalContext = ExternalContext.newInstance(field, key, injector);
+      this.externalContext = ExternalContext.newInstance(field,
+          Nullability.forAnnotations(field.getAnnotations()), key, injector);
     }
 
     public void inject(InternalContext context, Object o) {
@@ -470,9 +469,6 @@ class InjectorImpl implements Injector {
       context.setExternalContext(externalContext);
       try {
         Object value = factory.get(context);
-        if (value == null) {
-          throw new AssertionError(); // we should have prevented this
-        }
         field.set(o, value);
       }
       catch (IllegalAccessException e) {
@@ -510,7 +506,8 @@ class InjectorImpl implements Injector {
       Annotation[] parameterAnnotations = annotationsIterator.next();
       Key<?> key = Key.get(
           parameterType, member, parameterAnnotations, errorHandler);
-      parameterInjectors[index] = createParameterInjector(key, member, index);
+      parameterInjectors[index] = createParameterInjector(key, member, index,
+          annotations[index]);
       index++;
     }
 
@@ -518,14 +515,16 @@ class InjectorImpl implements Injector {
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(
-      Key<T> key, Member member, int index) throws MissingDependencyException {
+      Key<T> key, Member member, int index, Annotation[] annotations)
+      throws MissingDependencyException {
     InternalFactory<? extends T> factory = getInternalFactory(member, key);
     if (factory == null) {
       throw new MissingDependencyException(key, member);
     }
 
     ExternalContext<T> externalContext
-        = ExternalContext.newInstance(member, index, key, this);
+        = ExternalContext.newInstance(member, index,
+        Nullability.forAnnotations(annotations), key, this);
     return new SingleParameterInjector<T>(externalContext, factory);
   }
 
@@ -572,8 +571,14 @@ class InjectorImpl implements Injector {
       try {
         methodInvoker.invoke(o, getParameters(context, parameterInjectors));
       }
-      catch (Exception e) {
-        throw new RuntimeException(e);
+      catch (ProvisionException e) {
+        throw e;
+      }
+      catch (IllegalAccessException e) {
+        throw new ProvisionException(context.getExternalContext(), e);
+      }
+      catch (InvocationTargetException e) {
+        throw new ProvisionException(context.getExternalContext(), e);
       }
     }
   }
@@ -677,6 +682,10 @@ class InjectorImpl implements Injector {
   }
 
   void injectMembers(Object o, InternalContext context) {
+    if (o == null) {
+      return;
+    }
+
     List<SingleMemberInjector> injectorsForClass = injectors.get(o.getClass());
     for (SingleMemberInjector injector : injectorsForClass) {
       injector.inject(context, o);
@@ -711,7 +720,8 @@ class InjectorImpl implements Injector {
           public T call(InternalContext context) {
             ExternalContext<?> previous = context.getExternalContext();
             context.setExternalContext(
-                ExternalContext.newInstance(null, key, InjectorImpl.this));
+                ExternalContext.newInstance(null, Nullability.NOT_NULLABLE,
+                    key, InjectorImpl.this));
             try {
               return factory.get(context);
             }
@@ -1014,8 +1024,8 @@ class InjectorImpl implements Injector {
     }
 
     public T get(InternalContext context) {
-      return (T) constructorInjector.construct(context,
-          context.getExpectedType());
+      return context.sanitize((T) constructorInjector.construct(
+          context, context.getExpectedType()), SourceProviders.UNKNOWN_SOURCE);
     }
   }
 

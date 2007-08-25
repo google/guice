@@ -25,13 +25,15 @@ import com.google.inject.internal.ToStringBuilder;
 class ConstantFactory<T> implements InternalFactory<T> {
 
   private final T value;
+  private final Object source;
 
-  public ConstantFactory(T value) {
-    this.value = Objects.nonNull(value, "value");
+  public ConstantFactory(T value, Object source) {
+    this.value = value;
+    this.source = source;
   }
 
-  public T get(InternalContext ignored) {
-    return value;
+  public T get(InternalContext context) {
+    return context.sanitize(value, source);
   }
 
   public String toString() {
