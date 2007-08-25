@@ -172,7 +172,6 @@ class ProxyFactory implements ConstructionProxyFactory {
       @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
-        Objects.assertNoNulls(arguments);
         return (T) fastConstructor.newInstance(arguments);
       }
     };

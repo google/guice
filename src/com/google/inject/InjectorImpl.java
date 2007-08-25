@@ -549,7 +549,6 @@ class InjectorImpl implements Injector {
         this.methodInvoker = new MethodInvoker() {
           public Object invoke(Object target, Object... parameters) throws
               IllegalAccessException, InvocationTargetException {
-            Objects.assertNoNulls(parameters);
             return method.invoke(target, parameters);
           }
         };
@@ -561,7 +560,6 @@ class InjectorImpl implements Injector {
         this.methodInvoker = new MethodInvoker() {
           public Object invoke(Object target, Object... parameters)
           throws IllegalAccessException, InvocationTargetException {
-            Objects.assertNoNulls(parameters);
             return fastMethod.invoke(target, parameters);
           }
         };
