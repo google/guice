@@ -19,14 +19,13 @@ package com.google.inject;
 import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_FIELD;
 import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_PARAMETER;
 import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_VALUE;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,49 +34,26 @@ import java.util.List;
  */
 public class ProvisionException extends RuntimeException {
 
-  private static final String NEWLINE = String.format("%n");
-
   private final String errorMessage;
-  private final List<ExternalContext> contexts =
-      new ArrayList<ExternalContext>(4);
+  private final List<ExternalContext<?>> contexts;
 
-  ProvisionException(ExternalContext<?> externalContext,
+  ProvisionException(List<ExternalContext<?>> externalContextStack,
       Throwable cause, String errorMessage) {
     super(errorMessage, cause);
     this.errorMessage = errorMessage;
-    contexts.add(externalContext);
-  }
-
-  /**
-   * Add more context to this exception, to be included in the exception
-   * message. This allows nested contexts to be displayed more concisely than
-   * with exception chaining.
-   */
-  void addContext(ExternalContext<?> externalContext) {
-    // deduplicate contexts.
-    if (!contexts.isEmpty()) {
-      ExternalContext last = contexts.get(contexts.size() - 1);
-      if (Objects.equal(last.getKey(), externalContext.getKey())
-          && Objects.equal(last.getMember(), externalContext.getMember())) {
-        return;
-      }
-    }
-    
-    contexts.add(externalContext);
+    this.contexts = Collections.unmodifiableList(
+        new ArrayList<ExternalContext<?>>(externalContextStack));
   }
 
   @Override
   public String getMessage() {
     StringBuilder result = new StringBuilder();
-    result.append(errorMessage)
-        .append(NEWLINE);
+    result.append(errorMessage);
 
-    for (Iterator<ExternalContext> e = contexts.iterator(); e.hasNext(); ) {
-      ExternalContext externalContext = e.next();
+    for (int i = contexts.size() - 1; i >= 0; i--) {
+      ExternalContext externalContext = contexts.get(i);
+      result.append(String.format("%n"));
       result.append(contextToSnippet(externalContext));
-      if (e.hasNext()) {
-        result.append(NEWLINE);
-      }
     }
 
     return result.toString();

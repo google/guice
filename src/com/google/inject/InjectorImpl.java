@@ -215,9 +215,14 @@ class InjectorImpl implements Injector {
     BindingImpl<String> stringBinding = getBinding(stringKey);
     if (stringBinding != null && stringBinding.isConstant()) {
       InternalContext context = new InternalContext(this);
-      context.setExternalContext(ExternalContext.newInstance(
+      String value;
+      context.pushExternalContext(ExternalContext.newInstance(
           member, Nullability.NOT_NULLABLE, key, this));
-      String value = stringBinding.getInternalFactory().get(context);
+      try {
+        value = stringBinding.getInternalFactory().get(context);
+      } finally {
+        context.popExternalContext();
+      }
 
       // TODO: Generalize everything below here and enable users to plug in
       // their own converters.
@@ -465,8 +470,7 @@ class InjectorImpl implements Injector {
     }
 
     public void inject(InternalContext context, Object o) {
-      ExternalContext<?> previous = context.getExternalContext();
-      context.setExternalContext(externalContext);
+      context.pushExternalContext(externalContext);
       try {
         Object value = factory.get(context);
         field.set(o, value);
@@ -478,15 +482,14 @@ class InjectorImpl implements Injector {
         throw e;
       }
       catch (ProvisionException provisionException) {
-        provisionException.addContext(externalContext);
         throw provisionException;
       }
       catch (RuntimeException runtimeException) {
-        throw new ProvisionException(externalContext, runtimeException,
-            ErrorMessages.ERROR_INJECTING_FIELD);
+        throw new ProvisionException(context.getExternalContextStack(),
+            runtimeException, ErrorMessages.ERROR_INJECTING_FIELD);
       }
       finally {
-        context.setExternalContext(previous);
+        context.popExternalContext();
       }
     }
   }
@@ -527,9 +530,8 @@ class InjectorImpl implements Injector {
       throw new MissingDependencyException(key, member);
     }
 
-    ExternalContext<T> externalContext
-        = ExternalContext.newInstance(member, index,
-        Nullability.forAnnotations(annotations), key, this);
+    ExternalContext<T> externalContext = ExternalContext.newInstance(
+        member, index, Nullability.forAnnotations(annotations), key, this);
     return new SingleParameterInjector<T>(externalContext, factory);
   }
 
@@ -580,13 +582,12 @@ class InjectorImpl implements Injector {
         throw new AssertionError(e);
       }
       catch (ProvisionException e) {
-        e.addContext(context.getExternalContext());
         throw e;
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause() != null ? e.getCause() : e;
-        throw new ProvisionException(context.getExternalContext(), cause,
-            ErrorMessages.ERROR_INJECTING_METHOD);
+        throw new ProvisionException(context.getExternalContextStack(),
+            cause, ErrorMessages.ERROR_INJECTING_METHOD);
       }
     }
   }
@@ -655,24 +656,22 @@ class InjectorImpl implements Injector {
     }
 
     T inject(InternalContext context) {
-      ExternalContext<?> previous = context.getExternalContext();
-      context.setExternalContext(externalContext);
+      context.pushExternalContext(externalContext);
       try {
         return factory.get(context);
       }
       catch (ConfigurationException e) {
         throw e;
       }
-      catch (ProvisionException provisionException) {
-        provisionException.addContext(externalContext);
-        throw provisionException;
+      catch (ProvisionException e) {
+        throw e;
       }
       catch (RuntimeException runtimeException) {
-        throw new ProvisionException(externalContext, runtimeException,
-            ErrorMessages.ERROR_INJECTING_METHOD);
+        throw new ProvisionException(context.getExternalContextStack(),
+            runtimeException, ErrorMessages.ERROR_INJECTING_METHOD);
       }
       finally {
-        context.setExternalContext(previous);
+        context.popExternalContext();
       }
     }
   }
@@ -731,15 +730,13 @@ class InjectorImpl implements Injector {
       public T get() {
         return callInContext(new ContextualCallable<T>() {
           public T call(InternalContext context) {
-            ExternalContext<?> previous = context.getExternalContext();
-            context.setExternalContext(
-                ExternalContext.newInstance(null, Nullability.NOT_NULLABLE,
-                    key, InjectorImpl.this));
+            context.pushExternalContext(ExternalContext.newInstance(
+                null, Nullability.NOT_NULLABLE, key, InjectorImpl.this));
             try {
               return factory.get(context);
             }
             finally {
-              context.setExternalContext(previous);
+              context.popExternalContext();
             }
           }
         });

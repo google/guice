@@ -482,16 +482,14 @@ class BinderImpl implements Binder {
     }
 
     public Void call(InternalContext context) {
-      ExternalContext<?> externalContext
-          = ExternalContext.newInstance(null, NULLABLE, key,
-              context.getInjectorImpl());
-      context.setExternalContext(externalContext);
+      context.pushExternalContext(ExternalContext.newInstance(
+          null, NULLABLE, key, context.getInjectorImpl()));
       try {
         factory.get(context);
         return null;
       }
       finally {
-        context.setExternalContext(null);
+        context.popExternalContext();
       }
     }
   }

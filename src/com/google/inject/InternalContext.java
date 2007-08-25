@@ -18,7 +18,9 @@ package com.google.inject;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.google.inject.spi.SourceProviders;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Internal context. Used to coordinate injections and support circular
@@ -30,7 +32,8 @@ class InternalContext {
 
   final InjectorImpl injector;
   Map<Object, ConstructionContext<?>> constructionContexts;
-  ExternalContext<?> externalContext;
+  final List<ExternalContext<?>> externalContextStack =
+      new ArrayList<ExternalContext<?>>(5);
 
   InternalContext(InjectorImpl injector) {
     this.injector = injector;
@@ -61,15 +64,36 @@ class InternalContext {
 
   @SuppressWarnings("unchecked")
   <T> ExternalContext<T> getExternalContext() {
-    return (ExternalContext<T>) externalContext;
+    if (externalContextStack.isEmpty()) {
+      throw new IllegalStateException("No external context on stack");
+    }
+    return (ExternalContext<T>) externalContextStack.get(
+        externalContextStack.size() - 1);
+  }
+
+  public List<ExternalContext<?>> getExternalContextStack() {
+    return Collections.unmodifiableList(
+        new ArrayList<ExternalContext<?>>(externalContextStack));
   }
 
   Class<?> getExpectedType() {
-    return externalContext.getKey().getRawType();
+    return getExternalContext().getKey().getRawType();
   }
 
-  void setExternalContext(ExternalContext<?> externalContext) {
-    this.externalContext = externalContext;
+  /**
+   * Push a new external context onto the stack. Each call to {@code #push()}
+   * requires a matching call to {@code #pop()} so that the contexts are
+   * balanced.
+   */
+  void pushExternalContext(ExternalContext<?> externalContext) {
+    externalContextStack.add(externalContext);
+  }
+
+  /**
+   * Pop the external context off the stack.
+   */
+  void popExternalContext() {
+    externalContextStack.remove(externalContextStack.size() - 1);
   }
 
   /**
@@ -87,7 +111,7 @@ class InternalContext {
             getExternalContext().getMember())
         : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
 
-    throw new ProvisionException(externalContext,
+    throw new ProvisionException(getExternalContextStack(), 
         new NullPointerException(message),
         String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
   }
