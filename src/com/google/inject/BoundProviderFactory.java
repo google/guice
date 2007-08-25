@@ -57,6 +57,15 @@ class BoundProviderFactory<T>
   }
 
   public T get(InternalContext context) {
-    return context.sanitize(providerFactory.get(context).get(), source);
+    Provider<? extends T> provider = providerFactory.get(context);
+    try {
+      return context.sanitize(provider.get(), source);
+    } catch(ProvisionException provisionException) {
+      provisionException.addContext(context.getExternalContext());
+      throw provisionException;
+    } catch(RuntimeException e) {
+      throw new ProvisionException(context.getExternalContext(), e,
+          ErrorMessages.ERROR_IN_PROVIDER);
+    }
   }
 }

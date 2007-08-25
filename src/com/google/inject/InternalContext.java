@@ -86,8 +86,10 @@ class InternalContext {
         ? String.format(ErrorMessages.CANNOT_INJECT_NULL_INTO_MEMBER, source,
             getExternalContext().getMember())
         : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
+
     throw new ProvisionException(externalContext,
-        new NullPointerException(message));
+        new NullPointerException(message),
+        String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
   }
 
   // TODO(kevinb): gee, ya think we might want to remove this?

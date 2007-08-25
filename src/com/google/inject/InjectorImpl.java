@@ -477,8 +477,13 @@ class InjectorImpl implements Injector {
       catch (ConfigurationException e) {
         throw e;
       }
-      catch (Throwable throwable) {
-        throw new ProvisionException(externalContext, throwable);
+      catch (ProvisionException provisionException) {
+        provisionException.addContext(externalContext);
+        throw provisionException;
+      }
+      catch (RuntimeException runtimeException) {
+        throw new ProvisionException(externalContext, runtimeException,
+            ErrorMessages.ERROR_INJECTING_FIELD);
       }
       finally {
         context.setExternalContext(previous);
@@ -571,14 +576,17 @@ class InjectorImpl implements Injector {
       try {
         methodInvoker.invoke(o, getParameters(context, parameterInjectors));
       }
+      catch (IllegalAccessException e) {
+        throw new AssertionError(e);
+      }
       catch (ProvisionException e) {
+        e.addContext(context.getExternalContext());
         throw e;
       }
-      catch (IllegalAccessException e) {
-        throw new ProvisionException(context.getExternalContext(), e);
-      }
       catch (InvocationTargetException e) {
-        throw new ProvisionException(context.getExternalContext(), e);
+        Throwable cause = e.getCause() != null ? e.getCause() : e;
+        throw new ProvisionException(context.getExternalContext(), cause,
+            ErrorMessages.ERROR_INJECTING_METHOD);
       }
     }
   }
@@ -655,8 +663,13 @@ class InjectorImpl implements Injector {
       catch (ConfigurationException e) {
         throw e;
       }
-      catch (Throwable throwable) {
-        throw new ProvisionException(externalContext, throwable);
+      catch (ProvisionException provisionException) {
+        provisionException.addContext(externalContext);
+        throw provisionException;
+      }
+      catch (RuntimeException runtimeException) {
+        throw new ProvisionException(externalContext, runtimeException,
+            ErrorMessages.ERROR_INJECTING_METHOD);
       }
       finally {
         context.setExternalContext(previous);

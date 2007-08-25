@@ -155,14 +155,24 @@ class ErrorMessages {
   static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
       + " singleton-scoped bindings.";
 
-  static final String EXCEPTION_WHILE_CREATING = "Error while locating"
-      + " instance%n  bound to %s%n  for member at %s";
-  
-  static final String CANNOT_INJECT_NULL_INTO_MEMBER =
-      "Null value returned by binding at %s, but %s is not @Nullable";
+  static final String ERROR_INJECTING_FIELD = "Error injecting field";
+  static final String ERROR_INJECTING_METHOD = "Error injecting method";
+  static final String ERROR_INJECTING_CONSTRUCTOR =
+      "Error injecting constructor";
+  static final String ERROR_IN_PROVIDER = "Error in custom provider";
 
+  static final String ERROR_WHILE_LOCATING_FIELD =
+      "  while locating %s%n    for field at %s";
+  static final String ERROR_WHILE_LOCATING_PARAMETER =
+      "  while locating %s%n    for parameter %s at %s";
+  static final String ERROR_WHILE_LOCATING_VALUE =
+      "  while locating %s";
   static final String CANNOT_INJECT_NULL =
-      "Null value returned by binding at %s";
+      "null returned by binding at %s";
+  static final String CANNOT_INJECT_NULL_INTO_MEMBER =
+      "null returned by binding at %s%n    but %s is not @Nullable";
+
+
 
   static String getRootMessage(Throwable t) {
     Throwable cause = t.getCause();
