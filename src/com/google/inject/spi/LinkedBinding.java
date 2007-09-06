@@ -21,6 +21,8 @@ import com.google.inject.Binding;
 /**
  * A binding that links to another binding.
  *
+ * <p>Example: {@code bind(Collection.class).to(List.class);}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface LinkedBinding<T> extends Binding<T> {

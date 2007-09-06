@@ -23,6 +23,8 @@ import com.google.inject.Key;
 /**
  * A binding to a provider which is also bound.
  *
+ * <p>Example: {@code bind(Foo.class).toProvider(FooProvider.class);}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface ProviderBinding<T> extends Binding<T> {

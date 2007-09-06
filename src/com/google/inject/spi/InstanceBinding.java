@@ -21,6 +21,8 @@ import com.google.inject.Binding;
 /**
  * A binding to a single instance.
  *
+ * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface InstanceBinding<T> extends Binding<T>, HasDependencies {

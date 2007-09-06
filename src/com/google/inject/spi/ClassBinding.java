@@ -22,6 +22,8 @@ import com.google.inject.Binding;
  * A binding to a concrete, injectable class. Instantiates new instances of the
  * class and injects its members.
  *
+ * <p>Example: {@code bind(Concrete.class);}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface ClassBinding<T> extends Binding<T>, HasDependencies {

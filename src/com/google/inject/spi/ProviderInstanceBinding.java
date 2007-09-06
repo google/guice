@@ -22,6 +22,8 @@ import com.google.inject.Provider;
 /**
  * A binding to a single provider instance.
  *
+ * <p>Example: {@code bind(Foo.class).toProvider(new FooProvider());}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface ProviderInstanceBinding<T> extends Binding<T>,
