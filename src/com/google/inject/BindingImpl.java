@@ -21,19 +21,21 @@ import com.google.inject.internal.ToStringBuilder;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-class BindingImpl<T> implements Binding<T> {
+abstract class BindingImpl<T> implements Binding<T> {
 
   final InjectorImpl injector;
   final Key<T> key;
   final Object source;
   final InternalFactory<? extends T> internalFactory;
+  final Scope scope;
 
   BindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory) {
+      InternalFactory<? extends T> internalFactory, Scope scope) {
     this.injector = injector;
     this.key = key;
     this.source = source;
     this.internalFactory = internalFactory;
+    this.scope = scope;
   }
 
   public Key<T> getKey() {
@@ -57,9 +59,8 @@ class BindingImpl<T> implements Binding<T> {
     return internalFactory;
   }
 
-  static <T> BindingImpl<T> newInstance(InjectorImpl injector, Key<T> key,
-      Object source, InternalFactory<? extends T> internalFactory) {
-    return new BindingImpl<T>(injector, key, source, internalFactory);
+  public Scope getScope() {
+    return this.scope;
   }
 
   /**
@@ -70,10 +71,11 @@ class BindingImpl<T> implements Binding<T> {
   }
 
   public String toString() {
-    return new ToStringBuilder(BindingImpl.class)
+    return new ToStringBuilder(Binding.class)
         .add("key", key)
-        .add("source", source)
         .add("provider", internalFactory)
+        .add("scope", scope)
+        .add("source", source)
         .toString();
   }
 }

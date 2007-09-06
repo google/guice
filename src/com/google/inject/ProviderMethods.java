@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Creates bindings to methods annotated with {@link
- * @com.google.inject.Provides}. Use the scope and binding annotations on the
- * provider method to configure the binding.
+ * Creates bindings to methods annotated with
+ * {@link com.google.inject.Provides}. Use the scope and binding annotations
+ * on the provider method to configure the binding.
  */
 public class ProviderMethods {
 

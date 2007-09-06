@@ -132,7 +132,7 @@ public class Scopes {
       InjectorImpl injector, InternalFactory<? extends T> creator,
       Scope scope) {
     // No scope does nothing.
-    if (scope == null) {
+    if (scope == null || scope == Scopes.NO_SCOPE) {
       return creator;
     }
     Provider<T> scoped = scope.scope(key,

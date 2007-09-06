@@ -30,6 +30,9 @@ public class SourceProviders {
 
   private SourceProviders() {}
 
+  /**
+   * Indicates that the source is unknown.
+   */
   public static final Object UNKNOWN_SOURCE = "[unknown source]";
   
   static final SourceProvider DEFAULT_INSTANCE = new StacktraceSourceProvider();
@@ -50,6 +53,7 @@ public class SourceProviders {
    * <p>Skipping only takes place after this method is called.
    */
   public synchronized static void skip(Class<?> clazz) {
+    // Poor man's copy-on-write hash set.
     Set<String> copy = new HashSet<String>();
     copy.addAll(skippedClassNames);
     copy.add(clazz.getName());

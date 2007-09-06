@@ -68,7 +68,7 @@ class ConstructorInjector<T> {
     }
   }
 
-  private Constructor<T> findConstructorIn(InjectorImpl injector,
+  private static <T> Constructor<T> findConstructorIn(InjectorImpl injector,
       Class<T> implementation) {
     Constructor<T> found = null;
     @SuppressWarnings("unchecked")

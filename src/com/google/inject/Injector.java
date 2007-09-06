@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.introspect.Resolver;
 import java.util.List;
 import java.util.Map;
 
@@ -66,10 +65,8 @@ public interface Injector {
 
   /**
    * Gets a binding for the given key, or null if no binding for this key is
-   * found.  Note that if this key references an implementation class that can
-   * be implicitly bound, this method may return null, but may later return the
-   * implicit binding after it has been loaded. This method is part of the
-   * Injector Introspection API and is primarily intended for use by tools.
+   * found. This method is part of the Injector Introspection API and is
+   * primarily intended for use by tools.
    */
   <T> Binding<T> getBinding(Key<T> key);
 
@@ -108,11 +105,4 @@ public interface Injector {
    * dependencies ahead of time.
    */
   <T> T getInstance(Class<T> type);
-
-  /**
-   * Returns the resolver used by this injector to resolve injection requests.
-   * This method is part of the Injector Introspection API and is primarily
-   * intended for use by tools.
-   */
-  Resolver getResolver();
 }

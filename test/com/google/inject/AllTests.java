@@ -34,6 +34,7 @@ public class AllTests {
     TestSuite suite = new TestSuite();
 
     suite.addTestSuite(BinderTest.class);
+    suite.addTestSuite(BindingTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(ConstantConversionTest.class);

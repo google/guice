@@ -17,12 +17,11 @@
 package com.google.inject;
 
 import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.Strings;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.introspect.Resolver;
+import com.google.inject.internal.Classes;
 import com.google.inject.spi.SourceProviders;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -407,6 +406,9 @@ class InjectorImpl implements Injector {
 
   @SuppressWarnings("unchecked")
   public <T> BindingImpl<T> getBinding(Key<T> key) {
+    // TODO: Create binding objects for implicit bindings on the fly. This
+    // includes classes, Provider<X>, converted constants, etc.
+    
     return (BindingImpl<T>) bindings.get(key);
   }
 
@@ -602,12 +604,12 @@ class InjectorImpl implements Injector {
       = new ReferenceCache<Class<?>, ConstructorInjector>() {
     @SuppressWarnings("unchecked")
     protected ConstructorInjector<?> create(Class<?> implementation) {
-      if (implementation.isInterface()) {
+      if (!Classes.isConcrete(implementation)) {
         errorHandler.handle(defaultSource,
             ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
         return ConstructorInjector.invalidConstructor();
       }
-      if (isInnerClass(implementation)) {
+      if (Classes.isInnerClass(implementation)) {
         errorHandler.handle(defaultSource,
             ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
         return ConstructorInjector.invalidConstructor();
@@ -616,11 +618,6 @@ class InjectorImpl implements Injector {
       return new ConstructorInjector(InjectorImpl.this, implementation);
     }
   };
-
-  private static boolean isInnerClass(Class<?> c) {
-    return c.getEnclosingClass() != null
-        && !Modifier.isStatic(c.getModifiers());
-  }
 
   /**
    * A placeholder. This enables us to continue processing and gather more
@@ -876,10 +873,6 @@ class InjectorImpl implements Injector {
         throw new AssertionError(e);
       }
     }
-  }
-
-  public Resolver getResolver() {
-    throw new UnsupportedOperationException();
   }
 
   /**

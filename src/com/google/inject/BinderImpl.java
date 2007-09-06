@@ -23,6 +23,7 @@ import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.Stopwatch;
+import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
@@ -134,11 +135,28 @@ class BinderImpl implements Binder {
 
   final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
-  final List<CreationListener> instanceInjectors
-      = new ArrayList<CreationListener>();
 
   interface CreationListener {
     void notify(InjectorImpl injector);
+  }
+
+  final List<MembersInjector> membersInjectors = new ArrayList<MembersInjector>();
+
+  static class MembersInjector {
+
+    final Object o;
+
+    MembersInjector(Object o) {
+      this.o = o;
+    }
+
+    void checkDependencies(InjectorImpl injector) {
+      injector.injectors.get(o.getClass());
+    }
+
+    void injectMembers(InjectorImpl injector) {
+      injector.injectMembers(o);
+    }    
   }
 
   public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
@@ -242,9 +260,10 @@ class BinderImpl implements Binder {
    * @throws IllegalStateException if called more than once
    */
   Injector createInjector() throws CreationException {
-    stopwatch.resetAndLog(logger, "Configuration");
+    stopwatch.resetAndLog(logger, "Configuration (running the modules)");
 
-    Map<Key<?>, BindingImpl<?>> bindings = new HashMap<Key<?>, BindingImpl<?>>();
+    Map<Key<?>, BindingImpl<?>> bindings
+        = new HashMap<Key<?>, BindingImpl<?>>();
     injector = new InjectorImpl(
         proxyFactoryBuilder.create(), bindings, scopes);
     injector.setErrorHandler(configurationErrorHandler);
@@ -275,6 +294,12 @@ class BinderImpl implements Binder {
 
     stopwatch.resetAndLog(logger, "Static validation");
 
+    for (MembersInjector membersInjector : membersInjectors) {
+      membersInjector.checkDependencies(injector);
+    }
+
+    stopwatch.resetAndLog(logger, "Instance member validation");
+
     // Blow up if we encountered errors.
     if (!errorMessages.isEmpty()) {
       throw new CreationException(errorMessages);
@@ -282,6 +307,13 @@ class BinderImpl implements Binder {
 
     // Switch to runtime error handling.
     injector.setErrorHandler(new RuntimeErrorHandler());
+
+    // If we're in the tool stage, stop here. Don't eagerly inject or load
+    // anything.
+    if (stage == Stage.TOOL) {
+      // TODO: Wrap this and prevent usage of anything besides getBindings().
+      return injector;
+    }
 
     // Inject static members.
     for (StaticInjection staticInjection : staticInjections) {
@@ -291,8 +323,8 @@ class BinderImpl implements Binder {
     stopwatch.resetAndLog(logger, "Static member injection");
 
     // Inject pre-existing instances.
-    for (CreationListener instanceInjector : instanceInjectors) {
-      instanceInjector.notify(injector);
+    for (MembersInjector membersInjector : membersInjectors) {
+      membersInjector.injectMembers(injector);
     }
 
     stopwatch.resetAndLog(logger, "Instance injection");
@@ -325,11 +357,7 @@ class BinderImpl implements Binder {
 
   private <T> void createBinding(BindingBuilderImpl<T> builder,
       List<ContextualCallable<Void>> preloaders) {
-    final Key<T> key = builder.getKey();
-    final InternalFactory<? extends T> factory
-        = builder.getInternalFactory(injector);
-    BindingImpl<?> binding
-        = BindingImpl.newInstance(injector, key, builder.getSource(), factory);
+    BindingImpl<T> binding = builder.build(injector);
 
     putBinding(binding);
 
@@ -337,7 +365,8 @@ class BinderImpl implements Binder {
     boolean preload = stage == Stage.PRODUCTION;
     if (builder.isSingletonScoped()) {
       if (preload || builder.shouldPreload()) {
-        preloaders.add(new BindingPreloader(key, factory));
+        preloaders.add(
+            new BindingPreloader(binding.key, binding.internalFactory));
       }
     }
     else {
@@ -478,7 +507,7 @@ class BinderImpl implements Binder {
 
     public BindingPreloader(Key<?> key, InternalFactory<?> factory) {
       this.key = key;
-      this.factory = factory;
+      this.factory = Objects.nonNull(factory, "factory");
     }
 
     public Void call(InternalContext context) {

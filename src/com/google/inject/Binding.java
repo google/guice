@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.BindingVisitor;
+
 /**
  * A mapping from a key (type and optional annotation) to a provider of
  * instances of that type.  This interface is part of the {@link Injector}
@@ -34,11 +36,29 @@ public interface Binding<T> {
    * Returns an arbitrary object containing information about the "place"
    * where this binding was configured. Used by Guice in the production of
    * descriptive error messages.
+   *
+   * <p>Tools might specially handle types they know about;
+   * {@code StackTraceElement} is a good example. Tools should simply call
+   * {@code toString()} on the source object if the type is unfamiliar.
    */
   Object getSource();
 
   /**
-   * Returns the provider guice uses to fulfill requests for this binding.
+   * Returns the scoped provider guice uses to fulfill requests for this
+   * binding.
    */
   Provider<T> getProvider();
+
+  /**
+   * Returns the scope applied by this binding.
+   */
+  Scope getScope();
+
+  /**
+   * Accepts a binding visitor. Invokes the visitor method specific to this
+   * binding's type.
+   *
+   * @param visitor to call back on
+   */
+  void accept(BindingVisitor<? super T> visitor);
 }

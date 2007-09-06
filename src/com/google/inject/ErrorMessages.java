@@ -70,9 +70,6 @@ class ErrorMessages {
   static final String RECURSIVE_PROVIDER_TYPE = "@DefaultProvider"
       + " points to the same class it annotates.";
 
-  static final String ERROR_INJECTING_MEMBERS = "An error occurred"
-      + " while injecting members of %s. Error message: %s";
-
   static final String ERROR_INJECTING_MEMBERS_SEE_LOG = "An error of type %s"
       + " occurred while injecting members of %s. See log for details. Error"
       + " message: %s";
@@ -82,6 +79,9 @@ class ErrorMessages {
 
   static final String EXCEPTION_REPORTED_BY_MODULE_SEE_LOG = "An exception"
       + " was caught and reported. See log for details. Message: %s";
+
+  static final String MISSING_IMPLEMENTATION
+      = "No implementation was specified.";
 
   static final String MISSING_BINDING_ANNOTATION = "Please annotate with"
       + " @BindingAnnotation. Bound at %s.";
@@ -156,23 +156,28 @@ class ErrorMessages {
       + " singleton-scoped bindings.";
 
   static final String ERROR_INJECTING_FIELD = "Error injecting field";
+
   static final String ERROR_INJECTING_METHOD = "Error injecting method";
+
   static final String ERROR_INJECTING_CONSTRUCTOR =
       "Error injecting constructor";
+
   static final String ERROR_IN_PROVIDER = "Error in custom provider";
 
   static final String ERROR_WHILE_LOCATING_FIELD =
       "  while locating %s%n    for field at %s";
+
   static final String ERROR_WHILE_LOCATING_PARAMETER =
       "  while locating %s%n    for parameter %s at %s";
+
   static final String ERROR_WHILE_LOCATING_VALUE =
       "  while locating %s";
+
   static final String CANNOT_INJECT_NULL =
       "null returned by binding at %s";
+
   static final String CANNOT_INJECT_NULL_INTO_MEMBER =
-      "null returned by binding at %s%n    but %s is not @Nullable";
-
-
+      "null returned by binding at %s%n but %s is not @Nullable";
 
   static String getRootMessage(Throwable t) {
     Throwable cause = t.getCause();

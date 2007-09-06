@@ -22,6 +22,9 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.ConstantBinding;
 import java.lang.annotation.Annotation;
 
 /**
@@ -158,7 +161,36 @@ class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
     BindingImpl<T> createBinding(InjectorImpl injector) {
       Key<T> key = Key.get(type, annotationStrategy);
       ConstantFactory<T> factory = new ConstantFactory<T>(value, source);
-      return BindingImpl.newInstance(injector, key, source, factory);
+      return new ContantBindingImpl<T>(injector, key, source, factory, value);
+    }
+  }
+
+  private static class ContantBindingImpl<T> extends BindingImpl<T>
+      implements ConstantBinding<T> {
+
+    final T value;
+
+    ContantBindingImpl(InjectorImpl injector, Key<T> key, Object source,
+        InternalFactory<T> internalFactory, T value) {
+      super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
+      this.value = value;
+    }
+
+    public void accept(BindingVisitor<? super T> bindingVisitor) {
+      bindingVisitor.visit(this);
+    }
+
+    public T getValue() {
+      return this.value;
+    }
+
+    @Override
+    public String toString() {
+      return new ToStringBuilder(ConstantBinding.class)
+          .add("key", key)
+          .add("value", value)
+          .add("source", source)
+          .toString();
     }
   }
 }
