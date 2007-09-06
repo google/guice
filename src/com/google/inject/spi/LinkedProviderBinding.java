@@ -21,16 +21,17 @@ import com.google.inject.Provider;
 import com.google.inject.Key;
 
 /**
- * A binding to a provider which is also bound.
+ * A binding which links to a provider binding which provides instances for
+ * this binding.
  *
  * <p>Example: {@code bind(Foo.class).toProvider(FooProvider.class);}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ProviderBinding<T> extends Binding<T> {
+public interface LinkedProviderBinding<T> extends Binding<T> {
 
   /**
    * Gets the binding for the provider of this binding.
    */
-  Binding<? extends Provider<? extends T>> getProviderBinding();
+  Binding<? extends Provider<? extends T>> getTargetProvider();
 }

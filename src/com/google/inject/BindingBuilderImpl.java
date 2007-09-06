@@ -29,7 +29,7 @@ import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
-import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.LinkedProviderBinding;
 import com.google.inject.spi.ClassBinding;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
@@ -269,7 +269,7 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
       // Provider binding.
       if (this.providerKey != null) {
-        return new ProviderBindingImpl<T>(
+        return new LinkedProviderBindingImpl<T>(
             injector, key, source, scopedFactory, scope, providerKey);
       }
 
@@ -475,12 +475,12 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
     }
   }
 
-  private static class ProviderBindingImpl<T> extends BindingImpl<T>
-      implements ProviderBinding<T> {
+  private static class LinkedProviderBindingImpl<T> extends BindingImpl<T>
+      implements LinkedProviderBinding<T> {
 
     final Key<? extends Provider<? extends T>> providerKey;
 
-    ProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
+    LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
         InternalFactory<? extends T> internalFactory, Scope scope,
         Key<? extends Provider<? extends T>> providerKey) {
       super(injector, key, source, internalFactory, scope);
@@ -491,13 +491,13 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       bindingVisitor.visit(this);
     }
 
-    public Binding<? extends Provider<? extends T>> getProviderBinding() {
+    public Binding<? extends Provider<? extends T>> getTargetProvider() {
       return injector.getBinding(providerKey);
     }
 
     @Override
     public String toString() {
-      return new ToStringBuilder(ProviderBinding.class)
+      return new ToStringBuilder(LinkedProviderBinding.class)
           .add("key", key)
           .add("provider", providerKey)
           .add("scope", scope)

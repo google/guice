@@ -45,7 +45,7 @@ public interface BindingVisitor<T> {
   /**
    * Visits a binding to provider which is also bound.
    */
-  void visit(ProviderBinding<? extends T> binding);
+  void visit(LinkedProviderBinding<? extends T> binding);
 
   /**
    * Visits a class binding.

@@ -17,12 +17,11 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
-import com.google.inject.BinderTest.Foo;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.LinkedBinding;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
-import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.LinkedProviderBinding;
 import com.google.inject.spi.ClassBinding;
 import com.google.inject.spi.ConstantBinding;
 import com.google.inject.name.Names;
@@ -116,10 +115,10 @@ public class BindingTest extends TestCase {
 
     boolean providerVisited;
 
-    public void visit(ProviderBinding<?> providerBinding) {
+    public void visit(LinkedProviderBinding<?> linkedProviderBinding) {
       providerVisited = true;
       assertEquals(FooProvider.class,
-          providerBinding.getProviderBinding().getKey().getRawType());
+          linkedProviderBinding.getTargetProvider().getKey().getRawType());
     }
 
     boolean classVisitied;
