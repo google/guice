@@ -175,6 +175,13 @@ public abstract class Key<T> {
     return typeLiteral.getRawType();
   }
 
+  /**
+   * Gets the key of this key's provider.
+   */
+  Key<Provider<T>> providerKey() {
+    return ofType(typeLiteral.providerType());
+  }
+
   public boolean equals(Object o) {
     if (o == this) {
       return true;
@@ -303,6 +310,14 @@ public abstract class Key<T> {
    */
   Key<?> ofType(Type type) {
     return new SimpleKey<Object>(type, annotationStrategy);
+  }
+
+  /**
+   * Returns a new key of the specified type with the same annotation as this
+   * key.
+   */
+  <T> Key<T> ofType(TypeLiteral<T> type) {
+    return new SimpleKey<T>(type, annotationStrategy);
   }
 
   /**

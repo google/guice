@@ -131,6 +131,30 @@ public abstract class TypeLiteral<T> {
     return type;
   }
 
+  /**
+   * Gets the type of this type's provider.
+   */
+  @SuppressWarnings("unchecked")
+  TypeLiteral<Provider<T>> providerType() {
+    final Type[] typeParameters = new Type[] { getType() };
+
+    // This cast is safe and wouldn't generate a warning if Type had a type
+    // parameter.
+    return (TypeLiteral<Provider<T>>) get(new ParameterizedType() {
+      public Type[] getActualTypeArguments() {
+        return typeParameters;
+      }
+
+      public Type getRawType() {
+        return Provider.class;
+      }
+
+      public Type getOwnerType() {
+        return null;
+      }
+    });
+  }
+
   public int hashCode() {
     return this.hashCode;
   }

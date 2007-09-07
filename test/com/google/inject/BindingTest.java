@@ -33,6 +33,20 @@ import com.google.inject.name.Names;
  */
 public class BindingTest extends TestCase {
 
+  public void testProviderBinding() {
+    Injector injector = Guice.createInjector();
+    Binding<Bob> bobBinding = injector.getBinding(Bob.class);
+    assertTrue(bobBinding.getProvider().get() instanceof Bob);
+    Binding<Provider<Bob>> bobProviderBinding = bobBinding.getProviderBinding();
+    assertTrue(bobProviderBinding.getProvider().get().get() instanceof Bob);
+    Binding<Provider<Provider<Bob>>> bobProviderProviderBinding
+        = bobProviderBinding.getProviderBinding();
+    assertTrue(bobProviderProviderBinding.getProvider().get().get().get()
+        instanceof Bob);
+  }
+
+  static class Bob {}
+
   public void testVisitor() {
     MyVisitor myVisitor = new MyVisitor();
 

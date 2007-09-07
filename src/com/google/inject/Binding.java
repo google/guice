@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.ProviderBinding;
 
 /**
  * A mapping from a key (type and optional annotation) to a provider of
@@ -48,6 +49,11 @@ public interface Binding<T> {
    * binding.
    */
   Provider<T> getProvider();
+
+  /**
+   * Gets the synthetic binding to this binding's Provider.
+   */
+  ProviderBinding<T> getProviderBinding();
 
   /**
    * Returns the scope applied by this binding.

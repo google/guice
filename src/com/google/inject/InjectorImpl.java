@@ -161,6 +161,10 @@ class InjectorImpl implements Injector {
     return getJitBindingImpl(key);
   }
 
+  public <T> Binding<T> getBinding(Class<T> type) {
+    return getBinding(Key.get(type));
+  }
+
   /**
    * Gets a binding which was specified explicitly in a module.
    */
@@ -535,7 +539,9 @@ class InjectorImpl implements Injector {
 
     @SuppressWarnings("unchecked")
     public T get(InternalContext context) {
-      // We know this cast is safe (assuming getConstructor() is safe).
+      // This may not actually be safe because it could return a super type
+      // of T (if that's all the client needs), but it should be OK in
+      // practice thanks to the wonders of erasure.
       return (T) constructorInjector.construct(
           context, context.getExpectedType());
     }

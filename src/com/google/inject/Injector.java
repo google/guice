@@ -76,6 +76,16 @@ public interface Injector {
   <T> Binding<T> getBinding(Key<T> key);
 
   /**
+   * Gets a binding for the given type, or null if no binding for this type is
+   * found. Returns explicit bindings as well as those synthesized by the
+   * container such as bindings for converted constants, etc.
+   *
+   * <p>This method is part of the Injector Introspection API and is
+   * primarily intended for use by tools.
+   */
+  <T> Binding<T> getBinding(Class<T> type);
+
+  /**
    * Finds all bindings to the given type. This method is part of the Injector
    * Introspection API and is primarily intended for use by tools.
    */
