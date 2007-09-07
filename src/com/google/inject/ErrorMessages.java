@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.spi.SourceProviders;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -40,6 +41,10 @@ class ErrorMessages {
       "Binding to %s not found. Annotations on other"
           + " bindings to that type include: %s";
 
+  static void handleMissingBinding(InjectorImpl injector, Key<?> key) {
+    handleMissingBinding(injector, SourceProviders.defaultSource(), key);
+  }
+
   static void handleMissingBinding(InjectorImpl injector, Object source,
       Key<?> key) {
     ErrorHandler errorHandler = injector.errorHandler;
@@ -58,6 +63,13 @@ class ErrorMessages {
           MISSING_BINDING_BUT_OTHERS_EXIST, key, otherNames);
     }
   }
+
+  static final String BINDING_NOT_FOUND = "Binding to %s not found.";
+
+  static final String LOGGER_ALREADY_BOUND = "Logger is already bound.";
+
+  static final String BINDING_TO_GUICE_TYPE
+      = "Binding to Guice types is not allowed.";
 
   static final String SUBTYPE_NOT_PROVIDED
       = "%s doesn't provide instances of %s.";

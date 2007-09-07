@@ -25,31 +25,35 @@ import java.lang.reflect.Member;
  */
 class ConstantConversionException extends Exception {
 
-  ConstantConversionException(Member member, Key<?> key, String value,
+  ConstantConversionException(Key<?> key, String value,
       String reason) {
-    super(createMessage(value, key, member, reason));
+    super(createMessage(value, key, reason));
   }
 
-  ConstantConversionException(Member member, Key<?> key, String value,
+  ConstantConversionException(Key<?> key, String value,
       Throwable reason) {
-    this(member, key, value, reason.toString());
+    this(key, value, reason.toString());
   }
 
-  static String createMessage(String value, Key<?> key, Member member,
-      String reason) {
+  static String createMessage(String value, Key<?> key, String reason) {
     String annotationMessage = key.hasAnnotationType()
         ? " annotated with " + key.getAnnotationName()
         : "";
     
-    return member == null
-        ? "Error converting '" + value + "' to "
-            + key.getRawType().getSimpleName()
-            + " while getting binding value" + annotationMessage
-            + ". Reason: " + reason
-        : "Error converting '" + value + "' to "
-            + key.getRawType().getSimpleName() + " while injecting "
-            + member.getName() + " with binding value" + annotationMessage
-            + " required by " + member.getDeclaringClass().getSimpleName()
-            + ". Reason: " + reason;
+    return "Error converting '" + value + "' to "
+        + key.getRawType().getSimpleName()
+        + " while getting binding value" + annotationMessage
+        + ". Reason: " + reason;
+
+//    return member == null
+//        ? "Error converting '" + value + "' to "
+//            + key.getRawType().getSimpleName()
+//            + " while getting binding value" + annotationMessage
+//            + ". Reason: " + reason
+//        : "Error converting '" + value + "' to "
+//            + key.getRawType().getSimpleName() + " while injecting "
+//            + member.getName() + " with binding value" + annotationMessage
+//            + " required by " + member.getDeclaringClass().getSimpleName()
+//            + ". Reason: " + reason;
   }
 }

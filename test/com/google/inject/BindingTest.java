@@ -24,6 +24,8 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.LinkedProviderBinding;
 import com.google.inject.spi.ClassBinding;
 import com.google.inject.spi.ConstantBinding;
+import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.name.Names;
 
 /**
@@ -108,9 +110,11 @@ public class BindingTest extends TestCase {
     boolean providerInstanceVisited;
 
     public void visit(ProviderInstanceBinding<?> providerInstanceBinding) {
-      providerInstanceVisited = true;
-      assertTrue(providerInstanceBinding.getProvider().get() instanceof Foo);
-      assertEquals(Scopes.SINGLETON, providerInstanceBinding.getScope());
+      if (providerInstanceBinding.getKey().getRawType() == Foo.class) {
+        providerInstanceVisited = true;
+        assertTrue(providerInstanceBinding.getProvider().get() instanceof Foo);
+        assertEquals(Scopes.SINGLETON, providerInstanceBinding.getScope());
+      }
     }
 
     boolean providerVisited;
@@ -139,10 +143,11 @@ public class BindingTest extends TestCase {
       assertEquals("Bob", constantBinding.getValue());
     }
 
-    boolean unknownVisited;
+    public void visit(ProviderBinding<?> binding) {
+    }
 
-    public void visitUnknown(Binding<?> binding) {
-      unknownVisited = true;
+    public void visit(
+        ConvertedConstantBinding<? extends Object> convertedConstantBinding) {
     }
 
     void verify() {
@@ -152,7 +157,6 @@ public class BindingTest extends TestCase {
       assertTrue(providerVisited);
       assertTrue(classVisitied);
       assertTrue(constantVisited);
-      assertTrue(unknownVisited);
     }
   }
 }

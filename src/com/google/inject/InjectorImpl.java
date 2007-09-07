@@ -23,6 +23,10 @@ import com.google.inject.internal.Strings;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.internal.Classes;
 import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -40,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -83,18 +88,17 @@ class InjectorImpl implements Injector {
       = new PrimitiveConverters();
 
   final ConstructionProxyFactory constructionProxyFactory;
-  final Map<Key<?>, BindingImpl<?>> bindings;
+  final Map<Key<?>, BindingImpl<?>> explicitBindings;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<Class<? extends Annotation>, Scope> scopes;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
-  Object defaultSource = SourceProviders.UNKNOWN_SOURCE;
 
   InjectorImpl(ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, BindingImpl<?>> bindings,
       Map<Class<? extends Annotation>, Scope> scopes) {
     this.constructionProxyFactory = constructionProxyFactory;
-    this.bindings = bindings;
+    this.explicitBindings = bindings;
     this.scopes = scopes;
   }
 
@@ -102,7 +106,7 @@ class InjectorImpl implements Injector {
    * Indexes bindings by type.
    */
   void index() {
-    for (BindingImpl<?> binding : bindings.values()) {
+    for (BindingImpl<?> binding : explicitBindings.values()) {
       index(binding);
     }
   }
@@ -135,191 +139,570 @@ class InjectorImpl implements Injector {
    * This is only used during Injector building.
    */
   void withDefaultSource(Object defaultSource, Runnable runnable) {
-    Object previous = this.defaultSource;
-    this.defaultSource = defaultSource;
-    try {
-      runnable.run();
-    }
-    finally {
-      this.defaultSource = previous;
-    }
+    SourceProviders.withDefault(defaultSource, runnable);
   }
 
   void setErrorHandler(ErrorHandler errorHandler) {
     this.errorHandler = errorHandler;
   }
 
-  <T> InternalFactory<? extends T> getInternalFactory(
-      final Member member, Key<T> key) {
-    // TODO: Clean up unchecked type warnings.
-
-    // Do we have a factory for the specified type and name?
-    BindingImpl<T> binding = getBinding(key);
+  /**
+   * Gets a binding implementation. First, this checks for an explicit binding.
+   * If no explicit binding is found, it looks for a just-in-time binding.
+   */
+  public <T> BindingImpl<T> getBinding(Key<T> key) {
+    // Check explicit bindings, i.e. bindings created by modules.
+    BindingImpl<T> binding = getExplicitBindingImpl(key);
     if (binding != null) {
-      return binding.getInternalFactory();
+      return binding;
     }
 
-    Class<? super T> rawType = key.getTypeLiteral().getRawType();
+    // Look for an on-demand binding.
+    return getJitBindingImpl(key);
+  }
 
-    // Handle cases where T is a Provider<?>.
-    if (rawType.equals(Provider.class)) {
-      Type providerType = key.getTypeLiteral().getType();
-      if (!(providerType instanceof ParameterizedType)) {
-        // Raw Provider.
-        return null;
+  /**
+   * Gets a binding which was specified explicitly in a module.
+   */
+  @SuppressWarnings("unchecked")
+  <T> BindingImpl<T> getExplicitBindingImpl(Key<T> key) {
+    return (BindingImpl<T>) explicitBindings.get(key);
+  }
+
+  /**
+   * Gets a just-in-time binding. This could be an injectable class (including
+   * those with @ImplementedBy), an automatically converted constant, a
+   * Provider<X> binding, etc.
+   */
+  @SuppressWarnings("unchecked")
+  <T> BindingImpl<T> getJitBindingImpl(Key<T> key) {
+    synchronized (jitBindings) {
+      // Support null values.
+      if (!jitBindings.containsKey(key)) {
+        BindingImpl<T> binding = createBindingJustInTime(key);
+        jitBindings.put(key, binding);
+        return binding;
+      } else {
+        return (BindingImpl<T>) jitBindings.get(key);
       }
-      Type entryType
-          = ((ParameterizedType) providerType).getActualTypeArguments()[0];
-
-      try {
-        final Provider<?> provider = getProvider(key.ofType(entryType));
-        return new InternalFactory<T>() {
-          @SuppressWarnings("unchecked")
-          public T get(InternalContext context) {
-            return (T) provider;
-          }
-        };
-      }
-      catch (ConfigurationException e) {
-        // Look for a factory bound to a key without annotation attributes if
-        // necessary.
-        if (key.hasAttributes()) {
-          return getInternalFactory(member, key.withoutAttributes());
-        }
-
-        // End of the road.
-        ErrorMessages.handleMissingBinding(this, member, key);
-        return invalidFactory();
-      }
-    }
-
-    // Auto[un]box primitives.
-    Class<?> primitiveCounterpart
-        = PRIMITIVE_COUNTERPARTS.get(rawType);
-    if (primitiveCounterpart != null) {
-      BindingImpl<?> counterpartBinding
-          = getBinding(key.ofType(primitiveCounterpart));
-      if (counterpartBinding != null) {
-        return (InternalFactory<? extends T>)
-            counterpartBinding.getInternalFactory();
-      }
-    }
-
-    // TODO: Should we try to convert from a String first, or should we look
-    // for a binding to the annotation type sans attributes? Right now, we
-    // convert from a String.
-
-    // Can we convert from a String constant?
-    Key<String> stringKey = key.ofType(String.class);
-    BindingImpl<String> stringBinding = getBinding(stringKey);
-    if (stringBinding != null && stringBinding.isConstant()) {
-      InternalContext context = new InternalContext(this);
-      String value;
-      context.pushExternalContext(ExternalContext.newInstance(
-          member, Nullability.NOT_NULLABLE, key, this));
-      try {
-        value = stringBinding.getInternalFactory().get(context);
-      } finally {
-        context.popExternalContext();
-      }
-
-      // TODO: Generalize everything below here and enable users to plug in
-      // their own converters.
-
-      // Do we need a primitive?
-      Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
-      if (converter != null) {
-        try {
-          T t = converter.convert(member, key, value);
-          return new ConstantFactory<T>(t, defaultSource);
-        }
-        catch (ConstantConversionException e) {
-          return handleConstantConversionError(
-              member, stringBinding, rawType, e);
-        }
-      }
-
-      // Do we need an enum?
-      if (Enum.class.isAssignableFrom(rawType)) {
-        T t;
-        try {
-          t = (T) Enum.valueOf((Class) rawType, value);
-        }
-        catch (IllegalArgumentException e) {
-          return handleConstantConversionError(
-              member, stringBinding, rawType, e);
-        }
-        return new ConstantFactory<T>(t, defaultSource);
-      }
-
-      // Do we need a class?
-      if (rawType == Class.class) {
-        try {
-          // TODO: Make sure we use the right classloader.
-          return new ConstantFactory<T>((T) Class.forName(value), defaultSource);
-        }
-        catch (ClassNotFoundException e) {
-          return handleConstantConversionError(
-              member, stringBinding, rawType, e);
-        }
-      }
-    }
-
-    // Don't try to inject primitives, arrays, or enums.
-    int modifiers = rawType.getModifiers();
-    if (rawType.isArray() || rawType.isEnum() || rawType.isPrimitive()) {
-      // Look for a factory bound to a key without annotation attributes if
-      // necessary.
-      if (key.hasAttributes()) {
-        return getInternalFactory(member, key.withoutAttributes());
-      }
-
-      return null;
-    }
-
-    // We don't want to implicitly inject a member if we have a binding
-    // annotation.
-    if (key.hasAnnotationType()) {
-      // Look for a factory bound to a key without annotation attributes if
-      // necessary.
-      if (key.hasAttributes()) {
-        return getInternalFactory(member, key.withoutAttributes());
-      }
-
-      return null;
-    }
-
-    // Last resort: inject the type itself.
-    final ErrorHandler previous = this.errorHandler;
-    try {
-      if (member != null) {
-        // If we're injecting into a member, include it in the error messages.
-        this.errorHandler = new AbstractErrorHandler() {
-          public void handle(Object source, String message) {
-            previous.handle(source, "Error while injecting at "
-                + StackTraceElements.forMember(member) + ": " + message);
-          }
-        };
-      }
-      // note: intelliJ thinks this cast is superfluous, but is it?
-      return (InternalFactory<? extends T>) getImplicitBinding(member, rawType,
-          null);
-    }
-    finally {
-      this.errorHandler = previous;
     }
   }
 
-  private <T> InternalFactory<T> handleConstantConversionError(
-      Member member, Binding<String> stringBinding, Class<?> rawType,
-      Exception e) {
+  /** Just-in-time binding cache. */
+  final Map<Key<?>, BindingImpl<?>> jitBindings
+      = new HashMap<Key<?>, BindingImpl<?>>();
+
+  /**
+   * Returns true if the key type is Provider<?> (but not a subclass of
+   * Provider<?>).
+   */
+  static boolean isProvider(Key<?> key) {
+    return key.getTypeLiteral().getRawType().equals(Provider.class);
+  }
+
+  /**
+   * Creates a synthetic binding to Provider<T>, i.e. a binding to the provider
+   * from Binding<T>.
+   */
+  private <T> BindingImpl<Provider<T>> createProviderBinding(
+      Key<Provider<T>> key) {
+    Type providerType = key.getTypeLiteral().getType();
+
+    // If the Provider has no type parameter (raw Provider)...
+    if (!(providerType instanceof ParameterizedType)) {
+      return null;
+    }
+
+    Type entryType
+        = ((ParameterizedType) providerType).getActualTypeArguments()[0];
+
+    // This cast is safe. 
+    @SuppressWarnings("unchecked")
+    Key<T> providedKey = (Key<T>) key.ofType(entryType);
+
+    BindingImpl<T> providedBinding = getBinding(providedKey);
+
+    // If binding isn't found...
+    if (providedBinding == null) {
+      ErrorMessages.handleMissingBinding(this, key);
+      return invalidBinding(key);
+    }
+
+    return new ProviderBindingImpl<T>(this, key, providedBinding);
+  }
+
+  static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
+      implements ProviderBinding<T> {
+
+    final Binding<T> providedBinding;
+
+    ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key,
+        Binding<T> providedBinding) {
+      super(injector, key, SourceProviders.UNKNOWN_SOURCE,
+          createInternalFactory(providedBinding), Scopes.NO_SCOPE);
+      this.providedBinding = providedBinding;
+    }
+
+    static <T> InternalFactory<Provider<T>> createInternalFactory(
+        Binding<T> providedBinding) {
+      final Provider<T> provider = providedBinding.getProvider();
+      return new InternalFactory<Provider<T>>() {
+        public Provider<T> get(InternalContext context) {
+          return provider;
+        }
+      };
+    }
+
+    public void accept(BindingVisitor<? super Provider<T>> bindingVisitor) {
+      bindingVisitor.visit(this);
+    }
+
+    public Binding<T> getTarget() {
+      return providedBinding;
+    }
+  }
+
+  <T> BindingImpl<T> invalidBinding(Class<T> clazz) {
+    return invalidBinding(Key.get(clazz));
+  }
+
+  <T> BindingImpl<T> invalidBinding(Key<T> key) {
+    return new InvalidBindingImpl<T>(
+        this, key, SourceProviders.defaultSource());
+  }
+
+  /**
+   * Gets the binding corresponding to a primitives wrapper type or a wrapper
+   * type's primitive. The compiler treats them interchangeably, so we do, too.
+   */
+  <T> BindingImpl<T> getBoxedOrUnboxedBinding(Key<T> key) {
+    // This is a safe cast, just as this is safe: Class<Integer> c = int.class;
+    @SuppressWarnings("unchecked")
+    Class<T> primitiveCounterpart
+        = (Class<T>) PRIMITIVE_COUNTERPARTS.get(key.getRawType());
+    if (primitiveCounterpart != null) {
+      // Do we need to search more than explicit bindings? I don't think so.
+      // Constant type conversion already supports both primitives and their
+      // wrappers, and limiting this to explicit bindings means we don't have
+      // to worry about recursion.
+      return getExplicitBindingImpl(key.ofType(primitiveCounterpart));
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns true if we can convert from a string to the given type.
+   */
+  static boolean isConvertible(TypeLiteral<?> type) {
+    Class<?> rawType = type.getRawType();
+    return PRIMITIVE_CONVERTERS.get(rawType) != null
+        || Enum.class.isAssignableFrom(rawType)
+        || Class.class == rawType;
+  }
+
+  /**
+   * Converts a constant string binding to the required type.
+   *
+   * <p>If the required type is elligible for conversion and a constant string
+   * binding is found but the actual conversion fails, an error is generated.
+   *
+   * <p>If the type is not elligible for conversion or a constant string
+   * binding is not found, this method returns null.
+   */
+  private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key) {
+    // TODO: Support custom type converters from the user.
+
+    if (!isConvertible(key.getTypeLiteral())) {
+      // We can't convert from string to the required type.
+      return null;
+    }
+
+    // Find a constant string binding.
+    Key<String> stringKey = key.ofType(String.class);
+    BindingImpl<String> stringBinding = getExplicitBindingImpl(stringKey);
+    if (stringBinding == null || !stringBinding.isConstant()) {
+      // No constant string binding found.
+      return null;
+    }
+
+    String stringValue = stringBinding.getProvider().get();    
+    Class<? super T> rawType = key.getRawType();
+
+    // Convert to a primitive type. This cast is safe.
+    @SuppressWarnings("unchecked")
+    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
+    if (converter != null) {
+      return convertStringToPrimitive(
+          converter, key, stringValue, stringBinding);
+    }
+
+    // Convert to enum.
+    if (Enum.class.isAssignableFrom(rawType)) {
+      return convertStringToEnum(stringValue, stringBinding, key);
+    }
+
+    // Convert to Class.
+    if (rawType == Class.class) {
+      return convertStringToClass(stringValue, key, stringBinding);
+    }
+
+    // Unreachable.
+    throw new AssertionError();
+  }
+
+  private <T> BindingImpl<T> convertStringToClass(String stringValue, Key<T> key,
+      BindingImpl<String> stringBinding) {
+    try {
+      // TODO: Make sure we use the right classloader.
+      // This cast is safe. We know T is Class.
+      @SuppressWarnings("unchecked")
+      T clazz = (T) Class.forName(stringValue);
+      return new ConvertedConstantBindingImpl<T>(
+          this, key, clazz, stringBinding);
+    }
+    catch (ClassNotFoundException e) {
+      return handleConstantConversionError(stringBinding, key, e);
+    }
+  }
+
+  private <T> BindingImpl<T> convertStringToEnum(String stringValue,
+      BindingImpl<String> stringBinding, Key<T> key) {
+    try {
+      // Raw types: this is safe. We know T is an Enum.
+      @SuppressWarnings("unchecked")
+      T t = (T) Enum.valueOf((Class) key.getRawType(), stringValue);
+      return new ConvertedConstantBindingImpl<T>(this, key, t, stringBinding);
+    }
+    catch (IllegalArgumentException e) {
+      return handleConstantConversionError(stringBinding, key, e);
+    }
+  }
+
+  private <T> BindingImpl<T> convertStringToPrimitive(Converter<T> converter,
+      Key<T> key, String stringValue, BindingImpl<String> stringBinding) {
+    try {
+      T t = converter.convert(key, stringValue);
+      return new ConvertedConstantBindingImpl<T>(this, key, t, stringBinding);
+    }
+    catch (ConstantConversionException e) {
+      return handleConstantConversionError(stringBinding, key, e);
+    }
+  }
+
+  private static class ConvertedConstantBindingImpl<T> extends BindingImpl<T>
+      implements ConvertedConstantBinding<T> {
+
+    final T value;
+    final Provider<T> provider;
+    final Binding<String> originalBinding;
+
+    ConvertedConstantBindingImpl(InjectorImpl injector, Key<T> key, T value,
+        Binding<String> originalBinding) {
+      super(injector, key, SourceProviders.UNKNOWN_SOURCE,
+          new ConstantFactory<T>(value), Scopes.NO_SCOPE);
+      this.value = value;
+      this.provider = Providers.of(value);
+      this.originalBinding = originalBinding;
+    }
+
+    @Override
+    public Provider<T> getProvider() {
+      return this.provider;
+    }
+
+    public void accept(BindingVisitor<? super T> bindingVisitor) {
+      bindingVisitor.visit(this);
+    }
+
+    public T getValue() {
+      return this.value;
+    }
+
+    public Binding<String> getOriginal() {
+      return this.originalBinding;
+    }
+
+    @Override
+    public String toString() {
+      return new ToStringBuilder(ConvertedConstantBinding.class)
+          .add("key", key)
+          .add("value", value)
+          .add("original", originalBinding)
+          .toString();
+    }
+  }
+
+  <T> BindingImpl<T> createBindingFromType(Class<T> type) {
+    // Don't try to inject primitives, arrays, or enums.
+    if (type.isArray() || type.isEnum() || type.isPrimitive()) {
+      return null;
+    }
+
+    // Handle @ImplementedBy
+    ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
+    if (implementedBy != null) {
+      return createImplementedByBinding(type, implementedBy);
+    }
+
+    // Handle @ProvidedBy.
+    ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
+    if (providedBy != null) {
+      return createProvidedByBinding(type, providedBy);
+    }
+
+    return createBindingForInjectableType(type);
+  }
+
+  /**
+   * Creates a binding for an injectable type. Gets the scope from an
+   * annotation on the type.
+   */
+  <T> BindingImpl<T> createBindingForInjectableType(Class<T> type) {
+    return createBindingForInjectableType(type, null,
+        SourceProviders.defaultSource(), true);
+  }
+
+  /**
+   * Creates a binding for an injectable type with the given scope. Looks for
+   * a scope on the type if none is specified.
+   */
+  <T> BindingImpl<T> createBindingForInjectableType(Class<T> type,
+      Scope scope, Object source, boolean isJit) {
+    // We can't inject abstract classes.
+    // TODO: Method interceptors could actually enable us to implement
+    // abstract types. Should we remove this restriction?
+    if (Modifier.isAbstract(type.getModifiers())) {
+      return null;
+    }
+
+    // Error: Inner class.
+    if (Classes.isInnerClass(type)) {
+      errorHandler.handle(SourceProviders.defaultSource(),
+          ErrorMessages.CANNOT_INJECT_INNER_CLASS, type);
+      return invalidBinding(Key.get(type));
+    }
+
+    if (scope == null) {
+      scope = Scopes.getScopeForType(type, scopes, errorHandler);
+    }
+
+    Key<T> key = Key.get(type);
+
+    LateBoundConstructor<T> lateBoundConstructor
+        = new LateBoundConstructor<T>();
+    InternalFactory<? extends T> scopedFactory
+        = Scopes.scope(key, this, lateBoundConstructor, scope);
+
+    BindingImpl<T> binding
+        = new ClassBindingImpl<T>(this, key, source, scopedFactory, scope);
+
+    if (isJit) {
+      // Put the partially constructed binding in the map a little early. This
+      // enables us to handle circular dependencies.
+      // Example: FooImpl -> BarImpl -> FooImpl.
+      jitBindings.put(key, binding);
+    }
+
+    try {
+      lateBoundConstructor.bind(this, type);
+      return binding;
+    }
+    catch (RuntimeException e) {
+      // Clean up state.
+      if (isJit) {
+        jitBindings.remove(key);
+      }
+      throw e;
+    }
+    catch (Throwable t) {
+      // Clean up state.
+      if (isJit) {
+        jitBindings.remove(key);
+      }
+      throw new AssertionError(t);
+    }
+  }
+
+  static class LateBoundConstructor<T> implements InternalFactory<T> {
+
+    ConstructorInjector<T> constructorInjector;
+
+    void bind(
+        InjectorImpl injector, Class<T> implementation) {
+      this.constructorInjector = injector.getConstructor(implementation);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T get(InternalContext context) {
+      // We know this cast is safe (assuming getConstructor() is safe).
+      return (T) constructorInjector.construct(
+          context, context.getExpectedType());
+    }
+  }
+
+  /**
+   * Creates a binding for a type annotated with @ImplementedBy.
+   */
+  <T> BindingImpl<T> createProvidedByBinding(final Class<T> type,
+      ProvidedBy providedBy) {
+    final Class<? extends Provider<?>> providerType = providedBy.value();
+
+    // Make sure it's not the same type. TODO: Can we check for deeper loops?
+    if (providerType == type) {
+      errorHandler.handle(StackTraceElements.forType(type),
+          ErrorMessages.RECURSIVE_PROVIDER_TYPE, type);
+      return invalidBinding(type);
+    }
+
+    // TODO: Make sure the provided type extends type. We at least check
+    // the type at runtime below.
+
+    // Assume the provider provides an appropriate type. We double check at
+    // runtime.
+    @SuppressWarnings("unchecked")
+    Key<? extends Provider<T>> providerKey
+        = (Key<? extends Provider<T>>) Key.get(providerType);
+    final BindingImpl<? extends Provider<?>> providerBinding
+        = getBinding(providerKey);
+
+    if (providerBinding == null) {
+      errorHandler.handle(StackTraceElements.forType(type),
+          ErrorMessages.BINDING_NOT_FOUND, type);
+      return invalidBinding(type);
+    }
+
+    InternalFactory<T> internalFactory = new InternalFactory<T>() {
+      public T get(InternalContext context) {
+        Provider<?> provider = providerBinding.internalFactory.get(context);
+        Object o = provider.get();
+        try {
+          return type.cast(o);
+        } catch (ClassCastException e) {
+          errorHandler.handle(StackTraceElements.forType(type),
+              ErrorMessages.SUBTYPE_NOT_PROVIDED, providerType, type);
+          throw new AssertionError();
+        }
+      }
+    };
+
+    return new LinkedProviderBindingImpl<T>(this, Key.get(type),
+        StackTraceElements.forType(type), internalFactory, Scopes.NO_SCOPE,
+        providerKey);
+  }
+
+  /**
+   * Creates a binding for a type annotated with @ImplementedBy.
+   */
+  <T> BindingImpl<T> createImplementedByBinding(Class<T> type,
+      ImplementedBy implementedBy) {
+    // TODO: Use scope annotation on type if present. Right now, we always
+    // use NO_SCOPE.
+
+    Class<?> implementationType = implementedBy.value();
+
+    // Make sure it's not the same type. TODO: Can we check for deeper cycles?
+    if (implementationType == type) {
+      errorHandler.handle(StackTraceElements.forType(type),
+          ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE, type);
+      return invalidBinding(type);
+    }
+
+    // Make sure implementationType extends type.
+    if (!type.isAssignableFrom(implementationType)) {
+      errorHandler.handle(StackTraceElements.forType(type),
+          ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
+      return invalidBinding(type);
+    }
+
+    // After the preceding check, this cast is safe.
+    @SuppressWarnings("unchecked")
+    Class<? extends T> subclass = (Class<? extends T>) implementationType;
+
+    // Look up the target binding.
+    final BindingImpl<? extends T> targetBinding
+        = getBinding(Key.get(subclass));
+
+    if (targetBinding == null) {
+      errorHandler.handle(StackTraceElements.forType(type),
+          ErrorMessages.BINDING_NOT_FOUND, type);
+      return invalidBinding(type);
+    }
+
+    InternalFactory<T> internalFactory = new InternalFactory<T>() {
+      public T get(InternalContext context) {
+        return targetBinding.internalFactory.get(context);
+      }
+    };
+
+    return new LinkedBindingImpl<T>(this, Key.get(type), 
+        StackTraceElements.forType(type), internalFactory, Scopes.NO_SCOPE,
+        Key.get(subclass));
+  }
+
+  <T> BindingImpl<T> createBindingJustInTime(Key<T> key) {
+    // Handle cases where T is a Provider<?>.
+    if (isProvider(key)) {
+      return createProviderBindingUnsafely(key);
+    }
+
+    // Treat primitive types and their wrappers interchangeably.
+    BindingImpl<T> boxedOrUnboxed = getBoxedOrUnboxedBinding(key);
+    if (boxedOrUnboxed != null) {
+      return boxedOrUnboxed;
+    }
+
+    // Try to convert a constant string binding to the requested type.
+    BindingImpl<T> convertedBinding = convertConstantStringBinding(key);
+    if (convertedBinding != null) {
+      return convertedBinding;
+    }
+
+    // If the key has an annotation...
+    if (key.hasAnnotationType()) {
+      // Look for a binding without annotation attributes or return null.
+      return key.hasAttributes()
+          ? getBinding(key.withoutAttributes()) : null;
+    }
+
+    Type type = key.getTypeLiteral().getType();
+
+    // If the keys type isn't a Class, bail out.
+    if (!(type instanceof Class)) {
+      return null;
+    }
+
+    // This is safe after the preceding check.
+    @SuppressWarnings("unchecked")
+    Class<T> clazz = (Class<T>) type;
+
+    // Create a binding based on the type.
+    return createBindingFromType(clazz);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> BindingImpl<T> createProviderBindingUnsafely(Key<T> key) {
+    // These casts are safe. We know T extends Provider<X> and that given
+    // Key<Provider<X>>, createProviderBinding() will return
+    // BindingImpl<Provider<X>>.
+    // noinspection unchecked
+    return (BindingImpl<T>) createProviderBinding((Key) key);
+  }
+
+  <T> InternalFactory<? extends T> getInternalFactory(Key<T> key) {
+    BindingImpl<T> binding = getBinding(key);
+    return binding == null ? null : binding.internalFactory;
+  }
+
+  private <T> BindingImpl<T> handleConstantConversionError(
+      Binding<String> stringBinding, Key<T> key, Exception e) {
     errorHandler.handle(
-        StackTraceElements.forMember(member),
+        SourceProviders.defaultSource(),
         ErrorMessages.CONSTANT_CONVERSION_ERROR,
         stringBinding.getSource(),
-        rawType,
+        key.getRawType(),
         e.getMessage());
-    return invalidFactory();
+    return invalidBinding(key);
   }
 
   /**
@@ -396,20 +779,12 @@ class InjectorImpl implements Injector {
   }
 
   Map<Key<?>, BindingImpl<?>> internalBindings() {
-    return bindings;
+    return explicitBindings;
   }
 
   // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
-    return Collections.<Key<?>, Binding<?>>unmodifiableMap(bindings);
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T> BindingImpl<T> getBinding(Key<T> key) {
-    // TODO: Create binding objects for implicit bindings on the fly. This
-    // includes classes, Provider<X>, converted constants, etc.
-    
-    return (BindingImpl<T>) bindings.get(key);
+    return Collections.<Key<?>, Binding<?>>unmodifiableMap(explicitBindings);
   }
 
   interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
@@ -453,16 +828,23 @@ class InjectorImpl implements Injector {
     final InternalFactory<?> factory;
     final ExternalContext<?> externalContext;
 
-    public SingleFieldInjector(InjectorImpl injector, Field field)
+    public SingleFieldInjector(final InjectorImpl injector, Field field)
         throws MissingDependencyException {
       this.field = field;
 
       // Ewwwww...
       field.setAccessible(true);
 
-      Key<?> key = Key.get(
+      final Key<?> key = Key.get(
           field.getGenericType(), field, field.getAnnotations(), errorHandler);
-      factory = injector.getInternalFactory(field, key);
+      factory = SourceProviders.withDefault(StackTraceElements.forMember(field),
+        new Callable<InternalFactory<?>>() {
+          public InternalFactory<?> call() throws Exception {
+            return injector.getInternalFactory(key);
+          }
+        }
+      );
+
       if (factory == null) {
         throw new MissingDependencyException(key, field);
       }
@@ -525,9 +907,17 @@ class InjectorImpl implements Injector {
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(
-      Key<T> key, Member member, int index, Annotation[] annotations)
+      final Key<T> key, Member member, int index, Annotation[] annotations)
       throws MissingDependencyException {
-    InternalFactory<? extends T> factory = getInternalFactory(member, key);
+    InternalFactory<? extends T> factory =
+        SourceProviders.withDefault(StackTraceElements.forMember(member),
+      new Callable<InternalFactory<? extends T>>() {
+        public InternalFactory<? extends T> call() throws Exception {
+          return getInternalFactory(key);
+        }
+      }
+    );
+
     if (factory == null) {
       throw new MissingDependencyException(key, member);
     }
@@ -605,12 +995,12 @@ class InjectorImpl implements Injector {
     @SuppressWarnings("unchecked")
     protected ConstructorInjector<?> create(Class<?> implementation) {
       if (!Classes.isConcrete(implementation)) {
-        errorHandler.handle(defaultSource,
+        errorHandler.handle(SourceProviders.defaultSource(),
             ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
         return ConstructorInjector.invalidConstructor();
       }
       if (Classes.isInnerClass(implementation)) {
-        errorHandler.handle(defaultSource,
+        errorHandler.handle(SourceProviders.defaultSource(),
             ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
         return ConstructorInjector.invalidConstructor();
       }
@@ -713,12 +1103,11 @@ class InjectorImpl implements Injector {
     return getProvider(Key.get(type));
   }
 
-  public <T> Provider<T> getProvider(final Key<T> key) {
-    final InternalFactory<? extends T> factory = getInternalFactory(null, key);
+  <T> Provider<T> maybeGetProvider(final Key<T> key) {
+    final InternalFactory<? extends T> factory = getInternalFactory(key);
 
     if (factory == null) {
-      throw new ConfigurationException(
-          "Missing binding to " + ErrorMessages.convert(key) + ".");
+      return null;
     }
 
     return new Provider<T>() {
@@ -743,6 +1132,17 @@ class InjectorImpl implements Injector {
     };
   }
 
+  public <T> Provider<T> getProvider(final Key<T> key) {
+    Provider<T> provider = maybeGetProvider(key);
+
+    if (provider == null) {
+      throw new ConfigurationException(
+          "Missing binding to " + ErrorMessages.convert(key) + ".");
+    }
+
+    return provider;
+  }
+
   public <T> T getInstance(Key<T> key) {
     return getProvider(key).get();
   }
@@ -757,6 +1157,14 @@ class InjectorImpl implements Injector {
       return new InternalContext[1];
     }
   };
+
+  /**
+   * Gets context for the current thread. Returns null if no context has been
+   * set up.
+   */
+  InternalContext getContext() {
+    return localContext.get()[0];
+  }
 
   /**
    * Looks up thread local context. Creates (and removes) a new context if
@@ -831,12 +1239,11 @@ class InjectorImpl implements Injector {
 
       // Character doesn't follow the same pattern.
       Converter<Character> characterConverter = new Converter<Character>() {
-        public Character convert(Member member, Key<Character> key,
+        public Character convert(Key<Character> key,
             String value) throws ConstantConversionException {
           value = value.trim();
           if (value.length() != 1) {
-            throw new ConstantConversionException(member, key, value,
-                "Length != 1.");
+            throw new ConstantConversionException(key, value, "Length != 1.");
           }
           return value.charAt(0);
         }
@@ -852,7 +1259,7 @@ class InjectorImpl implements Injector {
             "parse" + Strings.capitalize(primitive.getName()), String.class);
         Converter<T> converter = new Converter<T>() {
           @SuppressWarnings("unchecked")
-          public T convert(Member member, Key<T> key, String value)
+          public T convert(Key<T> key, String value)
               throws ConstantConversionException {
             try {
               return (T) parser.invoke(null, value);
@@ -861,8 +1268,8 @@ class InjectorImpl implements Injector {
               throw new AssertionError(e);
             }
             catch (InvocationTargetException e) {
-              throw new ConstantConversionException(member, key, value,
-                  e.getTargetException());
+              throw new ConstantConversionException(
+                  key, value, e.getTargetException());
             }
           }
         };
@@ -883,168 +1290,13 @@ class InjectorImpl implements Injector {
     /**
      * Converts {@code String} value.
      */
-    T convert(Member member, Key<T> key, String value)
+    T convert(Key<T> key, String value)
         throws ConstantConversionException;
-  }
-
-  Map<Class<?>, InternalFactory<?>> implicitBindings =
-      new HashMap<Class<?>, InternalFactory<?>>();
-
-  /**
-   * Gets a factory for the specified type. Used when an explicit binding
-   * was not made. Uses synchronization here so it's not necessary in the
-   * factory itself. Returns {@code null} if the type isn't injectable.
-   */
-  <T> InternalFactory<? extends T> getImplicitBinding(Member member,
-      final Class<T> type, Scope scope) {
-    // Look for @DefaultImplementation.
-    ImplementedBy implementedBy =
-        type.getAnnotation(ImplementedBy.class);
-    if (implementedBy != null) {
-      Class<?> implementationType = implementedBy.value();
-
-      // Make sure it's not the same type. TODO: Can we check for deeper loops?
-      if (implementationType == type) {
-        errorHandler.handle(StackTraceElements.forType(type),
-            ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE, type);
-        return invalidFactory();
-      }
-
-      // Make sure implementationType extends type.
-      if (!type.isAssignableFrom(implementationType)) {
-        errorHandler.handle(StackTraceElements.forType(type),
-            ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
-        return invalidFactory();
-      }
-
-      return (InternalFactory<T>) getInternalFactory(
-          member, Key.get(implementationType));      
-    }
-
-    // Look for @DefaultProvider.
-    ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
-    if (providedBy != null) {
-      final Class<? extends Provider<?>> providerType = providedBy.value();
-
-      // Make sure it's not the same type. TODO: Can we check for deeper loops?
-      if (providerType == type) {
-        errorHandler.handle(StackTraceElements.forType(type),
-            ErrorMessages.RECURSIVE_PROVIDER_TYPE, type);
-        return invalidFactory();
-      }
-
-      // TODO: Make sure the provided type extends type. We at least check
-      // the type at runtime below.
-
-      InternalFactory<? extends Provider<?>> providerFactory
-          = getInternalFactory(member, Key.get(providerType));
-      Key<? extends Provider<?>> providerKey = Key.get(providerType);
-      return (InternalFactory<T>) new BoundProviderFactory(
-          providerKey, providerFactory, StackTraceElements.forType(type)) {
-        public Object get(InternalContext context) {
-          Object o = super.get(context);
-          try {
-            return type.cast(o);
-          } catch (ClassCastException e) {
-            errorHandler.handle(StackTraceElements.forType(type),
-                ErrorMessages.SUBTYPE_NOT_PROVIDED, providerType, type);
-            throw new AssertionError();
-          }
-        }
-      };
-    }
-
-    // TODO: Method interceptors could actually enable us to implement
-    // abstract types. Should we remove this restriction?
-    if (Modifier.isAbstract(type.getModifiers())) {
-      return null;
-    }
-
-    // Inject the class itself.
-    synchronized (implicitBindings) {
-      @SuppressWarnings("unchecked")
-      InternalFactory<T> factory =
-          (InternalFactory<T>) implicitBindings.get(type);
-      if (factory != null) {
-        return factory;
-      }
-
-      // Create the factory.
-      ImplicitBinding<T> implicitBinding = new ImplicitBinding<T>(type);
-
-      // Scope the factory if necessary.
-
-      // If we don't have a scope from the configuration, look for one on
-      // the type.
-      if (scope == null) {
-        scope = Scopes.getScopeForType(type, scopes, errorHandler);
-      }
-
-      InternalFactory<? extends T> scoped;
-      if (scope != null) {
-        scoped = Scopes.scope(Key.get(type), this, implicitBinding, scope);
-      } else {
-        scoped = implicitBinding;
-      }
-
-      implicitBindings.put(type, scoped);
-
-      try {
-        // Look up the constructor. We do this separately from constructions to
-        // support circular dependencies.
-        ConstructorInjector<T> constructor = getConstructor(type);
-        implicitBinding.setConstructorInjector(constructor);
-      }
-      catch (RuntimeException e) {
-        // Clean up state.
-        implicitBindings.remove(type);
-        throw e;
-      }
-      catch (Throwable t) {
-        // Clean up state.
-        implicitBindings.remove(type);
-        throw new AssertionError(t);
-      }
-      
-      return scoped;
-    }
-  }
-
-  static class ImplicitBinding<T> implements InternalFactory<T> {
-
-    final Class<T> implementation;
-    ConstructorInjector<T> constructorInjector;
-
-    ImplicitBinding(Class<T> implementation) {
-      this.implementation = implementation;
-    }
-
-    void setConstructorInjector(
-        ConstructorInjector<T> constructorInjector) {
-      this.constructorInjector = constructorInjector;
-    }
-
-    public T get(InternalContext context) {
-      return context.sanitize((T) constructorInjector.construct(
-          context, context.getExpectedType()), SourceProviders.UNKNOWN_SOURCE);
-    }
-  }
-
-  private static final InternalFactory<?> INVALID_FACTORY
-      = new InternalFactory<Object>() {
-    public Object get(InternalContext context) {
-      throw new AssertionError();
-    }
-  };
-
-  @SuppressWarnings("unchecked")
-  static <T> InternalFactory<T> invalidFactory() {
-    return (InternalFactory<T>) INVALID_FACTORY;
   }
 
   public String toString() {
     return new ToStringBuilder(Injector.class)
-        .add("bindings", bindings)
+        .add("bindings", explicitBindings)
         .toString();
   }
 }

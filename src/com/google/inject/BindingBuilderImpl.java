@@ -27,11 +27,10 @@ import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.internal.Classes;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.LinkedBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
-import com.google.inject.spi.LinkedProviderBinding;
-import com.google.inject.spi.ClassBinding;
+import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.logging.Logger;
 
 /**
@@ -149,22 +148,13 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
   public void toInstance(T instance) {
     ensureImplementationIsNotSet();
     this.instance = instance;
-    this.factory = new ConstantFactory<T>(instance, source);
+    this.factory = new ConstantFactory<T>(instance);
     registerInstanceForInjection(instance);
 
     // TODO: I don't think this can happen anymore.
     if (this.scope != null) {
       binder.addError(source, ErrorMessages.SINGLE_INSTANCE_AND_SCOPE);
     }
-  }
-
-  /**
-   * Binds to instances from the given factory.
-   */
-  BindingBuilderImpl<T> to(InternalFactory<? extends T> factory) {
-    ensureImplementationIsNotSet();
-    this.factory = factory;
-    return this;
   }
 
   public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
@@ -273,125 +263,60 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
             injector, key, source, scopedFactory, scope, providerKey);
       }
 
-      // Unknown binding type. We just have a raw internal factory.
-      // This happens with the Injector binding, for example.
-      return new UnknownBindingImpl<T>(injector, key, source, scopedFactory);
-
+      throw new AssertionError();
     } else {
       // If we're here, the type we bound to is also the implementation.
       // Example: bind(FooImpl.class).in(Scopes.SINGLETON);
 
-      Class<?> rawType = key.getRawType();
-
-      // Error: Inner class.
-      if (Classes.isInnerClass(rawType)) {
-        injector.errorHandler.handle(source,
-            ErrorMessages.CANNOT_INJECT_INNER_CLASS, rawType);
-        return invalidBinding(injector);
-      }
+      Type type = key.getTypeLiteral().getType();
 
       // Error: Missing implementation.
-      // Example: bind(Runnable.class);
       // Example: bind(Date.class).annotatedWith(Red.class);
-      if (key.hasAnnotationType() || !Classes.isConcrete(rawType)) {
+      // We can't assume abstract types aren't injectable. They may have an
+      // @ImplementedBy annotation or something.
+      if (key.hasAnnotationType() || !(type instanceof Class<?>)) {
         injector.errorHandler.handle(source,
             ErrorMessages.MISSING_IMPLEMENTATION);
         return invalidBinding(injector);
       }
 
-      final ImplicitImplementation<T> implicitImplementation =
-          new ImplicitImplementation<T>(key, scope, source);
-      binder.creationListeners.add(implicitImplementation);
+      // This cast is safe after the preceeding check.
+      // noinspection unchecked
+      Class<T> clazz = (Class<T>) type;
 
-      // We need to record the scope. If it's singleton, we'll preload in prod.
-      if (this.scope == null) {
-        // We can ignore errors because the error will already have been
-        // recorded.
-        this.scope = Scopes.getScopeForType(
-            key.getTypeLiteral().getRawType(), binder.scopes, IGNORE_ERRORS);
+      BindingImpl<T> binding = injector.createBindingForInjectableType(
+          clazz, scope, source, false);
 
-        if (this.scope == null) {
-          this.scope = Scopes.NO_SCOPE;
-        }
+      if (binding == null) {
+        injector.errorHandler.handle(source,
+            ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, clazz);
+        return invalidBinding(injector);
       }
 
-      return new ClassBindingImpl<T>(injector, key, source,
-          implicitImplementation, scope);
+      return binding;
     }
   }
 
-  InvalidBinding<T> invalidBinding(InjectorImpl injector) {
-    return new InvalidBinding<T>(injector, key, source);
-  }
-
-  private static class InvalidBinding<T> extends BindingImpl<T> {
-
-    InvalidBinding(InjectorImpl injector, Key<T> key, Object source) {
-      super(injector, key, source, new InternalFactory<T>() {
-        public T get(InternalContext context) {
-          throw new AssertionError();
-        }
-      }, Scopes.NO_SCOPE);
-    }
-
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      throw new AssertionError();
-    }
-
-    public String toString() {
-      return "InvalidBinding";
-    }
-  }
-
-  private static class ClassBindingImpl<T> extends BindingImpl<T>
-      implements ClassBinding<T> {
-
-    ClassBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-        InternalFactory<? extends T> internalFactory, Scope scope) {
-      super(injector, key, source, internalFactory, scope);
-    }
-
-    public void accept(BindingVisitor<? super T> visitor) {
-      visitor.visit(this);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Class<T> getBoundClass() {
-      // T should always be the class itself.
-      return (Class<T>) key.getRawType();
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringBuilder(ClassBinding.class)
-          .add("class", getBoundClass())
-          .add("scope", scope)
-          .add("source", source)
-          .toString();
-    }
-  }
-
-  private static class UnknownBindingImpl<T> extends BindingImpl<T> {
-
-    UnknownBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-        InternalFactory<? extends T> internalFactory) {
-      super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
-    }
-
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      bindingVisitor.visitUnknown(this);
-    }
+  InvalidBindingImpl<T> invalidBinding(InjectorImpl injector) {
+    return new InvalidBindingImpl<T>(injector, key, source);
   }
 
   private static class InstanceBindingImpl<T> extends BindingImpl<T>
       implements InstanceBinding<T> {
 
     final T instance;
+    final Provider<T> provider;
 
     InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
         InternalFactory<? extends T> internalFactory, T instance) {
       super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
       this.instance = instance;
+      this.provider = Providers.of(instance);
+    }
+
+    @Override
+    public Provider<T> getProvider() {
+      return this.provider;
     }
 
     public void accept(BindingVisitor<? super T> bindingVisitor) {
@@ -407,37 +332,6 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       return new ToStringBuilder(InstanceBinding.class)
           .add("key", key)
           .add("instance", instance)
-          .add("source", source)
-          .toString();
-    }
-  }
-
-  private static class LinkedBindingImpl<T> extends BindingImpl<T>
-      implements LinkedBinding<T> {
-
-    final Key<? extends T> targetKey;
-
-    LinkedBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-        InternalFactory<? extends T> internalFactory, Scope scope,
-        Key<? extends T> targetKey) {
-      super(injector, key, source, internalFactory, scope);
-      this.targetKey = targetKey;
-    }
-
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      bindingVisitor.visit(this);
-    }
-
-    public Binding<? extends T> getTarget() {
-      return injector.getBinding(targetKey);
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringBuilder(LinkedBinding.class)
-          .add("key", key)
-          .add("target", targetKey)
-          .add("scope", scope)
           .add("source", source)
           .toString();
     }
@@ -475,41 +369,6 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
     }
   }
 
-  private static class LinkedProviderBindingImpl<T> extends BindingImpl<T>
-      implements LinkedProviderBinding<T> {
-
-    final Key<? extends Provider<? extends T>> providerKey;
-
-    LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-        InternalFactory<? extends T> internalFactory, Scope scope,
-        Key<? extends Provider<? extends T>> providerKey) {
-      super(injector, key, source, internalFactory, scope);
-      this.providerKey = providerKey;
-    }
-
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      bindingVisitor.visit(this);
-    }
-
-    public Binding<? extends Provider<? extends T>> getTargetProvider() {
-      return injector.getBinding(providerKey);
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringBuilder(LinkedProviderBinding.class)
-          .add("key", key)
-          .add("provider", providerKey)
-          .add("scope", scope)
-          .add("source", source)
-          .toString();
-    }
-  }
-
-  boolean isSingletonScoped() {
-    return this.scope == Scopes.SINGLETON;
-  }
-
   void registerInstanceForInjection(final Object o) {
     binder.membersInjectors.add(new MembersInjector(o));
   }
@@ -536,7 +395,7 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
     public void notify(final InjectorImpl injector) {
       injector.withDefaultSource(source, new Runnable() {
         public void run() {
-          targetFactory = injector.getInternalFactory(null, targetKey);
+          targetFactory = injector.getInternalFactory(targetKey);
         }
       });
     }
@@ -549,41 +408,6 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       return new ToStringBuilder(FactoryProxy.class)
           .add("key", key)
           .add("provider", targetFactory)
-          .toString();
-    }
-  }
-
-  private static class ImplicitImplementation<T> implements InternalFactory<T>,
-      CreationListener {
-
-    private final Key<T> key;
-    private final Object source;
-    private final Scope scope;
-    InternalFactory<? extends T> implicitFactory;
-
-    ImplicitImplementation(Key<T> key, Scope scope, Object source) {
-      this.key = key;
-      this.scope = scope;
-      this.source = source;
-    }
-
-    public void notify(final InjectorImpl injector) {
-      injector.withDefaultSource(source, new Runnable() {
-        public void run() {
-          implicitFactory = injector.getImplicitBinding(null,
-              (Class) key.getTypeLiteral().getRawType(), scope);
-        }
-      });
-    }
-
-    public T get(InternalContext context) {
-      return implicitFactory.get(context);
-    }
-
-    public String toString() {
-      return new ToStringBuilder(FactoryProxy.class)
-          .add("key", key)
-          .add("provider", implicitFactory)
           .toString();
     }
   }

@@ -64,7 +64,8 @@ abstract class BindingImpl<T> implements Binding<T> {
   }
 
   /**
-   * Is this a constant binding?
+   * Is this a constant binding? This returns true for constant bindings as
+   * well as toInstance() bindings.
    */
   boolean isConstant() {
     return internalFactory instanceof ConstantFactory<?>;

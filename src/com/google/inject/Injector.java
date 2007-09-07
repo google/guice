@@ -58,14 +58,19 @@ public interface Injector {
   void injectMembers(Object o);
 
   /**
-   * Gets all explicit bindings.  This method is part of the Injector
+   * Gets all explicit bindings.
+   *
+   * <p>This method is part of the Injector
    * Introspection API and is primarily intended for use by tools.
    */
   Map<Key<?>, Binding<?>> getBindings();
 
   /**
    * Gets a binding for the given key, or null if no binding for this key is
-   * found. This method is part of the Injector Introspection API and is
+   * found. Returns explicit bindings as well as those synthesized by the
+   * container such as bindings for converted constants, etc.
+   *
+   * <p>This method is part of the Injector Introspection API and is
    * primarily intended for use by tools.
    */
   <T> Binding<T> getBinding(Key<T> key);

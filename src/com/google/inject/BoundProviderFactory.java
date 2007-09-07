@@ -47,7 +47,7 @@ class BoundProviderFactory<T>
   public void notify(final InjectorImpl injector) {
     injector.withDefaultSource(source, new Runnable() {
       public void run() {
-        providerFactory = injector.getInternalFactory(null, providerKey);
+        providerFactory = injector.getInternalFactory(providerKey);
       }
     });
   }

@@ -75,32 +75,6 @@ class BinderImpl implements Binder {
 
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
-  private static final InternalFactory<Injector> INJECTOR_FACTORY
-      = new InternalFactory<Injector>() {
-    public Injector get(InternalContext context) {
-      return context.getInjectorImpl();
-    }
-
-    public String toString() {
-      return "Provider<Injector>";
-    }
-  };
-
-  private static final InternalFactory<Logger> LOGGER_FACTORY
-      = new InternalFactory<Logger>() {
-    // not test-covered?
-    public Logger get(InternalContext context) {
-      Member member = context.getExternalContext().getMember();
-      return member == null
-          ? Logger.getAnonymousLogger()
-          : Logger.getLogger(member.getDeclaringClass().getName());
-    }
-
-    public String toString() {
-      return "Provider<Logger>";
-    }
-  };
-
   final ProxyFactoryBuilder proxyFactoryBuilder;
 
   /**
@@ -112,9 +86,9 @@ class BinderImpl implements Binder {
   public BinderImpl(Stage stage) {
     bindScope(Singleton.class, SINGLETON);
 
-    bind(Injector.class).to(INJECTOR_FACTORY);
-    bind(Logger.class).to(LOGGER_FACTORY);
-    bind(Stage.class).toInstance(stage);
+    bind(Logger.class, SourceProviders.UNKNOWN_SOURCE)
+        .toProvider(new LoggerProvider());
+    bind(Stage.class, SourceProviders.UNKNOWN_SOURCE).toInstance(stage);
 
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
 
@@ -188,10 +162,28 @@ class BinderImpl implements Binder {
     }
   }
 
+  static boolean inGuiceNamespace(Class<?> clazz) {
+    return clazz == Provider.class
+        || clazz == Injector.class
+        || clazz == Stage.class;
+  }
+
   public <T> BindingBuilderImpl<T> bind(Key<T> key) {
+    Object source = source();
+
     BindingBuilderImpl<T> builder =
-        new BindingBuilderImpl<T>(this, key, source());
-    bindingBuilders.add(builder);
+        new BindingBuilderImpl<T>(this, key, source);
+
+    Class<? super T> rawType = key.getTypeLiteral().getRawType();
+
+    if (inGuiceNamespace(rawType)) {
+      addError(source, ErrorMessages.BINDING_TO_GUICE_TYPE);
+    } else if (Logger.class == rawType) {
+      addError(source, ErrorMessages.LOGGER_ALREADY_BOUND);
+    } else {
+      bindingBuilders.add(builder);
+    }
+
     return builder;
   }
 
@@ -201,6 +193,17 @@ class BinderImpl implements Binder {
 
   public <T> BindingBuilderImpl<T> bind(Class<T> clazz) {
     return bind(Key.get(clazz));
+  }
+
+  /**
+   * Internal use only.
+   */
+  <T> BindingBuilderImpl<T> bind(Class<T> clazz, Object source) {
+    Key<T> key = Key.get(clazz);
+    BindingBuilderImpl<T> builder =
+        new BindingBuilderImpl<T>(this, key, source);
+    bindingBuilders.add(builder);
+    return builder;
   }
 
   public ConstantBindingBuilderImpl bindConstant() {
@@ -266,6 +269,10 @@ class BinderImpl implements Binder {
         = new HashMap<Key<?>, BindingImpl<?>>();
     injector = new InjectorImpl(
         proxyFactoryBuilder.create(), bindings, scopes);
+
+    // Create default bindings.
+    bind(Injector.class, SourceProviders.UNKNOWN_SOURCE).toInstance(injector);
+
     injector.setErrorHandler(configurationErrorHandler);
 
     createConstantBindings();
@@ -363,7 +370,7 @@ class BinderImpl implements Binder {
 
     // Register to preload if necessary.
     boolean preload = stage == Stage.PRODUCTION;
-    if (builder.isSingletonScoped()) {
+    if (binding.getScope() == Scopes.SINGLETON) {
       if (preload || builder.shouldPreload()) {
         preloaders.add(
             new BindingPreloader(binding.key, binding.internalFactory));
@@ -579,5 +586,21 @@ class BinderImpl implements Binder {
   @SuppressWarnings("unchecked")
   static <T> Provider<T> illegalProvider() {
     return (Provider<T>) ILLEGAL_PROVIDER;
+  }
+
+  static class LoggerProvider implements Provider<Logger> {
+
+    @Inject Injector injector;
+    public Logger get() {
+      InternalContext context = ((InjectorImpl) injector).getContext();
+      Member member = context.getExternalContext().getMember();
+      return member == null
+          ? Logger.getAnonymousLogger()
+          : Logger.getLogger(member.getDeclaringClass().getName());
+    }
+
+    public String toString() {
+      return "Provider<Logger>";
+    }
   }
 }

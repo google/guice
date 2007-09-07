@@ -16,8 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
-
 /**
  * Visits bindings. Pass an implementation of {@code BindingVisitor} to
  * {@link com.google.inject.Binding#accept(BindingVisitor)} and the binding
@@ -43,9 +41,16 @@ public interface BindingVisitor<T> {
   void visit(ProviderInstanceBinding<? extends T> binding);
 
   /**
-   * Visits a binding to provider which is also bound.
+   * Visits a binding which resolves instances from a bound provider.
    */
   void visit(LinkedProviderBinding<? extends T> binding);
+
+  /**
+   * Visits a synthetic binding to the provider from a binding.
+   */
+  // To provide any more type safety, the compiler would have to know that
+  // T extends Provider<X>.
+  void visit(ProviderBinding<?> binding);
 
   /**
    * Visits a class binding.
@@ -58,9 +63,7 @@ public interface BindingVisitor<T> {
   void visit(ConstantBinding<? extends T> binding);
 
   /**
-   * Visits a binding of unknown type. This method will be called for internal
-   * bindings and for future binding types which your visitor doesn't know
-   * about.
+   * Visits a converted constant binding.
    */
-  void visitUnknown(Binding<? extends T> binding);
+  void visit(ConvertedConstantBinding<? extends T> binding);
 }

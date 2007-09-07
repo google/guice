@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2006 Google Inc.
+/*
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.spi;
 
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.Binding;
 
 /**
+ * A binding which was converted from a string contant.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstantFactory<T> implements InternalFactory<T> {
+public interface ConvertedConstantBinding<T> extends ConstantBinding<T> {
 
-  private final T value;
-
-  public ConstantFactory(T value) {
-    this.value = value;
-  }
-
-  public T get(InternalContext context) {
-    return value;
-  }
-
-  public String toString() {
-    return new ToStringBuilder(ConstantFactory.class)
-        .add("value", value)
-        .toString();
-  }
+  /**
+   * Gets the binding that we converted to create this binding.
+   */
+  Binding<String> getOriginal();
 }

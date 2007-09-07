@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * Provides access to the default {@link SourceProvider} implementation and
@@ -97,6 +98,57 @@ public class SourceProviders {
     } finally {
       holder[0] = previous;
     }
+  }
+
+  /**
+   * Sets the default source, runs the given command, and then
+   * restores the previous default source provider.
+   */
+  public static void withDefault(
+      final Object source, Runnable r) {
+    withDefault(new SourceProvider() {
+      public Object source() {
+        return source;
+      }
+    }, r);
+  }
+
+  /**
+   * Sets the default source provider, runs the given command, and then
+   * restores the previous default source provider. Wraps checked exceptions
+   * with a RuntimeException.
+   */
+  public static <T> T withDefault(
+      SourceProvider sourceProvider, Callable<T> c) {
+    // We use a holder so we perform only 1 thread local access instead of 3.
+    SourceProvider[] holder = localSourceProvider.get();
+    SourceProvider previous = holder[0];
+    try {
+      holder[0] = sourceProvider;
+      return c.call();
+    } catch (Error e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      holder[0] = previous;
+    }
+  }
+
+  /**
+   * Sets the default source, runs the given command, and then
+   * restores the previous default source provider. Wraps checked exceptions
+   * with a RuntimeException.
+   */
+  public static <T> T withDefault(
+      final Object source, Callable<T> c) {
+    return withDefault(new SourceProvider() {
+      public Object source() {
+        return source;
+      }
+    }, c);
   }
 
   static class StacktraceSourceProvider implements SourceProvider {

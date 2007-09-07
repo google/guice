@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2006 Google Inc.
+/*
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,23 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.BindingVisitor;
 
-/**
- * @author crazybob@google.com (Bob Lee)
- */
-class ConstantFactory<T> implements InternalFactory<T> {
+class InvalidBindingImpl<T> extends BindingImpl<T> {
 
-  private final T value;
-
-  public ConstantFactory(T value) {
-    this.value = value;
+  InvalidBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
+    super(injector, key, source, new InternalFactory<T>() {
+      public T get(InternalContext context) {
+        throw new AssertionError();
+      }
+    }, Scopes.NO_SCOPE);
   }
 
-  public T get(InternalContext context) {
-    return value;
+  public void accept(BindingVisitor<? super T> bindingVisitor) {
+    throw new AssertionError();
   }
 
   public String toString() {
-    return new ToStringBuilder(ConstantFactory.class)
-        .add("value", value)
-        .toString();
+    return "InvalidBinding";
   }
 }

@@ -25,10 +25,11 @@ import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ConstantBinding;
+import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 
 /**
-   * Builds a constant binding.
+ * Builds a constant binding.
  */
 class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
     ConstantBindingBuilder {
@@ -160,7 +161,7 @@ class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
 
     BindingImpl<T> createBinding(InjectorImpl injector) {
       Key<T> key = Key.get(type, annotationStrategy);
-      ConstantFactory<T> factory = new ConstantFactory<T>(value, source);
+        ConstantFactory<T> factory = new ConstantFactory<T>(value);
       return new ContantBindingImpl<T>(injector, key, source, factory, value);
     }
   }
@@ -169,11 +170,18 @@ class ConstantBindingBuilderImpl implements AnnotatedConstantBindingBuilder,
       implements ConstantBinding<T> {
 
     final T value;
+    final Provider<T> provider;
 
     ContantBindingImpl(InjectorImpl injector, Key<T> key, Object source,
         InternalFactory<T> internalFactory, T value) {
       super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
       this.value = value;
+      this.provider = Providers.of(value);
+    }
+
+    @Override
+    public Provider<T> getProvider() {
+      return this.provider;
     }
 
     public void accept(BindingVisitor<? super T> bindingVisitor) {

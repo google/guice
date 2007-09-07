@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2006 Google Inc.
+/*
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.spi;
 
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.Binding;
+import com.google.inject.Provider;
 
 /**
+ * A synthetic binding to {@code Provider<T>} which exists for any binding to
+ * {@code T}.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstantFactory<T> implements InternalFactory<T> {
+public interface ProviderBinding<T> extends Binding<Provider<T>> {
 
-  private final T value;
-
-  public ConstantFactory(T value) {
-    this.value = value;
-  }
-
-  public T get(InternalContext context) {
-    return value;
-  }
-
-  public String toString() {
-    return new ToStringBuilder(ConstantFactory.class)
-        .add("value", value)
-        .toString();
-  }
+  /**
+   * Gets the binding from which the provider comes.
+   */
+  Binding<T> getTarget();
 }
