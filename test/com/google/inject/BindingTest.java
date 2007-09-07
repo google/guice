@@ -67,7 +67,6 @@ public class BindingTest extends TestCase {
       bind(Foo.class)
           .annotatedWith(Names.named("provider"))
           .toProvider(FooProvider.class);
-      bind(FooProvider.class);
 
       // Class.
       bind(Bar.class).in(Scopes.SINGLETON);

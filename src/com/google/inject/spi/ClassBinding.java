@@ -32,4 +32,6 @@ public interface ClassBinding<T> extends Binding<T>, HasDependencies {
    * Gets the class associated with this binding.
    */
   Class<T> getBoundClass();
+
+  // TODO: Expose information about method and constructor interceptors.
 }
