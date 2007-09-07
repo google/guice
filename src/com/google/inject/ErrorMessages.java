@@ -138,7 +138,7 @@ class ErrorMessages {
       + " types is not supported. Please use a concrete type instead of %s.";
 
   static final String CANNOT_INJECT_INNER_CLASS = "Injecting into inner"
-      + " classes is not supported.  Please use a static class (top-level or"
+      + " classes is not supported.  Please use a 'static' class (top-level or"
       + " nested) instead.";
 
   static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"

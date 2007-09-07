@@ -33,6 +33,18 @@ import com.google.inject.name.Names;
  */
 public class BindingTest extends TestCase {
 
+  public void testExplicitCyclicDependency() {
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(A.class);
+        bind(B.class);
+      }
+    }).getInstance(A.class);
+  }
+
+  static class A { @Inject B b; }
+  static class B { @Inject A a; }
+
   public void testProviderBinding() {
     Injector injector = Guice.createInjector();
     Binding<Bob> bobBinding = injector.getBinding(Bob.class);

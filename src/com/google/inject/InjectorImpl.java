@@ -464,7 +464,7 @@ class InjectorImpl implements Injector {
    */
   <T> BindingImpl<T> createBindingForInjectableType(Class<T> type) {
     return createBindingForInjectableType(type, null,
-        SourceProviders.defaultSource(), true);
+        SourceProviders.defaultSource());
   }
 
   /**
@@ -472,7 +472,7 @@ class InjectorImpl implements Injector {
    * a scope on the type if none is specified.
    */
   <T> BindingImpl<T> createBindingForInjectableType(Class<T> type,
-      Scope scope, Object source, boolean isJit) {
+      Scope scope, Object source) {
     // We can't inject abstract classes.
     // TODO: Method interceptors could actually enable us to implement
     // abstract types. Should we remove this restriction?
@@ -501,12 +501,12 @@ class InjectorImpl implements Injector {
     BindingImpl<T> binding
         = new ClassBindingImpl<T>(this, key, source, scopedFactory, scope);
 
-    if (isJit) {
-      // Put the partially constructed binding in the map a little early. This
-      // enables us to handle circular dependencies.
-      // Example: FooImpl -> BarImpl -> FooImpl.
-      jitBindings.put(key, binding);
-    }
+    // Put the partially constructed binding in the map a little early. This
+    // enables us to handle circular dependencies.
+    // Example: FooImpl -> BarImpl -> FooImpl.
+    // Note: We don't need to synchronize on jitBindings during injector
+    // creation.
+    jitBindings.put(key, binding);
 
     try {
       lateBoundConstructor.bind(this, type);
@@ -514,16 +514,12 @@ class InjectorImpl implements Injector {
     }
     catch (RuntimeException e) {
       // Clean up state.
-      if (isJit) {
-        jitBindings.remove(key);
-      }
+      jitBindings.remove(key);
       throw e;
     }
     catch (Throwable t) {
       // Clean up state.
-      if (isJit) {
-        jitBindings.remove(key);
-      }
+      jitBindings.remove(key);
       throw new AssertionError(t);
     }
   }
@@ -649,7 +645,13 @@ class InjectorImpl implements Injector {
   <T> BindingImpl<T> createBindingJustInTime(Key<T> key) {
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
-      return createProviderBindingUnsafely(key);
+      // These casts are safe. We know T extends Provider<X> and that given
+      // Key<Provider<X>>, createProviderBinding() will return
+      // BindingImpl<Provider<X>>.
+      @SuppressWarnings({ "UnnecessaryLocalVariable", "unchecked" })
+      BindingImpl<T> binding
+          = (BindingImpl<T>) createProviderBinding((Key) key);
+      return binding;
     }
 
     // Treat primitive types and their wrappers interchangeably.
@@ -684,15 +686,6 @@ class InjectorImpl implements Injector {
 
     // Create a binding based on the type.
     return createBindingFromType(clazz);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> BindingImpl<T> createProviderBindingUnsafely(Key<T> key) {
-    // These casts are safe. We know T extends Provider<X> and that given
-    // Key<Provider<X>>, createProviderBinding() will return
-    // BindingImpl<Provider<X>>.
-    // noinspection unchecked
-    return (BindingImpl<T>) createProviderBinding((Key) key);
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key) {

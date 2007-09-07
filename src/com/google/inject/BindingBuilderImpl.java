@@ -285,7 +285,8 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       Class<T> clazz = (Class<T>) type;
 
       BindingImpl<T> binding = injector.createBindingForInjectableType(
-          clazz, scope, source, false);
+          clazz, scope, source);
+      // TODO: Should we clean up the binding left behind in jitBindings? 
 
       if (binding == null) {
         injector.errorHandler.handle(source,
