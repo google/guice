@@ -26,12 +26,28 @@ import com.google.inject.spi.ClassBinding;
 import com.google.inject.spi.ConstantBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.spi.Dependency;
 import com.google.inject.name.Names;
+import java.util.Collection;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class BindingTest extends TestCase {
+
+  public void testDependencies() {
+    Injector injector = Guice.createInjector();
+    ClassBinding<Dependent> binding
+        = (ClassBinding<Dependent>) injector.getBinding(Dependent.class);
+    Collection<Dependency<?>> dependencies = binding.getDependencies();
+    assertEquals(4, dependencies.size());
+  }
+
+  static class Dependent {
+    @Inject A a;
+    @Inject Dependent(A a, B b) {}
+    @Inject void injectBob(Bob bob) {}
+  }
 
   public void testExplicitCyclicDependency() {
     Guice.createInjector(new AbstractModule() {

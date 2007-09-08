@@ -24,14 +24,15 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.internal.Classes;
 import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.logging.Logger;
+import java.util.Collection;
 
 /**
  * Binds a {@link com.google.inject.Key} to an implementation in a given scope.
@@ -284,7 +285,7 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       // noinspection unchecked
       Class<T> clazz = (Class<T>) type;
 
-      BindingImpl<T> binding = injector.createBindingForInjectableType(
+      BindingImpl<T> binding = injector.createBindingFromType(
           clazz, scope, source);
       // TODO: Should we clean up the binding left behind in jitBindings? 
 
@@ -328,6 +329,10 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       return this.instance;
     }
 
+    public Collection<Dependency<?>> getDependencies() {
+      return injector.getFieldAndMethodDependenciesFor(instance.getClass());
+    }
+
     @Override
     public String toString() {
       return new ToStringBuilder(InstanceBinding.class)
@@ -357,6 +362,11 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
     public Provider<? extends T> getProviderInstance() {
       return this.providerInstance;
+    }
+
+    public Collection<Dependency<?>> getDependencies() {
+      return injector.getFieldAndMethodDependenciesFor(
+          providerInstance.getClass());
     }
 
     @Override
@@ -412,9 +422,4 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
           .toString();
     }
   }
-
-  static ErrorHandler IGNORE_ERRORS = new ErrorHandler() {
-    public void handle(Object source, String message) {}
-    public void handle(Object source, String message, Object... arguments) {}
-  };
 }

@@ -16,11 +16,16 @@
 
 package com.google.inject.spi;
 
+import java.util.Collection;
+
 /**
  * Implemented by bindings which have implementation dependencies on other
  * bindings.
  */
 public interface HasDependencies {
 
-  // TODO: Provide list of dependencies.
+  /**
+   * Gets dependencies.
+   */
+  Collection<Dependency<?>> getDependencies();
 }

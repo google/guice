@@ -19,6 +19,7 @@ package com.google.inject;
 import java.lang.reflect.Member;
 import java.util.LinkedHashMap;
 import com.google.inject.internal.Objects;
+import com.google.inject.spi.Dependency;
 
 /**
  * An immutable snapshot of the current context which is safe to expose to
@@ -26,7 +27,7 @@ import com.google.inject.internal.Objects;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ExternalContext<T> implements Context {
+class ExternalContext<T> implements Dependency<T> {
 
   final Member member;
   final Key<T> key;
@@ -43,8 +44,16 @@ class ExternalContext<T> implements Context {
     this.injector = injector;
   }
 
-  public Key<?> getKey() {
+  public Key<T> getKey() {
     return this.key;
+  }
+
+  public Binding<T> getBinding() {
+    return injector.getBinding(key);
+  }
+
+  public boolean allowsNull() {
+    return getNullability() == Nullability.NULLABLE;
   }
 
   public Injector getInjector() {

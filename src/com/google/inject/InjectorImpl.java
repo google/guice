@@ -26,6 +26,7 @@ import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.spi.Dependency;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -438,6 +440,11 @@ class InjectorImpl implements Injector {
   }
 
   <T> BindingImpl<T> createBindingFromType(Class<T> type) {
+    return createBindingFromType(type, null, SourceProviders.defaultSource());
+  }
+
+  <T> BindingImpl<T> createBindingFromType(Class<T> type, Scope scope,
+      Object source) {
     // Don't try to inject primitives, arrays, or enums.
     if (type.isArray() || type.isEnum() || type.isPrimitive()) {
       return null;
@@ -446,25 +453,18 @@ class InjectorImpl implements Injector {
     // Handle @ImplementedBy
     ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
+      // TODO: Scope internal factory.
       return createImplementedByBinding(type, implementedBy);
     }
 
     // Handle @ProvidedBy.
     ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
+      // TODO: Scope internal factory.
       return createProvidedByBinding(type, providedBy);
     }
 
-    return createBindingForInjectableType(type);
-  }
-
-  /**
-   * Creates a binding for an injectable type. Gets the scope from an
-   * annotation on the type.
-   */
-  <T> BindingImpl<T> createBindingForInjectableType(Class<T> type) {
-    return createBindingForInjectableType(type, null,
-        SourceProviders.defaultSource());
+    return createBindingForInjectableType(type, scope, source);
   }
 
   /**
@@ -852,6 +852,10 @@ class InjectorImpl implements Injector {
           Nullability.forAnnotations(field.getAnnotations()), key, injector);
     }
 
+    public Collection<Dependency<?>> getDependencies() {
+      return Collections.<Dependency<?>>singleton(externalContext);
+    }
+
     public void inject(InternalContext context, Object o) {
       context.pushExternalContext(externalContext);
       try {
@@ -978,6 +982,14 @@ class InjectorImpl implements Injector {
         throw new ProvisionException(context.getExternalContextStack(),
             cause, ErrorMessages.ERROR_INJECTING_METHOD);
       }
+    }
+
+    public Collection<Dependency<?>> getDependencies() {
+      List<Dependency<?>> dependencies = new ArrayList<Dependency<?>>();
+      for (SingleParameterInjector<?> parameterInjector : parameterInjectors) {
+        dependencies.add(parameterInjector.externalContext);
+      }
+      return Collections.unmodifiableList(dependencies);
     }
   }
 
@@ -1195,16 +1207,27 @@ class InjectorImpl implements Injector {
     return constructors.get(implementation);
   }
 
-  @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(TypeLiteral<T> implementation) {
-    return constructors.get(implementation.getRawType());
-  }
-
   /**
    * Injects a field or method in a given object.
    */
   interface SingleMemberInjector {
     void inject(InternalContext context, Object o);
+    Collection<Dependency<?>> getDependencies();
+  }
+
+  List<Dependency<?>> getModifiableFieldAndMethodDependenciesFor(
+      Class<?> clazz) {
+    List<SingleMemberInjector> injectors = this.injectors.get(clazz);
+    List<Dependency<?>> dependencies = new ArrayList<Dependency<?>>();
+    for (SingleMemberInjector singleMemberInjector : injectors) {
+      dependencies.addAll(singleMemberInjector.getDependencies());
+    }
+    return dependencies;
+  }
+
+  Collection<Dependency<?>> getFieldAndMethodDependenciesFor(Class<?> clazz) {
+    return Collections.unmodifiableList(
+        getModifiableFieldAndMethodDependenciesFor(clazz));
   }
 
   class MissingDependencyException extends Exception {

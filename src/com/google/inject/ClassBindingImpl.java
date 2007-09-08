@@ -18,7 +18,10 @@ package com.google.inject;
 
 import com.google.inject.spi.ClassBinding;
 import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.Dependency;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.InjectorImpl.SingleParameterInjector;
+import java.util.Collection;
 
 /**
  *
@@ -40,6 +43,20 @@ class ClassBindingImpl<T> extends BindingImpl<T>
   public Class<T> getBoundClass() {
     // T should always be the class itself.
     return (Class<T>) key.getRawType();
+  }
+
+  public Collection<Dependency<?>> getDependencies() {
+    Class<T> boundClass = getBoundClass();
+    Collection<Dependency<?>> injectors
+        = injector.getModifiableFieldAndMethodDependenciesFor(boundClass);
+    ConstructorInjector<T> constructor = injector.getConstructor(boundClass);
+    if (constructor.parameterInjectors != null) {
+      for (SingleParameterInjector<?> parameterInjector
+          : constructor.parameterInjectors) {
+        injectors.add(parameterInjector.externalContext);
+      }
+    }
+    return injectors;
   }
 
   @Override
