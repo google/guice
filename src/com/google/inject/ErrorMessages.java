@@ -68,8 +68,8 @@ class ErrorMessages {
 
   static final String LOGGER_ALREADY_BOUND = "Logger is already bound.";
 
-  static final String BINDING_TO_GUICE_TYPE
-      = "Binding to Guice types is not allowed.";
+  static final String BINDING_TO_PROVIDER
+      = "Binding to Provider is not allowed.";
 
   static final String SUBTYPE_NOT_PROVIDED
       = "%s doesn't provide instances of %s.";

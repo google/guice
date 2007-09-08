@@ -35,7 +35,9 @@ public class InjectorTest extends TestCase {
   @BindingAnnotation @interface I {}
 
   public void testToStringDoesNotInfinitelyRecurse() {
-    Guice.createInjector().toString();
+    Injector injector = Guice.createInjector(Stage.TOOL);
+    injector.toString();
+    injector.getBinding(Injector.class).toString();
   }
 
   public void testProviderMethods() throws CreationException {

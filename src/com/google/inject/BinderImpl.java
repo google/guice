@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -57,8 +58,8 @@ class BinderImpl implements Binder {
   private static final Logger logger
       = Logger.getLogger(BinderImpl.class.getName());
 
-  final List<BindingBuilderImpl<?>> bindingBuilders
-      = new ArrayList<BindingBuilderImpl<?>>();
+  final LinkedList<BindingBuilderImpl<?>> bindingBuilders
+      = new LinkedList<BindingBuilderImpl<?>>();
   final List<ConstantBindingBuilderImpl> constantBindingBuilders
       = new ArrayList<ConstantBindingBuilderImpl>();
   final Map<Class<? extends Annotation>, Scope> scopes =
@@ -163,9 +164,7 @@ class BinderImpl implements Binder {
   }
 
   static boolean inGuiceNamespace(Class<?> clazz) {
-    return clazz == Provider.class
-        || clazz == Injector.class
-        || clazz == Stage.class;
+    return clazz == Provider.class;
   }
 
   public <T> BindingBuilderImpl<T> bind(Key<T> key) {
@@ -176,8 +175,8 @@ class BinderImpl implements Binder {
 
     Class<? super T> rawType = key.getTypeLiteral().getRawType();
 
-    if (inGuiceNamespace(rawType)) {
-      addError(source, ErrorMessages.BINDING_TO_GUICE_TYPE);
+    if (rawType == Provider.class) {
+      addError(source, ErrorMessages.BINDING_TO_PROVIDER);
     } else if (Logger.class == rawType) {
       addError(source, ErrorMessages.LOGGER_ALREADY_BOUND);
     } else {
@@ -202,7 +201,8 @@ class BinderImpl implements Binder {
     Key<T> key = Key.get(clazz);
     BindingBuilderImpl<T> builder =
         new BindingBuilderImpl<T>(this, key, source);
-    bindingBuilders.add(builder);
+    // Put Guice's bindings in front of user's bindings.
+    bindingBuilders.addFirst(builder);
     return builder;
   }
 
