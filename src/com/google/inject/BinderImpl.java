@@ -271,7 +271,10 @@ class BinderImpl implements Binder {
         proxyFactoryBuilder.create(), bindings, scopes);
 
     // Create default bindings.
-    bind(Injector.class, SourceProviders.UNKNOWN_SOURCE).toInstance(injector);
+    // We use toProvider() instead of toInstance() to avoid infinite recursion
+    // in toString().
+    bind(Injector.class, SourceProviders.UNKNOWN_SOURCE)
+        .toProvider(new InjectorProvider(injector));
 
     injector.setErrorHandler(configurationErrorHandler);
 
@@ -601,6 +604,23 @@ class BinderImpl implements Binder {
 
     public String toString() {
       return "Provider<Logger>";
+    }
+  }
+
+  static class InjectorProvider implements Provider<Injector> {
+
+    final Injector injector;
+
+    InjectorProvider(Injector injector) {
+      this.injector = injector;
+    }
+
+    public Injector get() {
+      return injector;
+    }
+
+    public String toString() {
+      return "Provider<Injector>";
     }
   }
 }

@@ -34,6 +34,10 @@ public class InjectorTest extends TestCase {
   @Retention(RUNTIME)
   @BindingAnnotation @interface I {}
 
+  public void testToStringDoesNotInfinitelyRecurse() {
+    Guice.createInjector().toString();
+  }
+
   public void testProviderMethods() throws CreationException {
     SampleSingleton singleton = new SampleSingleton();
     SampleSingleton other = new SampleSingleton();
