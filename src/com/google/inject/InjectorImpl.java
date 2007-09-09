@@ -86,22 +86,22 @@ class InjectorImpl implements Injector {
     PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
   }
 
-  private static final Map<Class<?>, Converter<?>> PRIMITIVE_CONVERTERS
-      = new PrimitiveConverters();
-
   final ConstructionProxyFactory constructionProxyFactory;
   final Map<Key<?>, BindingImpl<?>> explicitBindings;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<Class<? extends Annotation>, Scope> scopes;
+  final List<MatcherAndConverter<?>> converters;
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
   InjectorImpl(ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, BindingImpl<?>> bindings,
-      Map<Class<? extends Annotation>, Scope> scopes) {
+      Map<Class<? extends Annotation>, Scope> scopes,
+      List<MatcherAndConverter<?>> converters) {
     this.constructionProxyFactory = constructionProxyFactory;
     this.explicitBindings = bindings;
     this.scopes = scopes;
+    this.converters = converters;
   }
 
   /**
@@ -298,16 +298,6 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Returns true if we can convert from a string to the given type.
-   */
-  static boolean isConvertible(TypeLiteral<?> type) {
-    Class<?> rawType = type.getRawType();
-    return PRIMITIVE_CONVERTERS.get(rawType) != null
-        || Enum.class.isAssignableFrom(rawType)
-        || Class.class == rawType;
-  }
-
-  /**
    * Converts a constant string binding to the required type.
    *
    * <p>If the required type is elligible for conversion and a constant string
@@ -317,13 +307,6 @@ class InjectorImpl implements Injector {
    * binding is not found, this method returns null.
    */
   private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key) {
-    // TODO: Support custom type converters from the user.
-
-    if (!isConvertible(key.getTypeLiteral())) {
-      // We can't convert from string to the required type.
-      return null;
-    }
-
     // Find a constant string binding.
     Key<String> stringKey = key.ofType(String.class);
     BindingImpl<String> stringBinding = getExplicitBindingImpl(stringKey);
@@ -332,67 +315,58 @@ class InjectorImpl implements Injector {
       return null;
     }
 
-    String stringValue = stringBinding.getProvider().get();    
-    Class<? super T> rawType = key.getRawType();
+    String stringValue = stringBinding.getProvider().get();
 
-    // Convert to a primitive type. This cast is safe.
-    @SuppressWarnings("unchecked")
-    Converter<T> converter = (Converter<T>) PRIMITIVE_CONVERTERS.get(rawType);
-    if (converter != null) {
-      return convertStringToPrimitive(
-          converter, key, stringValue, stringBinding);
+    // Find a matching type converter.
+    TypeLiteral<T> type = key.getTypeLiteral();
+    MatcherAndConverter<?> matchingConverter = null;
+    for (MatcherAndConverter<?> converter : converters) {
+      if (converter.typeMatcher.matches(type)) {
+        if (matchingConverter != null) {
+          // More than one matching converter!
+          errorHandler.handle(SourceProviders.defaultSource(),
+              ErrorMessages.AMBIGUOUS_TYPE_CONVERSION, stringValue, type,
+              matchingConverter, converter);
+          return invalidBinding(key);
+        }
+
+        matchingConverter = converter;
+      }
     }
 
-    // Convert to enum.
-    if (Enum.class.isAssignableFrom(rawType)) {
-      return convertStringToEnum(stringValue, stringBinding, key);
+    if (matchingConverter == null) {
+      // No converter can handle the given type.
+      return null;
     }
 
-    // Convert to Class.
-    if (rawType == Class.class) {
-      return convertStringToClass(stringValue, key, stringBinding);
-    }
-
-    // Unreachable.
-    throw new AssertionError();
-  }
-
-  private <T> BindingImpl<T> convertStringToClass(String stringValue, Key<T> key,
-      BindingImpl<String> stringBinding) {
+    // Try to convert the string. A failed conversion results in an error.
     try {
-      // TODO: Make sure we use the right classloader.
-      // This cast is safe. We know T is Class.
+      // This cast is safe because we double check below.
       @SuppressWarnings("unchecked")
-      T clazz = (T) Class.forName(stringValue);
+      T converted
+          = (T) matchingConverter.typeConverter.convert(key, stringValue);
+
+      if (converted == null) {
+        throw new RuntimeException("Converter returned null.");
+      }
+
+      // We have to filter out primitive types because an Integer is not an
+      // instance of int, and we provide converters for all the primitive types
+      // and know that they work anyway.
+      if (!type.rawType.isPrimitive()
+          && !type.getRawType().isInstance(converted)) {
+        throw new RuntimeException("Converter returned " + converted
+            + " but we expected a[n] " + type + ".");
+      }
+
       return new ConvertedConstantBindingImpl<T>(
-          this, key, clazz, stringBinding);
-    }
-    catch (ClassNotFoundException e) {
-      return handleConstantConversionError(stringBinding, key, e);
-    }
-  }
-
-  private <T> BindingImpl<T> convertStringToEnum(String stringValue,
-      BindingImpl<String> stringBinding, Key<T> key) {
-    try {
-      // Raw types: this is safe. We know T is an Enum.
-      @SuppressWarnings("unchecked")
-      T t = (T) Enum.valueOf((Class) key.getRawType(), stringValue);
-      return new ConvertedConstantBindingImpl<T>(this, key, t, stringBinding);
-    }
-    catch (IllegalArgumentException e) {
-      return handleConstantConversionError(stringBinding, key, e);
-    }
-  }
-
-  private <T> BindingImpl<T> convertStringToPrimitive(Converter<T> converter,
-      Key<T> key, String stringValue, BindingImpl<String> stringBinding) {
-    try {
-      T t = converter.convert(key, stringValue);
-      return new ConvertedConstantBindingImpl<T>(this, key, t, stringBinding);
-    }
-    catch (ConstantConversionException e) {
-      return handleConstantConversionError(stringBinding, key, e);
+          this, key, converted, stringBinding);
+    } catch (Exception e) {
+      // Conversion error.
+      errorHandler.handle(SourceProviders.defaultSource(),
+          ErrorMessages.CONVERSION_ERROR, stringValue,
+          stringBinding.getSource(), type, matchingConverter, e.getMessage());
+      return invalidBinding(key);
     }
   }
 
@@ -691,17 +665,6 @@ class InjectorImpl implements Injector {
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key) {
     BindingImpl<T> binding = getBinding(key);
     return binding == null ? null : binding.internalFactory;
-  }
-
-  private <T> BindingImpl<T> handleConstantConversionError(
-      Binding<String> stringBinding, Key<T> key, Exception e) {
-    errorHandler.handle(
-        SourceProviders.defaultSource(),
-        ErrorMessages.CONSTANT_CONVERSION_ERROR,
-        stringBinding.getSource(),
-        key.getRawType(),
-        e.getMessage());
-    return invalidBinding(key);
   }
 
   /**
@@ -1243,77 +1206,6 @@ class InjectorImpl implements Injector {
     void handle(ErrorHandler errorHandler) {
       ErrorMessages.handleMissingBinding(InjectorImpl.this, member, key);
     }
-  }
-
-  /**
-   * Map of primitive type converters.
-   */
-  static class PrimitiveConverters extends HashMap<Class<?>, Converter<?>> {
-
-    PrimitiveConverters() {
-      putParser(int.class);
-      putParser(long.class);
-      putParser(boolean.class);
-      putParser(byte.class);
-      putParser(short.class);
-      putParser(float.class);
-      putParser(double.class);
-
-      // Character doesn't follow the same pattern.
-      Converter<Character> characterConverter = new Converter<Character>() {
-        public Character convert(Key<Character> key,
-            String value) throws ConstantConversionException {
-          value = value.trim();
-          if (value.length() != 1) {
-            throw new ConstantConversionException(key, value, "Length != 1.");
-          }
-          return value.charAt(0);
-        }
-      };
-      put(char.class, characterConverter);
-      put(Character.class, characterConverter);
-    }
-
-    <T> void putParser(final Class<T> primitive) {
-      try {
-        Class<?> wrapper = PRIMITIVE_COUNTERPARTS.get(primitive);
-        final Method parser = wrapper.getMethod(
-            "parse" + Strings.capitalize(primitive.getName()), String.class);
-        Converter<T> converter = new Converter<T>() {
-          @SuppressWarnings("unchecked")
-          public T convert(Key<T> key, String value)
-              throws ConstantConversionException {
-            try {
-              return (T) parser.invoke(null, value);
-            }
-            catch (IllegalAccessException e) {
-              throw new AssertionError(e);
-            }
-            catch (InvocationTargetException e) {
-              throw new ConstantConversionException(
-                  key, value, e.getTargetException());
-            }
-          }
-        };
-        put(wrapper, converter);
-        put(primitive, converter);
-      }
-      catch (NoSuchMethodException e) {
-        throw new AssertionError(e);
-      }
-    }
-  }
-
-  /**
-   * Converts a {@code String} to another type.
-   */
-  interface Converter<T> {
-
-    /**
-     * Converts {@code String} value.
-     */
-    T convert(Key<T> key, String value)
-        throws ConstantConversionException;
   }
 
   public String toString() {

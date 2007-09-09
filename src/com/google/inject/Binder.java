@@ -21,6 +21,7 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -273,4 +274,14 @@ public interface Binder {
    * try to use it beforehand.
    */
   <T> Provider<T> getProvider(Class<T> type);
+
+  /**
+   * Binds a type converter. The injector will use the given converter to
+   * convert string constants to matching types as needed.
+   *
+   * @param typeMatcher matches types the converter can handle
+   * @param converter converts values
+   */
+  void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter);
 }

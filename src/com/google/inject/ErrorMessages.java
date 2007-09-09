@@ -64,6 +64,14 @@ class ErrorMessages {
     }
   }
 
+  static final String CONVERSION_ERROR = "Error converting '%s'"
+      + " (bound at %s) to %s using %s. Reason: %s";
+
+  static final String AMBIGUOUS_TYPE_CONVERSION = "Error converting '%s' to "
+      + " %s. More than one type converter can apply: %s, and"
+      + " %s. Please adjust your type converter configuration to avoid "
+      + " overlapping matches.";
+
   static final String BINDING_NOT_FOUND = "Binding to %s not found.";
 
   static final String LOGGER_ALREADY_BOUND = "Logger is already bound.";
@@ -209,6 +217,12 @@ class ErrorMessages {
 
   @SuppressWarnings("unchecked")
   static final Collection<Converter<?>> converters = Arrays.asList(
+      new Converter<MatcherAndConverter>(MatcherAndConverter.class) {
+        public String toString(MatcherAndConverter m) {
+          return m.typeConverter + " which matches " + m.typeMatcher
+            + " (bound at " + m.source + ")";
+        }
+      },
       new Converter<Method>(Method.class) {
         public String toString(Method m) {
           return "method " + m.getDeclaringClass().getName() + "."

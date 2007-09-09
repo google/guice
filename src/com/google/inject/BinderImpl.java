@@ -24,12 +24,18 @@ import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.internal.Objects;
+import com.google.inject.internal.Strings;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,6 +100,74 @@ class BinderImpl implements Binder {
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
 
     this.stage = stage;
+
+    // Configure type converters.
+    convertToPrimitiveType(int.class, Integer.class);
+    convertToPrimitiveType(long.class, Long.class);
+    convertToPrimitiveType(boolean.class, Boolean.class);
+    convertToPrimitiveType(byte.class, Byte.class);
+    convertToPrimitiveType(short.class, Short.class);
+    convertToPrimitiveType(float.class, Float.class);
+    convertToPrimitiveType(double.class, Double.class);
+
+    TypeConverter characterConverter = new TypeConverter() {
+      public Object convert(Key<?> key, String value) {
+        value = value.trim();
+        if (value.length() != 1) {
+          throw new RuntimeException("Length != 1.");
+        }
+        return value.charAt(0);
+      }
+
+      @Override
+      public String toString() {
+        return "TypeConverter<Character>";
+      }
+    };
+
+    convertToClass(char.class, characterConverter);
+    convertToClass(Character.class, characterConverter);
+
+    convertToClasses(Matchers.subclassesOf(Enum.class), new TypeConverter() {
+      @SuppressWarnings("unchecked")
+      public Object convert(Key<?> key, String value) {
+        return Enum.valueOf((Class) key.getRawType(), value);
+      }
+
+      @Override
+      public String toString() {
+        return "TypeConverter<E extends Enum<E>>";
+      }
+    });
+
+    convertToTypes(
+      new AbstractMatcher<TypeLiteral<?>>() {
+        public boolean matches(TypeLiteral<?> typeLiteral) {
+          return typeLiteral.getRawType() == Class.class;
+        }
+
+        @Override
+        public String toString() {
+          return "Class<?>";
+        }
+      },
+      new TypeConverter() {
+        @SuppressWarnings("unchecked")
+        public Object convert(Key<?> key, String value) {
+          try {
+            return Class.forName(value);
+          }
+          catch (ClassNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+          }
+        }
+
+        @Override
+        public String toString() {
+          return "TypeConverter<Class<?>>";
+        }
+      }
+    );
   }
 
   /**
@@ -102,6 +176,76 @@ class BinderImpl implements Binder {
    */
   public BinderImpl() {
     this(Stage.DEVELOPMENT);
+  }
+
+  final List<MatcherAndConverter<?>> converters
+      = new ArrayList<MatcherAndConverter<?>>();
+
+  <T> void convertToType(TypeLiteral<T> type,
+      TypeConverter converter) {
+    convertToClasses(Matchers.identicalTo(type), converter);
+  }
+
+  <T> void convertToClass(Class<T> type,
+      TypeConverter converter) {
+    convertToClasses(Matchers.identicalTo(type), converter);
+  }
+
+  void convertToClasses(final Matcher<? super Class<?>> typeMatcher,
+      TypeConverter converter) {
+    convertToTypes(new AbstractMatcher<TypeLiteral<?>>() {
+      public boolean matches(TypeLiteral<?> typeLiteral) {
+        Type type = typeLiteral.getType();
+        if (!(type instanceof Class)) {
+          return false;
+        }
+        Class<?> clazz = (Class<?>) type;
+        return typeMatcher.matches(clazz);
+      }
+
+      public String toString() {
+        return typeMatcher.toString();
+      }
+    }, converter);
+  }
+
+  public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter) {
+    converters.add(MatcherAndConverter.newInstance(typeMatcher, converter));
+  }
+
+  <T> void convertToPrimitiveType(Class<T> primitiveType,
+      final Class<T> wrapperType) {
+    try {
+      final Method parser = wrapperType.getMethod(
+        "parse" + Strings.capitalize(primitiveType.getName()), String.class);
+
+      TypeConverter typeConverter = new TypeConverter() {
+        @SuppressWarnings("unchecked")
+        public Object convert(Key<?> key, String value) {
+          try {
+            return (T) parser.invoke(null, value);
+          }
+          catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+          }
+          catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getTargetException().getMessage());
+          }
+        }
+
+        @Override
+        public String toString() {
+          return "TypeConverter<" + wrapperType.getSimpleName() + ">";
+        }
+      };
+
+      convertToClass(primitiveType, typeConverter);
+      convertToClass(wrapperType, typeConverter);
+    }
+    catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
   }
 
   public Stage currentStage() {
@@ -115,7 +259,8 @@ class BinderImpl implements Binder {
     void notify(InjectorImpl injector);
   }
 
-  final List<MembersInjector> membersInjectors = new ArrayList<MembersInjector>();
+  final List<MembersInjector> membersInjectors
+      = new ArrayList<MembersInjector>();
 
   static class MembersInjector {
 
@@ -268,7 +413,7 @@ class BinderImpl implements Binder {
     Map<Key<?>, BindingImpl<?>> bindings
         = new HashMap<Key<?>, BindingImpl<?>>();
     injector = new InjectorImpl(
-        proxyFactoryBuilder.create(), bindings, scopes);
+        proxyFactoryBuilder.create(), bindings, scopes, converters);
 
     // Create default bindings.
     // We use toProvider() instead of toInstance() to avoid infinite recursion

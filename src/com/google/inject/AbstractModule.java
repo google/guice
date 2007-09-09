@@ -22,6 +22,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -160,14 +161,29 @@ public abstract class AbstractModule implements Module {
   /**
    * @see Binder#getProvider(Key)
    */
-  public <T> Provider<T> getProvider(Key<T> key) {
+  protected <T> Provider<T> getProvider(Key<T> key) {
     return binder.getProvider(key);
   }
 
   /**
    * @see Binder#getProvider(Class)
    */
-  public <T> Provider<T> getProvider(Class<T> type) {
+  protected <T> Provider<T> getProvider(Class<T> type) {
     return binder.getProvider(type);
+  }
+
+  /**
+   * @see Binder#convertToTypes
+   */
+  protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter) {
+    binder.convertToTypes(typeMatcher, converter);
+  }
+
+  /**
+   * @see Binder#currentStage() 
+   */
+  protected Stage currentStage() {
+    return binder.currentStage();
   }
 }
