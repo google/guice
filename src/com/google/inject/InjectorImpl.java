@@ -343,8 +343,8 @@ class InjectorImpl implements Injector {
     try {
       // This cast is safe because we double check below.
       @SuppressWarnings("unchecked")
-      T converted
-          = (T) matchingConverter.typeConverter.convert(key, stringValue);
+      T converted = (T) matchingConverter.typeConverter.convert(
+          key.getTypeLiteral(), stringValue);
 
       if (converted == null) {
         throw new RuntimeException("Converter returned null.");

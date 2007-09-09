@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 /**
  * Converts constant string values to a different type.
@@ -28,5 +29,5 @@ public interface TypeConverter {
   /**
    * Converts a string value. Throws an exception if a conversion error occurs.
    */
-  Object convert(Key<?> key, String value);
+  Object convert(TypeLiteral<?> requiredType, String value);
 }
