@@ -180,6 +180,7 @@ public class ReferenceMapTestSuite {
       assertNull(map.get(new Object()));
     }
 
+    @SuppressWarnings("unchecked")
     public void testCreate() {
       final Object k = new Object();
       final Object v = new Object();

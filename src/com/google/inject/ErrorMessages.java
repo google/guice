@@ -215,8 +215,11 @@ class ErrorMessages {
     return o;
   }
 
-  @SuppressWarnings("unchecked")
-  static final Collection<Converter<?>> converters = Arrays.asList(
+  static final Collection<Converter<?>> converters = createConverters();
+
+  @SuppressWarnings("unchecked") // for generic array creation.
+  private static Collection<Converter<?>> createConverters() {
+    return Arrays.asList(
       new Converter<MatcherAndConverter>(MatcherAndConverter.class) {
         public String toString(MatcherAndConverter m) {
           return m.typeConverter + " which matches " + m.typeMatcher
@@ -251,7 +254,8 @@ class ErrorMessages {
               : k.getTypeLiteral().toString();
         }
       }
-  );
+    );
+  }
 
   static abstract class Converter<T> {
 

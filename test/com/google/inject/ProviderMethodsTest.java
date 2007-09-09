@@ -27,6 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 public class ProviderMethodsTest extends TestCase {
 
+  @SuppressWarnings("unchecked")
   public void testProviderMethods() {
     Injector injector = Guice.createInjector(new Module() {
       public void configure(Binder binder) {

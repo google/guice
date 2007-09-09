@@ -79,7 +79,7 @@ public class ProviderMethods {
       }
     }
 
-    void bindProviderMethod(final Method method) {
+    <T> void bindProviderMethod(final Method method) {
       this.source = StackTraceElements.forMember(method);
 
       method.setAccessible(true);
@@ -92,15 +92,23 @@ public class ProviderMethods {
       final List<Provider<?>> parameterProviders
           = findParameterProviders(method);
 
-      Provider<Object> provider = new Provider<Object>() {
-        public Object get() {
+      // Define T as the method's return type.
+      @SuppressWarnings("unchecked")
+      TypeLiteral<T> returnType 
+          = (TypeLiteral<T>) TypeLiteral.get(method.getGenericReturnType());
+
+      Provider<T> provider = new Provider<T>() {
+        public T get() {
           Object[] parameters = new Object[parameterProviders.size()];
           for (int i = 0; i < parameters.length; i++) {
             parameters[i] = parameterProviders.get(i).get();
           }
 
           try {
-            return method.invoke(providers, parameters);
+            // We know this cast is safe becase T is the method's return type.
+            @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
+            T result = (T) method.invoke(providers, parameters);
+            return result;
           }
           catch (IllegalAccessException e) {
             throw new AssertionError(e);
@@ -111,16 +119,14 @@ public class ProviderMethods {
         }
       };
 
-      // TODO: Fix type warnings.
-      Class type = method.getReturnType();
       if (scopeAnnotation == null && bindingAnnotation == null) {
-        bind(type).toProvider(provider);
+        bind(returnType).toProvider(provider);
       } else if (scopeAnnotation == null) {
-        bind(type).annotatedWith(bindingAnnotation).toProvider(provider);
+        bind(returnType).annotatedWith(bindingAnnotation).toProvider(provider);
       } else if (bindingAnnotation == null) {
-        bind(type).toProvider(provider).in(scopeAnnotation);
+        bind(returnType).toProvider(provider).in(scopeAnnotation);
       } else {
-        bind(type)
+        bind(returnType)
             .annotatedWith(bindingAnnotation)
             .toProvider(provider)
             .in(scopeAnnotation);

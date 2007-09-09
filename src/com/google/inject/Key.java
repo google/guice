@@ -292,8 +292,7 @@ public abstract class Key<T> {
         }
       }
     }
-    Key<?> key = found == null ? Key.get(type) : Key.get(type, found);
-    return key;
+    return found == null ? Key.get(type) : Key.get(type, found);
   }
 
   /**

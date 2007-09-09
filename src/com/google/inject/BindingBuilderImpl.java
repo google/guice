@@ -282,7 +282,7 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       }
 
       // This cast is safe after the preceeding check.
-      // noinspection unchecked
+      @SuppressWarnings("unchecked")
       Class<T> clazz = (Class<T>) type;
 
       BindingImpl<T> binding = injector.createBindingFromType(

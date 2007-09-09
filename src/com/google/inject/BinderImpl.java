@@ -230,7 +230,7 @@ class BinderImpl implements Binder {
         @SuppressWarnings("unchecked")
         public Object convert(String value, TypeLiteral<?> toType) {
           try {
-            return (T) parser.invoke(null, value);
+            return parser.invoke(null, value);
           }
           catch (IllegalAccessException e) {
             throw new AssertionError(e);
@@ -554,8 +554,10 @@ class BinderImpl implements Binder {
 
   private static Set<Class<?>> FORBIDDEN_TYPES = forbiddenTypes();
 
+  @SuppressWarnings("unchecked") // For generic array creation.
   private static Set<Class<?>> forbiddenTypes() {
     Set<Class<?>> set = new HashSet<Class<?>>();
+    
     Collections.addAll(set,
 
         // It's unfortunate that we have to maintain a blacklist of specific

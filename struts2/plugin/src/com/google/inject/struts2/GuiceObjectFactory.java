@@ -100,6 +100,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     return clazz;
   }
 
+  @SuppressWarnings("unchecked")
   public Object buildBean(Class clazz, Map extraContext) {
     if (injector == null) {
       synchronized (this) {
@@ -156,6 +157,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     logger.info("Injector created successfully.");
   }
 
+  @SuppressWarnings("unchecked")
   public Interceptor buildInterceptor(InterceptorConfig interceptorConfig,
       Map interceptorRefParams) throws ConfigurationException {
     // Ensure the interceptor class is present.
