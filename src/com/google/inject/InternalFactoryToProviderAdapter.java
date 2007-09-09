@@ -39,7 +39,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   
   public T get(InternalContext context) {
     T provided = provider.get();
-    return context.sanitize(provided, source);
+    return context.checkForNull(provided, source);
   }
 
   public String toString() {

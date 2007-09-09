@@ -96,12 +96,9 @@ class InternalContext {
     externalContextStack.remove(externalContextStack.size() - 1);
   }
 
-  /**
-   * Perform sanity checks on the specified value before returning it.
-   */
-  <T> T sanitize(T value, Object source) {
+  <T> T checkForNull(T value, Object source) {
     if (value != null
-        || getExternalContext().getNullability() == Nullability.NULLABLE 
+        || getExternalContext().getNullability() == Nullability.NULLABLE
         || allowNullsBadBadBad()) {
       return value;
     }
@@ -111,7 +108,7 @@ class InternalContext {
             getExternalContext().getMember())
         : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
 
-    throw new ProvisionException(getExternalContextStack(), 
+    throw new ProvisionException(getExternalContextStack(),
         new NullPointerException(message),
         String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
   }

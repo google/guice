@@ -59,7 +59,7 @@ class BoundProviderFactory<T>
   public T get(InternalContext context) {
     Provider<? extends T> provider = providerFactory.get(context);
     try {
-      return context.sanitize(provider.get(), source);
+      return context.checkForNull(provider.get(), source);
     } catch(ProvisionException e) {
       throw e;
     } catch(RuntimeException e) {
