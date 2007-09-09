@@ -33,12 +33,12 @@ import java.util.List;
  */
 public class CreationException extends RuntimeException {
 
-  final List<Message> errorMessages;
+  final List<? extends Message> errorMessages;
 
   /**
    * Constructs a new exception for the given errors.
    */
-  public CreationException(Collection<Message> errorMessages) {
+  public CreationException(Collection<? extends Message> errorMessages) {
     super();
 
     // Sort the messages by source. 
@@ -54,7 +54,8 @@ public class CreationException extends RuntimeException {
     return createErrorMessage(errorMessages);
   }
 
-  private static String createErrorMessage(Collection<Message> errorMessages) {
+  private static String createErrorMessage(
+      Collection<? extends Message> errorMessages) {
     Formatter fmt = new Formatter().format("Guice configuration errors:%n%n");
     int index = 1;
     for (Message errorMessage : errorMessages) {

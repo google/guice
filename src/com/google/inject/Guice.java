@@ -65,7 +65,7 @@ public final class Guice {
    * @throws CreationException if one or more errors occur during Injector
    *     construction
    */
-  public static Injector createInjector(Iterable<Module> modules) {
+  public static Injector createInjector(Iterable<? extends Module> modules) {
     return createInjector(Stage.DEVELOPMENT, modules);
   }
 
@@ -87,7 +87,8 @@ public final class Guice {
    * @throws CreationException if one or more errors occur during Injector
    *     construction
    */
-  public static Injector createInjector(Stage stage, Iterable<Module> modules) {
+  public static Injector createInjector(Stage stage,
+      Iterable<? extends Module> modules) {
     BinderImpl binder = new BinderImpl(stage);
     for (Module module : modules) {
       binder.install(module);
