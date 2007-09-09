@@ -36,6 +36,13 @@ class MatcherAndConverter<T> {
   final Object source;
 
   MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter typeConverter, Object source) {
+    this.typeMatcher = Objects.nonNull(typeMatcher, "type matcher");
+    this.typeConverter = Objects.nonNull(typeConverter, "converter");
+    this.source = source;
+  }
+
+  MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     this.typeMatcher = Objects.nonNull(typeMatcher, "type matcher");
     this.typeConverter = Objects.nonNull(typeConverter, "converter");
@@ -46,5 +53,11 @@ class MatcherAndConverter<T> {
       Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     return new MatcherAndConverter<T>(typeMatcher, typeConverter);
+  }
+
+  static <T> MatcherAndConverter<T> newInstance(
+      Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter typeConverter, Object source) {
+    return new MatcherAndConverter<T>(typeMatcher, typeConverter, source);
   }
 }

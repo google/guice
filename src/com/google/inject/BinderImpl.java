@@ -140,7 +140,7 @@ class BinderImpl implements Binder {
       }
     });
 
-    convertToTypes(
+    internalConvertToTypes(
       new AbstractMatcher<TypeLiteral<?>>() {
         public boolean matches(TypeLiteral<?> typeLiteral) {
           return typeLiteral.getRawType() == Class.class;
@@ -193,7 +193,7 @@ class BinderImpl implements Binder {
 
   void convertToClasses(final Matcher<? super Class<?>> typeMatcher,
       TypeConverter converter) {
-    convertToTypes(new AbstractMatcher<TypeLiteral<?>>() {
+    internalConvertToTypes(new AbstractMatcher<TypeLiteral<?>>() {
       public boolean matches(TypeLiteral<?> typeLiteral) {
         Type type = typeLiteral.getType();
         if (!(type instanceof Class)) {
@@ -207,6 +207,12 @@ class BinderImpl implements Binder {
         return typeMatcher.toString();
       }
     }, converter);
+  }
+
+  public void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter) {
+    converters.add(MatcherAndConverter.newInstance(typeMatcher, converter,
+        SourceProviders.UNKNOWN_SOURCE));
   }
 
   public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
