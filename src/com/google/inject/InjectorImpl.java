@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.StackTraceElements;
-import com.google.inject.internal.Strings;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.internal.Classes;
 import com.google.inject.spi.SourceProviders;
@@ -343,8 +342,7 @@ class InjectorImpl implements Injector {
     try {
       // This cast is safe because we double check below.
       @SuppressWarnings("unchecked")
-      T converted = (T) matchingConverter.typeConverter.convert(
-          key.getTypeLiteral(), stringValue);
+      T converted = (T) matchingConverter.typeConverter.convert(stringValue, key.getTypeLiteral());
 
       if (converted == null) {
         throw new RuntimeException("Converter returned null.");

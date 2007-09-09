@@ -111,7 +111,7 @@ class BinderImpl implements Binder {
     convertToPrimitiveType(double.class, Double.class);
 
     TypeConverter characterConverter = new TypeConverter() {
-      public Object convert(TypeLiteral<?> requiredType, String value) {
+      public Object convert(String value, TypeLiteral<?> toType) {
         value = value.trim();
         if (value.length() != 1) {
           throw new RuntimeException("Length != 1.");
@@ -130,8 +130,8 @@ class BinderImpl implements Binder {
 
     convertToClasses(Matchers.subclassesOf(Enum.class), new TypeConverter() {
       @SuppressWarnings("unchecked")
-      public Object convert(TypeLiteral<?> requiredType, String value) {
-        return Enum.valueOf((Class) requiredType.getRawType(), value);
+      public Object convert(String value, TypeLiteral<?> toType) {
+        return Enum.valueOf((Class) toType.getRawType(), value);
       }
 
       @Override
@@ -153,7 +153,7 @@ class BinderImpl implements Binder {
       },
       new TypeConverter() {
         @SuppressWarnings("unchecked")
-        public Object convert(TypeLiteral<?> requiredType, String value) {
+        public Object convert(String value, TypeLiteral<?> toType) {
           try {
             return Class.forName(value);
           }
@@ -222,7 +222,7 @@ class BinderImpl implements Binder {
 
       TypeConverter typeConverter = new TypeConverter() {
         @SuppressWarnings("unchecked")
-        public Object convert(TypeLiteral<?> requiredType, String value) {
+        public Object convert(String value, TypeLiteral<?> toType) {
           try {
             return (T) parser.invoke(null, value);
           }
