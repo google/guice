@@ -144,7 +144,7 @@ abstract class AbstractReferenceCache<K, V> extends ReferenceMap<K, V> {
       return winningThread;
     }
 
-    V get() {
+    synchronized V get() {
       if (!set) {
         boolean interrupted = waitUntilSet();
 
