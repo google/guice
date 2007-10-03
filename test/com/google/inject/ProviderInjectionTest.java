@@ -42,6 +42,30 @@ public class ProviderInjectionTest extends TestCase {
     assertSame(singleton, foo.singletonProvider.get());
   }
 
+  /** Test for bug 155. */
+  public void testProvidersAreInjectedWhenBound() {
+    Module m = new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Bar.class).toProvider(new Provider<Bar>() {
+          @SuppressWarnings("unused") @Inject void cantBeCalled(Baz baz) {
+            fail("Can't have called this method since Baz is not bound.");
+          }
+          public Bar get() {
+            return new Bar() {};
+          }
+        });
+      }
+    };
+
+    try {
+      Guice.createInjector(m);
+      fail("Should have thrown a ConfigurationException");
+    }
+    catch (CreationException expected) {
+    }
+  }
+
   static class Foo {
     @Inject Provider<Bar> barProvider;
     @Inject Provider<SampleSingleton> singletonProvider;
@@ -50,4 +74,7 @@ public class ProviderInjectionTest extends TestCase {
   static class Bar {}
 
   static class SampleSingleton {}
+
+  interface Baz { }
+
 }
