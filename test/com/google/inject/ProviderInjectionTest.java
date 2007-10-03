@@ -48,7 +48,8 @@ public class ProviderInjectionTest extends TestCase {
       @Override
       protected void configure() {
         bind(Bar.class).toProvider(new Provider<Bar>() {
-          @SuppressWarnings("unused") @Inject void cantBeCalled(Baz baz) {
+          @SuppressWarnings("unused")
+          @Inject void cantBeCalled(Baz baz) {
             fail("Can't have called this method since Baz is not bound.");
           }
           public Bar get() {
@@ -60,7 +61,7 @@ public class ProviderInjectionTest extends TestCase {
 
     try {
       Guice.createInjector(m);
-      fail("Should have thrown a ConfigurationException");
+      fail("Should have thrown a CreationException");
     }
     catch (CreationException expected) {
     }
