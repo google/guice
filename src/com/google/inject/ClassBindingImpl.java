@@ -53,7 +53,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     if (constructor.parameterInjectors != null) {
       for (SingleParameterInjector<?> parameterInjector
           : constructor.parameterInjectors) {
-        injectors.add(parameterInjector.externalContext);
+        injectors.add(parameterInjector.injectionPoint);
       }
     }
     return injectors;

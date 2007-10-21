@@ -35,14 +35,20 @@ import java.util.List;
 public class ProvisionException extends RuntimeException {
 
   private final String errorMessage;
-  private final List<ExternalContext<?>> contexts;
+  private final List<InjectionPoint<?>> contexts
+      = new ArrayList<InjectionPoint<?>>(5);
 
-  ProvisionException(List<ExternalContext<?>> externalContextStack,
-      Throwable cause, String errorMessage) {
+  ProvisionException(Throwable cause, String errorMessage) {
     super(errorMessage, cause);
     this.errorMessage = errorMessage;
-    this.contexts = Collections.unmodifiableList(
-        new ArrayList<ExternalContext<?>>(externalContextStack));
+  }
+
+  /**
+   * Add an injection point that was being resolved when this exception
+   * occurred.
+   */
+  public void addContext(InjectionPoint<?> injectionPoint) {
+    this.contexts.add(injectionPoint);
   }
 
   @Override
@@ -51,9 +57,9 @@ public class ProvisionException extends RuntimeException {
     result.append(errorMessage);
 
     for (int i = contexts.size() - 1; i >= 0; i--) {
-      ExternalContext externalContext = contexts.get(i);
+      InjectionPoint injectionPoint = contexts.get(i);
       result.append(String.format("%n"));
-      result.append(contextToSnippet(externalContext));
+      result.append(contextToSnippet(injectionPoint));
     }
 
     return result.toString();
@@ -63,10 +69,10 @@ public class ProvisionException extends RuntimeException {
    * Returns a snippet to include in the stacktrace message that describes the
    * specified context.
    */
-  private String contextToSnippet(ExternalContext externalContext) {
-    Key<?> key = externalContext.getKey();
+  private String contextToSnippet(InjectionPoint injectionPoint) {
+    Key<?> key = injectionPoint.getKey();
     Object keyDescription = ErrorMessages.convert(key);
-    Member member = externalContext.getMember();
+    Member member = injectionPoint.getMember();
 
     if (member instanceof Field) {
       return String.format(ERROR_WHILE_LOCATING_FIELD,
@@ -74,7 +80,7 @@ public class ProvisionException extends RuntimeException {
 
     } else if (member instanceof Method || member instanceof Constructor) {
       return String.format(ERROR_WHILE_LOCATING_PARAMETER,
-          keyDescription, externalContext.getParameterIndex(),
+          keyDescription, injectionPoint.getParameterIndex(),
           StackTraceElements.forMember(member));
 
     } else {

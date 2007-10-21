@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import static com.google.inject.Nullability.NULLABLE;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.internal.Annotations;
@@ -94,7 +93,7 @@ class BinderImpl implements Binder {
     bindScope(Singleton.class, SINGLETON);
 
     bind(Logger.class, SourceProviders.UNKNOWN_SOURCE)
-        .toProvider(new LoggerProvider());
+        .toInternalFactory(new LoggerFactory());
     bind(Stage.class, SourceProviders.UNKNOWN_SOURCE).toInstance(stage);
 
     this.proxyFactoryBuilder = new ProxyFactoryBuilder();
@@ -674,14 +673,19 @@ class BinderImpl implements Binder {
     }
 
     public Void call(InternalContext context) {
-      context.pushExternalContext(ExternalContext.newInstance(
-          null, NULLABLE, key, context.getInjectorImpl()));
+      InjectionPoint<?> injectionPoint
+          = InjectionPoint.newInstance(key, context.getInjectorImpl());
+      context.setInjectionPoint(injectionPoint);
       try {
-        factory.get(context);
+        factory.get(context, injectionPoint);
         return null;
       }
+      catch(ProvisionException provisionException) {
+        provisionException.addContext(injectionPoint);
+        throw provisionException;
+      }
       finally {
-        context.popExternalContext();
+        context.setInjectionPoint(null);
       }
     }
   }
@@ -744,12 +748,10 @@ class BinderImpl implements Binder {
     return (Provider<T>) ILLEGAL_PROVIDER;
   }
 
-  static class LoggerProvider implements Provider<Logger> {
+  static class LoggerFactory implements InternalFactory<Logger> {
 
-    @Inject Injector injector;
-    public Logger get() {
-      InternalContext context = ((InjectorImpl) injector).getContext();
-      Member member = context.getExternalContext().getMember();
+    public Logger get(InternalContext context, InjectionPoint<?> injectionPoint) {
+      Member member = injectionPoint.getMember();
       return member == null
           ? Logger.getAnonymousLogger()
           : Logger.getLogger(member.getDeclaringClass().getName());

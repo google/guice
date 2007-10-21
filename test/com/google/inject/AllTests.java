@@ -55,6 +55,7 @@ public class AllTests {
     suite.addTestSuite(TypeLiteralTest.class);
     suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BindingAnnotationTest.class);
+    suite.addTestSuite(LoggerInjectionTest.class);
 
     suite.addTestSuite(MatcherTest.class);
 

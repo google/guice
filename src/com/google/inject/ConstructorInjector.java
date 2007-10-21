@@ -159,8 +159,8 @@ class ConstructorInjector<T> {
     }
     catch (InvocationTargetException e) {
       Throwable cause = e.getCause() != null ? e.getCause() : e;
-      throw new ProvisionException(context.getExternalContextStack(),
-          cause, ErrorMessages.ERROR_INJECTING_CONSTRUCTOR);
+      throw new ProvisionException(cause,
+          ErrorMessages.ERROR_INJECTING_CONSTRUCTOR);
     }
     finally {
       constructionContext.removeCurrentReference();

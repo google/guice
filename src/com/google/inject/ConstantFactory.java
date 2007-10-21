@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.ToStringBuilder;
 
 /**
@@ -30,7 +29,7 @@ class ConstantFactory<T> implements InternalFactory<T> {
     this.value = value;
   }
 
-  public T get(InternalContext context) {
+  public T get(InternalContext context, InjectionPoint injectionPoint) {
     return value;
   }
 

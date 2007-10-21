@@ -32,8 +32,7 @@ class InternalContext {
 
   final InjectorImpl injector;
   Map<Object, ConstructionContext<?>> constructionContexts;
-  final List<ExternalContext<?>> externalContextStack =
-      new ArrayList<ExternalContext<?>>(5);
+  InjectionPoint injectionPoint;
 
   InternalContext(InjectorImpl injector) {
     this.injector = injector;
@@ -62,60 +61,11 @@ class InternalContext {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  <T> ExternalContext<T> getExternalContext() {
-    if (externalContextStack.isEmpty()) {
-      throw new IllegalStateException("No external context on stack");
-    }
-    return (ExternalContext<T>) externalContextStack.get(
-        externalContextStack.size() - 1);
+  public InjectionPoint getInjectionPoint() {
+    return injectionPoint;
   }
 
-  public List<ExternalContext<?>> getExternalContextStack() {
-    return Collections.unmodifiableList(
-        new ArrayList<ExternalContext<?>>(externalContextStack));
-  }
-
-  Class<?> getExpectedType() {
-    return getExternalContext().getKey().getRawType();
-  }
-
-  /**
-   * Push a new external context onto the stack. Each call to {@code #push()}
-   * requires a matching call to {@code #pop()} so that the contexts are
-   * balanced.
-   */
-  void pushExternalContext(ExternalContext<?> externalContext) {
-    externalContextStack.add(externalContext);
-  }
-
-  /**
-   * Pop the external context off the stack.
-   */
-  void popExternalContext() {
-    externalContextStack.remove(externalContextStack.size() - 1);
-  }
-
-  <T> T checkForNull(T value, Object source) {
-    if (value != null
-        || getExternalContext().getNullability() == Nullability.NULLABLE
-        || allowNullsBadBadBad()) {
-      return value;
-    }
-
-    String message = getExternalContext().getMember() != null
-        ? String.format(ErrorMessages.CANNOT_INJECT_NULL_INTO_MEMBER, source,
-            getExternalContext().getMember())
-        : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
-
-    throw new ProvisionException(getExternalContextStack(),
-        new NullPointerException(message),
-        String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
-  }
-
-  // TODO(kevinb): gee, ya think we might want to remove this?
-  private static boolean allowNullsBadBadBad() {
-    return "I'm a bad hack".equals(
-          System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  public void setInjectionPoint(InjectionPoint injectionPoint) {
+    this.injectionPoint = injectionPoint;
   }
 }

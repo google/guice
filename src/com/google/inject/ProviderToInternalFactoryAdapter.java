@@ -34,7 +34,8 @@ class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
   public T get() {
     return injector.callInContext(new ContextualCallable<T>() {
       public T call(InternalContext context) {
-        return internalFactory.get(context);
+        InjectionPoint injectionPoint = context.getInjectionPoint();
+        return internalFactory.get(context, injectionPoint);
       }
     });
   }

@@ -22,7 +22,7 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
 
   InvalidBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
     super(injector, key, source, new InternalFactory<T>() {
-      public T get(InternalContext context) {
+      public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
         throw new AssertionError();
       }
     }, Scopes.NO_SCOPE);

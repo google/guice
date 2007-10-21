@@ -56,15 +56,14 @@ class BoundProviderFactory<T>
     return providerKey.toString();
   }
 
-  public T get(InternalContext context) {
-    Provider<? extends T> provider = providerFactory.get(context);
+  public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
+    Provider<? extends T> provider = providerFactory.get(context, injectionPoint);
     try {
-      return context.checkForNull(provider.get(), source);
+      return injectionPoint.checkForNull(provider.get(), source);
     } catch(ProvisionException e) {
       throw e;
     } catch(RuntimeException e) {
-      throw new ProvisionException(context.getExternalContextStack(),
-          e, ErrorMessages.ERROR_IN_PROVIDER);
+      throw new ProvisionException(e, ErrorMessages.ERROR_IN_PROVIDER);
     }
   }
 }

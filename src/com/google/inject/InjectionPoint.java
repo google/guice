@@ -17,17 +17,17 @@
 package com.google.inject;
 
 import java.lang.reflect.Member;
+import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import com.google.inject.internal.Objects;
 import com.google.inject.spi.Dependency;
 
 /**
- * An immutable snapshot of the current context which is safe to expose to
- * client code.
+ * An immutable snapshot of where the value is to be injected.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ExternalContext<T> implements Dependency<T> {
+class InjectionPoint<T> implements Dependency<T> {
 
   final Member member;
   final Key<T> key;
@@ -35,7 +35,7 @@ class ExternalContext<T> implements Dependency<T> {
   final int parameterIndex;
   final Nullability nullability;
 
-  public ExternalContext(Member member, int paramterIndex,
+  private InjectionPoint(Member member, int paramterIndex,
       Nullability nullability, Key<T> key, InjectorImpl injector) {
     this.member = member;
     this.parameterIndex = paramterIndex;
@@ -80,14 +80,40 @@ class ExternalContext<T> implements Dependency<T> {
     }}.toString();
   }
 
-  static <T> ExternalContext<T> newInstance(Member member,
-      Nullability nullability, Key<T> key, InjectorImpl injector) {
-    return new ExternalContext<T>(member, -1, nullability, key, injector);
+  <T> T checkForNull(T value, Object source) {
+    if (value != null
+        || getNullability() == Nullability.NULLABLE
+        || allowNullsBadBadBad()) {
+      return value;
+    }
+
+    String message = getMember() != null
+        ? String.format(ErrorMessages.CANNOT_INJECT_NULL_INTO_MEMBER, source,
+            getMember())
+        : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
+
+    throw new ProvisionException(new NullPointerException(message),
+        String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
   }
 
-  static <T> ExternalContext<T> newInstance(Member member, int parameterIndex,
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(
+          System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  }
+
+  static <T> InjectionPoint<T> newInstance(Field field,
       Nullability nullability, Key<T> key, InjectorImpl injector) {
-    return new ExternalContext<T>(member, parameterIndex, nullability, key,
+    return new InjectionPoint<T>(field, -1, nullability, key, injector);
+  }
+
+  static <T> InjectionPoint<T> newInstance(Key<T> key, InjectorImpl injector) {
+    return new InjectionPoint<T>(null, -1, Nullability.NULLABLE, key, injector);
+  }
+
+  static <T> InjectionPoint<T> newInstance(Member member, int parameterIndex,
+      Nullability nullability, Key<T> key, InjectorImpl injector) {
+    return new InjectionPoint<T>(member, parameterIndex, nullability, key,
         injector);
   }
 }

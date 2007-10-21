@@ -166,6 +166,17 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
     return this;
   }
 
+  public BindingBuilderImpl<T> toInternalFactory(InternalFactory<T> internalFactory) {
+    ensureImplementationIsNotSet();
+    this.factory = internalFactory;
+    this.providerInstance = new Provider<T>() {
+      public T get() {
+        throw new UnsupportedOperationException("?");
+      }
+    };
+    return this;
+  }
+
   public BindingBuilderImpl<T> toProvider(
       Class<? extends Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
@@ -411,8 +422,8 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       });
     }
 
-    public T get(InternalContext context) {
-      return targetFactory.get(context);
+    public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
+      return targetFactory.get(context, injectionPoint);
     }
 
     public String toString() {
