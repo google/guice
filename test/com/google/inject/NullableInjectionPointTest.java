@@ -46,6 +46,9 @@ public class NullableInjectionPointTest extends TestCase {
     }
   }
 
+  /**
+   * We haven't decided on what the desired behaviour of this test should be...
+   */
   public void testGetInstanceOfNull() {
     try {
       createInjector().getInstance(Foo.class);
@@ -80,11 +83,18 @@ public class NullableInjectionPointTest extends TestCase {
     return Guice.createInjector(
         new AbstractModule() {
           protected void configure() {
-            bind(Foo.class).toInstance(null);
+            bind(Foo.class).toProvider(new Provider<Foo>() {
+              public Foo get() {
+                return null;
+              }
+            });
           }
         });
   }
 
+  /**
+   * We haven't decided on what the desired behaviour of this test should be...
+   */
   public void testBindNullToInstance() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {

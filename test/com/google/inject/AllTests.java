@@ -44,6 +44,7 @@ public class AllTests {
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(ModuleTest.class);
+    suite.addTestSuite(NullableInjectionPointTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(NotRequiredTest.class);
