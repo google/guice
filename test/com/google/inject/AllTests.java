@@ -39,6 +39,7 @@ public class AllTests {
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(ConstantConversionTest.class);
+    suite.addTestSuite(ErrorMessagesTest.class);
     suite.addTestSuite(InjectorTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);

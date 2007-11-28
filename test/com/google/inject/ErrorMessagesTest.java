@@ -39,6 +39,35 @@ public class ErrorMessagesTest extends TestCase {
     }
   }
 
+  public void testExplicitBindingOfAnAbstractClass() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(AbstractClass.class);
+        }
+      });
+      fail();
+    } catch(CreationException e) {
+      assertTrue(e.getMessage().contains(
+          "Injecting into abstract types is not supported."));
+    }
+  }
+  
+  public void testGetInstanceOfAnAbstractClass() {
+    Injector injector = Guice.createInjector();
+    try {
+      injector.getInstance(AbstractClass.class);
+      fail();
+    } catch(ConfigurationException e) {
+      assertTrue(e.getMessage().contains(
+          "Injecting into abstract types is not supported."));
+    }
+  }
+
+  static abstract class AbstractClass {
+    @Inject AbstractClass() { }
+  }
+
   // TODO(kevinb): many many more
 
 }
