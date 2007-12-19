@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="guice-extensions-throwingproviders" basedir="." default="jar">
+<project name="guice-throwingproviders" basedir="." default="jar">
 
   <import file="../../common.xml"/>
   

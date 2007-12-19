@@ -38,9 +38,9 @@ import java.util.Map;
  * {@link @AssistedInject} and the user-specified parameters with
  * {@link @Assisted}:
  * <pre><code>public class RealPayment implements Payment {
- *    &#64;AssistedInject
+ *    {@literal @}AssistedInject
  *    public RealPayment(CreditService creditService, AuthService authService,
- *      &#64;Assisted Date startDate, &#64;Assisted Money amount) {
+ *      {@literal @}Assisted Date startDate, {@literal @}Assisted Money amount) {
  *     ...
  *  }
  * }</code></pre>
@@ -69,13 +69,13 @@ import java.util.Map;
  * parameters from the injector and the factory method.
  *
  * <pre><code>public class PaymentAction {
- *    @Inject private PaymentFactory paymentFactory;
+ *    {@literal @}Inject private PaymentFactory paymentFactory;
  *
  *    public void doPayment(Money amount) {
  *       Payment payment = paymentFactory.create(new Date(), amount);
  *       payment.apply();
  *    }
- * }
+ * }</code></pre>
  * 
  * @typeparam F The factory interface 
  * @typeparam R The concrete class to be created.

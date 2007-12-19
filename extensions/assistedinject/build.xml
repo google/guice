@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="guice-extensions-assistedinject" basedir="." default="jar">
+<project name="guice-assistedinject" basedir="." default="jar">
 
   <import file="../../common.xml"/>
   

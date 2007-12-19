@@ -29,7 +29,9 @@
     <ant antfile="servlet/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="spring/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="struts2/plugin/build.xml" target="jar" inheritAll="false"/>
-   
+    <ant antfile="extensions/assistedinject/build.xml" target="jar" inheritAll="false"/>
+    <ant antfile="extensions/throwingproviders/build.xml" target="jar" inheritAll="false"/>
+
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="servlet/build" includes="*.jar"/>
     </copy>
@@ -39,7 +41,13 @@
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="struts2/plugin/build" includes="*.jar"/>
     </copy>
-    
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/assistedinject/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/throwingproviders/build" includes="*.jar"/>
+    </copy>
+
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="${lib.dir}" 
@@ -87,6 +95,8 @@
         <pathelement location="${src.dir}"/>
         <pathelement location="${servlet.src.dir}"/>
         <pathelement location="${spring.src.dir}"/>
+        <pathelement location="${assistedinject.src.dir}"/>
+        <pathelement location="${throwingproviders.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <classpath>
@@ -104,6 +114,8 @@
     <ant dir="servlet" antfile="build.xml" target="clean"/>
     <ant dir="spring" antfile="build.xml" target="clean"/>
     <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
   </target>
   
 </project>

@@ -36,14 +36,12 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
 /**
- * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API.
- * For example:
- * <pre>
- *  ThrowingProviderBinder.create(binder())
+ * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API:
+ * <pre><code>ThrowingProviderBinder.create(binder())
  *    .bind(RemoteProvider.class, Customer.class)
  *    .to(RemoteCustomerProvider.class)
  *    .in(RequestScope.class);
- * </pre>
+ * </code></pre>
  * 
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
