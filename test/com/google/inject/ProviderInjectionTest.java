@@ -17,6 +17,9 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import java.util.List;
+import java.util.Arrays;
+import static java.util.Collections.emptySet;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -65,6 +68,43 @@ public class ProviderInjectionTest extends TestCase {
     }
     catch (CreationException expected) {
     }
+  }
+
+  /**
+   * When custom providers are used at injector creation time, they should be
+   * injected before use. In this testcase, we verify that a provider for
+   * List.class is injected before it is used.
+   */
+  public void testProvidersAreInjectedBeforeTheyAreUsed() {
+    Injector injector = Guice.createInjector(new Module() {
+      public void configure(Binder binder) {
+        // should bind String to "[true]"
+        binder.bind(String.class).toProvider(new Provider<String>() {
+          private String value;
+          @Inject void initialize(List list) {
+            value = list.toString();
+          }
+          public String get() {
+            return value;
+          }
+        });
+
+        // should bind List to [true]
+        binder.bind(List.class).toProvider(new Provider<List>() {
+          @Inject Boolean injectedYet = Boolean.FALSE;
+          public List get() {
+            return Arrays.asList(injectedYet);
+          }
+        });
+
+        // should bind Boolean to true
+        binder.bind(Boolean.class).toInstance(Boolean.TRUE);
+      }
+    });
+
+    assertEquals("Providers not injected before use",
+        "[true]",
+        injector.getInstance(String.class));
   }
 
   static class Foo {
