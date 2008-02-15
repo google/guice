@@ -1,0 +1,55 @@
+/**
+ * Copyright (C) 2008 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.inject.visitable;
+
+import com.google.inject.Binder;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.TypeConverter;
+
+
+/**
+ * Immutable snapshot of a request to convert binder types.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
+public final class ConvertToTypesCommand implements Command {
+  private final Matcher<? super TypeLiteral<?>> typeMatcher;
+  private final TypeConverter typeConverter;
+
+  ConvertToTypesCommand(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter typeConverter) {
+    this.typeMatcher = typeMatcher;
+    this.typeConverter = typeConverter;
+  }
+
+  public Matcher<? super TypeLiteral<?>> getTypeMatcher() {
+    return typeMatcher;
+  }
+
+  public TypeConverter getTypeConverter() {
+    return typeConverter;
+  }
+
+  public void execute(Binder binder) {
+    binder.convertToTypes(typeMatcher, typeConverter);
+  }
+
+  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+    return visitor.visitConvertToTypes(this);
+  }
+}
