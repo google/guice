@@ -132,11 +132,12 @@ public final class InterceptingInjectorBuilder {
   private class CommandRewriter extends CommandReplayer {
     private Set<Key> keysIntercepted = new HashSet<Key>();
 
-    @Override public <T> Void visitBind(BindCommand<T> command) {
+    @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
       Key<T> key = command.getKey();
 
       if (!keysToIntercept.contains(key)) {
-        return super.visitBind(command);
+        super.replayBind(binder, command);
+        return;
       }
 
       if (command.getTarget() == null) {
@@ -145,9 +146,9 @@ public final class InterceptingInjectorBuilder {
       }
 
       Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
-      binder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
+      binder.bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
 
-      LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
+      LinkedBindingBuilder<T> linkedBindingBuilder = binder.bind(anonymousKey);
       ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
 
       // we scope the user's provider, not the interceptor. This is dangerous,
@@ -159,8 +160,6 @@ public final class InterceptingInjectorBuilder {
       }
 
       keysIntercepted.add(key);
-
-      return null;
     }
   }
 

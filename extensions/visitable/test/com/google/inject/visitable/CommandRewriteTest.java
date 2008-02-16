@@ -16,10 +16,7 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.*;
 import junit.framework.TestCase;
 
 import java.util.List;
@@ -45,13 +42,12 @@ public class CommandRewriteTest extends TestCase {
 
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
     CommandReplayer rewriter = new CommandReplayer() {
-      @Override public <T> Void visitBind(BindCommand<T> command) {
+      @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
         if ("Wine".equals(command.getTarget().get(null))) {
-          binder().bind(CharSequence.class).toInstance("Beer");
+          binder.bind(CharSequence.class).toInstance("Beer");
         } else {
-          super.visitBind(command);
+          super.replayBind(binder, command);
         }
-        return null;
       }
     };
 
