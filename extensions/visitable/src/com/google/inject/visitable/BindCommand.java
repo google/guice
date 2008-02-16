@@ -115,40 +115,12 @@ public final class BindCommand<T> implements Command {
     }
 
     public ScopedBindingBuilder to(final Class<? extends T> implementation) {
-      nonNull(implementation, "implementation");
-      assertNoTarget();
-      target = new AbstractTarget<T>() {
-        public ScopedBindingBuilder execute(
-            LinkedBindingBuilder<T> linkedBindingBuilder) {
-          return linkedBindingBuilder.to(implementation);
-        }
-        @Override public Key<? extends T> getKey(Key<? extends T> defaultValue) {
-          return Key.get(implementation);
-        }
-        @Override public String toString() {
-          return String.valueOf(implementation);
-        }
-      };
-      return this;
+      return to(Key.get(implementation));
     }
 
     public ScopedBindingBuilder to(
         final TypeLiteral<? extends T> implementation) {
-      nonNull(implementation, "implementation");
-      assertNoTarget();
-      target = new AbstractTarget<T>() {
-        public ScopedBindingBuilder execute(
-            LinkedBindingBuilder<T> linkedBindingBuilder) {
-          return linkedBindingBuilder.to(implementation);
-        }
-        @Override public Key<? extends T> getKey(Key<? extends T> defaultValue) {
-          return Key.get(implementation);
-        }
-        @Override public String toString() {
-          return String.valueOf(implementation);
-        }
-      };
-      return this;
+      return to(Key.get(implementation));
     }
 
     public ScopedBindingBuilder to(final Key<? extends T> targetKey) {
@@ -169,6 +141,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void toInstance(final T instance) {
+      nonNull(instance, "instance"); // might someday want to tolerate null here
       assertNoTarget();
       target = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
@@ -202,20 +175,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public ScopedBindingBuilder toProvider(final Class<? extends Provider<? extends T>> providerType) {
-      nonNull(providerType, "providerType");
-      assertNoTarget();
-      target = new AbstractTarget<T>() {
-        public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
-          return linkedBindingBuilder.toProvider(providerType);
-        }
-        @Override public Key<? extends Provider<? extends T>> getProviderKey(Key<Provider<? extends T>> defaultValue) {
-          return Key.get(providerType);
-        }
-        @Override public String toString() {
-          return "provider " + providerType;
-        }
-      };
-      return this;
+      return toProvider(Key.get(providerType));
     }
 
     public ScopedBindingBuilder toProvider(final Key<? extends Provider<? extends T>> providerKey) {

@@ -33,7 +33,6 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindConstantCommand implements Command {
-
   private BindingAnnotation bindingAnnotation;
   private ConstantTarget<?> target;
 
