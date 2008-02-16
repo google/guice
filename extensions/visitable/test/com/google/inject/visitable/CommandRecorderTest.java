@@ -545,13 +545,13 @@ public class CommandRecorderTest extends TestCase {
    * Ensures the module performs the commands consistent with {@code visitors}.
    */
   protected void checkModule(Module module, Command.Visitor<?>... visitors) {
-    commandRecorder.recordCommands(module);
+    List<Command> commands = commandRecorder.recordCommands(module);
 
-    assertEquals(commandRecorder.getCommands().size(), visitors.length);
+    assertEquals(commands.size(), visitors.length);
 
     for (int i = 0; i < visitors.length; i++) {
       Command.Visitor<?> visitor = visitors[i];
-      Command command = commandRecorder.getCommands().get(i);
+      Command command = commands.get(i);
       command.acceptVisitor(visitor);
     }
   }

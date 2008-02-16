@@ -78,13 +78,10 @@ public final class InterceptingInjectorBuilder {
     FutureInjector futureInjector = new FutureInjector();
 
     // record commands from the modules
-    CommandRecorder commandRecorder = new CommandRecorder(futureInjector);
-    commandRecorder.recordCommands(modules);
-    List<Command> commands = commandRecorder.getCommands();
+    List<Command> commands = new CommandRecorder(futureInjector).recordCommands(modules);
 
     // rewrite the commands to insert interception
-    CommandReplayer replayer = new CommandRewriter();
-    Module module = replayer.createModule(commands);
+    Module module = new CommandRewriter().createModule(commands);
 
     // create and injector with the rewritten commands
     Injector injector = Guice.createInjector(module);

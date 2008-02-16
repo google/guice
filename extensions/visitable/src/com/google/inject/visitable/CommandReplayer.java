@@ -39,7 +39,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
   /**
    * Returns the current binder in use.
    */
-  public Binder getBinder() {
+  protected Binder getBinder() {
     if (binder == null) {
       throw new IllegalStateException("No binder exists at this time!");
     }

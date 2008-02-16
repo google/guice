@@ -28,17 +28,13 @@ public class CommandReplayerTest extends CommandRecorderTest {
 
   protected void checkModule(Module module, Command.Visitor<?>... visitors) {
     // get some commands to replay
-    CommandRecorder recorder = new CommandRecorder(earlyRequestProvider);
-    recorder.recordCommands(module);
-    List<Command> commands = recorder.getCommands();
+    List<Command> commands = new CommandRecorder(earlyRequestProvider).recordCommands(module);
 
     // replay the recorded commands, and record them again!
-    recorder = new CommandRecorder(earlyRequestProvider);
-    CommandReplayer copyingVisitor = new CommandReplayer();
-    copyingVisitor.replay(recorder.getBinder(), commands);
+    List<Command> replayedCommands = new CommandRecorder(earlyRequestProvider)
+        .recordCommands(new CommandReplayer().createModule(commands));
 
     // verify that the replayed commands are as expected
-    List<Command> replayedCommands = recorder.getCommands();
     assertEquals(replayedCommands.size(), visitors.length);
     for (int i = 0; i < visitors.length; i++) {
       Command.Visitor<?> visitor = visitors[i];

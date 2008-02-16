@@ -39,58 +39,45 @@ import java.util.List;
 public final class CommandRecorder {
   private final Stage stage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
-  private final List<Command> writableCommands = new ArrayList<Command>();
-  private final List<Command> commands = Collections.unmodifiableList(writableCommands);
-  private final Binder binder = new RecordingBinder();
 
   public CommandRecorder(EarlyRequestsProvider earlyRequestsProvider) {
     this.earlyRequestsProvider = earlyRequestsProvider;
   }
 
   /**
-   * Returns a mutable list of all commands recorded thus far.
+   * Records the commands executed by {@code modules}.
    */
-  public List<Command> getCommands() {
-    return commands;
-  }
-
-  /**
-   * Returns the binder used to record commands.
-   */
-  public Binder getBinder() {
-    return binder;
+  public List<Command> recordCommands(Module... modules) {
+    return recordCommands(Arrays.asList(modules));
   }
 
   /**
    * Records the commands executed by {@code modules}.
    */
-  public void recordCommands(Module... modules) {
-    recordCommands(Arrays.asList(modules));
-  }
-
-  /**
-   * Records the commands executed by {@code modules}.
-   */
-  public void recordCommands(Iterable<Module> modules) {
+  public List<Command> recordCommands(Iterable<Module> modules) {
+    RecordingBinder binder = new RecordingBinder();
     for (Module module : modules) {
       module.configure(binder);
     }
+    return Collections.unmodifiableList(binder.commands);
   }
 
   private class RecordingBinder implements Binder {
+    private final List<Command> commands = new ArrayList<Command>();
+
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         MethodInterceptor... interceptors) {
-      writableCommands.add(new BindInterceptorCommand(classMatcher, methodMatcher, interceptors));
+      commands.add(new BindInterceptorCommand(classMatcher, methodMatcher, interceptors));
     }
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-      writableCommands.add(new BindScopeCommand(annotationType, scope));
+      commands.add(new BindScopeCommand(annotationType, scope));
     }
 
     public void requestStaticInjection(Class<?>... types) {
-      writableCommands.add(new RequestStaticInjectionCommand(types));
+      commands.add(new RequestStaticInjectionCommand(types));
     }
 
     public void install(Module module) {
@@ -102,16 +89,16 @@ public final class CommandRecorder {
     }
 
     public void addError(String message, Object... arguments) {
-      writableCommands.add(new AddMessageErrorCommand(message, arguments));
+      commands.add(new AddMessageErrorCommand(message, arguments));
     }
 
     public void addError(Throwable t) {
-      writableCommands.add(new AddThrowableErrorCommand(t));
+      commands.add(new AddThrowableErrorCommand(t));
     }
 
     public <T> BindCommand<T>.BindingBuilder bind(Key<T> key) {
       BindCommand<T> bindCommand = new BindCommand<T>(key);
-      writableCommands.add(bindCommand);
+      commands.add(bindCommand);
       return bindCommand.bindingBuilder();
     }
 
@@ -125,12 +112,12 @@ public final class CommandRecorder {
 
     public AnnotatedConstantBindingBuilder bindConstant() {
       BindConstantCommand bindConstantCommand = new BindConstantCommand();
-      writableCommands.add(bindConstantCommand);
+      commands.add(bindConstantCommand);
       return bindConstantCommand.bindingBuilder();
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      writableCommands.add(new GetProviderCommand<T>(key, earlyRequestsProvider));
+      commands.add(new GetProviderCommand<T>(key, earlyRequestsProvider));
       return new Provider<T>() {
         public T get() {
           return earlyRequestsProvider.get(key);
@@ -144,7 +131,7 @@ public final class CommandRecorder {
 
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
                                TypeConverter converter) {
-      writableCommands.add(new ConvertToTypesCommand(typeMatcher, converter));
+      commands.add(new ConvertToTypesCommand(typeMatcher, converter));
     }
   }
 }
