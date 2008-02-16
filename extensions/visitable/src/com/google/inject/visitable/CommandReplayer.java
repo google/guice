@@ -39,7 +39,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
   /**
    * Returns the current binder in use.
    */
-  protected Binder getBinder() {
+  protected Binder binder() {
     if (binder == null) {
       throw new IllegalStateException("No binder exists at this time!");
     }
@@ -78,35 +78,35 @@ public class CommandReplayer implements Command.Visitor<Void> {
   }
 
   public Void visitAddMessageError(AddMessageErrorCommand command) {
-    getBinder().addError(command.getMessage(), command.getArguments().toArray());
+    binder().addError(command.getMessage(), command.getArguments().toArray());
     return null;
   }
 
   public Void visitAddError(AddThrowableErrorCommand command) {
-    getBinder().addError(command.getThrowable());
+    binder().addError(command.getThrowable());
     return null;
   }
 
   public Void visitBindInterceptor(BindInterceptorCommand command) {
     List<MethodInterceptor> interceptors = command.getInterceptors();
-    getBinder().bindInterceptor(command.getClassMatcher(), command.getMethodMatcher(),
+    binder().bindInterceptor(command.getClassMatcher(), command.getMethodMatcher(),
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));
     return null;
   }
 
   public Void visitBindScope(BindScopeCommand command) {
-    getBinder().bindScope(command.getAnnotationType(), command.getScope());
+    binder().bindScope(command.getAnnotationType(), command.getScope());
     return null;
   }
 
   public Void visitRequestStaticInjection(RequestStaticInjectionCommand command) {
     List<Class> types = command.getTypes();
-    getBinder().requestStaticInjection(types.toArray(new Class[types.size()]));
+    binder().requestStaticInjection(types.toArray(new Class[types.size()]));
     return null;
   }
 
   public Void visitConstantBinding(BindConstantCommand command) {
-    AnnotatedConstantBindingBuilder constantBindingBuilder = getBinder().bindConstant();
+    AnnotatedConstantBindingBuilder constantBindingBuilder = binder().bindConstant();
 
     Key<Object> key = command.getKey();
     ConstantBindingBuilder builder = key.getAnnotation() != null
@@ -118,12 +118,12 @@ public class CommandReplayer implements Command.Visitor<Void> {
   }
 
   public Void visitConvertToTypes(ConvertToTypesCommand command) {
-    getBinder().convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
+    binder().convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
     return null;
   }
 
   public <T> Void visitBinding(BindCommand<T> command) {
-    LinkedBindingBuilder<T> lbb = getBinder().bind(command.getKey());
+    LinkedBindingBuilder<T> lbb = binder().bind(command.getKey());
 
     BindTarget<T> bindTarget = command.getTarget();
     ScopedBindingBuilder sbb = bindTarget != null
@@ -139,7 +139,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
   }
 
   public <T> Void visitGetProviderCommand(GetProviderCommand<T> command) {
-    getBinder().getProvider(command.getKey());
+    binder().getProvider(command.getKey());
     return null;
   }
 }

@@ -109,9 +109,9 @@ public final class InterceptingInjectorBuilder {
       }
 
       Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
-      getBinder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
+      binder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
 
-      LinkedBindingBuilder<T> linkedBindingBuilder = getBinder().bind(anonymousKey);
+      LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
       ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
 
       BindScoping scoping = command.getScoping();
