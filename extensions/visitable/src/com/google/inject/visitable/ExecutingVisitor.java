@@ -31,8 +31,16 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public abstract class ExecutingVisitor implements BinderVisitor<Void> {
-  public abstract Binder binder();
+public class ExecutingVisitor implements Command.Visitor<Void> {
+  private final Binder binder;
+
+  protected ExecutingVisitor(Binder binder) {
+    this.binder = binder;
+  }
+
+  protected Binder binder() {
+    return binder;
+  }
 
   public Void visitAddMessageError(AddMessageErrorCommand command) {
     binder().addError(command.getMessage(), command.getArguments().toArray());
@@ -87,7 +95,7 @@ public abstract class ExecutingVisitor implements BinderVisitor<Void> {
         ? target.execute(lbb)
         : lbb;
 
-    BindingScope scoping = command.getScoping();
+    BindScoping scoping = command.getScoping();
     if (scoping != null) {
       scoping.execute(sbb);
     }

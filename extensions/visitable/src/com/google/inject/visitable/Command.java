@@ -16,13 +16,26 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
-
 /**
  * Immutable snapshot of a binding command.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Command {
-  <T> T acceptVisitor(BinderVisitor<T> visitor);
+  <T> T acceptVisitor(Visitor<T> visitor);
+
+  /**
+   * Visit the commands executed against a binder.
+   */
+  public interface Visitor<V> {
+    V visitAddMessageError(AddMessageErrorCommand command);
+    V visitAddError(AddThrowableErrorCommand command);
+    V visitBindInterceptor(BindInterceptorCommand command);
+    V visitBindScope(BindScopeCommand command);
+    V visitRequestStaticInjection(RequestStaticInjectionCommand command);
+    V visitConstantBinding(BindConstantCommand command);
+    V visitConvertToTypes(ConvertToTypesCommand command);
+    <T> V visitBinding(BindCommand<T> command);
+    <T> V visitGetProviderCommand(GetProviderCommand<T> command);
+  }
 }

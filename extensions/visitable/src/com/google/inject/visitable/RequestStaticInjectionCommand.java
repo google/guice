@@ -16,11 +16,8 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
-
 import java.util.List;
 import java.util.Arrays;
-import java.util.Collections;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -39,7 +36,7 @@ public final class RequestStaticInjectionCommand implements Command {
     return types;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitRequestStaticInjection(this);
   }
 }

@@ -16,7 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
@@ -45,7 +44,7 @@ public final class ConvertToTypesCommand implements Command {
     return typeConverter;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitConvertToTypes(this);
   }
 }

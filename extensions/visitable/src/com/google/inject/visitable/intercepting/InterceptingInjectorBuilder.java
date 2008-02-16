@@ -97,38 +97,36 @@ public final class InterceptingInjectorBuilder {
     // replay against a real binder, substituting interceptable wherever appropriate
     Module interceptingModule = new Module() {
       public void configure(final Binder binder) {
+        Command.Visitor<Void> visitor = new ExecutingVisitor(binder) {
+          @Override public <T> Void visitBinding(BindCommand<T> command) {
+            Key<T> key = command.getKey();
+
+            if (!interceptedKeys.contains(key)) {
+              return super.visitBinding(command);
+            }
+
+            if (command.getTarget() == null) {
+              throw new UnsupportedOperationException(
+                  String.format("Cannot intercept bare binding of %s.", key));
+            }
+
+            Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
+            binder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
+
+            LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
+            ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
+
+            BindScoping scoping = command.getScoping();
+            if (scoping != null) {
+              scoping.execute(scopedBindingBuilder);
+            }
+
+            return null;
+          }
+        };
+
         for (Command command : visitableBinder.getCommands()) {
-          command.acceptVisitor(new ExecutingVisitor() {
-
-            @Override public Binder binder() {
-              return binder;
-            }
-            
-            @Override public <T> Void visitBinding(BindCommand<T> command) {
-              Key<T> key = command.getKey();
-
-              if (!interceptedKeys.contains(key)) {
-                return super.visitBinding(command);
-              }
-
-              if (command.getTarget() == null) {
-                throw new UnsupportedOperationException(
-                    String.format("Cannot intercept bare binding of %s.", key));
-              }
-
-              Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
-              binder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
-
-              LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
-              ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
-
-              if (command.getScoping() != null) {
-                command.getScoping().execute(scopedBindingBuilder);
-              }
-
-              return null;
-            }
-          });
+          command.acceptVisitor(visitor);
         }
       }
     };

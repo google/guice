@@ -16,7 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
 import com.google.inject.Key;
 
 /**
@@ -37,7 +36,7 @@ public final class GetProviderCommand<T> implements Command {
     return key;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitGetProviderCommand(this);
   }
 

@@ -16,7 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
 import com.google.inject.Scope;
 
 import java.lang.annotation.Annotation;
@@ -44,7 +43,7 @@ public final class BindScopeCommand implements Command {
     return scope;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitBindScope(this);
   }
 }

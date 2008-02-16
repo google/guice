@@ -16,19 +16,18 @@
 
 package com.google.inject.visitable;
 
+import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.Scope;
+
+import java.lang.annotation.Annotation;
+
+
 /**
- * Visit the commands executed against a binder.
- *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public interface BinderVisitor<V> {
-  V visitAddMessageError(AddMessageErrorCommand command);
-  V visitAddError(AddThrowableErrorCommand command);
-  V visitBindInterceptor(BindInterceptorCommand command);
-  V visitBindScope(BindScopeCommand command);
-  V visitRequestStaticInjection(RequestStaticInjectionCommand command);
-  V visitConstantBinding(BindConstantCommand command);
-  V visitConvertToTypes(ConvertToTypesCommand command);
-  <T> V visitBinding(BindCommand<T> command);
-  <T> V visitGetProviderCommand(GetProviderCommand<T> command);
+public interface BindScoping {
+  void execute(ScopedBindingBuilder scopedBindingBuilder);
+  boolean isEagerSingleton();
+  Scope getScope(Scope defaultValue);
+  Class<? extends Annotation> getScopeAnnotation(Class<? extends Annotation> defaultValue);
 }

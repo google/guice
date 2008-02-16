@@ -22,7 +22,6 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.Objects;
 
 import java.lang.annotation.Annotation;
 
@@ -34,13 +33,13 @@ import java.lang.annotation.Annotation;
 public final class BindCommand<T> implements Command {
   private Key<T> key;
   private Target<T> target;
-  private BindingScope bindingScope;
+  private BindScoping bindScoping;
 
   BindCommand(Key<T> key) {
     this.key = key;
   }
 
-  public <V> V acceptVisitor(BinderVisitor<V> visitor) {
+  public <V> V acceptVisitor(Visitor<V> visitor) {
     return visitor.visitBinding(this);
   }
 
@@ -52,14 +51,14 @@ public final class BindCommand<T> implements Command {
     return target;
   }
 
-  public BindingScope getScoping() {
-    return bindingScope;
+  public BindScoping getScoping() {
+    return bindScoping;
   }
 
   @Override public String toString() {
     return "bind " + key
         + (target == null ? "" : (" to " + target))
-        + (bindingScope == null ? "" : (" in " + bindingScope));
+        + (bindScoping == null ? "" : (" in " + bindScoping));
   }
 
   private static abstract class AbstractTarget<T> implements Target<T> {
@@ -80,7 +79,7 @@ public final class BindCommand<T> implements Command {
     }
   }
 
-  private static abstract class AbstractScoping implements BindingScope {
+  private static abstract class AbstractScoping implements BindScoping {
     public boolean isEagerSingleton() {
       return false;
     }
@@ -199,7 +198,7 @@ public final class BindCommand<T> implements Command {
       nonNull(scopeAnnotation, "scopeAnnotation");
       assertNoScope();
 
-      bindingScope = new AbstractScoping() {
+      bindScoping = new AbstractScoping() {
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
           scopedBindingBuilder.in(scopeAnnotation);
         }
@@ -215,7 +214,7 @@ public final class BindCommand<T> implements Command {
     public void in(final Scope scope) {
       nonNull(scope, "scope");
       assertNoScope();
-      bindingScope = new AbstractScoping() {
+      bindScoping = new AbstractScoping() {
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
           scopedBindingBuilder.in(scope);
         }
@@ -230,7 +229,7 @@ public final class BindCommand<T> implements Command {
 
     public void asEagerSingleton() {
       assertNoScope();
-      bindingScope = new AbstractScoping() {
+      bindScoping = new AbstractScoping() {
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
           scopedBindingBuilder.asEagerSingleton();
         }
@@ -259,8 +258,8 @@ public final class BindCommand<T> implements Command {
     }
 
     private void assertNoScope() {
-      if (bindingScope != null) {
-        throw new IllegalStateException("Already scoped by " + bindingScope);
+      if (bindScoping != null) {
+        throw new IllegalStateException("Already scoped by " + bindScoping);
       }
     }
   }

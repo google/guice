@@ -16,8 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
-
 /**
  * Immutable snapshot of a request to add a throwable message.
  *
@@ -30,7 +28,7 @@ public final class AddThrowableErrorCommand implements Command {
     this.throwable = throwable;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitAddError(this);
   }
 

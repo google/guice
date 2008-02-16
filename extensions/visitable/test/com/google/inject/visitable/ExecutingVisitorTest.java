@@ -25,18 +25,14 @@ import com.google.inject.Binder;
  */
 public class ExecutingVisitorTest extends VisitableBinderTest {
 
-  protected void checkModule(Module module, BinderVisitor<?>... visitors) {
+  protected void checkModule(Module module, Command.Visitor<?>... visitors) {
     // record the commands
     VisitableBinder original = new VisitableBinder(earlyRequestProvider);
     module.configure(original);
 
     // test executing visitor by executing the recorded commands on a second binder
     final VisitableBinder copy = new VisitableBinder(earlyRequestProvider);
-    ExecutingVisitor copyingVisitor = new ExecutingVisitor() {
-      public Binder binder() {
-        return copy;
-      }
-    };
+    ExecutingVisitor copyingVisitor = new ExecutingVisitor(copy);
     for (Command command : original.getCommands()) {
       command.acceptVisitor(copyingVisitor);
     }
@@ -44,7 +40,7 @@ public class ExecutingVisitorTest extends VisitableBinderTest {
     // verify that the second binder is consistent with expectations
     assertEquals(copy.getCommands().size(), visitors.length);
     for (int i = 0; i < visitors.length; i++) {
-      BinderVisitor<?> visitor = visitors[i];
+      Command.Visitor<?> visitor = visitors[i];
       Command command = copy.getCommands().get(i);
       command.acceptVisitor(visitor);
     }

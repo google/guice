@@ -16,7 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
@@ -40,7 +39,7 @@ public final class BindConstantCommand implements Command {
     // hide public constructor
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitConstantBinding(this);
   }
 

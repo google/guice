@@ -16,7 +16,6 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.Binder;
 import com.google.inject.matcher.Matcher;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -57,7 +56,7 @@ public final class BindInterceptorCommand implements Command {
     return interceptors;
   }
 
-  public <T> T acceptVisitor(BinderVisitor<T> visitor) {
+  public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visitBindInterceptor(this);
   }
 }

@@ -543,13 +543,13 @@ public class VisitableBinderTest extends TestCase {
   /**
    * Ensures the module performs the commands consistent with {@code visitors}.
    */
-  protected void checkModule(Module module, BinderVisitor<?>... visitors) {
+  protected void checkModule(Module module, Command.Visitor<?>... visitors) {
     module.configure(binder);
 
     assertEquals(binder.getCommands().size(), visitors.length);
 
     for (int i = 0; i < visitors.length; i++) {
-      BinderVisitor<?> visitor = visitors[i];
+      Command.Visitor<?> visitor = visitors[i];
       Command command = binder.getCommands().get(i);
       command.acceptVisitor(visitor);
     }
@@ -561,7 +561,7 @@ public class VisitableBinderTest extends TestCase {
     }
   }
 
-  private static class FailingVisitor implements BinderVisitor<Void> {
+  private static class FailingVisitor implements Command.Visitor<Void> {
     public Void visitAddMessageError(AddMessageErrorCommand command) {
       throw new AssertionFailedError();
     }
