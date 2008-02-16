@@ -18,23 +18,23 @@ package com.google.inject.visitable;
 
 import com.google.inject.Binder;
 
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import static java.util.Collections.unmodifiableList;
+
 /**
  * Immutable snapshot of a request to add a string message.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class AddMessageErrorCommand implements Command {
-
   private final String message;
-  private final Object[] arguments;
+  private final List<Object> arguments;
 
   AddMessageErrorCommand(String message, Object[] arguments) {
     this.message = message;
-    this.arguments = arguments.clone();
-  }
-
-  public void execute(Binder binder) {
-    binder.addError(message, arguments);
+    this.arguments = unmodifiableList(Arrays.asList(arguments.clone()));
   }
 
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {
@@ -45,7 +45,7 @@ public final class AddMessageErrorCommand implements Command {
     return message;
   }
 
-  public Object[] getArguments() {
-    return arguments.clone();
+  public List<Object> getArguments() {
+    return arguments;
   }
 }

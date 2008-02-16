@@ -44,10 +44,6 @@ public final class BindScopeCommand implements Command {
     return scope;
   }
 
-  public void execute(Binder binder) {
-    binder.bindScope(annotationType, scope);
-  }
-
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {
     return visitor.visitBindScope(this);
   }

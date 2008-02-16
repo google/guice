@@ -45,10 +45,6 @@ public final class ConvertToTypesCommand implements Command {
     return typeConverter;
   }
 
-  public void execute(Binder binder) {
-    binder.convertToTypes(typeMatcher, typeConverter);
-  }
-
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {
     return visitor.visitConvertToTypes(this);
   }

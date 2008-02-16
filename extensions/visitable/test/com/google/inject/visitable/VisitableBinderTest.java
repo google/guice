@@ -17,6 +17,9 @@
 package com.google.inject.visitable;
 
 import com.google.inject.*;
+import com.google.inject.spi.TypeConverter;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.name.Names;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -27,35 +30,33 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.*;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class VisitableBinderTest extends TestCase {
 
-  private EarlyRequestsProvider stubEarlyRequestProvider
-      = new EarlyRequestsProvider() {
+  protected EarlyRequestsProvider earlyRequestProvider = new EarlyRequestsProvider() {
     public <T> T get(Key<T> key) {
       throw new AssertionFailedError();
     }
   };
 
-  private VisitableBinder binder = new VisitableBinder(stubEarlyRequestProvider);
+  private VisitableBinder binder = new VisitableBinder(earlyRequestProvider);
 
   public void testAddMessageErrorCommand() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        addError("Message", "A", "B", "C");
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            addError("Message", "A", "B", "C");
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
-            assertEquals("A", command.getArguments()[0]);
-            assertEquals("B", command.getArguments()[1]);
-            assertEquals("C", command.getArguments()[2]);
+            assertEquals(Arrays.asList("A", "B", "C"), command.getArguments());
             assertEquals("Message", command.getMessage());
             return null;
           }
@@ -64,14 +65,13 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testAddThrowableErrorCommand() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        addError(new Exception("A"));
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            addError(new Exception("A"));
+          }
+        },
 
-    module.configure(binder);
-    visitBindings(
         new FailingVisitor() {
           @Override public Void visitAddError(AddThrowableErrorCommand command) {
             assertEquals("A", command.getThrowable().getMessage());
@@ -82,19 +82,17 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindConstantAnnotations() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(TaggingAnnotation.class).to("A");
-        bindConstant().annotatedWith(Names.named("Bee")).to("B");
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bindConstant().annotatedWith(SampleAnnotation.class).to("A");
+            bindConstant().annotatedWith(Names.named("Bee")).to("B");
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public Void visitConstantBinding(BindConstantCommand command) {
-            assertEquals(Key.get(String.class, TaggingAnnotation.class), command.getKey());
+            assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals("A", command.getTarget().get(null));
             return null;
           }
@@ -111,24 +109,22 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindConstantTypes() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bindConstant().annotatedWith(Names.named("String")).to("A");
-        bindConstant().annotatedWith(Names.named("int")).to(2);
-        bindConstant().annotatedWith(Names.named("long")).to(3L);
-        bindConstant().annotatedWith(Names.named("boolean")).to(false);
-        bindConstant().annotatedWith(Names.named("double")).to(5.0d);
-        bindConstant().annotatedWith(Names.named("float")).to(6.0f);
-        bindConstant().annotatedWith(Names.named("short")).to((short) 7);
-        bindConstant().annotatedWith(Names.named("char")).to('h');
-        bindConstant().annotatedWith(Names.named("Class")).to(Iterator.class);
-        bindConstant().annotatedWith(Names.named("Enum")).to(CoinSide.TAILS);
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bindConstant().annotatedWith(Names.named("String")).to("A");
+            bindConstant().annotatedWith(Names.named("int")).to(2);
+            bindConstant().annotatedWith(Names.named("long")).to(3L);
+            bindConstant().annotatedWith(Names.named("boolean")).to(false);
+            bindConstant().annotatedWith(Names.named("double")).to(5.0d);
+            bindConstant().annotatedWith(Names.named("float")).to(6.0f);
+            bindConstant().annotatedWith(Names.named("short")).to((short) 7);
+            bindConstant().annotatedWith(Names.named("char")).to('h');
+            bindConstant().annotatedWith(Names.named("Class")).to(Iterator.class);
+            bindConstant().annotatedWith(Names.named("Enum")).to(CoinSide.TAILS);
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public Void visitConstantBinding(BindConstantCommand command) {
             assertEquals(Key.get(String.class, Names.named("String")), command.getKey());
@@ -212,94 +208,85 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindKeysNoAnnotations() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("A");
-        bind(new TypeLiteral<String>() {}).toInstance("B");
-        bind(Key.get(String.class)).toInstance("C");
+    FailingVisitor keyChecker = new FailingVisitor() {
+      @Override public Void visitBinding(BindCommand command) {
+        assertEquals(Key.get(String.class), command.getKey());
+        return null;
       }
     };
 
-    module.configure(binder);
-
-    for (Command command : binder.getCommands()) {
-      command.acceptVisitor(
-          new FailingVisitor() {
-            @Override public Void visitBinding(BindCommand command) {
-              assertEquals(Key.get(String.class), command.getKey());
-              return null;
-            }
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).toInstance("A");
+            bind(new TypeLiteral<String>() {
+            }).toInstance("B");
+            bind(Key.get(String.class)).toInstance("C");
           }
-      );
-    }
+        },
+        keyChecker,
+        keyChecker,
+        keyChecker
+    );
   }
 
   public void testBindKeysWithAnnotationType() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).annotatedWith(TaggingAnnotation.class).toInstance("A");
-        bind(new TypeLiteral<String>() {}).annotatedWith(TaggingAnnotation.class).toInstance("B");
+    FailingVisitor annotationChecker = new FailingVisitor() {
+      @Override public Void visitBinding(BindCommand command) {
+        assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
+        return null;
       }
     };
 
-    module.configure(binder);
-
-    for (Command command : binder.getCommands()) {
-      command.acceptVisitor(
-          new FailingVisitor() {
-            @Override public Void visitBinding(BindCommand command) {
-              assertEquals(Key.get(String.class, TaggingAnnotation.class), command.getKey());
-              return null;
-            }
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).annotatedWith(SampleAnnotation.class).toInstance("A");
+            bind(new TypeLiteral<String>() {
+            }).annotatedWith(SampleAnnotation.class).toInstance("B");
           }
-      );
-    }
+        },
+        annotationChecker,
+        annotationChecker
+    );
   }
 
   public void testBindKeysWithAnnotationInstance() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).annotatedWith(Names.named("a")).toInstance("B");
-        bind(new TypeLiteral<String>() {}).annotatedWith(Names.named("a")).toInstance("C");
+    FailingVisitor annotationChecker = new FailingVisitor() {
+      @Override public Void visitBinding(BindCommand command) {
+        assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
+        return null;
       }
     };
 
-    module.configure(binder);
 
-    for (Command command : binder.getCommands()) {
-      command.acceptVisitor(
-          new FailingVisitor() {
-            @Override public Void visitBinding(BindCommand command) {
-              assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
-              return null;
-            }
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).annotatedWith(Names.named("a")).toInstance("B");
+            bind(new TypeLiteral<String>() {
+            }).annotatedWith(Names.named("a")).toInstance("C");
           }
-      );
-    }
-  }
-
-  private static class ListProvider implements Provider<List> {
-    public List get() {
-      return new ArrayList();
-    }
+        },
+        annotationChecker,
+        annotationChecker
+    );
   }
 
   public void testBindToProvider() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toProvider(new Provider<String>() {
-          public String get() {
-            return "A";
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).toProvider(new Provider<String>() {
+              public String get() {
+                return "A";
+              }
+            });
+            bind(List.class).toProvider(ListProvider.class);
+            bind(Collection.class).toProvider(Key.get(ListProvider.class));
           }
-        });
-        bind(List.class).toProvider(ListProvider.class);
-        bind(Collection.class).toProvider(Key.get(ListProvider.class));
-      }
-    };
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public <T> Void visitBinding(BindCommand<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
@@ -329,17 +316,15 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindToLinkedBinding() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(List.class).to(ArrayList.class);
-        bind(Map.class).to(new TypeLiteral<HashMap<Integer, String>>() {});
-        bind(Set.class).to(Key.get(TreeSet.class, TaggingAnnotation.class));
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(List.class).to(ArrayList.class);
+            bind(Map.class).to(new TypeLiteral<HashMap<Integer, String>>() { });
+            bind(Set.class).to(Key.get(TreeSet.class, SampleAnnotation.class));
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public <T> Void visitBinding(BindCommand<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
@@ -359,7 +344,7 @@ public class VisitableBinderTest extends TestCase {
         new FailingVisitor() {
           @Override public <T> Void visitBinding(BindCommand<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
-            assertEquals(Key.get(TreeSet.class, TaggingAnnotation.class), command.getTarget().getKey(null));
+            assertEquals(Key.get(TreeSet.class, SampleAnnotation.class), command.getTarget().getKey(null));
             return null;
           }
         }
@@ -367,15 +352,13 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindToInstance() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toInstance("A");
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).toInstance("A");
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public <T> Void visitBinding(BindCommand<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
@@ -387,17 +370,15 @@ public class VisitableBinderTest extends TestCase {
   }
 
   public void testBindInScopes() {
-    Module module = new AbstractModule() {
-      protected void configure() {
-        bind(List.class).to(ArrayList.class).in(Scopes.SINGLETON);
-        bind(Map.class).to(HashMap.class).in(Singleton.class);
-        bind(Set.class).to(TreeSet.class).asEagerSingleton();
-      }
-    };
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(List.class).to(ArrayList.class).in(Scopes.SINGLETON);
+            bind(Map.class).to(HashMap.class).in(Singleton.class);
+            bind(Set.class).to(TreeSet.class).asEagerSingleton();
+          }
+        },
 
-    module.configure(binder);
-
-    visitBindings(
         new FailingVisitor() {
           @Override public <T> Void visitBinding(BindCommand<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
@@ -430,17 +411,153 @@ public class VisitableBinderTest extends TestCase {
     );
   }
 
+  public void testBindIntercepor() {
+    final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
+    final Matcher<Object> methodMatcher = Matchers.any();
+    final MethodInterceptor methodInterceptor = new MethodInterceptor() {
+      public Object invoke(MethodInvocation methodInvocation) {
+        return null;
+      }
+    };
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bindInterceptor(classMatcher, methodMatcher, methodInterceptor);
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitBindInterceptor(BindInterceptorCommand command) {
+            assertSame(classMatcher, command.getClassMatcher());
+            assertSame(methodMatcher, command.getMethodMatcher());
+            assertEquals(Arrays.asList(methodInterceptor), command.getInterceptors());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testBindScope() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bindScope(SampleAnnotation.class, Scopes.NO_SCOPE);
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitBindScope(BindScopeCommand command) {
+            assertSame(SampleAnnotation.class, command.getAnnotationType());
+            assertSame(Scopes.NO_SCOPE, command.getScope());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testConvertToTypes() {
+    final TypeConverter typeConverter = new TypeConverter() {
+      public Object convert(String value, TypeLiteral<?> toType) {
+        return value;
+      }
+    };
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            convertToTypes(Matchers.any(), typeConverter);
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitConvertToTypes(ConvertToTypesCommand command) {
+            assertSame(typeConverter, command.getTypeConverter());
+            assertSame(Matchers.any(), command.getTypeMatcher());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testGetProvider() {
+    final List<Key> calls = new ArrayList<Key>();
+
+    earlyRequestProvider = new EarlyRequestsProvider() {
+      public <T> T get(Key<T> key) {
+        calls.add(key);
+        return (T) "A";
+      }
+    };
+    binder = new VisitableBinder(earlyRequestProvider);
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            Provider<String> keyGetProvider = getProvider(Key.get(String.class, SampleAnnotation.class));
+            assertEquals("A", keyGetProvider.get());
+            assertEquals(Key.get(String.class, SampleAnnotation.class), calls.get(0));
+
+            Provider<String> typeGetProvider = getProvider(String.class);
+            assertEquals("A", typeGetProvider.get());
+            assertEquals(Key.get(String.class), calls.get(1));
+            assertEquals(2, calls.size());
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitGetProviderCommand(GetProviderCommand command) {
+            assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
+            assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
+            return null;
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitGetProviderCommand(GetProviderCommand command) {
+            assertEquals(Key.get(String.class), command.getKey());
+            assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testRequestStaticInjection() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            requestStaticInjection(ArrayList.class);
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitRequestStaticInjection(RequestStaticInjectionCommand command) {
+            assertEquals(Arrays.asList(ArrayList.class), command.getTypes());
+            return null;
+          }
+        }
+    );
+  }
 
   /**
-   * Visits each binding with a different visitor.
+   * Ensures the module performs the commands consistent with {@code visitors}.
    */
-  private void visitBindings(BinderVisitor<?>... visitors) {
+  protected void checkModule(Module module, BinderVisitor<?>... visitors) {
+    module.configure(binder);
+
     assertEquals(binder.getCommands().size(), visitors.length);
 
     for (int i = 0; i < visitors.length; i++) {
       BinderVisitor<?> visitor = visitors[i];
       Command command = binder.getCommands().get(i);
       command.acceptVisitor(visitor);
+    }
+  }
+
+  private static class ListProvider implements Provider<List> {
+    public List get() {
+      return new ArrayList();
     }
   }
 
@@ -485,7 +602,7 @@ public class VisitableBinderTest extends TestCase {
   @Retention(RUNTIME)
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @BindingAnnotation
-  public @interface TaggingAnnotation { }
+  public @interface SampleAnnotation { }
 
   public enum CoinSide { HEADS, TAILS }
 }

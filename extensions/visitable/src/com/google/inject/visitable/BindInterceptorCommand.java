@@ -16,12 +16,14 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.matcher.Matcher;
 import com.google.inject.Binder;
+import com.google.inject.matcher.Matcher;
+import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.reflect.Method;
-
-import org.aopalliance.intercept.MethodInterceptor;
+import java.util.Arrays;
+import static java.util.Collections.unmodifiableList;
+import java.util.List;
 
 /**
  * Immutable snapshot of a request to bind an interceptor.
@@ -32,7 +34,7 @@ public final class BindInterceptorCommand implements Command {
   
   private final Matcher<? super Class<?>> classMatcher;
   private final Matcher<? super Method> methodMatcher;
-  private final MethodInterceptor[] interceptors;
+  private final List<MethodInterceptor> interceptors;
 
   BindInterceptorCommand(
       Matcher<? super Class<?>> classMatcher,
@@ -40,7 +42,7 @@ public final class BindInterceptorCommand implements Command {
       MethodInterceptor[] interceptors) {
     this.classMatcher = classMatcher;
     this.methodMatcher = methodMatcher;
-    this.interceptors = interceptors;
+    this.interceptors = unmodifiableList(Arrays.asList(interceptors.clone()));
   }
 
   public Matcher<? super Class<?>> getClassMatcher() {
@@ -51,12 +53,8 @@ public final class BindInterceptorCommand implements Command {
     return methodMatcher;
   }
 
-  public MethodInterceptor[] getInterceptors() {
+  public List<MethodInterceptor> getInterceptors() {
     return interceptors;
-  }
-
-  public void execute(Binder binder) {
-    binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
 
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {

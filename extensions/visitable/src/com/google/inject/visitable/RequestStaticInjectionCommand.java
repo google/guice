@@ -18,24 +18,25 @@ package com.google.inject.visitable;
 
 import com.google.inject.Binder;
 
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import static java.util.Collections.unmodifiableList;
+
 /**
  * Immutable snapshot of a request for static injection.
  * 
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class RequestStaticInjectionCommand implements Command {
-  private final Class[] types;
+  private final List<Class> types;
 
   RequestStaticInjectionCommand(Class[] types) {
-    this.types = types.clone();
+    this.types = unmodifiableList(Arrays.asList(types.clone()));
   }
 
-  public Class[] getTypes() {
-    return types.clone();
-  }
-
-  public void execute(Binder binder) {
-    binder.requestStaticInjection(types);
+  public List<Class> getTypes() {
+    return types;
   }
 
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {

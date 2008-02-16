@@ -24,15 +24,10 @@ import com.google.inject.Binder;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class AddThrowableErrorCommand implements Command {
-
   private final Throwable throwable;
 
   AddThrowableErrorCommand(Throwable throwable) {
     this.throwable = throwable;
-  }
-
-  public void execute(Binder binder) {
-    binder.addError(throwable);
   }
 
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {

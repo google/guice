@@ -22,6 +22,7 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.Objects;
 
 import java.lang.annotation.Annotation;
 
@@ -31,31 +32,12 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindCommand<T> implements Command {
-
   private Key<T> key;
   private Target<T> target;
   private BindingScope bindingScope;
 
   BindCommand(Key<T> key) {
     this.key = key;
-  }
-
-  BindCommand(TypeLiteral<T> typeLiteral) {
-    this(Key.get(typeLiteral));
-  }
-
-  BindCommand(Class<T> type) {
-    this(Key.get(type));
-  }
-
-  public void execute(Binder binder) {
-    LinkedBindingBuilder<T> builder = binder.bind(key);
-    if (target != null) {
-      target.execute(builder);
-    }
-    if (bindingScope != null) {
-      bindingScope.execute(builder);
-    }
   }
 
   public <V> V acceptVisitor(BinderVisitor<V> visitor) {

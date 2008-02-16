@@ -26,6 +26,7 @@ import com.google.inject.Key;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class FutureInjector implements EarlyRequestsProvider {
+  /** manually initialized later */
   private Injector injector;
 
   public void initialize(Injector injector) {

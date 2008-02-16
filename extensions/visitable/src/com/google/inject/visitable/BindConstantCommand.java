@@ -19,18 +19,16 @@ package com.google.inject.visitable;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.Objects;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.Objects;
 
 import java.lang.annotation.Annotation;
 
 /**
  * Immutable snapshot of a request to bind a constant.
- *
- * TODO(jessewilson): combine with BindCommand
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -40,11 +38,7 @@ public final class BindConstantCommand implements Command {
   private ConstantTarget<?> target;
 
   BindConstantCommand() {
-    // hide the public constructor
-  }
-
-  public void execute(Binder binder) {
-    target.execute(bindingAnnotation.execute(binder.bindConstant()));
+    // hide public constructor
   }
 
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {

@@ -24,6 +24,5 @@ import com.google.inject.Binder;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Command {
-  void execute(Binder binder);
   <T> T acceptVisitor(BinderVisitor<T> visitor);
 }

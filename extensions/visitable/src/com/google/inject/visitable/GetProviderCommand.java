@@ -37,10 +37,6 @@ public final class GetProviderCommand<T> implements Command {
     return key;
   }
 
-  public void execute(Binder binder) {
-    binder.getProvider(key);
-  }
-
   public <T> T acceptVisitor(BinderVisitor<T> visitor) {
     return visitor.visitGetProviderCommand(this);
   }

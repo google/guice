@@ -36,7 +36,6 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class VisitableBinder implements Binder {
-  
   private final List<Command> commands = new ArrayList<Command>();
   private final Stage stage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
@@ -53,13 +52,10 @@ public final class VisitableBinder implements Binder {
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor... interceptors) {
-    commands.add(
-        new BindInterceptorCommand(classMatcher, methodMatcher, interceptors));
+    commands.add(new BindInterceptorCommand(classMatcher, methodMatcher, interceptors));
   }
 
-  public void bindScope(
-      Class<? extends Annotation> annotationType,
-      Scope scope) {
+  public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
     commands.add(new BindScopeCommand(annotationType, scope));
   }
 
@@ -83,22 +79,22 @@ public final class VisitableBinder implements Binder {
     commands.add(new AddThrowableErrorCommand(t));
   }
 
-  public <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+  private <T> BindCommand<T>.BindingBuilder internalBind(Key<T> key) {
     BindCommand<T> bindCommand = new BindCommand<T>(key);
     commands.add(bindCommand);
     return bindCommand.bindingBuilder();
   }
 
+  public <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+    return internalBind(key);
+  }
+
   public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    BindCommand<T> bindCommand = new BindCommand<T>(typeLiteral);
-    commands.add(bindCommand);
-    return bindCommand.bindingBuilder();
+    return internalBind(Key.get(typeLiteral));
   }
 
   public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
-    BindCommand<T> bindCommand = new BindCommand<T>(type);
-    commands.add(bindCommand);
-    return bindCommand.bindingBuilder();
+    return internalBind(Key.get(type));
   }
 
   public AnnotatedConstantBindingBuilder bindConstant() {
@@ -108,6 +104,7 @@ public final class VisitableBinder implements Binder {
   }
 
   public <T> Provider<T> getProvider(final Key<T> key) {
+    commands.add(new GetProviderCommand<T>(key, earlyRequestsProvider));
     return new Provider<T>() {
       public T get() {
         return earlyRequestsProvider.get(key);

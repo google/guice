@@ -17,6 +17,14 @@
 package com.google.inject.visitable;
 
 import com.google.inject.Binder;
+import com.google.inject.Key;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
+import org.aopalliance.intercept.MethodInterceptor;
+
+import java.util.List;
 
 /**
  * Executes recorded binding commands on a binder.
@@ -27,47 +35,68 @@ public abstract class ExecutingVisitor implements BinderVisitor<Void> {
   public abstract Binder binder();
 
   public Void visitAddMessageError(AddMessageErrorCommand command) {
-    command.execute(binder());
+    binder().addError(command.getMessage(), command.getArguments().toArray());
     return null;
   }
 
   public Void visitAddError(AddThrowableErrorCommand command) {
-    command.execute(binder());
+    binder().addError(command.getThrowable());
     return null;
   }
 
   public Void visitBindInterceptor(BindInterceptorCommand command) {
-    command.execute(binder());
+    List<MethodInterceptor> interceptors = command.getInterceptors();
+    binder().bindInterceptor(command.getClassMatcher(), command.getMethodMatcher(),
+        interceptors.toArray(new MethodInterceptor[interceptors.size()]));
     return null;
   }
 
   public Void visitBindScope(BindScopeCommand command) {
-    command.execute(binder());
+    binder().bindScope(command.getAnnotationType(), command.getScope());
     return null;
   }
 
   public Void visitRequestStaticInjection(RequestStaticInjectionCommand command) {
-    command.execute(binder());
+    List<Class> types = command.getTypes();
+    binder().requestStaticInjection(types.toArray(new Class[types.size()]));
     return null;
   }
 
   public Void visitConstantBinding(BindConstantCommand command) {
-    command.execute(binder());
+    AnnotatedConstantBindingBuilder constantBindingBuilder = binder().bindConstant();
+
+    Key<Object> key = command.getKey();
+    ConstantBindingBuilder builder = key.getAnnotation() != null
+        ? constantBindingBuilder.annotatedWith(key.getAnnotation())
+        : constantBindingBuilder.annotatedWith(key.getAnnotationType());
+
+    command.getTarget().execute(builder);
     return null;
   }
 
   public Void visitConvertToTypes(ConvertToTypesCommand command) {
-    command.execute(binder());
+    binder().convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
     return null;
   }
 
   public <T> Void visitBinding(BindCommand<T> command) {
-    command.execute(binder());
+    LinkedBindingBuilder<T> lbb = binder().bind(command.getKey());
+
+    Target<T> target = command.getTarget();
+    ScopedBindingBuilder sbb = target != null
+        ? target.execute(lbb)
+        : lbb;
+
+    BindingScope scoping = command.getScoping();
+    if (scoping != null) {
+      scoping.execute(sbb);
+    }
+
     return null;
   }
 
   public <T> Void visitGetProviderCommand(GetProviderCommand<T> command) {
-    command.execute(binder());
+    binder().getProvider(command.getKey());
     return null;
   }
 }
