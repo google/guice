@@ -20,7 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.visitable.intercepting.InjectionInterceptor;
+import com.google.inject.visitable.intercepting.ProvisionInterceptor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public class InjectionController {
 
   private final Map<Key<?>, Object> map = new HashMap<Key<?>, Object>();
 
-  private final InjectionInterceptor injectionInterceptor = new InjectionInterceptor() {
+  private final ProvisionInterceptor provisionInterceptor = new ProvisionInterceptor() {
     @SuppressWarnings({"unchecked"})
     public <T> T intercept(Key<T> key, Provider<? extends T> delegate) {
       T mockT = (T) map.get(key);
@@ -73,8 +73,8 @@ public class InjectionController {
   /**
    * Returns the injection interceptor for binding
    */
-  public InjectionInterceptor getInjectionInterceptor() {
-    return injectionInterceptor;
+  public ProvisionInterceptor getInjectionInterceptor() {
+    return provisionInterceptor;
   }
 
   /**
@@ -83,8 +83,8 @@ public class InjectionController {
   public final Module getModule() {
     return new AbstractModule() {
       protected void configure() {
-        bind(InjectionInterceptor.class)
-            .toInstance(injectionInterceptor);
+        bind(ProvisionInterceptor.class)
+            .toInstance(provisionInterceptor);
       }
     };
   }

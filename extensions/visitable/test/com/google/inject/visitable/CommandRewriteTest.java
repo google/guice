@@ -45,11 +45,11 @@ public class CommandRewriteTest extends TestCase {
 
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
     CommandReplayer rewriter = new CommandReplayer() {
-      @Override public <T> Void visitBinding(BindCommand<T> command) {
+      @Override public <T> Void visitBind(BindCommand<T> command) {
         if ("Wine".equals(command.getTarget().get(null))) {
           binder().bind(CharSequence.class).toInstance("Beer");
         } else {
-          super.visitBinding(command);
+          super.visitBind(command);
         }
         return null;
       }

@@ -25,6 +25,7 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.Objects;
 
 import java.lang.annotation.Annotation;
 
@@ -39,11 +40,11 @@ public final class BindCommand<T> implements Command {
   private BindScoping bindScoping;
 
   BindCommand(Key<T> key) {
-    this.key = key;
+    this.key = nonNull(key, "key");
   }
 
   public <V> V acceptVisitor(Visitor<V> visitor) {
-    return visitor.visitBinding(this);
+    return visitor.visitBind(this);
   }
 
   public Key<T> getKey() {
@@ -252,9 +253,6 @@ public final class BindCommand<T> implements Command {
     }
 
     private void assertNotAnnotated() {
-      if (BindCommand.this.key == null) {
-        throw new IllegalStateException();
-      }
       if (BindCommand.this.key.getAnnotationType() != null) {
         throw new IllegalStateException("Already annotated with " + key.getAnnotationType());
       }

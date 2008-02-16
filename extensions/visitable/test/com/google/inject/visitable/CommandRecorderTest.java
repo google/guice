@@ -17,10 +17,15 @@
 package com.google.inject.visitable;
 
 import com.google.inject.*;
+import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
+import com.sun.org.omg.CORBA.AttributeMode;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -90,7 +95,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals("A", command.getTarget().get(null));
             return null;
@@ -98,7 +103,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(String.class, Names.named("Bee")), command.getKey());
             assertEquals("B", command.getTarget().get(null));
             return null;
@@ -125,7 +130,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(String.class, Names.named("String")), command.getKey());
             assertEquals("A", command.getTarget().get(null));
             return null;
@@ -133,7 +138,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
             assertEquals(2, command.getTarget().get(null));
             return null;
@@ -141,7 +146,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
             assertEquals(3L, command.getTarget().get(null));
             return null;
@@ -149,7 +154,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, command.getTarget().get(null));
             return null;
@@ -157,7 +162,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, command.getTarget().get(null));
             return null;
@@ -165,7 +170,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, command.getTarget().get(null));
             return null;
@@ -173,7 +178,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, command.getTarget().get(null));
             return null;
@@ -181,7 +186,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', command.getTarget().get(null));
             return null;
@@ -189,7 +194,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(Class.class, Names.named("Class")), command.getKey());
             assertEquals(Iterator.class, command.getTarget().get(null));
             return null;
@@ -197,7 +202,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitConstantBinding(BindConstantCommand command) {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
             assertEquals(Key.get(CoinSide.class, Names.named("Enum")), command.getKey());
             assertEquals(CoinSide.TAILS, command.getTarget().get(null));
             return null;
@@ -208,7 +213,7 @@ public class CommandRecorderTest extends TestCase {
 
   public void testBindKeysNoAnnotations() {
     FailingVisitor keyChecker = new FailingVisitor() {
-      @Override public Void visitBinding(BindCommand command) {
+      @Override public Void visitBind(BindCommand command) {
         assertEquals(Key.get(String.class), command.getKey());
         return null;
       }
@@ -231,7 +236,7 @@ public class CommandRecorderTest extends TestCase {
 
   public void testBindKeysWithAnnotationType() {
     FailingVisitor annotationChecker = new FailingVisitor() {
-      @Override public Void visitBinding(BindCommand command) {
+      @Override public Void visitBind(BindCommand command) {
         assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
         return null;
       }
@@ -252,7 +257,7 @@ public class CommandRecorderTest extends TestCase {
 
   public void testBindKeysWithAnnotationInstance() {
     FailingVisitor annotationChecker = new FailingVisitor() {
-      @Override public Void visitBinding(BindCommand command) {
+      @Override public Void visitBind(BindCommand command) {
         assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
         return null;
       }
@@ -287,7 +292,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
             assertEquals("A", command.getTarget().getProvider(null).get());
             return null;
@@ -295,7 +300,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
             assertNull(command.getTarget().get(null));
             assertEquals(Key.get(ListProvider.class), command.getTarget().getProviderKey(null));
@@ -304,7 +309,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(Collection.class), command.getKey());
             assertNull(command.getTarget().get(null));
             assertEquals(Key.get(ListProvider.class), command.getTarget().getProviderKey(null));
@@ -325,7 +330,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
             assertEquals(Key.get(ArrayList.class), command.getTarget().getKey(null));
             return null;
@@ -333,7 +338,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(Map.class), command.getKey());
             assertEquals(Key.get(new TypeLiteral<HashMap<Integer, String>>() {}), command.getTarget().getKey(null));
             return null;
@@ -341,7 +346,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
             assertEquals(Key.get(TreeSet.class, SampleAnnotation.class), command.getTarget().getKey(null));
             return null;
@@ -359,7 +364,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
             assertEquals("A", command.getTarget().get(null));
             return null;
@@ -379,7 +384,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
             assertEquals(Scopes.SINGLETON, command.getScoping().getScope(null));
             assertNull(command.getScoping().getScopeAnnotation(null));
@@ -389,7 +394,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(Map.class), command.getKey());
             assertEquals(Singleton.class, command.getScoping().getScopeAnnotation(null));
             assertNull(command.getScoping().getScope(null));
@@ -399,7 +404,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
             assertNull(command.getScoping().getScopeAnnotation(null));
             assertNull(command.getScoping().getScope(null));
@@ -507,7 +512,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitGetProviderCommand(GetProviderCommand command) {
+          @Override public Void visitGetProvider(GetProviderCommand command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
             return null;
@@ -515,7 +520,7 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitGetProviderCommand(GetProviderCommand command) {
+          @Override public Void visitGetProvider(GetProviderCommand command) {
             assertEquals(Key.get(String.class), command.getKey());
             assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
             return null;
@@ -539,6 +544,74 @@ public class CommandRecorderTest extends TestCase {
           }
         }
     );
+  }
+
+  public void testMalformedBindCommands() {
+    CommandRecorder recorder = new CommandRecorder(earlyRequestProvider);
+
+    recorder.recordCommands(new AbstractModule() {
+      protected void configure() {
+        AnnotatedBindingBuilder<String> abb = bind(String.class);
+        abb.annotatedWith(SampleAnnotation.class);
+        try {
+          abb.annotatedWith(Names.named("A"));
+          fail();
+        } catch(IllegalStateException expected) {
+        }
+      }
+    });
+
+    recorder.recordCommands(new AbstractModule() {
+      protected void configure() {
+        AnnotatedBindingBuilder<String> abb = bind(String.class);
+        abb.toInstance("A");
+        try {
+          abb.toInstance("B");
+          fail();
+        } catch(IllegalStateException expected) {
+        }
+      }
+    });
+
+    recorder.recordCommands(new AbstractModule() {
+      protected void configure() {
+        ScopedBindingBuilder sbb = bind(List.class).to(ArrayList.class);
+        sbb.in(Scopes.NO_SCOPE);
+        try {
+          sbb.asEagerSingleton();
+          fail();
+        } catch(IllegalStateException expected) {
+        }
+      }
+    });
+  }
+
+  public void testMalformedBindConstantCommands() {
+    CommandRecorder recorder = new CommandRecorder(earlyRequestProvider);
+
+    recorder.recordCommands(new AbstractModule() {
+      protected void configure() {
+        AnnotatedConstantBindingBuilder cbb = bindConstant();
+        cbb.annotatedWith(SampleAnnotation.class);
+        try {
+          cbb.annotatedWith(Names.named("A"));
+          fail();
+        } catch(IllegalStateException expected) {
+        }
+      }
+    });
+
+    recorder.recordCommands(new AbstractModule() {
+      protected void configure() {
+        ConstantBindingBuilder cbb = bindConstant().annotatedWith(SampleAnnotation.class);
+        cbb.to("A");
+        try {
+          cbb.to("B");
+          fail();
+        } catch(IllegalStateException expected) {
+        }
+      }
+    });
   }
 
   /**
@@ -583,7 +656,7 @@ public class CommandRecorderTest extends TestCase {
       throw new AssertionFailedError();
     }
 
-    public Void visitConstantBinding(BindConstantCommand command) {
+    public Void visitBindConstant(BindConstantCommand command) {
       throw new AssertionFailedError();
     }
 
@@ -591,11 +664,11 @@ public class CommandRecorderTest extends TestCase {
       throw new AssertionFailedError();
     }
 
-    public <T> Void visitBinding(BindCommand<T> command) {
+    public <T> Void visitBind(BindCommand<T> command) {
       throw new AssertionFailedError();
     }
 
-    public Void visitGetProviderCommand(GetProviderCommand command) {
+    public Void visitGetProvider(GetProviderCommand command) {
       throw new AssertionFailedError();
     }
   }

@@ -27,6 +27,7 @@ import com.google.inject.internal.Objects;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.List;
+import java.util.ConcurrentModificationException;
 
 /**
  * Executes commands against a binder.
@@ -65,15 +66,17 @@ public class CommandReplayer implements Command.Visitor<Void> {
   public void replay(Binder binder, Iterable<Command> commands) {
     Objects.nonNull(binder, "binder");
     Objects.nonNull(commands, "commands");
+    if (this.binder != null) {
+      throw new ConcurrentModificationException("CommandReplayer does not support concurrent use");
+    }
 
-    Binder oldBinder = this.binder;
     this.binder = binder;
     try {
       for (Command command : commands) {
         command.acceptVisitor(this);
       }
     } finally {
-      this.binder = oldBinder;
+      this.binder = null;
     }
   }
 
@@ -105,7 +108,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
     return null;
   }
 
-  public Void visitConstantBinding(BindConstantCommand command) {
+  public Void visitBindConstant(BindConstantCommand command) {
     AnnotatedConstantBindingBuilder constantBindingBuilder = binder().bindConstant();
 
     Key<Object> key = command.getKey();
@@ -122,7 +125,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
     return null;
   }
 
-  public <T> Void visitBinding(BindCommand<T> command) {
+  public <T> Void visitBind(BindCommand<T> command) {
     LinkedBindingBuilder<T> lbb = binder().bind(command.getKey());
 
     BindTarget<T> bindTarget = command.getTarget();
@@ -138,7 +141,7 @@ public class CommandReplayer implements Command.Visitor<Void> {
     return null;
   }
 
-  public <T> Void visitGetProviderCommand(GetProviderCommand<T> command) {
+  public <T> Void visitGetProvider(GetProviderCommand<T> command) {
     binder().getProvider(command.getKey());
     return null;
   }

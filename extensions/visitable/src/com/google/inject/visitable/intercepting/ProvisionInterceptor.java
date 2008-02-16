@@ -14,33 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.inject.visitable;
+package com.google.inject.visitable.intercepting;
 
 import com.google.inject.Key;
+import com.google.inject.Provider;
 
 /**
- * Immutable snapshot of a request for a provider.
+ * Intercepts object provision.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @author jmourits@google.com (Jerome Mourits)
  */
-public final class GetProviderCommand<T> implements Command {
-  private final Key<T> key;
-  private final EarlyRequestsProvider earlyRequestsProvider;
-
-  GetProviderCommand(Key<T> key, EarlyRequestsProvider earlyRequestsProvider) {
-    this.key = key;
-    this.earlyRequestsProvider = earlyRequestsProvider;
-  }
-
-  public Key<T> getKey() {
-    return key;
-  }
-
-  public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitGetProvider(this);
-  }
-
-  public EarlyRequestsProvider getEarlyRequestsProvider() {
-    return earlyRequestsProvider;
-  }
+public interface ProvisionInterceptor {
+  <T> T intercept(Key<T> key, Provider<? extends T> delegate);
 }

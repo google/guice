@@ -28,18 +28,37 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.*;
 
 /**
- * Constructs an {@link Injector} that can intercept object provision.
+ * Builds an {@link Injector} that intercepts provision.
+ *
+ * <h3>Limitations of the current implementation</h3>
+ *
+ * <p>All intercepted bindings must have binding targets - for example,
+ * a type that is bound to itself cannot be intercepted:
+ * <pre class="code">bind(MyServiceClass.class);</pre>
+ *
+ * <p>All intercepted bindings must be bound explicitly. Interception cannot
+ * be applied to implicit bindings, or bindings that depend on
+ * {@literal @}{@link ProvidedBy}, {@literal @}{@link ImplementedBy}
+ * annotations.
+ *
+ * <p><strong>Implementation note:</strong> To intercept provision, an
+ * additional, internal binding is created for each intercepted key. This is
+ * used to bind the original (non-intercepted) provisioning strategy, and an
+ * intercepting binding is created for the original key. This shouldn't have
+ * any side-effects on the behaviour of the injector, but may confuse tools
+ * that depend on {@link Injector#getBindings()} and similar methods.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @author jmourits@google.com (Jerome Mourits)
  */
 public final class InterceptingInjectorBuilder {
 
-  private static final Key<InjectionInterceptor> INJECTION_INTERCEPTOR_KEY
-      = Key.get(InjectionInterceptor.class);
+  private static final Key<ProvisionInterceptor> INJECTION_INTERCEPTOR_KEY
+      = Key.get(ProvisionInterceptor.class);
 
-  final Collection<Module> modules = new ArrayList<Module>();
-  final Set<Key<?>> interceptedKeys = new HashSet<Key<?>>();
+  private final Collection<Module> modules = new ArrayList<Module>();
+  private final Set<Key<?>> keysToIntercept = new HashSet<Key<?>>();
+  private boolean tolerateUnmatchedInterceptions = false;
 
   public InterceptingInjectorBuilder bindModules(Module... modules) {
     this.modules.addAll(Arrays.asList(modules));
@@ -52,12 +71,16 @@ public final class InterceptingInjectorBuilder {
   }
 
   public InterceptingInjectorBuilder intercept(Key<?>... keys) {
-    this.interceptedKeys.addAll(Arrays.asList(keys));
+    this.keysToIntercept.addAll(Arrays.asList(keys));
     return this;
   }
 
   public InterceptingInjectorBuilder intercept(Collection<Key<?>> keys) {
-    interceptedKeys.addAll(keys);
+    if (keys.contains(INJECTION_INTERCEPTOR_KEY)) {
+      throw new IllegalArgumentException("Cannot intercept the interceptor!");
+    }
+
+    keysToIntercept.addAll(keys);
     return this;
   }
 
@@ -70,21 +93,32 @@ public final class InterceptingInjectorBuilder {
     return intercept(keysAsList);
   }
 
-  public Injector build() {
-    if (interceptedKeys.contains(INJECTION_INTERCEPTOR_KEY)) {
-      throw new IllegalArgumentException("Cannot intercept the interceptor!");
-    }
+  public InterceptingInjectorBuilder tolerateUnmatchedInterceptions() {
+    this.tolerateUnmatchedInterceptions = true;
+    return this;
+  }
 
+  public Injector build() {
     FutureInjector futureInjector = new FutureInjector();
 
     // record commands from the modules
     List<Command> commands = new CommandRecorder(futureInjector).recordCommands(modules);
 
     // rewrite the commands to insert interception
-    Module module = new CommandRewriter().createModule(commands);
+    CommandRewriter rewriter = new CommandRewriter();
+    Module module = rewriter.createModule(commands);
 
     // create and injector with the rewritten commands
     Injector injector = Guice.createInjector(module);
+
+    // fail if any interceptions were missing
+    if (!tolerateUnmatchedInterceptions 
+        && !rewriter.keysIntercepted.equals(keysToIntercept)) {
+      Set<Key> keysNotIntercepted = new HashSet<Key>(keysToIntercept);
+      keysNotIntercepted.removeAll(rewriter.keysIntercepted);
+      throw new IllegalArgumentException("An explicit binding is required for "
+          + "all intercepted keys, but was not found for " + keysNotIntercepted);
+    }
 
     // make the injector available for callbacks from early providers
     futureInjector.initialize(injector);
@@ -96,11 +130,13 @@ public final class InterceptingInjectorBuilder {
    * Replays commands, inserting the InterceptingProvider where necessary.
    */
   private class CommandRewriter extends CommandReplayer {
-    @Override public <T> Void visitBinding(BindCommand<T> command) {
+    private Set<Key> keysIntercepted = new HashSet<Key>();
+
+    @Override public <T> Void visitBind(BindCommand<T> command) {
       Key<T> key = command.getKey();
 
-      if (!interceptedKeys.contains(key)) {
-        return super.visitBinding(command);
+      if (!keysToIntercept.contains(key)) {
+        return super.visitBind(command);
       }
 
       if (command.getTarget() == null) {
@@ -114,22 +150,27 @@ public final class InterceptingInjectorBuilder {
       LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
       ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
 
+      // we scope the user's provider, not the interceptor. This is dangerous,
+      // but convenient. It means that although the user's provider will live
+      // in its proper scope, the intereptor gets invoked without a scope
       BindScoping scoping = command.getScoping();
       if (scoping != null) {
         scoping.execute(scopedBindingBuilder);
       }
+
+      keysIntercepted.add(key);
 
       return null;
     }
   }
 
   /**
-   * Provide {@code T}, with a hook for an {@link InjectionInterceptor}.
+   * Provide {@code T}, with a hook for an {@link ProvisionInterceptor}.
    */
   private static class InterceptingProvider<T> implements Provider<T> {
     private final Key<T> key;
     private final Key<T> anonymousKey;
-    private Provider<InjectionInterceptor> injectionInterceptorProvider;
+    private Provider<ProvisionInterceptor> injectionInterceptorProvider;
     private Provider<? extends T> delegateProvider;
 
     public InterceptingProvider(Key<T> key, Key<T> anonymousKey) {
@@ -137,7 +178,7 @@ public final class InterceptingInjectorBuilder {
       this.anonymousKey = anonymousKey;
     }
 
-    @Inject void initialize(Injector injector, Provider<InjectionInterceptor> injectionInterceptorProvider) {
+    @Inject void initialize(Injector injector, Provider<ProvisionInterceptor> injectionInterceptorProvider) {
       this.injectionInterceptorProvider = nonNull(
           injectionInterceptorProvider, "injectionInterceptorProvider");
       this.delegateProvider = nonNull(

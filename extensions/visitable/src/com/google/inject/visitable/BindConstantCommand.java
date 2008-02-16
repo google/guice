@@ -40,7 +40,7 @@ public final class BindConstantCommand implements Command {
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitConstantBinding(this);
+    return visitor.visitBindConstant(this);
   }
 
   public BindTarget<?> getTarget() {
@@ -98,7 +98,7 @@ public final class BindConstantCommand implements Command {
       implements AnnotatedConstantBindingBuilder, ConstantBindingBuilder {
 
     private void assertNoBindingAnnotation() {
-      if (target != null) {
+      if (bindingAnnotation != null) {
         throw new IllegalStateException("Already annotated with " + bindingAnnotation);
       }
     }

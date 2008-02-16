@@ -40,6 +40,11 @@ public final class CommandRecorder {
   private final Stage stage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
 
+  /**
+   * @param earlyRequestsProvider satisfies requests to
+   *     {@link Binder#getProvider} at module execution time. For modules that
+   *     will be used to create an injector, use {@link FutureInjector}.
+   */
   public CommandRecorder(EarlyRequestsProvider earlyRequestsProvider) {
     this.earlyRequestsProvider = earlyRequestsProvider;
   }

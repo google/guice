@@ -17,8 +17,10 @@
 package com.google.inject.visitable;
 
 import com.google.inject.Module;
+import com.google.inject.AbstractModule;
 
 import java.util.List;
+import java.util.ConcurrentModificationException;
 
 
 /**
@@ -41,5 +43,34 @@ public class CommandReplayerTest extends CommandRecorderTest {
       Command command = replayedCommands.get(i);
       command.acceptVisitor(visitor);
     }
+  }
+
+  /**
+   * CommandReplayer can only replay a single module concurrently due to the
+   * limit of one binder at a time. This test ensures that CommandReplayer
+   * fails if two binders are being used concurrently.
+   */
+  public void testConcurrentUse() {
+    final List<Command> commands = new CommandRecorder(earlyRequestProvider).recordCommands(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).toInstance("A");
+          }
+        }
+    );
+
+    CommandReplayer replayer = new CommandReplayer() {
+      @Override public <T> Void visitBind(BindCommand<T> command) {
+        try {
+          new CommandRecorder(earlyRequestProvider).recordCommands(createModule(commands));
+          fail();
+        } catch(ConcurrentModificationException expected) {
+        }
+        return super.visitBind(command);
+      }
+    };
+
+    new CommandRecorder(earlyRequestProvider)
+        .recordCommands(replayer.createModule(commands));
   }
 }

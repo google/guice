@@ -25,7 +25,7 @@ public interface Command {
   <T> T acceptVisitor(Visitor<T> visitor);
 
   /**
-   * Visit the commands executed against a binder.
+   * Visit commands.
    */
   public interface Visitor<V> {
     V visitAddMessageError(AddMessageErrorCommand command);
@@ -33,9 +33,9 @@ public interface Command {
     V visitBindInterceptor(BindInterceptorCommand command);
     V visitBindScope(BindScopeCommand command);
     V visitRequestStaticInjection(RequestStaticInjectionCommand command);
-    V visitConstantBinding(BindConstantCommand command);
+    V visitBindConstant(BindConstantCommand command);
     V visitConvertToTypes(ConvertToTypesCommand command);
-    <T> V visitBinding(BindCommand<T> command);
-    <T> V visitGetProviderCommand(GetProviderCommand<T> command);
+    <T> V visitBind(BindCommand<T> command);
+    <T> V visitGetProvider(GetProviderCommand<T> command);
   }
 }
