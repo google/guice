@@ -43,7 +43,7 @@ public final class BindConstantCommand implements Command {
     return visitor.visitConstantBinding(this);
   }
 
-  public Target<?> getTarget() {
+  public BindTarget<?> getTarget() {
     return target;
   }
 
@@ -54,7 +54,7 @@ public final class BindConstantCommand implements Command {
   /**
    * Target API for bindConstant().
    */
-  private static abstract class ConstantTarget<T> implements Target<T> {
+  private static abstract class ConstantTarget<T> implements BindTarget<T> {
 
     /**
      * Returns the type of constant, such as {@code int.class} or

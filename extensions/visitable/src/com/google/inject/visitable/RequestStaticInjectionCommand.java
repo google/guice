@@ -16,9 +16,9 @@
 
 package com.google.inject.visitable;
 
-import java.util.List;
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
+import java.util.List;
 
 /**
  * Immutable snapshot of a request for static injection.

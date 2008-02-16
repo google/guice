@@ -16,7 +16,10 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.*;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.Scope;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -32,7 +35,7 @@ import java.lang.annotation.Annotation;
  */
 public final class BindCommand<T> implements Command {
   private Key<T> key;
-  private Target<T> target;
+  private BindTarget<T> bindTarget;
   private BindScoping bindScoping;
 
   BindCommand(Key<T> key) {
@@ -47,8 +50,8 @@ public final class BindCommand<T> implements Command {
     return key;
   }
 
-  public Target<T> getTarget() {
-    return target;
+  public BindTarget<T> getTarget() {
+    return bindTarget;
   }
 
   public BindScoping getScoping() {
@@ -57,11 +60,11 @@ public final class BindCommand<T> implements Command {
 
   @Override public String toString() {
     return "bind " + key
-        + (target == null ? "" : (" to " + target))
+        + (bindTarget == null ? "" : (" to " + bindTarget))
         + (bindScoping == null ? "" : (" in " + bindScoping));
   }
 
-  private static abstract class AbstractTarget<T> implements Target<T> {
+  private static abstract class AbstractTarget<T> implements BindTarget<T> {
     public void execute(ConstantBindingBuilder builder) {
       throw new UnsupportedOperationException();
     }
@@ -125,7 +128,7 @@ public final class BindCommand<T> implements Command {
     public ScopedBindingBuilder to(final Key<? extends T> targetKey) {
       nonNull(targetKey, "targetKey");
       assertNoTarget();
-      target = new AbstractTarget<T>() {
+      bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.to(targetKey);
         }
@@ -142,7 +145,7 @@ public final class BindCommand<T> implements Command {
     public void toInstance(final T instance) {
       nonNull(instance, "instance"); // might someday want to tolerate null here
       assertNoTarget();
-      target = new AbstractTarget<T>() {
+      bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           linkedBindingBuilder.toInstance(instance);
           return null;
@@ -159,7 +162,7 @@ public final class BindCommand<T> implements Command {
     public ScopedBindingBuilder toProvider(final Provider<? extends T> provider) {
       nonNull(provider, "provider");
       assertNoTarget();
-      target = new AbstractTarget<T>() {
+      bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.toProvider(provider);
         }
@@ -180,7 +183,7 @@ public final class BindCommand<T> implements Command {
     public ScopedBindingBuilder toProvider(final Key<? extends Provider<? extends T>> providerKey) {
       nonNull(providerKey, "providerKey");
       assertNoTarget();
-      target = new AbstractTarget<T>() {
+      bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.toProvider(providerKey);
         }
@@ -243,8 +246,8 @@ public final class BindCommand<T> implements Command {
     }
 
     private void assertNoTarget() {
-      if (target != null) {
-        throw new IllegalStateException("Already targetted to " + target);
+      if (bindTarget != null) {
+        throw new IllegalStateException("Already targetted to " + bindTarget);
       }
     }
 

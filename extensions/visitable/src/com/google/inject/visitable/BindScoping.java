@@ -16,8 +16,8 @@
 
 package com.google.inject.visitable;
 
-import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.Scope;
+import com.google.inject.binder.ScopedBindingBuilder;
 
 import java.lang.annotation.Annotation;
 

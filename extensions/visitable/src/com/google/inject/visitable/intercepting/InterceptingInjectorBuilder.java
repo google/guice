@@ -16,27 +16,16 @@
 
 package com.google.inject.visitable.intercepting;
 
-import com.google.inject.Binder;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.Provider;
-import com.google.inject.visitable.*;
+import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.visitable.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Constructs an {@link Injector} that can intercept object provision.
@@ -88,50 +77,17 @@ public final class InterceptingInjectorBuilder {
 
     FutureInjector futureInjector = new FutureInjector();
 
-    // record everything that's being done to a fake binder
-    final VisitableBinder visitableBinder = new VisitableBinder(futureInjector);
-    for (Module module : modules) {
-      module.configure(visitableBinder);
-    }
+    // record commands from the modules
+    CommandRecorder commandRecorder = new CommandRecorder(futureInjector);
+    commandRecorder.recordCommands(modules);
+    List<Command> commands = commandRecorder.getCommands();
 
-    // replay against a real binder, substituting interceptable wherever appropriate
-    Module interceptingModule = new Module() {
-      public void configure(final Binder binder) {
-        Command.Visitor<Void> visitor = new ExecutingVisitor(binder) {
-          @Override public <T> Void visitBinding(BindCommand<T> command) {
-            Key<T> key = command.getKey();
+    // rewrite the commands to insert interception
+    CommandReplayer replayer = new CommandRewriter();
+    Module module = replayer.createModule(commands);
 
-            if (!interceptedKeys.contains(key)) {
-              return super.visitBinding(command);
-            }
-
-            if (command.getTarget() == null) {
-              throw new UnsupportedOperationException(
-                  String.format("Cannot intercept bare binding of %s.", key));
-            }
-
-            Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
-            binder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
-
-            LinkedBindingBuilder<T> linkedBindingBuilder = binder().bind(anonymousKey);
-            ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
-
-            BindScoping scoping = command.getScoping();
-            if (scoping != null) {
-              scoping.execute(scopedBindingBuilder);
-            }
-
-            return null;
-          }
-        };
-
-        for (Command command : visitableBinder.getCommands()) {
-          command.acceptVisitor(visitor);
-        }
-      }
-    };
-
-    Injector injector = Guice.createInjector(interceptingModule);
+    // create and injector with the rewritten commands
+    Injector injector = Guice.createInjector(module);
 
     // make the injector available for callbacks from early providers
     futureInjector.initialize(injector);
@@ -139,6 +95,40 @@ public final class InterceptingInjectorBuilder {
     return injector;
   }
 
+  /**
+   * Replays commands, inserting the InterceptingProvider where necessary.
+   */
+  private class CommandRewriter extends CommandReplayer {
+    @Override public <T> Void visitBinding(BindCommand<T> command) {
+      Key<T> key = command.getKey();
+
+      if (!interceptedKeys.contains(key)) {
+        return super.visitBinding(command);
+      }
+
+      if (command.getTarget() == null) {
+        throw new UnsupportedOperationException(
+            String.format("Cannot intercept bare binding of %s.", key));
+      }
+
+      Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
+      getBinder().bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
+
+      LinkedBindingBuilder<T> linkedBindingBuilder = getBinder().bind(anonymousKey);
+      ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
+
+      BindScoping scoping = command.getScoping();
+      if (scoping != null) {
+        scoping.execute(scopedBindingBuilder);
+      }
+
+      return null;
+    }
+  }
+
+  /**
+   * Provide {@code T}, with a hook for an {@link InjectionInterceptor}.
+   */
   private static class InterceptingProvider<T> implements Provider<T> {
     private final Key<T> key;
     private final Key<T> anonymousKey;
@@ -180,5 +170,4 @@ public final class InterceptingInjectorBuilder {
   }
   @Retention(RUNTIME) @BindingAnnotation
   private @interface Internal { }
-
 }

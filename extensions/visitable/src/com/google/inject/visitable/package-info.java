@@ -15,6 +15,7 @@
  */
 
 /**
- * Extension for inspecting the commands executed against a binder.
+ * Extension for recording, reviewing and instrumenting commands executed
+ * against a binder.
  */
 package com.google.inject.visitable;
