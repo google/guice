@@ -35,8 +35,8 @@ import java.util.Map;
  * <p>To use a {@link FactoryProvider}:
  *
  * <p>Annotate your implementation class' constructor with the
- * {@link @AssistedInject} and the user-specified parameters with
- * {@link @Assisted}:
+ * {@literal @}{@link AssistedInject} and the user-specified parameters with
+ * {@literal @}{@link Assisted}:
  * <pre><code>public class RealPayment implements Payment {
  *    {@literal @}AssistedInject
  *    public RealPayment(CreditService creditService, AuthService authService,
@@ -54,8 +54,8 @@ import java.util.Map;
  * <p>You can name your create methods whatever you like, such as <i>create</i>,
  * or <i>createPayment</i> or <i>newPayment</i>. The concrete class must
  * be assignable to the return type of your create method. You can also provide
- * multiple factory methods, but there must be exactly one {@link @AssistedInject}
- * constructor on the implementation class for each.
+ * multiple factory methods, but there must be exactly one
+ * {@literal @}{@link AssistedInject} constructor on the implementation class for each.
  *
  * <p>In your Guice {@link com.google.inject.Module module}, bind your factory
  * interface to an instance of {@link FactoryProvider} that was created with
@@ -63,8 +63,8 @@ import java.util.Map;
  * <pre><code>  bind(PaymentFactory.class).toProvider(
  *     FactoryProvider.newFactory(PaymentFactory.class, RealPayment.class));</code></pre>
  *
- * <p>Now you can {@code @Inject} your factory interface into your Guice-injected
- * classes. When you invoke the create method on that factory, the
+ * <p>Now you can {@literal @}{@code Inject} your factory interface into your
+ * Guice-injected classes. When you invoke the create method on that factory, the
  * {@link FactoryProvider} will instantiate the implementation class using
  * parameters from the injector and the factory method.
  *
@@ -77,8 +77,8 @@ import java.util.Map;
  *    }
  * }</code></pre>
  * 
- * @typeparam F The factory interface 
- * @typeparam R The concrete class to be created.
+ * @param <F> The factory interface
+ * @param <R> The concrete class to be created.
  * 
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -111,6 +111,9 @@ public class FactoryProvider<F, R> implements Provider<F> {
     for (AssistedConstructor<?> c : factoryMethodToConstructor.values()) {
       for (Parameter p : c.getAllParameters()) {
         if(!p.isProvidedByFactory() && !paramCanBeInjected(p, injector)) {
+          // this is lame - we're not using the proper mechanism to add an
+          // error to the injector. Throughout this class we throw exceptions
+          // to add errors, which isn't really the best way in Guice
           throw new IllegalStateException(String.format(
               "Parameter of type '%s' is not injectable or annotated "
                 + "with @Assisted for Constructor '%s'", p, c));

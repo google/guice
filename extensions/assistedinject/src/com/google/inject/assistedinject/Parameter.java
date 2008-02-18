@@ -16,10 +16,8 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provider;
+import com.google.inject.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -113,10 +111,28 @@ class Parameter {
   }
 
   public boolean isBound(Injector injector) {
-    return injector.getBinding(getPrimaryBindingKey()) != null
-        || injector.getBinding(getAlternateGuiceBindingKey()) != null
-        || injector.getBinding(fixAnnotations(getPrimaryBindingKey())) != null
-        || injector.getBinding(fixAnnotations(getAlternateGuiceBindingKey())) != null;
+    return isBound(injector, getPrimaryBindingKey())
+        || isBound(injector, getAlternateGuiceBindingKey())
+        || isBound(injector, fixAnnotations(getPrimaryBindingKey()))
+        || isBound(injector, fixAnnotations(getAlternateGuiceBindingKey()));
+  }
+
+  private boolean isBound(Injector injector, Key<?> key) {
+    /* This method is particularly lame - we really need an API that can test
+       for any binding, implicit or explicit */
+    try {
+      return injector.getBinding(key) != null
+          || injector.getProvider(key) != null;
+    } catch (ProvisionException e) {
+      return false;
+    } catch (RuntimeException re) {
+      // TODO: make ConfigurationException public?
+      if (re.getClass().getName().contains("ConfigurationException")) {
+        return false;
+      } else {
+        throw re;
+      }
+    }
   }
 
   /**

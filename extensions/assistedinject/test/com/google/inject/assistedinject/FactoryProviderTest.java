@@ -16,19 +16,15 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import java.awt.Color;
+import junit.framework.TestCase;
+
+import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
@@ -470,6 +466,51 @@ public class FactoryProviderTest extends TestCase {
     factory.create(Collections.emptyList());
   }
   
+  public static class SteeringWheel {}
+  
+  public static class Fiat implements Car {
+    @SuppressWarnings("unused")
+    private final SteeringWheel steeringWheel;
+    @SuppressWarnings("unused")
+    private final Color color;
+    
+    @AssistedInject
+    public Fiat(SteeringWheel steeringWheel, @Assisted Color color) {
+      this.steeringWheel = steeringWheel;
+      this.color = color;
+    }
+  }
+  
+  public void testFactoryWithImplicitBindings() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ColoredCarFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                ColoredCarFactory.class, 
+                Fiat.class));
+      }
+    });
+    
+    ColoredCarFactory coloredCarFactory = injector.getInstance(ColoredCarFactory.class);
+    Fiat fiat = (Fiat) coloredCarFactory.create(Color.GREEN);
+    assertEquals(Color.GREEN, fiat.color);
+    assertNotNull(fiat.steeringWheel);
+  }
+  
+  public void testFactoryFailsWithMissingBinding() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(ColoredCarFactory.class)
+              .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+        }
+      });
+    } catch (ProvisionException e) {
+      assertTrue(e.getCause().getMessage().contains("Parameter of type 'double' is not " +
+          "injectable or annotated with @Assisted"));
+    }
+  }
 
   // TODO(jessewilson): test for duplicate constructors
 }
