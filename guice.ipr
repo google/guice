@@ -109,7 +109,7 @@
         </ADDITIONAL_INDENT_OPTIONS>
       </value>
     </option>
-    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
+    <option name="USE_PER_PROJECT_SETTINGS" value="false" />
   </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
@@ -330,6 +330,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" filepath="$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/visitable/commands.iml" filepath="$PROJECT_DIR$/extensions/visitable/commands.iml" />
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
@@ -365,11 +366,6 @@
         <list size="0" />
       </value>
     </option>
-  </component>
-  <component name="uidesigner-configuration">
-    <option name="INSTRUMENT_CLASSES" value="true" />
-    <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />
-    <option name="DEFAULT_LAYOUT_MANAGER" value="GridLayoutManager" />
   </component>
 </project>
 
