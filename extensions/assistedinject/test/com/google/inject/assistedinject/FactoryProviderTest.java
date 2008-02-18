@@ -491,7 +491,7 @@ public class FactoryProviderTest extends TestCase {
                 Fiat.class));
       }
     });
-    
+
     ColoredCarFactory coloredCarFactory = injector.getInstance(ColoredCarFactory.class);
     Fiat fiat = (Fiat) coloredCarFactory.create(Color.GREEN);
     assertEquals(Color.GREEN, fiat.color);
