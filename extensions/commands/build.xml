@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="guice-visitable" basedir="." default="jar">
+<project name="guice-commands" basedir="." default="jar">
 
   <import file="../../common.xml"/>
   
