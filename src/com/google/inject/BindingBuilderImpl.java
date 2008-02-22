@@ -27,7 +27,6 @@ import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -349,43 +348,6 @@ class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
       return new ToStringBuilder(InstanceBinding.class)
           .add("key", key)
           .add("instance", instance)
-          .add("source", source)
-          .toString();
-    }
-  }
-
-  private static class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
-      implements ProviderInstanceBinding<T> {
-
-    final Provider<? extends T> providerInstance;
-
-    ProviderInstanceBindingImpl(InjectorImpl injector, Key<T> key,
-        Object source,
-        InternalFactory<? extends T> internalFactory, Scope scope,
-        Provider<? extends T> providerInstance) {
-      super(injector, key, source, internalFactory, scope);
-      this.providerInstance = providerInstance;
-    }
-
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      bindingVisitor.visit(this);
-    }
-
-    public Provider<? extends T> getProviderInstance() {
-      return this.providerInstance;
-    }
-
-    public Collection<Dependency<?>> getDependencies() {
-      return injector.getFieldAndMethodDependenciesFor(
-          providerInstance.getClass());
-    }
-
-    @Override
-    public String toString() {
-      return new ToStringBuilder(ProviderInstanceBinding.class)
-          .add("key", key)
-          .add("provider", providerInstance)
-          .add("scope", scope)
           .add("source", source)
           .toString();
     }

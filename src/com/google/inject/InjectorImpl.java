@@ -90,13 +90,18 @@ class InjectorImpl implements Injector {
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<Class<? extends Annotation>, Scope> scopes;
   final List<MatcherAndConverter<?>> converters;
+  final Injector parentInjector;
+  final Map<Key<?>, BindingImpl<?>> parentBindings
+      = new HashMap<Key<?>, BindingImpl<?>>();
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
-  InjectorImpl(ConstructionProxyFactory constructionProxyFactory,
+  InjectorImpl(Injector parentInjector,
+      ConstructionProxyFactory constructionProxyFactory,
       Map<Key<?>, BindingImpl<?>> bindings,
       Map<Class<? extends Annotation>, Scope> scopes,
       List<MatcherAndConverter<?>> converters) {
+    this.parentInjector = parentInjector;
     this.constructionProxyFactory = constructionProxyFactory;
     this.explicitBindings = bindings;
     this.scopes = scopes;
@@ -148,10 +153,20 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Gets a binding implementation. First, this checks for an explicit binding.
+   * Gets a binding implementation.  First, it check to see if the parent has
+   * a binding.  If the parent has a binding and the binding is scoped, it
+   * will use that binding.  Otherwise, this checks for an explicit binding.
    * If no explicit binding is found, it looks for a just-in-time binding.
    */
+
   public <T> BindingImpl<T> getBinding(Key<T> key) {
+    if (parentInjector != null) {
+      BindingImpl<T> bindingImpl = getParentBinding(key);
+      if (bindingImpl != null) {
+        return bindingImpl;
+      }
+    }
+
     // Check explicit bindings, i.e. bindings created by modules.
     BindingImpl<T> binding = getExplicitBindingImpl(key);
     if (binding != null) {
@@ -160,6 +175,44 @@ class InjectorImpl implements Injector {
 
     // Look for an on-demand binding.
     return getJitBindingImpl(key);
+  }
+
+  /**
+   * Checks the parent injector for a scoped binding, and if available, creates
+   * an appropriate binding local to this injector and remembers it.
+   */
+  @SuppressWarnings("unchecked")
+  private <T> BindingImpl<T> getParentBinding(Key<T> key) {
+    BindingImpl<T> bindingImpl;
+    synchronized(parentBindings) {
+      // null values will mean that the parent doesn't have this binding
+      if (!parentBindings.containsKey(key)) {
+        Binding<T> binding = null;
+        try {
+          binding = parentInjector.getBinding(key);
+        } catch (ConfigurationException e) {
+          // if this happens, the parent can't create this key, and we ignore it
+        }
+        if (binding != null
+            && binding.getScope() != null
+            && !binding.getScope().equals(Scopes.NO_SCOPE)) {
+          bindingImpl = new ProviderInstanceBindingImpl(
+              this,
+              key,
+              binding.getSource(),
+              new InternalFactoryToProviderAdapter(binding.getProvider(),
+                  binding.getSource()),
+              Scopes.NO_SCOPE,
+              binding.getProvider());
+        } else {
+          bindingImpl = null;
+        }
+        parentBindings.put(key, bindingImpl);
+      } else {
+        bindingImpl = (BindingImpl<T>) parentBindings.get(key);
+      }
+    }
+    return bindingImpl;
   }
 
   public <T> Binding<T> getBinding(Class<T> type) {

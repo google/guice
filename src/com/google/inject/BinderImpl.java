@@ -413,12 +413,25 @@ class BinderImpl implements Binder {
    * @throws IllegalStateException if called more than once
    */
   Injector createInjector() throws CreationException {
+    return createInjector(null);
+  }
+
+  /**
+   * Creates a {@link Injector} instance. Injects static members for classes
+   * which were registered using {@link #requestStaticInjection(Class...)}.
+   *
+   * @param parent The parent injector to chain object creation to.
+   * @throws CreationException if configuration errors are found. The
+   *     expectation is that the application will log this exception and exit.
+   * @throws IllegalStateException if called more than once
+   */
+  Injector createInjector(Injector parent) throws CreationException {
     stopwatch.resetAndLog(logger, "Configuration (running the modules)");
 
     Map<Key<?>, BindingImpl<?>> bindings
         = new HashMap<Key<?>, BindingImpl<?>>();
     injector = new InjectorImpl(
-        proxyFactoryBuilder.create(), bindings, scopes, converters);
+        parent, proxyFactoryBuilder.create(), bindings, scopes, converters);
 
     // Create default bindings.
     // We use toProvider() instead of toInstance() to avoid infinite recursion

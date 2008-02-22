@@ -70,6 +70,7 @@ public class AllTests {
     suite.addTestSuite(IntegrationTest.class);
 
     suite.addTestSuite(ProvidersTest.class);
+    suite.addTestSuite(ParentInjectorTest.class);
 
     return suite;
   }

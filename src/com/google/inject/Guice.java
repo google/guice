@@ -89,10 +89,50 @@ public final class Guice {
    */
   public static Injector createInjector(Stage stage,
       Iterable<? extends Module> modules) {
+    return createInjector(null, stage, modules);
+  }
+
+
+  /**
+   * Creates an injector for the given set of modules, with the given parent
+   * injector.
+   *
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
+   */
+  public static Injector createInjector(Injector parent,
+      Iterable<? extends Module> modules) {
+    return createInjector(parent, Stage.DEVELOPMENT, modules);
+  }
+
+
+  /**
+   * Creates an injector for the given set of modules, with the given parent
+   * injector.
+   *
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
+   */
+  public static Injector createInjector(Injector parent,
+      Module... modules) {
+    return createInjector(parent, Stage.DEVELOPMENT, Arrays.asList(modules));
+  }
+
+  /**
+   * Creates an injector for the given set of modules, in a given development
+   * stage, with the given parent injector.
+   *
+   * @throws CreationException if one or more errors occur during Injector
+   *     construction
+   */
+  public static Injector createInjector(
+      Injector parent, Stage stage,
+      Iterable<? extends Module> modules) {
     BinderImpl binder = new BinderImpl(stage);
     for (Module module : modules) {
       binder.install(module);
     }
-    return binder.createInjector();
+    return binder.createInjector(parent);
   }
+
 }
