@@ -17,7 +17,6 @@
 package com.google.inject.commands;
 
 import com.google.inject.commands.intercepting.InterceptingInjectorBuilderTest;
-import com.google.inject.injectioncontroller.InjectionControllerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -33,7 +32,6 @@ public class AllTests {
     suite.addTestSuite(CommandReplayerTest.class);
     suite.addTestSuite(CommandRewriteTest.class);
     suite.addTestSuite(InterceptingInjectorBuilderTest.class);
-    suite.addTestSuite(InjectionControllerTest.class);
 
     return suite;
   }
