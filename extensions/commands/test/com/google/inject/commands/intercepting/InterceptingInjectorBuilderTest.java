@@ -17,13 +17,11 @@
 package com.google.inject.commands.intercepting;
 
 import com.google.inject.*;
+import com.google.inject.name.Names;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 
 
 /**
@@ -188,4 +186,25 @@ public class InterceptingInjectorBuilderTest extends TestCase {
     assertEquals(new ArrayList(), injector.getInstance(ArrayList.class));
   }
 
+  public void testBindingForSetOfInterceptedKeys() {
+    Module module = new AbstractModule() {
+      protected void configure() {
+        bind(ProvisionInterceptor.class).toInstance(failingInterceptor);
+        bind(List.class).to(LinkedList.class);
+        bind(Map.class).to(HashMap.class);
+        bind(Collection.class).to(ArrayList.class);
+      }
+    };
+
+    Injector injector = new InterceptingInjectorBuilder()
+        .intercept(List.class)
+        .intercept(Collection.class)
+        .install(module)
+        .build();
+
+    Set<Key> interceptableKeys = injector.getInstance(
+        Key.get(new TypeLiteral<Set<Key>>() {}, Names.named("Interceptable")));
+    assertEquals(new HashSet<Key>(Arrays.asList(Key.get(List.class), Key.get(Collection.class))),
+        interceptableKeys);
+  }
 }

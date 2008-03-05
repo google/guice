@@ -17,6 +17,7 @@
 package com.google.inject.commands.intercepting;
 
 import com.google.inject.*;
+import com.google.inject.name.Names;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
@@ -29,6 +30,9 @@ import java.util.*;
 
 /**
  * Builds an {@link Injector} that intercepts provision.
+ *
+ * <p>The injector contains an extra binding for {@code Set<Key>} annotated
+ * with the name "Interceptable". This bound set contains all intercepted keys.
  *
  * <h3>Limitations of the current implementation</h3>
  *
@@ -59,6 +63,17 @@ public final class InterceptingInjectorBuilder {
   private final Collection<Module> modules = new ArrayList<Module>();
   private final Set<Key<?>> keysToIntercept = new HashSet<Key<?>>();
   private boolean tolerateUnmatchedInterceptions = false;
+
+  public InterceptingInjectorBuilder() {
+    // bind the keys to intercept
+    modules.add(new AbstractModule() {
+      protected void configure() {
+        bind(new TypeLiteral<Set<Key>>() {})
+            .annotatedWith(Names.named("Interceptable"))
+            .toInstance(Collections.<Key>unmodifiableSet(keysToIntercept));
+      }
+    });
+  }
 
   public InterceptingInjectorBuilder install(Module... modules) {
     this.modules.addAll(Arrays.asList(modules));
