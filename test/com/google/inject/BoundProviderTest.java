@@ -24,12 +24,14 @@ import junit.framework.TestCase;
 public class BoundProviderTest extends TestCase {
 
   public void testFooProvider() throws CreationException {
-    BinderImpl cb = new BinderImpl();
-    cb.bind(Foo.class).toProvider(FooProvider.class);
-    Injector c = cb.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class).toProvider(FooProvider.class);
+      }
+    });
 
-    Foo a = c.getInstance(Foo.class);
-    Foo b = c.getInstance(Foo.class);
+    Foo a = injector.getInstance(Foo.class);
+    Foo b = injector.getInstance(Foo.class);
 
     assertEquals(0, a.i);
     assertEquals(0, b.i);
@@ -39,12 +41,14 @@ public class BoundProviderTest extends TestCase {
   }
 
   public void testSingletonFooProvider() throws CreationException {
-    BinderImpl cb = new BinderImpl();
-    cb.bind(Foo.class).toProvider(SingletonFooProvider.class);
-    Injector c = cb.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class).toProvider(SingletonFooProvider.class);
+      }
+    });
 
-    Foo a = c.getInstance(Foo.class);
-    Foo b = c.getInstance(Foo.class);
+    Foo a = injector.getInstance(Foo.class);
+    Foo b = injector.getInstance(Foo.class);
 
     assertEquals(0, a.i);
     assertEquals(1, b.i);

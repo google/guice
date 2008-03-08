@@ -20,15 +20,14 @@ import com.google.inject.*;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import static com.google.inject.spi.SourceProviders.defaultSource;
 import com.google.inject.spi.TypeConverter;
+import com.google.inject.spi.SourceProviders;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Records commands executed by a module so they can be inspected or
@@ -37,8 +36,12 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class CommandRecorder {
-  private final Stage stage = Stage.DEVELOPMENT;
+  private Stage currentStage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
+
+  static {
+    SourceProviders.skip(RecordingBinder.class);
+  }
 
   /**
    * @param earlyRequestsProvider satisfies requests to
@@ -47,6 +50,13 @@ public final class CommandRecorder {
    */
   public CommandRecorder(EarlyRequestsProvider earlyRequestsProvider) {
     this.earlyRequestsProvider = earlyRequestsProvider;
+  }
+
+  /**
+   * Sets the stage reported by the binder.
+   */
+  public void setCurrentStage(Stage currentStage) {
+    this.currentStage = currentStage;
   }
 
   /**
@@ -62,49 +72,53 @@ public final class CommandRecorder {
   public List<Command> recordCommands(Iterable<Module> modules) {
     RecordingBinder binder = new RecordingBinder();
     for (Module module : modules) {
-      module.configure(binder);
+      binder.install(module);
     }
     return Collections.unmodifiableList(binder.commands);
   }
 
   private class RecordingBinder implements Binder {
+    private final Set<Module> modules = new HashSet<Module>();
     private final List<Command> commands = new ArrayList<Command>();
 
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         MethodInterceptor... interceptors) {
-      commands.add(new BindInterceptorCommand(classMatcher, methodMatcher, interceptors));
+      commands.add(new BindInterceptorCommand(
+          defaultSource(), classMatcher, methodMatcher, interceptors));
     }
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-      commands.add(new BindScopeCommand(annotationType, scope));
+      commands.add(new BindScopeCommand(defaultSource(), annotationType, scope));
     }
 
     public void requestStaticInjection(Class<?>... types) {
-      commands.add(new RequestStaticInjectionCommand(types));
+      commands.add(new RequestStaticInjectionCommand(defaultSource(), types));
     }
 
     public void install(Module module) {
-      module.configure(this);
+      if (modules.add(module)) {
+        module.configure(this);
+      }
     }
 
     public Stage currentStage() {
-      return stage;
+      return currentStage;
     }
 
     public void addError(String message, Object... arguments) {
-      commands.add(new AddMessageErrorCommand(message, arguments));
+      commands.add(new AddMessageErrorCommand(defaultSource(), message, arguments));
     }
 
     public void addError(Throwable t) {
-      commands.add(new AddThrowableErrorCommand(t));
+      commands.add(new AddThrowableErrorCommand(defaultSource(), t));
     }
 
     public <T> BindCommand<T>.BindingBuilder bind(Key<T> key) {
-      BindCommand<T> bindCommand = new BindCommand<T>(key);
+      BindCommand<T> bindCommand = new BindCommand<T>(defaultSource(), key);
       commands.add(bindCommand);
-      return bindCommand.bindingBuilder();
+      return bindCommand.bindingBuilder(RecordingBinder.this);
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
@@ -116,13 +130,13 @@ public final class CommandRecorder {
     }
 
     public AnnotatedConstantBindingBuilder bindConstant() {
-      BindConstantCommand bindConstantCommand = new BindConstantCommand();
+      BindConstantCommand bindConstantCommand = new BindConstantCommand(defaultSource());
       commands.add(bindConstantCommand);
-      return bindConstantCommand.bindingBuilder();
+      return bindConstantCommand.bindingBuilder(RecordingBinder.this);
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      commands.add(new GetProviderCommand<T>(key, earlyRequestsProvider));
+      commands.add(new GetProviderCommand<T>(defaultSource(), key, earlyRequestsProvider));
       return new Provider<T>() {
         public T get() {
           return earlyRequestsProvider.get(key);
@@ -135,8 +149,8 @@ public final class CommandRecorder {
     }
 
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
-                               TypeConverter converter) {
-      commands.add(new ConvertToTypesCommand(typeMatcher, converter));
+        TypeConverter converter) {
+      commands.add(new ConvertToTypesCommand(defaultSource(), typeMatcher, converter));
     }
   }
 }

@@ -41,15 +41,17 @@ public class InjectorTest extends TestCase {
   }
 
   public void testProviderMethods() throws CreationException {
-    SampleSingleton singleton = new SampleSingleton();
-    SampleSingleton other = new SampleSingleton();
+    final SampleSingleton singleton = new SampleSingleton();
+    final SampleSingleton other = new SampleSingleton();
 
-    BinderImpl builder = new BinderImpl();
-    builder.bind(SampleSingleton.class).toInstance(singleton);
-    builder.bind(SampleSingleton.class)
-        .annotatedWith(Other.class)
-        .toInstance(other);
-    Injector injector = builder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(SampleSingleton.class).toInstance(singleton);
+        bind(SampleSingleton.class)
+            .annotatedWith(Other.class)
+            .toInstance(other);
+      }
+    });
 
     assertSame(singleton,
         injector.getInstance(Key.get(SampleSingleton.class)));
@@ -96,9 +98,12 @@ public class InjectorTest extends TestCase {
 
   public void testIntAndIntegerAreInterchangeable()
       throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bindConstant().annotatedWith(I.class).to(5);
-    Injector injector = builder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(I.class).to(5);
+      }
+    });
+
     IntegerWrapper iw = injector.getInstance(IntegerWrapper.class);
     assertEquals(5, (int) iw.i);
   }
@@ -175,11 +180,13 @@ public class InjectorTest extends TestCase {
   }
 
   public void testInjectStatics() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bindConstant().annotatedWith(S.class).to("test");
-    builder.bindConstant().annotatedWith(I.class).to(5);
-    builder.requestStaticInjection(Static.class);
-    builder.createInjector();
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(S.class).to("test");
+        bindConstant().annotatedWith(I.class).to(5);
+        requestStaticInjection(Static.class);
+      }
+    });
 
     assertEquals("test", Static.s);
     assertEquals(5, Static.i);

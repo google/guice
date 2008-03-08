@@ -16,6 +16,8 @@
 
 package com.google.inject.commands;
 
+import static com.google.inject.internal.Objects.nonNull;
+
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
@@ -26,12 +28,18 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class AddMessageErrorCommand implements Command {
+  private final Object source;
   private final String message;
   private final List<Object> arguments;
 
-  AddMessageErrorCommand(String message, Object[] arguments) {
-    this.message = message;
+  AddMessageErrorCommand(Object source, String message, Object[] arguments) {
+    this.source = nonNull(source, "source");
+    this.message = nonNull(message, "message");
     this.arguments = unmodifiableList(Arrays.asList(arguments.clone()));
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {

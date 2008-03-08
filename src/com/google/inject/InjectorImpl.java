@@ -53,7 +53,7 @@ import net.sf.cglib.reflect.FastMethod;
  * Default {@link Injector} implementation.
  *
  * @author crazybob@google.com (Bob Lee)
- * @see BinderImpl
+ * @see InjectorBuilder
  */
 class InjectorImpl implements Injector {
 
@@ -85,27 +85,22 @@ class InjectorImpl implements Injector {
     PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
   }
 
-  final ConstructionProxyFactory constructionProxyFactory;
-  final Map<Key<?>, BindingImpl<?>> explicitBindings;
-  final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Map<Class<? extends Annotation>, Scope> scopes;
-  final List<MatcherAndConverter<?>> converters;
   final Injector parentInjector;
+  ConstructionProxyFactory constructionProxyFactory;
+  final Map<Key<?>, BindingImpl<?>> explicitBindings
+      = new HashMap<Key<?>, BindingImpl<?>>();
+  final BindingsMultimap bindingsMultimap = new BindingsMultimap();
+  final Map<Class<? extends Annotation>, Scope> scopes
+      = new HashMap<Class<? extends Annotation>, Scope>();
+  final List<MatcherAndConverter<?>> converters
+      = new ArrayList<MatcherAndConverter<?>>();
   final Map<Key<?>, BindingImpl<?>> parentBindings
       = new HashMap<Key<?>, BindingImpl<?>>();
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
-  InjectorImpl(Injector parentInjector,
-      ConstructionProxyFactory constructionProxyFactory,
-      Map<Key<?>, BindingImpl<?>> bindings,
-      Map<Class<? extends Annotation>, Scope> scopes,
-      List<MatcherAndConverter<?>> converters) {
+  InjectorImpl(Injector parentInjector) {
     this.parentInjector = parentInjector;
-    this.constructionProxyFactory = constructionProxyFactory;
-    this.explicitBindings = bindings;
-    this.scopes = scopes;
-    this.converters = converters;
   }
 
   /**

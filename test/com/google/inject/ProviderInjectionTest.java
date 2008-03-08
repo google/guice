@@ -27,12 +27,12 @@ import static java.util.Collections.emptySet;
 public class ProviderInjectionTest extends TestCase {
 
   public void testProviderInjection() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-
-    builder.bind(Bar.class);
-    builder.bind(SampleSingleton.class).in(Scopes.SINGLETON);
-
-    Injector injector = builder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Bar.class);
+        bind(SampleSingleton.class).in(Scopes.SINGLETON);
+      }
+    });
 
     Foo foo = injector.getInstance(Foo.class);
 

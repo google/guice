@@ -41,14 +41,23 @@ public interface BindTarget<T> {
   void execute(ConstantBindingBuilder builder);
 
   /**
-   * Returns the bound instance, if it exists, or {@code defaultValue}
-   * if no bound value exists.
+   * Returns the bound instance, if it exists, or {@code null} if no bound value exists.
    */
-  T get(T defaultValue);
+  T get();
 
-  Provider<? extends T> getProvider(Provider<? extends T> defaultValue);
+  Provider<? extends T> getProvider();
 
-  Key<? extends Provider<? extends T>> getProviderKey(Key<Provider<? extends T>> defaultValue);
+  Key<? extends Provider<? extends T>> getProviderKey();
 
-  Key<? extends T> getKey(Key<? extends T> defaultValue);
+  Key<? extends T> getKey();
+
+  <V> V acceptVisitor(Visitor<T, V> visitor);
+
+  interface Visitor<T, V> {
+    V visitToInstance(T instance);
+    V visitToProvider(Provider<? extends T> provider);
+    V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey);
+    V visitToKey(Key<? extends T> key);
+    V visitUntargetted();
+  }
 }

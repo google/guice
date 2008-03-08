@@ -61,10 +61,13 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testOneConstantInjection() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bindConstant().annotatedWith(NumericValue.class).to("5");
-    builder.bind(Simple.class);
-    Injector injector = builder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(NumericValue.class).to("5");
+        bind(Simple.class);
+      }
+    });
+
     Simple simple = injector.getInstance(Simple.class);
     assertEquals(5, simple.i);
   }
@@ -74,13 +77,16 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testConstantInjection() throws CreationException {
-    BinderImpl b = new BinderImpl();
-    b.bindConstant().annotatedWith(NumericValue.class).to("5");
-    b.bindConstant().annotatedWith(BooleanValue.class).to("true");
-    b.bindConstant().annotatedWith(EnumValue.class).to("TEE");
-    b.bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
-    Injector c = b.createInjector();
-    Foo foo = c.getInstance(Foo.class);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(NumericValue.class).to("5");
+        bindConstant().annotatedWith(BooleanValue.class).to("true");
+        bindConstant().annotatedWith(EnumValue.class).to("TEE");
+        bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
+      }
+    });
+
+    Foo foo = injector.getInstance(Foo.class);
 
     checkNumbers(
       foo.integerField,
@@ -108,11 +114,14 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidInteger() throws CreationException {
-    BinderImpl b = new BinderImpl();
-    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
-    Injector c = b.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(NumericValue.class).to("invalid");
+      }
+    });
+
     try {
-      c.getInstance(InvalidInteger.class);
+      injector.getInstance(InvalidInteger.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -122,11 +131,14 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidCharacter() throws CreationException {
-    BinderImpl b = new BinderImpl();
-    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
-    Injector c = b.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(NumericValue.class).to("invalid");
+      }
+    });
+
     try {
-      c.getInstance(InvalidCharacter.class);
+      injector.getInstance(InvalidCharacter.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -136,11 +148,14 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testInvalidEnum() throws CreationException {
-    BinderImpl b = new BinderImpl();
-    b.bindConstant().annotatedWith(NumericValue.class).to("invalid");
-    Injector c = b.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(NumericValue.class).to("invalid");
+      }
+    });
+
     try {
-      c.getInstance(InvalidEnum.class);
+      injector.getInstance(InvalidEnum.class);
       fail();
     } catch (ConfigurationException e) { /* expected */ }
   }
@@ -150,10 +165,12 @@ public class ConstantConversionTest extends TestCase {
   }
 
   public void testToInstanceIsTreatedLikeConstant() throws CreationException {
-    BinderImpl b = new BinderImpl();
-    b.bind(String.class).toInstance("5");
-    b.bind(LongHolder.class);
-    Injector c = b.createInjector();
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toInstance("5");
+        bind(LongHolder.class);
+      }
+    });
   }
 
   static class LongHolder {

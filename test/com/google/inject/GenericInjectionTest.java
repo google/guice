@@ -26,10 +26,14 @@ import junit.framework.TestCase;
 public class GenericInjectionTest extends TestCase {
 
   public void testGenericInjection() throws CreationException {
-    List<String> names = Arrays.asList("foo", "bar", "bob");
-    BinderImpl builder = new BinderImpl();
-    builder.bind(new TypeLiteral<List<String>>() {}).toInstance(names);
-    Injector injector = builder.createInjector();
+    final List<String> names = Arrays.asList("foo", "bar", "bob");
+
+    Injector injector = Guice.createInjector((Module) new AbstractModule() {
+      protected void configure() {
+        bind(new TypeLiteral<List<String>>() {}).toInstance(names);
+      }
+    });
+
     Foo foo = injector.getInstance(Foo.class);
     assertEquals(names, foo.names);
   }

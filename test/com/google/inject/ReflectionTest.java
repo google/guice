@@ -29,10 +29,15 @@ public class ReflectionTest extends TestCase {
   @BindingAnnotation @interface I {}
 
   public void testNormalBinding() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    Foo foo = new Foo();
-    builder.bind(Foo.class).toInstance(foo);
-    Injector injector = builder.createInjector();
+    InjectorBuilder builder = new InjectorBuilder();
+    final Foo foo = new Foo();
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class).toInstance(foo);
+      }
+    });
+
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());
@@ -40,9 +45,12 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testConstantBinding() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bindConstant().annotatedWith(I.class).to(5);
-    Injector injector = builder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(I.class).to(5);
+      }
+    });
+
     Binding<?> i = injector.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getProvider().get());
     assertNotNull(i.getSource());
@@ -50,11 +58,16 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testLinkedBinding() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    Bar bar = new Bar();
-    builder.bind(Bar.class).toInstance(bar);
-    builder.bind(Key.get(Foo.class)).to(Key.get(Bar.class));
-    Injector injector = builder.createInjector();
+    InjectorBuilder builder = new InjectorBuilder();
+    final Bar bar = new Bar();
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Bar.class).toInstance(bar);
+        bind(Key.get(Foo.class)).to(Key.get(Bar.class));
+      }
+    });
+
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getProvider().get());
     assertNotNull(fooBinding.getSource());

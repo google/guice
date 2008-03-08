@@ -22,6 +22,7 @@ package com.google.inject.commands;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Command {
+  Object getSource();
   <T> T acceptVisitor(Visitor<T> visitor);
 
   /**

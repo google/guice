@@ -16,6 +16,8 @@
 
 package com.google.inject.commands;
 
+import static com.google.inject.internal.Objects.nonNull;
+
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
@@ -26,10 +28,16 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class RequestStaticInjectionCommand implements Command {
+  private final Object source;
   private final List<Class> types;
 
-  RequestStaticInjectionCommand(Class[] types) {
+  RequestStaticInjectionCommand(Object source, Class[] types) {
+    this.source = nonNull(source, "source");
     this.types = unmodifiableList(Arrays.asList(types.clone()));
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public List<Class> getTypes() {

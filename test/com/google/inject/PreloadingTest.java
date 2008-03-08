@@ -29,24 +29,24 @@ public class PreloadingTest extends TestCase {
   }
 
   public void testPreloadSome() throws CreationException {
-    BinderImpl builder = createBinder(Stage.DEVELOPMENT);
-    builder.createInjector();
+    createBinder(Stage.DEVELOPMENT);
     assertEquals(1, Foo.count);
     assertEquals(0, Bar.count);
   }
 
   public void testPreloadAll() throws CreationException {
-    BinderImpl builder = createBinder(Stage.PRODUCTION);
-    builder.createInjector();
+    createBinder(Stage.PRODUCTION);
     assertEquals(1, Foo.count);
     assertEquals(1, Bar.count);
   }
 
-  private BinderImpl createBinder(Stage stage) {
-    BinderImpl builder = new BinderImpl(stage);
-    builder.bind(Foo.class).asEagerSingleton();
-    builder.bind(Bar.class);
-    return builder;
+  private Injector createBinder(Stage stage) {
+    return Guice.createInjector(stage, new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class).asEagerSingleton();
+        bind(Bar.class);
+      }
+    });
   }
 
   static class Foo {

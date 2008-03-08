@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.BinderImpl.CreationListener;
+import com.google.inject.BindCommandProcessor.CreationListener;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.

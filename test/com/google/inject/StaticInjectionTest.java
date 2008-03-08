@@ -32,12 +32,13 @@ public class StaticInjectionTest extends TestCase {
   @BindingAnnotation @interface S {}
 
   public void testInjectStatics() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bindConstant().annotatedWith(S.class).to("test");
-    builder.bindConstant().annotatedWith(I.class).to(5);
-    builder.requestStaticInjection(StaticInjectionTest.Static.class);
-
-    Injector c = builder.createInjector();
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(S.class).to("test");
+        bindConstant().annotatedWith(I.class).to(5);
+        requestStaticInjection(StaticInjectionTest.Static.class);
+      }
+    });
 
     assertEquals("test", StaticInjectionTest.Static.s);
     assertEquals(5, StaticInjectionTest.Static.i);

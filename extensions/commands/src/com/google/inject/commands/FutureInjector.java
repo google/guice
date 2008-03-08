@@ -52,7 +52,8 @@ public final class FutureInjector implements EarlyRequestsProvider {
 
   public <T> T get(Key<T> key) {
     if (injector == null) {
-      throw new IllegalStateException("Not yet initialized");
+      throw new IllegalStateException("This provider cannot be used until the"
+          + " Injector has been created.");
     }
 
     return injector.getInstance(key);

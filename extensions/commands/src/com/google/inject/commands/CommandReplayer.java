@@ -19,6 +19,7 @@ package com.google.inject.commands;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -106,59 +107,96 @@ public class CommandReplayer {
     }
   }
 
-  public void replayAddMessageError(Binder binder, AddMessageErrorCommand command) {
-    binder.addError(command.getMessage(), command.getArguments().toArray());
+  public void replayAddMessageError(final Binder binder, final AddMessageErrorCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        binder.addError(command.getMessage(), command.getArguments().toArray());
+      }
+    });
   }
 
-  public void replayAddError(Binder binder, AddThrowableErrorCommand command) {
-    binder.addError(command.getThrowable());
+  public void replayAddError(final Binder binder, final AddThrowableErrorCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        binder.addError(command.getThrowable());
+      }
+    });
   }
 
-  public void replayBindInterceptor(Binder binder, BindInterceptorCommand command) {
-    List<MethodInterceptor> interceptors = command.getInterceptors();
-    binder.bindInterceptor(command.getClassMatcher(), command.getMethodMatcher(),
-        interceptors.toArray(new MethodInterceptor[interceptors.size()]));
+  public void replayBindInterceptor(final Binder binder, final BindInterceptorCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        List<MethodInterceptor> interceptors = command.getInterceptors();
+        binder.bindInterceptor(command.getClassMatcher(), command.getMethodMatcher(),
+            interceptors.toArray(new MethodInterceptor[interceptors.size()]));
+      }
+    });
   }
 
-  public void replayBindScope(Binder binder, BindScopeCommand command) {
-    binder.bindScope(command.getAnnotationType(), command.getScope());
+  public void replayBindScope(final Binder binder, final BindScopeCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        binder.bindScope(command.getAnnotationType(), command.getScope());
+      }
+    });
   }
 
-  public void replayRequestStaticInjection(Binder binder, RequestStaticInjectionCommand command) {
-    List<Class> types = command.getTypes();
-    binder.requestStaticInjection(types.toArray(new Class[types.size()]));
+  public void replayRequestStaticInjection(final Binder binder,
+      final RequestStaticInjectionCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        List<Class> types = command.getTypes();
+        binder.requestStaticInjection(types.toArray(new Class[types.size()]));
+      }
+    });
   }
 
-  public void replayBindConstant(Binder binder, BindConstantCommand command) {
-    AnnotatedConstantBindingBuilder constantBindingBuilder = binder.bindConstant();
+  public void replayBindConstant(final Binder binder, final BindConstantCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        AnnotatedConstantBindingBuilder constantBindingBuilder = binder.bindConstant();
 
-    Key<Object> key = command.getKey();
-    ConstantBindingBuilder builder = key.getAnnotation() != null
-        ? constantBindingBuilder.annotatedWith(key.getAnnotation())
-        : constantBindingBuilder.annotatedWith(key.getAnnotationType());
+        Key<Object> key = command.getKey();
+        ConstantBindingBuilder builder = key.getAnnotation() != null
+            ? constantBindingBuilder.annotatedWith(key.getAnnotation())
+            : constantBindingBuilder.annotatedWith(key.getAnnotationType());
 
-    command.getTarget().execute(builder);
+        command.getTarget().execute(builder);
+      }
+    });
   }
 
-  public void replayConvertToTypes(Binder binder, ConvertToTypesCommand command) {
-    binder.convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
+  public void replayConvertToTypes(final Binder binder, final ConvertToTypesCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        binder.convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
+      }
+    });
   }
 
-  public <T> void replayBind(Binder binder, BindCommand<T> command) {
-    LinkedBindingBuilder<T> lbb = binder.bind(command.getKey());
+  public <T> void replayBind(final Binder binder, final BindCommand<T> command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        LinkedBindingBuilder<T> lbb = binder.bind(command.getKey());
 
-    BindTarget<T> bindTarget = command.getTarget();
-    ScopedBindingBuilder sbb = bindTarget != null
-        ? bindTarget.execute(lbb)
-        : lbb;
+        BindTarget<T> bindTarget = command.getTarget();
+        ScopedBindingBuilder sbb = bindTarget != null
+            ? bindTarget.execute(lbb)
+            : lbb;
 
-    BindScoping scoping = command.getScoping();
-    if (scoping != null) {
-      scoping.execute(sbb);
-    }
+        BindScoping scoping = command.getScoping();
+        if (scoping != null) {
+          scoping.execute(sbb);
+        }
+      }
+    });
   }
 
-  public <T> void replayGetProvider(Binder binder, GetProviderCommand<T> command) {
-    binder.getProvider(command.getKey());
+  public <T> void replayGetProvider(final Binder binder, final GetProviderCommand<T> command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        binder.getProvider(command.getKey());
+      }
+    });
   }
 }

@@ -24,10 +24,12 @@ import junit.framework.TestCase;
 public class ScopesTest extends TestCase {
 
   public void testSingletonAnnotation() throws CreationException {
-    BinderImpl binder = new BinderImpl();
-    BindingBuilderImpl<SampleSingleton> bindingBuilder
-        = binder.bind(SampleSingleton.class);
-    Injector injector = binder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(SampleSingleton.class);
+      }
+    });
+
     assertSame(
         injector.getInstance(SampleSingleton.class),
         injector.getInstance(SampleSingleton.class));
@@ -38,9 +40,12 @@ public class ScopesTest extends TestCase {
 
   public void testOverriddingAnnotation()
       throws CreationException {
-    BinderImpl binder = new BinderImpl();
-    binder.bind(SampleSingleton.class).in(Scopes.NO_SCOPE);
-    Injector injector = binder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(SampleSingleton.class).in(Scopes.NO_SCOPE);
+      }
+    });
+
     assertNotSame(
         injector.getInstance(SampleSingleton.class),
         injector.getInstance(SampleSingleton.class));

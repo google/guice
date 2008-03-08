@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.commands;
+package com.google.inject;
 
-import com.google.inject.Scope;
-import com.google.inject.binder.ScopedBindingBuilder;
-
-import java.lang.annotation.Annotation;
-
+import com.google.inject.commands.BindInterceptorCommand;
 
 /**
- * Immutable snapshot of a binding scope.
+ * Handles {@link Binder#bindInterceptor} commands.
  *
+ * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public interface BindScoping {
-  void execute(ScopedBindingBuilder scopedBindingBuilder);
-  boolean isEagerSingleton();
-  Scope getScope();
-  Class<? extends Annotation> getScopeAnnotation();
-  <V> V acceptVisitor(Visitor<V> visitor);
-  
-  interface Visitor<V> {
-    V visitEagerSingleton();
-    V visitScope(Scope scope);
-    V visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation);
-    V visitNoScoping();
+class BindInterceptorCommandProcessor extends CommandProcessor {
+
+  private final ProxyFactoryBuilder proxyFactoryBuilder = new ProxyFactoryBuilder();
+
+  @Override public Boolean visitBindInterceptor(BindInterceptorCommand command) {
+    proxyFactoryBuilder.intercept(
+        command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors());
+    return true;
+  }
+
+  ProxyFactory createProxyFactory() {
+    return proxyFactoryBuilder.create();
   }
 }

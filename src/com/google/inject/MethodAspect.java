@@ -21,6 +21,9 @@ import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collection;
+import java.util.ArrayList;
+
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -35,11 +38,10 @@ class MethodAspect {
   final List<MethodInterceptor> interceptors;
 
   MethodAspect(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+      Matcher<? super Method> methodMatcher, List<MethodInterceptor> interceptors) {
     this.classMatcher = Objects.nonNull(classMatcher, "class matcher");
     this.methodMatcher = Objects.nonNull(methodMatcher, "method matcher");
-    this.interceptors
-        = Arrays.asList(Objects.nonNull(interceptors, "interceptors"));
+    this.interceptors = Objects.nonNull(interceptors, "interceptors");
   }
 
   boolean matches(Class<?> clazz) {

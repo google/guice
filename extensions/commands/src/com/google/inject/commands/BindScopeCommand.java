@@ -17,6 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.Scope;
+import static com.google.inject.internal.Objects.nonNull;
 
 import java.lang.annotation.Annotation;
 
@@ -26,13 +27,18 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindScopeCommand implements Command {
+  private final Object source;
   private final Class<? extends Annotation> annotationType;
   private final Scope scope;
 
-  BindScopeCommand(
-      Class<? extends Annotation> annotationType, Scope scope) {
-    this.annotationType = annotationType;
-    this.scope = scope;
+  BindScopeCommand(Object source, Class<? extends Annotation> annotationType, Scope scope) {
+    this.source = nonNull(source, "source");
+    this.annotationType = nonNull(annotationType, "annotationType");
+    this.scope = nonNull(scope, "scope");
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public Class<? extends Annotation> getAnnotationType() {

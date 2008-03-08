@@ -128,11 +128,11 @@ public final class Guice {
   public static Injector createInjector(
       Injector parent, Stage stage,
       Iterable<? extends Module> modules) {
-    BinderImpl binder = new BinderImpl(stage);
-    for (Module module : modules) {
-      binder.install(module);
-    }
-    return binder.createInjector(parent);
+    return new InjectorBuilder()
+        .stage(stage)
+        .parentInjector(parent)
+        .addModules(modules)
+        .build();
   }
 
 }

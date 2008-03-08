@@ -16,16 +16,24 @@
 
 package com.google.inject.commands;
 
+import static com.google.inject.internal.Objects.nonNull;
+
 /**
  * Immutable snapshot of a request to add a throwable message.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class AddThrowableErrorCommand implements Command {
+  private final Object source;
   private final Throwable throwable;
 
-  AddThrowableErrorCommand(Throwable throwable) {
-    this.throwable = throwable;
+  AddThrowableErrorCommand(Object source, Throwable throwable) {
+    this.source = nonNull(source, "source");
+    this.throwable = nonNull(throwable, "throwable");
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {

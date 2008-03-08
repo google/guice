@@ -20,6 +20,9 @@ import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Arrays;
+
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -43,10 +46,15 @@ class ProxyFactoryBuilder {
    */
   public ProxyFactoryBuilder intercept(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      MethodInterceptor... interceptors) {
-    methodAspects.add(
-        new MethodAspect(classMatcher, methodMatcher, interceptors));
+      List<MethodInterceptor> interceptors) {
+    methodAspects.add(new MethodAspect(classMatcher, methodMatcher, interceptors));
     return this;
+  }
+
+  public ProxyFactoryBuilder intercept(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher,
+      MethodInterceptor... interceptors) {
+    return intercept(classMatcher, methodMatcher, Arrays.asList(interceptors));
   }
 
   /**

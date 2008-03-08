@@ -25,11 +25,13 @@ public class CircularDependencyTest extends TestCase {
 
   public void testCircularlyDependentConstructors()
       throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bind(A.class).to(AImpl.class);
-    builder.bind(B.class).to(BImpl.class);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(A.class).to(AImpl.class);
+        bind(B.class).to(BImpl.class);
+      }
+    });
 
-    Injector injector = builder.createInjector();
     A a = injector.getInstance(A.class);
     assertNotNull(a.getB().getA());
   }

@@ -17,6 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.Key;
+import static com.google.inject.internal.Objects.nonNull;
 
 /**
  * Immutable snapshot of a request for a provider.
@@ -24,12 +25,18 @@ import com.google.inject.Key;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class GetProviderCommand<T> implements Command {
+  private final Object source;
   private final Key<T> key;
   private final EarlyRequestsProvider earlyRequestsProvider;
 
-  GetProviderCommand(Key<T> key, EarlyRequestsProvider earlyRequestsProvider) {
+  GetProviderCommand(Object source, Key<T> key, EarlyRequestsProvider earlyRequestsProvider) {
+    this.source = nonNull(source, "source");
     this.key = key;
     this.earlyRequestsProvider = earlyRequestsProvider;
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public Key<T> getKey() {

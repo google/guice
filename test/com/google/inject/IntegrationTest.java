@@ -27,12 +27,14 @@ import org.aopalliance.intercept.MethodInvocation;
 public class IntegrationTest extends TestCase {
 
   public void testIntegration() throws CreationException {
-    CountingInterceptor counter = new CountingInterceptor();
+    final CountingInterceptor counter = new CountingInterceptor();
 
-    BinderImpl binder = new BinderImpl();
-    binder.bind(Foo.class);
-    binder.bindInterceptor(any(), any(), counter);
-    Injector injector = binder.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Foo.class);
+        bindInterceptor(any(), any(), counter);
+      }
+    });
 
     Foo foo = injector.getInstance(Key.get(Foo.class));
     foo.foo();

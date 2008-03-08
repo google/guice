@@ -17,6 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.TypeLiteral;
+import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
 
@@ -27,13 +28,19 @@ import com.google.inject.spi.TypeConverter;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ConvertToTypesCommand implements Command {
+  private final Object source;
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;
 
-  ConvertToTypesCommand(Matcher<? super TypeLiteral<?>> typeMatcher,
+  ConvertToTypesCommand(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
-    this.typeMatcher = typeMatcher;
-    this.typeConverter = typeConverter;
+    this.source = nonNull(source, "source");
+    this.typeMatcher = nonNull(typeMatcher, "typeMatcher");
+    this.typeConverter = nonNull(typeConverter, "typeConverter");
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public Matcher<? super TypeLiteral<?>> getTypeMatcher() {

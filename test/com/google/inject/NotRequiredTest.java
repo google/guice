@@ -24,10 +24,13 @@ import junit.framework.TestCase;
 public class NotRequiredTest extends TestCase {
 
   public void testProvided() throws CreationException {
-    BinderImpl builder = new BinderImpl();
-    builder.bind(Bar.class).to(BarImpl.class);
-    Injector c = builder.createInjector();
-    Foo foo = c.getInstance(Foo.class);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Bar.class).to(BarImpl.class);
+      }
+    });
+
+    Foo foo = injector.getInstance(Foo.class);
     assertNotNull(foo.bar);
     assertNotNull(foo.fromMethod);
   }

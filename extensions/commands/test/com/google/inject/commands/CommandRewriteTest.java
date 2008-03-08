@@ -43,7 +43,7 @@ public class CommandRewriteTest extends TestCase {
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
     CommandReplayer rewriter = new CommandReplayer() {
       @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
-        if ("Wine".equals(command.getTarget().get(null))) {
+        if ("Wine".equals(command.getTarget().get())) {
           binder.bind(CharSequence.class).toInstance("Beer");
         } else {
           super.replayBind(binder, command);

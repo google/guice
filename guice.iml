@@ -111,6 +111,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="commands" />
     <orderEntryProperties />
   </component>
 </module>

@@ -123,9 +123,6 @@ class ErrorMessages {
 
   static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";
 
-  static final String SINGLE_INSTANCE_AND_SCOPE = "Setting the scope is not"
-      + " permitted when binding to a single instance.";
-
   static final String CONSTRUCTOR_RULES = "Classes must have either one (and"
       + " only one) constructor annotated with @Inject or a zero-argument"
       + " constructor.";
@@ -149,23 +146,12 @@ class ErrorMessages {
       + " classes is not supported.  Please use a 'static' class (top-level or"
       + " nested) instead.";
 
-  static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
-      + " is specified for this binding.";
-
-  static final String IMPLEMENTATION_ALREADY_SET = "Implementation is set more"
-      + " than once.";
-
-  static final String SCOPE_ALREADY_SET = "Scope is set more than once.";
-
   static final String DUPLICATE_BINDING_ANNOTATIONS =
       "Found more than one annotation annotated with @BindingAnnotation:"
           + " %s and %s";
 
   static final String DUPLICATE_SCOPE_ANNOTATIONS = "More than one scope"
       + " annotation was found: %s and %s";
-
-  static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
-      + " than once.";
 
   static final String RECURSIVE_BINDING = "Binding points to itself.";
 

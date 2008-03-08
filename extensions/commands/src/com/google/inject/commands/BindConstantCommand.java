@@ -18,11 +18,14 @@ package com.google.inject.commands;
 
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.Binder;
+import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
+import static com.google.inject.internal.Objects.nonNull;
 
 import java.lang.annotation.Annotation;
 
@@ -32,11 +35,20 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindConstantCommand implements Command {
+  static {
+    SourceProviders.skip(BindingBuilder.class);
+  }
+
+  private final Object source;
   private BindingAnnotation bindingAnnotation;
   private ConstantTarget<?> target;
 
-  BindConstantCommand() {
-    // hide public constructor
+  BindConstantCommand(Object source) {
+    this.source = nonNull(source, "source");
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
@@ -68,15 +80,17 @@ public final class BindConstantCommand implements Command {
     public ScopedBindingBuilder execute(LinkedBindingBuilder linkedBindingBuilder) {
       throw new UnsupportedOperationException();
     }
-    public Provider<? extends T> getProvider(Provider<? extends T> defaultValue) {
-      return defaultValue;
+    public <V> V acceptVisitor(Visitor<T, V> visitor) {
+      return visitor.visitToInstance(get());
     }
-    public Key<? extends Provider<? extends T>> getProviderKey(
-        Key<Provider<? extends T>> defaultValue) {
-      return defaultValue;
+    public Provider<? extends T> getProvider() {
+      return null;
     }
-    public Key<? extends T> getKey(Key<? extends T> defaultValue) {
-      return defaultValue;
+    public Key<? extends Provider<? extends T>> getProviderKey() {
+      return null;
+    }
+    public Key<? extends T> getKey() {
+      return null;
     }
   }
 
@@ -88,8 +102,8 @@ public final class BindConstantCommand implements Command {
     abstract <T> Key<T> getKey();
   }
 
-  BindingBuilder bindingBuilder() {
-    return new BindingBuilder();
+  BindingBuilder bindingBuilder(Binder binder) {
+    return new BindingBuilder(binder);
   }
 
   /**
@@ -97,20 +111,14 @@ public final class BindConstantCommand implements Command {
    */
   class BindingBuilder
       implements AnnotatedConstantBindingBuilder, ConstantBindingBuilder {
+    private final Binder binder;
 
-    private void assertNoBindingAnnotation() {
-      if (bindingAnnotation != null) {
-        throw new IllegalStateException("Already annotated with " + bindingAnnotation);
-      }
-    }
-
-    private void assertNoTarget() {
-      if (target != null) {
-        throw new IllegalStateException("Already targetted to " + target);
-      }
+    BindingBuilder(Binder binder) {
+      this.binder = binder;
     }
 
     public ConstantBindingBuilder annotatedWith(final Class<? extends Annotation> annotationType) {
+      nonNull(annotationType, "annotationType");
       assertNoBindingAnnotation();
 
       bindingAnnotation = new BindingAnnotation() {
@@ -126,6 +134,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public ConstantBindingBuilder annotatedWith(final Annotation annotation) {
+      nonNull(annotation, "annotation");
       assertNoBindingAnnotation();
 
       bindingAnnotation = new BindingAnnotation() {
@@ -141,13 +150,14 @@ public final class BindConstantCommand implements Command {
     }
 
     public void to(final String value) {
+      nonNull(value, "value");
       assertNoTarget();
 
       BindConstantCommand.this.target = new ConstantTarget() {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
@@ -166,11 +176,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Integer.class;
+          return int.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -185,11 +195,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Long.class;
+          return long.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -204,11 +214,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Boolean.class;
+          return boolean.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -223,11 +233,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Double.class;
+          return double.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -242,11 +252,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Float.class;
+          return float.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -261,11 +271,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Short.class;
+          return short.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -280,11 +290,11 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
-          return Character.class;
+          return char.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -293,13 +303,14 @@ public final class BindConstantCommand implements Command {
     }
 
     public void to(final Class<?> value) {
+      nonNull(value, "value");
       assertNoTarget();
 
       BindConstantCommand.this.target = new ConstantTarget() {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
@@ -319,7 +330,7 @@ public final class BindConstantCommand implements Command {
         public void execute(ConstantBindingBuilder builder) {
           builder.to(value);
         }
-        public Object get(Object defaultValue) {
+        public Object get() {
           return value;
         }
         public Class getType() {
@@ -329,6 +340,23 @@ public final class BindConstantCommand implements Command {
           return String.valueOf(value);
         }
       };
+    }
+
+    static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
+        + " than once.";
+    static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
+        + " is specified for this binding.";
+
+    private void assertNoBindingAnnotation() {
+      if (bindingAnnotation != null) {
+        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
+      }
+    }
+
+    private void assertNoTarget() {
+      if (target != null) {
+        binder.addError(CONSTANT_VALUE_ALREADY_SET);
+      }
     }
   }
 }

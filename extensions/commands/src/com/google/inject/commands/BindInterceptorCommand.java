@@ -17,6 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.matcher.Matcher;
+import static com.google.inject.internal.Objects.nonNull;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.reflect.Method;
@@ -30,17 +31,24 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindInterceptorCommand implements Command {
+  private final Object source;
   private final Matcher<? super Class<?>> classMatcher;
   private final Matcher<? super Method> methodMatcher;
   private final List<MethodInterceptor> interceptors;
 
   BindInterceptorCommand(
+      Object source,
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor[] interceptors) {
-    this.classMatcher = classMatcher;
-    this.methodMatcher = methodMatcher;
+    this.source = nonNull(source, "source");
+    this.classMatcher = nonNull(classMatcher, "classMatcher");
+    this.methodMatcher = nonNull(methodMatcher, "methodMatcher");
     this.interceptors = unmodifiableList(Arrays.asList(interceptors.clone()));
+  }
+
+  public Object getSource() {
+    return source;
   }
 
   public Matcher<? super Class<?>> getClassMatcher() {
