@@ -111,7 +111,8 @@ public class ProviderInjectionTest extends TestCase {
 
   /**
    * This test ensures that regardless of binding order, instances are injected
-   * before they are used.
+   * before they are used. It injects mutable Count objects and records their
+   * value at the time that they're injected.
    */
   public void testCreationTimeInjectionOrdering() {
     Injector injector = Guice.createInjector(new AbstractModule() {
