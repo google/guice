@@ -41,20 +41,22 @@ class BindCommandProcessor extends CommandProcessor {
   private final Map<Class<? extends Annotation>, Scope> scopes;
   private final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
-  private final List<ContextualCallable<Void>> preloaders
+  private final List<ContextualCallable<Void>> eagerSingletonCreators
       = new ArrayList<ContextualCallable<Void>>();
   private final Stage stage;
   private final Map<Key<?>, BindingImpl<?>> bindings;
-  private final List<MembersInjector> membersInjectors = new ArrayList<MembersInjector>();
+  private final Map<Object, Void> outstandingInjections;
 
   BindCommandProcessor(InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
       Stage stage,
-      Map<Key<?>, BindingImpl<?>> bindings) {
+      Map<Key<?>, BindingImpl<?>> bindings,
+      Map<Object, Void> outstandingInjections) {
     this.injector = injector;
     this.scopes = scopes;
     this.stage = stage;
     this.bindings = bindings;
+    this.outstandingInjections = outstandingInjections;
   }
 
   @Override public <T> Boolean visitBind(BindCommand<T> command) {
@@ -105,8 +107,8 @@ class BindCommandProcessor extends CommandProcessor {
 
     command.getTarget().acceptVisitor(new BindTarget.Visitor<T, Void>() {
       public Void visitToInstance(T instance) {
-        InternalFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        registerInstanceForInjection(instance);
+        ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
+        outstandingInjections.put(instance, null);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         createBinding(source, shouldPreload, new InstanceBindingImpl<T>(
@@ -115,9 +117,9 @@ class BindCommandProcessor extends CommandProcessor {
       }
 
       public Void visitToProvider(Provider<? extends T> provider) {
-        InternalFactory<? extends T> factory
+        InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
-        registerInstanceForInjection(provider);
+        outstandingInjections.put(provider, null);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         createBinding(source, shouldPreload, new ProviderInstanceBindingImpl<T>(
@@ -204,38 +206,6 @@ class BindCommandProcessor extends CommandProcessor {
     return new InvalidBindingImpl<T>(injector, key, source);
   }
 
-  void registerInstanceForInjection(final Object o) {
-    membersInjectors.add(new MembersInjector(o));
-  }
-
-  public void validate(InjectorImpl injector) {
-    for (MembersInjector membersInjector : membersInjectors) {
-      membersInjector.checkDependencies(injector);
-    }
-  }
-
-  public void injectMembers(InjectorImpl injector) {
-    for (MembersInjector membersInjector : membersInjectors) {
-      membersInjector.injectMembers(injector);
-    }
-  }
-
-  private static class MembersInjector {
-    final Object o;
-
-    MembersInjector(Object o) {
-      this.o = o;
-    }
-
-    void checkDependencies(InjectorImpl injector) {
-      injector.injectors.get(o.getClass());
-    }
-
-    void injectMembers(InjectorImpl injector) {
-      injector.injectMembers(o);
-    }
-  }
-
   @Override public Boolean visitBindConstant(BindConstantCommand command) {
     Object value = command.getTarget().get();
     if (value == null) {
@@ -257,7 +227,7 @@ class BindCommandProcessor extends CommandProcessor {
     // Register to preload if necessary.
     if (binding.getScope() == Scopes.SINGLETON) {
       if (stage == Stage.PRODUCTION || shouldPreload) {
-        preloaders.add(new BindingPreloader(binding.key, binding.internalFactory));
+        eagerSingletonCreators.add(new EagerSingletonCreator(binding.key, binding.internalFactory));
       }
     } else {
       if (shouldPreload) {
@@ -266,15 +236,10 @@ class BindCommandProcessor extends CommandProcessor {
     }
   }
 
-  public void runPreloaders(InjectorImpl injector) {
-    injector.callInContext(new ContextualCallable<Void>() {
-      public Void call(InternalContext context) {
-        for (ContextualCallable<Void> preloader : preloaders) {
-          preloader.call(context);
-        }
-        return null;
-      }
-    });
+  public void createEagerSingletons(InjectorImpl injector) {
+    for (ContextualCallable<Void> preloader : eagerSingletonCreators) {
+      injector.callInContext(preloader);
+    }
   }
 
   public void runCreationListeners(InjectorImpl injector) {
@@ -283,11 +248,11 @@ class BindCommandProcessor extends CommandProcessor {
     }
   }
 
-  private static class BindingPreloader implements ContextualCallable<Void> {
+  private static class EagerSingletonCreator implements ContextualCallable<Void> {
     private final Key<?> key;
     private final InternalFactory<?> factory;
 
-    public BindingPreloader(Key<?> key, InternalFactory<?> factory) {
+    public EagerSingletonCreator(Key<?> key, InternalFactory<?> factory) {
       this.key = key;
       this.factory = Objects.nonNull(factory, "factory");
     }

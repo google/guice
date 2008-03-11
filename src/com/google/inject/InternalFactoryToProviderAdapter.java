@@ -36,8 +36,9 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     this.provider = Objects.nonNull(provider, "provider");
     this.source = Objects.nonNull(source, "source");
   }
-  
+
   public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
+    context.ensureMemberInjected(provider);
     T provided = provider.get();
     return injectionPoint.checkForNull(provided, source);
   }

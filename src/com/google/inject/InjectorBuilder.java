@@ -135,7 +135,8 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Converters creation");
 
     bindCommandProcesor = new BindCommandProcessor(
-        injector, injector.scopes, stage, injector.explicitBindings);
+        injector, injector.scopes, stage, injector.explicitBindings,
+        injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands, configurationErrorHandler);
     stopwatch.resetAndLog("Binding creation");
 
@@ -159,7 +160,7 @@ class InjectorBuilder {
     requestStaticInjectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
-    bindCommandProcesor.validate(injector);
+    injector.validateOustandingInjections();
     stopwatch.resetAndLog("Instance member validation");
 
     new GetProviderProcessor(injector)
@@ -175,13 +176,12 @@ class InjectorBuilder {
   private void fulfillInjectionRequests() {
     futureInjector.initialize(injector);
 
-    // TODO(jessewilson): sort these injections by their dependencies
     requestStaticInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
-    bindCommandProcesor.injectMembers(injector);
+    injector.fulfillOutstandingInjections();
     stopwatch.resetAndLog("Instance injection");
 
-    bindCommandProcesor.runPreloaders(injector);
+    bindCommandProcesor.createEagerSingletons(injector);
     stopwatch.resetAndLog("Preloading");
   }
 

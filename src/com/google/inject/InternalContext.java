@@ -18,9 +18,6 @@ package com.google.inject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Internal context. Used to coordinate injections and support circular
@@ -67,5 +64,17 @@ class InternalContext {
 
   public void setInjectionPoint(InjectionPoint injectionPoint) {
     this.injectionPoint = injectionPoint;
+  }
+
+  /**
+   * Ensures that an object requiring injection at Injector-creation time has
+   * been injected before its use.
+   */
+  public void ensureMemberInjected(Object toInject) {
+    if (!injector.outstandingInjections.keySet().remove(toInject)) {
+      return;
+    }
+
+    injector.injectMembers(toInject);
   }
 }

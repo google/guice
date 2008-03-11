@@ -30,6 +30,7 @@ class ConstantFactory<T> implements InternalFactory<T> {
   }
 
   public T get(InternalContext context, InjectionPoint injectionPoint) {
+    context.ensureMemberInjected(value);
     return value;
   }
 

@@ -37,14 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -96,11 +89,45 @@ class InjectorImpl implements Injector {
       = new ArrayList<MatcherAndConverter<?>>();
   final Map<Key<?>, BindingImpl<?>> parentBindings
       = new HashMap<Key<?>, BindingImpl<?>>();
+  final Map<Object, Void> outstandingInjections
+      = new IdentityHashMap<Object, Void>();
 
   ErrorHandler errorHandler = new InvalidErrorHandler();
 
   InjectorImpl(Injector parentInjector) {
     this.parentInjector = parentInjector;
+  }
+
+  void validateOustandingInjections() {
+    for (Object toInject : outstandingInjections.keySet()) {
+      injectors.get(toInject.getClass());
+    }
+  }
+
+  /**
+   * Performs creation-time injections on all objects that require it. Whenever
+   * fulfilling an injection depends on another object that requires injection,
+   * we use {@link InternalContext#ensureMemberInjected} to inject that member
+   * first.
+   *
+   * <p>If the two objects are codependent (directly or transitively), ordering
+   * of injection is arbitrary.
+   */
+  void fulfillOutstandingInjections() {
+    callInContext(new ContextualCallable<Void>() {
+      public Void call(InternalContext context) {
+        // loop over a defensive copy, since ensureMemberInjected() mutates the
+        // outstandingInjections set
+        for (Object toInject : new ArrayList<Object>(outstandingInjections.keySet())) {
+          context.ensureMemberInjected(toInject);
+        }
+        return null;
+      }
+    });
+
+    if (!outstandingInjections.isEmpty()) {
+      throw new IllegalStateException("failed to satisfy " + outstandingInjections);
+    }
   }
 
   /**
