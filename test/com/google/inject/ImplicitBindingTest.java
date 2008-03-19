@@ -56,10 +56,23 @@ public class ImplicitBindingTest extends TestCase {
     public void go() {}
   }
 
+  static class AlternateImpl implements I {
+    public void go() {}
+  }
+
   public void testDefaultProvider() {
     Injector injector = Guice.createInjector();
     Provided provided = injector.getInstance(Provided.class);
     provided.go();
+  }
+
+  public void testBindingOverridesImplementedBy() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(I.class).to(AlternateImpl.class);
+      }
+    });
+    assertEquals(AlternateImpl.class, injector.getInstance(I.class).getClass());
   }
 
   @ProvidedBy(ProvidedProvider.class)
