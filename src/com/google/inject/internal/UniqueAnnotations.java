@@ -23,6 +23,9 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
 public class UniqueAnnotations {
   private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
