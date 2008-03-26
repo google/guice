@@ -16,24 +16,15 @@
 
 package com.google.inject.throwingproviders;
 
-import com.google.inject.Binder;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API:
@@ -250,14 +241,35 @@ public class ThrowingProviderBinder {
    * instances, for use in creating distinct {@link Key}s.
    */
   private static Annotation uniqueAnnotation() {
-    return new Annotation() {
+    final int value = nextUniqueValue.getAndIncrement();
+    return new Internal() {
+      public int value() {
+        return value;
+      }
+
       public Class<? extends Annotation> annotationType() {
         return Internal.class;
+      }
+
+      @Override public String toString() {
+        return "@" + Internal.class.getName() + "(value=" + value + ")";
+      }
+
+      @Override public boolean equals(Object o) {
+        return o instanceof Internal
+            && ((Internal) o).value() == value();
+      }
+
+      @Override public int hashCode() {
+        return 127 * "value".hashCode() ^ value;
       }
     };
   }
   @Retention(RUNTIME) @BindingAnnotation
-  private @interface Internal { }
+  private @interface Internal {
+    int value();
+  }
+  private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
   /**
    * Represents the returned value from a call to {@link
