@@ -42,7 +42,7 @@ public class BindingOrderTest extends TestCase {
   public void testBindingOrderAndScopes() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(A.class).asEagerSingleton();
+        bind(A.class);
         bind(B.class).asEagerSingleton();
       }
     });
@@ -51,13 +51,11 @@ public class BindingOrderTest extends TestCase {
     // injector time. This is because we use the injector's just-in-time
     // bindings to build these, rather than the bind command. This is a known
     // bug.
-    A a = injector.getInstance(A.class);
-    assertSame(a.first, a.second);
+    assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
   }
 
   static class A {
-    @Inject B first;
-    @Inject B second;
+    @Inject B b;
   }
 
   static class B { }
