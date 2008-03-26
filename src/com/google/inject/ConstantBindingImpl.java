@@ -25,13 +25,13 @@ import com.google.inject.internal.ToStringBuilder;
 /**
  * A constant binding.
  */
-class ContantBindingImpl<T> extends BindingImpl<T>
+class ConstantBindingImpl<T> extends BindingImpl<T>
     implements ConstantBinding<T> {
 
   final T value;
   final Provider<T> provider;
 
-  ContantBindingImpl(InjectorImpl injector, Key<T> key, Object source,
+  ConstantBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<T> internalFactory, T value) {
     super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
     this.value = value;

@@ -38,4 +38,27 @@ public class BindingOrderTest extends TestCase {
 
   interface BoundSecond { }
   static class BoundSecondImpl implements BoundSecond { }
+
+  public void testBindingOrderAndScopes() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(A.class).asEagerSingleton();
+        bind(B.class).asEagerSingleton();
+      }
+    });
+
+    // For untargetted bindings with scopes, sometimes we lose the scope at
+    // injector time. This is because we use the injector's just-in-time
+    // bindings to build these, rather than the bind command. This is a known
+    // bug.
+    A a = injector.getInstance(A.class);
+    assertSame(a.first, a.second);
+  }
+
+  static class A {
+    @Inject B first;
+    @Inject B second;
+  }
+
+  static class B { }
 }

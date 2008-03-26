@@ -46,6 +46,7 @@ class BindCommandProcessor extends CommandProcessor {
   private final Stage stage;
   private final Map<Key<?>, BindingImpl<?>> bindings;
   private final Map<Object, Void> outstandingInjections;
+  private final List<Runnable> untargettedBindings = new ArrayList<Runnable>();
 
   BindCommandProcessor(InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
@@ -153,7 +154,7 @@ class BindCommandProcessor extends CommandProcessor {
       }
 
       public Void visitUntargetted() {
-        Type type = key.getTypeLiteral().getType();
+        final Type type = key.getTypeLiteral().getType();
 
         // Error: Missing implementation.
         // Example: bind(Date.class).annotatedWith(Red.class);
@@ -165,20 +166,26 @@ class BindCommandProcessor extends CommandProcessor {
           return null;
         }
 
-        // This cast is safe after the preceeding check.
-        @SuppressWarnings("unchecked")
-        Class<T> clazz = (Class<T>) type;
+        untargettedBindings.add(new Runnable() {
+          public void run() {
+            // This cast is safe after the preceeding check.
+            @SuppressWarnings("unchecked")
+            Class<T> clazz = (Class<T>) type;
 
-        BindingImpl<T> binding = injector.createBindingFromType(clazz, scope, source);
-        // TODO: Should we clean up the binding left behind in jitBindings?
+            BindingImpl<T> binding = injector.createBindingFromType(clazz, scope, source);
+            // TODO: Should we clean up the binding left behind in jitBindings?
 
-        if (binding == null) {
-          addError(source, ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, clazz);
-          createBinding(source, shouldPreload, invalidBinding(injector, key, source));
-          return null;
-        }
+            if (binding == null) {
+              injector.errorHandler.handle(
+                  source, ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, clazz);
+              createBinding(source, shouldPreload, invalidBinding(injector, key, source));
+              return;
+            }
 
-        createBinding(source, shouldPreload, binding);
+            createBinding(source, shouldPreload, binding);
+          }
+        });
+
         return null;
       }
     });
@@ -214,7 +221,7 @@ class BindCommandProcessor extends CommandProcessor {
 
     validateKey(command.getSource(), command.getKey());
     ConstantFactory<Object> factory = new ConstantFactory<Object>(value);
-    putBinding(new ContantBindingImpl<Object>(
+    putBinding(new ConstantBindingImpl<Object>(
         injector, command.getKey(), command.getSource(), factory, value));
 
     return true;
@@ -233,6 +240,12 @@ class BindCommandProcessor extends CommandProcessor {
       if (shouldPreload) {
         addError(source, ErrorMessages.PRELOAD_NOT_ALLOWED);
       }
+    }
+  }
+
+  public void createUntargettedBindings() {
+    for (Runnable untargettedBinding : untargettedBindings) {
+      untargettedBinding.run();
     }
   }
 

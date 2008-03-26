@@ -20,16 +20,16 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import com.google.inject.internal.Stopwatch;
 import com.google.inject.internal.Objects;
+import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -139,6 +139,7 @@ class InjectorBuilder {
         injector, injector.scopes, stage, injector.explicitBindings,
         injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands, configurationErrorHandler);
+    bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
 
     injector.index();
