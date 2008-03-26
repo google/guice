@@ -21,11 +21,9 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.commands.*;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.*;
 
 /**
@@ -162,7 +160,7 @@ public final class InterceptingInjectorBuilder {
         }
       });
 
-      Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
+      Key<T> anonymousKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
       binder.bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
 
       LinkedBindingBuilder<T> linkedBindingBuilder = binder.bind(anonymousKey);
@@ -208,23 +206,6 @@ public final class InterceptingInjectorBuilder {
       return injectionInterceptorProvider.get().intercept(key, delegateProvider);
     }
   }
-
-  /**
-   * Returns an annotation instance that is not equal to any other annotation
-   * instances, for use in creating distinct {@link Key}s.
-   */
-  private static Annotation uniqueAnnotation() {
-    return new Annotation() {
-      public Class<? extends Annotation> annotationType() {
-        return Internal.class;
-      }
-      @Override public String toString() {
-        return "InterceptingBinderPrivate";
-      }
-    };
-  }
-  @Retention(RUNTIME) @BindingAnnotation
-  private @interface Internal { }
 
   private static class NoOpBindTargetVisitor<T, V> implements BindTarget.Visitor<T, V> {
     public V visitToInstance(T instance) {

@@ -19,12 +19,10 @@ package com.google.inject.throwingproviders;
 import com.google.inject.*;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
+import com.google.inject.internal.UniqueAnnotations;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.reflect.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API:
@@ -85,7 +83,7 @@ public class ThrowingProviderBinder {
     }
 
     public ScopedBindingBuilder to(P target) {
-      Key<P> targetKey = Key.get(interfaceType, uniqueAnnotation());
+      Key<P> targetKey = Key.get(interfaceType, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
       return to(targetKey);
     }
@@ -96,7 +94,7 @@ public class ThrowingProviderBinder {
 
     public ScopedBindingBuilder to(final Key<? extends P> targetKey) {
       Objects.nonNull(targetKey, "targetKey");
-      final Key<Result> resultKey = Key.get(Result.class, uniqueAnnotation());
+      final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
       final Key<P> key = createKey();
 
       binder.bind(key).toProvider(new Provider<P>() {
@@ -235,41 +233,6 @@ public class ThrowingProviderBinder {
       }
     }
   }
-
-  /**
-   * Returns an annotation instance that is not equal to any other annotation
-   * instances, for use in creating distinct {@link Key}s.
-   */
-  private static Annotation uniqueAnnotation() {
-    final int value = nextUniqueValue.getAndIncrement();
-    return new Internal() {
-      public int value() {
-        return value;
-      }
-
-      public Class<? extends Annotation> annotationType() {
-        return Internal.class;
-      }
-
-      @Override public String toString() {
-        return "@" + Internal.class.getName() + "(value=" + value + ")";
-      }
-
-      @Override public boolean equals(Object o) {
-        return o instanceof Internal
-            && ((Internal) o).value() == value();
-      }
-
-      @Override public int hashCode() {
-        return 127 * "value".hashCode() ^ value;
-      }
-    };
-  }
-  @Retention(RUNTIME) @BindingAnnotation
-  private @interface Internal {
-    int value();
-  }
-  private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
   /**
    * Represents the returned value from a call to {@link
