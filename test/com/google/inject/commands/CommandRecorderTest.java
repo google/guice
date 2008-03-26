@@ -141,7 +141,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
+            assertEquals(Key.get(int.class, Names.named("int")), command.getKey());
             assertEquals(2, command.getTarget().get());
             return null;
           }
@@ -149,7 +149,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
+            assertEquals(Key.get(long.class, Names.named("long")), command.getKey());
             assertEquals(3L, command.getTarget().get());
             return null;
           }
@@ -157,7 +157,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
+            assertEquals(Key.get(boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, command.getTarget().get());
             return null;
           }
@@ -165,7 +165,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
+            assertEquals(Key.get(double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, command.getTarget().get());
             return null;
           }
@@ -173,7 +173,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
+            assertEquals(Key.get(float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, command.getTarget().get());
             return null;
           }
@@ -181,7 +181,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
+            assertEquals(Key.get(short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, command.getTarget().get());
             return null;
           }
@@ -189,7 +189,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
+            assertEquals(Key.get(char.class, Names.named("char")), command.getKey());
             assertEquals('h', command.getTarget().get());
             return null;
           }
@@ -548,72 +548,131 @@ public class CommandRecorderTest extends TestCase {
     );
   }
 
-  public void testMalformedBindCommands() {
-    CommandRecorder recorder = new CommandRecorder(earlyRequestProvider);
+  public void testBindWithMultipleAnnotationsAddsError() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            AnnotatedBindingBuilder<String> abb = bind(String.class);
+            abb.annotatedWith(SampleAnnotation.class);
+            abb.annotatedWith(Names.named("A"));
+          }
+        },
 
-    recorder.recordCommands(new AbstractModule() {
-      protected void configure() {
-        AnnotatedBindingBuilder<String> abb = bind(String.class);
-        abb.annotatedWith(SampleAnnotation.class);
-        try {
-          abb.annotatedWith(Names.named("A"));
-          fail();
-        } catch(IllegalStateException expected) {
-        }
-      }
-    });
+        new FailingVisitor() {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
+            return null;
+          }
+        },
 
-    recorder.recordCommands(new AbstractModule() {
-      protected void configure() {
-        AnnotatedBindingBuilder<String> abb = bind(String.class);
-        abb.toInstance("A");
-        try {
-          abb.toInstance("B");
-          fail();
-        } catch(IllegalStateException expected) {
+        new FailingVisitor() {
+          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+            assertEquals("More than one annotation is specified for this binding.",
+                command.getMessage());
+            return null;
+          }
         }
-      }
-    });
-
-    recorder.recordCommands(new AbstractModule() {
-      protected void configure() {
-        ScopedBindingBuilder sbb = bind(List.class).to(ArrayList.class);
-        sbb.in(Scopes.NO_SCOPE);
-        try {
-          sbb.asEagerSingleton();
-          fail();
-        } catch(IllegalStateException expected) {
-        }
-      }
-    });
+    );
   }
 
-  public void testMalformedBindConstantCommands() {
-    CommandRecorder recorder = new CommandRecorder(earlyRequestProvider);
+  public void testBindWithMultipleTargetsAddsError() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            AnnotatedBindingBuilder<String> abb = bind(String.class);
+            abb.toInstance("A");
+            abb.toInstance("B");
+          }
+        },
 
-    recorder.recordCommands(new AbstractModule() {
-      protected void configure() {
-        AnnotatedConstantBindingBuilder cbb = bindConstant();
-        cbb.annotatedWith(SampleAnnotation.class);
-        try {
-          cbb.annotatedWith(Names.named("A"));
-          fail();
-        } catch(IllegalStateException expected) {
-        }
-      }
-    });
+        new FailingVisitor() {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
+            return null;
+          }
+        },
 
-    recorder.recordCommands(new AbstractModule() {
-      protected void configure() {
-        ConstantBindingBuilder cbb = bindConstant().annotatedWith(SampleAnnotation.class);
-        cbb.to("A");
-        try {
-          cbb.to("B");
-          fail();
-        } catch(IllegalStateException expected) {
+        new FailingVisitor() {
+          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+            assertEquals("Implementation is set more than once.", command.getMessage());
+            return null;
+          }
         }
-      }
-    });
+    );
+  }
+
+  public void testBindWithMultipleScopesAddsError() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            ScopedBindingBuilder sbb = bind(List.class).to(ArrayList.class);
+            sbb.in(Scopes.NO_SCOPE);
+            sbb.asEagerSingleton();
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public <T> Void visitBind(BindCommand<T> command) {
+            return null;
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+            assertEquals("Scope is set more than once.", command.getMessage());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testBindConstantWithMultipleAnnotationsAddsError() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            AnnotatedConstantBindingBuilder cbb = bindConstant();
+            cbb.annotatedWith(SampleAnnotation.class).to("A");
+            cbb.annotatedWith(Names.named("A"));
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
+            return null;
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+            assertEquals("More than one annotation is specified for this binding.",
+                command.getMessage());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testBindConstantWithMultipleTargetsAddsError() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            ConstantBindingBuilder cbb = bindConstant().annotatedWith(SampleAnnotation.class);
+            cbb.to("A");
+            cbb.to("B");
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitBindConstant(BindConstantCommand command) {
+            return null;
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+            assertEquals("Constant value is set more than once.", command.getMessage());
+            return null;
+          }
+        }
+    );
   }
 
   // Business logic tests

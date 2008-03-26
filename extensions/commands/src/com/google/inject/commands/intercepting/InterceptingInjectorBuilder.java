@@ -17,11 +17,11 @@
 package com.google.inject.commands.intercepting;
 
 import com.google.inject.*;
-import com.google.inject.name.Names;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.commands.*;
+import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.name.Names;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -148,17 +148,19 @@ public final class InterceptingInjectorBuilder {
     private Set<Key> keysIntercepted = new HashSet<Key>();
 
     @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
-      Key<T> key = command.getKey();
+      final Key<T> key = command.getKey();
 
       if (!keysToIntercept.contains(key)) {
         super.replayBind(binder, command);
         return;
       }
 
-      if (command.getTarget() == null) {
-        throw new UnsupportedOperationException(
-            String.format("Cannot intercept bare binding of %s.", key));
-      }
+      command.getTarget().acceptVisitor(new NoOpBindTargetVisitor<T, Void>() {
+        @Override public Void visitUntargetted() {
+          throw new UnsupportedOperationException(
+              String.format("Cannot intercept bare binding of %s.", key));
+        }
+      });
 
       Key<T> anonymousKey = Key.get(key.getTypeLiteral(), uniqueAnnotation());
       binder.bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
@@ -223,4 +225,26 @@ public final class InterceptingInjectorBuilder {
   }
   @Retention(RUNTIME) @BindingAnnotation
   private @interface Internal { }
+
+  private static class NoOpBindTargetVisitor<T, V> implements BindTarget.Visitor<T, V> {
+    public V visitToInstance(T instance) {
+      return null;
+    }
+
+    public V visitToProvider(Provider<? extends T> provider) {
+      return null;
+    }
+
+    public V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+      return null;
+    }
+
+    public V visitToKey(Key<? extends T> key) {
+      return null;
+    }
+
+    public V visitUntargetted() {
+      return null;
+    }
+  }
 }

@@ -21,6 +21,7 @@ import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
 import com.google.inject.internal.Stopwatch;
+import com.google.inject.internal.Objects;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 
@@ -82,14 +83,14 @@ class InjectorBuilder {
       throw new AssertionError("Already built, builders are not reusable.");
     }
 
+    injector = new InjectorImpl(parent);
+    injector.setErrorHandler(configurationErrorHandler);
+
     modules.add(0, new BuiltInModule(injector, stage));
 
     CommandRecorder commandRecorder = new CommandRecorder(futureInjector);
     commandRecorder.setCurrentStage(stage);
     commands.addAll(commandRecorder.recordCommands(modules));
-
-    injector = new InjectorImpl(parent);
-    injector.setErrorHandler(configurationErrorHandler);
 
     buildCoreInjector();
 
@@ -190,8 +191,8 @@ class InjectorBuilder {
     final Stage stage;
 
     private BuiltInModule(Injector injector, Stage stage) {
-      this.injector = injector;
-      this.stage = stage;
+      this.injector = Objects.nonNull(injector, "injector");
+      this.stage = Objects.nonNull(stage, "stage");
     }
 
     protected void configure() {

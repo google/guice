@@ -139,14 +139,14 @@ public final class BindCommand<T> implements Command {
     public LinkedBindingBuilder<T> annotatedWith(
         Class<? extends Annotation> annotationType) {
       nonNull(annotationType, "annotationType");
-      assertNotAnnotated();
+      checkNotAnnotated();
       key = Key.get(key.getTypeLiteral(), annotationType);
       return this;
     }
 
     public LinkedBindingBuilder<T> annotatedWith(Annotation annotation) {
       nonNull(annotation, "annotation");
-      assertNotAnnotated();
+      checkNotAnnotated();
       key = Key.get(key.getTypeLiteral(), annotation);
       return this;
     }
@@ -162,7 +162,7 @@ public final class BindCommand<T> implements Command {
 
     public ScopedBindingBuilder to(final Key<? extends T> targetKey) {
       nonNull(targetKey, "targetKey");
-      assertNoTarget();
+      checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.to(targetKey);
@@ -186,7 +186,7 @@ public final class BindCommand<T> implements Command {
       // not set
       nonNull(instance, "instance");
 
-      assertNoTarget();
+      checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           linkedBindingBuilder.toInstance(instance);
@@ -206,7 +206,7 @@ public final class BindCommand<T> implements Command {
 
     public ScopedBindingBuilder toProvider(final Provider<? extends T> provider) {
       nonNull(provider, "provider");
-      assertNoTarget();
+      checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.toProvider(provider);
@@ -232,7 +232,7 @@ public final class BindCommand<T> implements Command {
     public ScopedBindingBuilder toProvider(
         final Key<? extends Provider<? extends T>> providerKey) {
       nonNull(providerKey, "providerKey");
-      assertNoTarget();
+      checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
           return linkedBindingBuilder.toProvider(providerKey);
@@ -252,7 +252,7 @@ public final class BindCommand<T> implements Command {
 
     public void in(final Class<? extends Annotation> scopeAnnotation) {
       nonNull(scopeAnnotation, "scopeAnnotation");
-      assertNoScope();
+      checkNotScoped();
 
       bindScoping = new AbstractScoping() {
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
@@ -272,7 +272,7 @@ public final class BindCommand<T> implements Command {
 
     public void in(final Scope scope) {
       nonNull(scope, "scope");
-      assertNoScope();
+      checkNotScoped();
       bindScoping = new AbstractScoping() {
 
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
@@ -291,7 +291,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void asEagerSingleton() {
-      assertNoScope();
+      checkNotScoped();
       bindScoping = new AbstractScoping() {
         public void execute(ScopedBindingBuilder scopedBindingBuilder) {
           scopedBindingBuilder.asEagerSingleton();
@@ -316,19 +316,19 @@ public final class BindCommand<T> implements Command {
     static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
         + " is specified for this binding.";
 
-    private void assertNoTarget() {
+    private void checkNotTargetted() {
       if (bindTarget != EMPTY_BIND_TARGET) {
         binder.addError(IMPLEMENTATION_ALREADY_SET);
       }
     }
 
-    private void assertNotAnnotated() {
+    private void checkNotAnnotated() {
       if (BindCommand.this.key.getAnnotationType() != null) {
         binder.addError(ANNOTATION_ALREADY_SPECIFIED);
       }
     }
 
-    private void assertNoScope() {
+    private void checkNotScoped() {
       // Scoping isn't allowed when we have only one instance.
       if (bindTarget.get() != null) {
         binder.addError(SINGLE_INSTANCE_AND_SCOPE);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.commands;
+package com.google.inject.commands.intercepting;
 
 import com.google.inject.commands.intercepting.InterceptingInjectorBuilderTest;
 import junit.framework.Test;
@@ -28,9 +28,6 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTestSuite(CommandRecorderTest.class);
-    suite.addTestSuite(CommandReplayerTest.class);
-    suite.addTestSuite(CommandRewriteTest.class);
     suite.addTestSuite(InterceptingInjectorBuilderTest.class);
 
     return suite;
