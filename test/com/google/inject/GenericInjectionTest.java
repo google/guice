@@ -41,4 +41,33 @@ public class GenericInjectionTest extends TestCase {
   static class Foo {
     @Inject List<String> names;
   }
+
+  /**
+   * Although we may not have intended to support this behaviour, this test
+   * passes under Guice 1.0. The workaround is to add an explicit binding for
+   * the parameterized type. See {@link #testExplicitBindingOfGenericType()}.
+   */
+  public void testImplicitBindingOfGenericType() {
+    Parameterized<String> parameterized
+        = Guice.createInjector().getInstance(Key.get(new TypeLiteral<Parameterized<String>>() {}));
+    assertNotNull(parameterized);
+  }
+
+  public void testExplicitBindingOfGenericType() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Key.get(new TypeLiteral<Parameterized<String>>() {}))
+            .to((Class) Parameterized.class);
+      }
+    });
+
+    Parameterized<String> parameterized
+        = injector.getInstance(Key.get(new TypeLiteral<Parameterized<String>>() { }));
+    assertNotNull(parameterized);
+  }
+
+  static class Parameterized<T> {
+    @Inject
+    Parameterized() { }
+  }
 }
