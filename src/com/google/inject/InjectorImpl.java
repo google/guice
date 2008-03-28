@@ -722,18 +722,9 @@ class InjectorImpl implements Injector {
           ? getBinding(key.withoutAttributes()) : null;
     }
 
-    Type type = key.getTypeLiteral().getType();
-
-    // If the keys type isn't a Class, bail out.
-    if (!(type instanceof Class)) {
-      return null;
-    }
-
-    // This is safe after the preceding check.
+    // Create a binding based on the raw type.
     @SuppressWarnings("unchecked")
-    Class<T> clazz = (Class<T>) type;
-
-    // Create a binding based on the type.
+    Class<T> clazz = (Class<T>) key.getTypeLiteral().getRawType();
     return createBindingFromType(clazz);
   }
 
