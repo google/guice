@@ -20,9 +20,9 @@ import com.google.inject.*;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.SourceProviders;
 import static com.google.inject.spi.SourceProviders.defaultSource;
 import com.google.inject.spi.TypeConverter;
-import com.google.inject.spi.SourceProviders;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.annotation.Annotation;
@@ -101,6 +101,13 @@ public final class CommandRecorder {
       if (modules.add(module)) {
         module.configure(this);
       }
+    }
+
+    public SubModuleBinder installAsSubModule(Module module) {
+      SubModuleCommand subModuleCommand
+          = new SubModuleCommand(defaultSource(), currentStage(), module);
+      commands.add(subModuleCommand);
+      return subModuleCommand.subModuleBinder(RecordingBinder.this);
     }
 
     public Stage currentStage() {

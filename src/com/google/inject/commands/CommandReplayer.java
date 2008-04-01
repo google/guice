@@ -19,12 +19,12 @@ package com.google.inject.commands;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
+import com.google.inject.spi.SourceProviders;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.List;
@@ -98,6 +98,11 @@ public class CommandReplayer {
 
       public <T> Void visitGetProvider(GetProviderCommand<T> command) {
         replayGetProvider(binder, command);
+        return null;
+      }
+
+      public Void visitSubModule(SubModuleCommand command) {
+        replaySubModule(binder, command);
         return null;
       }
     };
@@ -196,6 +201,14 @@ public class CommandReplayer {
     SourceProviders.withDefault(command.getSource(), new Runnable() {
       public void run() {
         binder.getProvider(command.getKey());
+      }
+    });
+  }
+
+  public void replaySubModule(final Binder binder, final SubModuleCommand command) {
+    SourceProviders.withDefault(command.getSource(), new Runnable() {
+      public void run() {
+        replay(binder, command.getCommands());
       }
     });
   }

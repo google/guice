@@ -20,11 +20,11 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
+import org.aopalliance.intercept.MethodInterceptor;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -236,6 +236,12 @@ public interface Binder {
    * Uses the given module to configure more bindings.
    */
   void install(Module module);
+
+  /**
+   * Installs the module as a submodule to this one, allowing it access to the
+   * parent's bindings.
+   */
+  SubModuleBinder installAsSubModule(Module module);
 
   /**
    * Gets the current stage.
