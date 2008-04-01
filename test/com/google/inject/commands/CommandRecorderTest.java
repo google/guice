@@ -18,9 +18,9 @@ package com.google.inject.commands;
 
 import com.google.inject.*;
 import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
@@ -753,10 +753,6 @@ public class CommandRecorderTest extends TestCase {
     }
 
     public <T> Void visitBind(BindCommand<T> command) {
-      throw new AssertionFailedError();
-    }
-
-    public Void visitSubModule(SubModuleCommand command) {
       throw new AssertionFailedError();
     }
 

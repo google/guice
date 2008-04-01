@@ -38,6 +38,5 @@ public interface Command {
     V visitConvertToTypes(ConvertToTypesCommand command);
     <T> V visitBind(BindCommand<T> command);
     <T> V visitGetProvider(GetProviderCommand<T> command);
-    V visitSubModule(SubModuleCommand command);
   }
 }

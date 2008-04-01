@@ -91,8 +91,4 @@ abstract class CommandProcessor implements Command.Visitor<Boolean> {
   public <T> Boolean visitGetProvider(GetProviderCommand<T> command) {
     return false;
   }
-
-  public Boolean visitSubModule(SubModuleCommand command) {
-    return false;
-  }
 }

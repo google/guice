@@ -16,15 +16,15 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.CommandRecorderTest;
-import com.google.inject.commands.CommandReplayerTest;
-import com.google.inject.commands.CommandRewriteTest;
 import com.google.inject.internal.FinalizableReferenceQueueTest;
 import com.google.inject.internal.ReferenceCacheTest;
 import com.google.inject.internal.ReferenceMapTest;
 import com.google.inject.internal.ReferenceMapTestSuite;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.util.ProvidersTest;
+import com.google.inject.commands.CommandRecorderTest;
+import com.google.inject.commands.CommandReplayerTest;
+import com.google.inject.commands.CommandRewriteTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -74,7 +74,6 @@ public class AllTests {
 
     suite.addTestSuite(ProvidersTest.class);
     suite.addTestSuite(ParentInjectorTest.class);
-    suite.addTestSuite(SubModuleTest.class);
 
     suite.addTestSuite(CommandRecorderTest.class);
     suite.addTestSuite(CommandReplayerTest.class);

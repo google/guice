@@ -23,10 +23,9 @@ import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.TypeConverter;
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A support class for {@link Module}s which reduces repetition and results in
@@ -186,12 +185,5 @@ public abstract class AbstractModule implements Module {
    */
   protected Stage currentStage() {
     return binder.currentStage();
-  }
-
-  /**
-   * @see Binder#installAsSubModule(Module)
-   */
-  protected SubModuleBinder installAsSubModule(Module module) {
-    return binder.installAsSubModule(module);
   }
 }

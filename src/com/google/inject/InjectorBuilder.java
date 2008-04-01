@@ -20,7 +20,6 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import com.google.inject.commands.SubModuleCommand;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Message;
@@ -95,8 +94,6 @@ class InjectorBuilder {
 
     buildCoreInjector();
 
-    buildSubInjectors();
-
     validate();
 
     injector.setErrorHandler(RuntimeErrorHandler.INSTANCE);
@@ -115,20 +112,6 @@ class InjectorBuilder {
     }
 
     return injector;
-  }
-
-  private void buildSubInjectors() {
-    CommandProcessor subInjectorCommandProcessor = new CommandProcessor() {
-      public Boolean visitSubModule(SubModuleCommand command) {
-        InjectorBuilder childBuilder = new InjectorBuilder()
-            .stage(stage).parentInjector(injector);
-        childBuilder.commands.addAll(command.getCommands());
-        Injector injector = childBuilder.build();
-        command.getEarlyRequestsProvider().initialize(injector);
-        return true;
-      }
-    };
-    subInjectorCommandProcessor.processCommands(commands, configurationErrorHandler);
   }
 
   /**
