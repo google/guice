@@ -29,6 +29,7 @@ import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.name.Names;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -198,6 +199,18 @@ public class BindingTest extends TestCase {
       assertTrue(providerVisited);
       assertTrue(classVisitied);
       assertTrue(constantVisited);
+    }
+  }
+
+  public void testBindToUnboundLinkedBinding() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(Collection.class).to(List.class);
+        }
+      });
+      fail("Dangling linked binding");
+    } catch (CreationException expected) {
     }
   }
 }
