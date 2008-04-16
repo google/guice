@@ -16,10 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.StackTraceElements;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.internal.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
@@ -274,25 +273,6 @@ public abstract class Key<T> {
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral,
       Annotation annotation) {
     return new SimpleKey<T>(typeLiteral, strategyFor(annotation));
-  }
-
-  /**
-   * Gets a key for the given type, member and annotations.
-   */
-  static Key<?> get(Type type, Member member, Annotation[] annotations,
-      ErrorHandler errorHandler) {
-    Annotation found = null;
-    for (Annotation annotation : annotations) {
-      if (annotation.annotationType().getAnnotation(BindingAnnotation.class) != null) {
-        if (found == null) {
-          found = annotation;
-        } else {
-          errorHandler.handle(StackTraceElements.forMember(member),
-              ErrorMessages.DUPLICATE_BINDING_ANNOTATIONS, found, annotation);
-        }
-      }
-    }
-    return found == null ? Key.get(type) : Key.get(type, found);
   }
 
   /**

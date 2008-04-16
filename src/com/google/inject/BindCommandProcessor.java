@@ -23,6 +23,7 @@ import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.ErrorMessages;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

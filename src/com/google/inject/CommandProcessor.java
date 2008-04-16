@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.commands.*;
+import com.google.inject.internal.ErrorHandler;
 
 import java.util.Iterator;
 import java.util.List;

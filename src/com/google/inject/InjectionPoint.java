@@ -20,6 +20,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import com.google.inject.internal.Objects;
+import com.google.inject.internal.ErrorMessages;
 import com.google.inject.spi.Dependency;
 
 /**

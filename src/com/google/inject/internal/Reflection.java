@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+
+package com.google.inject.internal;
 
 /**
- * Handles errors in the Injector.
+ * Abstraction for Java's reflection APIs. This interface exists to provide a
+ * single place where runtime reflection can be substituted for another
+ * mechanism such as CGLib or compile-time code generation.
  *
- * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
-interface ErrorHandler {
+public interface Reflection {
 
-  /**
-   * Handles an error.
-   */
-  void handle(Object source, String message);
+  public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation);
 
-  /**
-   * Handles an error.
-   */
-  void handle(Object source, String message, Object... arguments);
+  interface Factory {
+    Reflection create(ErrorHandler errorHandler, ConstructionProxyFactory constructionProxyFactory);
+  }
 }

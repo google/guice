@@ -20,8 +20,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.Stopwatch;
+import com.google.inject.internal.*;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 
@@ -44,6 +43,7 @@ class InjectorBuilder {
 
   private Injector parent;
   private Stage stage;
+  private Reflection.Factory reflectionFactory = new RuntimeReflectionFactory();
   private final List<Module> modules = new LinkedList<Module>();
 
   private final ConfigurationErrorHandler configurationErrorHandler
@@ -63,6 +63,11 @@ class InjectorBuilder {
    */
   InjectorBuilder stage(Stage stage) {
     this.stage = stage;
+    return this;
+  }
+
+  InjectorBuilder usingReflectionFactory(Reflection.Factory reflectionFactory) {
+    this.reflectionFactory = reflectionFactory;
     return this;
   }
 
@@ -96,7 +101,7 @@ class InjectorBuilder {
 
     validate();
 
-    injector.setErrorHandler(RuntimeErrorHandler.INSTANCE);
+    injector.setErrorHandler(ErrorHandlers.RUNTIME);
 
     // If we're in the tool stage, stop here. Don't eagerly inject or load
     // anything.
@@ -122,9 +127,10 @@ class InjectorBuilder {
         .processCommands(commands, configurationErrorHandler);
 
     BindInterceptorCommandProcessor bindInterceptorCommandProcessor
-        = new BindInterceptorCommandProcessor();
+        = new BindInterceptorCommandProcessor(configurationErrorHandler);
     bindInterceptorCommandProcessor.processCommands(commands, configurationErrorHandler);
-    injector.constructionProxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
+    ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
+    injector.reflection = reflectionFactory.create(configurationErrorHandler, proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
     new ScopesCommandProcessor(injector.scopes)
@@ -246,7 +252,7 @@ class InjectorBuilder {
   /**
    * Handles errors while the injector is being created.
    */
-  private class ConfigurationErrorHandler extends AbstractErrorHandler {
+  private class ConfigurationErrorHandler extends ErrorHandlers.AbstractErrorHandler {
     final Collection<Message> errorMessages = new ArrayList<Message>();
 
     public void handle(Object source, String message) {
@@ -257,17 +263,6 @@ class InjectorBuilder {
       if (!errorMessages.isEmpty()) {
         throw new CreationException(errorMessages);
       }
-    }
-  }
-
-  /**
-   * Handles errors after the injector is created.
-   */
-  private static class RuntimeErrorHandler extends AbstractErrorHandler {
-    static ErrorHandler INSTANCE = new RuntimeErrorHandler();
-
-    public void handle(Object source, String message) {
-      throw new ConfigurationException("Error at " + source + " " + message);
     }
   }
 }

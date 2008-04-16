@@ -20,6 +20,7 @@ import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.ErrorMessages;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;

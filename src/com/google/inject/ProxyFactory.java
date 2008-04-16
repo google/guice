@@ -16,17 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.GuiceNamingPolicy;
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.ReferenceCache;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.inject.internal.*;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
@@ -34,6 +24,15 @@ import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Member;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Proxies classes applying interceptors to methods as specified in
@@ -43,12 +42,14 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 class ProxyFactory implements ConstructionProxyFactory {
 
+  final ErrorHandler errorHandler;
   final List<MethodAspect> methodAspects;
-  final ConstructionProxyFactory defaultFactory
-      = new DefaultConstructionProxyFactory();
+  final ConstructionProxyFactory defaultFactory;
 
-  ProxyFactory(List<MethodAspect> methodAspects) {
+  ProxyFactory(ErrorHandler errorHandler, List<MethodAspect> methodAspects) {
+    this.errorHandler = errorHandler;
     this.methodAspects = methodAspects;
+    defaultFactory = new DefaultConstructionProxyFactory(errorHandler);
   }
 
   Map<Constructor<?>, ConstructionProxy<?>> constructionProxies
@@ -173,6 +174,14 @@ class ProxyFactory implements ConstructionProxyFactory {
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
+      }
+
+      public List<Parameter<?>> getParameters() {
+        return Parameter.forConstructor(errorHandler, fastConstructor.getJavaConstructor());
+      }
+
+      public Member getMember() {
+        return fastConstructor.getJavaConstructor();
       }
     };
   }

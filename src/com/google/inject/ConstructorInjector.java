@@ -16,8 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.StackTraceElements;
-import java.lang.reflect.Constructor;
+import com.google.inject.internal.ConstructionProxy;
+import com.google.inject.internal.ErrorMessages;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -34,11 +35,10 @@ class ConstructorInjector<T> {
 
   ConstructorInjector(InjectorImpl injector, Class<T> implementation) {
     this.implementation = implementation;
-    Constructor<T> constructor = findConstructorIn(injector, implementation);
-    parameterInjectors = createParameterInjector(injector, constructor);
+    constructionProxy = injector.reflection.getConstructionProxy(implementation);
+    parameterInjectors = createParameterInjector(injector, constructionProxy);
     memberInjectors = injector.injectors.get(implementation)
         .toArray(new InjectorImpl.SingleMemberInjector[0]);
-    constructionProxy = injector.constructionProxyFactory.get(constructor);
   }
 
   /**
@@ -52,62 +52,17 @@ class ConstructorInjector<T> {
   }
 
   InjectorImpl.SingleParameterInjector<?>[] createParameterInjector(
-      InjectorImpl injector, Constructor<T> constructor) {
+      InjectorImpl injector, ConstructionProxy<T> constructionProxy) {
     try {
-      return constructor.getParameterTypes().length == 0
+      return constructionProxy.getParameters().isEmpty()
           ? null // default constructor.
           : injector.getParametersInjectors(
-              constructor,
-              constructor.getParameterAnnotations(),
-              constructor.getGenericParameterTypes()
-          );
+              constructionProxy.getMember(),
+              constructionProxy.getParameters());
     }
     catch (InjectorImpl.MissingDependencyException e) {
       e.handle(injector.errorHandler);
       return null;
-    }
-  }
-
-  private static <T> Constructor<T> findConstructorIn(InjectorImpl injector,
-      Class<T> implementation) {
-    Constructor<T> found = null;
-    @SuppressWarnings("unchecked")
-    Constructor<T>[] constructors
-        = (Constructor<T>[]) implementation.getDeclaredConstructors();
-    for (Constructor<T> constructor : constructors) {
-      Inject inject = constructor.getAnnotation(Inject.class);
-      if (inject != null) {
-        if (inject.optional()) {
-          injector.errorHandler.handle(
-              StackTraceElements.forMember(constructor),
-              ErrorMessages.OPTIONAL_CONSTRUCTOR);
-        }
-
-        if (found != null) {
-          injector.errorHandler.handle(
-              StackTraceElements.forMember(found),
-              ErrorMessages.TOO_MANY_CONSTRUCTORS);
-          return InjectorImpl.invalidConstructor();
-        }
-        found = constructor;
-      }
-    }
-    if (found != null) {
-      return found;
-    }
-
-    // If no annotated constructor is found, look for a no-arg constructor
-    // instead.
-    try {
-      return implementation.getDeclaredConstructor();
-    }
-    catch (NoSuchMethodException e) {
-      injector.errorHandler.handle(
-          StackTraceElements.forMember(
-              implementation.getDeclaredConstructors()[0]),
-          ErrorMessages.MISSING_CONSTRUCTOR,
-          implementation);
-      return InjectorImpl.invalidConstructor();
     }
   }
 

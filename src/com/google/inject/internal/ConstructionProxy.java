@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
+
+import com.google.inject.Parameter;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.util.List;
 
 /**
  * Proxies calls to a {@link java.lang.reflect.Constructor} for a class
@@ -24,10 +28,14 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface ConstructionProxy<T> {
+public interface ConstructionProxy<T> {
 
   /**
    * Constructs an instance of {@code T} for the given arguments.
    */
   T newInstance(Object... arguments) throws InvocationTargetException;
+
+  List<Parameter<?>> getParameters();
+
+  Member getMember();
 }

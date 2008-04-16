@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.BindCommandProcessor.CreationListener;
+import com.google.inject.internal.ErrorMessages;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.

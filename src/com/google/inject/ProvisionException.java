@@ -16,16 +16,17 @@
 
 package com.google.inject;
 
-import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_FIELD;
-import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_PARAMETER;
-import static com.google.inject.ErrorMessages.ERROR_WHILE_LOCATING_VALUE;
+import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_FIELD;
+import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_PARAMETER;
+import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_VALUE;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.ErrorMessages;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -1,3 +1,4 @@
+
 /**
  * Copyright (C) 2006 Google Inc.
  *
@@ -20,6 +21,8 @@ import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
+import com.google.inject.internal.ConstructionProxy;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +39,7 @@ public class ProxyFactoryTest extends TestCase {
       throws NoSuchMethodException, InvocationTargetException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(ErrorHandlers.INVALID);
     builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
@@ -69,7 +72,7 @@ public class ProxyFactoryTest extends TestCase {
       throws NoSuchMethodException, InvocationTargetException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(ErrorHandlers.INVALID);
 
     builder.intercept(
         only(Bar.class), annotatedWith(Intercept.class), interceptor);
@@ -126,7 +129,7 @@ public class ProxyFactoryTest extends TestCase {
       throws InvocationTargetException, NoSuchMethodException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(ErrorHandlers.INVALID);
     builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
@@ -142,7 +145,7 @@ public class ProxyFactoryTest extends TestCase {
       throws NoSuchMethodException, InvocationTargetException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(ErrorHandlers.INVALID);
     builder.intercept(not(any()), not(any()), interceptor);
     ProxyFactory factory = builder.create();
 
@@ -166,7 +169,7 @@ public class ProxyFactoryTest extends TestCase {
     DoubleInterceptor doubleInterceptor = new DoubleInterceptor();
     CountingInterceptor countingInterceptor = new CountingInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(ErrorHandlers.INVALID);
     builder.intercept(any(), any(), doubleInterceptor, countingInterceptor);
     ProxyFactory factory = builder.create();
 

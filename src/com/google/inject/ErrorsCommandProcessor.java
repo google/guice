@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.commands.AddMessageErrorCommand;
 import com.google.inject.commands.AddThrowableErrorCommand;
+import com.google.inject.internal.ErrorMessages;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -17,6 +17,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.ErrorMessages;
+
 import java.lang.annotation.Annotation;
 import java.util.Map;
 

@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
+
+import com.google.inject.internal.ConstructionProxy;
+
+import java.lang.reflect.Constructor;
 
 /**
+ * Creates {@link ConstructionProxy} instances.
+ *
  * @author crazybob@google.com (Bob Lee)
-*/
-class InvalidErrorHandler extends AbstractErrorHandler {
+ */
+public interface ConstructionProxyFactory {
 
-  static ErrorHandler INSTANCE = new InvalidErrorHandler();
-
-  public void handle(Object source, String message) {
-    throw new AssertionError(message);
-  }
+  /**
+   * Gets a construction proxy for the given constructor.
+   */
+  <T> ConstructionProxy<T> get(Constructor<T> constructor);
 }

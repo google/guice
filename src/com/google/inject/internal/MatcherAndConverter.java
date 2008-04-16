@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
 
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.internal.Objects;
+import com.google.inject.TypeLiteral;
 
 /**
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class MatcherAndConverter<T> {
+public class MatcherAndConverter<T> {
 
   static {
     SourceProviders.skip(MatcherAndConverter.class);
   }
   
-  final Matcher<? super TypeLiteral<?>> typeMatcher;
-  final TypeConverter typeConverter;
-  final Object source;
+  private final Matcher<? super TypeLiteral<?>> typeMatcher;
+  private final TypeConverter typeConverter;
+  private final Object source;
 
   MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter, Object source) {
@@ -49,15 +50,32 @@ class MatcherAndConverter<T> {
     this.source = SourceProviders.defaultSource();
   }
 
-  static <T> MatcherAndConverter<T> newInstance(
+  public TypeConverter getTypeConverter() {
+    return typeConverter;
+  }
+
+  public Matcher<? super TypeLiteral<?>> getTypeMatcher() {
+    return typeMatcher;
+  }
+
+  public static <T> MatcherAndConverter<T> newInstance(
       Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     return new MatcherAndConverter<T>(typeMatcher, typeConverter);
   }
 
-  static <T> MatcherAndConverter<T> newInstance(
+  public static <T> MatcherAndConverter<T> newInstance(
       Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter, Object source) {
     return new MatcherAndConverter<T>(typeMatcher, typeConverter, source);
+  }
+
+  public Object getSource() {
+    return source;
+  }
+
+  @Override public String toString() {
+    return typeConverter + " which matches " + typeMatcher
+        + " (bound at " + source + ")";
   }
 }

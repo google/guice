@@ -19,6 +19,7 @@ package com.google.inject;
 
 import com.google.inject.commands.ConvertToTypesCommand;
 import com.google.inject.internal.Strings;
+import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;

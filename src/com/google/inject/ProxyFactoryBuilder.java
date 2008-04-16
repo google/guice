@@ -17,6 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.matcher.Matcher;
+import com.google.inject.internal.ErrorHandler;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,12 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 class ProxyFactoryBuilder {
 
+  final ErrorHandler errorHandler;
   final List<MethodAspect> methodAspects = new ArrayList<MethodAspect>();
+
+  ProxyFactoryBuilder(ErrorHandler errorHandler) {
+    this.errorHandler = errorHandler;
+  }
 
   /**
    * Applies the given method interceptor to the methods matched by the class
@@ -61,6 +68,6 @@ class ProxyFactoryBuilder {
    * Creates a {@code ProxyFactory}.
    */
   public ProxyFactory create() {
-    return new ProxyFactory(new ArrayList<MethodAspect>(methodAspects));
+    return new ProxyFactory(errorHandler, new ArrayList<MethodAspect>(methodAspects));
   }
 }

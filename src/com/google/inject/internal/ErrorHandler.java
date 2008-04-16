@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
 
 /**
- * Implements formatting. Converts known types to readable strings.
+ * Handles errors in the Injector.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-abstract class AbstractErrorHandler implements ErrorHandler {
+public interface ErrorHandler {
 
-  public final void handle(Object source, String message, Object... arguments) {
-    for (int i = 0; i < arguments.length; i++) {
-      arguments[i] = ErrorMessages.convert(arguments[i]);
-    }
-    handle(source, String.format(message, arguments));
-  }
+  /**
+   * Handles an error.
+   */
+  void handle(Object source, String message);
+
+  /**
+   * Handles an error.
+   */
+  void handle(Object source, String message, Object... arguments);
 }

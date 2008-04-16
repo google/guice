@@ -16,22 +16,33 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.Objects;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import com.google.inject.internal.ConstructionProxy;
+import com.google.inject.internal.ConstructionProxyFactory;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
+import java.util.List;
+
 /**
- * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
+ * Default {@link com.google.inject.internal.ConstructionProxyFactory} implementation. Simply invokes the
  * constructor. Can be reused by other {@code ConstructionProxyFactory}
  * implementations.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
+
+  private final ErrorHandler errorHandler;
+
+  DefaultConstructionProxyFactory(ErrorHandler errorHandler) {
+    this.errorHandler = errorHandler;
+  }
 
   public <T> ConstructionProxy<T> get(final Constructor<T> constructor) {
     // We can't use FastConstructor if the constructor is private or protected.
@@ -51,6 +62,12 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
             throw new AssertionError(e);
           }
         }
+        public List<Parameter<?>> getParameters() {
+          return Parameter.forConstructor(errorHandler, constructor);
+        }
+        public Member getMember() {
+          return constructor;
+        }
       };
     }
 
@@ -63,6 +80,12 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       public T newInstance(Object... arguments)
           throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
+      }
+      public List<Parameter<?>> getParameters() {
+        return Parameter.forConstructor(errorHandler, fastConstructor);
+      }
+      public Member getMember() {
+        return fastConstructor.getJavaConstructor();
       }
     };
   }
