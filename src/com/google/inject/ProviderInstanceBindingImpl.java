@@ -16,10 +16,11 @@ limitations under the License.
 
 package com.google.inject;
 
-import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.Dependency;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.ProviderInstanceBinding;
+
 import java.util.Collection;
 
 /**

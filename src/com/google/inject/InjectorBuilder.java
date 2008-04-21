@@ -20,7 +20,9 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import com.google.inject.internal.*;
+import com.google.inject.internal.ConstructionProxyFactory;
+import com.google.inject.internal.Objects;
+import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 
@@ -146,6 +148,7 @@ class InjectorBuilder {
         injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands, configurationErrorHandler);
     bindCommandProcesor.createUntargettedBindings();
+    bindLogger();
     stopwatch.resetAndLog("Binding creation");
 
     injector.index();
@@ -205,9 +208,6 @@ class InjectorBuilder {
     protected void configure() {
       SourceProviders.withDefault(SourceProviders.UNKNOWN_SOURCE, new Runnable() {
         public void run() {
-          // TODO(jessewilson): use a real logger
-          // bind(Logger.class).toInternalFactory(new LoggerFactory());
-          bind(Logger.class).toInstance(Logger.getLogger(""));
           bind(Stage.class).toInstance(stage);
           bindScope(Singleton.class, SINGLETON);
           // Create default bindings.
@@ -234,18 +234,35 @@ class InjectorBuilder {
         return "Provider<Injector>";
       }
     }
+  }
 
-    class LoggerFactory implements InternalFactory<Logger> {
-      public Logger get(InternalContext context, InjectionPoint<?> injectionPoint) {
-        Member member = injectionPoint.getMember();
-        return member == null
-            ? Logger.getAnonymousLogger()
-            : Logger.getLogger(member.getDeclaringClass().getName());
-      }
+  /**
+   * The Logger is a special case because it knows the injection point of the
+   * injected member. It's the only binding that does this.
+   */
+  private void bindLogger() {
+    Key<Logger> key = Key.get(Logger.class);
+    LoggerFactory loggerFactory = new LoggerFactory();
+    injector.explicitBindings.put(key,
+        new ProviderInstanceBindingImpl<Logger>(injector, key,
+            SourceProviders.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
+            loggerFactory));
+  }
 
-      public String toString() {
-        return "Provider<Logger>";
-      }
+  static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
+    public Logger get(InternalContext context, InjectionPoint<?> injectionPoint) {
+      Member member = injectionPoint.getMember();
+      return member == null
+          ? Logger.getAnonymousLogger()
+          : Logger.getLogger(member.getDeclaringClass().getName());
+    }
+
+    public Logger get() {
+      return Logger.getAnonymousLogger();
+    }
+
+    public String toString() {
+      return "Provider<Logger>";
     }
   }
 

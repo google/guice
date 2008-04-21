@@ -3,6 +3,8 @@ package com.google.inject;
 import junit.framework.TestCase;
 import java.util.logging.Logger;
 
+import com.google.inject.spi.ProviderInstanceBinding;
+
 /**
  * Test built-in injection of loggers.
  *
@@ -20,7 +22,11 @@ public class LoggerInjectionTest extends TestCase {
   
   public void testLoggerWithoutMember() {
     Injector injector = Guice.createInjector();
-    Logger loggerWithoutMember = injector.getInstance(Logger.class);
-    assertNull(loggerWithoutMember.getName());
+    assertNull(injector.getInstance(Logger.class).getName());
+    assertNull(injector.getProvider(Logger.class).get().getName());
+    assertNull(injector.getBinding(Logger.class).getProvider().get().getName());
+    assertNull(((ProviderInstanceBinding<Logger>) injector.getBinding(Logger.class))
+        .getProviderInstance().get().getName());
+    assertEquals("Provider<Logger>", injector.getProvider(Logger.class).toString());
   }
 }
