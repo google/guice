@@ -47,18 +47,11 @@ public class NullableInjectionPointTest extends TestCase {
   }
 
   /**
-   * We haven't decided on what the desired behaviour of this test should be...
+   * Provider.getInstance() is allowed to return null via direct calls to
+   * getInstance().
    */
   public void testGetInstanceOfNull() {
-    try {
-      createInjector().getInstance(Foo.class);
-      fail("Getting an instance of null should fail with an error");
-    }
-    catch (ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding "
-          + "at com.google.inject.NullableInjectionPointTest");
-    }
+    assertNull(createInjector().getInstance(Foo.class));
   }
 
   public void testInjectNullIntoNullableConstructor() {
@@ -96,20 +89,20 @@ public class NullableInjectionPointTest extends TestCase {
    * We haven't decided on what the desired behaviour of this test should be...
    */
   public void testBindNullToInstance() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(Foo.class).toInstance(null);
+        try {
+          bind(Foo.class).toInstance(null);
+          fail();
+        }
+        catch(NullPointerException expected) {
+          assertEquals("Binding to null instances is not allowed. "
+              + "Use toProvider(Providers.of(null)) if this is your intended behaviour.", 
+              expected.getMessage());
+        }
       }
     });
-    assertNull(injector.getInstance(NullableFooField.class).foo);
 
-    try {
-      injector.getInstance(FooField.class);
-    }
-    catch(ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
-    }
   }
 
   public void testBindNullToProvider() {
