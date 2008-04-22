@@ -209,6 +209,8 @@ public class BindingTest extends TestCase {
           bind(Collection.class).to(List.class);
         }
       });
+      // Despite the fact that the binding to List.class cannot be resolved,
+      // we successfully return a (broken) injector. This is a known bug.
       fail("Dangling linked binding");
     } catch (CreationException expected) {
     }
