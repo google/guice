@@ -27,20 +27,20 @@ import java.util.Map;
  */
 class InternalContext {
 
-  final InjectorImpl injector;
-  Map<Object, ConstructionContext<?>> constructionContexts;
-  InjectionPoint injectionPoint;
+  private final InjectorImpl injector;
+  private Map<Object, ConstructionContext<?>> constructionContexts;
+  private InjectionPoint injectionPoint;
 
-  InternalContext(InjectorImpl injector) {
+  public InternalContext(InjectorImpl injector) {
     this.injector = injector;
   }
 
-  InjectorImpl getInjectorImpl() {
+  public InjectorImpl getInjector() {
     return injector;
   }
 
   @SuppressWarnings("unchecked")
-  <T> ConstructionContext<T> getConstructionContext(Object key) {
+  public <T> ConstructionContext<T> getConstructionContext(Object key) {
     if (constructionContexts == null) {
       constructionContexts = new HashMap<Object, ConstructionContext<?>>();
       ConstructionContext<T> constructionContext = new ConstructionContext<T>();

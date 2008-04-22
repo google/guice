@@ -131,12 +131,14 @@ class CodeGenReflectionFactory implements Reflection.Factory {
         }
       }
 
-      out.writeLine();
-      out.openScope("public class %s implements Reflection {", generatedClassSimpleName());
-      out.writeLine();
+      out.writeLine()
+          .openScope("public class %s implements %s {", generatedClassSimpleName(), Reflection.class)
+          .writeLine();
+
       writeGetConstructionProxy();
-      out.writeLine();
-      out.closeScope("}");
+
+      out.writeLine()
+          .closeScope("}");
     }
 
     String keyLiteral(Key<?> key) {
@@ -151,15 +153,17 @@ class CodeGenReflectionFactory implements Reflection.Factory {
 
 
     void writeGetConstructionProxy() throws IOException {
-      out.writeLine("@%s(\"unchecked\")", SuppressWarnings.class);
-      out.openScope("public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation) {");
+      out.writeLine("@%s(\"unchecked\")", SuppressWarnings.class)
+          .openScope("public <T> %s<T> getConstructionProxy(%s<T> implementation) {", ConstructionProxy.class, Class.class);
 
       for (Map.Entry<Class<?>, ConstructionProxy<?>> entry : constructionProxies.entrySet()) {
         Class<?> implementation = entry.getKey();
-        out.openScope("if (implementation == %s.class) {", implementation);
-        out.openScope("return (%s) new %s<%s>() {", ConstructionProxy.class, ConstructionProxy.class, implementation);
-        out.openScope("public %s newInstance(final %s... arguments) throws %s {", implementation, Object.class, InvocationTargetException.class);
-        out.openScope("return new %s(", implementation);
+        out.openScope("if (implementation == %s.class) {", implementation)
+            .openScope("return (%s) new %s<%s>() {", ConstructionProxy.class, ConstructionProxy.class, implementation);
+
+        // newInstance
+        out.openScope("public %s newInstance(final %s... arguments) throws %s {", implementation, Object.class, InvocationTargetException.class)
+            .openScope("return new %s(", implementation);
         int argument = 0;
         for (Iterator<Parameter<?>> i = entry.getValue().getParameters().iterator(); i.hasNext(); ) {
           Parameter<?> parameter = i.next();
@@ -167,10 +171,12 @@ class CodeGenReflectionFactory implements Reflection.Factory {
           out.writeLine("(%s) arguments[%d]%s", parameter.getKey().getTypeLiteral().getType(), argument, separator);
           argument++;
         }
-        out.closeScope(");");
-        out.closeScope("}");
-        out.openScope("public %s<%s<?>> getParameters() {", List.class, Parameter.class);
-        out.openScope("return %s.<%s<?>>asList(", Arrays.class, Parameter.class);
+        out.closeScope(");")
+            .closeScope("}");
+
+        // getParameters
+        out.openScope("public %s<%s<?>> getParameters() {", List.class, Parameter.class)
+            .openScope("return %s.<%s<?>>asList(", Arrays.class, Parameter.class);
         argument = 0;
         for (Iterator<Parameter<?>> i = entry.getValue().getParameters().iterator(); i.hasNext(); ) {
           Parameter<?> parameter = i.next();
@@ -178,17 +184,20 @@ class CodeGenReflectionFactory implements Reflection.Factory {
           out.writeLine("%s.create(%s, %s, %s.%s)%s", Parameter.class, argument, keyLiteral(parameter.getKey()), Nullability.class, parameter.getNullability(), separator);
           argument++;
         }
-        out.closeScope(");");
-        out.closeScope("}");
-        out.openScope("public %s getMember() {", Member.class);
-        out.writeLine("return null;");
-        out.closeScope("}");
-        out.closeScope("};");
-        out.closeScope("}");
+        out.closeScope(");")
+            .closeScope("}");
+
+        // getMember
+        out.openScope("public %s getMember() {", Member.class)
+            .writeLine("return null;")
+            .closeScope("}");
+
+        out.closeScope("};")
+            .closeScope("}");
       }
-      out.writeLine();
-      out.writeLine("throw new %s();", IllegalArgumentException.class);
-      out.closeScope("}");
+      out.writeLine()
+          .writeLine("throw new %s();", IllegalArgumentException.class)
+          .closeScope("}");
     }
   }
 }

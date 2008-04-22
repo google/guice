@@ -15,9 +15,9 @@
  */
 
 
-package com.google.inject.internal;
+package com.google.inject;
 
-import com.google.inject.Inject;
+import com.google.inject.internal.*;
 import static com.google.inject.internal.Objects.nonNull;
 
 import java.lang.reflect.Constructor;
@@ -25,7 +25,7 @@ import java.lang.reflect.Constructor;
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class RuntimeReflectionFactory implements Reflection.Factory {
+class RuntimeReflectionFactory implements Reflection.Factory {
   public Reflection create(ErrorHandler errorHandler,
       ConstructionProxyFactory constructionProxyFactory) {
     return new RuntimeReflection(errorHandler, constructionProxyFactory);

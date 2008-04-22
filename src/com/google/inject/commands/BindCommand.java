@@ -23,6 +23,7 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.ErrorMessages;
 
 import java.lang.annotation.Annotation;
 
@@ -181,10 +182,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void toInstance(final T instance) {
-      // might someday want to tolerate null here, probably by setting up a
-      // Provider<null> rather than trying to distinguish between null and
-      // not set
-      nonNull(instance, "instance");
+      nonNull(instance, ErrorMessages.CANNOT_BIND_TO_NULL_INSTANCE);
 
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {

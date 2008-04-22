@@ -169,6 +169,10 @@ public class ErrorMessages {
   public static final String CANNOT_BIND_TO_GUICE_TYPE = "Binding to core guice"
       + " framework type is not allowed: %s.";
 
+  public static final String CANNOT_BIND_TO_NULL_INSTANCE = "Binding to null "
+      + "instances is not allowed. Use toProvider(Providers.of(null)) if this "
+      + "is your intended behaviour.";
+
   public static final String SCOPE_NOT_FOUND = "No scope is bound to %s.";
 
   public static final String CONSTRUCTOR_RULES = "Classes must have either one (and"

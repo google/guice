@@ -15,7 +15,11 @@
  */
 
 
-package com.google.inject.internal;
+package com.google.inject;
+
+import com.google.inject.internal.ConstructionProxy;
+import com.google.inject.internal.ConstructionProxyFactory;
+import com.google.inject.internal.ErrorHandler;
 
 /**
  * Abstraction for Java's reflection APIs. This interface exists to provide a
@@ -24,7 +28,7 @@ package com.google.inject.internal;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public interface Reflection {
+interface Reflection {
 
   public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation);
 

@@ -1229,7 +1229,7 @@ class InjectorImpl implements Injector {
   /**
    * Injects a field or method in a given object.
    */
-  interface SingleMemberInjector {
+  public interface SingleMemberInjector {
     void inject(InternalContext context, Object o);
     Collection<Dependency<?>> getDependencies();
   }

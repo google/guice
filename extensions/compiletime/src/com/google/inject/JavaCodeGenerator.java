@@ -108,26 +108,29 @@ public class JavaCodeGenerator {
     return args;
   }
 
-  public void writeLine(String format, Object... args) throws IOException {
+  public JavaCodeGenerator writeLine(String format, Object... args) throws IOException {
     for (int i = 0; i < indent; i++) {
       writer.append("  ");
     }
     writer.append(String.format(format, processArgs(args)));
     writeLine();
+    return this;
   }
 
-  public void openScope(String format, Object... args) throws IOException {
+  public JavaCodeGenerator openScope(String format, Object... args) throws IOException {
     writeLine(format, args);
     indent++;
+    return this;
   }
 
-  public void closeScope(String format, Object... args) throws IOException {
+  public JavaCodeGenerator closeScope(String format, Object... args) throws IOException {
     indent--;
-    writeLine(format, args);
+    return writeLine(format, args);
   }
 
-  public void writeLine() throws IOException {
+  public JavaCodeGenerator writeLine() throws IOException {
     writer.append("\n");
+    return this;
   }
 
   public void close() throws IOException {

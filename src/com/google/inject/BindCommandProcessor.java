@@ -73,9 +73,7 @@ class BindCommandProcessor extends CommandProcessor {
     }
 
     if (Logger.class == rawType) {
-      // TODO(jessewilson): assert this is coming from the internal module?
-      // addError(source, ErrorMessages.LOGGER_ALREADY_BOUND);
-      // return true;
+       addError(source, ErrorMessages.LOGGER_ALREADY_BOUND);
     }
 
     validateKey(command.getSource(), command.getKey());
@@ -273,7 +271,7 @@ class BindCommandProcessor extends CommandProcessor {
 
     public Void call(InternalContext context) {
       InjectionPoint<?> injectionPoint
-          = InjectionPoint.newInstance(key, context.getInjectorImpl());
+          = InjectionPoint.newInstance(key, context.getInjector());
       context.setInjectionPoint(injectionPoint);
       try {
         factory.get(context, injectionPoint);

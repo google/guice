@@ -18,7 +18,6 @@
 package com.google.inject;
 
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.Reflection;
 
 import java.io.File;
 import java.io.IOException;
