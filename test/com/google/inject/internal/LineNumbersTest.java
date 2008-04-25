@@ -35,8 +35,7 @@ public class LineNumbersTest extends TestCase {
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
-          bindInterceptor(Matchers.only(A.class),
-              Matchers.any(),
+          bindInterceptor(Matchers.only(A.class), Matchers.any(),
               new MethodInterceptor() {
                 public Object invoke(MethodInvocation methodInvocation) {
                   return null;
@@ -48,8 +47,8 @@ public class LineNumbersTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains("No bindings to that type were found."));
       assertTrue(expected.getMessage().contains("LineNumbersTest$B"));
+      assertTrue(expected.getMessage().contains("No bindings to that type were found."));
     }
   }
 

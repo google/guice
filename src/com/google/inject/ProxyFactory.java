@@ -158,17 +158,17 @@ class ProxyFactory implements ConstructionProxyFactory {
     // Store callbacks.
     Enhancer.registerStaticCallbacks(proxied, callbacks);
 
-    return createConstructionProxy(proxied, constructor.getParameterTypes());
+    return createConstructionProxy(proxied, constructor);
   }
 
   /**
    * Creates a construction proxy given a class and parameter types.
    */
-  <T> ConstructionProxy<T> createConstructionProxy(Class<?> clazz,
-      Class[] parameterTypes) {
+  private <T> ConstructionProxy<T> createConstructionProxy(final Class<?> clazz,
+      final Constructor standardConstructor) {
     FastClass fastClass = GuiceFastClass.create(clazz);
     final FastConstructor fastConstructor
-        = fastClass.getConstructor(parameterTypes);
+        = fastClass.getConstructor(standardConstructor.getParameterTypes());
     return new ConstructionProxy<T>() {
       @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
@@ -181,7 +181,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
 
       public Member getMember() {
-        return fastConstructor.getJavaConstructor();
+        return standardConstructor;
       }
     };
   }

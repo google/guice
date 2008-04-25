@@ -37,5 +37,10 @@ public interface ConstructionProxy<T> {
 
   List<Parameter<?>> getParameters();
 
+  /**
+   * Returns the injected method or constructor. If the injected member is
+   * synthetic (such as generated code for method interception), the natural
+   * constructor is returned.
+   */
   Member getMember();
 }
