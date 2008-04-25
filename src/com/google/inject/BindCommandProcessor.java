@@ -72,10 +72,6 @@ class BindCommandProcessor extends CommandProcessor {
       return true;
     }
 
-    if (Logger.class == rawType) {
-       addError(source, ErrorMessages.LOGGER_ALREADY_BOUND);
-    }
-
     validateKey(command.getSource(), command.getKey());
 
     // TODO(jessewilson): Scope annotation on type, like @Singleton

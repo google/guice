@@ -143,12 +143,12 @@ class InjectorBuilder {
         .processCommands(commands, configurationErrorHandler);
     stopwatch.resetAndLog("Converters creation");
 
+    bindLogger();
     bindCommandProcesor = new BindCommandProcessor(
         injector, injector.scopes, stage, injector.explicitBindings,
         injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands, configurationErrorHandler);
     bindCommandProcesor.createUntargettedBindings();
-    bindLogger();
     stopwatch.resetAndLog("Binding creation");
 
     injector.index();
