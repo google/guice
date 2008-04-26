@@ -303,7 +303,7 @@ class InjectorImpl implements Injector {
 
     // If binding isn't found...
     if (providedBinding == null) {
-      handleMissingBinding(this, key);
+      handleMissingBinding(key);
       return invalidBinding(key);
     }
 
