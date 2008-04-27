@@ -51,7 +51,8 @@ public class BindingOrderTest extends TestCase {
     // injector time. This is because we use the injector's just-in-time
     // bindings to build these, rather than the bind command. This is a known
     // bug.
-    assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
+    assertSame("known bug: untargetted binding out-of-order",
+        injector.getInstance(A.class).b, injector.getInstance(A.class).b);
   }
 
   static class A {

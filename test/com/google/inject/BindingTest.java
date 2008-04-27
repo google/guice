@@ -211,7 +211,7 @@ public class BindingTest extends TestCase {
       });
       // Despite the fact that the binding to List.class cannot be resolved,
       // we successfully return a (broken) injector. This is a known bug.
-      fail("Dangling linked binding");
+      fail("known bug: Dangling linked binding");
     } catch (CreationException expected) {
     }
   }

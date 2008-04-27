@@ -62,8 +62,8 @@ public class ErrorMessagesTest extends TestCase {
       // The error returned is "Missing binding to AbstractClass", which is
       // true, but as helpful as it could be in this context. This is a
       // known bug
-      assertTrue(e.getMessage().contains(
-          "Injecting into abstract types is not supported."));
+      assertTrue("known bug: unhelpful message for abstract classes",
+          e.getMessage().contains("Injecting into abstract types is not supported."));
     }
   }
 

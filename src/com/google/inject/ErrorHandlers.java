@@ -30,12 +30,6 @@ class ErrorHandlers {
     }
   };
 
-  static ErrorHandler RUNTIME = new AbstractErrorHandler() {
-    public void handle(Object source, String message) {
-      throw new ConfigurationException("Error at " + source + " " + message);
-    }
-  };
-
   /**
    * Implements formatting. Converts known types to readable strings.
    */

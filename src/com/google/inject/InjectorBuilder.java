@@ -23,12 +23,10 @@ import com.google.inject.commands.FutureInjector;
 import com.google.inject.internal.ConstructionProxyFactory;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.Stopwatch;
-import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -48,10 +46,8 @@ class InjectorBuilder {
   private Reflection.Factory reflectionFactory = new RuntimeReflectionFactory();
   private final List<Module> modules = new LinkedList<Module>();
 
-  private final ConfigurationErrorHandler configurationErrorHandler
-      = new ConfigurationErrorHandler();
-
   private InjectorImpl injector;
+  private DefaultErrorHandler errorHandler = new DefaultErrorHandler();
 
   private final FutureInjector futureInjector = new FutureInjector();
   private final List<Command> commands = new ArrayList<Command>();
@@ -90,8 +86,7 @@ class InjectorBuilder {
       throw new AssertionError("Already built, builders are not reusable.");
     }
 
-    injector = new InjectorImpl(parent);
-    injector.setErrorHandler(configurationErrorHandler);
+    injector = new InjectorImpl(parent, errorHandler);
 
     modules.add(0, new BuiltInModule(injector, stage));
 
@@ -103,7 +98,7 @@ class InjectorBuilder {
 
     validate();
 
-    injector.setErrorHandler(ErrorHandlers.RUNTIME);
+    errorHandler.switchToRuntime();
 
     // If we're in the tool stage, stop here. Don't eagerly inject or load
     // anything.
@@ -126,28 +121,28 @@ class InjectorBuilder {
    */
   private void buildCoreInjector() {
     new ErrorsCommandProcessor()
-        .processCommands(commands, configurationErrorHandler);
+        .processCommands(commands, errorHandler);
 
     BindInterceptorCommandProcessor bindInterceptorCommandProcessor
-        = new BindInterceptorCommandProcessor(configurationErrorHandler);
-    bindInterceptorCommandProcessor.processCommands(commands, configurationErrorHandler);
+        = new BindInterceptorCommandProcessor(errorHandler);
+    bindInterceptorCommandProcessor.processCommands(commands, errorHandler);
     ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
-    injector.reflection = reflectionFactory.create(configurationErrorHandler, proxyFactory);
+    injector.reflection = reflectionFactory.create(errorHandler, proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
     new ScopesCommandProcessor(injector.scopes)
-        .processCommands(commands, configurationErrorHandler);
+        .processCommands(commands, errorHandler);
     stopwatch.resetAndLog("Scopes creation");
 
     new ConvertToTypesCommandProcessor(injector.converters)
-        .processCommands(commands, configurationErrorHandler);
+        .processCommands(commands, errorHandler);
     stopwatch.resetAndLog("Converters creation");
 
     bindLogger();
     bindCommandProcesor = new BindCommandProcessor(
         injector, injector.scopes, stage, injector.explicitBindings,
         injector.outstandingInjections);
-    bindCommandProcesor.processCommands(commands, configurationErrorHandler);
+    bindCommandProcesor.processCommands(commands, errorHandler);
     bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
 
@@ -156,7 +151,7 @@ class InjectorBuilder {
 
     requestStaticInjectionCommandProcessor = new RequestStaticInjectionCommandProcessor();
     requestStaticInjectionCommandProcessor
-        .processCommands(commands, configurationErrorHandler);
+        .processCommands(commands, errorHandler);
     stopwatch.resetAndLog("Static injection");
   }
 
@@ -175,10 +170,10 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Instance member validation");
 
     new GetProviderProcessor(injector)
-        .processCommands(commands, configurationErrorHandler);
+        .processCommands(commands, errorHandler);
     stopwatch.resetAndLog("Provider verification");
 
-    configurationErrorHandler.blowUpIfErrorsExist();
+    errorHandler.blowUpIfErrorsExist();
   }
 
   /**
@@ -266,20 +261,4 @@ class InjectorBuilder {
     }
   }
 
-  /**
-   * Handles errors while the injector is being created.
-   */
-  private class ConfigurationErrorHandler extends ErrorHandlers.AbstractErrorHandler {
-    final Collection<Message> errorMessages = new ArrayList<Message>();
-
-    public void handle(Object source, String message) {
-      errorMessages.add(new Message(source, message));
-    }
-
-    void blowUpIfErrorsExist() {
-      if (!errorMessages.isEmpty()) {
-        throw new CreationException(errorMessages);
-      }
-    }
-  }
 }

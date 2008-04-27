@@ -86,15 +86,12 @@ class InjectorImpl implements Injector {
   final Map<Object, Void> outstandingInjections
       = new IdentityHashMap<Object, Void>();
 
-  ErrorHandler errorHandler = new ErrorHandlers.AbstractErrorHandler() {
-    public void handle(Object source, String message) {
-      throw new AssertionError(message);
-    }
-  };
+  final ErrorHandler errorHandler;
   Reflection reflection;
 
-  InjectorImpl(Injector parentInjector) {
+  InjectorImpl(Injector parentInjector, ErrorHandler errorHandler) {
     this.parentInjector = parentInjector;
+    this.errorHandler = errorHandler;
   }
 
   void validateOustandingInjections() {
@@ -167,10 +164,6 @@ class InjectorImpl implements Injector {
    */
   void withDefaultSource(Object defaultSource, Runnable runnable) {
     SourceProviders.withDefault(defaultSource, runnable);
-  }
-
-  void setErrorHandler(ErrorHandler errorHandler) {
-    this.errorHandler = errorHandler;
   }
 
   /**
@@ -303,15 +296,11 @@ class InjectorImpl implements Injector {
 
     // If binding isn't found...
     if (providedBinding == null) {
-      handleMissingBinding(key);
+      handleMissingBinding(SourceProviders.defaultSource(), key);
       return invalidBinding(key);
     }
 
     return new ProviderBindingImpl<T>(this, key, providedBinding);
-  }
-
-  void handleMissingBinding(Key<?> key) {
-    handleMissingBinding(SourceProviders.defaultSource(), key);
   }
 
   void handleMissingBinding(Object source, Key<?> key) {
