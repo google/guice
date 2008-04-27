@@ -17,10 +17,12 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.ErrorMessages;
 import com.google.inject.spi.Message;
 
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A stateful error handler that can be used at both configuration time and
@@ -30,7 +32,7 @@ import java.util.ArrayList;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class DefaultErrorHandler extends ErrorHandlers.AbstractErrorHandler {
+class DefaultErrorHandler implements ErrorHandler {
   State state = State.CONFIGURATION_TIME;
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
@@ -44,6 +46,16 @@ class DefaultErrorHandler extends ErrorHandlers.AbstractErrorHandler {
     } else {
       throw new AssertionError();
     }
+  }
+
+  /**
+   * Implements formatting. Converts known types to readable strings.
+   */
+  public final void handle(Object source, String message, Object... arguments) {
+    for (int i = 0; i < arguments.length; i++) {
+      arguments[i] = ErrorMessages.convert(arguments[i]);
+    }
+    handle(source, String.format(message, arguments));
   }
 
   void switchToRuntime() {

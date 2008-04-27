@@ -18,27 +18,16 @@
 package com.google.inject;
 
 import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessages;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-class ErrorHandlers {
-  static ErrorHandler INVALID = new AbstractErrorHandler() {
-    public void handle(Object source, String message) {
-      throw new AssertionError(message);
-    }
-  };
+class InvalidErrorHandler implements ErrorHandler {
+  public void handle(Object source, String message) {
+    throw new AssertionError(message);
+  }
 
-  /**
-   * Implements formatting. Converts known types to readable strings.
-   */
-  abstract static class AbstractErrorHandler implements ErrorHandler {
-    public final void handle(Object source, String message, Object... arguments) {
-      for (int i = 0; i < arguments.length; i++) {
-        arguments[i] = ErrorMessages.convert(arguments[i]);
-      }
-      handle(source, String.format(message, arguments));
-    }
+  public void handle(Object source, String message, Object... arguments) {
+    throw new AssertionError(message);
   }
 }
