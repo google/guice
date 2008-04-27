@@ -58,15 +58,15 @@ class DefaultErrorHandler implements ErrorHandler {
     handle(source, String.format(message, arguments));
   }
 
-  void switchToRuntime() {
-    state = State.RUNTIME;
-    errorMessages.clear();
-  }
-
   void blowUpIfErrorsExist() {
     if (!errorMessages.isEmpty()) {
       throw new CreationException(errorMessages);
     }
+  }
+
+  void switchToRuntime() {
+    state = State.RUNTIME;
+    errorMessages.clear();
   }
 
   enum State {

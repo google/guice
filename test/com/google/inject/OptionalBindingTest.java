@@ -24,7 +24,8 @@ import junit.framework.TestCase;
 /**
  * This test verifies the ways things are injected (ie. getInstance(),
  * injectMembers(), bind to instance, and bind to provider instance) for all
- * states of optional bindings.
+ * states of optional bindings (fields, methods, multiple-argument methods,
+ * provider fields, provider methods, constructors).
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -35,6 +36,8 @@ public class OptionalBindingTest extends TestCase {
   private static final C injectC = new C() {};
   private static final D injectD = new D() {};
   private static final E injectE = new E() {};
+  private static final F injectF = new F() {};
+  private static final G injectG = new G() {};
 
   private Module everythingModule = new AbstractModule() {
     protected void configure() {
@@ -43,6 +46,8 @@ public class OptionalBindingTest extends TestCase {
       bind(C.class).toInstance(injectC);
       bind(D.class).toInstance(injectD);
       bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
+      bind(F.class).toInstance(injectF);
+      bind(G.class).toInstance(injectG);
     }
   };
 
@@ -170,7 +175,9 @@ public class OptionalBindingTest extends TestCase {
     C c; // method injection with two arguments
     D d; // method injection with two arguments
     E e; // annotated injection
-    boolean invoked0, invoked1, invoked2, invokedAnnotated;
+    @Inject(optional=true) Provider<F> fProvider; // provider
+    Provider<G> gProvider; // method injection of provider
+    boolean invoked0, invoked1, invoked2, invokedAnnotated, invokeProvider;
 
     @Inject(optional=true) void methodInjectZeroArguments() {
       invoked0 = true;
@@ -192,12 +199,19 @@ public class OptionalBindingTest extends TestCase {
       invokedAnnotated = true;
     }
 
+    @Inject(optional=true) void methodInjectProvider(Provider<G> gProvider) {
+      this.gProvider = gProvider;
+      invokeProvider = true;
+    }
+
     void assertNothingInjected() {
       assertSame(originalA, a);
       assertNull(b);
       assertNull(c);
       assertNull(d);
       assertNull(e);
+      assertNull(fProvider);
+      assertNull(gProvider);
       assertTrue(invoked0);
       assertFalse(invoked1);
       assertFalse(invoked2);
@@ -211,6 +225,8 @@ public class OptionalBindingTest extends TestCase {
       assertSame(injectC, c);
       assertSame(injectD, d);
       assertSame(injectE, e);
+      assertSame(injectF, fProvider.get());
+      assertSame(injectG, gProvider.get());
       assertTrue(invoked0);
       assertTrue(invoked1);
       assertTrue(invoked2);
@@ -256,4 +272,6 @@ public class OptionalBindingTest extends TestCase {
   interface C {}
   interface D {}
   interface E {}
+  interface F {}
+  interface G {}
 }
