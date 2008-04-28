@@ -17,25 +17,14 @@
 package com.google.inject;
 
 import com.google.inject.internal.*;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.ConvertedConstantBinding;
-import com.google.inject.spi.Dependency;
-import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.*;
 import com.google.inject.util.Providers;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.Callable;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Default {@link Injector} implementation.
@@ -167,13 +156,24 @@ class InjectorImpl implements Injector {
   }
 
   /**
+   * Returns the binding for {@code key}, or {@code null} if that binding
+   * cannot be resolved.
+   */
+  public <T> BindingImpl<T> getBinding(Key<T> key) {
+    try {
+      return getBindingOrThrow(key);
+    } catch(ResolveFailedException e) {
+      return null;
+    }
+  }
+
+  /**
    * Gets a binding implementation.  First, it check to see if the parent has
    * a binding.  If the parent has a binding and the binding is scoped, it
    * will use that binding.  Otherwise, this checks for an explicit binding.
    * If no explicit binding is found, it looks for a just-in-time binding.
    */
-
-  public <T> BindingImpl<T> getBinding(Key<T> key) {
+  public <T> BindingImpl<T> getBindingOrThrow(Key<T> key) throws ResolveFailedException {
     if (parentInjector != null) {
       BindingImpl<T> bindingImpl = getParentBinding(key);
       if (bindingImpl != null) {
@@ -190,6 +190,7 @@ class InjectorImpl implements Injector {
     // Look for an on-demand binding.
     return getJitBindingImpl(key);
   }
+
 
   /**
    * Checks the parent injector for a scoped binding, and if available, creates
@@ -247,7 +248,7 @@ class InjectorImpl implements Injector {
    * Provider<X> binding, etc.
    */
   @SuppressWarnings("unchecked")
-  <T> BindingImpl<T> getJitBindingImpl(Key<T> key) {
+  <T> BindingImpl<T> getJitBindingImpl(Key<T> key) throws ResolveFailedException {
     synchronized (jitBindings) {
       // Support null values.
       if (!jitBindings.containsKey(key)) {
@@ -277,12 +278,12 @@ class InjectorImpl implements Injector {
    * from Binding<T>.
    */
   private <T> BindingImpl<Provider<T>> createProviderBinding(
-      Key<Provider<T>> key) {
+      Key<Provider<T>> key) throws ResolveFailedException {
     Type providerType = key.getTypeLiteral().getType();
 
     // If the Provider has no type parameter (raw Provider)...
     if (!(providerType instanceof ParameterizedType)) {
-      return null;
+      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_RAW_PROVIDER);
     }
 
     Type entryType
@@ -292,15 +293,7 @@ class InjectorImpl implements Injector {
     @SuppressWarnings("unchecked")
     Key<T> providedKey = (Key<T>) key.ofType(entryType);
 
-    BindingImpl<T> providedBinding = getBinding(providedKey);
-
-    // If binding isn't found...
-    if (providedBinding == null) {
-      handleMissingBinding(SourceProviders.defaultSource(), key);
-      return invalidBinding(key);
-    }
-
-    return new ProviderBindingImpl<T>(this, key, providedBinding);
+    return new ProviderBindingImpl<T>(this, key, getBindingOrThrow(providedKey));
   }
 
   void handleMissingBinding(Object source, Key<?> key) {
@@ -389,7 +382,8 @@ class InjectorImpl implements Injector {
    * <p>If the type is not elligible for conversion or a constant string
    * binding is not found, this method returns null.
    */
-  private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key) {
+  private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key)
+      throws ResolveFailedException {
     // Find a constant string binding.
     Key<String> stringKey = key.ofType(String.class);
     BindingImpl<String> stringBinding = getExplicitBindingImpl(stringKey);
@@ -406,11 +400,8 @@ class InjectorImpl implements Injector {
     for (MatcherAndConverter<?> converter : converters) {
       if (converter.getTypeMatcher().matches(type)) {
         if (matchingConverter != null) {
-          // More than one matching converter!
-          errorHandler.handle(SourceProviders.defaultSource(),
-              ErrorMessages.AMBIGUOUS_TYPE_CONVERSION, stringValue, type,
-              matchingConverter, converter);
-          return invalidBinding(key);
+          throw new ResolveFailedException(ErrorMessages.AMBIGUOUS_TYPE_CONVERSION,
+              stringValue, type, matchingConverter, converter);
         }
 
         matchingConverter = converter;
@@ -430,7 +421,7 @@ class InjectorImpl implements Injector {
           .convert(stringValue, key.getTypeLiteral());
 
       if (converted == null) {
-        throw new RuntimeException("Converter returned null.");
+        throw new ResolveFailedException(ErrorMessages.CONVERTER_RETURNED_NULL);
       }
 
       // We have to filter out primitive types because an Integer is not an
@@ -438,18 +429,16 @@ class InjectorImpl implements Injector {
       // and know that they work anyway.
       if (!type.rawType.isPrimitive()
           && !type.getRawType().isInstance(converted)) {
-        throw new RuntimeException("Converter returned " + converted
-            + " but we expected a[n] " + type + ".");
+        throw new ResolveFailedException(ErrorMessages.CONVERSION_TYPE_ERROR, converted, type);
       }
 
       return new ConvertedConstantBindingImpl<T>(
           this, key, converted, stringBinding);
+    } catch (ResolveFailedException e) {
+      throw e;
     } catch (Exception e) {
-      // Conversion error.
-      errorHandler.handle(SourceProviders.defaultSource(),
-          ErrorMessages.CONVERSION_ERROR, stringValue,
+      throw new ResolveFailedException(ErrorMessages.CONVERSION_ERROR, stringValue,
           stringBinding.getSource(), type, matchingConverter, e.getMessage());
-      return invalidBinding(key);
     }
   }
 
@@ -496,15 +485,16 @@ class InjectorImpl implements Injector {
     }
   }
 
-  <T> BindingImpl<T> createBindingFromType(Class<T> type) {
+  <T> BindingImpl<T> createBindingFromType(Class<T> type)
+      throws ResolveFailedException {
     return createBindingFromType(type, null, SourceProviders.defaultSource());
   }
 
   <T> BindingImpl<T> createBindingFromType(Class<T> type, Scope scope,
-      Object source) {
+      Object source) throws ResolveFailedException {
     // Don't try to inject primitives, arrays, or enums.
     if (type.isArray() || type.isEnum() || type.isPrimitive()) {
-      return null;
+      throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, type);
     }
 
     // Handle @ImplementedBy
@@ -529,19 +519,18 @@ class InjectorImpl implements Injector {
    * a scope on the type if none is specified.
    */
   <T> BindingImpl<T> createBindingForInjectableType(Class<T> type,
-      Scope scope, Object source) {
+      Scope scope, Object source) throws ResolveFailedException {
+
     // We can't inject abstract classes.
     // TODO: Method interceptors could actually enable us to implement
     // abstract types. Should we remove this restriction?
     if (Modifier.isAbstract(type.getModifiers())) {
-      return null;
+      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, type);
     }
 
     // Error: Inner class.
     if (Classes.isInnerClass(type)) {
-      errorHandler.handle(SourceProviders.defaultSource(),
-          ErrorMessages.CANNOT_INJECT_INNER_CLASS, type);
-      return invalidBinding(Key.get(type));
+      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_INNER_CLASS, type);
     }
 
     if (scope == null) {
@@ -556,7 +545,7 @@ class InjectorImpl implements Injector {
         = Scopes.scope(key, this, lateBoundConstructor, scope);
 
     BindingImpl<T> binding
-        = new ClassBindingImpl<T>(this, key, source, scopedFactory, scope);
+        = new ClassBindingImpl<T>(this, key, source, scopedFactory, scope, lateBoundConstructor);
 
     // Put the partially constructed binding in the map a little early. This
     // enables us to handle circular dependencies.
@@ -564,29 +553,25 @@ class InjectorImpl implements Injector {
     // Note: We don't need to synchronize on jitBindings during injector
     // creation.
     jitBindings.put(key, binding);
-
+    boolean successful = false;
     try {
       lateBoundConstructor.bind(this, type);
-      return binding;
+      successful = true;
+    } finally {
+      if (!successful) {
+        jitBindings.remove(key);
+      }
     }
-    catch (RuntimeException e) {
-      // Clean up state.
-      jitBindings.remove(key);
-      throw e;
-    }
-    catch (Throwable t) {
-      // Clean up state.
-      jitBindings.remove(key);
-      throw new AssertionError(t);
-    }
+
+    return binding;
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {
 
     ConstructorInjector<T> constructorInjector;
 
-    void bind(
-        InjectorImpl injector, Class<T> implementation) {
+    void bind(InjectorImpl injector, Class<T> implementation)
+        throws ResolveFailedException {
       this.constructorInjector = injector.getConstructor(implementation);
     }
 
@@ -601,17 +586,15 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Creates a binding for a type annotated with @ImplementedBy.
+   * Creates a binding for a type annotated with @ProvidedBy.
    */
   <T> BindingImpl<T> createProvidedByBinding(final Class<T> type,
-      ProvidedBy providedBy) {
+      ProvidedBy providedBy) throws ResolveFailedException {
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
     if (providerType == type) {
-      errorHandler.handle(StackTraceElements.forType(type),
-          ErrorMessages.RECURSIVE_PROVIDER_TYPE, type);
-      return invalidBinding(type);
+      throw new ResolveFailedException(ErrorMessages.RECURSIVE_PROVIDER_TYPE);
     }
 
     // TODO: Make sure the provided type extends type. We at least check
@@ -623,13 +606,7 @@ class InjectorImpl implements Injector {
     Key<? extends Provider<T>> providerKey
         = (Key<? extends Provider<T>>) Key.get(providerType);
     final BindingImpl<? extends Provider<?>> providerBinding
-        = getBinding(providerKey);
-
-    if (providerBinding == null) {
-      errorHandler.handle(StackTraceElements.forType(type),
-          ErrorMessages.BINDING_NOT_FOUND, type);
-      return invalidBinding(type);
-    }
+        = getBindingOrThrow(providerKey);
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(InternalContext context, InjectionPoint injectionPoint) {
@@ -655,7 +632,7 @@ class InjectorImpl implements Injector {
    * Creates a binding for a type annotated with @ImplementedBy.
    */
   <T> BindingImpl<T> createImplementedByBinding(Class<T> type,
-      ImplementedBy implementedBy) {
+      ImplementedBy implementedBy) throws ResolveFailedException {
     // TODO: Use scope annotation on type if present. Right now, we always
     // use NO_SCOPE.
 
@@ -663,16 +640,12 @@ class InjectorImpl implements Injector {
 
     // Make sure it's not the same type. TODO: Can we check for deeper cycles?
     if (implementationType == type) {
-      errorHandler.handle(StackTraceElements.forType(type),
-          ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE, type);
-      return invalidBinding(type);
+      throw new ResolveFailedException(ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE);
     }
 
     // Make sure implementationType extends type.
     if (!type.isAssignableFrom(implementationType)) {
-      errorHandler.handle(StackTraceElements.forType(type),
-          ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
-      return invalidBinding(type);
+      throw new ResolveFailedException(ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
     }
 
     // After the preceding check, this cast is safe.
@@ -681,13 +654,7 @@ class InjectorImpl implements Injector {
 
     // Look up the target binding.
     final BindingImpl<? extends T> targetBinding
-        = getBinding(Key.get(subclass));
-
-    if (targetBinding == null) {
-      errorHandler.handle(StackTraceElements.forType(type),
-          ErrorMessages.BINDING_NOT_FOUND, type);
-      return invalidBinding(type);
-    }
+        = getBindingOrThrow(Key.get(subclass));
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
@@ -700,7 +667,7 @@ class InjectorImpl implements Injector {
         Key.get(subclass));
   }
 
-  <T> BindingImpl<T> createBindingJustInTime(Key<T> key) {
+  <T> BindingImpl<T> createBindingJustInTime(Key<T> key) throws ResolveFailedException {
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given
@@ -727,8 +694,14 @@ class InjectorImpl implements Injector {
     // If the key has an annotation...
     if (key.hasAnnotationType()) {
       // Look for a binding without annotation attributes or return null.
-      return key.hasAttributes()
-          ? getBinding(key.withoutAttributes()) : null;
+      if (key.hasAttributes()) {
+        try {
+          return getBindingOrThrow(key.withoutAttributes());
+        } catch (ResolveFailedException ignored) {
+          // throw with a more appropriate message below
+        }
+      }
+      throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, key);
     }
 
     // Create a binding based on the raw type.
@@ -737,9 +710,9 @@ class InjectorImpl implements Injector {
     return createBindingFromType(clazz);
   }
 
-  <T> InternalFactory<? extends T> getInternalFactory(Key<T> key) {
-    BindingImpl<T> binding = getBinding(key);
-    return binding == null ? null : binding.internalFactory;
+  <T> InternalFactory<? extends T> getInternalFactory(Key<T> key)
+      throws ResolveFailedException {
+    return getBindingOrThrow(key).internalFactory;
   }
 
   /**
@@ -777,7 +750,7 @@ class InjectorImpl implements Injector {
     addInjectorsForMembers(Arrays.asList(methods), statics, injectors,
         new SingleInjectorFactory<Method>() {
           public SingleMemberInjector create(InjectorImpl injector,
-              Method method) throws MissingDependencyException {
+              Method method) throws ResolveFailedException {
             return new SingleMethodInjector(injector, method);
           }
         });
@@ -788,7 +761,7 @@ class InjectorImpl implements Injector {
     addInjectorsForMembers(Arrays.asList(fields), statics, injectors,
         new SingleInjectorFactory<Field>() {
           public SingleMemberInjector create(InjectorImpl injector,
-              Field field) throws MissingDependencyException {
+              Field field) throws ResolveFailedException {
             return new SingleFieldInjector(injector, field);
           }
         });
@@ -804,10 +777,10 @@ class InjectorImpl implements Injector {
           try {
             injectors.add(injectorFactory.create(this, member));
           }
-          catch (MissingDependencyException e) {
+          catch (ResolveFailedException e) {
             if (!inject.optional()) {
               // TODO: Report errors for more than one parameter per member.
-              e.handle(errorHandler);
+              errorHandler.handle(member, e.getMessage());
             }
           }
         }
@@ -826,7 +799,7 @@ class InjectorImpl implements Injector {
 
   interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
     SingleMemberInjector create(InjectorImpl injector, M member)
-        throws MissingDependencyException;
+        throws ResolveFailedException;
   }
 
   private boolean isStatic(Member member) {
@@ -866,7 +839,7 @@ class InjectorImpl implements Injector {
     final InjectionPoint<?> injectionPoint;
 
     public SingleFieldInjector(final InjectorImpl injector, Field field)
-        throws MissingDependencyException {
+        throws ResolveFailedException {
       this.field = field;
 
       // Ewwwww...
@@ -874,17 +847,11 @@ class InjectorImpl implements Injector {
 
       final Key<?> key = Keys.get(
           field.getGenericType(), field, field.getAnnotations(), errorHandler);
-      factory = SourceProviders.withDefault(StackTraceElements.forMember(field),
-        new Callable<InternalFactory<?>>() {
-          public InternalFactory<?> call() throws Exception {
+      factory = new ResolvingCallable<InternalFactory<?>>() {
+          public InternalFactory<?> call() throws ResolveFailedException {
             return injector.getInternalFactory(key);
           }
-        }
-      );
-
-      if (factory == null) {
-        throw new MissingDependencyException(key, field);
-      }
+        }.runWithDefaultSource(StackTraceElements.forMember(field));
 
       this.injectionPoint = InjectionPoint.newInstance(field,
           Nullability.forAnnotations(field.getAnnotations()), key, injector);
@@ -928,7 +895,7 @@ class InjectorImpl implements Injector {
    */
   SingleParameterInjector<?>[] getParametersInjectors(Member member,
       List<Parameter<?>> parameters)
-      throws MissingDependencyException {
+      throws ResolveFailedException {
     SingleParameterInjector<?>[] parameterInjectors
         = new SingleParameterInjector<?>[parameters.size()];
     int index = 0;
@@ -941,19 +908,13 @@ class InjectorImpl implements Injector {
 
   <T> SingleParameterInjector<T> createParameterInjector(
       final Parameter<T> parameter, Member member)
-      throws MissingDependencyException {
-    InternalFactory<? extends T> factory =
-        SourceProviders.withDefault(StackTraceElements.forMember(member),
-      new Callable<InternalFactory<? extends T>>() {
-        public InternalFactory<? extends T> call() throws Exception {
-          return getInternalFactory(parameter.getKey());
-        }
-      }
-    );
-
-    if (factory == null) {
-      throw new MissingDependencyException(parameter.getKey(), member);
-    }
+      throws ResolveFailedException {
+    InternalFactory<? extends T> factory
+        = new ResolvingCallable<InternalFactory<? extends T>>() {
+          public InternalFactory<? extends T> call() throws ResolveFailedException {
+            return getInternalFactory(parameter.getKey());
+          }
+    }.runWithDefaultSource(StackTraceElements.forMember(member));
 
     InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(
         member, parameter.getIndex(), parameter.getNullability(), parameter.getKey(), this);
@@ -966,7 +927,7 @@ class InjectorImpl implements Injector {
     final SingleParameterInjector<?>[] parameterInjectors;
 
     public SingleMethodInjector(InjectorImpl injector, final Method method)
-        throws MissingDependencyException {
+        throws ResolveFailedException {
       // We can't use FastMethod if the method is private.
       if (Modifier.isPrivate(method.getModifiers())
           || Modifier.isProtected(method.getModifiers())) {
@@ -1031,19 +992,16 @@ class InjectorImpl implements Injector {
         IllegalAccessException, InvocationTargetException;
   }
 
-  final Map<Class<?>, ConstructorInjector> constructors
-      = new ReferenceCache<Class<?>, ConstructorInjector>() {
+  final Map<Class<?>, Object> constructors
+      = new ReferenceCache<Class<?>, Object>() {
     @SuppressWarnings("unchecked")
-    protected ConstructorInjector<?> create(Class<?> implementation) {
+    protected Object create(Class<?> implementation) {
       if (!Classes.isConcrete(implementation)) {
-        errorHandler.handle(SourceProviders.defaultSource(),
+        return new ResolveFailedException(
             ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
-        return ConstructorInjector.invalidConstructor();
       }
       if (Classes.isInnerClass(implementation)) {
-        errorHandler.handle(SourceProviders.defaultSource(),
-            ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
-        return ConstructorInjector.invalidConstructor();
+        return new ResolveFailedException(ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
       }
 
       return new ConstructorInjector(InjectorImpl.this, implementation);
@@ -1125,12 +1083,8 @@ class InjectorImpl implements Injector {
     return getProvider(Key.get(type));
   }
 
-  <T> Provider<T> maybeGetProvider(final Key<T> key) {
+  <T> Provider<T> getProviderOrThrow(final Key<T> key) throws ResolveFailedException {
     final InternalFactory<? extends T> factory = getInternalFactory(key);
-
-    if (factory == null) {
-      return null;
-    }
 
     return new Provider<T>() {
       public T get() {
@@ -1160,14 +1114,12 @@ class InjectorImpl implements Injector {
   }
 
   public <T> Provider<T> getProvider(final Key<T> key) {
-    Provider<T> provider = maybeGetProvider(key);
-
-    if (provider == null) {
+    try {
+      return getProviderOrThrow(key);
+    } catch (ResolveFailedException e) {
       throw new ConfigurationException(
-          "Missing binding to " + ErrorMessages.convert(key) + ".");
+          "Missing binding to " + ErrorMessages.convert(key) + ": " + e.getMessage());
     }
-
-    return provider;
   }
 
   public <T> T getInstance(Key<T> key) {
@@ -1211,8 +1163,16 @@ class InjectorImpl implements Injector {
    * Gets a constructor function for a given implementation class.
    */
   @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(Class<T> implementation) {
-    return constructors.get(implementation);
+  <T> ConstructorInjector<T> getConstructor(Class<T> implementation)
+      throws ResolveFailedException {
+    Object o = constructors.get(implementation);
+    if (o instanceof ResolveFailedException) {
+      throw (ResolveFailedException) o;
+    } else if (o instanceof ConstructorInjector<?>) {
+      return (ConstructorInjector<T>) o;
+    } else {
+      throw new AssertionError();
+    }
   }
 
   /**
@@ -1236,21 +1196,6 @@ class InjectorImpl implements Injector {
   Collection<Dependency<?>> getFieldAndMethodDependenciesFor(Class<?> clazz) {
     return Collections.unmodifiableList(
         getModifiableFieldAndMethodDependenciesFor(clazz));
-  }
-
-  class MissingDependencyException extends Exception {
-
-    final Key<?> key;
-    final Member member;
-
-    MissingDependencyException(Key<?> key, Member member) {
-      this.key = key;
-      this.member = member;
-    }
-
-    void handle(ErrorHandler errorHandler) {
-      handleMissingBinding(member, key);
-    }
   }
 
   public String toString() {

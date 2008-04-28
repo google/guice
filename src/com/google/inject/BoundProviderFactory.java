@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.BindCommandProcessor.CreationListener;
 import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ResolveFailedException;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
@@ -48,7 +49,11 @@ class BoundProviderFactory<T>
   public void notify(final InjectorImpl injector) {
     injector.withDefaultSource(source, new Runnable() {
       public void run() {
-        providerFactory = injector.getInternalFactory(providerKey);
+        try {
+          providerFactory = injector.getInternalFactory(providerKey);
+        } catch (ResolveFailedException e) {
+          injector.errorHandler.handle(source, e.getMessage());
+        }
       }
     });
   }

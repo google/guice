@@ -37,6 +37,8 @@ class DefaultErrorHandler implements ErrorHandler {
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
   public void handle(Object source, String message) {
+    source = ErrorMessages.convert(source);
+
     if (state == State.RUNTIME) {
       throw new ConfigurationException("Error at " + source + " " + message);
 
@@ -52,10 +54,7 @@ class DefaultErrorHandler implements ErrorHandler {
    * Implements formatting. Converts known types to readable strings.
    */
   public final void handle(Object source, String message, Object... arguments) {
-    for (int i = 0; i < arguments.length; i++) {
-      arguments[i] = ErrorMessages.convert(arguments[i]);
-    }
-    handle(source, String.format(message, arguments));
+    handle(source, ErrorMessages.format(message, arguments));
   }
 
   void blowUpIfErrorsExist() {

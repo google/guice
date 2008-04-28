@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.ConstructionProxy;
 import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ResolveFailedException;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -60,8 +61,8 @@ class ConstructorInjector<T> {
               constructionProxy.getMember(),
               constructionProxy.getParameters());
     }
-    catch (InjectorImpl.MissingDependencyException e) {
-      e.handle(injector.errorHandler);
+    catch (ResolveFailedException e) {
+      injector.errorHandler.handle(constructionProxy.getMember(), e.getMessage());
       return null;
     }
   }

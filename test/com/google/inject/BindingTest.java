@@ -16,18 +16,10 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.LinkedBinding;
-import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.ProviderInstanceBinding;
-import com.google.inject.spi.LinkedProviderBinding;
-import com.google.inject.spi.ClassBinding;
-import com.google.inject.spi.ConstantBinding;
-import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.ConvertedConstantBinding;
-import com.google.inject.spi.Dependency;
 import com.google.inject.name.Names;
+import com.google.inject.spi.*;
+import junit.framework.TestCase;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -209,10 +201,10 @@ public class BindingTest extends TestCase {
           bind(Collection.class).to(List.class);
         }
       });
-      // Despite the fact that the binding to List.class cannot be resolved,
-      // we successfully return a (broken) injector. This is a known bug.
-      fail("known bug: Dangling linked binding");
+      fail();
     } catch (CreationException expected) {
+      assertTrue(expected.getMessage().contains(
+          "Injecting into abstract types is not supported."));
     }
   }
 }

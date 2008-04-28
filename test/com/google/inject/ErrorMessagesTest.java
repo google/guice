@@ -59,11 +59,7 @@ public class ErrorMessagesTest extends TestCase {
       injector.getInstance(AbstractClass.class);
       fail();
     } catch(ConfigurationException e) {
-      // The error returned is "Missing binding to AbstractClass", which is
-      // true, but as helpful as it could be in this context. This is a
-      // known bug
-      assertTrue("known bug: unhelpful message for abstract classes",
-          e.getMessage().contains("Injecting into abstract types is not supported."));
+      assertTrue(e.getMessage().contains("Injecting into abstract types is not supported."));
     }
   }
 

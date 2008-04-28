@@ -17,6 +17,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 
 /**
@@ -41,7 +42,11 @@ class FactoryProxy<T> implements InternalFactory<T>,
   public void notify(final InjectorImpl injector) {
     injector.withDefaultSource(source, new Runnable() {
       public void run() {
-        targetFactory = injector.getInternalFactory(targetKey);
+        try {
+          targetFactory = injector.getInternalFactory(targetKey);
+        } catch (ResolveFailedException e) {
+          injector.errorHandler.handle(source, e.getMessage());
+        }
       }
     });
   }

@@ -106,11 +106,7 @@ public class SourceProviders {
    */
   public static void withDefault(
       final Object source, Runnable r) {
-    withDefault(new SourceProvider() {
-      public Object source() {
-        return source;
-      }
-    }, r);
+    withDefault(sourceProviderFor(source), r);
   }
 
   /**
@@ -138,17 +134,40 @@ public class SourceProviders {
   }
 
   /**
+   * Sets the default source provider, runs the given command, and then
+   * restores the previous default source provider. Unlike
+   * {@link #withDefault}, this method doesn't wrap exceptions.
+   */
+  public static <T> T withDefaultChecked(Object source, Callable<T> c)
+      throws Exception {
+    // We use a holder so we perform only 1 thread local access instead of 3.
+    SourceProvider[] holder = localSourceProvider.get();
+    SourceProvider previous = holder[0];
+    try {
+      holder[0] = sourceProviderFor(source);
+      return c.call();
+    } finally {
+      holder[0] = previous;
+    }
+  }
+
+  private static SourceProvider sourceProviderFor(final Object source) {
+    return new SourceProvider() {
+      public Object source() {
+        return source;
+      }
+    };
+  }
+
+
+  /**
    * Sets the default source, runs the given command, and then
    * restores the previous default source provider. Wraps checked exceptions
    * with a RuntimeException.
    */
   public static <T> T withDefault(
       final Object source, Callable<T> c) {
-    return withDefault(new SourceProvider() {
-      public Object source() {
-        return source;
-      }
-    }, c);
+    return withDefault(sourceProviderFor(source), c);
   }
 
   static class StacktraceSourceProvider implements SourceProvider {

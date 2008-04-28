@@ -20,15 +20,11 @@ import com.google.inject.commands.BindCommand;
 import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindScoping;
 import com.google.inject.commands.BindTarget;
-import com.google.inject.internal.Annotations;
-import com.google.inject.internal.Objects;
-import com.google.inject.internal.StackTraceElements;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Handles {@link Binder#bind} and {@link Binder#bindConstant} commands.
@@ -167,17 +163,13 @@ class BindCommandProcessor extends CommandProcessor {
             @SuppressWarnings("unchecked")
             Class<T> clazz = (Class<T>) type;
 
-            BindingImpl<T> binding = injector.createBindingFromType(clazz, scope, source);
-            // TODO: Should we clean up the binding left behind in jitBindings?
-
-            if (binding == null) {
-              injector.errorHandler.handle(
-                  source, ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, clazz);
+            try {
+              BindingImpl<T> binding = injector.createBindingFromType(clazz, scope, source);
+              createBinding(source, shouldPreload, binding);
+            } catch (ResolveFailedException e) {
+              injector.errorHandler.handle(source, e.getMessage());
               createBinding(source, shouldPreload, invalidBinding(injector, key, source));
-              return;
             }
-
-            createBinding(source, shouldPreload, binding);
           }
         });
 

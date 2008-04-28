@@ -42,6 +42,13 @@ public class ErrorMessages {
     return o;
   }
 
+  public static String format(String message, Object... arguments) {
+    for (int i = 0; i < arguments.length; i++) {
+      arguments[i] = ErrorMessages.convert(arguments[i]);
+    }
+    return String.format(message, arguments);
+  }
+  
   @SuppressWarnings("unchecked") // for generic array creation.
   static Collection<Converter<?>> createConverters() {
     return Arrays.asList(
@@ -112,6 +119,12 @@ public class ErrorMessages {
       "Binding to %s not found. Annotations on other"
           + " bindings to that type include: %s";
 
+  public static final String CONVERTER_RETURNED_NULL
+      = "Converter returned null.";
+
+  public static final String CONVERSION_TYPE_ERROR
+      = "Converter returned %s but we expected a[n] %s.";
+
   public static final String CONVERSION_ERROR = "Error converting '%s'"
       + " (bound at %s) to %s using %s. Reason: %s";
 
@@ -132,10 +145,10 @@ public class ErrorMessages {
 
   public static final String NOT_A_SUBTYPE = "%s doesn't extend %s.";
 
-  public static final String RECURSIVE_IMPLEMENTATION_TYPE = "@DefaultImplementation"
+  public static final String RECURSIVE_IMPLEMENTATION_TYPE = "@ImplementedBy"
       + " points to the same class it annotates.";
 
-  public static final String RECURSIVE_PROVIDER_TYPE = "@DefaultProvider"
+  public static final String RECURSIVE_PROVIDER_TYPE = "@ProvidedBy"
       + " points to the same class it annotates.";
 
   public static final String ERROR_INJECTING_MEMBERS_SEE_LOG = "An error of type %s"
@@ -236,6 +249,9 @@ public class ErrorMessages {
 
   public static final String CANNOT_INJECT_NULL_INTO_MEMBER =
       "null returned by binding at %s%n but %s is not @Nullable";
+
+  public static final String CANNOT_INJECT_RAW_PROVIDER =
+      "Cannot inject a Provider that has no type parameter";
 
   public static String getRootMessage(Throwable t) {
     Throwable cause = t.getCause();
