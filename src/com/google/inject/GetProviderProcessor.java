@@ -29,6 +29,7 @@ class GetProviderProcessor extends CommandProcessor {
   private final InjectorImpl injector;
 
   GetProviderProcessor(InjectorImpl injector) {
+    super(injector.errorHandler);
     this.injector = injector;
   }
 

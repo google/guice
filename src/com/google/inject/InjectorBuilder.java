@@ -120,38 +120,39 @@ class InjectorBuilder {
    * Builds the injector.
    */
   private void buildCoreInjector() {
-    new ErrorsCommandProcessor()
-        .processCommands(commands, errorHandler);
+    new ErrorsCommandProcessor(errorHandler)
+        .processCommands(commands);
 
     BindInterceptorCommandProcessor bindInterceptorCommandProcessor
         = new BindInterceptorCommandProcessor(errorHandler);
-    bindInterceptorCommandProcessor.processCommands(commands, errorHandler);
+    bindInterceptorCommandProcessor.processCommands(commands);
     ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
     injector.reflection = reflectionFactory.create(errorHandler, proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
-    new ScopesCommandProcessor(injector.scopes)
-        .processCommands(commands, errorHandler);
+    new ScopesCommandProcessor(errorHandler, injector.scopes)
+        .processCommands(commands);
     stopwatch.resetAndLog("Scopes creation");
 
-    new ConvertToTypesCommandProcessor(injector.converters)
-        .processCommands(commands, errorHandler);
+    new ConvertToTypesCommandProcessor(errorHandler, injector.converters)
+        .processCommands(commands);
     stopwatch.resetAndLog("Converters creation");
 
     bindLogger();
     bindCommandProcesor = new BindCommandProcessor(
         injector, injector.scopes, stage, injector.explicitBindings,
         injector.outstandingInjections);
-    bindCommandProcesor.processCommands(commands, errorHandler);
+    bindCommandProcesor.processCommands(commands);
     bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
 
     injector.index();
     stopwatch.resetAndLog("Binding indexing");
 
-    requestStaticInjectionCommandProcessor = new RequestStaticInjectionCommandProcessor();
     requestStaticInjectionCommandProcessor
-        .processCommands(commands, errorHandler);
+        = new RequestStaticInjectionCommandProcessor(errorHandler);
+    requestStaticInjectionCommandProcessor
+        .processCommands(commands);
     stopwatch.resetAndLog("Static injection");
   }
 
@@ -170,7 +171,7 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Instance member validation");
 
     new GetProviderProcessor(injector)
-        .processCommands(commands, errorHandler);
+        .processCommands(commands);
     stopwatch.resetAndLog("Provider verification");
 
     errorHandler.blowUpIfErrorsExist();

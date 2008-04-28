@@ -18,9 +18,10 @@ package com.google.inject;
 
 import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.ErrorMessages;
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.StackTraceElements;
-import com.google.inject.internal.ErrorMessages;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -35,7 +36,9 @@ class ScopesCommandProcessor extends CommandProcessor {
 
   private final Map<Class<? extends Annotation>, Scope> scopes;
 
-  ScopesCommandProcessor(Map<Class<? extends Annotation>, Scope> scopes) {
+  ScopesCommandProcessor(ErrorHandler errorHandler,
+      Map<Class<? extends Annotation>, Scope> scopes) {
+    super(errorHandler);
     this.scopes = scopes;
   }
 

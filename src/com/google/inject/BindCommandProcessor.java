@@ -50,6 +50,7 @@ class BindCommandProcessor extends CommandProcessor {
       Stage stage,
       Map<Key<?>, BindingImpl<?>> bindings,
       Map<Object, Void> outstandingInjections) {
+    super(injector.errorHandler);
     this.injector = injector;
     this.scopes = scopes;
     this.stage = stage;

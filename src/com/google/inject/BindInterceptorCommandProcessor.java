@@ -30,6 +30,7 @@ class BindInterceptorCommandProcessor extends CommandProcessor {
   private final ProxyFactoryBuilder proxyFactoryBuilder;
 
   BindInterceptorCommandProcessor(ErrorHandler errorHandler) {
+    super(errorHandler);
     proxyFactoryBuilder = new ProxyFactoryBuilder(errorHandler);
   }
 

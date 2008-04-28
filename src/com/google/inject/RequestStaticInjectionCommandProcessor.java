@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.commands.RequestStaticInjectionCommand;
+import com.google.inject.internal.ErrorHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,10 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
 
   private final List<StaticInjection> staticInjections
       = new ArrayList<StaticInjection>();
+
+  RequestStaticInjectionCommandProcessor(ErrorHandler errorHandler) {
+    super(errorHandler);
+  }
 
   @Override public Boolean visitRequestStaticInjection(RequestStaticInjectionCommand command) {
     for (Class<?> type : command.getTypes()) {

@@ -18,8 +18,9 @@
 package com.google.inject;
 
 import com.google.inject.commands.ConvertToTypesCommand;
-import com.google.inject.internal.Strings;
+import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.MatcherAndConverter;
+import com.google.inject.internal.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
@@ -41,7 +42,9 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
 
   private final List<MatcherAndConverter<?>> converters;
 
-  ConvertToTypesCommandProcessor(List<MatcherAndConverter<?>> converters) {
+  ConvertToTypesCommandProcessor(ErrorHandler errorHandler,
+      List<MatcherAndConverter<?>> converters) {
+    super(errorHandler);
     this.converters = converters;
 
     // Configure type converters.

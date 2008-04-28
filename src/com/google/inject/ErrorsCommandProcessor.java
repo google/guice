@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.commands.AddMessageErrorCommand;
 import com.google.inject.commands.AddThrowableErrorCommand;
+import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.ErrorMessages;
 
 import java.util.logging.Level;
@@ -34,8 +35,12 @@ class ErrorsCommandProcessor extends CommandProcessor {
   private static final Logger logger
       = Logger.getLogger(ErrorsCommandProcessor.class.getName());
 
+  ErrorsCommandProcessor(ErrorHandler errorHandler) {
+    super(errorHandler);
+  }
+
   @Override public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    addError(command.getSource(), command.getMessage(), command.getArguments());
+    addError(command.getSource(), command.getMessage(), command.getArguments().toArray());
     return true;
   }
 

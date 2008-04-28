@@ -33,19 +33,18 @@ import java.util.List;
  */
 abstract class CommandProcessor implements Command.Visitor<Boolean> {
 
-  private ErrorHandler errorHandler;
+  private final ErrorHandler errorHandler;
 
-  public void processCommands(List<Command> commands, ErrorHandler errorHandler) {
+  protected CommandProcessor(ErrorHandler errorHandler) {
     this.errorHandler = errorHandler;
-    try {
-      for (Iterator<Command> i = commands.iterator(); i.hasNext(); ) {
-        Boolean allDone = i.next().acceptVisitor(this);
-        if (allDone) {
-          i.remove();
-        }
+  }
+
+  public void processCommands(List<Command> commands) {
+    for (Iterator<Command> i = commands.iterator(); i.hasNext(); ) {
+      Boolean allDone = i.next().acceptVisitor(this);
+      if (allDone) {
+        i.remove();
       }
-    } finally {
-      this.errorHandler = null;
     }
   }
 
