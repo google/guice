@@ -52,7 +52,6 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     }
     catch (ProvisionException e) {
-      e.printStackTrace();
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(e.getMessage(), "Error injecting method");
       assertContains(e.getMessage(), "while locating "
