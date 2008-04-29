@@ -36,6 +36,7 @@ import com.google.inject.Key;
  * futureInjector.initialize(injector);
  * </pre>
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class FutureInjector implements EarlyRequestsProvider {

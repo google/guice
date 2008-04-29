@@ -21,6 +21,7 @@ import com.google.inject.Key;
 /**
  * Satisfies requests of the binder.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface EarlyRequestsProvider {

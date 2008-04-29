@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * Immutable snapshot of a request to bind an interceptor.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindInterceptorCommand implements Command {

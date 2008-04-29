@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a request to bind a scope.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindScopeCommand implements Command {

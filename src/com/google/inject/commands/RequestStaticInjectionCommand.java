@@ -25,6 +25,7 @@ import java.util.List;
 /**
  * Immutable snapshot of a request for static injection.
  * 
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class RequestStaticInjectionCommand implements Command {

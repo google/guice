@@ -97,6 +97,7 @@ public final class Guice {
    * Creates an injector for the given set of modules, with the given parent
    * injector.
    *
+   * @deprecated this API is not finalized and should not be depended upon
    * @throws CreationException if one or more errors occur during Injector
    *     construction
    */
@@ -110,6 +111,7 @@ public final class Guice {
    * Creates an injector for the given set of modules, with the given parent
    * injector.
    *
+   * @deprecated this API is not finalized and should not be depended upon
    * @throws CreationException if one or more errors occur during Injector
    *     construction
    */
@@ -122,6 +124,7 @@ public final class Guice {
    * Creates an injector for the given set of modules, in a given development
    * stage, with the given parent injector.
    *
+   * @deprecated this API is not finalized and should not be depended upon
    * @throws CreationException if one or more errors occur during Injector
    *     construction
    */

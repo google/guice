@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a binding scope.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface BindScoping {

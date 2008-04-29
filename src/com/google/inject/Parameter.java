@@ -34,6 +34,7 @@ import net.sf.cglib.reflect.FastConstructor;
 /**
  * A method or constructor parameter, plus Guice metadata.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class Parameter<T> {

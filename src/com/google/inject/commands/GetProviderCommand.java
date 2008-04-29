@@ -22,6 +22,7 @@ import static com.google.inject.internal.Objects.nonNull;
 /**
  * Immutable snapshot of a request for a provider.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class GetProviderCommand<T> implements Command {

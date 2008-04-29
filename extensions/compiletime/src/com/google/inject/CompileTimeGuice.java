@@ -31,9 +31,11 @@ import java.util.Set;
  * reflection. This is motivated to support Guice on environments where Java
  * reflection is expensive or unavailable.
  *
+ * @deprecated this API is not finalized and should not be depended upon
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class CompileTimeGuice {
+@Deprecated public class CompileTimeGuice {
 
   private final String name;
   private final Set<? extends Module> modules;

@@ -19,6 +19,7 @@ package com.google.inject.commands;
 /**
  * Immutable snapshot of a binding command.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Command {

@@ -33,6 +33,7 @@ import java.util.*;
  * Records commands executed by a module so they can be inspected or
  * {@link CommandReplayer replayed}.
  *
+ * @deprecated this API is not finalized and should not be depended upon
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class CommandRecorder {

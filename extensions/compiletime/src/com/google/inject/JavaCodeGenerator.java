@@ -23,9 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @deprecated this API is not finalized and should not be depended upon
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class JavaCodeGenerator {
+@Deprecated public class JavaCodeGenerator {
 
   private final Writer writer;
   private final String packageName;
