@@ -138,6 +138,20 @@ public class MultibinderTest extends TestCase {
     assertEquals(setOf("D", "E"), de);
   }
 
+  public void testMultibinderWithMultipleSetTypes() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Multibinder.newSetBinder(binder(), String.class)
+            .addBinding().toInstance("A");
+        Multibinder.newSetBinder(binder(), Integer.class)
+            .addBinding().toInstance(1);
+      }
+    });
+
+    assertEquals(setOf("A"), injector.getInstance(Key.get(setOfString)));
+    assertEquals(setOf(1), injector.getInstance(Key.get(setOfInteger)));
+  }
+
   public void testMultibinderWithEmptySet() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {

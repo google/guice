@@ -217,7 +217,8 @@ public abstract class Multibinder<T> {
     }
 
     private boolean keyMatches(Key<?> key) {
-      return key.getAnnotation() instanceof Element
+      return key.getTypeLiteral().getType().equals(elementType)
+          && key.getAnnotation() instanceof Element
           && ((Element) key.getAnnotation()).setName().equals(setName);
     }
 
@@ -244,12 +245,24 @@ public abstract class Multibinder<T> {
       return Collections.unmodifiableSet(result);
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
       return o instanceof Module
+          && ((RealMultibinder)o ).elementType.equals(elementType)
           && ((RealMultibinder)o ).setName.equals(setName);
     }
-    public int hashCode() {
-      return setName.hashCode();
+
+    @Override public int hashCode() {
+      return setName.hashCode() ^ elementType.hashCode();
+    }
+
+    @Override public String toString() {
+      return new StringBuilder()
+          .append(setName)
+          .append(setName.length() > 0 ? " " : "")
+          .append("Multibinder<")
+          .append(elementType)
+          .append(">")
+          .toString();
     }
   }
 
