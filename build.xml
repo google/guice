@@ -104,7 +104,8 @@
         <pathelement location="${servlet.src.dir}"/>
         <pathelement location="${spring.src.dir}"/>
         <pathelement location="${assistedinject.src.dir}"/>
-        <pathelement location="${assistedinject.src.dir}"/>
+        <pathelement location="${throwingproviders  .src.dir}"/>
+        <pathelement location="${multibindings.src.dir}"/>
         <pathelement location="${commands.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
