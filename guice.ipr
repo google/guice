@@ -333,6 +333,7 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/commands/commands.iml" filepath="$PROJECT_DIR$/extensions/commands/commands.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/compiletime/compiletime.iml" filepath="$PROJECT_DIR$/extensions/compiletime/compiletime.iml" />
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
       <module fileurl="file://$PROJECT_DIR$/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/struts2/example/struts2-example.iml" />

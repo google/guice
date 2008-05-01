@@ -31,6 +31,7 @@
     <ant antfile="struts2/plugin/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="extensions/assistedinject/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="jar" inheritAll="false"/>
+    <ant antfile="extensions/multibindings/build.xml" target="jar" inheritAll="false"/>
     <ant antfile="extensions/commands/build.xml" target="jar" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
@@ -47,6 +48,9 @@
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/throwingproviders/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/multibindings/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/commands/build" includes="*.jar"/>
@@ -121,6 +125,7 @@
     <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
     <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
     <ant dir="extensions/commands" antfile="build.xml" target="clean"/>
   </target>
   

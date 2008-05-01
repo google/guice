@@ -16,8 +16,10 @@
 
 package com.google.inject;
 
-import java.util.List;
+import com.google.inject.internal.TypeWithArgument;
 import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -28,7 +30,8 @@ public class TypeLiteralTest extends TestCase {
     TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
     TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
         new TypeWithArgument(List.class, String.class)) {};
-    assertEquals(a, b);
+    assertTrue(b.equals(a) && a.equals(b));
+    assertEquals(a.hashCode(), b.hashCode());
   }
 
   public void testEquality() {

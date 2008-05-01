@@ -16,11 +16,9 @@
 
 package com.google.inject;
 
-import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_FIELD;
-import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_PARAMETER;
-import static com.google.inject.internal.ErrorMessages.ERROR_WHILE_LOCATING_VALUE;
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ErrorMessages;
+import static com.google.inject.internal.ErrorMessages.*;
+import com.google.inject.internal.StackTraceElements;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -39,7 +37,7 @@ public class ProvisionException extends RuntimeException {
   private final List<InjectionPoint<?>> contexts
       = new ArrayList<InjectionPoint<?>>(5);
 
-  ProvisionException(Throwable cause, String errorMessage) {
+  public ProvisionException(Throwable cause, String errorMessage) {
     super(errorMessage, cause);
     this.errorMessage = errorMessage;
   }
@@ -48,7 +46,7 @@ public class ProvisionException extends RuntimeException {
    * Add an injection point that was being resolved when this exception
    * occurred.
    */
-  public void addContext(InjectionPoint<?> injectionPoint) {
+  void addContext(InjectionPoint<?> injectionPoint) {
     this.contexts.add(injectionPoint);
   }
 
