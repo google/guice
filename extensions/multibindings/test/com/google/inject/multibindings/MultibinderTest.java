@@ -239,7 +239,7 @@ public class MultibinderTest extends TestCase {
   @interface De {}
 
   private <T> Set<T> setOf(T... elements) {
-    HashSet<T> result = new HashSet<T>();
+    Set<T> result = new HashSet<T>();
     result.addAll(Arrays.asList(elements));
     return result;
   }

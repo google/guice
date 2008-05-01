@@ -80,7 +80,8 @@ public abstract class Multibinder<T> {
    * {@link Set} that is itself bound with no binding annotation.
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, null);
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "",
+        Key.get(Multibinder.<T>setOf(type)));
     binder.install(result);
     return result;
   }
@@ -90,8 +91,8 @@ public abstract class Multibinder<T> {
    * {@link Set} that is itself bound with {@code annotation}.
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
-    nonNull(annotation, "annotation");
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation);
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation.toString(),
+        Key.get(Multibinder.<T>setOf(type), annotation));
     binder.install(result);
     return result;
   }
@@ -102,10 +103,16 @@ public abstract class Multibinder<T> {
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
       Class<? extends Annotation> annotationType) {
-    nonNull(annotationType, "annotationType");
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotationType);
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "@" + annotationType.getName(),
+        Key.get(Multibinder.<T>setOf(type), annotationType));
     binder.install(result);
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> TypeLiteral<Set<T>> setOf(Type elementType) {
+    Type type = new TypeWithArgument(Set.class, elementType);
+    return (TypeLiteral<Set<T>>) TypeLiteral.get(type);
   }
 
   /**
@@ -144,45 +151,27 @@ public abstract class Multibinder<T> {
   private static final class RealMultibinder<T>
       extends Multibinder<T> implements Module, Provider<Set<T>> {
     private final Type elementType;
-    private final Object bindingAnnotation;
     private final String setName;
+    private final Key<Set<T>> setKey;
 
-    // non-null until this multibinding is initialized
+    /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
+
+    /* a provider for each element in the set. null until initialization, non-null afterwards */
     private List<Provider<T>> providers;
 
     private RealMultibinder(Binder binder, Type elementType,
-        /* @Nullable */ Object bindingAnnotation) {
+        String setName, Key<Set<T>> setKey) {
       this.binder = nonNull(binder, "binder");
       this.elementType = nonNull(elementType, "elementType");
-      this.bindingAnnotation = bindingAnnotation;
-
-      if (bindingAnnotation == null) {
-        setName = "";
-      } else if (bindingAnnotation instanceof Class) {
-        setName = "@" + ((Class) bindingAnnotation).getName();
-      } else if (bindingAnnotation instanceof Annotation) {
-        // we're hosed if the user doesn't provide a reasonable toString()
-        setName = bindingAnnotation.toString();
-      } else {
-        throw new IllegalArgumentException("Not an annotation " + bindingAnnotation);
-      }
+      this.setName = nonNull(setName, "setName");
+      this.setKey = nonNull(setKey, "setKey");
     }
 
     @SuppressWarnings("unchecked")
     public void configure(Binder binder) {
       if (isInitialized()) {
         throw new IllegalStateException("Multibinder was already initialized");
-      }
-
-      Key<Set<T>> setKey;
-      Type setType = new TypeWithArgument(Set.class, elementType);
-      if (bindingAnnotation instanceof Annotation) {
-        setKey = (Key<Set<T>>) Key.get(setType, (Annotation) bindingAnnotation);
-      } else if (bindingAnnotation instanceof Class<?>) {
-        setKey = (Key<Set<T>>) Key.get(setType, (Class<? extends Annotation>) bindingAnnotation);
-      } else {
-        setKey = (Key<Set<T>>) Key.get(setType);
       }
 
       binder.bind(setKey).toProvider(this);
@@ -246,7 +235,7 @@ public abstract class Multibinder<T> {
     }
 
     @Override public boolean equals(Object o) {
-      return o instanceof Module
+      return o instanceof RealMultibinder
           && ((RealMultibinder)o ).elementType.equals(elementType)
           && ((RealMultibinder)o ).setName.equals(setName);
     }
