@@ -79,7 +79,7 @@ public abstract class Multibinder<T> {
    * Returns a new multibinder that collects instances of {@code type} in a
    * {@link Set} that is itself bound with no binding annotation.
    */
-  static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, null);
     binder.install(result);
     return result;
@@ -89,7 +89,7 @@ public abstract class Multibinder<T> {
    * Returns a new multibinder that collects instances of {@code type} in a
    * {@link Set} that is itself bound with {@code annotation}.
    */
-  static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
     nonNull(annotation, "annotation");
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation);
     binder.install(result);
@@ -100,7 +100,7 @@ public abstract class Multibinder<T> {
    * Returns a new multibinder that collects instances of {@code type} in a
    * {@link Set} that is itself bound with {@code annotationType}.
    */
-  static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
       Class<? extends Annotation> annotationType) {
     nonNull(annotationType, "annotationType");
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotationType);
