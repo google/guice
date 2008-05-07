@@ -20,7 +20,6 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import com.google.inject.internal.ConstructionProxyFactory;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.SourceProviders;

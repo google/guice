@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ConstructionProxy;
 import com.google.inject.internal.ErrorMessages;
 import com.google.inject.internal.ResolveFailedException;
 

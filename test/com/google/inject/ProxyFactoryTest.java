@@ -17,18 +17,14 @@
 
 package com.google.inject;
 
-import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.inject.matcher.Matchers.any;
-import static com.google.inject.matcher.Matchers.not;
-import static com.google.inject.matcher.Matchers.only;
-import com.google.inject.internal.ConstructionProxy;
+import static com.google.inject.matcher.Matchers.*;
+import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
-import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author crazybob@google.com (Bob Lee)

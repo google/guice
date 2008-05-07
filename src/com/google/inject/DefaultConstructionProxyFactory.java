@@ -18,8 +18,6 @@ package com.google.inject;
 
 import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.ConstructionProxy;
-import com.google.inject.internal.ConstructionProxyFactory;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 
@@ -30,7 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
- * Default {@link com.google.inject.internal.ConstructionProxyFactory} implementation. Simply invokes the
+ * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
  * constructor. Can be reused by other {@code ConstructionProxyFactory}
  * implementations.
  *

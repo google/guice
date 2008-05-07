@@ -17,26 +17,26 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.Keys;
+import net.sf.cglib.reflect.FastConstructor;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.Member;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Arrays;
 import java.util.ArrayList;
-
-import com.google.inject.internal.Keys;
-import com.google.inject.internal.ErrorHandler;
-import net.sf.cglib.reflect.FastConstructor;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A method or constructor parameter, plus Guice metadata.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class Parameter<T> {
+class Parameter<T> {
   private final int index;
   private final Key<T> key;
   private final Nullability nullability;

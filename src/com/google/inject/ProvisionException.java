@@ -28,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Used to rethrow exceptions that occur while providing instances, to add
- * additional contextual details.
+ * Indicates a failure to provide an instance.
  */
 public class ProvisionException extends RuntimeException {
 
