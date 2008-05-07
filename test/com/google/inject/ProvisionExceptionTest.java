@@ -23,6 +23,9 @@ import junit.framework.TestCase;
  */
 public class ProvisionExceptionTest extends TestCase {
 
+  private static final ProvisionException provisionException
+      = new ProvisionException(new RuntimeException(), "User Exception");
+
   public void testExceptionsCollapsed() {
     try {
       Guice.createInjector().getInstance(A.class);
@@ -76,6 +79,36 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  /**
+   * This test demonstrates that if the user throws a ProvisionException,
+   * sometimes we wrap it and sometimes we don't. We should be consistent.
+   */
+  public void testUserCodeProvisionExceptionsAreWrapped() {
+    try {
+      Guice.createInjector().getInstance(F.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertNotSame(e, provisionException);
+      assertContains(e.getMessage(), "while locating "
+          + "com.google.inject.ProvisionExceptionTest$F");
+      assertEquals("User Exception", e.getCause().getMessage());
+    }
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(F.class).toProvider(FProvider.class);
+        }
+      }).getInstance(F.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertNotSame(e, provisionException);
+      assertContains(e.getMessage(), "while locating "
+          + "com.google.inject.ProvisionExceptionTest$F");
+      assertEquals("User Exception", e.getCause().getMessage());
+    }
+  }
+
   static class A {
     @Inject
     A(B b) { }
@@ -106,5 +139,17 @@ public class ProvisionExceptionTest extends TestCase {
   private void assertContains(String text, String substring) {
     assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
         text, substring), text.contains(substring));
+  }
+
+  static class F {
+    @Inject public F() {
+      throw provisionException;
+    }
+  }
+
+  static class FProvider implements Provider<F> {
+    public F get() {
+      return new F();
+    }
   }
 }
