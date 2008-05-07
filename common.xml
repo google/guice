@@ -56,4 +56,16 @@
     <delete dir="${build.dir}"/>
   </target>
   
+  <target name="source.jar"
+      description="Create a .jar file with sources">
+    <mkdir dir="${build.dir}"/>
+    <zip destfile="${build.dir}/${ant.project.name}-${version}-src.jar">
+      <fileset dir="src"/>
+    </zip>
+  </target>
+
+  <target name="distjars"
+      depends="source.jar, jar"
+      description="Build jar files"/>
+
 </project>
