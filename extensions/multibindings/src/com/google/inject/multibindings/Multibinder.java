@@ -245,7 +245,7 @@ public abstract class Multibinder<T> {
     }
 
     @Override public int hashCode() {
-      return setName.hashCode() ^ elementType.hashCode();
+      return setKey.hashCode();
     }
 
     @Override public String toString() {
