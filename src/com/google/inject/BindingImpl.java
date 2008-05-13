@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.ProviderBinding;
 
@@ -78,6 +79,12 @@ abstract class BindingImpl<T> implements Binding<T> {
   boolean isConstant() {
     return internalFactory instanceof ConstantFactory<?>;
   }
+
+  /**
+   * Perform any post-creation initialization, that could require construction
+   * of other bindings.
+   */
+  void initialize(InjectorImpl injector) throws ResolveFailedException {}
 
   public String toString() {
     return new ToStringBuilder(Binding.class)

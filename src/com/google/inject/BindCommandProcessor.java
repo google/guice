@@ -158,18 +158,25 @@ class BindCommandProcessor extends CommandProcessor {
           return null;
         }
 
+        // This cast is safe after the preceeding check.
+        @SuppressWarnings("unchecked")
+        Class<T> clazz = (Class<T>) type;
+        final BindingImpl<T> binding;
+        try {
+          binding = injector.createUnitializedBinding(clazz, scope, source);
+          createBinding(source, shouldPreload, binding);
+        } catch (ResolveFailedException e) {
+          injector.errorHandler.handle(source, e.getMessage());
+          createBinding(source, shouldPreload, invalidBinding(injector, key, source));
+          return null;
+        }
+
         untargettedBindings.add(new Runnable() {
           public void run() {
-            // This cast is safe after the preceeding check.
-            @SuppressWarnings("unchecked")
-            Class<T> clazz = (Class<T>) type;
-
             try {
-              BindingImpl<T> binding = injector.createBindingFromType(clazz, scope, source);
-              createBinding(source, shouldPreload, binding);
+              injector.initializeBinding(binding);
             } catch (ResolveFailedException e) {
               injector.errorHandler.handle(source, e.getMessage());
-              createBinding(source, shouldPreload, invalidBinding(injector, key, source));
             }
           }
         });

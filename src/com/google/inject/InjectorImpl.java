@@ -492,6 +492,38 @@ class InjectorImpl implements Injector {
 
   <T> BindingImpl<T> createBindingFromType(Class<T> type, Scope scope,
       Object source) throws ResolveFailedException {
+    BindingImpl<T> binding = createUnitializedBinding(type, scope, source);
+    initializeBinding(binding);
+    return binding;
+  }
+
+  <T> void initializeBinding(BindingImpl<T> binding) throws ResolveFailedException {
+    // Put the partially constructed binding in the map a little early. This
+    // enables us to handle circular dependencies.
+    // Example: FooImpl -> BarImpl -> FooImpl.
+    // Note: We don't need to synchronize on jitBindings during injector
+    // creation.
+    if (binding instanceof ClassBindingImpl<?>) {
+      Key<T> key = binding.getKey();
+      jitBindings.put(key, binding);
+      boolean successful = false;
+      try {
+        binding.initialize(this);
+        successful = true;
+      } finally {
+        if (!successful) {
+          jitBindings.remove(key);
+        }
+      }
+    }
+  }
+
+  /**
+   * Creates a binding for an injectable type with the given scope. Looks for
+   * a scope on the type if none is specified.
+   */
+  <T> BindingImpl<T> createUnitializedBinding(Class<T> type,
+      Scope scope, Object source) throws ResolveFailedException {
     // Don't try to inject primitives, arrays, or enums.
     if (type.isArray() || type.isEnum() || type.isPrimitive()) {
       throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, type);
@@ -510,16 +542,6 @@ class InjectorImpl implements Injector {
       // TODO: Scope internal factory.
       return createProvidedByBinding(type, providedBy);
     }
-
-    return createBindingForInjectableType(type, scope, source);
-  }
-
-  /**
-   * Creates a binding for an injectable type with the given scope. Looks for
-   * a scope on the type if none is specified.
-   */
-  <T> BindingImpl<T> createBindingForInjectableType(Class<T> type,
-      Scope scope, Object source) throws ResolveFailedException {
 
     // We can't inject abstract classes.
     // TODO: Method interceptors could actually enable us to implement
@@ -544,26 +566,7 @@ class InjectorImpl implements Injector {
     InternalFactory<? extends T> scopedFactory
         = Scopes.scope(key, this, lateBoundConstructor, scope);
 
-    BindingImpl<T> binding
-        = new ClassBindingImpl<T>(this, key, source, scopedFactory, scope, lateBoundConstructor);
-
-    // Put the partially constructed binding in the map a little early. This
-    // enables us to handle circular dependencies.
-    // Example: FooImpl -> BarImpl -> FooImpl.
-    // Note: We don't need to synchronize on jitBindings during injector
-    // creation.
-    jitBindings.put(key, binding);
-    boolean successful = false;
-    try {
-      lateBoundConstructor.bind(this, type);
-      successful = true;
-    } finally {
-      if (!successful) {
-        jitBindings.remove(key);
-      }
-    }
-
-    return binding;
+    return new ClassBindingImpl<T>(this, key, source, scopedFactory, scope, lateBoundConstructor);
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {

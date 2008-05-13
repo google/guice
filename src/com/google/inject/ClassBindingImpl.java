@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleParameterInjector;
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ClassBinding;
@@ -38,6 +39,10 @@ class ClassBindingImpl<T> extends BindingImpl<T>
       InjectorImpl.LateBoundConstructor<T> lateBoundConstructor) {
     super(injector, key, source, internalFactory, scope);
     this.lateBoundConstructor = lateBoundConstructor;
+  }
+
+  @Override void initialize(InjectorImpl injector) throws ResolveFailedException {
+    lateBoundConstructor.bind(injector, getBoundClass());
   }
 
   public void accept(BindingVisitor<? super T> visitor) {
