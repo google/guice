@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -205,6 +206,28 @@ public class BindingTest extends TestCase {
     } catch (CreationException expected) {
       assertTrue(expected.getMessage().contains(
           "Injecting into abstract types is not supported."));
+    }
+  }
+
+  /**
+   * This test ensures that the asEagerSingleton() scoping applies to the key,
+   * not to what the key is linked to.
+   */
+  public void testScopeIsAppliedToKeyNotTarget() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Integer.class).toProvider(Counter.class).asEagerSingleton();
+        bind(Number.class).toProvider(Counter.class).asEagerSingleton();
+      }
+    });
+
+    assertNotSame(injector.getInstance(Integer.class), injector.getInstance(Number.class));
+  }
+
+  static class Counter implements Provider<Integer> {
+    static AtomicInteger next = new AtomicInteger(1);
+    public Integer get() {
+      return next.getAndIncrement();
     }
   }
 }
