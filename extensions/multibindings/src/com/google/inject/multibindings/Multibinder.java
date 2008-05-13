@@ -22,8 +22,6 @@ import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.TypeWithArgument;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -148,8 +146,10 @@ public abstract class Multibinder<T> {
    * <p>We use a subclass to hide 'implements Module, Provider' from the public
    * API.
    */
-  private static final class RealMultibinder<T>
+  static final class RealMultibinder<T>
       extends Multibinder<T> implements Module, Provider<Set<T>> {
+    static final AtomicInteger nextUniqueId = new AtomicInteger(1);
+
     private final Type elementType;
     private final String setName;
     private final Key<Set<T>> setKey;
@@ -177,14 +177,18 @@ public abstract class Multibinder<T> {
       binder.bind(setKey).toProvider(this);
     }
 
-    @SuppressWarnings("unchecked")
     public LinkedBindingBuilder<T> addBinding() {
+      return addBinding("element", nextUniqueId.getAndIncrement());
+    }
+
+    @SuppressWarnings("unchecked")
+    LinkedBindingBuilder<T> addBinding(String role, int uniqueId) {
       if (isInitialized()) {
         throw new IllegalStateException("Multibinder was already initialized");
       }
 
       return (LinkedBindingBuilder<T>) binder.bind(
-          Key.get(elementType, new RealElement(setName)));
+          Key.get(elementType, new RealElement(setName, role, uniqueId)));
     }
 
     /**
@@ -195,7 +199,7 @@ public abstract class Multibinder<T> {
     @Inject void initialize(Injector injector) {
       providers = new ArrayList<Provider<T>>();
       for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
-        if (keyMatches(entry.getKey())) {
+        if (keyMatches(entry.getKey(), "element")) {
           @SuppressWarnings("unchecked")
           Binding<T> binding = (Binding<T>) entry.getValue();
           providers.add(binding.getProvider());
@@ -205,10 +209,11 @@ public abstract class Multibinder<T> {
       this.binder = null;
     }
 
-    private boolean keyMatches(Key<?> key) {
+    boolean keyMatches(Key<?> key, String role) {
       return key.getTypeLiteral().getType().equals(elementType)
           && key.getAnnotation() instanceof Element
-          && ((Element) key.getAnnotation()).setName().equals(setName);
+          && ((Element) key.getAnnotation()).setName().equals(setName)
+          && ((Element) key.getAnnotation()).role().equals(role);
     }
 
     private boolean isInitialized() {
@@ -236,8 +241,7 @@ public abstract class Multibinder<T> {
 
     @Override public boolean equals(Object o) {
       return o instanceof RealMultibinder
-          && ((RealMultibinder)o ).elementType.equals(elementType)
-          && ((RealMultibinder)o ).setName.equals(setName);
+          && ((RealMultibinder) o).setKey.equals(setKey);
     }
 
     @Override public int hashCode() {
@@ -253,55 +257,9 @@ public abstract class Multibinder<T> {
           .append(">")
           .toString();
     }
-  }
 
-  /**
-   * An internal binding annotation applied to each element in a multibinding.
-   * All elements are assigned a globally-unique id to allow different modules
-   * to contribute multibindings independently.
-   */
-  @Retention(RUNTIME) @BindingAnnotation
-  private @interface Element {
-    String setName();
-    int uniqueId();
-  }
-
-  private static class RealElement implements Element {
-    private static final AtomicInteger nextUniqueId = new AtomicInteger(1);
-
-    private final int uniqueId = nextUniqueId.getAndIncrement();
-    private final String setName;
-
-    RealElement(String setName) {
-      this.setName = setName;
-    }
-
-    public String setName() {
-      return setName;
-    }
-
-    public int uniqueId() {
-      return uniqueId;
-    }
-
-    public Class<? extends Annotation> annotationType() {
-      return Element.class;
-    }
-
-    @Override public String toString() {
-      return "@" + Element.class.getName() + "(uniqueId=" + uniqueId
-          + ",setName=" + setName + ")";
-    }
-
-    @Override public boolean equals(Object o) {
-      return o instanceof Element
-          && ((Element) o).uniqueId() == uniqueId()
-          && ((Element) o).setName().equals(setName());
-    }
-
-    @Override public int hashCode() {
-      return 127 * ("uniqueId".hashCode() ^ uniqueId)
-          + 127 * ("setName".hashCode() ^ setName.hashCode());
+    public Type getElementType() {
+      return elementType;
     }
   }
 }

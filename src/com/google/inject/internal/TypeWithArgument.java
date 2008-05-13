@@ -59,4 +59,27 @@ public class TypeWithArgument implements ParameterizedType {
         && Arrays.equals(getActualTypeArguments(), that.getActualTypeArguments())
         && that.getOwnerType() == null;
   }
+
+  @Override public String toString() {
+    return toString(this);
+  }
+
+  private String toString(Type type) {
+    if (type instanceof Class<?>) {
+      return ((Class) type).getSimpleName();
+    } else if (type instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) type;
+      Type[] arguments = parameterizedType.getActualTypeArguments();
+      StringBuilder stringBuilder = new StringBuilder()
+          .append(toString(parameterizedType.getRawType()))
+          .append("<")
+          .append(toString(arguments[0]));
+      for (int i = 1; i < arguments.length; i++) {
+        stringBuilder.append(", ").append(toString(arguments[i]));
+      }
+      return stringBuilder.append(">").toString();
+    } else {
+      return type.toString();
+    }
+  }
 }
