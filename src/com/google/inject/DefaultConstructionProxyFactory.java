@@ -80,10 +80,10 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         return (T) fastConstructor.newInstance(arguments);
       }
       public List<Parameter<?>> getParameters() {
-        return Parameter.forConstructor(errorHandler, fastConstructor);
+        return Parameter.forConstructor(errorHandler, constructor);
       }
       public Member getMember() {
-        return fastConstructor.getJavaConstructor();
+        return constructor;
       }
     };
   }
