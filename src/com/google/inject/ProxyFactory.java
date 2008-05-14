@@ -16,7 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.*;
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.GuiceFastClass;
+import com.google.inject.internal.GuiceNamingPolicy;
+import com.google.inject.internal.ReferenceCache;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
@@ -27,8 +30,8 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -177,7 +180,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
 
       public List<Parameter<?>> getParameters() {
-        return Parameter.forConstructor(errorHandler, fastConstructor.getJavaConstructor());
+        return Parameter.forConstructor(errorHandler, standardConstructor);
       }
 
       public Member getMember() {
