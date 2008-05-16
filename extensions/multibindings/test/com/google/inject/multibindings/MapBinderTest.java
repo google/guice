@@ -30,7 +30,6 @@ import java.util.Map;
 
 /**
  * @author dpb@google.com (David P. Baker)
- * @author jessewilson@google.com (Jesse Wilson)
  */
 public class MapBinderTest extends TestCase {
 

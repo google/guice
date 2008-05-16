@@ -85,7 +85,6 @@ import java.util.Set;
  * will not).
  *
  * @author dpb@google.com (David P. Baker)
- * @author jessewilson@google.com (Jesse Wilson)
  */
 public abstract class MapBinder<K, V> {
   private MapBinder() {}
