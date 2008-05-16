@@ -232,6 +232,20 @@ public class MultibinderTest extends TestCase {
     }
   }
 
+  public void testSourceLinesInMultibindings() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          Multibinder.newSetBinder(binder(), Integer.class).addBinding();
+        }
+      });
+      fail();
+    } catch (CreationException e) {
+      assertTrue(e.getMessage().contains("Error at " + getClass().getName()));
+      assertTrue(e.getMessage().contains("No implementation was specified."));
+    }
+  }
+
   @Retention(RUNTIME) @BindingAnnotation
   @interface Abc {}
 

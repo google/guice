@@ -266,6 +266,21 @@ public class MapBinderTest extends TestCase {
     assertEquals(1, (int) injector.getInstance(Key.get(mapOfInteger)).get("one"));
   }
 
+  public void testSourceLinesInMapBindings() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          MapBinder.newMapBinder(binder(), String.class, Integer.class)
+              .addBinding("one");
+        }
+      });
+      fail();
+    } catch (CreationException e) {
+      assertTrue(e.getMessage().contains("Error at " + getClass().getName()));
+      assertTrue(e.getMessage().contains("No implementation was specified."));
+    }
+  }
+
   @Retention(RUNTIME) @BindingAnnotation
   @interface Abc {}
 

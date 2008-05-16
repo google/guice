@@ -21,6 +21,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.TypeWithArgument;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
+import com.google.inject.spi.SourceProviders;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -88,6 +89,9 @@ import java.util.Set;
  */
 public abstract class MapBinder<K, V> {
   private MapBinder() {}
+  static {
+    SourceProviders.skip(RealMapBinder.class);
+  }
 
   /**
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code 

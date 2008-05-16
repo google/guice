@@ -16,16 +16,16 @@
 
 package com.google.inject.commands;
 
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.Binder;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.spi.SourceProviders;
 
 import java.lang.annotation.Annotation;
 
@@ -357,6 +357,12 @@ public final class BindConstantCommand implements Command {
       if (target != null) {
         binder.addError(CONSTANT_VALUE_ALREADY_SET);
       }
+    }
+
+    @Override public String toString() {
+      return bindingAnnotation == null
+          ? "AnnotatedConstantBindingBuilder"
+          : "ConstantBindingBuilder";
     }
   }
 }

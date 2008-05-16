@@ -20,6 +20,7 @@ import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.TypeWithArgument;
+import com.google.inject.spi.SourceProviders;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -71,6 +72,9 @@ import java.util.*;
  */
 public abstract class Multibinder<T> {
   private Multibinder() {}
+  static {
+    SourceProviders.skip(RealMultibinder.class);
+  }
 
   /**
    * Returns a new multibinder that collects instances of {@code type} in a

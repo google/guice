@@ -17,13 +17,13 @@
 package com.google.inject.commands;
 
 import com.google.inject.*;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.ErrorMessages;
+import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.spi.SourceProviders;
 
 import java.lang.annotation.Annotation;
 
@@ -336,6 +336,13 @@ public final class BindCommand<T> implements Command {
       if (bindScoping != EMPTY_SCOPING) {
         binder.addError(SCOPE_ALREADY_SET);
       }
+    }
+
+    @Override public String toString() {
+      String type = key.getAnnotationType() == null
+          ? "AnnotatedBindingBuilder<"
+          : "LinkedBindingBuilder<";
+      return type + key.getTypeLiteral() + ">";
     }
   }
 }

@@ -16,7 +16,10 @@
 
 package com.google.inject;
 
+import com.google.inject.name.Names;
 import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -51,6 +54,42 @@ public class BinderTest extends TestCase {
     }
     catch (CreationException e) {
       assertEquals(1, e.getErrorMessages().size());
+    }
+  }
+
+  public void testDanglingConstantBinding() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override public void configure() {
+          bindConstant();
+        }
+      });
+      fail();
+    } catch (CreationException e) {
+      assertTrue(e.getMessage().contains("Missing constant value."));
+    }
+  }
+
+  public void testToStringOnBinderApi() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override public void configure() {
+          assertEquals("Binder", binder().toString());
+          assertEquals("Provider<java.lang.Integer>", getProvider(Integer.class).toString());
+          assertEquals("Provider<java.util.List<java.lang.String>>",
+              getProvider(Key.get(new TypeLiteral<List<String>>() {})).toString());
+
+          assertEquals("AnnotatedBindingBuilder<java.lang.Integer>",
+              bind(Integer.class).toString());
+          assertEquals("LinkedBindingBuilder<java.lang.Integer>",
+              bind(Integer.class).annotatedWith(Names.named("a")).toString());
+          assertEquals("AnnotatedConstantBindingBuilder", bindConstant().toString());
+          assertEquals("ConstantBindingBuilder",
+              bindConstant().annotatedWith(Names.named("b")).toString());
+        }
+      });
+      fail();
+    } catch (CreationException ignored) {
     }
   }
 

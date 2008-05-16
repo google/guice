@@ -20,9 +20,9 @@ import com.google.inject.*;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.SourceProviders;
 import static com.google.inject.spi.SourceProviders.defaultSource;
 import com.google.inject.spi.TypeConverter;
-import com.google.inject.spi.SourceProviders;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.annotation.Annotation;
@@ -141,6 +141,10 @@ public final class CommandRecorder {
         public T get() {
           return earlyRequestsProvider.get(key);
         }
+
+        @Override public String toString() {
+          return "Provider<" + key.getTypeLiteral() + ">";
+        }
       };
     }
 
@@ -151,6 +155,10 @@ public final class CommandRecorder {
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
         TypeConverter converter) {
       commands.add(new ConvertToTypesCommand(defaultSource(), typeMatcher, converter));
+    }
+
+    @Override public String toString() {
+      return "Binder";
     }
   }
 }

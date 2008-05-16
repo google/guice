@@ -209,11 +209,13 @@ class BindCommandProcessor extends CommandProcessor {
   }
 
   @Override public Boolean visitBindConstant(BindConstantCommand command) {
-    Object value = command.getTarget().get();
-    if (value == null) {
+    BindTarget<?> target = command.getTarget();
+    if (target == null) {
       addError(command.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
+      return true;
     }
 
+    Object value = target.get();
     validateKey(command.getSource(), command.getKey());
     ConstantFactory<Object> factory = new ConstantFactory<Object>(value);
     putBinding(new ConstantBindingImpl<Object>(
