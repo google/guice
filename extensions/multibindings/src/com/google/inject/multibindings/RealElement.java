@@ -17,27 +17,24 @@
 package com.google.inject.multibindings;
 
 import java.lang.annotation.Annotation;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class RealElement implements Element {
-  private final String setName;
-  private final String role;
-  private final int uniqueId;
+  private static final AtomicInteger nextUniqueId = new AtomicInteger(1);
 
-  RealElement(String setName, String role, int uniqueId) {
+  private final int uniqueId;
+  private final String setName;
+
+  RealElement(String setName) {
+    uniqueId = nextUniqueId.getAndIncrement();
     this.setName = setName;
-    this.role = role;
-    this.uniqueId = uniqueId;
   }
 
   public String setName() {
     return setName;
-  }
-
-  public String role() {
-    return role;
   }
 
   public int uniqueId() {
@@ -50,19 +47,17 @@ class RealElement implements Element {
 
   @Override public String toString() {
     return "@" + Element.class.getName() + "(setName=" + setName
-        + ",role=" + role + ",uniqueId=" + uniqueId + ")";
+        + ",uniqueId=" + uniqueId + ")";
   }
 
   @Override public boolean equals(Object o) {
     return o instanceof Element
         && ((Element) o).setName().equals(setName())
-        && ((Element) o).role().equals(role())
         && ((Element) o).uniqueId() == uniqueId();
   }
 
   @Override public int hashCode() {
     return 127 * ("setName".hashCode() ^ setName.hashCode())
-        + 127 * ("role".hashCode() ^ role.hashCode())
         + 127 * ("uniqueId".hashCode() ^ uniqueId);
   }
 }

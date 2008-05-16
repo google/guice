@@ -31,7 +31,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME) @BindingAnnotation
 @interface Element {
-  public abstract String setName();
-  public abstract String role();
-  public abstract int uniqueId();
+  String setName();
+  int uniqueId();
 }

@@ -25,9 +25,10 @@ import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * An API to bind multiple map entries separately, only to later inject them as
@@ -95,11 +96,11 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType) {
-    return newMapBinder(binder,
+    return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType)),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType)),
-        Multibinder.<K>newSetBinder(binder, keyType),
-        Multibinder.<V>newSetBinder(binder, valueType));
+        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType)), 
+        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
+            binder, entryOfProviderOf(keyType, valueType)));
   }
 
   /**
@@ -108,11 +109,11 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType, Annotation annotation) {
-    return newMapBinder(binder,
+    return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotation),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotation),
-        Multibinder.<K>newSetBinder(binder, keyType, annotation),
-        Multibinder.<V>newSetBinder(binder, valueType, annotation));
+        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotation), 
+        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
+            binder, entryOfProviderOf(keyType, valueType), annotation));
   }
 
   /**
@@ -121,11 +122,11 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType, Class<? extends Annotation> annotationType) {
-    return newMapBinder(binder,
+    return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotationType),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotationType),
-        Multibinder.<K>newSetBinder(binder, keyType, annotationType),
-        Multibinder.<V>newSetBinder(binder, valueType, annotationType));
+        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotationType), 
+        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
+            binder, entryOfProviderOf(keyType, valueType), annotationType));
   }
 
   @SuppressWarnings("unchecked")
@@ -138,14 +139,19 @@ public abstract class MapBinder<K, V> {
       Type keyType, Type valueType) {
     return mapOf(keyType, new TypeWithArgument(Provider.class, valueType));
   }
+  
+  private static Type entryOfProviderOf(Type keyType, final Type valueType) {
+    return new TypeWithArgument(Map.Entry.class, keyType, 
+        new TypeWithArgument(Provider.class, valueType));
+  }
 
   private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
-      Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> valueKey,
-      Multibinder<K> keyMultibinder, Multibinder<V> valueMultibinder) {
-    RealMapBinder<K, V> realMapBinder = new RealMapBinder<K, V>(
-        mapKey, valueKey, keyMultibinder, valueMultibinder);
-    binder.install(realMapBinder);
-    return realMapBinder;
+      Type valueType, Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
+      Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
+    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(binder, 
+        valueType, mapKey, providerMapKey, entrySetBinder);
+    binder.install(mapBinder);
+    return mapBinder;
   }
 
   /**
@@ -186,81 +192,77 @@ public abstract class MapBinder<K, V> {
    * <p>We use a subclass to hide 'implements Module' from the public API.
    */
   private static final class RealMapBinder<K, V> extends MapBinder<K, V> implements Module {
+    private final Type valueType;
     private final Key<Map<K, V>> mapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
-    private final RealMultibinder<K> keyBinder;
-    private final RealMultibinder<V> valueBinder;
+    private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
+    
+    /* the target injector's binder. non-null until initialization, null afterwards */
+    private Binder binder;
 
-    private RealMapBinder(Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
-        Multibinder<K> keyBinder, Multibinder<V> valueBinder) {
+    private RealMapBinder(Binder binder, Type valueType, 
+        Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
+        Multibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
+      this.valueType = valueType;
       this.mapKey = mapKey;
       this.providerMapKey = providerMapKey;
-      this.keyBinder = (RealMultibinder<K>) keyBinder;
-      this.valueBinder = (RealMultibinder<V>) valueBinder;
+      this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
+      this.binder = binder;
     }
 
-    public LinkedBindingBuilder<V> addBinding(K key) {
-      // this code is currently quite crufty - we depend on the fact that the
-      // key and the value have the same unique ID. A better approach would be
-      // to create an element annotation that knows the Map.Entry type
+    /**
+     * This creates two bindings. One for the {@code Map.Entry<K, Provider<V>>}
+     * and another for {@code V}.
+     */
+    @Override public LinkedBindingBuilder<V> addBinding(K key) {
       Objects.nonNull(key, "key");
-      int uniqueId = RealMultibinder.nextUniqueId.getAndIncrement();
-      keyBinder.addBinding("key", uniqueId).toInstance(key);
-      return valueBinder.addBinding("value", uniqueId);
+      if (isInitialized()) {
+        throw new IllegalStateException("MapBinder was already initialized");
+      }
+
+      @SuppressWarnings("unchecked")
+      Key<V> valueKey = (Key<V>) Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
+      entrySetBinder.addBinding()
+          .toInstance(new MapEntry<K, Provider<V>>(key, binder.getProvider(valueKey)));
+      return binder.bind(valueKey);
     }
 
     public void configure(Binder binder) {
-      final Provider<Map<K, Provider<V>>> providerMapProvider
-          = new Provider<Map<K, Provider<V>>>() {
+      if (isInitialized()) {
+        throw new IllegalStateException("MapBinder was already initialized");
+      }
+
+      // binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>
+      final Provider<Set<Entry<K,Provider<V>>>> entrySetProvider
+          = binder.getProvider(entrySetBinder.getSetKey());
+      binder.bind(providerMapKey).toProvider(new Provider<Map<K, Provider<V>>>() {
         private Map<K, Provider<V>> providerMap;
-
-        @Inject void init(Injector injector) {
-          Map<Integer, K> keys = new LinkedHashMap<Integer, K>();
-          Map<Integer, Provider<V>> valueProviders = new HashMap<Integer, Provider<V>>();
-
-          // find the bindings
-          for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
-            if (keyBinder.keyMatches(entry.getKey(), "key")) {
-              Element element = (Element) entry.getKey().getAnnotation();
-              @SuppressWarnings("unchecked")
-              Binding<K> binding = (Binding<K>) entry.getValue();
-              keys.put(element.uniqueId(), binding.getProvider().get());
-            } else if (valueBinder.keyMatches(entry.getKey(), "value")) {
-              Element element = (Element) entry.getKey().getAnnotation();
-              @SuppressWarnings("unchecked")
-              Binding<V> binding = (Binding<V>) entry.getValue();
-              valueProviders.put(element.uniqueId(), binding.getProvider());
-            }
-          }
-
-          // build the map
+    
+        @SuppressWarnings("unused")
+        @Inject void initialize() {
+          RealMapBinder.this.binder = null;
+          
           Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
-          for (Map.Entry<Integer, K> entry : keys.entrySet()) {
-            K key = entry.getValue();
-            Provider<V> valueProvider = valueProviders.get(entry.getKey());
-            if (valueProvider == null) {
-              continue;
-            }
-            if (providerMapMutable.put(key, valueProvider) != null) {
+          for (Map.Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+            if (providerMapMutable.put(entry.getKey(), entry.getValue()) != null) {
               throw new IllegalStateException("Map injection failed due to duplicated key \""
-                  + key + "\"");
+                  + entry.getKey() + "\"");
             }
           }
-
+    
           providerMap = Collections.unmodifiableMap(providerMapMutable);
         }
-
+    
         public Map<K, Provider<V>> get() {
           return providerMap;
         }
-      };
+       });
 
-      binder.bind(providerMapKey).toProvider(providerMapProvider);
-
+      final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
       binder.bind(mapKey).toProvider(new Provider<Map<K, V>>() {
         public Map<K, V> get() {
           Map<K, V> map = new LinkedHashMap<K, V>();
-          for (Map.Entry<K, Provider<V>> entry : providerMapProvider.get().entrySet()) {
+          for (Map.Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
             V value = entry.getValue().get();
             K key = entry.getKey();
             if (value == null) {
@@ -274,13 +276,54 @@ public abstract class MapBinder<K, V> {
       });
     }
 
+    private boolean isInitialized() {
+      return binder == null;
+    }
+
     @Override public boolean equals(Object o) {
       return o instanceof RealMapBinder
-          && ((RealMapBinder) o).mapKey.equals(mapKey);
+          && ((RealMapBinder<?, ?>) o).mapKey.equals(mapKey);
     }
 
     @Override public int hashCode() {
       return mapKey.hashCode();
+    }
+
+    private static final class MapEntry<K, V> implements Map.Entry<K, V> {
+      private final K key;
+      private final V value;
+
+      private MapEntry(K key, V value) {
+        this.key = key;
+        this.value = value;
+      }
+
+      public K getKey() {
+        return key;
+      }
+
+      public V getValue() {
+        return value;
+      }
+
+      public V setValue(V value) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override public boolean equals(Object obj) {
+        return obj instanceof Map.Entry 
+            && key.equals(((Map.Entry<?, ?>) obj).getKey()) 
+            && value.equals(((Map.Entry<?, ?>) obj).getValue());
+      }
+
+      @Override public int hashCode() {
+        return 127 * ("key".hashCode() ^ key.hashCode())
+            + 127 * ("value".hashCode() ^ value.hashCode());
+      }
+
+      @Override public String toString() {
+        return "MapEntry(" + key + ", " + value + ")";
+      }
     }
   }
 }

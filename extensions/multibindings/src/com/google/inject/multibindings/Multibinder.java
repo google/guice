@@ -24,7 +24,6 @@ import com.google.inject.internal.TypeWithArgument;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An API to bind multiple values separately, only to later inject them as a
@@ -148,7 +147,6 @@ public abstract class Multibinder<T> {
    */
   static final class RealMultibinder<T>
       extends Multibinder<T> implements Module, Provider<Set<T>> {
-    static final AtomicInteger nextUniqueId = new AtomicInteger(1);
 
     private final Type elementType;
     private final String setName;
@@ -177,18 +175,13 @@ public abstract class Multibinder<T> {
       binder.bind(setKey).toProvider(this);
     }
 
-    public LinkedBindingBuilder<T> addBinding() {
-      return addBinding("element", nextUniqueId.getAndIncrement());
-    }
-
     @SuppressWarnings("unchecked")
-    LinkedBindingBuilder<T> addBinding(String role, int uniqueId) {
+    @Override public LinkedBindingBuilder<T> addBinding() {
       if (isInitialized()) {
         throw new IllegalStateException("Multibinder was already initialized");
       }
 
-      return (LinkedBindingBuilder<T>) binder.bind(
-          Key.get(elementType, new RealElement(setName, role, uniqueId)));
+      return binder.bind((Key<T>) Key.get(elementType, new RealElement(setName)));
     }
 
     /**
@@ -199,7 +192,7 @@ public abstract class Multibinder<T> {
     @Inject void initialize(Injector injector) {
       providers = new ArrayList<Provider<T>>();
       for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
-        if (keyMatches(entry.getKey(), "element")) {
+        if (keyMatches(entry.getKey())) {
           @SuppressWarnings("unchecked")
           Binding<T> binding = (Binding<T>) entry.getValue();
           providers.add(binding.getProvider());
@@ -209,11 +202,10 @@ public abstract class Multibinder<T> {
       this.binder = null;
     }
 
-    boolean keyMatches(Key<?> key, String role) {
+    private boolean keyMatches(Key<?> key) {
       return key.getTypeLiteral().getType().equals(elementType)
           && key.getAnnotation() instanceof Element
-          && ((Element) key.getAnnotation()).setName().equals(setName)
-          && ((Element) key.getAnnotation()).role().equals(role);
+          && ((Element) key.getAnnotation()).setName().equals(setName);
     }
 
     private boolean isInitialized() {
@@ -238,10 +230,18 @@ public abstract class Multibinder<T> {
       }
       return Collections.unmodifiableSet(result);
     }
+    
+    String getSetName() {
+      return setName;
+    }
+    
+    Key<Set<T>> getSetKey() {
+      return setKey;
+    }
 
     @Override public boolean equals(Object o) {
       return o instanceof RealMultibinder
-          && ((RealMultibinder) o).setKey.equals(setKey);
+          && ((RealMultibinder<?>) o).setKey.equals(setKey);
     }
 
     @Override public int hashCode() {
