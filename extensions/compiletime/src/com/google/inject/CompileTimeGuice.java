@@ -33,7 +33,7 @@ import java.util.Set;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class CompileTimeGuice {
+/* public */ class CompileTimeGuice {
 
   private final String name;
   private final Set<? extends Module> modules;

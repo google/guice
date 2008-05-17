@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class JavaCodeGenerator {
+/* public */ class JavaCodeGenerator {
 
   private final Writer writer;
   private final String packageName;

@@ -29,16 +29,30 @@ import java.util.List;
 
 /**
  * Indicates a failure to provide an instance.
+ *
+ * @author kevinb@google.com (Kevin Bourrillion)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public class ProvisionException extends RuntimeException {
 
   private final String errorMessage;
-  private final List<InjectionPoint<?>> contexts
-      = new ArrayList<InjectionPoint<?>>(5);
+  private final List<String> contexts = new ArrayList<String>(5);
 
   public ProvisionException(Throwable cause, String errorMessage) {
     super(errorMessage, cause);
     this.errorMessage = errorMessage;
+  }
+
+  @Override public String getMessage() {
+    StringBuilder result = new StringBuilder();
+    result.append(errorMessage);
+
+    for (int i = contexts.size() - 1; i >= 0; i--) {
+      result.append(String.format("%n"));
+      result.append(contexts.get(i));
+    }
+
+    return result.toString();
   }
 
   /**
@@ -46,21 +60,7 @@ public class ProvisionException extends RuntimeException {
    * occurred.
    */
   void addContext(InjectionPoint<?> injectionPoint) {
-    this.contexts.add(injectionPoint);
-  }
-
-  @Override
-  public String getMessage() {
-    StringBuilder result = new StringBuilder();
-    result.append(errorMessage);
-
-    for (int i = contexts.size() - 1; i >= 0; i--) {
-      InjectionPoint injectionPoint = contexts.get(i);
-      result.append(String.format("%n"));
-      result.append(contextToSnippet(injectionPoint));
-    }
-
-    return result.toString();
+    this.contexts.add(contextToSnippet(injectionPoint));
   }
 
   /**

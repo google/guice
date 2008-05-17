@@ -580,6 +580,10 @@ class InjectorImpl implements Injector {
 
     @SuppressWarnings("unchecked")
     public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
+      if (constructorInjector == null) {
+        throw new IllegalStateException("Construct before bind, " + constructorInjector);
+      }
+
       // This may not actually be safe because it could return a super type
       // of T (if that's all the client needs), but it should be OK in
       // practice thanks to the wonders of erasure.
