@@ -19,12 +19,12 @@ package com.google.inject.commands;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.Objects;
+import com.google.inject.spi.SourceProviders;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class CommandReplayer {
    * Returns a module that executes the specified commands
    * using this executing visitor.
    */
-  public Module createModule(final Iterable<Command> commands) {
+  public final Module createModule(final Iterable<Command> commands) {
     return new Module() {
       public void configure(Binder binder) {
         replay(binder, commands);
@@ -51,7 +51,7 @@ public class CommandReplayer {
   /**
    * Replays {@code commands} against {@code binder}.
    */
-  public void replay(final Binder binder, Iterable<Command> commands) {
+  public final void replay(final Binder binder, Iterable<Command> commands) {
     Objects.nonNull(binder, "binder");
     Objects.nonNull(commands, "commands");
 

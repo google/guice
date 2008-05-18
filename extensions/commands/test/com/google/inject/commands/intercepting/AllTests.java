@@ -16,7 +16,6 @@
 
 package com.google.inject.commands.intercepting;
 
-import com.google.inject.commands.intercepting.InterceptingInjectorBuilderTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
