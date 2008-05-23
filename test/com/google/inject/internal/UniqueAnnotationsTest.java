@@ -36,6 +36,5 @@ public class UniqueAnnotationsTest extends TestCase {
     assertEquals(expected.toString(), actual.toString());
     assertEquals(expected.hashCode(), actual.hashCode());
     assertEquals(expected, actual);
-
   }
 }

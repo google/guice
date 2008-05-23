@@ -57,7 +57,7 @@ public class UniqueAnnotations {
       }
 
       @Override public int hashCode() {
-        return 127 * ("value".hashCode() ^ value);
+        return (127 * "value".hashCode()) ^ value;
       }
     };
   }

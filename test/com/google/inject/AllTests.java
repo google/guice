@@ -19,10 +19,7 @@ package com.google.inject;
 import com.google.inject.commands.CommandRecorderTest;
 import com.google.inject.commands.CommandReplayerTest;
 import com.google.inject.commands.CommandRewriteTest;
-import com.google.inject.internal.FinalizableReferenceQueueTest;
-import com.google.inject.internal.ReferenceCacheTest;
-import com.google.inject.internal.ReferenceMapTest;
-import com.google.inject.internal.ReferenceMapTestSuite;
+import com.google.inject.internal.*;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.util.ProvidersTest;
 import junit.framework.Test;
@@ -37,48 +34,59 @@ public class AllTests {
     TestSuite suite = new TestSuite();
 
     suite.addTestSuite(BinderTest.class);
+    suite.addTestSuite(BindingAnnotationTest.class);
     suite.addTestSuite(BindingOrderTest.class);
     suite.addTestSuite(BindingTest.class);
+    suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(ConstantConversionTest.class);
+    // suite.addTestSuite(ErrorHandlingTest.class); not a testcase
     suite.addTestSuite(ErrorMessagesTest.class);
-    suite.addTestSuite(InjectorTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
+    suite.addTestSuite(InjectorTest.class);
+    suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(KeyTest.class);
+    suite.addTestSuite(LoggerInjectionTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
+    suite.addTestSuite(OptionalBindingTest.class);
+    suite.addTestSuite(OverrideModuleTest.class);
+    suite.addTestSuite(ParentInjectorTest.class);
+    suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
-    suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
-    suite.addTestSuite(PreloadingTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);
+    suite.addTest(ReferenceMapTestSuite.suite());
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
+    suite.addTestSuite(SerializationTest.class);
     suite.addTestSuite(StaticInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
-    suite.addTestSuite(BoundInstanceInjectionTest.class);
-    suite.addTestSuite(BindingAnnotationTest.class);
-    suite.addTestSuite(LoggerInjectionTest.class);
 
-    suite.addTestSuite(MatcherTest.class);
-
-    suite.addTestSuite(FinalizableReferenceQueueTest.class);
-    suite.addTestSuite(ReferenceCacheTest.class);
-    suite.addTestSuite(ReferenceMapTest.class);
-    suite.addTest(ReferenceMapTestSuite.suite());
-
-    suite.addTestSuite(IntegrationTest.class);
-
-    suite.addTestSuite(ProvidersTest.class);
-    suite.addTestSuite(ParentInjectorTest.class);
-
+    // commands
     suite.addTestSuite(CommandRecorderTest.class);
     suite.addTestSuite(CommandReplayerTest.class);
     suite.addTestSuite(CommandRewriteTest.class);
+
+    // internal
+    suite.addTestSuite(FinalizableReferenceQueueTest.class);
+    suite.addTestSuite(LineNumbersTest.class);
+    suite.addTestSuite(ReferenceCacheTest.class);
+    suite.addTestSuite(ReferenceMapTest.class);
+    suite.addTestSuite(UniqueAnnotationsTest.class);
+
+    // matcher
+    suite.addTestSuite(MatcherTest.class);
+
+    // tools
+    // suite.addTestSuite(JmxTest.class); not a testcase
+
+    // util
+    suite.addTestSuite(ProvidersTest.class);
 
     return suite;
   }
