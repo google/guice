@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.*;
+import com.google.inject.internal.ToStringBuilder;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
 /**
@@ -42,7 +43,7 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class Key<T> {
+public abstract class Key<T> implements Serializable {
 
   final AnnotationStrategy annotationStrategy;
 
@@ -327,7 +328,7 @@ public abstract class Key<T> {
     }
   }
 
-  interface AnnotationStrategy {
+  interface AnnotationStrategy extends Serializable {
 
     Annotation getAnnotation();
     Class<? extends Annotation> getAnnotationType();
@@ -364,6 +365,11 @@ public abstract class Key<T> {
     public String toString() {
       return "[none]";
     }
+
+    Object readResolve() {
+      return NULL_STRATEGY;
+    }
+    private static final long serialVersionUID = 0;
   };
 
   /**
@@ -459,6 +465,8 @@ public abstract class Key<T> {
     public String toString() {
       return annotation.toString();
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   static class AnnotationTypeStrategy implements AnnotationStrategy {
@@ -506,6 +514,8 @@ public abstract class Key<T> {
     public String toString() {
       return "@" + annotationType.getName();
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   static boolean isBindingAnnotation(Annotation annotation) {
@@ -516,4 +526,6 @@ public abstract class Key<T> {
       Class<? extends Annotation> annotationType) {
     return annotationType.isAnnotationPresent(BindingAnnotation.class);
   }
+
+  private static final long serialVersionUID = 0;
 }

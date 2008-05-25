@@ -17,11 +17,13 @@
 package com.google.inject.name;
 
 import com.google.inject.internal.Objects;
+
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 
-class NamedImpl implements Named {
+class NamedImpl implements Named, Serializable {
 
-  final String value;
+  private final String value;
 
   public NamedImpl(String value) {
     this.value = Objects.nonNull(value, "name");
@@ -33,7 +35,7 @@ class NamedImpl implements Named {
 
   public int hashCode() {
     // This is specified in java.lang.Annotation.
-    return 127 * "value".hashCode() ^ value.hashCode();
+    return (127 * "value".hashCode()) ^ value.hashCode();
   }
 
   public boolean equals(Object o) {
@@ -52,4 +54,6 @@ class NamedImpl implements Named {
   public Class<? extends Annotation> annotationType() {
     return Named.class;
   }
+
+  private static final long serialVersionUID = 0;
 }

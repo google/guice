@@ -17,6 +17,9 @@
 package com.google.inject;
 
 import static com.google.inject.internal.Objects.nonNull;
+import com.google.inject.internal.TypeWithArgument;
+
+import java.io.Serializable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -38,7 +41,7 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class TypeLiteral<T> {
+public abstract class TypeLiteral<T> implements Serializable {
 
   final Class<? super T> rawType;
   final Type type;
@@ -136,30 +139,17 @@ public abstract class TypeLiteral<T> {
    */
   @SuppressWarnings("unchecked")
   TypeLiteral<Provider<T>> providerType() {
-    final Type[] typeParameters = new Type[] { getType() };
-
     // This cast is safe and wouldn't generate a warning if Type had a type
     // parameter.
-    return (TypeLiteral<Provider<T>>) get(new ParameterizedType() {
-      public Type[] getActualTypeArguments() {
-        return typeParameters;
-      }
-
-      public Type getRawType() {
-        return Provider.class;
-      }
-
-      public Type getOwnerType() {
-        return null;
-      }
-    });
+    return (TypeLiteral<Provider<T>>) get(
+        new TypeWithArgument(Provider.class, getType()));
   }
 
-  public int hashCode() {
+  @Override public int hashCode() {
     return this.hashCode;
   }
 
-  public boolean equals(Object o) {
+  @Override public boolean equals(Object o) {
     if (o == this) {
       return true;
     }
@@ -171,7 +161,7 @@ public abstract class TypeLiteral<T> {
     return equals(type, other.type);
   }
 
-  public String toString() {
+  @Override public String toString() {
     return type instanceof Class<?>
         ? ((Class<?>) type).getName()
         : type.toString();
@@ -202,6 +192,7 @@ public abstract class TypeLiteral<T> {
     public SimpleTypeLiteral(Type type) {
       super(type);
     }
+    private static final long serialVersionUID = 0;
   }
 
   static int hashCode(Type type) {
@@ -276,4 +267,6 @@ public abstract class TypeLiteral<T> {
     // type, etc.
     return false;
   }
+
+  private static final long serialVersionUID = 0;
 }

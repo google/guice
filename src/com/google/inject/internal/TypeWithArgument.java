@@ -66,7 +66,7 @@ public class TypeWithArgument implements ParameterizedType {
 
   private String toString(Type type) {
     if (type instanceof Class<?>) {
-      return ((Class) type).getSimpleName();
+      return ((Class) type).getName();
     } else if (type instanceof ParameterizedType) {
       ParameterizedType parameterizedType = (ParameterizedType) type;
       Type[] arguments = parameterizedType.getActualTypeArguments();

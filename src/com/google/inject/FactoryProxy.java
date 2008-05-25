@@ -31,7 +31,7 @@ class FactoryProxy<T> implements InternalFactory<T>,
   private final Key<? extends T> targetKey;
   private final Object source;
 
-  InternalFactory<? extends T> targetFactory;
+  private InternalFactory<? extends T> targetFactory;
 
   FactoryProxy(Key<T> key, Key<? extends T> targetKey, Object source) {
     this.key = key;

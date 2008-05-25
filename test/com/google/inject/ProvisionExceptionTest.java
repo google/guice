@@ -19,14 +19,12 @@ package com.google.inject;
 import junit.framework.TestCase;
 
 /**
- * @author jessewilson
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public class ProvisionExceptionTest extends TestCase {
 
-  private static final RuntimeException runtimeException
-      = new RuntimeException();
   private static final ProvisionException provisionException
-      = new ProvisionException(runtimeException, "User Exception");
+      = new ProvisionException(new RuntimeException(), "User Exception");
 
   public void testExceptionsCollapsed() {
     try {
@@ -73,6 +71,32 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(e.getMessage(), "Error in custom provider");
+      assertContains(e.getMessage(), "while locating "
+          + "com.google.inject.ProvisionExceptionTest$D");
+    }
+  }
+
+  public void testBindToTypeExceptions() {
+    try {
+      Guice.createInjector().getInstance(D.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertTrue(e.getCause() instanceof UnsupportedOperationException);
+      assertContains(e.getMessage(), "while locating "
+          + "com.google.inject.ProvisionExceptionTest$D");
+    }
+  }
+
+  public void testBindToProviderInstanceExceptions() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(D.class).toProvider(new DProvider());
+        }
+      }).getInstance(D.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$D");
     }
@@ -126,47 +150,6 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
-  public void testRuntimeExceptionsAreWrappedForBindToType() {
-    try {
-      Guice.createInjector().getInstance(G.class);
-      fail();
-    } catch (ProvisionException e) {
-      assertSame(runtimeException, e.getCause());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$G");
-    }
-  }
-
-  public void testRuntimeExceptionsAreWrappedForBindToProviderType() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(G.class).toProvider(GProvider.class);
-        }
-      }).getInstance(G.class);
-      fail();
-    } catch (ProvisionException e) {
-      assertSame(runtimeException, e.getCause());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$G");
-    }
-  }
-
-  public void testRuntimeExceptionsAreWrappedForBindToProviderInstance() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(G.class).toProvider(new GProvider());
-        }
-      }).getInstance(G.class);
-      fail();
-    } catch (ProvisionException e) {
-      assertSame(runtimeException, e.getCause());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$G");
-    }
-  }
-
   static class A {
     @Inject
     A(B b) { }
@@ -208,18 +191,6 @@ public class ProvisionExceptionTest extends TestCase {
   static class FProvider implements Provider<F> {
     public F get() {
       return new F();
-    }
-  }
-
-  static class G {
-    @Inject public G() {
-      throw runtimeException;
-    }
-  }
-
-  static class GProvider implements Provider<G> {
-    public G get() {
-      return new G();
     }
   }
 }

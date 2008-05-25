@@ -27,7 +27,8 @@ interface InternalFactory<T> {
    * Creates an object to be injected.
    *
    * @param context of this injection
-   * @return instance to be injected; never null
+   * @throws ProvisionException if a value cannot be provided
+   * @return instance to be injected
    */
   T get(InternalContext context, InjectionPoint<?> injectionPoint);
 }

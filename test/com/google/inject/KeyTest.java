@@ -16,12 +16,13 @@
 
 package com.google.inject;
 
+import junit.framework.TestCase;
+
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -29,6 +30,7 @@ import junit.framework.TestCase;
 public class KeyTest extends TestCase {
 
   public void foo(List<String> a, List<String> b) {}
+  public void bar(Provider<List<String>> a) {}
 
   @Retention(RUNTIME)
   @BindingAnnotation @interface Foo {}
@@ -40,11 +42,22 @@ public class KeyTest extends TestCase {
     assertEquals(Foo.class, ki.getAnnotationType());
   }
 
-  public void testEquality() {
-    assertEquals(
-      new Key<List<String>>(Foo.class) {},
-      Key.get(new TypeLiteral<List<String>>() {}, Foo.class)
-    );
+  public void testKeyEquality() {
+    Key<List<String>> a = new Key<List<String>>(Foo.class) {};
+    Key<List<String>> b = Key.get(new TypeLiteral<List<String>>() {}, Foo.class);
+    assertEquals(a, b);
+    assertEquals(a.hashCode(), b.hashCode());
+  }
+
+  public void testProviderKey() throws NoSuchMethodException {
+    Key<?> actual = Key.get(getClass().getMethod("foo", List.class, List.class)
+        .getGenericParameterTypes()[0]).providerKey();
+    Key<?> expected = Key.get(getClass().getMethod("bar", Provider.class)
+        .getGenericParameterTypes()[0]);
+    assertTrue(expected.equals(actual));
+    assertTrue(actual.equals(expected));
+    assertEquals(expected.hashCode(), actual.hashCode());
+    assertEquals(expected.toString(), actual.toString());
   }
 
   public void testTypeEquality() throws Exception {

@@ -16,12 +16,13 @@
 
 package com.google.inject;
 
-import java.lang.reflect.Member;
-import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.Objects;
+import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 
 /**
  * An immutable snapshot of where the value is to be injected.
@@ -74,11 +75,11 @@ class InjectionPoint<T> implements Dependency<T> {
   }
 
   public String toString() {
-    return "Context" + new LinkedHashMap<String, Object>() {{
-      put("member", member);
-      put("key", getKey());
-      put("injector", injector);
-    }}.toString();
+    return new ToStringBuilder("Context")
+        .add("member", member)
+        .add("key", key)
+        .add("injector", injector)
+        .toString();
   }
 
   <T> T checkForNull(T value, Object source) {

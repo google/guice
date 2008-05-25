@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ErrorMessages;
 import com.google.inject.internal.Objects;
 import com.google.inject.spi.SourceProviders;
 
@@ -39,8 +40,13 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
   public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
     context.ensureMemberInjected(provider);
-    T provided = provider.get();
-    return injectionPoint.checkForNull(provided, source);
+    try {
+      return injectionPoint.checkForNull(provider.get(), source);
+    } catch(ProvisionException e) {
+      throw e;
+    } catch(RuntimeException e) {
+      throw new ProvisionException(e, ErrorMessages.ERROR_IN_PROVIDER);
+    }
   }
 
   public String toString() {
