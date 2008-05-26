@@ -61,7 +61,7 @@ public class LineNumbers {
     if (in == null) {
       throw new IllegalArgumentException("Cannot find bytecode for " + cls);
     }
-    new ClassReader(in).accept(new LineNumberReader(), false);
+    new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
   }
 
   /**
