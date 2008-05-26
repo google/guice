@@ -128,7 +128,8 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertTrue(e.getCause() instanceof ProvisionException);
+      assertTrue("Known failure. ProvisionExceptions are not wrapped.",
+          e.getCause() instanceof ProvisionException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
     }
@@ -143,7 +144,8 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertTrue(e.getCause() instanceof ProvisionException);
+      assertTrue("Known failure. ProvisionExceptions are not wrapped.",
+          e.getCause() instanceof ProvisionException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
     }

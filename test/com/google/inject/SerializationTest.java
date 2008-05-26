@@ -45,7 +45,11 @@ public class SerializationTest extends TestCase {
   }
 
   public void testCreationExceptionIsSerializable() throws IOException {
-    assertEqualWhenReserialized(createCreationException());
+    try {
+      assertEqualWhenReserialized(createCreationException());
+    } catch (NotSerializableException e) {
+      fail("Known failure. CreationException is not Serializable.");
+    }
   }
 
   private CreationException createCreationException() {
