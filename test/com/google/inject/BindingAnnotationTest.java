@@ -16,10 +16,12 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Annotation;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static com.google.inject.Asserts.assertContains;
 import junit.framework.TestCase;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -51,9 +53,9 @@ public class BindingAnnotationTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains("BindingAnnotationTest$Foo.s"));
-      assertTrue(expected.getMessage().contains("Binding to java.lang.String"));
-      assertTrue(expected.getMessage().contains("BindingAnnotationTest$Blue(value=5) not found"));
+      assertContains(expected.getMessage(), "BindingAnnotationTest$Foo.s");
+      assertContains(expected.getMessage(), "Binding to java.lang.String");
+      assertContains(expected.getMessage(), "BindingAnnotationTest$Blue(value=5) not found");
     }
   }
 

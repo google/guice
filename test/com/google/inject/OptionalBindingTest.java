@@ -17,6 +17,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
@@ -244,9 +245,10 @@ public class OptionalBindingTest extends TestCase {
   public void testOptionalConstructorBlowsUp() {
     try {
       Guice.createInjector().getInstance(HasOptionalConstructor.class);
-    } catch (ConfigurationException e) {
-      assertTrue(e.getMessage().contains(
-          "@Inject(optional=true) is not allowed on constructors"));
+      fail();
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(),
+          "@Inject(optional=true) is not allowed on constructors");
     }
   }
 

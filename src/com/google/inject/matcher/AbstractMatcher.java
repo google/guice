@@ -16,6 +16,8 @@
 
 package com.google.inject.matcher;
 
+import java.io.Serializable;
+
 /**
  * Implements {@code and()} and {@code or()}.
  *
@@ -31,9 +33,8 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
     return new OrMatcher<T>(this, other);
   }
 
-  static class AndMatcher<T> extends AbstractMatcher<T> {
-
-    final Matcher<? super T> a, b;
+  private static class AndMatcher<T> extends AbstractMatcher<T> implements Serializable {
+    private final Matcher<? super T> a, b;
 
     public AndMatcher(Matcher<? super T> a, Matcher<? super T> b) {
       this.a = a;
@@ -43,11 +44,24 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
     public boolean matches(T t) {
       return a.matches(t) && b.matches(t);
     }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof AndMatcher
+          && ((AndMatcher) other).a.equals(a)
+          && ((AndMatcher) other).b.equals(b);
+    }
+
+    @Override public int hashCode() {
+      return 41 * (a.hashCode() ^ b.hashCode());
+    }
+
+    @Override public String toString() {
+      return "and(" + a + ", " + b + ")";
+    }
   }
 
-  static class OrMatcher<T> extends AbstractMatcher<T> {
-
-    final Matcher<? super T> a, b;
+  private static class OrMatcher<T> extends AbstractMatcher<T> implements Serializable {
+    private final Matcher<? super T> a, b;
 
     public OrMatcher(Matcher<? super T> a, Matcher<? super T> b) {
       this.a = a;
@@ -56,6 +70,20 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
 
     public boolean matches(T t) {
       return a.matches(t) || b.matches(t);
+    }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof OrMatcher
+          && ((OrMatcher) other).a.equals(a)
+          && ((OrMatcher) other).b.equals(b);
+    }
+
+    @Override public int hashCode() {
+      return 37 * (a.hashCode() ^ b.hashCode());
+    }
+
+    @Override public String toString() {
+      return "or(" + a + ", " + b + ")";
     }
   }
 }

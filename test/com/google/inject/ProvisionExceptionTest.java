@@ -16,15 +16,17 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 import junit.framework.TestCase;
+
+import java.io.IOException;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@SuppressWarnings("UnusedDeclaration")
 public class ProvisionExceptionTest extends TestCase {
-
-  private static final ProvisionException provisionException
-      = new ProvisionException(new RuntimeException(), "User Exception");
 
   public void testExceptionsCollapsed() {
     try {
@@ -111,10 +113,9 @@ public class ProvisionExceptionTest extends TestCase {
       Guice.createInjector().getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertNotSame(e, provisionException);
+      assertTrue(e.getCause() instanceof ProvisionException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
-      assertSame(provisionException, e.getCause());
     }
   }
 
@@ -127,10 +128,9 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertNotSame(e, provisionException);
+      assertTrue(e.getCause() instanceof ProvisionException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
-      assertSame(provisionException, e.getCause());
     }
   }
 
@@ -143,10 +143,18 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertNotSame(e, provisionException);
+      assertTrue(e.getCause() instanceof ProvisionException);
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
-      assertSame(provisionException, e.getCause());
+    }
+  }
+
+  public void testProvisionExceptionIsSerializable() throws IOException {
+    try {
+      Guice.createInjector().getInstance(A.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertSimilarWhenReserialized(expected);
     }
   }
 
@@ -177,14 +185,9 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
-  private void assertContains(String text, String substring) {
-    assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
-        text, substring), text.contains(substring));
-  }
-
   static class F {
     @Inject public F() {
-      throw provisionException;
+      throw new ProvisionException(new RuntimeException(), "User Exception");
     }
   }
 

@@ -17,10 +17,9 @@
 package com.google.inject;
 
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.TypeWithArgument;
+import com.google.inject.internal.Types;
 
 import java.io.Serializable;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -41,7 +40,7 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class TypeLiteral<T> implements Serializable {
+public class TypeLiteral<T> implements Serializable {
 
   final Class<? super T> rawType;
   final Type type;
@@ -58,8 +57,8 @@ public abstract class TypeLiteral<T> implements Serializable {
   @SuppressWarnings("unchecked")
   protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
-    this.rawType = (Class<? super T>) getRawType(type);
-    this.hashCode = hashCode(type);
+    this.rawType = (Class<? super T>) Types.getRawType(type);
+    this.hashCode = Types.hashCode(type);
   }
 
   /**
@@ -67,9 +66,9 @@ public abstract class TypeLiteral<T> implements Serializable {
    */
   @SuppressWarnings("unchecked")
   TypeLiteral(Type type) {
-    this.rawType = (Class<? super T>) getRawType(nonNull(type, "type"));
+    this.rawType = (Class<? super T>) Types.getRawType(nonNull(type, "type"));
     this.type = type;
-    this.hashCode = hashCode(type);
+    this.hashCode = Types.hashCode(type);
   }
 
   /**
@@ -87,50 +86,20 @@ public abstract class TypeLiteral<T> implements Serializable {
    * Gets type literal from super class's type parameter.
    */
   static TypeLiteral<?> fromSuperclassTypeParameter(Class<?> subclass) {
-    return new SimpleTypeLiteral<Object>(getSuperclassTypeParameter(subclass));
-  }
-
-  @SuppressWarnings({ "unchecked" })
-  private static Class<?> getRawType(Type type) {
-    if (type instanceof Class<?>) {
-      // type is a normal class.
-      return (Class<?>) type;
-    }
-    else {
-      if (type instanceof ParameterizedType) {
-        ParameterizedType parameterizedType = (ParameterizedType) type;
-
-        // I'm not exactly sure why getRawType() returns Type instead of Class.
-        // Neal isn't either but suspects some pathological case related
-        // to nested classes exists.
-        Type rawType = parameterizedType.getRawType();
-        if (!(rawType instanceof Class<?>)) {
-          throw unexpectedType(rawType, Class.class);
-        }
-        return (Class<?>) rawType;
-      }
-
-      if (type instanceof GenericArrayType) {
-        // TODO: Is this sufficient?
-        return Object[].class;
-      }
-
-      // type is a parameterized type.
-      throw unexpectedType(type, ParameterizedType.class);
-    }
+    return new TypeLiteral<Object>(getSuperclassTypeParameter(subclass));
   }
 
   /**
    * Gets the raw type.
    */
-  Class<? super T> getRawType() {
+  final Class<? super T> getRawType() {
     return rawType;
   }
 
   /**
    * Gets underlying {@code Type} instance.
    */
-  public Type getType() {
+  public final Type getType() {
     return type;
   }
 
@@ -138,134 +107,42 @@ public abstract class TypeLiteral<T> implements Serializable {
    * Gets the type of this type's provider.
    */
   @SuppressWarnings("unchecked")
-  TypeLiteral<Provider<T>> providerType() {
+  final TypeLiteral<Provider<T>> providerType() {
     // This cast is safe and wouldn't generate a warning if Type had a type
     // parameter.
     return (TypeLiteral<Provider<T>>) get(
-        new TypeWithArgument(Provider.class, getType()));
+        Types.newTypeWithArgument(Provider.class, getType()));
   }
 
-  @Override public int hashCode() {
+  @Override public final int hashCode() {
     return this.hashCode;
   }
 
-  @Override public boolean equals(Object o) {
-    if (o == this) {
-      return true;
-    }
-    if (!(o instanceof TypeLiteral<?>)) {
-      return false;
-    }
-    TypeLiteral<?> other = (TypeLiteral<?>) o;
-
-    return equals(type, other.type);
+  @Override public final boolean equals(Object o) {
+    return o instanceof TypeLiteral<?>
+        && Types.equals(type, ((TypeLiteral) o).type);
   }
 
-  @Override public String toString() {
-    return type instanceof Class<?>
-        ? ((Class<?>) type).getName()
-        : type.toString();
-  }
-
-  static AssertionError unexpectedType(Type type, Class<?> expected) {
-    return new AssertionError(
-        "Unexpected type. Expected: " + expected.getName()
-        + ", got: " + type.getClass().getName()
-        + ", for type literal: " + type.toString() + ".");
+  @Override public final String toString() {
+    return Types.toString(type);
   }
 
   /**
    * Gets type literal for the given {@code Type} instance.
    */
   public static TypeLiteral<?> get(Type type) {
-    return new SimpleTypeLiteral<Object>(type);
+    return new TypeLiteral<Object>(type);
   }
 
   /**
    * Gets type literal for the given {@code Class} instance.
    */
   public static <T> TypeLiteral<T> get(Class<T> type) {
-    return new SimpleTypeLiteral<T>(type);
+    return new TypeLiteral<T>(type);
   }
 
-  private static class SimpleTypeLiteral<T> extends TypeLiteral<T> {
-    public SimpleTypeLiteral(Type type) {
-      super(type);
-    }
-    private static final long serialVersionUID = 0;
-  }
-
-  static int hashCode(Type type) {
-    if (type instanceof ParameterizedType) {
-      ParameterizedType p = (ParameterizedType) type;
-      int h = p.getRawType().hashCode();
-      for (Type argument : p.getActualTypeArguments()) {
-        h = h * 31 + hashCode(argument);
-      }
-      return h;
-    }
-
-    if (type instanceof Class) {
-      // Class specifies hashCode().
-      return type.hashCode();
-    }
-
-    if (type instanceof GenericArrayType) {
-      return hashCode(((GenericArrayType) type).getGenericComponentType()) * 31;
-    }
-
-    // This isn't a type we support. Could be a generic array type, wildcard
-    // type, etc.
-    return type.hashCode();
-  }
-
-  static boolean equals(Type a, Type b) {
-    if (a instanceof Class) {
-      // Class already specifies equals().
-      return a.equals(b);
-    }
-
-    if (a instanceof ParameterizedType) {
-      if (!(b instanceof ParameterizedType)) {
-        return false;
-      }
-
-      ParameterizedType pa = (ParameterizedType) a;
-      ParameterizedType pb = (ParameterizedType) b;
-
-      if (!pa.getRawType().equals(pb.getRawType())) {
-        return false;
-      }
-
-      Type[] aa = pa.getActualTypeArguments();
-      Type[] ba = pb.getActualTypeArguments();
-      if (aa.length != ba.length) {
-        return false;
-      }
-
-      for (int i = 0; i < aa.length; i++) {
-        if (!equals(aa[i], ba[i])) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    if (a instanceof GenericArrayType) {
-      if (!(b instanceof GenericArrayType)) {
-        return false;
-      }
-
-      return equals(
-          ((GenericArrayType) a).getGenericComponentType(),
-          ((GenericArrayType) b).getGenericComponentType()
-      );
-    }
-
-    // This isn't a type we support. Could be a generic array type, wildcard
-    // type, etc.
-    return false;
+  protected final Object writeReplace() {
+    return get(Types.makeSerializable(type));
   }
 
   private static final long serialVersionUID = 0;

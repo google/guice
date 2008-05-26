@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.Guice.overrideModule;
 import static com.google.inject.name.Names.named;
@@ -182,10 +183,9 @@ public class OverrideModuleTest extends TestCase {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains("Error at " + replacements.getClass().getName()));
-      assertTrue(expected.getMessage().contains(
-          "A binding to java.lang.String was already configured at "
-              + replacements.getClass().getName()));
+      assertContains(expected.getMessage(), "Error at " + replacements.getClass().getName());
+      assertContains(expected.getMessage(), "A binding to java.lang.String "
+          + "was already configured at " + replacements.getClass().getName());
     }
   }
 
@@ -208,10 +208,9 @@ public class OverrideModuleTest extends TestCase {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains("Error at " + original.getClass().getName()));
-      assertTrue(expected.getMessage().contains(
-          "A binding to java.lang.String was already configured at "
-              + replacements.getClass().getName()));
+      assertContains(expected.getMessage(), "Error at " + original.getClass().getName());
+      assertContains(expected.getMessage(), "A binding to java.lang.String "
+          + "was already configured at " + replacements.getClass().getName());
     }
   }
 

@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
 
@@ -65,8 +66,8 @@ public class BinderTest extends TestCase {
         }
       });
       fail();
-    } catch (CreationException e) {
-      assertTrue(e.getMessage().contains("Missing constant value."));
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Missing constant value.");
     }
   }
 

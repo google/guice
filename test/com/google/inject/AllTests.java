@@ -77,7 +77,7 @@ public class AllTests {
     suite.addTestSuite(LineNumbersTest.class);
     suite.addTestSuite(ReferenceCacheTest.class);
     suite.addTestSuite(ReferenceMapTest.class);
-    suite.addTestSuite(TypeWithArgumentTest.class);
+    suite.addTestSuite(TypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
 
     // matcher

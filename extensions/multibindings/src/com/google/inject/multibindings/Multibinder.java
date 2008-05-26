@@ -19,7 +19,7 @@ package com.google.inject.multibindings;
 import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
 import static com.google.inject.internal.Objects.nonNull;
-import com.google.inject.internal.TypeWithArgument;
+import com.google.inject.internal.Types;
 import com.google.inject.spi.SourceProviders;
 
 import java.lang.annotation.Annotation;
@@ -112,7 +112,7 @@ public abstract class Multibinder<T> {
 
   @SuppressWarnings("unchecked")
   private static <T> TypeLiteral<Set<T>> setOf(Type elementType) {
-    Type type = new TypeWithArgument(Set.class, elementType);
+    Type type = Types.newTypeWithArgument(Set.class, elementType);
     return (TypeLiteral<Set<T>>) TypeLiteral.get(type);
   }
 

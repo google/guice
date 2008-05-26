@@ -51,4 +51,11 @@ public class Objects {
 
     return a.equals(b);
   }
+
+  /**
+   * {@code null}-aware hashCode.
+   */
+  public static int hashCode(Object o) {
+    return o != null ? o.hashCode() : 0;
+  }
 }

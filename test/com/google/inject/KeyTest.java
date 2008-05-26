@@ -16,13 +16,19 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertEqualWhenReserialized;
+import static com.google.inject.Asserts.assertEqualsBothWays;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -45,8 +51,7 @@ public class KeyTest extends TestCase {
   public void testKeyEquality() {
     Key<List<String>> a = new Key<List<String>>(Foo.class) {};
     Key<List<String>> b = Key.get(new TypeLiteral<List<String>>() {}, Foo.class);
-    assertEquals(a, b);
-    assertEquals(a.hashCode(), b.hashCode());
+    assertEqualsBothWays(a, b);
   }
 
   public void testProviderKey() throws NoSuchMethodException {
@@ -54,9 +59,7 @@ public class KeyTest extends TestCase {
         .getGenericParameterTypes()[0]).providerKey();
     Key<?> expected = Key.get(getClass().getMethod("bar", Provider.class)
         .getGenericParameterTypes()[0]);
-    assertTrue(expected.equals(actual));
-    assertTrue(actual.equals(expected));
-    assertEquals(expected.hashCode(), actual.hashCode());
+    assertEqualsBothWays(expected, actual);
     assertEquals(expected.toString(), actual.toString());
   }
 
@@ -69,4 +72,15 @@ public class KeyTest extends TestCase {
     assertFalse(types[0].equals(
         new Key<List<Integer>>() {}.getTypeLiteral().getType()));
   }
+
+  public void testSerialization() throws IOException {
+    assertEqualWhenReserialized(Key.get(B.class));
+    assertEqualWhenReserialized(Key.get(B.class, Names.named("bee")));
+    assertEqualWhenReserialized(Key.get(B.class, Named.class));
+    assertEqualWhenReserialized(Key.get(B[].class));
+    assertEqualWhenReserialized(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
+    assertEqualWhenReserialized(Key.get(new TypeLiteral<List<B[]>>() {}));
+  }
+
+  interface B {}
 }

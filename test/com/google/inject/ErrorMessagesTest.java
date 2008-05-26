@@ -2,6 +2,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import junit.framework.TestCase;
 
 /**
@@ -18,10 +19,9 @@ public class ErrorMessagesTest extends TestCase {
     try {
       injector.getInstance(InnerClass.class);
       fail();
-    } catch (Exception e) {
+    } catch (Exception expected) {
       // TODO(kevinb): why does the source come out as unknown??
-      assertTrue(e.getMessage().contains(
-          "Injecting into inner classes is not supported."));
+      assertContains(expected.getMessage(), "Injecting into inner classes is not supported.");
     }
   }
 
@@ -32,10 +32,9 @@ public class ErrorMessagesTest extends TestCase {
     try {
       injector.getInstance(LocalClass.class);
       fail();
-    } catch (Exception e) {
+    } catch (Exception expected) {
       // TODO(kevinb): why does the source come out as unknown??
-      assertTrue(e.getMessage().contains(
-          "Injecting into inner classes is not supported."));
+      assertContains(expected.getMessage(), "Injecting into inner classes is not supported.");
     }
   }
 
@@ -47,9 +46,8 @@ public class ErrorMessagesTest extends TestCase {
         }
       });
       fail();
-    } catch(CreationException e) {
-      assertTrue(e.getMessage().contains(
-          "Injecting into abstract types is not supported."));
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }
   
@@ -58,8 +56,8 @@ public class ErrorMessagesTest extends TestCase {
     try {
       injector.getInstance(AbstractClass.class);
       fail();
-    } catch(ConfigurationException e) {
-      assertTrue(e.getMessage().contains("Injecting into abstract types is not supported."));
+    } catch(ConfigurationException expected) {
+      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }
 

@@ -17,6 +17,7 @@
 package com.google.inject.multibindings;
 
 import com.google.inject.*;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.util.Providers;
@@ -274,9 +275,9 @@ public class MapBinderTest extends TestCase {
         }
       });
       fail();
-    } catch (CreationException e) {
-      assertTrue(e.getMessage().contains("Error at " + getClass().getName()));
-      assertTrue(e.getMessage().contains("No implementation was specified."));
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Error at " + getClass().getName());
+      assertContains(expected.getMessage(), "No implementation was specified.");
     }
   }
 

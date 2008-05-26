@@ -16,9 +16,12 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.TypeWithArgument;
+import static com.google.inject.Asserts.assertEqualWhenReserialized;
+import static com.google.inject.Asserts.assertEqualsBothWays;
+import com.google.inject.internal.Types;
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -26,12 +29,11 @@ import java.util.List;
  */
 public class TypeLiteralTest extends TestCase {
 
-  public void testWithParameterizedTypeImpl() {
+  public void testWithParameterizedType() {
     TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
     TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
-        new TypeWithArgument(List.class, String.class)) {};
-    assertTrue(b.equals(a) && a.equals(b));
-    assertEquals(a.hashCode(), b.hashCode());
+        Types.newTypeWithArgument(List.class, String.class)) {};
+    assertEqualsBothWays(a, b);
   }
 
   public void testEquality() {
@@ -40,8 +42,7 @@ public class TypeLiteralTest extends TestCase {
     TypeLiteral<List<Integer>> t3 = new TypeLiteral<List<Integer>>() {};
     TypeLiteral<String> t4 = new TypeLiteral<String>() {};
 
-    assertEquals(t1, t2);
-    assertEquals(t2, t1);
+    assertEqualsBothWays(t1, t2);
 
     assertFalse(t2.equals(t3));
     assertFalse(t3.equals(t2));
@@ -50,7 +51,7 @@ public class TypeLiteralTest extends TestCase {
     assertFalse(t4.equals(t2));
 
     TypeLiteral<String> t5 = TypeLiteral.get(String.class);
-    assertEquals(t4, t5);
+    assertEqualsBothWays(t4, t5);
   }
 
   public void testMissingTypeParameter() {
@@ -67,5 +68,17 @@ public class TypeLiteralTest extends TestCase {
     TypeLiteral<List<String[]>> listOfStringArray
         = new TypeLiteral<List<String[]>>() {};
     assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {});
+  }
+
+  public void testEqualityOfGenericArrayAndClassArray() {
+    TypeLiteral<String[]> arrayAsClass = TypeLiteral.get(String[].class);
+    TypeLiteral<String[]> arrayAsType = new TypeLiteral<String[]>() {};
+    assertEquals("Known failure. Although they're functionally equal, Java has two non-equal "
+        + "Types that can represent a String[]. We should probably choose a canonical form.",
+        arrayAsClass, arrayAsType);
+  }
+
+  public void testSerialization() throws IOException {
+    assertEqualWhenReserialized(new TypeLiteral<List<String>>() {});
   }
 }

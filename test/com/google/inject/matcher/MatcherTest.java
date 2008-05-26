@@ -16,17 +16,17 @@
 
 package com.google.inject.matcher;
 
-import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.inject.matcher.Matchers.any;
-import static com.google.inject.matcher.Matchers.inPackage;
-import static com.google.inject.matcher.Matchers.not;
-import static com.google.inject.matcher.Matchers.only;
-import static com.google.inject.matcher.Matchers.returns;
-import static com.google.inject.matcher.Matchers.subclassesOf;
+import static com.google.inject.Asserts.assertEqualWhenReserialized;
+import static com.google.inject.matcher.Matchers.*;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import junit.framework.TestCase;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import junit.framework.TestCase;
+import java.util.AbstractList;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -52,7 +52,7 @@ public class MatcherTest extends TestCase {
         MatcherTest.class.getMethods()[0]));
 
     try {
-      annotatedWith(Baz.class).matches(Car.class);
+      annotatedWith(Baz.class);
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -90,6 +90,20 @@ public class MatcherTest extends TestCase {
         Object.class.getMethod("hashCode")));
   }
   
+  public void testSerialization() throws IOException {
+    assertEqualWhenReserialized(Matchers.any());
+    assertEqualWhenReserialized(Matchers.not(Matchers.any()));
+    assertEqualWhenReserialized(Matchers.annotatedWith(Named.class));
+    assertEqualWhenReserialized(Matchers.annotatedWith(Names.named("foo")));
+    assertEqualWhenReserialized(Matchers.only("foo"));
+    assertEqualWhenReserialized(Matchers.identicalTo(Object.class));
+    assertEqualWhenReserialized(Matchers.inPackage(String.class.getPackage()));
+    assertEqualWhenReserialized(Matchers.returns(Matchers.any()));
+    assertEqualWhenReserialized(Matchers.subclassesOf(AbstractList.class));
+    assertEqualWhenReserialized(Matchers.only("a").or(Matchers.only("b")));
+    assertEqualWhenReserialized(Matchers.only("a").and(Matchers.only("b")));
+  }
+
   static abstract class MyRunnable implements Runnable {}
   
   @Retention(RetentionPolicy.RUNTIME)

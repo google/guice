@@ -18,6 +18,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.AbstractModule;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -47,8 +48,8 @@ public class LineNumbersTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains("LineNumbersTest$B"));
-      assertTrue(expected.getMessage().contains("Injecting into abstract types is not supported."));
+      assertContains(expected.getMessage(), "LineNumbersTest$B");
+      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }
 

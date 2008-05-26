@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
 import com.google.inject.spi.*;
 import junit.framework.TestCase;
@@ -204,8 +205,7 @@ public class BindingTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains(
-          "Injecting into abstract types is not supported."));
+      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }
 

@@ -17,6 +17,7 @@
 package com.google.inject.assistedinject;
 
 import com.google.inject.*;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
@@ -373,8 +374,8 @@ public class FactoryProviderTest extends TestCase {
     try {
       FactoryProvider.newFactory(DefectiveCarFactoryWithNoExceptions.class, DefectiveCar.class);
       fail();
-    } catch (IllegalStateException e) {
-      assertTrue(e.getMessage().contains("no compatible exception is thrown"));
+    } catch (IllegalStateException expected) {
+      assertContains(expected.getMessage(), "no compatible exception is thrown");
     }
   }
 
@@ -506,9 +507,10 @@ public class FactoryProviderTest extends TestCase {
               .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
         }
       });
-    } catch (ProvisionException e) {
-      assertTrue(e.getCause().getMessage().contains("Parameter of type 'double' is not " +
-          "injectable or annotated with @Assisted"));
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(), "Parameter of type 'double' is not " +
+          "injectable or annotated with @Assisted");
     }
   }
 

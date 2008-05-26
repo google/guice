@@ -1,10 +1,11 @@
 package com.google.inject;
 
-import junit.framework.TestCase;
-import java.util.logging.Logger;
-
-import com.google.inject.spi.ProviderInstanceBinding;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
+import com.google.inject.spi.ProviderInstanceBinding;
+import junit.framework.TestCase;
+
+import java.util.logging.Logger;
 
 /**
  * Test built-in injection of loggers.
@@ -52,8 +53,8 @@ public class LoggerInjectionTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertTrue(expected.getMessage().contains(
-          "A binding to java.util.logging.Logger was already configured"));
+      assertContains(expected.getMessage(),
+          "A binding to java.util.logging.Logger was already configured");
     }
   }
 }

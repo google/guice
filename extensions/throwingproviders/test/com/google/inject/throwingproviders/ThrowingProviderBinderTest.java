@@ -16,16 +16,14 @@
 
 package com.google.inject.throwingproviders;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
+import junit.framework.TestCase;
+
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
@@ -170,8 +168,9 @@ public class ThrowingProviderBinderTest extends TestCase {
               .to(mockRemoteProvider);
         }
       });
-    } catch (IllegalArgumentException e) {
-      assertTrue(e.getMessage().contains("is not a compliant interface"));
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
   
@@ -183,8 +182,9 @@ public class ThrowingProviderBinderTest extends TestCase {
               .bind(SubRemoteProvider.class, String.class);
         }
       });
-    } catch (IllegalArgumentException e) {
-      assertTrue(e.getMessage().contains("is not a compliant interface"));
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
 
@@ -198,8 +198,9 @@ public class ThrowingProviderBinderTest extends TestCase {
               .bind(RemoteProviderWithExtraMethod.class, String.class);
         }
       });
-    } catch (IllegalArgumentException e) {
-      assertTrue(e.getMessage().contains("is not a compliant interface"));
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
 

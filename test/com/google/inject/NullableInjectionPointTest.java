@@ -1,5 +1,6 @@
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import junit.framework.TestCase;
 
 /**
@@ -167,11 +168,6 @@ public class NullableInjectionPointTest extends TestCase {
       assertContains(cause.getMessage(), "null returned by binding "
           + "at com.google.inject.NullableInjectionPointTest");
     }
-  }
-
-  private void assertContains(String text, String substring) {
-    assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
-        text, substring), text.contains(substring));
   }
 
   static class Foo { }
