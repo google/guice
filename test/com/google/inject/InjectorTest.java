@@ -16,9 +16,12 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertNotSerializable;
+import junit.framework.TestCase;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -106,6 +109,16 @@ public class InjectorTest extends TestCase {
 
     IntegerWrapper iw = injector.getInstance(IntegerWrapper.class);
     assertEquals(5, (int) iw.i);
+  }
+
+  public void testInjectorApiIsNotSerializable() throws IOException {
+    Injector injector = Guice.createInjector();
+    assertNotSerializable(injector);
+    assertNotSerializable(injector.getProvider(String.class));
+    assertNotSerializable(injector.getBinding(String.class));
+    for (Binding<?> binding : injector.getBindings().values()) {
+      assertNotSerializable(binding);
+    }
   }
 
   static class IntegerWrapper {

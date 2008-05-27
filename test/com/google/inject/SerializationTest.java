@@ -17,9 +17,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -40,13 +38,9 @@ public class SerializationTest extends TestCase {
     protected void configure() {}
   }
 
-  public void testSingletonScopeIsNotSerializable() throws IOException {
-    assertNotSerializable(Scopes.SINGLETON);
-  }
-
   public void testCreationExceptionIsSerializable() throws IOException {
     try {
-      assertEqualWhenReserialized(createCreationException());
+      assertSimilarWhenReserialized(createCreationException());
     } catch (NotSerializableException e) {
       fail("Known failure. CreationException is not Serializable.");
     }
@@ -78,21 +72,9 @@ public class SerializationTest extends TestCase {
     }
   }
 
-  public void testInjectorIsNotSerializable() throws IOException {
-    assertNotSerializable(Guice.createInjector());
-  }
-
   static class A {
     @Inject B b;
   }
 
   static class B {}
-
-  public static void assertNotSerializable(Object object) throws IOException {
-    try {
-      Asserts.reserialize(object);
-      Assert.fail();
-    } catch (NotSerializableException expected) {
-    }
-  }
 }

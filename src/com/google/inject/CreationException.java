@@ -17,12 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.spi.Message;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Formatter;
-import java.util.List;
+
+import java.util.*;
 
 /**
  * Thrown when errors occur while creating a {@link Injector}. Includes a list
@@ -45,7 +41,7 @@ public class CreationException extends RuntimeException {
     this.errorMessages = new ArrayList<Message>(errorMessages);
     Collections.sort(this.errorMessages, new Comparator<Message>() {
       public int compare(Message a, Message b) {
-        return a.getSourceString().compareTo(b.getSourceString());
+        return a.getSource().compareTo(b.getSource());
       }
     });
   }
@@ -59,7 +55,7 @@ public class CreationException extends RuntimeException {
     Formatter fmt = new Formatter().format("Guice configuration errors:%n%n");
     int index = 1;
     for (Message errorMessage : errorMessages) {
-      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSourceString())
+      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSource())
          .format(" %s%n%n", errorMessage.getMessage());
     }
     return fmt.format("%s error[s]", errorMessages.size()).toString();

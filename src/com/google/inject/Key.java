@@ -43,12 +43,12 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class Key<T> implements Serializable {
+public class Key<T> implements Serializable {
 
-  final AnnotationStrategy annotationStrategy;
+  private final AnnotationStrategy annotationStrategy;
 
-  final TypeLiteral<T> typeLiteral;
-  final int hashCode;
+  private final TypeLiteral<T> typeLiteral;
+  private final int hashCode;
 
   /**
    * Constructs a new key. Derives the type from this class's type parameter.
@@ -104,7 +104,7 @@ public abstract class Key<T> implements Serializable {
    */
   @SuppressWarnings("unchecked")
   protected Key() {
-    this.annotationStrategy = NULL_STRATEGY;
+    this.annotationStrategy = NullAnnotationStrategy.INSTANCE;
     this.typeLiteral
         = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
@@ -135,21 +135,21 @@ public abstract class Key<T> implements Serializable {
   /**
    * Gets the key type.
    */
-  public TypeLiteral<T> getTypeLiteral() {
+  public final TypeLiteral<T> getTypeLiteral() {
     return typeLiteral;
   }
 
   /**
    * Gets the annotation type.
    */
-  public Class<? extends Annotation> getAnnotationType() {
+  public final Class<? extends Annotation> getAnnotationType() {
     return annotationStrategy.getAnnotationType();
   }
 
   /**
    * Gets the annotation.
    */
-  public Annotation getAnnotation() {
+  public final Annotation getAnnotation() {
     return annotationStrategy.getAnnotation();
   }
 
@@ -167,10 +167,6 @@ public abstract class Key<T> implements Serializable {
     return annotationStrategy.getAnnotationType().toString();
   }
 
-  public int hashCode() {
-    return this.hashCode;
-  }
-
   Class<? super T> getRawType() {
     return typeLiteral.getRawType();
   }
@@ -182,7 +178,7 @@ public abstract class Key<T> implements Serializable {
     return ofType(typeLiteral.providerType());
   }
 
-  public boolean equals(Object o) {
+  @Override public final boolean equals(Object o) {
     if (o == this) {
       return true;
     }
@@ -194,7 +190,11 @@ public abstract class Key<T> implements Serializable {
         && typeLiteral.equals(other.typeLiteral);
   }
 
-  public String toString() {
+  @Override public final int hashCode() {
+    return this.hashCode;
+  }
+
+  @Override public final String toString() {
     return new ToStringBuilder(Key.class)
         .add("type", typeLiteral)
         .add("annotation", annotationStrategy)
@@ -206,14 +206,14 @@ public abstract class Key<T> implements Serializable {
    */
   static <T> Key<T> get(Class<T> type,
       AnnotationStrategy annotationStrategy) {
-    return new SimpleKey<T>(type, annotationStrategy);
+    return new Key<T>(type, annotationStrategy);
   }
 
   /**
    * Gets a key for an injection type.
    */
   public static <T> Key<T> get(Class<T> type) {
-    return new SimpleKey<T>(type, NULL_STRATEGY);
+    return new Key<T>(type, NullAnnotationStrategy.INSTANCE);
   }
 
   /**
@@ -221,21 +221,21 @@ public abstract class Key<T> implements Serializable {
    */
   public static <T> Key<T> get(Class<T> type,
       Class<? extends Annotation> annotationType) {
-    return new SimpleKey<T>(type, strategyFor(annotationType));
+    return new Key<T>(type, strategyFor(annotationType));
   }
 
   /**
    * Gets a key for an injection type and an annotation.
    */
   public static <T> Key<T> get(Class<T> type, Annotation annotation) {
-    return new SimpleKey<T>(type, strategyFor(annotation));
+    return new Key<T>(type, strategyFor(annotation));
   }
 
   /**
    * Gets a key for an injection type.
    */
   public static Key<?> get(Type type) {
-    return new SimpleKey<Object>(type, NULL_STRATEGY);
+    return new Key<Object>(type, NullAnnotationStrategy.INSTANCE);
   }
 
   /**
@@ -243,21 +243,21 @@ public abstract class Key<T> implements Serializable {
    */
   public static Key<?> get(Type type,
       Class<? extends Annotation> annotationType) {
-    return new SimpleKey<Object>(type, strategyFor(annotationType));
+    return new Key<Object>(type, strategyFor(annotationType));
   }
 
   /**
    * Gets a key for an injection type and an annotation.
    */
   public static Key<?> get(Type type, Annotation annotation) {
-    return new SimpleKey<Object>(type, strategyFor(annotation));
+    return new Key<Object>(type, strategyFor(annotation));
   }
 
   /**
    * Gets a key for an injection type.
    */
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral) {
-    return new SimpleKey<T>(typeLiteral, NULL_STRATEGY);
+    return new Key<T>(typeLiteral, NullAnnotationStrategy.INSTANCE);
   }
 
   /**
@@ -265,7 +265,7 @@ public abstract class Key<T> implements Serializable {
    */
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral,
       Class<? extends Annotation> annotationType) {
-    return new SimpleKey<T>(typeLiteral, strategyFor(annotationType));
+    return new Key<T>(typeLiteral, strategyFor(annotationType));
   }
 
   /**
@@ -273,7 +273,7 @@ public abstract class Key<T> implements Serializable {
    */
   public static <T> Key<T> get(TypeLiteral<T> typeLiteral,
       Annotation annotation) {
-    return new SimpleKey<T>(typeLiteral, strategyFor(annotation));
+    return new Key<T>(typeLiteral, strategyFor(annotation));
   }
 
   /**
@@ -281,7 +281,7 @@ public abstract class Key<T> implements Serializable {
    * key.
    */
   <T> Key<T> ofType(Class<T> type) {
-    return new SimpleKey<T>(type, annotationStrategy);
+    return new Key<T>(type, annotationStrategy);
   }
 
   /**
@@ -289,7 +289,7 @@ public abstract class Key<T> implements Serializable {
    * key.
    */
   Key<?> ofType(Type type) {
-    return new SimpleKey<Object>(type, annotationStrategy);
+    return new Key<Object>(type, annotationStrategy);
   }
 
   /**
@@ -297,12 +297,11 @@ public abstract class Key<T> implements Serializable {
    * key.
    */
   <T> Key<T> ofType(TypeLiteral<T> type) {
-    return new SimpleKey<T>(type, annotationStrategy);
+    return new Key<T>(type, annotationStrategy);
   }
 
   /**
    * Returns true if this key has annotation attributes.
-   * @return
    */
   boolean hasAttributes() {
     return annotationStrategy.hasAttributes();
@@ -313,19 +312,7 @@ public abstract class Key<T> implements Serializable {
    * annotation type.
    */
   Key<T> withoutAttributes() {
-    return new SimpleKey<T>(typeLiteral, annotationStrategy.withoutAttributes());
-  }
-
-  private static class SimpleKey<T> extends Key<T> {
-
-    private SimpleKey(Type type, AnnotationStrategy annotationStrategy) {
-      super(type, annotationStrategy);
-    }
-
-    private SimpleKey(TypeLiteral<T> typeLiteral,
-        AnnotationStrategy annotationStrategy) {
-      super(typeLiteral, annotationStrategy);
-    }
+    return new Key<T>(typeLiteral, annotationStrategy.withoutAttributes());
   }
 
   interface AnnotationStrategy extends Serializable {
@@ -335,42 +322,6 @@ public abstract class Key<T> implements Serializable {
     boolean hasAttributes();
     AnnotationStrategy withoutAttributes();
   }
-
-  static final AnnotationStrategy NULL_STRATEGY = new AnnotationStrategy() {
-
-    public boolean hasAttributes() {
-      return false;
-    }
-
-    public AnnotationStrategy withoutAttributes() {
-      throw new UnsupportedOperationException("Key already has no attributes.");
-    }
-
-    public Annotation getAnnotation() {
-      return null;
-    }
-
-    public Class<? extends Annotation> getAnnotationType() {
-      return null;
-    }
-
-    public boolean equals(Object o) {
-      return o == NULL_STRATEGY;
-    }
-
-    public int hashCode() {
-      return 0;
-    }
-
-    public String toString() {
-      return "[none]";
-    }
-
-    Object readResolve() {
-      return NULL_STRATEGY;
-    }
-    private static final long serialVersionUID = 0;
-  };
 
   /**
    * Returns {@code true} if the given annotation type has no attributes.
@@ -424,6 +375,30 @@ public abstract class Key<T> implements Serializable {
     }
   }
 
+  static enum NullAnnotationStrategy implements AnnotationStrategy {
+    INSTANCE;
+
+    public boolean hasAttributes() {
+      return false;
+    }
+
+    public AnnotationStrategy withoutAttributes() {
+      throw new UnsupportedOperationException("Key already has no attributes.");
+    }
+
+    public Annotation getAnnotation() {
+      return null;
+    }
+
+    public Class<? extends Annotation> getAnnotationType() {
+      return null;
+    }
+
+    @Override public String toString() {
+      return "[none]";
+    }
+  }
+
   // this class not test-covered
   static class AnnotationInstanceStrategy implements AnnotationStrategy {
 
@@ -449,7 +424,7 @@ public abstract class Key<T> implements Serializable {
       return annotation.annotationType();
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
       if (!(o instanceof AnnotationInstanceStrategy)) {
         return false;
       }
@@ -458,11 +433,11 @@ public abstract class Key<T> implements Serializable {
       return annotation.equals(other.annotation);
     }
 
-    public int hashCode() {
+    @Override public int hashCode() {
       return annotation.hashCode();
     }
 
-    public String toString() {
+    @Override public String toString() {
       return annotation.toString();
     }
 
@@ -498,7 +473,7 @@ public abstract class Key<T> implements Serializable {
       return annotationType;
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
       if (!(o instanceof AnnotationTypeStrategy)) {
         return false;
       }
@@ -507,11 +482,11 @@ public abstract class Key<T> implements Serializable {
       return annotationType.equals(other.annotationType);
     }
 
-    public int hashCode() {
+    @Override public int hashCode() {
       return annotationType.hashCode();
     }
 
-    public String toString() {
+    @Override public String toString() {
       return "@" + annotationType.getName();
     }
 
@@ -525,6 +500,17 @@ public abstract class Key<T> implements Serializable {
   static boolean isBindingAnnotation(
       Class<? extends Annotation> annotationType) {
     return annotationType.isAnnotationPresent(BindingAnnotation.class);
+  }
+
+  /**
+   * Returns the canonical form of this key for serialization. The returned
+   * instance is always a {@code Key}, never a subclass. This prevents problems
+   * caused by serializing anonymous types.
+   */
+  protected final Object writeReplace() {
+    return getClass() == Key.class
+        ? this
+        : new Key<T>(typeLiteral, annotationStrategy);
   }
 
   private static final long serialVersionUID = 0;

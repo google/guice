@@ -73,9 +73,7 @@ public class TypeLiteralTest extends TestCase {
   public void testEqualityOfGenericArrayAndClassArray() {
     TypeLiteral<String[]> arrayAsClass = TypeLiteral.get(String[].class);
     TypeLiteral<String[]> arrayAsType = new TypeLiteral<String[]>() {};
-    assertEquals("Known failure. Although they're functionally equal, Java has two non-equal "
-        + "Types that can represent a String[]. We should probably choose a canonical form.",
-        arrayAsClass, arrayAsType);
+    assertEquals(arrayAsClass, arrayAsType);
   }
 
   public void testSerialization() throws IOException {

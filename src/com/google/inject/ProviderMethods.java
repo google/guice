@@ -16,10 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.SourceProviders;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Creates bindings to methods annotated with
+ * Creates bindings to methods annotated with {@literal @}
  * {@link com.google.inject.Provides}. Use the scope and binding annotations
  * on the provider method to configure the binding.
  */

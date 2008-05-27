@@ -17,9 +17,11 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -40,7 +42,7 @@ public class BinderTest extends TestCase {
       }
     });
 
-    assertTrue(fooProvider.get() instanceof Foo);
+    assertNotNull(fooProvider.get());
   }
 
   static class Foo {}
@@ -91,6 +93,67 @@ public class BinderTest extends TestCase {
       });
       fail();
     } catch (CreationException ignored) {
+    }
+  }
+
+  public void testNothingIsSerializableInBinderApi() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override public void configure() {
+          try {
+            assertNotSerializable(binder());
+            assertNotSerializable(getProvider(Integer.class));
+            assertNotSerializable(getProvider(Key.get(new TypeLiteral<List<String>>() {})));
+            assertNotSerializable(bind(Integer.class));
+            assertNotSerializable(bind(Integer.class).annotatedWith(Names.named("a")));
+            assertNotSerializable(bindConstant());
+            assertNotSerializable(bindConstant().annotatedWith(Names.named("b")));
+          } catch (IOException e) {
+            fail(e.getMessage());
+          }
+        }
+      });
+      fail();
+    } catch (CreationException ignored) {
+    }
+  }
+
+  /**
+   * Although {@code String[].class} isn't equal to {@code new
+   * GenericArrayTypeImpl(String.class)}, Guice should treat these two types
+   * interchangeably.
+   */
+  public void testArrayTypeCanonicalization() {
+    final String[] strings = new String[] { "A" };
+    final Integer[] integers = new Integer[] { 1 };
+    
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String[].class).toInstance(strings);
+        bind(new TypeLiteral<Integer[]>() {}).toInstance(integers);
+      }
+    });
+
+    assertSame(integers, injector.getInstance(Key.get(new TypeLiteral<Integer[]>() {})));
+    assertSame(integers, injector.getInstance(new Key<Integer[]>() {}));
+    assertSame(integers, injector.getInstance(Integer[].class));
+    assertSame(strings, injector.getInstance(Key.get(new TypeLiteral<String[]>() {})));
+    assertSame(strings, injector.getInstance(new Key<String[]>() {}));
+    assertSame(strings, injector.getInstance(String[].class));
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(String[].class).toInstance(strings);
+          bind(new TypeLiteral<String[]>() {}).toInstance(strings);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "A binding to java.lang.String[] was already configured");
+      Asserts.assertContains(expected.getMessage(),
+          "1 error[s]");
     }
   }
 

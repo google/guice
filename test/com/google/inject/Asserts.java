@@ -76,4 +76,12 @@ public class Asserts {
       throw new RuntimeException(e);
     }
   }
+
+  public static void assertNotSerializable(Object object) throws IOException {
+    try {
+      reserialize(object);
+      Assert.fail();
+    } catch (NotSerializableException expected) {
+    }
+  }
 }

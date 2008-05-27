@@ -18,8 +18,8 @@ package com.google.inject.name;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.SourceProviders;
+
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,7 +49,7 @@ public class Names {
   public static void bindProperties(final Binder binder,
       final Map<String, String> properties) {
     SourceProviders.withDefault(
-        new SimpleSourceProvider(SourceProviders.defaultSource()),
+        SourceProviders.defaultSource(),
         new Runnable() {
           public void run() {
             for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -67,7 +67,7 @@ public class Names {
   public static void bindProperties(final Binder binder,
       final Properties properties) {
     SourceProviders.withDefault(
-        new SimpleSourceProvider(SourceProviders.defaultSource()),
+        SourceProviders.defaultSource(),
         new Runnable() {
           public void run() {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -77,18 +77,5 @@ public class Names {
             }
           }
         });
-  }
-
-  static class SimpleSourceProvider implements SourceProvider {
-
-    final Object source;
-
-    SimpleSourceProvider(Object source) {
-      this.source = source;
-    }
-
-    public Object source() {
-      return source;
-    }
   }
 }

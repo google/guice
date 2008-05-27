@@ -18,19 +18,21 @@ package com.google.inject.spi;
 
 import static com.google.inject.internal.Objects.nonNull;
 
+import java.io.Serializable;
+
 /**
  * A message. Contains a source pointing to the code which resulted
  * in this message and a text message.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Message {
+public final class Message implements Serializable {
 
-  final Object source;
-  final String message;
+  private final String source;
+  private final String message;
 
   public Message(Object source, String message) {
-    this.source = nonNull(source, "source");
+    this.source = nonNull(source, "source").toString();
     this.message = nonNull(message, "message");
   }
 
@@ -39,22 +41,10 @@ public class Message {
   }
 
   /**
-   * Gets the source of the configuration which resulted in this error message.
-   */
-  public Object getSource() {
-    return source;
-  }
-
-  String sourceString = null;
-
-  /**
    * Returns a string representation of the source object. 
    */
-  public String getSourceString() {
-    if (sourceString == null) {
-      sourceString = source.toString();
-    }
-    return sourceString;
+  public String getSource() {
+    return source;
   }
 
   /**
@@ -65,7 +55,7 @@ public class Message {
   }
 
   public String toString() {
-    return getSourceString() + " " + message;
+    return source + " " + message;
   }
 
   public int hashCode() {

@@ -30,11 +30,11 @@ public class Types {
   private Types() {}
 
   /**
-   * Returns an equal Type that implements {@code Serializable}. Unfortunately,
-   * the Sun JDK 1.5 Type classes (among others) are not serializable, so we
-   * replace them with our own serializable implementations here.
+   * Returns a type that is functionally equal but not necessarily equal
+   * according to {@link Object#equals(Object) Object.equals()}. The returned
+   * type is {@link Serializable}.
    */
-  public static Type makeSerializable(Type type) {
+  public static Type canonicalize(Type type) {
     if (type instanceof ParameterizedTypeImpl
         || type instanceof GenericArrayTypeImpl) {
       return type;
@@ -47,6 +47,10 @@ public class Types {
     } else if (type instanceof GenericArrayType) {
       GenericArrayType g = (GenericArrayType) type;
       return newGenericArrayType(g.getGenericComponentType());
+
+    } else if (type instanceof Class<?> && ((Class<?>) type).isArray()) {
+      Class<?> c = (Class<?>) type;
+      return newGenericArrayType(c.getComponentType());
 
     } else {
       // type is either serializable as-is or unsupported
@@ -198,11 +202,11 @@ public class Types {
     private final Type[] typeArguments;
 
     private ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
-      this.ownerType = ownerType == null ? null : makeSerializable(ownerType);
-      this.rawType = makeSerializable(rawType);
+      this.ownerType = ownerType == null ? null : canonicalize(ownerType);
+      this.rawType = canonicalize(rawType);
       this.typeArguments = typeArguments.clone();
       for (int t = 0; t < this.typeArguments.length; t++) {
-        this.typeArguments[t] = makeSerializable(this.typeArguments[t]);
+        this.typeArguments[t] = canonicalize(this.typeArguments[t]);
       }
     }
 
@@ -238,7 +242,7 @@ public class Types {
     private final Type componentType;
 
     private GenericArrayTypeImpl(Type componentType) {
-      this.componentType = componentType;
+      this.componentType = canonicalize(componentType);
     }
 
     public Type getGenericComponentType() {

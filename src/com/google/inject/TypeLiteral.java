@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.Types;
+import static com.google.inject.internal.Types.canonicalize;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -66,20 +67,22 @@ public class TypeLiteral<T> implements Serializable {
    */
   @SuppressWarnings("unchecked")
   TypeLiteral(Type type) {
-    this.rawType = (Class<? super T>) Types.getRawType(nonNull(type, "type"));
-    this.type = type;
-    this.hashCode = Types.hashCode(type);
+    this.type = canonicalize(nonNull(type, "type"));
+    this.rawType = (Class<? super T>) Types.getRawType(this.type);
+    this.hashCode = Types.hashCode(this.type);
   }
 
   /**
-   * Gets type from super class's type parameter.
+   * Returns the type from super class's type parameter in {@link
+   * Types#canonicalize(Type) canonical form}.
    */
   static Type getSuperclassTypeParameter(Class<?> subclass) {
     Type superclass = subclass.getGenericSuperclass();
     if (superclass instanceof Class) {
       throw new RuntimeException("Missing type parameter.");
     }
-    return ((ParameterizedType) superclass).getActualTypeArguments()[0];
+    ParameterizedType parameterized = (ParameterizedType) superclass;
+    return canonicalize(parameterized.getActualTypeArguments()[0]);
   }
 
   /**
@@ -141,8 +144,15 @@ public class TypeLiteral<T> implements Serializable {
     return new TypeLiteral<T>(type);
   }
 
+  /**
+   * Returns the canonical form of this type literal for serialization. The
+   * returned instance is always a {@code TypeLiteral}, never a subclass. This
+   * prevents problems caused by serializing anonymous types.
+   */
   protected final Object writeReplace() {
-    return get(Types.makeSerializable(type));
+    return getClass() == TypeLiteral.class
+        ? this
+        : get(type);
   }
 
   private static final long serialVersionUID = 0;

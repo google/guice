@@ -300,7 +300,7 @@ public class Matchers {
     }
 
     @Override public String toString() {
-      return "package(" + targetPackage.getName() + ")";
+      return "inPackage(" + targetPackage.getName() + ")";
     }
 
     public Object readResolve() {

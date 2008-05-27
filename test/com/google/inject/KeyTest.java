@@ -80,6 +80,7 @@ public class KeyTest extends TestCase {
     assertEqualWhenReserialized(Key.get(B[].class));
     assertEqualWhenReserialized(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
     assertEqualWhenReserialized(Key.get(new TypeLiteral<List<B[]>>() {}));
+    assertEqualWhenReserialized(new Key<List<B[]>>() {});
   }
 
   interface B {}
