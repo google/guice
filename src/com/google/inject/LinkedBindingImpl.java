@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.LinkedBinding;
-import com.google.inject.spi.BindingVisitor;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.LinkedBinding;
 
 /**
  *
@@ -44,8 +44,7 @@ class LinkedBindingImpl<T> extends BindingImpl<T>
     return injector.getBinding(targetKey);
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return new ToStringBuilder(LinkedBinding.class)
         .add("key", key)
         .add("target", targetKey)

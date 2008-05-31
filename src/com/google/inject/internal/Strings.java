@@ -22,6 +22,7 @@ package com.google.inject.internal;
  * @author crazybob@google.com (Bob Lee)
  */
 public class Strings {
+  private Strings() {}
 
   /**
    * Returns a string that is equivalent to the specified string with its
@@ -44,8 +45,9 @@ public class Strings {
    * @throws NullPointerException if <tt>s</tt> is null
    */
   public static String capitalize(String s) {
-    if (s.length() == 0)
+    if (s.length() == 0) {
       return s;
+    }
     char first = s.charAt(0);
     char capitalized = Character.toUpperCase(first);
     return (first == capitalized)

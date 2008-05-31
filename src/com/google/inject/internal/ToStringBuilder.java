@@ -46,7 +46,7 @@ public class ToStringBuilder {
     return this;
   }
 
-  public String toString() {
+  @Override public String toString() {
     return name + map.toString().replace('{', '[').replace('}', ']');
   }
 }

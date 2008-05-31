@@ -37,15 +37,6 @@ class BoundProviderFactory<T>
     this.source = source;
   }
 
-  BoundProviderFactory(
-      Key<? extends Provider<? extends T>> providerKey,
-      InternalFactory<? extends Provider<? extends T>> providerFactory,
-      Object source) {
-    this.providerKey = providerKey;
-    this.providerFactory = providerFactory;
-    this.source = source;
-  }
-
   public void notify(final InjectorImpl injector) {
     injector.withDefaultSource(source, new Runnable() {
       public void run() {
@@ -58,10 +49,6 @@ class BoundProviderFactory<T>
     });
   }
 
-  public String toString() {
-    return providerKey.toString();
-  }
-
   public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
     Provider<? extends T> provider = providerFactory.get(context, injectionPoint);
     try {
@@ -71,5 +58,9 @@ class BoundProviderFactory<T>
     } catch(RuntimeException e) {
       throw new ProvisionException(e, ErrorMessages.ERROR_IN_PROVIDER);
     }
+  }
+
+  @Override public String toString() {
+    return providerKey.toString();
   }
 }

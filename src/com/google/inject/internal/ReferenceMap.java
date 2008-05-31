@@ -23,12 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.ref.Reference;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -83,7 +78,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public V get(final Object key) {
-    ensureNotNull(key);
+    Objects.nonNull(key, "key");
     return internalGet((K) key);
   }
 
@@ -100,7 +95,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public V remove(Object key) {
-    ensureNotNull(key);
+    Objects.nonNull(key, "key");
     Object referenceAwareKey = makeKeyReferenceAware(key);
     Object valueReference = delegate.remove(referenceAwareKey);
     return dereferenceValue(valueReference);
@@ -115,13 +110,13 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public boolean containsKey(Object key) {
-    ensureNotNull(key);
+    Objects.nonNull(key, "key");
     Object referenceAwareKey = makeKeyReferenceAware(key);
     return delegate.containsKey(referenceAwareKey);
   }
 
   public boolean containsValue(Object value) {
-    ensureNotNull(value);
+    Objects.nonNull(value, "value");
     for (Object valueReference : delegate.values()) {
       if (value.equals(dereferenceValue(valueReference))) {
         return true;
@@ -318,11 +313,11 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
       return wrapped;
     }
 
-    public int hashCode() {
+    @Override public int hashCode() {
       return wrapped.hashCode();
     }
 
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
       // defer to reference's equals() logic.
       return obj.equals(this);
     }
@@ -602,13 +597,6 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
 
     public void clear() {
       delegate.clear();
-    }
-  };
-
-  // TODO(kevinb): use preconditions
-  static void ensureNotNull(Object o) {
-    if (o == null) {
-      throw new NullPointerException();
     }
   }
 

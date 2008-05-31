@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.StackTraceElements;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class Scopes {
       };
     }
 
-    public String toString() {
+    @Override public String toString() {
       return "Scopes.SINGLETON";
     }
   };
@@ -85,7 +85,7 @@ public class Scopes {
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
       return unscoped;
     }
-    public String toString() {
+    @Override public String toString() {
       return "Scopes.NO_SCOPE";
     }
   };

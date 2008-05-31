@@ -84,7 +84,7 @@ class InjectionPoint<T> implements Dependency<T> {
 
   <T> T checkForNull(T value, Object source) {
     if (value != null
-        || getNullability() == Nullability.NULLABLE
+        || allowsNull()
         || allowNullsBadBadBad()) {
       return value;
     }

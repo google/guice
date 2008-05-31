@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class UniqueAnnotations {
+  private UniqueAnnotations() {}
   private static final AtomicInteger nextUniqueValue = new AtomicInteger(1);
 
   /**

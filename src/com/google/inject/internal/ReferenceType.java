@@ -51,5 +51,5 @@ public enum ReferenceType {
    *
    * @see java.lang.ref.PhantomReference
    */
-  PHANTOM;
+  PHANTOM
 }

@@ -16,10 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.InjectorImpl.SingleMemberInjector;
+import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.ErrorMessages;
 import com.google.inject.internal.ResolveFailedException;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * Injects constructors.
@@ -29,29 +32,20 @@ import java.lang.reflect.InvocationTargetException;
 class ConstructorInjector<T> {
 
   final Class<T> implementation;
-  final InjectorImpl.SingleMemberInjector[] memberInjectors;
-  final InjectorImpl.SingleParameterInjector<?>[] parameterInjectors;
+  final SingleMemberInjector[] memberInjectors;
+  final SingleParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
   ConstructorInjector(InjectorImpl injector, Class<T> implementation) {
     this.implementation = implementation;
     constructionProxy = injector.reflection.getConstructionProxy(implementation);
     parameterInjectors = createParameterInjector(injector, constructionProxy);
-    memberInjectors = injector.injectors.get(implementation)
-        .toArray(new InjectorImpl.SingleMemberInjector[0]);
+    List<SingleMemberInjector> memberInjectorsList = injector.injectors.get(implementation);
+    memberInjectors = memberInjectorsList.toArray(
+        new SingleMemberInjector[memberInjectorsList.size()]);
   }
 
-  /**
-   * Used to create an invalid injector.
-   */
-  private ConstructorInjector() {
-    implementation = null;
-    memberInjectors = null;
-    parameterInjectors = null;
-    constructionProxy = null;
-  }
-
-  InjectorImpl.SingleParameterInjector<?>[] createParameterInjector(
+  SingleParameterInjector<?>[] createParameterInjector(
       InjectorImpl injector, ConstructionProxy<T> constructionProxy) {
     try {
       return constructionProxy.getParameters().isEmpty()
@@ -120,20 +114,5 @@ class ConstructorInjector<T> {
     finally {
       constructionContext.removeCurrentReference();
     }
-  }
-
-  /**
-   * Returns an invalid constructor. This enables us to keep running and
-   * reporting legitimate errors.
-   */
-  static <T> ConstructorInjector<T> invalidConstructor() {
-    return new ConstructorInjector<T>() {
-      Object construct(InternalContext context, Class<?> expectedType) {
-        throw new UnsupportedOperationException();
-      }
-      public T get() {
-        throw new UnsupportedOperationException();
-      }
-    };
   }
 }

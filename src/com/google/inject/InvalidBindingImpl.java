@@ -32,7 +32,7 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
     throw new AssertionError();
   }
 
-  public String toString() {
+  @Override public String toString() {
     return "InvalidBinding";
   }
 }

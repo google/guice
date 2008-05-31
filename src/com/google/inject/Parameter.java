@@ -19,7 +19,6 @@ package com.google.inject;
 
 import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.Keys;
-import net.sf.cglib.reflect.FastConstructor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -72,11 +71,6 @@ class Parameter<T> {
       ErrorHandler errorHandler, Constructor constructor) {
     return forMember(errorHandler, constructor, constructor.getGenericParameterTypes(),
         constructor.getParameterAnnotations());
-  }
-
-  public static List<Parameter<?>> forConstructor(
-      ErrorHandler errorHandler, FastConstructor constructor) {
-    return forConstructor(errorHandler, constructor.getJavaConstructor());
   }
 
   private static List<Parameter<?>> forMember(ErrorHandler errorHandler, Member member,

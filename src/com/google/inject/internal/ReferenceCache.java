@@ -61,7 +61,7 @@ public abstract class ReferenceCache<K, V>
       ReferenceType keyReferenceType,
       ReferenceType valueReferenceType,
       final Function<? super K, ? extends V> function) {
-    ensureNotNull(function);
+    Objects.nonNull(function, "function");
     return new ReferenceCache<K, V>(keyReferenceType, valueReferenceType) {
       protected V create(K key) {
         return function.apply(key);

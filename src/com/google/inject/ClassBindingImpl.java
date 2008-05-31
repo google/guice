@@ -73,8 +73,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     return injectors;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return new ToStringBuilder(ClassBinding.class)
         .add("class", getBoundClass())
         .add("scope", scope)
