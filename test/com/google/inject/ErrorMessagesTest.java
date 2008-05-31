@@ -5,6 +5,11 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import junit.framework.TestCase;
 
+import static java.lang.annotation.ElementType.*;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 /**
  * Tests the error messages produced by Guice.
  *
@@ -64,6 +69,58 @@ public class ErrorMessagesTest extends TestCase {
   static abstract class AbstractClass {
     @Inject AbstractClass() { }
   }
+
+  public void testScopingAnnotationsOnAbstractTypes() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(A.class).to(AImpl.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Scope annotations on abstract types are not supported.");
+    }
+  }
+
+  @Singleton
+  interface A {}
+  class AImpl implements A {}
+
+  public void testBindingAnnotationsOnMethodsAndConstructors() {
+    try {
+      Guice.createInjector().getInstance(B.class);
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Binding annotations on injected methods are not supported. "
+              + "Annotate the parameter instead?");
+    }
+
+    try {
+      Guice.createInjector().getInstance(C.class);
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Binding annotations on injected constructors are not supported. "
+              + "Annotate the parameter instead?");
+    }
+  }
+
+  static class B {
+    @Inject @Green void injectMe(String greenString) {}
+  }
+
+  static class C {
+    @Inject @Green C(String greenString) {}
+  }
+
+  @Retention(RUNTIME)
+  @Target({ FIELD, PARAMETER, CONSTRUCTOR, METHOD })
+  @BindingAnnotation
+  @interface Green {}
+
 
   // TODO(kevinb): many many more
 
