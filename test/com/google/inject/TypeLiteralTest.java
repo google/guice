@@ -76,6 +76,34 @@ public class TypeLiteralTest extends TestCase {
     assertEquals(arrayAsClass, arrayAsType);
   }
 
+  /**
+   * Unlike Key, TypeLiteral retains full type information and differentiates
+   * between {@code int.class} and {@code Integer.class}.
+   */
+  public void testDifferentiationBetweenWrappersAndPrimitives() {
+    Class[] primitives = new Class[] {
+        boolean.class, byte.class, short.class, int.class, long.class,
+        float.class, double.class, char.class, void.class
+    };
+    Class[] wrappers = new Class[] {
+        Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
+        Float.class, Double.class, Character.class, Void.class
+    };
+
+    for (int t = 0; t < primitives.length; t++) {
+      @SuppressWarnings("unchecked")
+      TypeLiteral primitiveTl = TypeLiteral.get(primitives[t]);
+      @SuppressWarnings("unchecked")
+      TypeLiteral wrapperTl = TypeLiteral.get(wrappers[t]);
+
+      assertFalse(primitiveTl.equals(wrapperTl));
+      assertEquals(primitives[t], primitiveTl.getType());
+      assertEquals(wrappers[t], wrapperTl.getType());
+      assertEquals(primitives[t], primitiveTl.getRawType());
+      assertEquals(wrappers[t], wrapperTl.getRawType());
+    }
+  }
+
   public void testSerialization() throws IOException {
     assertEqualWhenReserialized(new TypeLiteral<List<String>>() {});
   }

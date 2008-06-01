@@ -73,6 +73,52 @@ public class KeyTest extends TestCase {
         new Key<List<Integer>>() {}.getTypeLiteral().getType()));
   }
 
+
+  /**
+   * Key canonicalizes {@link int.class} to {@code Integer.class}, and
+   * won't expose wrapper types.
+   */
+  public void testPrimitivesAndWrappersAreEqual() {
+    Class[] primitives = new Class[] {
+        boolean.class, byte.class, short.class, int.class, long.class,
+        float.class, double.class, char.class, void.class
+    };
+    Class[] wrappers = new Class[] {
+        Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
+        Float.class, Double.class, Character.class, Void.class
+    };
+
+    for (int t = 0; t < primitives.length; t++) {
+      @SuppressWarnings("unchecked")
+      Key primitiveKey = Key.get(primitives[t]);
+      @SuppressWarnings("unchecked")
+      Key wrapperKey = Key.get(wrappers[t]);
+
+      assertEquals(primitiveKey, wrapperKey);
+      assertEquals(wrappers[t], primitiveKey.getRawType());
+      assertEquals(wrappers[t], wrapperKey.getRawType());
+      assertEquals(wrappers[t], primitiveKey.getTypeLiteral().getType());
+      assertEquals(wrappers[t], wrapperKey.getTypeLiteral().getType());
+    }
+    
+    Key<Integer> integerKey = Key.get(Integer.class);
+
+    Class<Integer> intClassLiteral = int.class;
+    assertEquals(integerKey, Key.get(intClassLiteral));
+    assertEquals(integerKey, Key.get(intClassLiteral, Named.class));
+    assertEquals(integerKey, Key.get(intClassLiteral, Names.named("int")));
+
+    Type intType = int.class;
+    assertEquals(integerKey, Key.get(intType));
+    assertEquals(integerKey, Key.get(intType, Named.class));
+    assertEquals(integerKey, Key.get(intType, Names.named("int")));
+
+    TypeLiteral<Integer> intTypeLiteral = TypeLiteral.get(int.class);
+    assertEquals(integerKey, Key.get(intTypeLiteral));
+    assertEquals(integerKey, Key.get(intTypeLiteral, Named.class));
+    assertEquals(integerKey, Key.get(intTypeLiteral, Names.named("int")));
+  }
+
   public void testSerialization() throws IOException {
     assertEqualWhenReserialized(Key.get(B.class));
     assertEqualWhenReserialized(Key.get(B.class, Names.named("bee")));
