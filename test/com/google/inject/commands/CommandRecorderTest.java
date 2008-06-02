@@ -142,7 +142,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(int.class, Names.named("int")), command.getKey());
+            assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
             assertEquals(2, command.getTarget().get());
             return null;
           }
@@ -150,7 +150,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(long.class, Names.named("long")), command.getKey());
+            assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
             assertEquals(3L, command.getTarget().get());
             return null;
           }
@@ -158,7 +158,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(boolean.class, Names.named("boolean")), command.getKey());
+            assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, command.getTarget().get());
             return null;
           }
@@ -166,7 +166,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(double.class, Names.named("double")), command.getKey());
+            assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, command.getTarget().get());
             return null;
           }
@@ -174,7 +174,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(float.class, Names.named("float")), command.getKey());
+            assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, command.getTarget().get());
             return null;
           }
@@ -182,7 +182,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(short.class, Names.named("short")), command.getKey());
+            assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, command.getTarget().get());
             return null;
           }
@@ -190,7 +190,7 @@ public class CommandRecorderTest extends TestCase {
 
         new FailingVisitor() {
           @Override public Void visitBindConstant(BindConstantCommand command) {
-            assertEquals(Key.get(char.class, Names.named("char")), command.getKey());
+            assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', command.getTarget().get());
             return null;
           }

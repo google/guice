@@ -509,8 +509,8 @@ public class FactoryProviderTest extends TestCase {
       });
       fail();
     } catch (ProvisionException expected) {
-      assertContains(expected.getMessage(), "Parameter of type 'double' is not " +
-          "injectable or annotated with @Assisted");
+      assertContains(expected.getCause().getMessage(),
+          "Parameter of type 'double' is not injectable or annotated with @Assisted");
     }
   }
 

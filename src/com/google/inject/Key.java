@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.internal.Types;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -40,6 +41,10 @@ import java.lang.reflect.Type;
  *
  * <p>{@code Key} supports generic types via subclassing just like {@link
  * TypeLiteral}.
+ *
+ * <p>Keys do not differentiate between primitive types (int, char, etc.) and
+ * their correpsonding wrapper types (Integer, Character, etc.). Primitive
+ * types will be replaced with their wrapper types when keys are created.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -116,7 +121,7 @@ public class Key<T> implements Serializable {
   @SuppressWarnings("unchecked")
   private Key(Type type, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.get(type);
+    this.typeLiteral = Types.wrapPrimitives((TypeLiteral<T>) TypeLiteral.get(type));
     this.hashCode = computeHashCode();
   }
 
@@ -124,7 +129,7 @@ public class Key<T> implements Serializable {
   private Key(TypeLiteral<T> typeLiteral,
       AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = typeLiteral;
+    this.typeLiteral = Types.wrapPrimitives(typeLiteral);
     this.hashCode = computeHashCode();
   }
 

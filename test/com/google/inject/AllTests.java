@@ -40,7 +40,7 @@ public class AllTests {
     suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
-    suite.addTestSuite(ConstantConversionTest.class);
+    suite.addTestSuite(TypeConversionTest.class);
     // suite.addTestSuite(ErrorHandlingTest.class); not a testcase
     suite.addTestSuite(ErrorMessagesTest.class);
     suite.addTestSuite(GenericInjectionTest.class);

@@ -43,8 +43,8 @@ public class KeyTest extends TestCase {
 
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);
-    Key<Integer> ki = k.ofType(int.class);
-    assertEquals(int.class, ki.getRawType());
+    Key<Integer> ki = k.ofType(Integer.class);
+    assertEquals(Integer.class, ki.getRawType());
     assertEquals(Foo.class, ki.getAnnotationType());
   }
 
@@ -72,7 +72,6 @@ public class KeyTest extends TestCase {
     assertFalse(types[0].equals(
         new Key<List<Integer>>() {}.getTypeLiteral().getType()));
   }
-
 
   /**
    * Key canonicalizes {@link int.class} to {@code Integer.class}, and
@@ -102,21 +101,23 @@ public class KeyTest extends TestCase {
     }
     
     Key<Integer> integerKey = Key.get(Integer.class);
+    Key<Integer> integerKey2 = Key.get(Integer.class, Named.class);
+    Key<Integer> integerKey3 = Key.get(Integer.class, Names.named("int"));
 
     Class<Integer> intClassLiteral = int.class;
     assertEquals(integerKey, Key.get(intClassLiteral));
-    assertEquals(integerKey, Key.get(intClassLiteral, Named.class));
-    assertEquals(integerKey, Key.get(intClassLiteral, Names.named("int")));
+    assertEquals(integerKey2, Key.get(intClassLiteral, Named.class));
+    assertEquals(integerKey3, Key.get(intClassLiteral, Names.named("int")));
 
     Type intType = int.class;
     assertEquals(integerKey, Key.get(intType));
-    assertEquals(integerKey, Key.get(intType, Named.class));
-    assertEquals(integerKey, Key.get(intType, Names.named("int")));
+    assertEquals(integerKey2, Key.get(intType, Named.class));
+    assertEquals(integerKey3, Key.get(intType, Names.named("int")));
 
     TypeLiteral<Integer> intTypeLiteral = TypeLiteral.get(int.class);
     assertEquals(integerKey, Key.get(intTypeLiteral));
-    assertEquals(integerKey, Key.get(intTypeLiteral, Named.class));
-    assertEquals(integerKey, Key.get(intTypeLiteral, Names.named("int")));
+    assertEquals(integerKey2, Key.get(intTypeLiteral, Named.class));
+    assertEquals(integerKey3, Key.get(intTypeLiteral, Names.named("int")));
   }
 
   public void testSerialization() throws IOException {

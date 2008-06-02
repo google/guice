@@ -69,7 +69,7 @@ public final class BindConstantCommand implements Command {
   private static abstract class ConstantTarget<T> implements BindTarget<T> {
 
     /**
-     * Returns the type of constant, such as {@code int.class} or
+     * Returns the type of constant, such as {@code Integer.class} or
      * {@code Enum.class}.
      */
     abstract Class getType();
@@ -180,7 +180,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return int.class;
+          return Integer.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -199,7 +199,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return long.class;
+          return Long.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -218,7 +218,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return boolean.class;
+          return Boolean.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -237,7 +237,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return double.class;
+          return Double.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -256,7 +256,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return float.class;
+          return Float.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -275,7 +275,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return short.class;
+          return Short.class;
         }
         @Override public String toString() {
           return String.valueOf(value);
@@ -294,7 +294,7 @@ public final class BindConstantCommand implements Command {
           return value;
         }
         public Class getType() {
-          return char.class;
+          return Character.class;
         }
         @Override public String toString() {
           return String.valueOf(value);

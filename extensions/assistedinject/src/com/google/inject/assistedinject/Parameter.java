@@ -21,9 +21,6 @@ import com.google.inject.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Models a method or constructor parameter.
@@ -33,30 +30,6 @@ import java.util.Map;
  */
 class Parameter {
   
-  private static final Map<Type, Type> PRIMITIVE_COUNTERPARTS;
-  static {
-    Map<Type, Type> primitiveToWrapper = new HashMap<Type, Type>() {{
-        put(int.class, Integer.class);
-        put(long.class, Long.class);
-        put(boolean.class, Boolean.class);
-        put(byte.class, Byte.class);
-        put(short.class, Short.class);
-        put(float.class, Float.class);
-        put(double.class, Double.class);
-        put(char.class, Character.class);
-    }};
-
-    Map<Type, Type> counterparts = new HashMap<Type, Type>();
-    for (Map.Entry<Type, Type> entry : primitiveToWrapper.entrySet()) {
-      Type key = entry.getKey();
-      Type value = entry.getValue();
-      counterparts.put(key, value);
-      counterparts.put(value, key);
-    }
-
-    PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
-  }
-
   private final Type type;
   private final boolean isAssisted;
   private final Annotation bindingAnnotation;
@@ -112,9 +85,7 @@ class Parameter {
 
   public boolean isBound(Injector injector) {
     return isBound(injector, getPrimaryBindingKey())
-        || isBound(injector, getAlternateGuiceBindingKey())
-        || isBound(injector, fixAnnotations(getPrimaryBindingKey()))
-        || isBound(injector, fixAnnotations(getAlternateGuiceBindingKey()));
+        || isBound(injector, fixAnnotations(getPrimaryBindingKey()));
   }
 
   private boolean isBound(Injector injector, Key<?> key) {
@@ -153,16 +124,6 @@ class Parameter {
         ? getBindingForType(getProvidedType(type))
         : getBindingForType(type);
   }
-
-  private Key<?> getAlternateGuiceBindingKey() {
-    Type counterpart = (PRIMITIVE_COUNTERPARTS.containsKey(type))
-      ? PRIMITIVE_COUNTERPARTS.get(type)
-      : type;
-    return isProvider
-        ? getBindingForType(getProvidedType(counterpart))
-        : getBindingForType(counterpart);
-  }
-
 
   private Type getProvidedType(Type type) {
     return ((ParameterizedType)type).getActualTypeArguments()[0];

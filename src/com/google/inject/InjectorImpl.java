@@ -34,34 +34,6 @@ import java.util.*;
  */
 class InjectorImpl implements Injector {
 
-  /**
-   * Maps between primitive types and their wrappers and vice versa.
-   */
-  private static final Map<Class<?>, Class<?>> PRIMITIVE_COUNTERPARTS;
-  static {
-    Map<Class<?>, Class<?>> primitiveToWrapper =
-        new HashMap<Class<?>, Class<?>>() {{
-          put(int.class, Integer.class);
-          put(long.class, Long.class);
-          put(boolean.class, Boolean.class);
-          put(byte.class, Byte.class);
-          put(short.class, Short.class);
-          put(float.class, Float.class);
-          put(double.class, Double.class);
-          put(char.class, Character.class);
-        }};
-
-    Map<Class<?>, Class<?>> counterparts = new HashMap<Class<?>, Class<?>>();
-    for (Map.Entry<Class<?>, Class<?>> entry : primitiveToWrapper.entrySet()) {
-      Class<?> key = entry.getKey();
-      Class<?> value = entry.getValue();
-      counterparts.put(key, value);
-      counterparts.put(value, key);
-    }
-
-    PRIMITIVE_COUNTERPARTS = Collections.unmodifiableMap(counterparts);
-  }
-
   final Injector parentInjector;
   final Map<Key<?>, BindingImpl<?>> explicitBindings
       = new HashMap<Key<?>, BindingImpl<?>>();
@@ -354,32 +326,12 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Gets the binding corresponding to a primitives wrapper type or a wrapper
-   * type's primitive. The compiler treats them interchangeably, so we do, too.
-   */
-  <T> BindingImpl<T> getBoxedOrUnboxedBinding(Key<T> key) {
-    // This is a safe cast, just as this is safe: Class<Integer> c = int.class;
-    @SuppressWarnings("unchecked")
-    Class<T> primitiveCounterpart
-        = (Class<T>) PRIMITIVE_COUNTERPARTS.get(key.getRawType());
-    if (primitiveCounterpart != null) {
-      // Do we need to search more than explicit bindings? I don't think so.
-      // Constant type conversion already supports both primitives and their
-      // wrappers, and limiting this to explicit bindings means we don't have
-      // to worry about recursion.
-      return getExplicitBindingImpl(key.ofType(primitiveCounterpart));
-    }
-
-    return null;
-  }
-
-  /**
    * Converts a constant string binding to the required type.
    *
-   * <p>If the required type is elligible for conversion and a constant string
+   * <p>If the required type is eligible for conversion and a constant string
    * binding is found but the actual conversion fails, an error is generated.
    *
-   * <p>If the type is not elligible for conversion or a constant string
+   * <p>If the type is not eligible for conversion or a constant string
    * binding is not found, this method returns null.
    */
   private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key)
@@ -427,8 +379,7 @@ class InjectorImpl implements Injector {
       // We have to filter out primitive types because an Integer is not an
       // instance of int, and we provide converters for all the primitive types
       // and know that they work anyway.
-      if (!type.rawType.isPrimitive()
-          && !type.getRawType().isInstance(converted)) {
+      if (!type.getRawType().isInstance(converted)) {
         throw new ResolveFailedException(ErrorMessages.CONVERSION_TYPE_ERROR, converted, type);
       }
 
@@ -524,8 +475,8 @@ class InjectorImpl implements Injector {
    */
   <T> BindingImpl<T> createUnitializedBinding(Class<T> type,
       Scope scope, Object source) throws ResolveFailedException {
-    // Don't try to inject primitives, arrays, or enums.
-    if (type.isArray() || type.isEnum() || type.isPrimitive()) {
+    // Don't try to inject arrays, or enums.
+    if (type.isArray() || type.isEnum()) {
       throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, type);
     }
 
@@ -684,12 +635,6 @@ class InjectorImpl implements Injector {
       BindingImpl<T> binding
           = (BindingImpl<T>) createProviderBinding((Key) key);
       return binding;
-    }
-
-    // Treat primitive types and their wrappers interchangeably.
-    BindingImpl<T> boxedOrUnboxed = getBoxedOrUnboxedBinding(key);
-    if (boxedOrUnboxed != null) {
-      return boxedOrUnboxed;
     }
 
     // Try to convert a constant string binding to the requested type.

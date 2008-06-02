@@ -56,7 +56,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
     convertToPrimitiveType(float.class, Float.class);
     convertToPrimitiveType(double.class, Double.class);
 
-    TypeConverter characterConverter = new TypeConverter() {
+    convertToClass(Character.class, new TypeConverter() {
       public Object convert(String value, TypeLiteral<?> toType) {
         value = value.trim();
         if (value.length() != 1) {
@@ -68,10 +68,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
       @Override public String toString() {
         return "TypeConverter<Character>";
       }
-    };
-
-    convertToClass(char.class, characterConverter);
-    convertToClass(Character.class, characterConverter);
+    });
 
     convertToClasses(Matchers.subclassesOf(Enum.class), new TypeConverter() {
       @SuppressWarnings("unchecked")
@@ -116,7 +113,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
       final Class<T> wrapperType) {
     try {
       final Method parser = wrapperType.getMethod(
-        "parse" + Strings.capitalize(primitiveType.getName()), String.class);
+          "parse" + Strings.capitalize(primitiveType.getName()), String.class);
 
       TypeConverter typeConverter = new TypeConverter() {
         @SuppressWarnings("unchecked")
@@ -137,10 +134,8 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
         }
       };
 
-      convertToClass(primitiveType, typeConverter);
       convertToClass(wrapperType, typeConverter);
-    }
-    catch (NoSuchMethodException e) {
+    } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
   }
@@ -161,7 +156,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
         return typeMatcher.matches(clazz);
       }
 
-      public String toString() {
+      @Override public String toString() {
         return typeMatcher.toString();
       }
     }, converter);
@@ -175,7 +170,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
 
   @Override public Boolean visitConvertToTypes(ConvertToTypesCommand command) {
     converters.add(MatcherAndConverter.newInstance(
-        command.getTypeMatcher(), command.getTypeConverter()));
+        command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;
   }
 }

@@ -17,17 +17,50 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.TypeLiteral;
+
 import java.io.Serializable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class Types {
   private Types() {}
+
+  private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER;
+  static {
+    Map<TypeLiteral<?>, TypeLiteral<?>> m = new HashMap<TypeLiteral<?>, TypeLiteral<?>>();
+    m.put(TypeLiteral.get(boolean.class), TypeLiteral.get(Boolean.class));
+    m.put(TypeLiteral.get(byte.class), TypeLiteral.get(Byte.class));
+    m.put(TypeLiteral.get(short.class), TypeLiteral.get(Short.class));
+    m.put(TypeLiteral.get(int.class), TypeLiteral.get(Integer.class));
+    m.put(TypeLiteral.get(long.class), TypeLiteral.get(Long.class));
+    m.put(TypeLiteral.get(float.class), TypeLiteral.get(Float.class));
+    m.put(TypeLiteral.get(double.class), TypeLiteral.get(Double.class));
+    m.put(TypeLiteral.get(char.class), TypeLiteral.get(Character.class));
+    m.put(TypeLiteral.get(void.class), TypeLiteral.get(Void.class));
+    PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(m);
+  }
+
+  /**
+   * Returns an equivalent (but not necessarily equal) type literal that is
+   * free of primitive types. Type literals of primitives will return the
+   * corresponding wrapper types.
+   */
+  public static <T> TypeLiteral<T> wrapPrimitives(TypeLiteral<T> typeLiteral) {
+    @SuppressWarnings("unchecked")
+    TypeLiteral<T> wrappedPrimitives = (TypeLiteral<T>) PRIMITIVE_TO_WRAPPER.get(typeLiteral);
+    return wrappedPrimitives != null
+        ? wrappedPrimitives
+        : typeLiteral;
+  }
 
   /**
    * Returns a type that is functionally equal but not necessarily equal
