@@ -41,20 +41,17 @@ class BindCommandProcessor extends CommandProcessor {
   private final Map<Class<? extends Annotation>, Scope> scopes;
   private final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
-  private final Stage stage;
   private final Map<Key<?>, BindingImpl<?>> bindings;
   private final Map<Object, Void> outstandingInjections;
   private final List<Runnable> untargettedBindings = new ArrayList<Runnable>();
 
   BindCommandProcessor(InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
-      Stage stage,
       Map<Key<?>, BindingImpl<?>> bindings,
       Map<Object, Void> outstandingInjections) {
     super(injector.errorHandler);
     this.injector = injector;
     this.scopes = scopes;
-    this.stage = stage;
     this.bindings = bindings;
     this.outstandingInjections = outstandingInjections;
   }
@@ -229,30 +226,6 @@ class BindCommandProcessor extends CommandProcessor {
   public void createUntargettedBindings() {
     for (Runnable untargettedBinding : untargettedBindings) {
       untargettedBinding.run();
-    }
-  }
-
-  public void loadEagerSingletons(InjectorImpl injector) {
-    // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
-    for (final BindingImpl<?> binding : bindings.values()) {
-      if (stage == Stage.PRODUCTION || binding.getLoadStrategy() == LoadStrategy.EAGER) {
-        injector.callInContext(new ContextualCallable<Void>() {
-          public Void call(InternalContext context) {
-            InjectionPoint<?> injectionPoint
-                = InjectionPoint.newInstance(binding.key, context.getInjector());
-            context.setInjectionPoint(injectionPoint);
-            try {
-              binding.internalFactory.get(context, injectionPoint);
-              return null;
-            } catch(ProvisionException provisionException) {
-              provisionException.addContext(injectionPoint);
-              throw provisionException;
-            } finally {
-              context.setInjectionPoint(null);
-            }
-          }
-        });
-      }
     }
   }
 

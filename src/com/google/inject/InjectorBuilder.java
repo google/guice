@@ -139,7 +139,7 @@ class InjectorBuilder {
 
     bindLogger();
     bindCommandProcesor = new BindCommandProcessor(
-        injector, injector.scopes, stage, injector.explicitBindings,
+        injector, injector.scopes, injector.explicitBindings,
         injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands);
     bindCommandProcesor.createUntargettedBindings();
@@ -187,9 +187,34 @@ class InjectorBuilder {
     injector.fulfillOutstandingInjections();
     stopwatch.resetAndLog("Instance injection");
 
-    bindCommandProcesor.loadEagerSingletons(injector);
+    loadEagerSingletons();
     stopwatch.resetAndLog("Preloading");
   }
+
+  public void loadEagerSingletons() {
+    // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
+    for (final BindingImpl<?> binding : injector.explicitBindings.values()) {
+      if (stage == Stage.PRODUCTION || binding.getLoadStrategy() == LoadStrategy.EAGER) {
+        injector.callInContext(new ContextualCallable<Void>() {
+          public Void call(InternalContext context) {
+            InjectionPoint<?> injectionPoint
+                = InjectionPoint.newInstance(binding.key, context.getInjector());
+            context.setInjectionPoint(injectionPoint);
+            try {
+              binding.internalFactory.get(context, injectionPoint);
+              return null;
+            } catch(ProvisionException provisionException) {
+              provisionException.addContext(injectionPoint);
+              throw provisionException;
+            } finally {
+              context.setInjectionPoint(null);
+            }
+          }
+        });
+      }
+    }
+  }
+
 
   private static class BuiltInModule extends AbstractModule {
     final Injector injector;
