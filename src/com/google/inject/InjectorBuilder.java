@@ -20,6 +20,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
+import static com.google.inject.internal.GoogleCollections.concat;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.SourceProviders;
@@ -193,8 +194,10 @@ class InjectorBuilder {
 
   public void loadEagerSingletons() {
     // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
-    for (final BindingImpl<?> binding : injector.explicitBindings.values()) {
-      if (stage == Stage.PRODUCTION || binding.getLoadStrategy() == LoadStrategy.EAGER) {
+    for (final BindingImpl<?> binding
+        : concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
+      if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
+          || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         injector.callInContext(new ContextualCallable<Void>() {
           public Void call(InternalContext context) {
             InjectionPoint<?> injectionPoint
@@ -214,7 +217,6 @@ class InjectorBuilder {
       }
     }
   }
-
 
   private static class BuiltInModule extends AbstractModule {
     final Injector injector;

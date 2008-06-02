@@ -25,22 +25,28 @@ import java.io.IOException;
  */
 public class ScopesTest extends TestCase {
 
+  private final AbstractModule singletonsModule = new AbstractModule() {
+    protected void configure() {
+      bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
+      bind(AnnotatedSingleton.class);
+      bind(EagerSingleton.class).asEagerSingleton();
+      bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
+      bind(DependsOnJustInTimeSingleton.class);
+      bind(NotASingleton.class);
+    }
+  };
+
   @Override protected void setUp() throws Exception {
     AnnotatedSingleton.nextInstanceId = 0;
     BoundAsSingleton.nextInstanceId = 0;
     EagerSingleton.nextInstanceId = 0;
     RealLinkedSingleton.nextInstanceId = 0;
+    JustInTimeSingleton.nextInstanceId = 0;
+    NotASingleton.nextInstanceId = 0;
   }
 
   public void testSingletons() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
-        bind(AnnotatedSingleton.class);
-        bind(EagerSingleton.class).asEagerSingleton();
-        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
-      }
-    });
+    Injector injector = Guice.createInjector(singletonsModule);
 
     assertSame(
         injector.getInstance(BoundAsSingleton.class),
@@ -57,6 +63,15 @@ public class ScopesTest extends TestCase {
     assertSame(
         injector.getInstance(LinkedSingleton.class),
         injector.getInstance(LinkedSingleton.class));
+
+
+    assertSame(
+        injector.getInstance(JustInTimeSingleton.class),
+        injector.getInstance(JustInTimeSingleton.class));
+
+    assertNotSame(
+        injector.getInstance(NotASingleton.class),
+        injector.getInstance(NotASingleton.class));
   }
 
   public void testJustInTimeAnnotatedSingleton() {
@@ -86,35 +101,25 @@ public class ScopesTest extends TestCase {
   }
 
   public void testSingletonsInProductionStage() {
-    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
-      protected void configure() {
-        bind(AnnotatedSingleton.class);
-        bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
-        bind(EagerSingleton.class).asEagerSingleton();
-        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
-      }
-    });
+    Guice.createInjector(Stage.PRODUCTION, singletonsModule);
 
     assertEquals(1, AnnotatedSingleton.nextInstanceId);
     assertEquals(1, BoundAsSingleton.nextInstanceId);
     assertEquals(1, EagerSingleton.nextInstanceId);
     assertEquals(1, RealLinkedSingleton.nextInstanceId);
+    assertEquals(1, JustInTimeSingleton.nextInstanceId);
+    assertEquals(0, NotASingleton.nextInstanceId);
   }
 
   public void testSingletonsInDevelopmentStage() {
-    Guice.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
-      protected void configure() {
-        bind(AnnotatedSingleton.class);
-        bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
-        bind(EagerSingleton.class).asEagerSingleton();
-        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
-      }
-    });
+    Guice.createInjector(Stage.DEVELOPMENT, singletonsModule);
 
     assertEquals(0, AnnotatedSingleton.nextInstanceId);
     assertEquals(0, BoundAsSingleton.nextInstanceId);
     assertEquals(1, EagerSingleton.nextInstanceId);
     assertEquals(0, RealLinkedSingleton.nextInstanceId);
+    assertEquals(0, JustInTimeSingleton.nextInstanceId);
+    assertEquals(0, NotASingleton.nextInstanceId);
   }
 
   public void testSingletonScopeIsNotSerializable() throws IOException {
@@ -145,6 +150,21 @@ public class ScopesTest extends TestCase {
 
   @Singleton
   static class RealLinkedSingleton implements LinkedSingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  static class DependsOnJustInTimeSingleton {
+    @Inject JustInTimeSingleton justInTimeSingleton;
+  }
+
+  @Singleton
+  static class JustInTimeSingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  static class NotASingleton {
     static int nextInstanceId;
     final int instanceId = nextInstanceId++;
   }
