@@ -31,8 +31,9 @@ class LinkedProviderBindingImpl<T> extends BindingImpl<T>
 
   LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
-      Key<? extends Provider<? extends T>> providerKey) {
-    super(injector, key, source, internalFactory, scope);
+      Key<? extends Provider<? extends T>> providerKey,
+      LoadStrategy loadStrategy) {
+    super(injector, key, source, internalFactory, scope, loadStrategy);
     this.providerKey = providerKey;
   }
 

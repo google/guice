@@ -20,7 +20,10 @@ import com.google.inject.commands.BindCommand;
 import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindScoping;
 import com.google.inject.commands.BindTarget;
-import com.google.inject.internal.*;
+import com.google.inject.internal.Annotations;
+import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.StackTraceElements;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -38,8 +41,6 @@ class BindCommandProcessor extends CommandProcessor {
   private final Map<Class<? extends Annotation>, Scope> scopes;
   private final List<CreationListener> creationListeners
       = new ArrayList<CreationListener>();
-  private final List<ContextualCallable<Void>> eagerSingletonCreators
-      = new ArrayList<ContextualCallable<Void>>();
   private final Stage stage;
   private final Map<Key<?>, BindingImpl<?>> bindings;
   private final Map<Object, Void> outstandingInjections;
@@ -71,8 +72,9 @@ class BindCommandProcessor extends CommandProcessor {
 
     validateKey(command.getSource(), command.getKey());
 
-    // TODO(jessewilson): Scope annotation on type, like @Singleton
-    final boolean shouldPreload = command.getScoping().isEagerSingleton();
+    final LoadStrategy loadStrategy = command.getScoping().isEagerSingleton()
+        ? LoadStrategy.EAGER
+        : LoadStrategy.LAZY;
     final Scope scope = command.getScoping().acceptVisitor(new BindScoping.Visitor<Scope>() {
       public Scope visitEagerSingleton() {
         return Scopes.SINGLETON;
@@ -104,8 +106,8 @@ class BindCommandProcessor extends CommandProcessor {
         outstandingInjections.put(instance, null);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
-        createBinding(source, shouldPreload, new InstanceBindingImpl<T>(
-            injector, key, source, scopedFactory, instance));
+        putBinding(new InstanceBindingImpl<T>(
+                injector, key, source, scopedFactory, instance));
         return null;
       }
 
@@ -115,8 +117,8 @@ class BindCommandProcessor extends CommandProcessor {
         outstandingInjections.put(provider, null);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
-        createBinding(source, shouldPreload, new ProviderInstanceBindingImpl<T>(
-            injector, key, source, scopedFactory, scope, provider));
+        putBinding(new ProviderInstanceBindingImpl<T>(
+                injector, key, source, scopedFactory, scope, provider, loadStrategy));
         return null;
       }
 
@@ -126,8 +128,8 @@ class BindCommandProcessor extends CommandProcessor {
         creationListeners.add(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, scope);
-        createBinding(source, shouldPreload, new LinkedProviderBindingImpl<T>(
-            injector, key, source, scopedFactory, scope, providerKey));
+        putBinding(new LinkedProviderBindingImpl<T>(
+                injector, key, source, scopedFactory, scope, providerKey, loadStrategy));
         return null;
       }
 
@@ -140,8 +142,8 @@ class BindCommandProcessor extends CommandProcessor {
         creationListeners.add(factory);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
-        createBinding(source, shouldPreload, new LinkedBindingImpl<T>(
-            injector, key, source, scopedFactory, scope, targetKey));
+        putBinding(new LinkedBindingImpl<T>(
+                injector, key, source, scopedFactory, scope, targetKey, loadStrategy));
         return null;
       }
 
@@ -154,7 +156,7 @@ class BindCommandProcessor extends CommandProcessor {
         // @ImplementedBy annotation or something.
         if (key.hasAnnotationType() || !(type instanceof Class<?>)) {
           addError(source, ErrorMessages.MISSING_IMPLEMENTATION);
-          createBinding(source, shouldPreload, invalidBinding(injector, key, source));
+          putBinding(invalidBinding(injector, key, source));
           return null;
         }
 
@@ -163,11 +165,11 @@ class BindCommandProcessor extends CommandProcessor {
         Class<T> clazz = (Class<T>) type;
         final BindingImpl<T> binding;
         try {
-          binding = injector.createUnitializedBinding(clazz, scope, source);
-          createBinding(source, shouldPreload, binding);
+          binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy);
+          putBinding(binding);
         } catch (ResolveFailedException e) {
           injector.errorHandler.handle(source, e.getMessage());
-          createBinding(source, shouldPreload, invalidBinding(injector, key, source));
+          putBinding(invalidBinding(injector, key, source));
           return null;
         }
 
@@ -224,62 +226,39 @@ class BindCommandProcessor extends CommandProcessor {
     return true;
   }
 
-  private <T> void createBinding(Object source, boolean shouldPreload,
-      BindingImpl<T> binding) {
-    putBinding(binding);
-
-    // Register to preload if necessary.
-    if (binding.getScope() == Scopes.SINGLETON) {
-      if (stage == Stage.PRODUCTION || shouldPreload) {
-        eagerSingletonCreators.add(new EagerSingletonCreator(binding.key, binding.internalFactory));
-      }
-    } else {
-      if (shouldPreload) {
-        addError(source, ErrorMessages.PRELOAD_NOT_ALLOWED);
-      }
-    }
-  }
-
   public void createUntargettedBindings() {
     for (Runnable untargettedBinding : untargettedBindings) {
       untargettedBinding.run();
     }
   }
 
-  public void createEagerSingletons(InjectorImpl injector) {
-    for (ContextualCallable<Void> preloader : eagerSingletonCreators) {
-      injector.callInContext(preloader);
+  public void loadEagerSingletons(InjectorImpl injector) {
+    // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
+    for (final BindingImpl<?> binding : bindings.values()) {
+      if (stage == Stage.PRODUCTION || binding.getLoadStrategy() == LoadStrategy.EAGER) {
+        injector.callInContext(new ContextualCallable<Void>() {
+          public Void call(InternalContext context) {
+            InjectionPoint<?> injectionPoint
+                = InjectionPoint.newInstance(binding.key, context.getInjector());
+            context.setInjectionPoint(injectionPoint);
+            try {
+              binding.internalFactory.get(context, injectionPoint);
+              return null;
+            } catch(ProvisionException provisionException) {
+              provisionException.addContext(injectionPoint);
+              throw provisionException;
+            } finally {
+              context.setInjectionPoint(null);
+            }
+          }
+        });
+      }
     }
   }
 
   public void runCreationListeners(InjectorImpl injector) {
     for (CreationListener creationListener : creationListeners) {
       creationListener.notify(injector);
-    }
-  }
-
-  private static class EagerSingletonCreator implements ContextualCallable<Void> {
-    private final Key<?> key;
-    private final InternalFactory<?> factory;
-
-    public EagerSingletonCreator(Key<?> key, InternalFactory<?> factory) {
-      this.key = key;
-      this.factory = Objects.nonNull(factory, "factory");
-    }
-
-    public Void call(InternalContext context) {
-      InjectionPoint<?> injectionPoint
-          = InjectionPoint.newInstance(key, context.getInjector());
-      context.setInjectionPoint(injectionPoint);
-      try {
-        factory.get(context, injectionPoint);
-        return null;
-      } catch(ProvisionException provisionException) {
-        provisionException.addContext(injectionPoint);
-        throw provisionException;
-      } finally {
-        context.setInjectionPoint(null);
-      }
     }
   }
 

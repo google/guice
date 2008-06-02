@@ -33,13 +33,12 @@ class ConstantBindingImpl<T> extends BindingImpl<T>
 
   ConstantBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<T> internalFactory, T value) {
-    super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
+    super(injector, key, source, internalFactory, Scopes.NO_SCOPE, LoadStrategy.LAZY);
     this.value = value;
     this.provider = Providers.of(value);
   }
 
-  @Override
-  public Provider<T> getProvider() {
+  @Override public Provider<T> getProvider() {
     return this.provider;
   }
 
@@ -51,8 +50,7 @@ class ConstantBindingImpl<T> extends BindingImpl<T>
     return this.value;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return new ToStringBuilder(ConstantBinding.class)
         .add("key", key)
         .add("value", value)

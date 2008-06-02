@@ -31,8 +31,9 @@ class LinkedBindingImpl<T> extends BindingImpl<T>
 
   LinkedBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
-      Key<? extends T> targetKey) {
-    super(injector, key, source, internalFactory, scope);
+      Key<? extends T> targetKey,
+      LoadStrategy loadStrategy) {
+    super(injector, key, source, internalFactory, scope, loadStrategy);
     this.targetKey = targetKey;
   }
 

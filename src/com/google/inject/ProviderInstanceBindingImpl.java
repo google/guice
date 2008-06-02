@@ -34,8 +34,9 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   ProviderInstanceBindingImpl(InjectorImpl injector, Key<T> key,
       Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
-      Provider<? extends T> providerInstance) {
-    super(injector, key, source, internalFactory, scope);
+      Provider<? extends T> providerInstance,
+      LoadStrategy loadStrategy) {
+    super(injector, key, source, internalFactory, scope, loadStrategy);
     this.providerInstance = providerInstance;
   }
 

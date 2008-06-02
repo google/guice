@@ -190,7 +190,8 @@ class InjectorImpl implements Injector {
               new InternalFactoryToProviderAdapter(binding.getProvider(),
                   binding.getSource()),
               Scopes.NO_SCOPE,
-              binding.getProvider());
+              binding.getProvider(),
+              LoadStrategy.LAZY);
         } else {
           bindingImpl = null;
         }
@@ -250,7 +251,7 @@ class InjectorImpl implements Injector {
    * from Binding<T>.
    */
   private <T> BindingImpl<Provider<T>> createProviderBinding(
-      Key<Provider<T>> key) throws ResolveFailedException {
+      Key<Provider<T>> key, LoadStrategy loadStrategy) throws ResolveFailedException {
     Type providerType = key.getTypeLiteral().getType();
 
     // If the Provider has no type parameter (raw Provider)...
@@ -265,7 +266,7 @@ class InjectorImpl implements Injector {
     @SuppressWarnings("unchecked")
     Key<T> providedKey = (Key<T>) key.ofType(entryType);
 
-    return new ProviderBindingImpl<T>(this, key, getBindingOrThrow(providedKey));
+    return new ProviderBindingImpl<T>(this, key, getBindingOrThrow(providedKey), loadStrategy);
   }
 
   void handleMissingBinding(Object source, Key<?> key) {
@@ -290,9 +291,9 @@ class InjectorImpl implements Injector {
     final Binding<T> providedBinding;
 
     ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key,
-        Binding<T> providedBinding) {
+        Binding<T> providedBinding, LoadStrategy loadStrategy) {
       super(injector, key, SourceProviders.UNKNOWN_SOURCE,
-          createInternalFactory(providedBinding), Scopes.NO_SCOPE);
+          createInternalFactory(providedBinding), Scopes.NO_SCOPE, loadStrategy);
       this.providedBinding = providedBinding;
     }
 
@@ -403,7 +404,7 @@ class InjectorImpl implements Injector {
     ConvertedConstantBindingImpl(InjectorImpl injector, Key<T> key, T value,
         Binding<String> originalBinding) {
       super(injector, key, SourceProviders.UNKNOWN_SOURCE,
-          new ConstantFactory<T>(value), Scopes.NO_SCOPE);
+          new ConstantFactory<T>(value), Scopes.NO_SCOPE, LoadStrategy.LAZY);
       this.value = value;
       this.provider = Providers.of(value);
       this.originalBinding = originalBinding;
@@ -436,14 +437,10 @@ class InjectorImpl implements Injector {
     }
   }
 
-  <T> BindingImpl<T> createBindingFromType(Class<T> type)
+  <T> BindingImpl<T> createBindingFromType(Class<T> type, LoadStrategy loadStrategy)
       throws ResolveFailedException {
-    return createBindingFromType(type, null, SourceProviders.defaultSource());
-  }
-
-  <T> BindingImpl<T> createBindingFromType(Class<T> type, Scope scope,
-      Object source) throws ResolveFailedException {
-    BindingImpl<T> binding = createUnitializedBinding(type, scope, source);
+    BindingImpl<T> binding = createUnitializedBinding(
+        type, null, SourceProviders.defaultSource(), loadStrategy);
     initializeBinding(binding);
     return binding;
   }
@@ -474,7 +471,7 @@ class InjectorImpl implements Injector {
    * a scope on the type if none is specified.
    */
   <T> BindingImpl<T> createUnitializedBinding(Class<T> type,
-      Scope scope, Object source) throws ResolveFailedException {
+      Scope scope, Object source, LoadStrategy loadStrategy) throws ResolveFailedException {
     // Don't try to inject arrays, or enums.
     if (type.isArray() || type.isEnum()) {
       throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, type);
@@ -484,14 +481,14 @@ class InjectorImpl implements Injector {
     ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
       // TODO: Scope internal factory.
-      return createImplementedByBinding(type, implementedBy);
+      return createImplementedByBinding(type, implementedBy, loadStrategy);
     }
 
     // Handle @ProvidedBy.
     ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
       // TODO: Scope internal factory.
-      return createProvidedByBinding(type, providedBy);
+      return createProvidedByBinding(type, providedBy, loadStrategy);
     }
 
     // We can't inject abstract classes.
@@ -512,12 +509,12 @@ class InjectorImpl implements Injector {
 
     Key<T> key = Key.get(type);
 
-    LateBoundConstructor<T> lateBoundConstructor
-        = new LateBoundConstructor<T>();
+    LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
     InternalFactory<? extends T> scopedFactory
         = Scopes.scope(key, this, lateBoundConstructor, scope);
 
-    return new ClassBindingImpl<T>(this, key, source, scopedFactory, scope, lateBoundConstructor);
+    return new ClassBindingImpl<T>(this, key, source, scopedFactory, scope, lateBoundConstructor,
+        loadStrategy);
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {
@@ -547,7 +544,7 @@ class InjectorImpl implements Injector {
    * Creates a binding for a type annotated with @ProvidedBy.
    */
   <T> BindingImpl<T> createProvidedByBinding(final Class<T> type,
-      ProvidedBy providedBy) throws ResolveFailedException {
+      ProvidedBy providedBy, LoadStrategy loadStrategy) throws ResolveFailedException {
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
@@ -583,14 +580,14 @@ class InjectorImpl implements Injector {
 
     return new LinkedProviderBindingImpl<T>(this, Key.get(type),
         StackTraceElements.forType(type), internalFactory, Scopes.NO_SCOPE,
-        providerKey);
+        providerKey, loadStrategy);
   }
 
   /**
    * Creates a binding for a type annotated with @ImplementedBy.
    */
   <T> BindingImpl<T> createImplementedByBinding(Class<T> type,
-      ImplementedBy implementedBy) throws ResolveFailedException {
+      ImplementedBy implementedBy, LoadStrategy loadStrategy) throws ResolveFailedException {
     // TODO: Use scope annotation on type if present. Right now, we always
     // use NO_SCOPE.
 
@@ -622,7 +619,7 @@ class InjectorImpl implements Injector {
 
     return new LinkedBindingImpl<T>(this, Key.get(type), 
         StackTraceElements.forType(type), internalFactory, Scopes.NO_SCOPE,
-        Key.get(subclass));
+        Key.get(subclass), loadStrategy);
   }
 
   <T> BindingImpl<T> createBindingJustInTime(Key<T> key) throws ResolveFailedException {
@@ -633,7 +630,7 @@ class InjectorImpl implements Injector {
       // BindingImpl<Provider<X>>.
       @SuppressWarnings({ "UnnecessaryLocalVariable", "unchecked" })
       BindingImpl<T> binding
-          = (BindingImpl<T>) createProviderBinding((Key) key);
+          = (BindingImpl<T>) createProviderBinding((Key) key, LoadStrategy.LAZY);
       return binding;
     }
 
@@ -659,7 +656,7 @@ class InjectorImpl implements Injector {
     // Create a binding based on the raw type.
     @SuppressWarnings("unchecked")
     Class<T> clazz = (Class<T>) key.getTypeLiteral().getRawType();
-    return createBindingFromType(clazz);
+    return createBindingFromType(clazz, LoadStrategy.LAZY);
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key)
@@ -916,9 +913,6 @@ class InjectorImpl implements Injector {
       }
       catch (IllegalAccessException e) {
         throw new AssertionError(e);
-      }
-      catch (ProvisionException e) {
-        throw e;
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause() != null ? e.getCause() : e;

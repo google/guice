@@ -223,9 +223,6 @@ public class ErrorMessages {
   public static final String BINDING_ALREADY_SET = "A binding to %s was already"
       + " configured at %s.";
 
-  public static final String PRELOAD_NOT_ALLOWED = "Preloading is only supported for"
-      + " singleton-scoped bindings.";
-
   public static final String ERROR_INJECTING_FIELD = "Error injecting field";
 
   public static final String ERROR_INJECTING_METHOD = "Error injecting method";

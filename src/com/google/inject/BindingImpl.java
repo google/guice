@@ -30,14 +30,16 @@ abstract class BindingImpl<T> implements Binding<T> {
   final Object source;
   final InternalFactory<? extends T> internalFactory;
   final Scope scope;
+  final LoadStrategy loadStrategy;
 
   BindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, Scope scope) {
+      InternalFactory<? extends T> internalFactory, Scope scope, LoadStrategy loadStrategy) {
     this.injector = injector;
     this.key = key;
     this.source = source;
     this.internalFactory = internalFactory;
     this.scope = scope;
+    this.loadStrategy = loadStrategy;
   }
 
   public Key<T> getKey() {
@@ -78,6 +80,10 @@ abstract class BindingImpl<T> implements Binding<T> {
    */
   boolean isConstant() {
     return internalFactory instanceof ConstantFactory<?>;
+  }
+
+  LoadStrategy getLoadStrategy() {
+    return loadStrategy;
   }
 
   /**

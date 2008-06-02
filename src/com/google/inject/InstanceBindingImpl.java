@@ -33,13 +33,12 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
 
   InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, T instance) {
-    super(injector, key, source, internalFactory, Scopes.NO_SCOPE);
+    super(injector, key, source, internalFactory, Scopes.NO_SCOPE, LoadStrategy.EAGER);
     this.instance = instance;
     this.provider = Providers.of(instance);
   }
 
-  @Override
-  public Provider<T> getProvider() {
+  @Override public Provider<T> getProvider() {
     return this.provider;
   }
 
@@ -55,8 +54,7 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
     return injector.getFieldAndMethodDependenciesFor(instance.getClass());
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return new ToStringBuilder(InstanceBinding.class)
         .add("key", key)
         .add("instance", instance)

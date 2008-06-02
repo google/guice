@@ -187,7 +187,7 @@ class InjectorBuilder {
     injector.fulfillOutstandingInjections();
     stopwatch.resetAndLog("Instance injection");
 
-    bindCommandProcesor.createEagerSingletons(injector);
+    bindCommandProcesor.loadEagerSingletons(injector);
     stopwatch.resetAndLog("Preloading");
   }
 
@@ -241,7 +241,7 @@ class InjectorBuilder {
     injector.explicitBindings.put(key,
         new ProviderInstanceBindingImpl<Logger>(injector, key,
             SourceProviders.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
-            loggerFactory));
+            loggerFactory, LoadStrategy.LAZY));
   }
 
   static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {

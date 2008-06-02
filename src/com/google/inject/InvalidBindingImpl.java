@@ -25,7 +25,7 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
       public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
         throw new AssertionError();
       }
-    }, Scopes.NO_SCOPE);
+    }, Scopes.NO_SCOPE, LoadStrategy.LAZY);
   }
 
   public void accept(BindingVisitor<? super T> bindingVisitor) {

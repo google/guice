@@ -36,8 +36,9 @@ class ClassBindingImpl<T> extends BindingImpl<T>
 
   ClassBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
-      InjectorImpl.LateBoundConstructor<T> lateBoundConstructor) {
-    super(injector, key, source, internalFactory, scope);
+      InjectorImpl.LateBoundConstructor<T> lateBoundConstructor,
+      LoadStrategy loadStrategy) {
+    super(injector, key, source, internalFactory, scope, loadStrategy);
     this.lateBoundConstructor = lateBoundConstructor;
   }
 
