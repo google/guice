@@ -69,7 +69,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/asm-2.2.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/build/asm-3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -78,34 +78,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/cglib-2.2_beta1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/asm-3.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/cglib-nodep-2.2_beta1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/cglib-src-2.2_beta1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/build/cglib-2.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

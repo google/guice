@@ -19,35 +19,44 @@ package com.google.inject;
 import junit.framework.TestCase;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ScopesTest extends TestCase {
 
-  public void testSingletonAnnotation() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(AnnotatedSingleton.class);
-      }
-    });
-
-    assertSame(
-        injector.getInstance(AnnotatedSingleton.class),
-        injector.getInstance(AnnotatedSingleton.class));
+  @Override protected void setUp() throws Exception {
+    AnnotatedSingleton.nextInstanceId = 0;
+    BoundAsSingleton.nextInstanceId = 0;
+    EagerSingleton.nextInstanceId = 0;
+    RealLinkedSingleton.nextInstanceId = 0;
   }
 
-  public void testBoundAsSingleton() {
+  public void testSingletons() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
+        bind(AnnotatedSingleton.class);
+        bind(EagerSingleton.class).asEagerSingleton();
+        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
       }
     });
 
     assertSame(
         injector.getInstance(BoundAsSingleton.class),
         injector.getInstance(BoundAsSingleton.class));
+
+    assertSame(
+        injector.getInstance(AnnotatedSingleton.class),
+        injector.getInstance(AnnotatedSingleton.class));
+
+    assertSame(
+        injector.getInstance(EagerSingleton.class),
+        injector.getInstance(EagerSingleton.class));
+
+    assertSame(
+        injector.getInstance(LinkedSingleton.class),
+        injector.getInstance(LinkedSingleton.class));
   }
 
   public void testJustInTimeAnnotatedSingleton() {
@@ -76,52 +85,36 @@ public class ScopesTest extends TestCase {
         injector.getInstance(AnnotatedSingleton.class));
   }
 
-  public void testAnnotatedSingletonsInProductionAreEager() {
-    int nextInstanceId = AnnotatedSingleton.nextInstanceId.intValue();
-    
+  public void testSingletonsInProductionStage() {
     Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
       protected void configure() {
         bind(AnnotatedSingleton.class);
+        bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
+        bind(EagerSingleton.class).asEagerSingleton();
+        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
       }
     });
 
-    assertEquals(nextInstanceId + 1, AnnotatedSingleton.nextInstanceId.intValue());
+    assertEquals(1, AnnotatedSingleton.nextInstanceId);
+    assertEquals(1, BoundAsSingleton.nextInstanceId);
+    assertEquals(1, EagerSingleton.nextInstanceId);
+    assertEquals(1, RealLinkedSingleton.nextInstanceId);
   }
 
-  public void testAnnotatedSingletonsInDevelopmentAreNotEager() {
-    int nextInstanceId = AnnotatedSingleton.nextInstanceId.intValue();
-
+  public void testSingletonsInDevelopmentStage() {
     Guice.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
       protected void configure() {
         bind(AnnotatedSingleton.class);
-      }
-    });
-
-    assertEquals(nextInstanceId, AnnotatedSingleton.nextInstanceId.intValue());
-  }
-
-  public void testBoundAsSingletonInProductionAreEager() {
-    int nextInstanceId = BoundAsSingleton.nextInstanceId.intValue();
-
-    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
-      protected void configure() {
         bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
+        bind(EagerSingleton.class).asEagerSingleton();
+        bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
       }
     });
 
-    assertEquals(nextInstanceId + 1, BoundAsSingleton.nextInstanceId.intValue());
-  }
-
-  public void testBoundAsSingletonInDevelopmentAreNotEager() {
-    int nextInstanceId = BoundAsSingleton.nextInstanceId.intValue();
-
-    Guice.createInjector(Stage.DEVELOPMENT, new AbstractModule() {
-      protected void configure() {
-        bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
-      }
-    });
-
-    assertEquals(nextInstanceId, BoundAsSingleton.nextInstanceId.intValue());
+    assertEquals(0, AnnotatedSingleton.nextInstanceId);
+    assertEquals(0, BoundAsSingleton.nextInstanceId);
+    assertEquals(1, EagerSingleton.nextInstanceId);
+    assertEquals(0, RealLinkedSingleton.nextInstanceId);
   }
 
   public void testSingletonScopeIsNotSerializable() throws IOException {
@@ -134,12 +127,25 @@ public class ScopesTest extends TestCase {
 
   @Singleton
   static class AnnotatedSingleton {
-    static final AtomicInteger nextInstanceId = new AtomicInteger(1);
-    final int instanceId = nextInstanceId.getAndIncrement();
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
   }
 
   static class BoundAsSingleton {
-    static final AtomicInteger nextInstanceId = new AtomicInteger(1);
-    final int instanceId = nextInstanceId.getAndIncrement();
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  static class EagerSingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  interface LinkedSingleton {}
+
+  @Singleton
+  static class RealLinkedSingleton implements LinkedSingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
   }
 }
