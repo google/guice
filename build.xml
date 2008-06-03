@@ -9,12 +9,13 @@
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
   </path>
 
-  <target name="jar" depends="compile"
+  <target name="jar" depends="compile, manifest"
        description="Build jar.">
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" 
       classpath="lib/build/jarjar-1.0rc7.jar"/>
     <mkdir dir="${build.dir}/dist"/>
-    <jarjar jarfile="${build.dir}/dist/guice-${version}.jar">
+    <jarjar jarfile="${build.dir}/dist/guice-${version}.jar"
+        manifest="${build.dir}/META-INF/MANIFEST.MF">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="lib/build/cglib-2.2.jar"/>
       <zipfileset src="lib/build/asm-3.1.jar"/>

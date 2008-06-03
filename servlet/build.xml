@@ -12,10 +12,11 @@
     <fileset dir="../build/dist" includes="*.jar"/>
   </path>
 
-  <target name="jar" depends="compile"
+  <target name="jar" depends="compile, manifest"
        description="Build jar.">
     <mkdir dir="${build.dir}"/>
-    <jar destfile="${build.dir}/${ant.project.name}-${version}.jar">
+    <jar destfile="${build.dir}/${ant.project.name}-${version}.jar"
+         manifest="${build.dir}/META-INF/MANIFEST.MF">
       <fileset dir="${build.dir}/classes"/>
     </jar>
   </target>

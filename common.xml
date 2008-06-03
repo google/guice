@@ -7,7 +7,11 @@
   <!-- can be overridden at the command line with -Dversion=
        or in IDEA, in the ant properties dialog -->
   <property name="version" value="snapshot"/>
-  
+  <property name="bundle.version" value="0.0.0.snapshot"/>
+  <tstamp prefix="datestamp">
+    <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
+  </tstamp>
+
   <target name="compile" description="Compile Java source.">
     <mkdir dir="${build.dir}/classes"/>
     <javac srcdir="${src.dir}"
@@ -20,7 +24,42 @@
     </copy>
   </target>
 
-  <target name="test.compile" 
+  <target name="manifest"
+      description="Build a jar manifest so Guice can be used as an OSGi bundle">
+    <dirname property="guice_home" file="${ant.file.common}" />
+    <taskdef name="osgiBundleInfo" classname="org.knopflerfish.ant.taskdefs.bundle.BundleInfoTask"
+        classpath="${guice_home}/lib/build/OSGiBundleInfo.jar"/>
+
+    <!-- extracts the packagelist for OSGi -->
+    <osgiBundleInfo exports="exports" imports="imports" defaultimports="com.google.inject"
+        stdimports="java.,net.sf.cglib,org.objectweb.asm,com.google.inject.InjectorImpl,com.google.inject.BindCommandProcessor">
+      <fileset dir="${basedir}">
+        <include name="src/**/*.java"/>
+        <!--<exclude name="src/com/google/inject/internal/**/*.java"/>-->
+      </fileset>
+    </osgiBundleInfo>
+
+    <mkdir dir="${build.dir}/META-INF"/>
+    <manifest file="${build.dir}/META-INF/MANIFEST.MF">
+      <attribute name="Manifest-Version" value="1.0"/>
+      <attribute name="Built-By" value="${user.name}"/>
+      <attribute name="Built-At" value="${datestamp.dateAndTime}"/>
+
+      <attribute name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
+      <attribute name="Import-Package" value="${imports}"/>
+      <attribute name="Export-Package" value="${exports}"/>
+      <attribute name="Bundle-Version" value="${bundle.version}"/>
+      <attribute name="Bundle-Copyright" value="Google Inc. (C) 2006"/>
+      <attribute name="Bundle-Name" value="${ant.project.name}"/>
+      <attribute name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 5 and above"/>
+      <attribute name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
+      <attribute name="Bundle-Vendor" value="Google Inc."/>
+      <attribute name="Bundle-ManifestVersion" value="2"/>
+      <attribute name="Bundle-SymbolicName" value="${ant.project.name}"/>
+    </manifest>
+  </target>
+
+  <target name="test.compile"
       depends="compile"
       description="Compile test source.">
     <mkdir dir="${build.dir}/test"/>
@@ -38,7 +77,7 @@
   <target name="test"
       depends="test.compile"
       description="Execute JUnit tests.">
-    <java fork="true" 
+    <java fork="true"
         classname="junit.textui.TestRunner"
         failonerror="true"
         taskname="junit">
@@ -47,15 +86,15 @@
         <pathelement location="${build.dir}/classes"/>
         <path refid="compile.classpath"/>
       </classpath>
-      <arg value="${test.class}"/>    
+      <arg value="${test.class}"/>
     </java>
   </target>
-  
+
   <target name="clean"
       description="Remove generated files.">
     <delete dir="${build.dir}"/>
   </target>
-  
+
   <target name="source.jar"
       description="Create a .jar file with sources">
     <mkdir dir="${build.dir}"/>
