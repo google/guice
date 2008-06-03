@@ -239,6 +239,11 @@ public class Types {
       this.rawType = canonicalize(rawType);
       this.typeArguments = typeArguments.clone();
       for (int t = 0; t < this.typeArguments.length; t++) {
+        if (this.typeArguments[t] instanceof Class<?> 
+            && ((Class) this.typeArguments[t]).isPrimitive()) {
+          throw new IllegalArgumentException(
+              "Parameterized types may not have primitive arguments: " + this.typeArguments[t]);
+        }
         this.typeArguments[t] = canonicalize(this.typeArguments[t]);
       }
     }

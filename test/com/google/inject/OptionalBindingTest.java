@@ -269,6 +269,20 @@ public class OptionalBindingTest extends TestCase {
     assertSame(staticInjectA, injectA);
   }
 
+  /**
+   * Test for bug 107, where we weren't doing optional injection properly for
+   * indirect injections.
+   */
+  public void testIndirectOptionalInjection() {
+    Indirect indirect = Guice.createInjector().getInstance(Indirect.class);
+    assertNotNull(indirect.hasOptionalInjections);
+    indirect.hasOptionalInjections.assertNothingInjected();
+  }
+
+  static class Indirect {
+    @Inject HasOptionalInjections hasOptionalInjections;
+  }
+
   interface A {}
   interface B {}
   interface C {}

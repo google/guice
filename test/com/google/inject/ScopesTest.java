@@ -64,7 +64,6 @@ public class ScopesTest extends TestCase {
         injector.getInstance(LinkedSingleton.class),
         injector.getInstance(LinkedSingleton.class));
 
-
     assertSame(
         injector.getInstance(JustInTimeSingleton.class),
         injector.getInstance(JustInTimeSingleton.class));

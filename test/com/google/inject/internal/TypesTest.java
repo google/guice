@@ -18,6 +18,7 @@
 package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import com.google.inject.Asserts;
 import junit.framework.TestCase;
 
 import java.lang.reflect.GenericArrayType;
@@ -66,6 +67,16 @@ public class TypesTest extends TestCase {
     assertEquals(innerFloatDouble.toString(), actual.toString());
   }
 
+  public void testTypeParametersMustNotBePrimitives() {
+    try {
+      Types.newTypeWithArgument(Map.class, String.class, int.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "Parameterized types may not have primitive arguments: int");
+    }
+  }
+
   public void testEqualsAndHashcode() {
     ParameterizedType parameterizedType
         = Types.newTypeWithArgument(Map.class, String.class, Integer.class);
@@ -89,5 +100,6 @@ public class TypesTest extends TestCase {
         Types.toString(innerFloatDouble));
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   class Inner<T1, T2> {}
 }
