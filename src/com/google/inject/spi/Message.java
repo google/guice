@@ -16,9 +16,8 @@
 
 package com.google.inject.spi;
 
-import static com.google.inject.internal.Objects.nonNull;
-
 import java.io.Serializable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A message. Contains a source pointing to the code which resulted
@@ -32,8 +31,8 @@ public final class Message implements Serializable {
   private final String message;
 
   public Message(Object source, String message) {
-    this.source = nonNull(source, "source").toString();
-    this.message = nonNull(message, "message");
+    this.source = checkNotNull(source, "source").toString();
+    this.message = checkNotNull(message, "message");
   }
 
   public Message(String message) {

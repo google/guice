@@ -16,14 +16,13 @@
 
 package com.google.inject.matcher;
 
-import com.google.inject.internal.Objects;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Matcher implementations. Supports matching classes and methods.
@@ -67,7 +66,7 @@ public class Matchers {
     final Matcher<? super T> delegate;
 
     private Not(Matcher<? super T> delegate) {
-      this.delegate = Objects.nonNull(delegate, "delegate");
+      this.delegate = checkNotNull(delegate, "delegate");
     }
 
     public boolean matches(T t) {
@@ -111,7 +110,7 @@ public class Matchers {
     private final Class<? extends Annotation> annotationType;
 
     public AnnotatedWithType(Class<? extends Annotation> annotationType) {
-      this.annotationType = Objects.nonNull(annotationType, "annotation type");
+      this.annotationType = checkNotNull(annotationType, "annotation type");
       checkForRuntimeRetention(annotationType);
     }
 
@@ -147,7 +146,7 @@ public class Matchers {
     private final Annotation annotation;
 
     public AnnotatedWith(Annotation annotation) {
-      this.annotation = Objects.nonNull(annotation, "annotation");
+      this.annotation = checkNotNull(annotation, "annotation");
       checkForRuntimeRetention(annotation.annotationType());
     }
 
@@ -183,7 +182,7 @@ public class Matchers {
     private final Class<?> superclass;
 
     public SubclassesOf(Class<?> superclass) {
-      this.superclass = Objects.nonNull(superclass, "superclass");
+      this.superclass = checkNotNull(superclass, "superclass");
     }
 
     public boolean matches(Class subclass) {
@@ -216,7 +215,7 @@ public class Matchers {
     private final Object value;
 
     public Only(Object value) {
-      this.value = Objects.nonNull(value, "value");
+      this.value = checkNotNull(value, "value");
     }
 
     public boolean matches(Object other) {
@@ -249,7 +248,7 @@ public class Matchers {
     private final Object value;
 
     public IdenticalTo(Object value) {
-      this.value = Objects.nonNull(value, "value");
+      this.value = checkNotNull(value, "value");
     }
 
     public boolean matches(Object other) {
@@ -282,7 +281,7 @@ public class Matchers {
     private final String packageName;
 
     public InPackage(Package targetPackage) {
-      this.targetPackage = Objects.nonNull(targetPackage, "package");
+      this.targetPackage = checkNotNull(targetPackage, "package");
       this.packageName = targetPackage.getName();
     }
 
@@ -320,7 +319,7 @@ public class Matchers {
     private final Matcher<? super Class<?>> returnType;
 
     public Returns(Matcher<? super Class<?>> returnType) {
-      this.returnType = Objects.nonNull(returnType, "return type matcher");
+      this.returnType = checkNotNull(returnType, "return type matcher");
     }
 
     public boolean matches(Method m) {

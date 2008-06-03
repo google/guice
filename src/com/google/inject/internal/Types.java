@@ -17,15 +17,14 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.TypeLiteral;
-
 import java.io.Serializable;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,20 +33,18 @@ import java.util.Map;
 public class Types {
   private Types() {}
 
-  private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER;
-  static {
-    Map<TypeLiteral<?>, TypeLiteral<?>> m = new HashMap<TypeLiteral<?>, TypeLiteral<?>>();
-    m.put(TypeLiteral.get(boolean.class), TypeLiteral.get(Boolean.class));
-    m.put(TypeLiteral.get(byte.class), TypeLiteral.get(Byte.class));
-    m.put(TypeLiteral.get(short.class), TypeLiteral.get(Short.class));
-    m.put(TypeLiteral.get(int.class), TypeLiteral.get(Integer.class));
-    m.put(TypeLiteral.get(long.class), TypeLiteral.get(Long.class));
-    m.put(TypeLiteral.get(float.class), TypeLiteral.get(Float.class));
-    m.put(TypeLiteral.get(double.class), TypeLiteral.get(Double.class));
-    m.put(TypeLiteral.get(char.class), TypeLiteral.get(Character.class));
-    m.put(TypeLiteral.get(void.class), TypeLiteral.get(Void.class));
-    PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(m);
-  }
+  private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER
+      = new ImmutableMap.Builder<TypeLiteral<?>, TypeLiteral<?>>()
+          .put(TypeLiteral.get(boolean.class), TypeLiteral.get(Boolean.class))
+          .put(TypeLiteral.get(byte.class), TypeLiteral.get(Byte.class))
+          .put(TypeLiteral.get(short.class), TypeLiteral.get(Short.class))
+          .put(TypeLiteral.get(int.class), TypeLiteral.get(Integer.class))
+          .put(TypeLiteral.get(long.class), TypeLiteral.get(Long.class))
+          .put(TypeLiteral.get(float.class), TypeLiteral.get(Float.class))
+          .put(TypeLiteral.get(double.class), TypeLiteral.get(Double.class))
+          .put(TypeLiteral.get(char.class), TypeLiteral.get(Character.class))
+          .put(TypeLiteral.get(void.class), TypeLiteral.get(Void.class))
+          .build();
 
   /**
    * Returns an equivalent (but not necessarily equal) type literal that is
@@ -189,16 +186,19 @@ public class Types {
       ParameterizedType p = (ParameterizedType) type;
       return Arrays.hashCode(p.getActualTypeArguments())
           ^ p.getRawType().hashCode()
-          ^ Objects.hashCode(p.getOwnerType());
+          ^ hashCodeOrZero(p.getOwnerType());
 
     } else if (type instanceof GenericArrayType) {
       return hashCode(((GenericArrayType) type).getGenericComponentType());
 
     } else {
-      // This isn't a type we support. Could be a generic array type, wildcard
-      // type, etc.
-      return Objects.hashCode(type);
+      // This isn't a type we support. Could be a generic array type, wildcard type, etc.
+      return hashCodeOrZero(type);
     }
+  }
+
+  private static int hashCodeOrZero(Object o) {
+    return o != null ? o.hashCode() : 0;
   }
 
   public static String toString(Type type) {
@@ -239,7 +239,7 @@ public class Types {
       this.rawType = canonicalize(rawType);
       this.typeArguments = typeArguments.clone();
       for (int t = 0; t < this.typeArguments.length; t++) {
-        if (this.typeArguments[t] instanceof Class<?> 
+        if (this.typeArguments[t] instanceof Class<?>
             && ((Class) this.typeArguments[t]).isPrimitive()) {
           throw new IllegalArgumentException(
               "Parameterized types may not have primitive arguments: " + this.typeArguments[t]);

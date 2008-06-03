@@ -16,11 +16,11 @@
 
 package com.google.inject.commands;
 
-import static com.google.inject.internal.Objects.nonNull;
 
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request to add a string message.
@@ -33,8 +33,8 @@ public final class AddMessageErrorCommand implements Command {
   private final List<Object> arguments;
 
   AddMessageErrorCommand(Object source, String message, Object[] arguments) {
-    this.source = nonNull(source, "source");
-    this.message = nonNull(message, "message");
+    this.source = checkNotNull(source, "source");
+    this.message = checkNotNull(message, "message");
     this.arguments = unmodifiableList(Arrays.asList(arguments.clone()));
   }
 

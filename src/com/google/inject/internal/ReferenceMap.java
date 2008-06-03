@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.ReferenceType.STRONG;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -78,7 +79,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public V get(final Object key) {
-    Objects.nonNull(key, "key");
+    checkNotNull(key, "key");
     return internalGet((K) key);
   }
 
@@ -95,7 +96,7 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public V remove(Object key) {
-    Objects.nonNull(key, "key");
+    checkNotNull(key, "key");
     Object referenceAwareKey = makeKeyReferenceAware(key);
     Object valueReference = delegate.remove(referenceAwareKey);
     return dereferenceValue(valueReference);
@@ -110,13 +111,13 @@ public class ReferenceMap<K, V> extends AbstractMap<K, V>
   }
 
   public boolean containsKey(Object key) {
-    Objects.nonNull(key, "key");
+    checkNotNull(key, "key");
     Object referenceAwareKey = makeKeyReferenceAware(key);
     return delegate.containsKey(referenceAwareKey);
   }
 
   public boolean containsValue(Object value) {
-    Objects.nonNull(value, "value");
+    checkNotNull(value, "value");
     for (Object valueReference : delegate.values()) {
       if (value.equals(dereferenceValue(valueReference))) {
         return true;

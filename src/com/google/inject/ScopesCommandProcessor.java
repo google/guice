@@ -20,8 +20,8 @@ import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ErrorHandler;
 import com.google.inject.internal.ErrorMessages;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.StackTraceElements;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -58,12 +58,12 @@ class ScopesCommandProcessor extends CommandProcessor {
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    Scope existing = scopes.get(nonNull(annotationType, "annotation type"));
+    Scope existing = scopes.get(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
       addError(command.getSource(), ErrorMessages.DUPLICATE_SCOPES, existing,
           annotationType, scope);
     } else {
-      scopes.put(annotationType, nonNull(scope, "scope"));
+      scopes.put(annotationType, checkNotNull(scope, "scope"));
     }
 
     return true;

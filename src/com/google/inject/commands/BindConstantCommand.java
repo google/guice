@@ -23,9 +23,8 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.Objects;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 
@@ -44,7 +43,7 @@ public final class BindConstantCommand implements Command {
   private ConstantTarget<?> target;
 
   BindConstantCommand(Object source) {
-    this.source = nonNull(source, "source");
+    this.source = checkNotNull(source, "source");
   }
 
   public Object getSource() {
@@ -118,7 +117,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public ConstantBindingBuilder annotatedWith(final Class<? extends Annotation> annotationType) {
-      nonNull(annotationType, "annotationType");
+      checkNotNull(annotationType, "annotationType");
       assertNoBindingAnnotation();
 
       bindingAnnotation = new BindingAnnotation() {
@@ -134,7 +133,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public ConstantBindingBuilder annotatedWith(final Annotation annotation) {
-      nonNull(annotation, "annotation");
+      checkNotNull(annotation, "annotation");
       assertNoBindingAnnotation();
 
       bindingAnnotation = new BindingAnnotation() {
@@ -150,7 +149,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public void to(final String value) {
-      nonNull(value, "value");
+      checkNotNull(value, "value");
       assertNoTarget();
 
       BindConstantCommand.this.target = new ConstantTarget() {
@@ -303,7 +302,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public void to(final Class<?> value) {
-      nonNull(value, "value");
+      checkNotNull(value, "value");
       assertNoTarget();
 
       BindConstantCommand.this.target = new ConstantTarget() {
@@ -323,7 +322,7 @@ public final class BindConstantCommand implements Command {
     }
 
     public <E extends Enum<E>> void to(final E value) {
-      Objects.nonNull(value, "value");
+      checkNotNull(value, "value");
       assertNoTarget();
 
       BindConstantCommand.this.target = new ConstantTarget() {

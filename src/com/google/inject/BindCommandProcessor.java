@@ -16,18 +16,22 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Lists;
 import com.google.inject.commands.BindCommand;
 import com.google.inject.commands.BindConstantCommand;
-import com.google.inject.commands.BindScoping;
+import com.google.inject.commands.BindScoping.Visitor;
 import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ErrorMessages;
 import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.StackTraceElements;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles {@link Binder#bind} and {@link Binder#bindConstant} commands.
@@ -39,16 +43,15 @@ class BindCommandProcessor extends CommandProcessor {
 
   private final InjectorImpl injector;
   private final Map<Class<? extends Annotation>, Scope> scopes;
-  private final List<CreationListener> creationListeners
-      = new ArrayList<CreationListener>();
+  private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Map<Key<?>, BindingImpl<?>> bindings;
-  private final Map<Object, Void> outstandingInjections;
-  private final List<Runnable> untargettedBindings = new ArrayList<Runnable>();
+  private final Set<Object> outstandingInjections;
+  private final List<Runnable> untargettedBindings = Lists.newArrayList();
 
   BindCommandProcessor(InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
       Map<Key<?>, BindingImpl<?>> bindings,
-      Map<Object, Void> outstandingInjections) {
+      Set<Object> outstandingInjections) {
     super(injector.errorHandler);
     this.injector = injector;
     this.scopes = scopes;
@@ -72,7 +75,7 @@ class BindCommandProcessor extends CommandProcessor {
     final LoadStrategy loadStrategy = command.getScoping().isEagerSingleton()
         ? LoadStrategy.EAGER
         : LoadStrategy.LAZY;
-    final Scope scope = command.getScoping().acceptVisitor(new BindScoping.Visitor<Scope>() {
+    final Scope scope = command.getScoping().acceptVisitor(new Visitor<Scope>() {
       public Scope visitEagerSingleton() {
         return Scopes.SINGLETON;
       }
@@ -100,7 +103,7 @@ class BindCommandProcessor extends CommandProcessor {
     command.getTarget().acceptVisitor(new BindTarget.Visitor<T, Void>() {
       public Void visitToInstance(T instance) {
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        outstandingInjections.put(instance, null);
+        outstandingInjections.add(instance);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new InstanceBindingImpl<T>(
@@ -111,7 +114,7 @@ class BindCommandProcessor extends CommandProcessor {
       public Void visitToProvider(Provider<? extends T> provider) {
         InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
-        outstandingInjections.put(provider, null);
+        outstandingInjections.add(provider);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new ProviderInstanceBindingImpl<T>(

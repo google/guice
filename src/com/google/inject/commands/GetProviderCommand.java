@@ -17,7 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.Key;
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request for a provider.
@@ -30,7 +30,7 @@ public final class GetProviderCommand<T> implements Command {
   private final EarlyRequestsProvider earlyRequestsProvider;
 
   GetProviderCommand(Object source, Key<T> key, EarlyRequestsProvider earlyRequestsProvider) {
-    this.source = nonNull(source, "source");
+    this.source = checkNotNull(source, "source");
     this.key = key;
     this.earlyRequestsProvider = earlyRequestsProvider;
   }

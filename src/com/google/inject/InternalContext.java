@@ -71,7 +71,7 @@ class InternalContext {
    * been injected before its use.
    */
   public void ensureMemberInjected(Object toInject) {
-    if (!injector.outstandingInjections.keySet().remove(toInject)) {
+    if (!injector.outstandingInjections.remove(toInject)) {
       return;
     }
 

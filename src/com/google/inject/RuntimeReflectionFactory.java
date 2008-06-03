@@ -18,7 +18,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.*;
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Constructor;
 
@@ -37,8 +37,8 @@ class RuntimeReflectionFactory implements Reflection.Factory {
 
     private RuntimeReflection(ErrorHandler errorHandler,
         ConstructionProxyFactory constructionProxyFactory) {
-      this.errorHandler = nonNull(errorHandler, "errorHandler");
-      this.constructionProxyFactory = nonNull(constructionProxyFactory, "constructionProxyFatory");
+      this.errorHandler = checkNotNull(errorHandler, "errorHandler");
+      this.constructionProxyFactory = checkNotNull(constructionProxyFactory, "constructionProxyFatory");
     }
 
     public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation) {

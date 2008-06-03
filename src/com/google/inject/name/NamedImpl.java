@@ -16,17 +16,16 @@
 
 package com.google.inject.name;
 
-import com.google.inject.internal.Objects;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 class NamedImpl implements Named, Serializable {
 
   private final String value;
 
   public NamedImpl(String value) {
-    this.value = Objects.nonNull(value, "name");
+    this.value = checkNotNull(value, "name");
   }
 
   public String value() {

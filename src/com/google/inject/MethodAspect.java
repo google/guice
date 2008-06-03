@@ -16,13 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Collection;
-import java.util.ArrayList;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -39,9 +36,9 @@ class MethodAspect {
 
   MethodAspect(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, List<MethodInterceptor> interceptors) {
-    this.classMatcher = Objects.nonNull(classMatcher, "class matcher");
-    this.methodMatcher = Objects.nonNull(methodMatcher, "method matcher");
-    this.interceptors = Objects.nonNull(interceptors, "interceptors");
+    this.classMatcher = checkNotNull(classMatcher, "class matcher");
+    this.methodMatcher = checkNotNull(methodMatcher, "method matcher");
+    this.interceptors = checkNotNull(interceptors, "interceptors");
   }
 
   boolean matches(Class<?> clazz) {

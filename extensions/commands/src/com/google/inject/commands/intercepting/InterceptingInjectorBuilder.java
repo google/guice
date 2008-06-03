@@ -20,9 +20,9 @@ import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.commands.*;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
 
@@ -194,15 +194,15 @@ public final class InterceptingInjectorBuilder {
 
     @Inject void initialize(Injector injector,
         Provider<ProvisionInterceptor> injectionInterceptorProvider) {
-      this.injectionInterceptorProvider = nonNull(
-          injectionInterceptorProvider, "injectionInterceptorProvider");
-      this.delegateProvider = nonNull(
-          injector.getProvider(anonymousKey), "delegateProvider");
+      this.injectionInterceptorProvider
+          = checkNotNull(injectionInterceptorProvider, "injectionInterceptorProvider");
+      this.delegateProvider
+          = checkNotNull(injector.getProvider(anonymousKey), "delegateProvider");
     }
 
     public T get() {
-      nonNull(injectionInterceptorProvider, "injectionInterceptorProvider");
-      nonNull(delegateProvider, "delegateProvider");
+      checkNotNull(injectionInterceptorProvider, "injectionInterceptorProvider");
+      checkNotNull(delegateProvider, "delegateProvider");
       return injectionInterceptorProvider.get().intercept(key, delegateProvider);
     }
   }

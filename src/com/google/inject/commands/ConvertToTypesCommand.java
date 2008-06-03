@@ -17,10 +17,9 @@
 package com.google.inject.commands;
 
 import com.google.inject.TypeLiteral;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request to convert binder types.
@@ -34,9 +33,9 @@ public final class ConvertToTypesCommand implements Command {
 
   ConvertToTypesCommand(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
-    this.source = nonNull(source, "source");
-    this.typeMatcher = nonNull(typeMatcher, "typeMatcher");
-    this.typeConverter = nonNull(typeConverter, "typeConverter");
+    this.source = checkNotNull(source, "source");
+    this.typeMatcher = checkNotNull(typeMatcher, "typeMatcher");
+    this.typeConverter = checkNotNull(typeConverter, "typeConverter");
   }
 
   public Object getSource() {

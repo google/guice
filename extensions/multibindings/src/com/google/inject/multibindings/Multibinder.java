@@ -18,9 +18,9 @@ package com.google.inject.multibindings;
 
 import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.Types;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -164,10 +164,10 @@ public abstract class Multibinder<T> {
 
     private RealMultibinder(Binder binder, Type elementType,
         String setName, Key<Set<T>> setKey) {
-      this.binder = nonNull(binder, "binder");
-      this.elementType = nonNull(elementType, "elementType");
-      this.setName = nonNull(setName, "setName");
-      this.setKey = nonNull(setKey, "setKey");
+      this.binder = checkNotNull(binder, "binder");
+      this.elementType = checkNotNull(elementType, "elementType");
+      this.setName = checkNotNull(setName, "setName");
+      this.setKey = checkNotNull(setKey, "setKey");
     }
 
     @SuppressWarnings("unchecked")

@@ -17,9 +17,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.Annotations;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.internal.Types;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -339,7 +339,7 @@ public class Key<T> implements Serializable {
    * Gets the strategy for an annotation.
    */
   static AnnotationStrategy strategyFor(Annotation annotation) {
-    nonNull(annotation, "annotation");
+    checkNotNull(annotation, "annotation");
     Class<? extends Annotation> annotationType = annotation.annotationType();
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
@@ -354,9 +354,8 @@ public class Key<T> implements Serializable {
   /**
    * Gets the strategy for an annotation type.
    */
-  static AnnotationStrategy strategyFor(
-      Class<? extends Annotation> annotationType) {
-    nonNull(annotationType, "annotation type");
+  static AnnotationStrategy strategyFor(Class<? extends Annotation> annotationType) {
+    checkNotNull(annotationType, "annotation type");
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
     return new AnnotationTypeStrategy(annotationType, null);
@@ -410,7 +409,7 @@ public class Key<T> implements Serializable {
     final Annotation annotation;
 
     AnnotationInstanceStrategy(Annotation annotation) {
-      this.annotation = nonNull(annotation, "annotation");
+      this.annotation = checkNotNull(annotation, "annotation");
     }
 
     public boolean hasAttributes() {
@@ -458,7 +457,7 @@ public class Key<T> implements Serializable {
 
     AnnotationTypeStrategy(Class<? extends Annotation> annotationType,
         Annotation annotation) {
-      this.annotationType = nonNull(annotationType, "annotation type");
+      this.annotationType = checkNotNull(annotationType, "annotation type");
       this.annotation = annotation;
     }
 

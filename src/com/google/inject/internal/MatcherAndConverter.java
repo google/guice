@@ -19,8 +19,8 @@ package com.google.inject.internal;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.SourceProviders;
-import com.google.inject.internal.Objects;
 import com.google.inject.TypeLiteral;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  *
@@ -38,15 +38,15 @@ public class MatcherAndConverter<T> {
 
   MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter, Object source) {
-    this.typeMatcher = Objects.nonNull(typeMatcher, "type matcher");
-    this.typeConverter = Objects.nonNull(typeConverter, "converter");
+    this.typeMatcher = checkNotNull(typeMatcher, "type matcher");
+    this.typeConverter = checkNotNull(typeConverter, "converter");
     this.source = source;
   }
 
   MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
-    this.typeMatcher = Objects.nonNull(typeMatcher, "type matcher");
-    this.typeConverter = Objects.nonNull(typeConverter, "converter");
+    this.typeMatcher = checkNotNull(typeMatcher, "type matcher");
+    this.typeConverter = checkNotNull(typeConverter, "converter");
     this.source = SourceProviders.defaultSource();
   }
 

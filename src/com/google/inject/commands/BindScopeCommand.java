@@ -17,7 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.Scope;
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 
@@ -32,9 +32,9 @@ public final class BindScopeCommand implements Command {
   private final Scope scope;
 
   BindScopeCommand(Object source, Class<? extends Annotation> annotationType, Scope scope) {
-    this.source = nonNull(source, "source");
-    this.annotationType = nonNull(annotationType, "annotationType");
-    this.scope = nonNull(scope, "scope");
+    this.source = checkNotNull(source, "source");
+    this.annotationType = checkNotNull(annotationType, "annotationType");
+    this.scope = checkNotNull(scope, "scope");
   }
 
   public Object getSource() {

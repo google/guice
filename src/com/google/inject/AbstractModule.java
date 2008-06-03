@@ -19,10 +19,10 @@ package com.google.inject;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.Objects;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.TypeConverter;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -61,7 +61,7 @@ public abstract class AbstractModule implements Module {
       if (this.binder != null) {
         throw new IllegalStateException("Re-entry is not allowed.");
       }
-      this.binder = Objects.nonNull(builder, "builder");
+      this.binder = checkNotNull(builder, "builder");
 
       configure();
 

@@ -22,8 +22,8 @@ import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.ErrorMessages;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 
@@ -58,13 +58,14 @@ public final class BindCommand<T> implements Command {
 
   private final Object source;
   private Key<T> key;
-  @SuppressWarnings({"unchecked"})
+
+  @SuppressWarnings("unchecked")
   private BindTarget<T> bindTarget = (BindTarget<T>) EMPTY_BIND_TARGET;
   private BindScoping bindScoping = EMPTY_SCOPING;
 
   BindCommand(Object source, Key<T> key) {
-    this.source = nonNull(source, "source");
-    this.key = nonNull(key, "key");
+    this.source = checkNotNull(source, "source");
+    this.key = checkNotNull(key, "key");
   }
 
   public Object getSource() {
@@ -139,14 +140,14 @@ public final class BindCommand<T> implements Command {
 
     public LinkedBindingBuilder<T> annotatedWith(
         Class<? extends Annotation> annotationType) {
-      nonNull(annotationType, "annotationType");
+      checkNotNull(annotationType, "annotationType");
       checkNotAnnotated();
       key = Key.get(key.getTypeLiteral(), annotationType);
       return this;
     }
 
     public LinkedBindingBuilder<T> annotatedWith(Annotation annotation) {
-      nonNull(annotation, "annotation");
+      checkNotNull(annotation, "annotation");
       checkNotAnnotated();
       key = Key.get(key.getTypeLiteral(), annotation);
       return this;
@@ -162,7 +163,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public ScopedBindingBuilder to(final Key<? extends T> targetKey) {
-      nonNull(targetKey, "targetKey");
+      checkNotNull(targetKey, "targetKey");
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
@@ -182,7 +183,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void toInstance(final T instance) {
-      nonNull(instance, ErrorMessages.CANNOT_BIND_TO_NULL_INSTANCE);
+      checkNotNull(instance, ErrorMessages.CANNOT_BIND_TO_NULL_INSTANCE);
 
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
@@ -203,7 +204,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public ScopedBindingBuilder toProvider(final Provider<? extends T> provider) {
-      nonNull(provider, "provider");
+      checkNotNull(provider, "provider");
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
@@ -229,7 +230,7 @@ public final class BindCommand<T> implements Command {
 
     public ScopedBindingBuilder toProvider(
         final Key<? extends Provider<? extends T>> providerKey) {
-      nonNull(providerKey, "providerKey");
+      checkNotNull(providerKey, "providerKey");
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {
@@ -249,7 +250,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void in(final Class<? extends Annotation> scopeAnnotation) {
-      nonNull(scopeAnnotation, "scopeAnnotation");
+      checkNotNull(scopeAnnotation, "scopeAnnotation");
       checkNotScoped();
 
       bindScoping = new AbstractScoping() {
@@ -269,7 +270,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void in(final Scope scope) {
-      nonNull(scope, "scope");
+      checkNotNull(scope, "scope");
       checkNotScoped();
       bindScoping = new AbstractScoping() {
 

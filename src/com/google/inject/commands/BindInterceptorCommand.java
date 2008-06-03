@@ -17,7 +17,7 @@
 package com.google.inject.commands;
 
 import com.google.inject.matcher.Matcher;
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.lang.reflect.Method;
@@ -41,9 +41,9 @@ public final class BindInterceptorCommand implements Command {
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       MethodInterceptor[] interceptors) {
-    this.source = nonNull(source, "source");
-    this.classMatcher = nonNull(classMatcher, "classMatcher");
-    this.methodMatcher = nonNull(methodMatcher, "methodMatcher");
+    this.source = checkNotNull(source, "source");
+    this.classMatcher = checkNotNull(classMatcher, "classMatcher");
+    this.methodMatcher = checkNotNull(methodMatcher, "methodMatcher");
     this.interceptors = unmodifiableList(Arrays.asList(interceptors.clone()));
   }
 

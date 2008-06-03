@@ -19,9 +19,9 @@ package com.google.inject.spring;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.name.Names;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 
@@ -92,8 +92,8 @@ public class SpringIntegration {
     final String name;
 
     public SpringProvider(Class<T> type, String name) {
-      this.type = nonNull(type, "type");
-      this.name = nonNull(name, "name");
+      this.type = checkNotNull(type, "type");
+      this.name = checkNotNull(name, "name");
     }
 
     static <T> SpringProvider<T> newInstance(Class<T> type, String name) {

@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.ReferenceType.STRONG;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Extends {@link ReferenceMap} to support lazy loading values by overriding
@@ -61,7 +62,7 @@ public abstract class ReferenceCache<K, V>
       ReferenceType keyReferenceType,
       ReferenceType valueReferenceType,
       final Function<? super K, ? extends V> function) {
-    Objects.nonNull(function, "function");
+    checkNotNull(function, "function");
     return new ReferenceCache<K, V>(keyReferenceType, valueReferenceType) {
       protected V create(K key) {
         return function.apply(key);

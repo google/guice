@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import static com.google.inject.internal.Objects.nonNull;
 import com.google.inject.internal.Types;
 import static com.google.inject.internal.Types.canonicalize;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -67,7 +67,7 @@ public class TypeLiteral<T> implements Serializable {
    */
   @SuppressWarnings("unchecked")
   TypeLiteral(Type type) {
-    this.type = canonicalize(nonNull(type, "type"));
+    this.type = canonicalize(checkNotNull(type, "type"));
     this.rawType = (Class<? super T>) Types.getRawType(this.type);
     this.hashCode = Types.hashCode(this.type);
   }

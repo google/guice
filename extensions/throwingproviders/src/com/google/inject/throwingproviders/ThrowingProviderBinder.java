@@ -18,8 +18,8 @@ package com.google.inject.throwingproviders;
 
 import com.google.inject.*;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.UniqueAnnotations;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -60,8 +60,8 @@ public class ThrowingProviderBinder {
     private final Class<?> exceptionType;
 
     public SecondaryBinder(Class<P> interfaceType, Type valueType) {
-      this.interfaceType = Objects.nonNull(interfaceType, "interfaceType");
-      this.valueType = Objects.nonNull(valueType, "valueType");
+      this.interfaceType = checkNotNull(interfaceType, "interfaceType");
+      this.valueType = checkNotNull(valueType, "valueType");
       checkInterface();
       this.exceptionType = getExceptionType(interfaceType);
     }
@@ -93,7 +93,7 @@ public class ThrowingProviderBinder {
     }
 
     public ScopedBindingBuilder to(final Key<? extends P> targetKey) {
-      Objects.nonNull(targetKey, "targetKey");
+      checkNotNull(targetKey, "targetKey");
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
       final Key<P> key = createKey();
 

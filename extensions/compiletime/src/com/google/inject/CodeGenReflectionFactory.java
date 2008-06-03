@@ -18,7 +18,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.*;
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,7 @@ class CodeGenReflectionFactory implements Reflection.Factory {
     private final Reflection delegate;
 
     private CodeGenReflection(Reflection delegate) {
-      this.delegate = nonNull(delegate, "delegate");
+      this.delegate = checkNotNull(delegate, "delegate");
     }
 
     public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation) {

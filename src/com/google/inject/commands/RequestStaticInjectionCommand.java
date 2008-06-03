@@ -16,11 +16,11 @@
 
 package com.google.inject.commands;
 
-import static com.google.inject.internal.Objects.nonNull;
 
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request for static injection.
@@ -32,7 +32,7 @@ public final class RequestStaticInjectionCommand implements Command {
   private final List<Class> types;
 
   RequestStaticInjectionCommand(Object source, Class[] types) {
-    this.source = nonNull(source, "source");
+    this.source = checkNotNull(source, "source");
     this.types = unmodifiableList(Arrays.asList(types.clone()));
   }
 

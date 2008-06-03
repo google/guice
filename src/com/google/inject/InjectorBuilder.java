@@ -16,15 +16,14 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Iterables;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
-import static com.google.inject.internal.GoogleCollections.concat;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.SourceProviders;
-
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -195,7 +194,7 @@ class InjectorBuilder {
   public void loadEagerSingletons() {
     // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
     for (final BindingImpl<?> binding
-        : concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
+        : Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
       if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         injector.callInContext(new ContextualCallable<Void>() {
@@ -223,8 +222,8 @@ class InjectorBuilder {
     final Stage stage;
 
     private BuiltInModule(Injector injector, Stage stage) {
-      this.injector = Objects.nonNull(injector, "injector");
-      this.stage = Objects.nonNull(stage, "stage");
+      this.injector = checkNotNull(injector, "injector");
+      this.stage = checkNotNull(stage, "stage");
     }
 
     protected void configure() {

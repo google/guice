@@ -17,9 +17,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.ErrorMessages;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -41,7 +41,7 @@ class InjectionPoint<T> implements Dependency<T> {
       Nullability nullability, Key<T> key, InjectorImpl injector) {
     this.member = member;
     this.parameterIndex = paramterIndex;
-    this.nullability = Objects.nonNull(nullability, "nullability");
+    this.nullability = checkNotNull(nullability, "nullability");
     this.key = key;
     this.injector = injector;
   }

@@ -17,11 +17,10 @@
 
 package com.google.inject;
 
-import static com.google.inject.internal.Objects.nonNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * <strong>Unsupported.</strong> Currently compile-time Guice code still
@@ -47,8 +46,8 @@ import java.util.Set;
    * @param modules the modules used to build the injector.
    */
   public CompileTimeGuice(String name, Set<? extends Module> modules) {
-    this.name = nonNull(name, "name");
-    this.modules = nonNull(modules, "modules");
+    this.name = checkNotNull(name, "name");
+    this.modules = checkNotNull(modules, "modules");
   }
 
   /**

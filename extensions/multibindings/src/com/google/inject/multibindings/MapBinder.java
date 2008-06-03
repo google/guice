@@ -18,10 +18,10 @@ package com.google.inject.multibindings;
 
 import com.google.inject.*;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.Objects;
 import com.google.inject.internal.Types;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -218,7 +218,7 @@ public abstract class MapBinder<K, V> {
      * and another for {@code V}.
      */
     @Override public LinkedBindingBuilder<V> addBinding(K key) {
-      Objects.nonNull(key, "key");
+      checkNotNull(key, "key");
       if (isInitialized()) {
         throw new IllegalStateException("MapBinder was already initialized");
       }

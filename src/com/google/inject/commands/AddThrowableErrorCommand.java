@@ -16,7 +16,7 @@
 
 package com.google.inject.commands;
 
-import static com.google.inject.internal.Objects.nonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request to add a throwable message.
@@ -28,8 +28,8 @@ public final class AddThrowableErrorCommand implements Command {
   private final Throwable throwable;
 
   AddThrowableErrorCommand(Object source, Throwable throwable) {
-    this.source = nonNull(source, "source");
-    this.throwable = nonNull(throwable, "throwable");
+    this.source = checkNotNull(source, "source");
+    this.throwable = checkNotNull(throwable, "throwable");
   }
 
   public Object getSource() {

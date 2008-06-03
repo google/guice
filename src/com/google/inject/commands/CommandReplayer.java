@@ -23,8 +23,8 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.Objects;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.List;
@@ -52,8 +52,8 @@ public class CommandReplayer {
    * Replays {@code commands} against {@code binder}.
    */
   public final void replay(final Binder binder, Iterable<Command> commands) {
-    Objects.nonNull(binder, "binder");
-    Objects.nonNull(commands, "commands");
+    checkNotNull(binder, "binder");
+    checkNotNull(commands, "commands");
 
     Command.Visitor<Void> visitor = new Command.Visitor<Void>() {
       public Void visitAddMessageError(AddMessageErrorCommand command) {

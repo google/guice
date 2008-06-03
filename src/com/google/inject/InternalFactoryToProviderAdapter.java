@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.ErrorMessages;
-import com.google.inject.internal.Objects;
 import com.google.inject.spi.SourceProviders;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -34,8 +34,8 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
 
   public InternalFactoryToProviderAdapter(
       Provider<? extends T> provider, Object source) {
-    this.provider = Objects.nonNull(provider, "provider");
-    this.source = Objects.nonNull(source, "source");
+    this.provider = checkNotNull(provider, "provider");
+    this.source = checkNotNull(source, "source");
   }
 
   public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
