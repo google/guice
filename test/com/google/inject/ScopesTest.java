@@ -19,6 +19,16 @@ package com.google.inject;
 import junit.framework.TestCase;
 
 import java.io.IOException;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
+import com.google.inject.util.Providers;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -128,6 +138,37 @@ public class ScopesTest extends TestCase {
   public void testNoScopeIsNotSerializable() throws IOException {
     Asserts.assertNotSerializable(Scopes.NO_SCOPE);
   }
+
+  public void testUnscopedProviderWorksOutsideOfRequestedScope() {
+    final RememberProviderScope scope = new RememberProviderScope();
+    
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindScope(CustomScoped.class, scope);
+        bind(List.class).to(ArrayList.class).in(CustomScoped.class);
+      }
+    });
+
+    injector.getInstance(List.class);
+    Provider<?> listProvider = scope.providers.get(Key.get(List.class));
+
+    // this line fails with a NullPointerException because the Providers
+    // passed to Scope.scope() don't work outside of the scope() method.
+    assertTrue(listProvider.get() instanceof ArrayList);
+  }
+
+  class RememberProviderScope implements Scope {
+    final Map<Key<?>, Provider<?>> providers = new HashMap<Key<?>, Provider<?>>();
+    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+      providers.put(key, unscoped);
+      return unscoped;
+    }
+  }
+
+  @Target({ ElementType.TYPE, ElementType.METHOD })
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface CustomScoped {}
 
   @Singleton
   static class AnnotatedSingleton {
