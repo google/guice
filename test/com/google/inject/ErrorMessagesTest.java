@@ -3,14 +3,18 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
+import com.google.inject.util.Providers;
+import junit.framework.TestCase;
+
+import static java.lang.annotation.ElementType.*;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
-import junit.framework.TestCase;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.List;
 
 /**
  * Tests the error messages produced by Guice.
@@ -18,6 +22,23 @@ import junit.framework.TestCase;
  * @author Kevin Bourrillion
  */
 public class ErrorMessagesTest extends TestCase {
+
+  private ParameterizedType parameterizedWithVariable;
+  private ParameterizedType parameterizedWithWildcard;
+  private TypeVariable typeVariable;
+  private WildcardType wildcardType;
+
+  <T> void parameterizedWithVariable(List<T> typeWithVariables) {}
+  <T> void parameterizedWithWildcard(List<? extends Comparable> typeWithWildcard) {}
+
+  @Override protected void setUp() throws Exception {
+    parameterizedWithVariable = (ParameterizedType) getClass()
+        .getDeclaredMethod("parameterizedWithVariable", List.class).getGenericParameterTypes()[0];
+    parameterizedWithWildcard = (ParameterizedType) getClass()
+        .getDeclaredMethod("parameterizedWithWildcard", List.class).getGenericParameterTypes()[0];
+    typeVariable = (TypeVariable) parameterizedWithVariable.getActualTypeArguments()[0];
+    wildcardType = (WildcardType) parameterizedWithWildcard.getActualTypeArguments()[0];
+  }
 
   private class InnerClass {}
 
@@ -57,7 +78,7 @@ public class ErrorMessagesTest extends TestCase {
       assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }
-  
+
   public void testGetInstanceOfAnAbstractClass() {
     Injector injector = Guice.createInjector();
     try {
@@ -70,6 +91,31 @@ public class ErrorMessagesTest extends TestCase {
 
   static abstract class AbstractClass {
     @Inject AbstractClass() { }
+  }
+
+  public void testBindDisallowedTypes() throws NoSuchMethodException {
+    Type[] types = new Type[] {
+        parameterizedWithVariable,
+        parameterizedWithWildcard,
+        typeVariable,
+        wildcardType,
+    };
+
+    for (Type type : types) {
+      @SuppressWarnings("unchecked") final
+      Key<Object> key = (Key<Object>) Key.get(type);
+
+      try {
+        Guice.createInjector(new AbstractModule() {
+          protected void configure() {
+            bind(key).toProvider(Providers.of(null));
+          }
+        });
+        fail("Guice should not allow bindings to " + type);
+      } catch (CreationException e) {
+        assertContains(e.getMessage(), "Cannot bind types that have type variables");
+      }
+    }
   }
 
   public void testScopingAnnotationsOnAbstractTypes() {
