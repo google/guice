@@ -16,19 +16,16 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-
 import java.io.IOException;
-import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.util.Map;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
-
-import com.google.inject.util.Providers;
+import java.util.Map;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

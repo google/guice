@@ -17,9 +17,13 @@
 
 package com.google.inject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import junit.framework.Assert;
-
-import java.io.*;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -44,8 +48,11 @@ public class Asserts {
    * Fails unless {@code text} includes {@code substring}.
    */
   public static void assertContains(String text, String substring) {
+    int position = text.indexOf(substring);
     Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
-        text, substring), text.contains(substring));
+        text, substring), position >= 0);
+    Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
+        text, substring), text.indexOf(substring, position + 1) == -1);
   }
 
   /**

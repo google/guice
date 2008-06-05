@@ -944,7 +944,7 @@ class InjectorImpl implements Injector {
         throw new ProvisionException(runtimeException, ErrorMessages.ERROR_INJECTING_METHOD);
       }
       finally {
-        context.setInjectionPoint(injectionPoint);
+        context.setInjectionPoint(null);
       }
     }
   }
