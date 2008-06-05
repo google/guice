@@ -3,12 +3,14 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import junit.framework.TestCase;
-
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
+import junit.framework.TestCase;
 
 /**
  * Tests the error messages produced by Guice.
@@ -81,6 +83,22 @@ public class ErrorMessagesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "Scope annotations on abstract types are not supported.");
+    }
+  }
+
+  /** Demonstrates issue 64, when setAccessible() fails. */
+  public void testGetUninjectableClass() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(Class.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Failed to inject java.lang.Class");
+      assertTrue(expected.getCause() instanceof SecurityException);
     }
   }
 
