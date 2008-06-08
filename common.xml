@@ -7,10 +7,7 @@
   <!-- can be overridden at the command line with -Dversion=
        or in IDEA, in the ant properties dialog -->
   <property name="version" value="snapshot"/>
-  <property name="bundle.version" value="0.0.0.snapshot"/>
-  <tstamp prefix="datestamp">
-    <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
-  </tstamp>
+  <property name="api.version" value="1.0"/>
 
   <target name="compile" description="Compile Java source.">
     <mkdir dir="${build.dir}/classes"/>
@@ -24,39 +21,37 @@
     </copy>
   </target>
 
-  <target name="manifest"
-      description="Build a jar manifest so Guice can be used as an OSGi bundle">
-    <dirname property="guice_home" file="${ant.file.common}" />
-    <taskdef name="osgiBundleInfo" classname="org.knopflerfish.ant.taskdefs.bundle.BundleInfoTask"
-        classpath="${guice_home}/lib/build/OSGiBundleInfo.jar"/>
+  <target name="manifest" description="Generate OSGi manifest." depends="compile">
+    <dirname property="common.basedir" file="${ant.file.common}"/>
+    <taskdef resource="aQute/bnd/ant/taskdef.properties"
+      classpath="${common.basedir}/lib/build/bnd-0.0.255.jar"/>
 
-    <!-- extracts the packagelist for OSGi -->
-    <osgiBundleInfo exports="exports" imports="imports" defaultimports="com.google.inject"
-        stdimports="java.,net.sf.cglib,org.objectweb.asm,com.google.inject.InjectorImpl,com.google.inject.BindCommandProcessor">
-      <fileset dir="${basedir}">
-        <include name="src/**/*.java"/>
-        <!--<exclude name="src/com/google/inject/internal/**/*.java"/>-->
-      </fileset>
-    </osgiBundleInfo>
+    <fail unless="module" message="Missing 'module' property (use the primary package name in this jar)"/>
 
-    <mkdir dir="${build.dir}/META-INF"/>
-    <manifest file="${build.dir}/META-INF/MANIFEST.MF">
-      <attribute name="Manifest-Version" value="1.0"/>
-      <attribute name="Built-By" value="${user.name}"/>
-      <attribute name="Built-At" value="${datestamp.dateAndTime}"/>
+    <property name="Bundle-Name" value="${ant.project.name}"/>
+    <property name="Bundle-SymbolicName" value="${module}"/>
+    <property name="Bundle-Version" value="${replace;${version};^[^0-9];${api.version}.$0}"/>
 
-      <attribute name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
-      <attribute name="Import-Package" value="${imports}"/>
-      <attribute name="Export-Package" value="${exports}"/>
-      <attribute name="Bundle-Version" value="${bundle.version}"/>
-      <attribute name="Bundle-Copyright" value="Google Inc. (C) 2006"/>
-      <attribute name="Bundle-Name" value="${ant.project.name}"/>
-      <attribute name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 5 and above"/>
-      <attribute name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
-      <attribute name="Bundle-Vendor" value="Google Inc."/>
-      <attribute name="Bundle-ManifestVersion" value="2"/>
-      <attribute name="Bundle-SymbolicName" value="${ant.project.name}"/>
-    </manifest>
+    <property name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 5 and above"/>
+    <property name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
+    <property name="Bundle-Copyright" value="Copyright (C) 2006 Google Inc."/>
+    <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
+    <property name="Bundle-Vendor" value="Google Inc."/>
+
+    <property name="exclude.imports" value=""/>
+    <property name="guice.imports" value="com.google.inject.*;version=${api.version}"/>
+    <property name="Import-Package" value="${exclude.imports},${guice.imports},*;resolution:=optional"/>
+    <property name="Export-Package" value="${module}.*;version=${api.version}"/>
+    <property name="-nouses" value="true"/>
+    <property name="-removeheaders" value="Bnd-LastModified,Ignore-Package,Include-Resource,Private-Package,Tool"/>
+
+    <bndwrap jars="${build.dir}/classes" output="${build.dir}"/>
+
+    <unjar src="${build.dir}/classes.bar" dest="${build.dir}">
+      <patternset>
+        <include name="META-INF/MANIFEST.MF"/>
+      </patternset>
+    </unjar>
   </target>
 
   <target name="test.compile"
