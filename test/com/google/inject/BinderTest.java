@@ -19,10 +19,10 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -155,6 +155,22 @@ public class BinderTest extends TestCase {
       Asserts.assertContains(expected.getMessage(),
           "1 error[s]");
     }
+  }
+
+  /** Test for issue 186 */
+  public void testGuiceRefusesToCreateParameterizedClasses() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(List.class).to(ArrayList.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "Cannot instantiate Parameterized class java.util.List");
+    }
+
   }
 
 //  public void testBindInterfaceWithoutImplementation() {
