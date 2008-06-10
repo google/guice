@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.internal.Types;
+import com.google.inject.internal.MoreTypes;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
@@ -121,7 +121,7 @@ public class Key<T> implements Serializable {
   @SuppressWarnings("unchecked")
   private Key(Type type, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = Types.wrapPrimitives((TypeLiteral<T>) TypeLiteral.get(type));
+    this.typeLiteral = MoreTypes.wrapPrimitives((TypeLiteral<T>) TypeLiteral.get(type));
     this.hashCode = computeHashCode();
   }
 
@@ -129,7 +129,7 @@ public class Key<T> implements Serializable {
   private Key(TypeLiteral<T> typeLiteral,
       AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = Types.wrapPrimitives(typeLiteral);
+    this.typeLiteral = MoreTypes.wrapPrimitives(typeLiteral);
     this.hashCode = computeHashCode();
   }
 

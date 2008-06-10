@@ -18,7 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import com.google.inject.internal.Types;
+import com.google.inject.util.Types;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class TypeLiteralTest extends TestCase {
   public void testWithParameterizedType() {
     TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {};
     TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
-        Types.newTypeWithArgument(List.class, String.class)) {};
+        Types.listOf(String.class)) {};
     assertEqualsBothWays(a, b);
   }
 

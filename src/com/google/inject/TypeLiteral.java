@@ -16,8 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Types;
-import static com.google.inject.internal.Types.canonicalize;
+import com.google.inject.internal.MoreTypes;
+import static com.google.inject.internal.MoreTypes.canonicalize;
+import com.google.inject.util.Types;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
@@ -58,8 +59,8 @@ public class TypeLiteral<T> implements Serializable {
   @SuppressWarnings("unchecked")
   protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
-    this.rawType = (Class<? super T>) Types.getRawType(type);
-    this.hashCode = Types.hashCode(type);
+    this.rawType = (Class<? super T>) MoreTypes.getRawType(type);
+    this.hashCode = MoreTypes.hashCode(type);
   }
 
   /**
@@ -68,13 +69,13 @@ public class TypeLiteral<T> implements Serializable {
   @SuppressWarnings("unchecked")
   TypeLiteral(Type type) {
     this.type = canonicalize(checkNotNull(type, "type"));
-    this.rawType = (Class<? super T>) Types.getRawType(this.type);
-    this.hashCode = Types.hashCode(this.type);
+    this.rawType = (Class<? super T>) MoreTypes.getRawType(this.type);
+    this.hashCode = MoreTypes.hashCode(this.type);
   }
 
   /**
    * Returns the type from super class's type parameter in {@link
-   * Types#canonicalize(Type) canonical form}.
+   * com.google.inject.internal.MoreTypes#canonicalize(Type) canonical form}.
    */
   static Type getSuperclassTypeParameter(Class<?> subclass) {
     Type superclass = subclass.getGenericSuperclass();
@@ -113,8 +114,7 @@ public class TypeLiteral<T> implements Serializable {
   final TypeLiteral<Provider<T>> providerType() {
     // This cast is safe and wouldn't generate a warning if Type had a type
     // parameter.
-    return (TypeLiteral<Provider<T>>) get(
-        Types.newTypeWithArgument(Provider.class, getType()));
+    return (TypeLiteral<Provider<T>>) get(Types.providerOf(getType()));
   }
 
   @Override public final int hashCode() {
@@ -123,11 +123,11 @@ public class TypeLiteral<T> implements Serializable {
 
   @Override public final boolean equals(Object o) {
     return o instanceof TypeLiteral<?>
-        && Types.equals(type, ((TypeLiteral) o).type);
+        && MoreTypes.equals(type, ((TypeLiteral) o).type);
   }
 
   @Override public final String toString() {
-    return Types.toString(type);
+    return MoreTypes.toString(type);
   }
 
   /**

@@ -17,8 +17,8 @@
 package com.google.inject.multibindings;
 
 import com.google.inject.*;
+import com.google.inject.util.Types;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.Types;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import com.google.inject.spi.SourceProviders;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -134,18 +134,18 @@ public abstract class MapBinder<K, V> {
 
   @SuppressWarnings("unchecked")
   private static <K, V> TypeLiteral<Map<K, V>> mapOf(Type keyType, Type valueType) {
-    Type type = Types.newTypeWithArgument(Map.class, keyType, valueType);
+    Type type = Types.mapOf(keyType, valueType);
     return (TypeLiteral<Map<K, V>>) TypeLiteral.get(type);
   }
 
   private static <K, V> TypeLiteral<Map<K, Provider<V>>> mapOfProviderOf(
       Type keyType, Type valueType) {
-    return mapOf(keyType, Types.newTypeWithArgument(Provider.class, valueType));
+    return mapOf(keyType, Types.newParameterizedType(Provider.class, valueType));
   }
   
   private static Type entryOfProviderOf(Type keyType, final Type valueType) {
-    return Types.newTypeWithArgument(Map.Entry.class, keyType,
-        Types.newTypeWithArgument(Provider.class, valueType));
+    return Types.newParameterizedType(Map.Entry.class, keyType,
+        Types.providerOf(valueType));
   }
 
   private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,

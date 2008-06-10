@@ -22,6 +22,7 @@ import com.google.inject.commands.CommandRewriteTest;
 import com.google.inject.internal.*;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.util.ProvidersTest;
+import com.google.inject.util.TypesTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
