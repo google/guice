@@ -19,7 +19,7 @@ package com.google.inject.name;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.spi.SourceProviders;
-
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
@@ -44,7 +44,8 @@ public class Names {
   }
 
   /**
-   * Creates a constant binding to {@code @Named(key)} for each property.
+   * Creates a constant binding to {@code @Named(key)} for each entry in
+   * {@code properties}.
    */
   public static void bindProperties(final Binder binder,
       final Map<String, String> properties) {
@@ -62,7 +63,9 @@ public class Names {
   }
 
   /**
-   * Creates a constant binding to {@code @Named(key)} for each property.
+   * Creates a constant binding to {@code @Named(key)} for each property. This
+   * method binds all properties including those inherited from 
+   * {@link Properties#defaults defaults}.
    */
   public static void bindProperties(final Binder binder,
       final Properties properties) {
@@ -70,10 +73,11 @@ public class Names {
         SourceProviders.defaultSource(),
         new Runnable() {
           public void run() {
-            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-              String key = (String) entry.getKey();
-              String value = (String) entry.getValue();
-              binder.bind(Key.get(String.class, new NamedImpl(key))).toInstance(value);
+            // use enumeration to include the default properties
+            for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {
+              String propertyName = (String) e.nextElement();
+              String value = properties.getProperty(propertyName);
+              binder.bind(Key.get(String.class, new NamedImpl(propertyName))).toInstance(value);
             }
           }
         });

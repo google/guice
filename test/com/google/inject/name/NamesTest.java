@@ -17,11 +17,17 @@
 
 package com.google.inject.name;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import junit.framework.TestCase;
-
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -44,5 +50,60 @@ public class NamesTest extends TestCase {
 
   public void testNamedIsSerializable() throws IOException {
     assertEqualWhenReserialized(Names.named("foo"));
+  }
+
+  public void testBindPropertiesUsingProperties() {
+    final Properties teams = new Properties();
+    teams.setProperty("SanJose", "Sharks");
+    teams.setProperty("Edmonton", "Oilers");
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Names.bindProperties(binder(), teams);
+      }
+    });
+
+    assertEquals("Sharks", injector.getInstance(Key.get(String.class, Names.named("SanJose"))));
+    assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
+  }
+
+  public void testBindPropertiesUsingMap() {
+    final Map<String, String> properties = ImmutableMap.of(
+        "SanJose", "Sharks", "Edmonton", "Oilers");
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Names.bindProperties(binder(), properties);
+      }
+    });
+
+    assertEquals("Sharks", injector.getInstance(Key.get(String.class, Names.named("SanJose"))));
+    assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
+  }
+
+  public void testBindPropertiesIncludesInheritedProperties() {
+    Properties defaults = new Properties();
+    defaults.setProperty("Edmonton", "Eskimos");
+    defaults.setProperty("Regina", "Pats");
+
+    final Properties teams = new Properties(defaults);
+    teams.setProperty("SanJose", "Sharks");
+    teams.setProperty("Edmonton", "Oilers");
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Names.bindProperties(binder(), teams);
+      }
+    });
+
+    assertEquals("Pats", injector.getInstance(Key.get(String.class, Names.named("Regina"))));
+    assertEquals("Oilers", injector.getInstance(Key.get(String.class, Names.named("Edmonton"))));
+    assertEquals("Sharks", injector.getInstance(Key.get(String.class, Names.named("SanJose"))));
+
+    try {
+      injector.getInstance(Key.get(String.class, Names.named("Calgary")));
+      fail();
+    } catch (RuntimeException expected) {
+    }
   }
 }
