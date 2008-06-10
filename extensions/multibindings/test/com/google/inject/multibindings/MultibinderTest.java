@@ -210,9 +210,9 @@ public class MultibinderTest extends TestCase {
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
-    } catch(IllegalStateException expected) {
+    } catch(ProvisionException expected) {
       assertEquals("Set injection failed due to duplicated element \"A\"",
-          expected.getMessage());
+          expected.getCause().getMessage());
     }
   }
 
@@ -227,9 +227,9 @@ public class MultibinderTest extends TestCase {
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
-    } catch(IllegalStateException expected) {
+    } catch(ProvisionException expected) {
       assertEquals("Set injection failed due to null element",
-          expected.getMessage());
+          expected.getCause().getMessage());
     }
   }
 

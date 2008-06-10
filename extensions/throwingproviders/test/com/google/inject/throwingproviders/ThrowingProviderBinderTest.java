@@ -16,14 +16,17 @@
 
 package com.google.inject.throwingproviders;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
-
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
@@ -128,7 +131,7 @@ public class ThrowingProviderBinderTest extends TestCase {
       remoteProvider.get();
       fail();
     } catch (RuntimeException e) {
-      assertEquals("A", e.getMessage());
+      assertEquals("A", e.getCause().getMessage());
     }
 
     // undeclared exceptions shouldn't be scoped
@@ -137,7 +140,7 @@ public class ThrowingProviderBinderTest extends TestCase {
       remoteProvider.get();
       fail();
     } catch (RuntimeException e) {
-      assertEquals("B", e.getMessage());
+      assertEquals("B", e.getCause().getMessage());
     }
   }
 

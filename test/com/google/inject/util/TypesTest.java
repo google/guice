@@ -17,7 +17,7 @@
 
 package com.google.inject.util;
 
-import com.google.inject.Asserts;
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.internal.MoreTypes;
 import java.lang.reflect.GenericArrayType;
@@ -86,7 +86,7 @@ public class TypesTest extends TestCase {
       Types.newParameterizedType(Map.class, String.class, int.class);
       fail();
     } catch (IllegalArgumentException expected) {
-      Asserts.assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(),
           "Parameterized types may not have primitive arguments: int");
     }
   }
@@ -112,6 +112,29 @@ public class TypesTest extends TestCase {
         MoreTypes.toString(listStringArray));
     assertEquals(innerFloatDouble.toString(),
         MoreTypes.toString(innerFloatDouble));
+  }
+
+  static class Owning<A> {}
+
+  /**
+   * Ensure that owning types are required when necessary, and forbidden
+   * otherwise.
+   */
+  public void testCanonicalizeRequiresOwnerTypes() throws NoSuchFieldException {
+    try {
+      Types.newParameterizedType(Owning.class, String.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(),
+          "No owner type for enclosed " + Owning.class);
+    }
+
+    try {
+      Types.newParameterizedTypeWithOwner(Object.class, Set.class, String.class);
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(),
+          "Owner type for unenclosed " + Set.class);
+    }
   }
 
   @SuppressWarnings("UnusedDeclaration")

@@ -18,6 +18,7 @@
 package com.google.inject.internal;
 
 import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Types;
@@ -226,11 +227,20 @@ public class MoreTypes {
     private final Type[] typeArguments;
 
     public ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
+      // require an owner type if the raw type needs it
+      if (rawType instanceof Class<?>) {
+        Class rawTypeAsClass = (Class) rawType;
+        checkArgument(ownerType != null || rawTypeAsClass.getEnclosingClass() == null,
+            "No owner type for enclosed %s", rawType);
+        checkArgument(ownerType == null || rawTypeAsClass.getEnclosingClass() != null,
+            "Owner type for unenclosed %s", rawType);
+      }
+
       this.ownerType = ownerType == null ? null : canonicalize(ownerType);
       this.rawType = canonicalize(rawType);
       this.typeArguments = typeArguments.clone();
       for (int t = 0; t < this.typeArguments.length; t++) {
-        com.google.common.base.Preconditions.checkArgument(!(this.typeArguments[t] instanceof Class<?>)
+        checkArgument(!(this.typeArguments[t] instanceof Class<?>)
             || !((Class) this.typeArguments[t]).isPrimitive(),
             "Parameterized types may not have primitive arguments: %s", this.typeArguments[t]);
         this.typeArguments[t] = canonicalize(this.typeArguments[t]);

@@ -16,13 +16,23 @@
 
 package com.google.inject.throwingproviders;
 
-import com.google.inject.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 /**
  * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API:
@@ -204,20 +214,9 @@ public class ThrowingProviderBinder {
     private Key<P> createKey() {
       TypeLiteral<P> typeLiteral;
       if (interfaceType.getTypeParameters().length == 1) {
-        typeLiteral = (TypeLiteral<P>) TypeLiteral.get(new ParameterizedType() {
-
-          public Type[] getActualTypeArguments() {
-            return new Type[]{valueType};
-          }
-
-          public Type getRawType() {
-            return interfaceType;
-          }
-
-          public Type getOwnerType() {
-            throw new UnsupportedOperationException();
-          }
-        });
+        ParameterizedType type = Types.newParameterizedTypeWithOwner(
+            interfaceType.getEnclosingClass(), interfaceType, valueType);
+        typeLiteral = (TypeLiteral<P>) TypeLiteral.get(type);
       } else {
         typeLiteral = TypeLiteral.get(interfaceType);
       }

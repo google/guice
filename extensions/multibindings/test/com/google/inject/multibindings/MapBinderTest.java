@@ -241,9 +241,9 @@ public class MapBinderTest extends TestCase {
     try {
       injector.getInstance(Key.get(mapOfString));
       fail();
-    } catch(IllegalStateException expected) {
+    } catch(ProvisionException expected) {
       assertEquals("Map injection failed due to null value for key \"null\"",
-          expected.getMessage());
+          expected.getCause().getMessage());
     }
   }
 

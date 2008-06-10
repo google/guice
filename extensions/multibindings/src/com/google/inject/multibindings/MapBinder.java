@@ -144,7 +144,7 @@ public abstract class MapBinder<K, V> {
   }
   
   private static Type entryOfProviderOf(Type keyType, final Type valueType) {
-    return Types.newParameterizedType(Map.Entry.class, keyType,
+    return Types.newParameterizedTypeWithOwner(Map.class, Map.Entry.class, keyType,
         Types.providerOf(valueType));
   }
 
