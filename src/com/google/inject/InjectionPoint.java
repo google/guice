@@ -16,11 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessages;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 
@@ -90,12 +89,11 @@ class InjectionPoint<T> implements Dependency<T> {
     }
 
     String message = getMember() != null
-        ? String.format(ErrorMessages.CANNOT_INJECT_NULL_INTO_MEMBER, source,
-            getMember())
-        : String.format(ErrorMessages.CANNOT_INJECT_NULL, source);
+        ? ErrorMessage.cannotInjectNullIntoMember(source, getMember()).toString()
+        : ErrorMessage.cannotInjectNull(source).toString();
 
-    throw new ProvisionException(new NullPointerException(message),
-        String.format(ErrorMessages.CANNOT_INJECT_NULL, source));
+    throw new ProvisionException(ErrorMessage.cannotInjectNull(source).toString(),
+        new NullPointerException(message));
   }
 
   // TODO(kevinb): gee, ya think we might want to remove this?

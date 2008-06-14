@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ErrorMessage;
+import com.google.inject.spi.Message;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,9 +69,8 @@ class ConstructionContext<T> {
 
     if (!expectedType.isInterface()) {
       // TODO: Report better error.
-      throw new ConfigurationException("Tried proxying "
-          + expectedType.getName() + " to support a circular dependency, but"
-          + " it is not an interface.");
+      throw new CreationException(
+          new Message(ErrorMessage.cannotSatisfyCircularDependency(expectedType).toString()));
     }
 
     if (invocationHandlers == null) {

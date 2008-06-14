@@ -16,15 +16,18 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Binder;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.Scope;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.spi.SourceProviders;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.lang.annotation.Annotation;
 
 /**
@@ -183,7 +186,7 @@ public final class BindCommand<T> implements Command {
     }
 
     public void toInstance(final T instance) {
-      checkNotNull(instance, ErrorMessages.CANNOT_BIND_TO_NULL_INSTANCE);
+      checkNotNull(instance, ErrorMessage.cannotBindToNullInstance().toString());
 
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {

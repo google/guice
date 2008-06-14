@@ -19,8 +19,8 @@ package com.google.inject;
 import com.google.inject.commands.AddMessageErrorCommand;
 import com.google.inject.commands.AddThrowableErrorCommand;
 import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessages;
-
+import com.google.inject.internal.ErrorMessage;
+import com.google.inject.spi.Message;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,17 +40,17 @@ class ErrorsCommandProcessor extends CommandProcessor {
   }
 
   @Override public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    addError(command.getSource(), command.getMessage(), command.getArguments().toArray());
+    String message = String.format(command.getMessage(), command.getArguments());
+    errorHandler.handle(new Message(command.getSource(), message));
     return true;
   }
 
   @Override public Boolean visitAddError(AddThrowableErrorCommand command) {
     Object source = command.getSource();
-    String message = ErrorMessages.getRootMessage(command.getThrowable());
-    String logMessage = String.format(
-        ErrorMessages.EXCEPTION_REPORTED_BY_MODULE, message);
+    String message = ErrorMessage.getRootMessage(command.getThrowable());
+    String logMessage = ErrorMessage.exceptionReportedByModules(message).toString();
     logger.log(Level.INFO, logMessage, command.getThrowable());
-    addError(source, ErrorMessages.EXCEPTION_REPORTED_BY_MODULE_SEE_LOG, message);
+    addError(source, ErrorMessage.exceptionReportedByModuleSeeLogs(message));
     return true;
   }
 }

@@ -4,9 +4,10 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.util.Providers;
-import junit.framework.TestCase;
-
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * Tests the error messages produced by Guice.
@@ -84,7 +86,7 @@ public class ErrorMessagesTest extends TestCase {
     try {
       injector.getInstance(AbstractClass.class);
       fail();
-    } catch(ConfigurationException expected) {
+    } catch(CreationException expected) {
       assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
     }
   }

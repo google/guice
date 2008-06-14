@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.spi.Message;
+
 /**
  * Handles errors in the Injector.
  *
@@ -26,10 +28,10 @@ public interface ErrorHandler {
   /**
    * Handles an error.
    */
-  void handle(Object source, String message);
+  void handle(Object source, ErrorMessage errorMessage);
 
   /**
-   * Handles an error.
+   * Handles a user-reported error.
    */
-  void handle(Object source, String message, Object... arguments);
+  void handle(Message message);
 }

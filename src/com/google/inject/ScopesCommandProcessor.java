@@ -16,13 +16,12 @@
 
 package com.google.inject;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.StackTraceElements;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
@@ -48,20 +47,19 @@ class ScopesCommandProcessor extends CommandProcessor {
 
     if (!Scopes.isScopeAnnotation(annotationType)) {
       addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_SCOPE_ANNOTATION);
+          ErrorMessage.missingScopeAnnotation());
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
       addError(StackTraceElements.forType(annotationType),
-          ErrorMessages.MISSING_RUNTIME_RETENTION, command.getSource());
+          ErrorMessage.missingRuntimeRetention(command.getSource()));
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     Scope existing = scopes.get(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
-      addError(command.getSource(), ErrorMessages.DUPLICATE_SCOPES, existing,
-          annotationType, scope);
+      addError(command.getSource(), ErrorMessage.duplicateScopes(existing, annotationType, scope));
     } else {
       scopes.put(annotationType, checkNotNull(scope, "scope"));
     }

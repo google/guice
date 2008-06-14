@@ -18,11 +18,11 @@
 package com.google.inject;
 
 import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.spi.Message;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A stateful error handler that can be used at both configuration time and
@@ -33,17 +33,17 @@ import java.util.Collection;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class DefaultErrorHandler implements ErrorHandler {
+  private static final Object[] NO_ARGUMENTS = new Object[0];
+
   State state = State.CONFIGURATION_TIME;
   final Collection<Message> errorMessages = new ArrayList<Message>();
 
-  public void handle(Object source, String message) {
-    source = ErrorMessages.convert(source);
-
+  public final void handle(Message message) {
     if (state == State.RUNTIME) {
-      throw new ConfigurationException("Error at " + source + " " + message);
+      throw new CreationException(Collections.singleton(message));
 
     } else if (state == State.CONFIGURATION_TIME) {
-      errorMessages.add(new Message(source, message));
+      errorMessages.add(message);
 
     } else {
       throw new AssertionError();
@@ -53,8 +53,8 @@ class DefaultErrorHandler implements ErrorHandler {
   /**
    * Implements formatting. Converts known types to readable strings.
    */
-  public final void handle(Object source, String message, Object... arguments) {
-    handle(source, ErrorMessages.format(message, arguments));
+  public final void handle(Object source, ErrorMessage errorMessage) {
+    handle(new Message(source, errorMessage.toString()));
   }
 
   void blowUpIfErrorsExist() {

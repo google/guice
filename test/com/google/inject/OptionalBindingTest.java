@@ -246,7 +246,7 @@ public class OptionalBindingTest extends TestCase {
     try {
       Guice.createInjector().getInstance(HasOptionalConstructor.class);
       fail();
-    } catch (ConfigurationException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "@Inject(optional=true) is not allowed on constructors");
     }

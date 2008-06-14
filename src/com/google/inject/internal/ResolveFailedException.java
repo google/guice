@@ -17,6 +17,8 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.spi.Message;
+
 /**
  * Indicates that resolving a binding failed. This is thrown when resolving a
  * new binding, either at injector-creation time or when resolving a
@@ -26,7 +28,11 @@ package com.google.inject.internal;
  */
 public class ResolveFailedException extends Exception {
 
-  public ResolveFailedException(String message, Object... arguments) {
-    super(ErrorMessages.format(message, arguments));
+  public ResolveFailedException(ErrorMessage errorMessage) {
+    super(errorMessage.toString());
+  }
+
+  public Message getMessage(Object source) {
+    return new Message(source, getMessage());
   }
 }

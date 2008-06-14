@@ -19,8 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.text.DateFormat;
@@ -29,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -133,7 +132,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidInteger.class);
       fail();
-    } catch (ConfigurationException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to java.lang.Integer");
@@ -154,7 +153,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidCharacter.class);
       fail();
-    } catch (ConfigurationException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to java.lang.Character");
@@ -175,7 +174,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidEnum.class);
       fail();
-    } catch (ConfigurationException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to " + Bar.class.getName());

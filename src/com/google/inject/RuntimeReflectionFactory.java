@@ -17,9 +17,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.*;
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 
 /**
@@ -56,13 +57,13 @@ class RuntimeReflectionFactory implements Reflection.Factory {
           if (inject.optional()) {
             errorHandler.handle(
                 StackTraceElements.forMember(constructor),
-                ErrorMessages.OPTIONAL_CONSTRUCTOR);
+                ErrorMessage.optionalConstructor());
           }
 
           if (found != null) {
             errorHandler.handle(
                 StackTraceElements.forMember(found),
-                ErrorMessages.TOO_MANY_CONSTRUCTORS);
+                ErrorMessage.tooManyConstructors());
             return invalidConstructor();
           }
           found = constructor;
@@ -81,8 +82,7 @@ class RuntimeReflectionFactory implements Reflection.Factory {
         errorHandler.handle(
             StackTraceElements.forMember(
                 implementation.getDeclaredConstructors()[0]),
-            ErrorMessages.MISSING_CONSTRUCTOR,
-            implementation);
+            ErrorMessage.missingConstructor(implementation));
         return invalidConstructor();
       }
     }

@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessages;
-import com.google.inject.spi.SourceProviders;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.internal.ErrorMessage;
+import com.google.inject.spi.SourceProviders;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -45,7 +45,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     } catch(ProvisionException e) {
       throw e;
     } catch(RuntimeException e) {
-      throw new ProvisionException(e, ErrorMessages.ERROR_IN_PROVIDER);
+      throw new ProvisionException(ErrorMessage.errorInProvider().toString(), e);
     }
   }
 

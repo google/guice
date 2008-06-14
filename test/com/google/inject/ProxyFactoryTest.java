@@ -17,14 +17,19 @@
 
 package com.google.inject;
 
-import static com.google.inject.matcher.Matchers.*;
-import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
+import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.ErrorMessage;
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.not;
+import static com.google.inject.matcher.Matchers.only;
+import com.google.inject.spi.Message;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
+import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -200,6 +205,16 @@ public class ProxyFactoryTest extends TestCase {
     int count;
     void inc() {
       count++;
+    }
+  }
+
+  static class InvalidErrorHandler implements ErrorHandler {
+    public void handle(Object source, ErrorMessage errorMessage) {
+      throw new AssertionError(errorMessage.toString());
+    }
+
+    public void handle(Message message) {
+      throw new AssertionError(message.getMessage());
     }
   }
 }

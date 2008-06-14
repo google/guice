@@ -17,12 +17,11 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Key;
 import com.google.inject.BindingAnnotation;
-
-import java.lang.reflect.Type;
-import java.lang.reflect.Member;
+import com.google.inject.Key;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 
 public class Keys {
 
@@ -38,7 +37,8 @@ public class Keys {
           found = annotation;
         } else {
           errorHandler.handle(StackTraceElements.forMember(member),
-              ErrorMessages.DUPLICATE_BINDING_ANNOTATIONS, found, annotation);
+              ErrorMessage.duplicateBindingAnnotations(
+                  found.annotationType(), annotation.annotationType()));
         }
       }
     }

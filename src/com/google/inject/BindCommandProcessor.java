@@ -17,18 +17,18 @@
 package com.google.inject;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.commands.BindCommand;
 import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindScoping.Visitor;
 import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +66,7 @@ class BindCommandProcessor extends CommandProcessor {
     Class<? super T> rawType = key.getTypeLiteral().getRawType();
 
     if (rawType == Provider.class) {
-      addError(source, ErrorMessages.BINDING_TO_PROVIDER);
+      addError(source, ErrorMessage.bindingToProvider());
       return true;
     }
 
@@ -89,8 +89,8 @@ class BindCommandProcessor extends CommandProcessor {
         if (scope != null) {
           return scope;
         } else {
-          addError(source, ErrorMessages.SCOPE_NOT_FOUND,
-              "@" + scopeAnnotation.getSimpleName());
+          addError(source, ErrorMessage.scopeNotFound(
+              "@" + scopeAnnotation.getSimpleName()));
           return Scopes.NO_SCOPE;
         }
       }
@@ -135,7 +135,7 @@ class BindCommandProcessor extends CommandProcessor {
 
       public Void visitToKey(Key<? extends T> targetKey) {
         if (key.equals(targetKey)) {
-          addError(source, ErrorMessages.RECURSIVE_BINDING);
+          addError(source, ErrorMessage.recursiveBinding());
         }
 
         FactoryProxy<T> factory = new FactoryProxy<T>(key, targetKey, source);
@@ -155,7 +155,7 @@ class BindCommandProcessor extends CommandProcessor {
         // We can't assume abstract types aren't injectable. They may have an
         // @ImplementedBy annotation or something.
         if (key.hasAnnotationType() || !(type instanceof Class<?>)) {
-          addError(source, ErrorMessages.MISSING_IMPLEMENTATION);
+          addError(source, ErrorMessage.missingImplementation());
           putBinding(invalidBinding(injector, key, source));
           return null;
         }
@@ -168,7 +168,7 @@ class BindCommandProcessor extends CommandProcessor {
           binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy);
           putBinding(binding);
         } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(source, e.getMessage());
+          injector.errorHandler.handle(e.getMessage(source));
           putBinding(invalidBinding(injector, key, source));
           return null;
         }
@@ -178,7 +178,7 @@ class BindCommandProcessor extends CommandProcessor {
             try {
               injector.initializeBinding(binding);
             } catch (ResolveFailedException e) {
-              injector.errorHandler.handle(source, e.getMessage());
+              injector.errorHandler.handle(e.getMessage(source));
             }
           }
         });
@@ -196,12 +196,12 @@ class BindCommandProcessor extends CommandProcessor {
 
       if (!Annotations.isRetainedAtRuntime(annotationType)) {
         addError(StackTraceElements.forType(annotationType),
-            ErrorMessages.MISSING_RUNTIME_RETENTION, source);
+            ErrorMessage.missingRuntimeRetention(source));
       }
 
       if (!Key.isBindingAnnotation(annotationType)) {
         addError(StackTraceElements.forType(annotationType),
-            ErrorMessages.MISSING_BINDING_ANNOTATION, source);
+            ErrorMessage.missingBindingAnnotation(source));
       }
     }
   }
@@ -213,7 +213,7 @@ class BindCommandProcessor extends CommandProcessor {
   @Override public Boolean visitBindConstant(BindConstantCommand command) {
     BindTarget<?> target = command.getTarget();
     if (target == null) {
-      addError(command.getSource(), ErrorMessages.MISSING_CONSTANT_VALUE);
+      addError(command.getSource(), ErrorMessage.missingConstantValues());
       return true;
     }
 
@@ -244,14 +244,14 @@ class BindCommandProcessor extends CommandProcessor {
 
     Class<?> rawType = key.getRawType();
     if (FORBIDDEN_TYPES.contains(rawType)) {
-      addError(binding.getSource(), ErrorMessages.CANNOT_BIND_TO_GUICE_TYPE,
-          rawType.getSimpleName());
+      addError(binding.getSource(), ErrorMessage.cannotBindToGuiceType(
+          rawType.getSimpleName()));
       return;
     }
 
     if (bindings.containsKey(key)) {
-      addError(binding.getSource(), ErrorMessages.BINDING_ALREADY_SET, key,
-          original.getSource());
+      addError(binding.getSource(), ErrorMessage.bindingAlreadySet(key,
+          original.getSource()));
     } else {
       bindings.put(key, binding);
     }
@@ -261,7 +261,7 @@ class BindCommandProcessor extends CommandProcessor {
 
   @SuppressWarnings("unchecked") // For generic array creation.
   private static Set<Class<?>> forbiddenTypes() {
-    Set<Class<?>> set = new HashSet<Class<?>>();
+    Set<Class<?>> set = Sets.newHashSet();
 
     Collections.addAll(set,
 

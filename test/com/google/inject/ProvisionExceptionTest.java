@@ -18,9 +18,8 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
-import junit.framework.TestCase;
-
 import java.io.IOException;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -189,7 +188,7 @@ public class ProvisionExceptionTest extends TestCase {
 
   static class F {
     @Inject public F() {
-      throw new ProvisionException(new RuntimeException(), "User Exception");
+      throw new ProvisionException("User Exception", new RuntimeException());
     }
   }
 

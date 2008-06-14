@@ -17,13 +17,17 @@
 package com.google.inject;
 
 import com.google.inject.spi.Message;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.List;
 
 /**
- * Thrown when errors occur while creating a {@link Injector}. Includes a list
- * of encountered errors. Typically, a client should catch this exception, log
- * it, and stop execution.
+ * Thrown when errors occur when configuration problems are encountered when
+ * creating or using an {@link Injector}. Typically, a client should catch this
+ * exception, log it, and stop execution.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -35,15 +39,17 @@ public class CreationException extends RuntimeException {
    * Constructs a new exception for the given errors.
    */
   public CreationException(Collection<? extends Message> errorMessages) {
-    super();
-
-    // Sort the messages by source. 
+    // Sort the messages by source.
     this.errorMessages = new ArrayList<Message>(errorMessages);
     Collections.sort(this.errorMessages, new Comparator<Message>() {
       public int compare(Message a, Message b) {
         return a.getSource().compareTo(b.getSource());
       }
     });
+  }
+
+  public CreationException(Message message) {
+    this.errorMessages = Collections.singletonList(message);
   }
 
   public String getMessage() {

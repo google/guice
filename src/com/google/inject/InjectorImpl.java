@@ -25,7 +25,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
@@ -37,6 +37,7 @@ import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.util.Providers;
@@ -194,7 +195,7 @@ class InjectorImpl implements Injector {
       try {
         binding = parentInjector.getBinding(key);
       }
-      catch (ConfigurationException e) {
+      catch (CreationException e) {
         // if this happens, the parent can't create this key, and we ignore it
       }
 
@@ -260,7 +261,7 @@ class InjectorImpl implements Injector {
 
     // If the Provider has no type parameter (raw Provider)...
     if (!(providerType instanceof ParameterizedType)) {
-      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_RAW_PROVIDER);
+      throw new ResolveFailedException(ErrorMessage.cannotInjectRawProvider());
     }
 
     Type entryType = ((ParameterizedType) providerType).getActualTypeArguments()[0];
@@ -279,10 +280,10 @@ class InjectorImpl implements Injector {
     }
 
     if (otherNames.isEmpty()) {
-      errorHandler.handle(source, ErrorMessages.MISSING_BINDING, key);
+      errorHandler.handle(source, ErrorMessage.missingBinding(key));
     }
     else {
-      errorHandler.handle(source, ErrorMessages.MISSING_BINDING_BUT_OTHERS_EXIST, key, otherNames);
+      errorHandler.handle(source, ErrorMessage.missingBindingButOthersExist(key, otherNames));
     }
   }
 
@@ -358,8 +359,8 @@ class InjectorImpl implements Injector {
     for (MatcherAndConverter<?> converter : converters) {
       if (converter.getTypeMatcher().matches(type)) {
         if (matchingConverter != null) {
-          throw new ResolveFailedException(ErrorMessages.AMBIGUOUS_TYPE_CONVERSION,
-              stringValue, type, matchingConverter, converter);
+          throw new ResolveFailedException(ErrorMessage.ambiguousTypeConversion(
+              stringValue, type, matchingConverter, converter));
         }
         matchingConverter = converter;
       }
@@ -377,13 +378,13 @@ class InjectorImpl implements Injector {
           .convert(stringValue, key.getTypeLiteral());
 
       if (converted == null) {
-        throw new ResolveFailedException(ErrorMessages.CONVERTER_RETURNED_NULL);
+        throw new ResolveFailedException(ErrorMessage.converterReturnedNull());
       }
 
       // We have to filter out primitive types because an Integer is not an instance of int, and we
       // provide converters for all the primitive types and know that they work anyway.
       if (!type.getRawType().isInstance(converted)) {
-        throw new ResolveFailedException(ErrorMessages.CONVERSION_TYPE_ERROR, converted, type);
+        throw new ResolveFailedException(ErrorMessage.conversionTypeError(converted, type));
       }
       return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
     }
@@ -391,8 +392,8 @@ class InjectorImpl implements Injector {
       throw e;
     }
     catch (Exception e) {
-      throw new ResolveFailedException(ErrorMessages.CONVERSION_ERROR, stringValue,
-          stringBinding.getSource(), type, matchingConverter, e.getMessage());
+      throw new ResolveFailedException(ErrorMessage.conversionError(stringValue,
+          stringBinding.getSource(), type, matchingConverter, e.getMessage()));
     }
   }
 
@@ -473,7 +474,7 @@ class InjectorImpl implements Injector {
       throws ResolveFailedException {
     // Don't try to inject arrays, or enums.
     if (type.isArray() || type.isEnum()) {
-      throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, type);
+      throw new ResolveFailedException(ErrorMessage.missingBinding(type));
     }
 
     // Handle @ImplementedBy
@@ -494,12 +495,12 @@ class InjectorImpl implements Injector {
     // TODO: Method interceptors could actually enable us to implement
     // abstract types. Should we remove this restriction?
     if (Modifier.isAbstract(type.getModifiers())) {
-      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, type);
+      throw new ResolveFailedException(ErrorMessage.cannotInjectAbstractType(type));
     }
 
     // Error: Inner class.
     if (Classes.isInnerClass(type)) {
-      throw new ResolveFailedException(ErrorMessages.CANNOT_INJECT_INNER_CLASS, type);
+      throw new ResolveFailedException(ErrorMessage.cannotInjectInnerClass(type));
     }
 
     if (scope == null) {
@@ -539,7 +540,7 @@ class InjectorImpl implements Injector {
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
     if (providerType == type) {
-      throw new ResolveFailedException(ErrorMessages.RECURSIVE_PROVIDER_TYPE);
+      throw new ResolveFailedException(ErrorMessage.recursiveProviderType());
     }
 
     // TODO: Make sure the provided type extends type. We at least check the type at runtime below.
@@ -554,8 +555,8 @@ class InjectorImpl implements Injector {
         Provider<?> provider = providerBinding.internalFactory.get(context, injectionPoint);
         Object o = provider.get();
         if (o != null && !type.isInstance(o)) {
-          errorHandler.handle(StackTraceElements.forType(type), ErrorMessages.SUBTYPE_NOT_PROVIDED,
-              providerType, type);
+          errorHandler.handle(StackTraceElements.forType(type),
+              ErrorMessage.subtypeNotProvided(providerType, type));
           throw new AssertionError();
         }
 
@@ -584,12 +585,12 @@ class InjectorImpl implements Injector {
 
     // Make sure it's not the same type. TODO: Can we check for deeper cycles?
     if (implementationType == type) {
-      throw new ResolveFailedException(ErrorMessages.RECURSIVE_IMPLEMENTATION_TYPE);
+      throw new ResolveFailedException(ErrorMessage.recursiveImplementationType());
     }
 
     // Make sure implementationType extends type.
     if (!type.isAssignableFrom(implementationType)) {
-      throw new ResolveFailedException(ErrorMessages.NOT_A_SUBTYPE, implementationType, type);
+      throw new ResolveFailedException(ErrorMessage.notASubtype(implementationType, type));
     }
 
     // After the preceding check, this cast is safe.
@@ -642,7 +643,7 @@ class InjectorImpl implements Injector {
           // throw with a more appropriate message below
         }
       }
-      throw new ResolveFailedException(ErrorMessages.MISSING_BINDING, key);
+      throw new ResolveFailedException(ErrorMessage.missingBinding(key));
     }
 
     // Create a binding based on the raw type.
@@ -717,7 +718,7 @@ class InjectorImpl implements Injector {
           catch (ResolveFailedException e) {
             if (!inject.optional()) {
               // TODO: Report errors for more than one parameter per member.
-              errorHandler.handle(member, e.getMessage());
+              errorHandler.handle(e.getMessage(member));
             }
           }
         }
@@ -793,7 +794,7 @@ class InjectorImpl implements Injector {
       catch (IllegalAccessException e) {
         throw new AssertionError(e);
       }
-      catch (ConfigurationException e) {
+      catch (CreationException e) {
         throw e;
       }
       catch (ProvisionException provisionException) {
@@ -801,7 +802,8 @@ class InjectorImpl implements Injector {
         throw provisionException;
       }
       catch (RuntimeException runtimeException) {
-        throw new ProvisionException(runtimeException, ErrorMessages.ERROR_INJECTING_FIELD);
+        throw new ProvisionException(
+            ErrorMessage.errorInjectingField().toString(), runtimeException);
       }
       finally {
         context.setInjectionPoint(null);
@@ -884,7 +886,7 @@ class InjectorImpl implements Injector {
       }
       catch (InvocationTargetException e) {
         Throwable cause = e.getCause() != null ? e.getCause() : e;
-        throw new ProvisionException(cause, ErrorMessages.ERROR_INJECTING_METHOD);
+        throw new ProvisionException(ErrorMessage.errorInjectingMethod().toString(), cause);
       }
     }
 
@@ -906,13 +908,14 @@ class InjectorImpl implements Injector {
   final Map<Class<?>, Object> constructors = new ReferenceCache<Class<?>, Object>() {
     @SuppressWarnings("unchecked")
     protected Object create(Class<?> implementation) {
+      // TODO: reduce duplication between this and createUnitializedBinding
       if (!Classes.isConcrete(implementation)) {
         return new ResolveFailedException(
-            ErrorMessages.CANNOT_INJECT_ABSTRACT_TYPE, implementation);
+            ErrorMessage.cannotInjectAbstractType(implementation));
       }
       if (Classes.isInnerClass(implementation)) {
         return new ResolveFailedException(
-            ErrorMessages.CANNOT_INJECT_INNER_CLASS, implementation);
+            ErrorMessage.cannotInjectInnerClass(implementation));
       }
       return new ConstructorInjector(InjectorImpl.this, implementation);
     }
@@ -933,7 +936,7 @@ class InjectorImpl implements Injector {
       try {
         return factory.get(context, injectionPoint);
       }
-      catch (ConfigurationException e) {
+      catch (CreationException e) {
         throw e;
       }
       catch (ProvisionException provisionException) {
@@ -941,7 +944,8 @@ class InjectorImpl implements Injector {
         throw provisionException;
       }
       catch (RuntimeException runtimeException) {
-        throw new ProvisionException(runtimeException, ErrorMessages.ERROR_INJECTING_METHOD);
+        throw new ProvisionException(
+            ErrorMessage.errorInjectingMethod().toString(), runtimeException);
       }
       finally {
         context.setInjectionPoint(null);
@@ -1021,8 +1025,8 @@ class InjectorImpl implements Injector {
       return getProviderOrThrow(key);
     }
     catch (ResolveFailedException e) {
-      throw new ConfigurationException(
-          "Missing binding to " + ErrorMessages.convert(key) + ": " + e.getMessage());
+      throw new CreationException(new Message(
+          ErrorMessage.bindingNotFound(key, e.getMessage()).toString()));
     }
   }
 

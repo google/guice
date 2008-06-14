@@ -45,7 +45,7 @@ class FactoryProxy<T> implements InternalFactory<T>,
         try {
           targetFactory = injector.getInternalFactory(targetKey);
         } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(source, e.getMessage());
+          injector.errorHandler.handle(e.getMessage(source));
         }
       }
     });

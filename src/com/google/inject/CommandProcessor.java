@@ -16,9 +16,18 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.*;
+import com.google.inject.commands.AddMessageErrorCommand;
+import com.google.inject.commands.AddThrowableErrorCommand;
+import com.google.inject.commands.BindCommand;
+import com.google.inject.commands.BindConstantCommand;
+import com.google.inject.commands.BindInterceptorCommand;
+import com.google.inject.commands.BindScopeCommand;
+import com.google.inject.commands.Command;
+import com.google.inject.commands.ConvertToTypesCommand;
+import com.google.inject.commands.GetProviderCommand;
+import com.google.inject.commands.RequestStaticInjectionCommand;
 import com.google.inject.internal.ErrorHandler;
-
+import com.google.inject.internal.ErrorMessage;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,7 +42,7 @@ import java.util.List;
  */
 abstract class CommandProcessor implements Command.Visitor<Boolean> {
 
-  private final ErrorHandler errorHandler;
+  protected final ErrorHandler errorHandler;
 
   protected CommandProcessor(ErrorHandler errorHandler) {
     this.errorHandler = errorHandler;
@@ -48,12 +57,8 @@ abstract class CommandProcessor implements Command.Visitor<Boolean> {
     }
   }
 
-  protected void addError(Object source, String message, Object... arguments) {
-    errorHandler.handle(source, message, arguments);
-  }
-
-  protected void addError(Object source, String message) {
-    errorHandler.handle(source, message);
+  protected void addError(Object source, ErrorMessage errorMessage) {
+    errorHandler.handle(source, errorMessage);
   }
 
   public Boolean visitAddMessageError(AddMessageErrorCommand command) {

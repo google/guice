@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.BindCommandProcessor.CreationListener;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.ResolveFailedException;
 
 /**
@@ -43,7 +43,7 @@ class BoundProviderFactory<T>
         try {
           providerFactory = injector.getInternalFactory(providerKey);
         } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(source, e.getMessage());
+          injector.errorHandler.handle(e.getMessage(source));
         }
       }
     });
@@ -56,7 +56,7 @@ class BoundProviderFactory<T>
     } catch(ProvisionException e) {
       throw e;
     } catch(RuntimeException e) {
-      throw new ProvisionException(e, ErrorMessages.ERROR_IN_PROVIDER);
+      throw new ProvisionException(ErrorMessage.errorInProvider().toString(), e);
     }
   }
 

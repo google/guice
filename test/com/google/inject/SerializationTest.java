@@ -18,13 +18,11 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.io.IOException;
-import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.util.List;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -39,11 +37,7 @@ public class SerializationTest extends TestCase {
   }
 
   public void testCreationExceptionIsSerializable() throws IOException {
-    try {
-      assertSimilarWhenReserialized(createCreationException());
-    } catch (NotSerializableException e) {
-      fail("Known failure. CreationException is not Serializable.");
-    }
+    assertSimilarWhenReserialized(createCreationException());
   }
 
   private CreationException createCreationException() {
@@ -55,19 +49,6 @@ public class SerializationTest extends TestCase {
       });
       throw new AssertionFailedError();
     } catch (CreationException e) {
-      return e;
-    }
-  }
-
-  public void testConfigurationExceptionIsSerializable() throws IOException {
-    assertSimilarWhenReserialized(createConfigurationException());
-  }
-
-  private ConfigurationException createConfigurationException() {
-    try {
-      Guice.createInjector().getInstance(List.class);
-      throw new AssertionFailedError();
-    } catch (ConfigurationException e) {
       return e;
     }
   }

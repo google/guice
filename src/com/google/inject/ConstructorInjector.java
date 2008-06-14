@@ -18,9 +18,8 @@ package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.ResolveFailedException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -55,7 +54,7 @@ class ConstructorInjector<T> {
               constructionProxy.getParameters());
     }
     catch (ResolveFailedException e) {
-      injector.errorHandler.handle(constructionProxy.getMember(), e.getMessage());
+      injector.errorHandler.handle(e.getMessage(constructionProxy.getMember()));
       return null;
     }
   }
@@ -108,8 +107,7 @@ class ConstructorInjector<T> {
     }
     catch (InvocationTargetException e) {
       Throwable cause = e.getCause() != null ? e.getCause() : e;
-      throw new ProvisionException(cause,
-          ErrorMessages.ERROR_INJECTING_CONSTRUCTOR);
+      throw new ProvisionException(ErrorMessage.errorInjectingConstructor().toString(), cause);
     }
     finally {
       constructionContext.removeCurrentReference();

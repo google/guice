@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessages;
-import static com.google.inject.internal.ErrorMessages.*;
+import static com.google.inject.internal.ErrorMessage.whileLocatingField;
+import static com.google.inject.internal.ErrorMessage.whileLocatingParameter;
+import static com.google.inject.internal.ErrorMessage.whileLocatingValue;
 import com.google.inject.internal.StackTraceElements;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -35,17 +35,15 @@ import java.util.List;
  */
 public class ProvisionException extends RuntimeException {
 
-  private final String errorMessage;
   private final List<String> contexts = new ArrayList<String>(5);
 
-  public ProvisionException(Throwable cause, String errorMessage) {
-    super(errorMessage, cause);
-    this.errorMessage = errorMessage;
+  public ProvisionException(String message, Throwable cause) {
+    super(message, cause);
   }
 
   @Override public String getMessage() {
     StringBuilder result = new StringBuilder();
-    result.append(errorMessage);
+    result.append(super.getMessage());
 
     for (int i = contexts.size() - 1; i >= 0; i--) {
       result.append(String.format("%n"));
@@ -69,20 +67,19 @@ public class ProvisionException extends RuntimeException {
    */
   private String contextToSnippet(InjectionPoint injectionPoint) {
     Key<?> key = injectionPoint.getKey();
-    Object keyDescription = ErrorMessages.convert(key);
     Member member = injectionPoint.getMember();
 
     if (member instanceof Field) {
-      return String.format(ERROR_WHILE_LOCATING_FIELD,
-          keyDescription, StackTraceElements.forMember(member));
+      return whileLocatingField(
+          key, StackTraceElements.forMember(member)).toString();
 
     } else if (member instanceof Method || member instanceof Constructor) {
-      return String.format(ERROR_WHILE_LOCATING_PARAMETER,
-          keyDescription, injectionPoint.getParameterIndex(),
-          StackTraceElements.forMember(member));
+      return whileLocatingParameter(
+          key, injectionPoint.getParameterIndex(),
+          StackTraceElements.forMember(member)).toString();
 
     } else {
-      return String.format(ERROR_WHILE_LOCATING_VALUE, keyDescription);
+      return whileLocatingValue(key).toString();
     }
   }
 }

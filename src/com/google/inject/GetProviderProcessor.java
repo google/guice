@@ -37,7 +37,7 @@ class GetProviderProcessor extends CommandProcessor {
     try {
       // ensure the provider can be created
       injector.getProvider(command.getKey());
-    } catch (ConfigurationException e) {
+    } catch (CreationException e) {
       injector.handleMissingBinding(command.getSource(), command.getKey());
     }
 

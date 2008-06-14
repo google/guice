@@ -16,11 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessages;
+import com.google.inject.internal.ErrorMessage;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.SourceProviders;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -160,10 +159,8 @@ public class ProviderMethods {
         if (annotation.annotationType()
             .isAnnotationPresent(ScopeAnnotation.class)) {
           if (found != null) {
-            addError(ErrorMessages.DUPLICATE_SCOPE_ANNOTATIONS,
-                "@" + found.getSimpleName(),
-                "@" + annotation.annotationType().getSimpleName()
-            );
+            addError(ErrorMessage.duplicateScopeAnnotations(
+                found, annotation.annotationType()).toString());
           } else {
             found = annotation.annotationType();
           }
@@ -180,10 +177,8 @@ public class ProviderMethods {
         if (annotation.annotationType()
             .isAnnotationPresent(BindingAnnotation.class)) {
           if (found != null) {
-            addError(ErrorMessages.DUPLICATE_BINDING_ANNOTATIONS,
-                "@" + found.annotationType().getSimpleName(),
-                "@" + annotation.annotationType().getSimpleName()
-            );
+            addError(ErrorMessage.duplicateBindingAnnotations(
+                found.annotationType(), annotation.annotationType()).toString());
           } else {
             found = annotation;
           }
