@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.commands.BindInterceptorCommand;
-import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.Errors;
 
 /**
  * Handles {@link Binder#bindInterceptor} commands.
@@ -29,9 +29,9 @@ class BindInterceptorCommandProcessor extends CommandProcessor {
 
   private final ProxyFactoryBuilder proxyFactoryBuilder;
 
-  BindInterceptorCommandProcessor(ErrorHandler errorHandler) {
-    super(errorHandler);
-    proxyFactoryBuilder = new ProxyFactoryBuilder(errorHandler);
+  BindInterceptorCommandProcessor(Errors errors) {
+    super(errors);
+    proxyFactoryBuilder = new ProxyFactoryBuilder();
   }
 
   @Override public Boolean visitBindInterceptor(BindInterceptorCommand command) {

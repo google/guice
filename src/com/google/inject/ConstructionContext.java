@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessage;
-import com.google.inject.spi.Message;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,15 +62,13 @@ class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  Object createProxy(Class<?> expectedType) {
+  Object createProxy(Errors errors, Class<?> expectedType) throws ResolveFailedException {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).
 
     if (!expectedType.isInterface()) {
-      // TODO: Report better error.
-      throw new CreationException(
-          new Message(ErrorMessage.cannotSatisfyCircularDependency(expectedType).toString()));
+      throw errors.cannotSatisfyCircularDependency(expectedType).toException();
     }
 
     if (invocationHandlers == null) {

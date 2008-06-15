@@ -123,7 +123,7 @@ public class ConstantConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidInteger.class);
       fail();
-    } catch (CreationException expected) { /* expected */ }
+    } catch (ProvisionException expected) { /* expected */ }
   }
 
   public static class InvalidInteger {
@@ -140,7 +140,7 @@ public class ConstantConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidCharacter.class);
       fail();
-    } catch (CreationException expected) { /* expected */ }
+    } catch (ProvisionException expected) { /* expected */ }
   }
 
   public static class InvalidCharacter {
@@ -157,7 +157,7 @@ public class ConstantConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidEnum.class);
       fail();
-    } catch (CreationException expected) { /* expected */ }
+    } catch (ProvisionException expected) { /* expected */ }
   }
 
   public static class InvalidEnum {

@@ -17,12 +17,12 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.Dependency;
-import com.google.inject.util.Providers;
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
-
+import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InstanceBinding;
+import com.google.inject.util.Providers;
 import java.util.Collection;
 
 class InstanceBindingImpl<T> extends BindingImpl<T>
@@ -50,8 +50,15 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
     return this.instance;
   }
 
-  public Collection<Dependency<?>> getDependencies() {
-    return injector.getFieldAndMethodDependenciesFor(instance.getClass());
+  public Collection<InjectionPoint<?>> getInjectionPoints() {
+    try {
+      return injector.getFieldAndMethodInjectionsFor(instance.getClass());
+    }
+    catch (ResolveFailedException e) {
+      // this would have been a creation exception
+      // TODO: initialize the dependencies via a callback
+      throw new AssertionError(e);
+    }
   }
 
   @Override public String toString() {

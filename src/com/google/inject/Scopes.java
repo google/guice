@@ -16,9 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
-import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.Errors;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
@@ -95,17 +93,14 @@ public class Scopes {
    *
    * @param implementation type
    * @param scopes map of scope names to scopes
-   * @param errorHandler handles errors
    */
-  static Scope getScopeForType(Class<?> implementation,
-      Map<Class<? extends Annotation>, Scope> scopes,
-      ErrorHandler errorHandler) {
+  static Scope getScopeForType(Errors errors, Class<?> implementation,
+      Map<Class<? extends Annotation>, Scope> scopes) {
     Class<? extends Annotation> found = null;
     for (Annotation annotation : implementation.getAnnotations()) {
       if (isScopeAnnotation(annotation)) {
         if (found != null) {
-          errorHandler.handle(StackTraceElements.forType(implementation),
-              ErrorMessage.duplicateScopeAnnotations(found, annotation.annotationType()));
+          errors.duplicateScopeAnnotations(found, annotation.annotationType());
         }
         else {
           found = annotation.annotationType();

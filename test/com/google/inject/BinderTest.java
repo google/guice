@@ -21,6 +21,8 @@ import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.name.Names;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import junit.framework.TestCase;
 
@@ -47,16 +49,44 @@ public class BinderTest extends TestCase {
 
   static class Foo {}
 
-  public void testInvalidProviderFromBinder() {
+  public void testMissingBindings() {
     try {
-      Guice.createInjector(new Module() {
-        public void configure(Binder binder) {
-          binder.getProvider(Runnable.class);
+      Guice.createInjector(new AbstractModule() {
+        public void configure() {
+          getProvider(Runnable.class);
+          bind(Comparator.class);
+          bind(Date.class).annotatedWith(Names.named("date"));
         }
       });
+    } catch (CreationException e) {
+      assertEquals(3, e.getErrorMessages().size());
+      assertContains(e.getMessage(),
+          "1) Error at " + getClass().getName(),
+          "No implementation for java.lang.Runnable was bound.",
+          "2) Error at " + getClass().getName(),
+          "No implementation for " + Comparator.class.getName() + " was bound.",
+          "3) Error at " + getClass().getName(),
+          "No implementation for java.util.Date annotated with "
+              + "@com.google.inject.name.Named(value=date) was bound.");
     }
-    catch (CreationException e) {
-      assertEquals(1, e.getErrorMessages().size());
+  }
+
+  public void testGetInstanceOfAnAbstractClass() {
+    Injector injector = Guice.createInjector();
+    try {
+      injector.getInstance(Runnable.class);
+      fail();
+    } catch(ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "No implementation for java.lang.Runnable was bound.");
+    }
+
+    try {
+      injector.getInstance(Key.get(Date.class, Names.named("date")));
+      fail();
+    } catch(ProvisionException expected) {
+      assertContains(expected.getMessage(), "No implementation for java.util.Date "
+          + "annotated with @com.google.inject.name.Named(value=date) was bound.");
     }
   }
 
@@ -180,4 +210,6 @@ public class BinderTest extends TestCase {
 //      }
 //    }).getInstance(Runnable.class);
 //  }
+
+  enum Roshambo { ROCK, SCISSORS, PAPER }
 }

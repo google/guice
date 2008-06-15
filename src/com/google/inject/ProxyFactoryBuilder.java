@@ -16,39 +16,30 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Lists;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.internal.ErrorHandler;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Collection;
 import java.util.Arrays;
-
+import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Creates a {@link ProxyFactory}.
+ * Creates a {@link com.google.inject.ProxyFactory}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 class ProxyFactoryBuilder {
 
-  final ErrorHandler errorHandler;
-  final List<MethodAspect> methodAspects = new ArrayList<MethodAspect>();
-
-  ProxyFactoryBuilder(ErrorHandler errorHandler) {
-    this.errorHandler = errorHandler;
-  }
+  final List<MethodAspect> methodAspects = Lists.newArrayList();
 
   /**
-   * Applies the given method interceptor to the methods matched by the class
-   * and method matchers.
+   * Applies the given method interceptor to the methods matched by the class and method matchers.
    *
-   * @param classMatcher matches classes the interceptor should apply to. For
-   *     example: {@code only(Runnable.class)}.
-   * @param methodMatcher matches methods the interceptor should apply to. For
-   *     example: {@code annotatedWith(Transactional.class)}.
+   * @param classMatcher matches classes the interceptor should apply to. For example: {@code
+   * only(Runnable.class)}.
+   * @param methodMatcher matches methods the interceptor should apply to. For example: {@code
+   * annotatedWith(Transactional.class)}.
    * @param interceptors to apply
    */
   public ProxyFactoryBuilder intercept(Matcher<? super Class<?>> classMatcher,
@@ -64,10 +55,8 @@ class ProxyFactoryBuilder {
     return intercept(classMatcher, methodMatcher, Arrays.asList(interceptors));
   }
 
-  /**
-   * Creates a {@code ProxyFactory}.
-   */
+  /** Creates a {@code ProxyFactory}. */
   public ProxyFactory create() {
-    return new ProxyFactory(errorHandler, new ArrayList<MethodAspect>(methodAspects));
+    return new ProxyFactory(new ArrayList<MethodAspect>(methodAspects));
   }
 }

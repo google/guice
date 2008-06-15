@@ -49,8 +49,8 @@ public class LineNumbersTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + A.class.getName() + "(" + B.class.getName());
-      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
+          "Error at " + A.class.getName() + "<init>(LineNumbersTest:",
+          "No implementation for " + B.class.getName() + " was bound.");
     }
   }
 

@@ -17,14 +17,15 @@
 package com.google.inject;
 
 import com.google.inject.BindCommandProcessor.CreationListener;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.spi.SourceProviders;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
  */
-class BoundProviderFactory<T>
-    implements InternalFactory<T>, CreationListener {
+class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
 
   final Key<? extends Provider<? extends T>> providerKey;
   final Object source;
@@ -37,26 +38,25 @@ class BoundProviderFactory<T>
     this.source = source;
   }
 
-  public void notify(final InjectorImpl injector) {
-    injector.withDefaultSource(source, new Runnable() {
+  public void notify(final InjectorImpl injector, final Errors errors) {
+    SourceProviders.withDefault(source, new Runnable() {
       public void run() {
         try {
-          providerFactory = injector.getInternalFactory(providerKey);
+          providerFactory = injector.getInternalFactory(providerKey, errors);
         } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(e.getMessage(source));
+          errors.merge(e.getErrors());
         }
       }
     });
   }
 
-  public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
-    Provider<? extends T> provider = providerFactory.get(context, injectionPoint);
+  public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+      throws ResolveFailedException {
+    Provider<? extends T> provider = providerFactory.get(errors, context, injectionPoint);
     try {
-      return injectionPoint.checkForNull(provider.get(), source);
-    } catch(ProvisionException e) {
-      throw e;
-    } catch(RuntimeException e) {
-      throw new ProvisionException(ErrorMessage.errorInProvider().toString(), e);
+      return injectionPoint.checkForNull(errors, provider.get(), source);
+    } catch(RuntimeException userCodeFailed) {
+      throw errors.errorInProvider(userCodeFailed).toException();
     }
   }
 

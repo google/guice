@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 
 /**
@@ -29,8 +32,9 @@ class ConstantFactory<T> implements InternalFactory<T> {
     this.value = value;
   }
 
-  public T get(InternalContext context, InjectionPoint injectionPoint) {
-    context.ensureMemberInjected(value);
+  public T get(Errors errors, InternalContext context, InjectionPoint injectionPoint)
+      throws ResolveFailedException {
+    context.ensureMemberInjected(errors, value);
     return value;
   }
 

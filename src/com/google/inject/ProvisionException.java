@@ -16,15 +16,8 @@
 
 package com.google.inject;
 
-import static com.google.inject.internal.ErrorMessage.whileLocatingField;
-import static com.google.inject.internal.ErrorMessage.whileLocatingParameter;
-import static com.google.inject.internal.ErrorMessage.whileLocatingValue;
-import com.google.inject.internal.StackTraceElements;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.Message;
 import java.util.List;
 
 /**
@@ -33,53 +26,43 @@ import java.util.List;
  * @author kevinb@google.com (Kevin Bourrillion)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class ProvisionException extends RuntimeException {
+public final class ProvisionException extends RuntimeException {
 
-  private final List<String> contexts = new ArrayList<String>(5);
+  /** non-null for Guice-created ProvisionExceptions */
+  private final Errors errors;
+
+  /**
+   * Creates a ProvisionException containing {@code errors}.
+   */
+  public ProvisionException(Errors errors) { // TODO: make private
+    this.errors = errors;
+
+    // include the cause in the common where there's just a single message
+    List<Message> messages = errors.getMessages();
+    if (messages.size() == 1) {
+      initCause(messages.get(0).getCause());
+    }
+  }
 
   public ProvisionException(String message, Throwable cause) {
     super(message, cause);
+    this.errors = null;
+  }
+
+  public ProvisionException(String message) {
+    super(message);
+    this.errors = null;
   }
 
   @Override public String getMessage() {
-    StringBuilder result = new StringBuilder();
-    result.append(super.getMessage());
-
-    for (int i = contexts.size() - 1; i >= 0; i--) {
-      result.append(String.format("%n"));
-      result.append(contexts.get(i));
-    }
-
-    return result.toString();
+    return errors != null 
+        ? Errors.format("Guice provision errors", errors.getMessages())
+        : super.getMessage();
   }
 
-  /**
-   * Add an injection point that was being resolved when this exception
-   * occurred.
-   */
-  void addContext(InjectionPoint<?> injectionPoint) {
-    this.contexts.add(contextToSnippet(injectionPoint));
-  }
-
-  /**
-   * Returns a snippet to include in the stacktrace message that describes the
-   * specified context.
-   */
-  private String contextToSnippet(InjectionPoint injectionPoint) {
-    Key<?> key = injectionPoint.getKey();
-    Member member = injectionPoint.getMember();
-
-    if (member instanceof Field) {
-      return whileLocatingField(
-          key, StackTraceElements.forMember(member)).toString();
-
-    } else if (member instanceof Method || member instanceof Constructor) {
-      return whileLocatingParameter(
-          key, injectionPoint.getParameterIndex(),
-          StackTraceElements.forMember(member)).toString();
-
-    } else {
-      return whileLocatingValue(key).toString();
-    }
+  public static Errors getErrors(RuntimeException userException) {
+    return userException instanceof ProvisionException
+        ? ((ProvisionException) userException).errors
+        : null;
   }
 }

@@ -18,21 +18,48 @@
 package com.google.inject.internal;
 
 import com.google.inject.spi.Message;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Indicates that resolving a binding failed. This is thrown when resolving a
- * new binding, either at injector-creation time or when resolving a
- * just-in-time binding.
+ * Indicates that resolving a binding failed. This is thrown when resolving a new binding, either at
+ * injector-creation time or when resolving a just-in-time binding. It can fail due to a problem
+ * executing user-supplied code (such as a user's UnsupportedOperationException), or due to a
+ * configuration issue. 
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class ResolveFailedException extends Exception {
 
-  public ResolveFailedException(ErrorMessage errorMessage) {
-    super(errorMessage.toString());
+  private final Errors errors;
+
+  private final List<String> contexts = new ArrayList<String>(5);
+
+  public ResolveFailedException(Errors errors) {
+    this.errors = errors;
   }
 
   public Message getMessage(Object source) {
     return new Message(source, getMessage());
+  }
+
+  public List<String> getContexts() {
+    return contexts;
+  }
+
+  @Override public String getMessage() {
+    StringBuilder result = new StringBuilder();
+    result.append(super.getMessage());
+
+    for (String context : contexts) {
+      result.append(String.format("%n"));
+      result.append(context);
+    }
+
+    return result.toString();
+  }
+
+  public Errors getErrors() {
+    return errors;
   }
 }

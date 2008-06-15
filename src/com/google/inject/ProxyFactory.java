@@ -16,10 +16,20 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorHandler;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.GuiceNamingPolicy;
 import com.google.inject.internal.ReferenceCache;
+import com.google.inject.internal.ResolveFailedException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
@@ -27,15 +37,6 @@ import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Proxies classes applying interceptors to methods as specified in
@@ -45,65 +46,68 @@ import java.util.Map;
  */
 class ProxyFactory implements ConstructionProxyFactory {
 
-  final ErrorHandler errorHandler;
   final List<MethodAspect> methodAspects;
   final ConstructionProxyFactory defaultFactory;
 
-  ProxyFactory(ErrorHandler errorHandler, List<MethodAspect> methodAspects) {
-    this.errorHandler = errorHandler;
+  ProxyFactory(List<MethodAspect> methodAspects) {
     this.methodAspects = methodAspects;
-    defaultFactory = new DefaultConstructionProxyFactory(errorHandler);
+    defaultFactory = new DefaultConstructionProxyFactory();
   }
 
-  Map<Constructor<?>, ConstructionProxy<?>> constructionProxies
-      = new ReferenceCache<Constructor<?>, ConstructionProxy<?>>() {
-    protected ConstructionProxy<?> create(Constructor<?> constructor) {
-      return createConstructionProxy(constructor);
+  @SuppressWarnings("unchecked")
+  public <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
+      throws ResolveFailedException {
+    return (ConstructionProxy<T>) getConstructionProxy(constructor);
+  }
+
+  Map<Constructor<?>, Object> constructionProxies = new ReferenceCache<Constructor<?>, Object>() {
+    protected Object create(Constructor<?> constructor) {
+      Errors errors = new Errors();
+      try {
+        ConstructionProxy<?> result = createConstructionProxy(errors, constructor);
+        errors.throwIfNecessary();
+        return result;
+      } catch (ResolveFailedException e) {
+        return errors.merge(e.getErrors()).makeImmutable();
+      }
     }
   };
 
-  /**
-   * Gets a factory for the given type. Uses the zero-arg constructor. Wraps
-   * exceptions in {@link RuntimeException} including
-   * {@link InvocationTargetException}.
-   */
-  public <T> Provider<T> getFactory(Class<T> type) throws NoSuchMethodException {
-    final ConstructionProxy<T> constructionProxy
-        = createConstructionProxy(type.getDeclaredConstructor());
-    return new Provider<T>() {
-      public T get() {
-        try {
-          return constructionProxy.newInstance();
-        }
-        catch (InvocationTargetException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    };
+  public ConstructionProxy<?> getConstructionProxy(Constructor<?> constructor)
+      throws ResolveFailedException {
+    Object constructionProxyOrErrors = constructionProxies.get(constructor);
+
+    if (constructionProxyOrErrors instanceof ConstructionProxy<?>) {
+      return (ConstructionProxy<?>) constructionProxyOrErrors;
+    } else if (constructionProxyOrErrors instanceof Errors) {
+      throw ((Errors) constructionProxyOrErrors).copy().toException();
+    } else {
+      throw new AssertionError();
+    }
   }
 
-  <T> ConstructionProxy<T> createConstructionProxy(Constructor<T> constructor) {
+  <T> ConstructionProxy<T> createConstructionProxy(Errors errors, Constructor<T> constructor)
+      throws ResolveFailedException {
     Class<T> declaringClass = constructor.getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
-    List<MethodAspect> applicableAspects = new ArrayList<MethodAspect>();
+    List<MethodAspect> applicableAspects = Lists.newArrayList();
     for (MethodAspect methodAspect : methodAspects) {
       if (methodAspect.matches(declaringClass)) {
         applicableAspects.add(methodAspect);
       }
     }
     if (applicableAspects.isEmpty()) {
-      return defaultFactory.get(constructor);
+      return defaultFactory.get(errors, constructor);
     }
 
     // Get list of methods from cglib.
-    List<Method> methods = new ArrayList<Method>();
+    List<Method> methods = Lists.newArrayList();
     Enhancer.getMethods(declaringClass, null, methods);
-    final Map<Method, Integer> indices = new HashMap<Method, Integer>();
+    final Map<Method, Integer> indices = Maps.newHashMap();
 
     // Create method/interceptor holders and record indices.
-    List<MethodInterceptorsPair> methodInterceptorsPairs
-        = new ArrayList<MethodInterceptorsPair>();
+    List<MethodInterceptorsPair> methodInterceptorsPairs = Lists.newArrayList();
     for (int i = 0; i < methods.size(); i++) {
       Method method = methods.get(i);
       methodInterceptorsPairs.add(new MethodInterceptorsPair(method));
@@ -122,14 +126,14 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
     if (!anyMatched) {
       // not test-covered
-      return defaultFactory.get(constructor);
+      return defaultFactory.get(errors, constructor);
     }
 
     // Create callbacks.
     Callback[] callbacks = new Callback[methods.size()];
 
-    @SuppressWarnings("unchecked")
-    Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
+    @SuppressWarnings("unchecked") Class<? extends Callback>[] callbackTypes = new Class[methods
+        .size()];
     for (int i = 0; i < methods.size(); i++) {
       MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
       if (!pair.hasInterceptors()) {
@@ -137,8 +141,7 @@ class ProxyFactory implements ConstructionProxyFactory {
         callbackTypes[i] = NoOp.class;
       }
       else {
-        callbacks[i] = new InterceptorStackCallback(
-            pair.method, pair.interceptors);
+        callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
         callbackTypes[i] = net.sf.cglib.proxy.MethodInterceptor.class;
       }
     }
@@ -161,17 +164,19 @@ class ProxyFactory implements ConstructionProxyFactory {
     // Store callbacks.
     Enhancer.registerStaticCallbacks(proxied, callbacks);
 
-    return createConstructionProxy(proxied, constructor);
+    return createConstructionProxy(errors, proxied, constructor);
   }
 
   /**
    * Creates a construction proxy given a class and parameter types.
    */
-  private <T> ConstructionProxy<T> createConstructionProxy(final Class<?> clazz,
-      final Constructor standardConstructor) {
+  private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
+      final Constructor standardConstructor) throws ResolveFailedException {
     FastClass fastClass = GuiceFastClass.create(clazz);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
+    final List<Parameter<?>> parameters = Parameter.forConstructor(standardConstructor, errors);
+
     return new ConstructionProxy<T>() {
       @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments)
@@ -180,7 +185,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
 
       public List<Parameter<?>> getParameters() {
-        return Parameter.forConstructor(errorHandler, standardConstructor);
+        return parameters;
       }
 
       public Member getMember() {
@@ -208,10 +213,5 @@ class ProxyFactory implements ConstructionProxyFactory {
     boolean hasInterceptors() {
       return interceptors != null;
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T> ConstructionProxy<T> get(Constructor<T> constructor) {
-    return (ConstructionProxy<T>) constructionProxies.get(constructor);
   }
 }

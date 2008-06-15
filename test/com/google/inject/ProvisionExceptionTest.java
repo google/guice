@@ -33,19 +33,40 @@ public class ProvisionExceptionTest extends TestCase {
       fail(); 
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "Error injecting constructor");
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$D");
-      assertContains(e.getMessage(), "for parameter 0 at "
-          + "com.google.inject.ProvisionExceptionTest$C.setD");
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$C");
-      assertContains(e.getMessage(), "for field at "
-          + "com.google.inject.ProvisionExceptionTest$B.c");
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$B");
-      assertContains(e.getMessage(), "for parameter 0 at "
-          + "com.google.inject.ProvisionExceptionTest$A");
+      assertContains(e.getMessage(), "Error injecting constructor",
+          "while locating com.google.inject.ProvisionExceptionTest$D",
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
+          "while locating com.google.inject.ProvisionExceptionTest$C",
+          "for field at com.google.inject.ProvisionExceptionTest$B.c",
+          "while locating com.google.inject.ProvisionExceptionTest$B",
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A",
+          "while locating com.google.inject.ProvisionExceptionTest$A");
+    }
+  }
+
+  /**
+   * There's a pass-through of user code in the scope. We want exceptions thrown by Guice to be
+   * limited to a single exception, even if it passes through user code.
+   */
+  public void testExceptionsCollapsedWithScopes() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(B.class).in(Scopes.SINGLETON);
+        }
+      }).getInstance(A.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertTrue(e.getCause() instanceof UnsupportedOperationException);
+      assertFalse(e.getMessage().contains("custom provider"));
+      assertContains(e.getMessage(), "Error injecting constructor",
+          "while locating com.google.inject.ProvisionExceptionTest$D",
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
+          "while locating com.google.inject.ProvisionExceptionTest$C",
+          "for field at com.google.inject.ProvisionExceptionTest$B.c",
+          "while locating com.google.inject.ProvisionExceptionTest$B",
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A",
+          "while locating com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -104,15 +125,14 @@ public class ProvisionExceptionTest extends TestCase {
   }
 
   /**
-   * This test demonstrates that if the user throws a ProvisionException,
-   * sometimes we wrap it and sometimes we don't. We should be consistent.
+   * This test demonstrates that if the user throws a ProvisionException, we wrap it to add context.
    */
   public void testProvisionExceptionsAreWrappedForBindToType() {
     try {
       Guice.createInjector().getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertTrue(e.getCause() instanceof ProvisionException);
+      assertEquals("User Exception", e.getCause().getMessage());
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
     }
@@ -127,8 +147,7 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertTrue("Known failure. ProvisionExceptions are not wrapped.",
-          e.getCause() instanceof ProvisionException);
+      assertEquals("User Exception", e.getCause().getMessage());
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
     }
@@ -143,8 +162,7 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertTrue("Known failure. ProvisionExceptions are not wrapped.",
-          e.getCause() instanceof ProvisionException);
+      assertEquals("User Exception", e.getCause().getMessage());
       assertContains(e.getMessage(), "while locating "
           + "com.google.inject.ProvisionExceptionTest$F");
     }

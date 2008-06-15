@@ -16,7 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
 import com.google.inject.Key;
 import java.lang.reflect.Member;
 
@@ -35,11 +34,6 @@ public interface Dependency<T> {
    * {@code getBinding().getKey()}.
    */
   Key<T> getKey();
-
-  /**
-   * Gets the binding which fulfills this dependency.
-   */
-  Binding<T> getBinding();
 
   /**
    * Gets the member (constructor, method, or field) which has the dependency.

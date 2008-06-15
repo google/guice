@@ -17,7 +17,9 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.spi.SourceProviders;
 
 /**
@@ -38,18 +40,18 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     this.source = checkNotNull(source, "source");
   }
 
-  public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
-    context.ensureMemberInjected(provider);
+  public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+      throws ResolveFailedException {
     try {
-      return injectionPoint.checkForNull(provider.get(), source);
-    } catch(ProvisionException e) {
-      throw e;
-    } catch(RuntimeException e) {
-      throw new ProvisionException(ErrorMessage.errorInProvider().toString(), e);
+      context.ensureMemberInjected(errors, provider);
+      T result = provider.get();
+      return injectionPoint.checkForNull(errors, result, source);
+    } catch (RuntimeException userException) {
+      throw errors.errorInProvider(userException).toException();
     }
   }
 
-  public String toString() {
+  @Override public String toString() {
     return provider.toString();
   }
 }

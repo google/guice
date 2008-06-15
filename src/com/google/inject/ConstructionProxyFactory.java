@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.Constructor;
 
 /**
@@ -28,5 +30,6 @@ interface ConstructionProxyFactory {
   /**
    * Gets a construction proxy for the given constructor.
    */
-  <T> ConstructionProxy<T> get(Constructor<T> constructor);
+  <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
+      throws ResolveFailedException;
 }

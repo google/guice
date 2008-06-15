@@ -16,6 +16,10 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.internal.ResolveFailedException;
+
 /**
  * Creates objects which will be injected.
  *
@@ -27,8 +31,9 @@ interface InternalFactory<T> {
    * Creates an object to be injected.
    *
    * @param context of this injection
-   * @throws ProvisionException if a value cannot be provided
+   * @throws ResolveFailedException if a value cannot be provided
    * @return instance to be injected
    */
-  T get(InternalContext context, InjectionPoint<?> injectionPoint);
+  T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+      throws ResolveFailedException;
 }

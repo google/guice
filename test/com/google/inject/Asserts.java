@@ -45,14 +45,20 @@ public class Asserts {
   }
 
   /**
-   * Fails unless {@code text} includes {@code substring}.
+   * Fails unless {@code text} includes all {@code substrings}, in order.
    */
-  public static void assertContains(String text, String substring) {
-    int position = text.indexOf(substring);
-    Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
-        text, substring), position >= 0);
+  public static void assertContains(String text, String... substrings) {
+    int startingFrom = 0;
+    for (int i = 0; i < substrings.length; i++) {
+      int index = text.indexOf(substrings[i], startingFrom);
+      Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
+          text, substrings[i]), index >= startingFrom);
+      startingFrom = index + substrings[i].length();
+    }
+
+    String lastSubstring = substrings[substrings.length - 1];
     Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
-        text, substring), text.indexOf(substring, position + 1) == -1);
+        text, lastSubstring), text.indexOf(lastSubstring, startingFrom) == -1);
   }
 
   /**

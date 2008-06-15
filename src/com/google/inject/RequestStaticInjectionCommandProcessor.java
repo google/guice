@@ -16,10 +16,12 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Lists;
+import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.commands.RequestStaticInjectionCommand;
-import com.google.inject.internal.ErrorHandler;
-
-import java.util.ArrayList;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.spi.SourceProviders;
 import java.util.List;
 
 /**
@@ -30,11 +32,10 @@ import java.util.List;
  */
 class RequestStaticInjectionCommandProcessor extends CommandProcessor {
 
-  private final List<StaticInjection> staticInjections
-      = new ArrayList<StaticInjection>();
+  private final List<StaticInjection> staticInjections = Lists.newArrayList();
 
-  RequestStaticInjectionCommandProcessor(ErrorHandler errorHandler) {
-    super(errorHandler);
+  RequestStaticInjectionCommandProcessor(Errors errors) {
+    super(errors);
   }
 
   @Override public Boolean visitRequestStaticInjection(RequestStaticInjectionCommand command) {
@@ -56,14 +57,11 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
     }
   }
 
-  /**
-   * A requested static injection.
-   */
+  /** A requested static injection. */
   private class StaticInjection {
     final Object source;
     final Class<?> type;
-    final List<InjectorImpl.SingleMemberInjector> memberInjectors
-        = new ArrayList<InjectorImpl.SingleMemberInjector>();
+    final List<SingleMemberInjector> memberInjectors = Lists.newArrayList();
 
     public StaticInjection(Object source, Class type) {
       this.source = source;
@@ -71,26 +69,29 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
     }
 
     void validate(final InjectorImpl injector) {
-      injector.withDefaultSource(source,
-          new Runnable() {
-            public void run() {
-              injector.addSingleInjectorsForFields(
-                  type.getDeclaredFields(), true, memberInjectors);
-              injector.addSingleInjectorsForMethods(
-                  type.getDeclaredMethods(), true, memberInjectors);
-            }
-          });
+      SourceProviders.withDefault(source, new Runnable() {
+        public void run() {
+          injector.addSingleInjectorsForFields(
+              type.getDeclaredFields(), true, memberInjectors, errors);
+          injector.addSingleInjectorsForMethods(
+              type.getDeclaredMethods(), true, memberInjectors, errors);
+        }
+      });
     }
 
     void injectMembers(InjectorImpl injector) {
-      injector.callInContext(new ContextualCallable<Void>() {
-        public Void call(InternalContext context) {
-          for (InjectorImpl.SingleMemberInjector injector : memberInjectors) {
-            injector.inject(context, null);
+      try {
+        injector.callInContext(new ContextualCallable<Void>() {
+          public Void call(InternalContext context) {
+            for (SingleMemberInjector injector : memberInjectors) {
+              injector.inject(errors, context, null);
+            }
+            return null;
           }
-          return null;
-        }
-      });
+        });
+      } catch (ResolveFailedException e) {
+        throw new AssertionError();
+      }
     }
   }
 }

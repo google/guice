@@ -16,15 +16,16 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorMessage;
+import com.google.common.collect.Lists;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.SourceProviders;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -87,8 +88,7 @@ public class ProviderMethods {
 
       Class<? extends Annotation> scopeAnnotation
           = findScopeAnnotation(method.getAnnotations());
-      Annotation bindingAnnotation = findBindingAnnotation(
-          method.getAnnotations());
+      Annotation bindingAnnotation = findBindingAnnotation(method, method.getAnnotations());
 
       final List<Provider<?>> parameterProviders
           = findParameterProviders(method);
@@ -135,15 +135,13 @@ public class ProviderMethods {
     }
 
     List<Provider<?>> findParameterProviders(Method method) {
-      List<Provider<?>> parameterProviders = new ArrayList<Provider<?>>();
+      List<Provider<?>> parameterProviders = Lists.newArrayList();
 
       Type[] parameterTypes = method.getGenericParameterTypes();
       Annotation[][] parameterAnnotations = method.getParameterAnnotations();
       for (int i = 0; i < parameterTypes.length; i++) {
-        Annotation bindingAnnotation =
-          findBindingAnnotation(parameterAnnotations[i]);
-        Key<?> key = bindingAnnotation == null
-            ? Key.get(parameterTypes[i])
+        Annotation bindingAnnotation = findBindingAnnotation(method, parameterAnnotations[i]);
+        Key<?> key = bindingAnnotation == null ? Key.get(parameterTypes[i])
             : Key.get(parameterTypes[i], bindingAnnotation);
         Provider<?> provider = getProvider(key);
         parameterProviders.add(provider);
@@ -159,7 +157,7 @@ public class ProviderMethods {
         if (annotation.annotationType()
             .isAnnotationPresent(ScopeAnnotation.class)) {
           if (found != null) {
-            addError(ErrorMessage.duplicateScopeAnnotations(
+            addError(new Errors().duplicateScopeAnnotations(
                 found, annotation.annotationType()).toString());
           } else {
             found = annotation.annotationType();
@@ -170,14 +168,14 @@ public class ProviderMethods {
       return found;
     }
 
-    Annotation findBindingAnnotation(Annotation[] annotations) {
+    Annotation findBindingAnnotation(Member member, Annotation[] annotations) {
       Annotation found = null;
 
       for (Annotation annotation : annotations) {
         if (annotation.annotationType()
             .isAnnotationPresent(BindingAnnotation.class)) {
           if (found != null) {
-            addError(ErrorMessage.duplicateBindingAnnotations(
+            addError(new Errors().duplicateBindingAnnotations(member,
                 found.annotationType(), annotation.annotationType()).toString());
           } else {
             found = annotation;

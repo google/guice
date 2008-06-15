@@ -17,13 +17,12 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
-import com.google.inject.spi.Message;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
@@ -37,16 +36,17 @@ import org.aopalliance.intercept.MethodInvocation;
 public class ProxyFactoryTest extends TestCase {
 
   public void testSimpleCase()
-      throws NoSuchMethodException, InvocationTargetException {
+      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(new InvalidErrorHandler());
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
     builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
-    Provider<Simple> creator = factory.getFactory(Simple.class);
+    ConstructionProxy<Simple> constructionProxy = factory
+        .createConstructionProxy(new Errors(), Simple.class.getDeclaredConstructor());
 
-    Simple simple = creator.get();
+    Simple simple = constructionProxy.newInstance();
     simple.invoke();
     assertTrue(simple.invoked);
     assertTrue(interceptor.invoked);
@@ -70,19 +70,19 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testInterceptOneMethod()
-      throws NoSuchMethodException, InvocationTargetException {
+      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(new InvalidErrorHandler());
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
 
     builder.intercept(
         only(Bar.class), annotatedWith(Intercept.class), interceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<Foo> fooFactory =
-        factory.get(Foo.class.getDeclaredConstructor());
+        factory.get(new Errors(), Foo.class.getDeclaredConstructor());
     ConstructionProxy<Bar> barFactory =
-        factory.get(Bar.class.getDeclaredConstructor());
+        factory.get(new Errors(), Bar.class.getDeclaredConstructor());
 
     Foo foo = fooFactory.newInstance();
     Bar bar = barFactory.newInstance();
@@ -127,15 +127,15 @@ public class ProxyFactoryTest extends TestCase {
   @interface Intercept {}
 
   public void testWithConstructorArguments()
-      throws InvocationTargetException, NoSuchMethodException {
+      throws InvocationTargetException, NoSuchMethodException, ResolveFailedException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(new InvalidErrorHandler());
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
     builder.intercept(any(), any(), interceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<A> constructor =
-        factory.get(A.class.getDeclaredConstructor(int.class));
+        factory.get(new Errors(), A.class.getDeclaredConstructor(int.class));
 
     A a = constructor.newInstance(5);
     a.a();
@@ -143,15 +143,15 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testNotProxied()
-      throws NoSuchMethodException, InvocationTargetException {
+      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(new InvalidErrorHandler());
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
     builder.intercept(not(any()), not(any()), interceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<A> constructor =
-        factory.get(A.class.getDeclaredConstructor(int.class));
+        factory.get(new Errors(), A.class.getDeclaredConstructor(int.class));
 
     A a = constructor.newInstance(5);
     assertEquals(A.class, a.getClass());
@@ -166,16 +166,16 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testMultipleInterceptors()
-      throws NoSuchMethodException, InvocationTargetException {
+      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
     DoubleInterceptor doubleInterceptor = new DoubleInterceptor();
     CountingInterceptor countingInterceptor = new CountingInterceptor();
 
-    ProxyFactoryBuilder builder = new ProxyFactoryBuilder(new InvalidErrorHandler());
+    ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
     builder.intercept(any(), any(), doubleInterceptor, countingInterceptor);
     ProxyFactory factory = builder.create();
 
     ConstructionProxy<Counter> constructor =
-        factory.get(Counter.class.getDeclaredConstructor());
+        factory.get(new Errors(), Counter.class.getDeclaredConstructor());
 
     Counter counter = constructor.newInstance();
     counter.inc();
@@ -205,16 +205,6 @@ public class ProxyFactoryTest extends TestCase {
     int count;
     void inc() {
       count++;
-    }
-  }
-
-  static class InvalidErrorHandler implements ErrorHandler {
-    public void handle(Object source, ErrorMessage errorMessage) {
-      throw new AssertionError(errorMessage.toString());
-    }
-
-    public void handle(Message message) {
-      throw new AssertionError(message.getMessage());
     }
   }
 }

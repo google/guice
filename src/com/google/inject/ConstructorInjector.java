@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -35,43 +35,37 @@ class ConstructorInjector<T> {
   final SingleParameterInjector<?>[] parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
-  ConstructorInjector(InjectorImpl injector, Class<T> implementation) {
+  ConstructorInjector(Errors errors, InjectorImpl injector, Class<T> implementation)
+      throws ResolveFailedException {
     this.implementation = implementation;
-    constructionProxy = injector.reflection.getConstructionProxy(implementation);
-    parameterInjectors = createParameterInjector(injector, constructionProxy);
-    List<SingleMemberInjector> memberInjectorsList = injector.injectors.get(implementation);
+    constructionProxy = injector.reflection.getConstructionProxy(errors, implementation);
+    parameterInjectors = createParameterInjector(errors, injector, constructionProxy);
+    List<SingleMemberInjector> memberInjectorsList = injector.getMemberInjectors(implementation);
     memberInjectors = memberInjectorsList.toArray(
         new SingleMemberInjector[memberInjectorsList.size()]);
   }
 
-  SingleParameterInjector<?>[] createParameterInjector(
-      InjectorImpl injector, ConstructionProxy<T> constructionProxy) {
-    try {
-      return constructionProxy.getParameters().isEmpty()
-          ? null // default constructor.
-          : injector.getParametersInjectors(
-              constructionProxy.getMember(),
-              constructionProxy.getParameters());
-    }
-    catch (ResolveFailedException e) {
-      injector.errorHandler.handle(e.getMessage(constructionProxy.getMember()));
-      return null;
-    }
+  SingleParameterInjector<?>[] createParameterInjector(Errors errors,
+      InjectorImpl injector, ConstructionProxy<T> constructionProxy)
+      throws ResolveFailedException {
+    return constructionProxy.getParameters().isEmpty()
+        ? null // default constructor.
+        : injector.getParametersInjectors(constructionProxy.getMember(),
+            constructionProxy.getParameters(), errors);
   }
 
   /**
    * Construct an instance. Returns {@code Object} instead of {@code T} because
    * it may return a proxy.
    */
-  Object construct(InternalContext context, Class<?> expectedType) {
-    ConstructionContext<T> constructionContext
-        = context.getConstructionContext(this);
+  Object construct(Errors errors, InternalContext context, Class<?> expectedType)
+      throws ResolveFailedException {
+    ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-      // TODO (crazybob): if we can't proxy this object, can we proxy the
-      // other object?
-      return constructionContext.createProxy(expectedType);
+      // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
+      return constructionContext.createProxy(errors, expectedType);
     }
 
     // If we're re-entering this factory while injecting fields or methods,
@@ -85,8 +79,7 @@ class ConstructorInjector<T> {
       // First time through...
       constructionContext.startConstruction();
       try {
-        Object[] parameters
-            = InjectorImpl.getParameters(context, parameterInjectors);
+        Object[] parameters = InjectorImpl.getParameters(errors, context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
         constructionContext.setProxyDelegates(t);
       }
@@ -100,14 +93,16 @@ class ConstructorInjector<T> {
 
       // Inject fields and methods.
       for (InjectorImpl.SingleMemberInjector injector : memberInjectors) {
-        injector.inject(context, t);
+        injector.inject(errors, context, t);
       }
 
       return t;
     }
-    catch (InvocationTargetException e) {
-      Throwable cause = e.getCause() != null ? e.getCause() : e;
-      throw new ProvisionException(ErrorMessage.errorInjectingConstructor().toString(), cause);
+    catch (InvocationTargetException userException) {
+      Throwable cause = userException.getCause() != null
+          ? userException.getCause()
+          : userException;
+      throw errors.errorInjectingConstructor(cause).toException();
     }
     finally {
       constructionContext.removeCurrentReference();

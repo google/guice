@@ -16,8 +16,11 @@
 
 package com.google.inject.spi;
 
-import java.io.Serializable;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.internal.Errors;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * A message. Contains a source pointing to the code which resulted
@@ -26,17 +29,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author crazybob@google.com (Bob Lee)
  */
 public final class Message implements Serializable {
-
   private final String source;
   private final String message;
+  private final List<InjectionPoint> injectionPoints;
+  private final Throwable cause;
+
+  public Message(Object source, String message, List<InjectionPoint> injectionPoints,
+      Throwable cause) {
+    this.source = Errors.convert(checkNotNull(source, "source")).toString();
+    this.message = checkNotNull(message, "message");
+    this.injectionPoints = ImmutableList.copyOf(injectionPoints);
+    this.cause = cause;
+  }
 
   public Message(Object source, String message) {
-    this.source = checkNotNull(source, "source").toString();
-    this.message = checkNotNull(message, "message");
+    this(source, message, ImmutableList.<InjectionPoint>of(), null);
   }
 
   public Message(String message) {
-    this(SourceProviders.UNKNOWN_SOURCE, message);
+    this(SourceProviders.UNKNOWN_SOURCE, message, ImmutableList.<InjectionPoint>of(), null);
   }
 
   /**
@@ -53,15 +64,27 @@ public final class Message implements Serializable {
     return message;
   }
 
-  public String toString() {
+  public List<InjectionPoint> getInjectionPoints() {
+    return injectionPoints;
+  }
+
+  /**
+   * Returns the throwable that caused this message, or {@code null} if this
+   * message was not caused by a throwable.
+   */
+  public Throwable getCause() {
+    return cause;
+  }
+
+  @Override public String toString() {
     return source + " " + message;
   }
 
-  public int hashCode() {
+  @Override public int hashCode() {
     return source.hashCode() * 31 + message.hashCode();
   }
 
-  public boolean equals(Object o) {
+  @Override public boolean equals(Object o) {
     if (!(o instanceof Message)) {
       return false;
     }

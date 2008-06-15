@@ -16,13 +16,16 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.internal.ResolveFailedException;
+
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
 
   private final InjectorImpl injector;
-
   private final InternalFactory<? extends T> internalFactory;
 
   public ProviderToInternalFactoryAdapter(InjectorImpl injector,
@@ -32,15 +35,22 @@ class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
   }
 
   public T get() {
-    return injector.callInContext(new ContextualCallable<T>() {
-      public T call(InternalContext context) {
-        InjectionPoint injectionPoint = context.getInjectionPoint();
-        return internalFactory.get(context, injectionPoint);
-      }
-    });
+    final Errors errors = new Errors();
+    try {
+      T t = injector.callInContext(new ContextualCallable<T>() {
+        public T call(InternalContext context) throws ResolveFailedException {
+          InjectionPoint injectionPoint = context.getInjectionPoint();
+          return internalFactory.get(errors, context, injectionPoint);
+        }
+      });
+      errors.throwIfNecessary();
+      return t;
+    } catch (ResolveFailedException e) {
+      throw errors.merge(e.getErrors()).toProvisionException();
+    }
   }
 
-  public String toString() {
+  @Override public String toString() {
     return internalFactory.toString();
   }
 }

@@ -17,14 +17,18 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.*;
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.collect.Maps;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Reflection that writes reflected data to a generated class.
@@ -34,8 +38,7 @@ import java.util.*;
 class CodeGenReflectionFactory implements Reflection.Factory {
   private static final String generatedCodePackage = "com.google.inject";
   private final String name;
-  private Map<Class<?>, ConstructionProxy<?>> constructionProxies
-      = new HashMap<Class<?>, ConstructionProxy<?>>();
+  private Map<Class<?>, ConstructionProxy<?>> constructionProxies = Maps.newHashMap();
 
   /**
    * @param name uniquely identifies this reflection instance. This name needs
@@ -45,10 +48,8 @@ class CodeGenReflectionFactory implements Reflection.Factory {
     this.name = name;
   }
 
-  public Reflection create(ErrorHandler errorHandler,
-      ConstructionProxyFactory constructionProxyFactory) {
-    Reflection delegate = new RuntimeReflectionFactory()
-        .create(errorHandler, constructionProxyFactory);
+  public Reflection create(ConstructionProxyFactory constructionProxyFactory) {
+    Reflection delegate = new RuntimeReflectionFactory().create(constructionProxyFactory);
     return new CodeGenReflection(delegate);
   }
 
@@ -63,8 +64,7 @@ class CodeGenReflectionFactory implements Reflection.Factory {
     }
 
     return new Reflection.Factory() {
-      public Reflection create(ErrorHandler errorHandler,
-          ConstructionProxyFactory constructionProxyFactory) {
+      public Reflection create(ConstructionProxyFactory constructionProxyFactory) {
         return reflection;
       }
     };
@@ -81,8 +81,9 @@ class CodeGenReflectionFactory implements Reflection.Factory {
       this.delegate = checkNotNull(delegate, "delegate");
     }
 
-    public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation) {
-      ConstructionProxy<T> result = delegate.getConstructionProxy(implementation);
+    public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
+        throws ResolveFailedException {
+      ConstructionProxy<T> result = delegate.getConstructionProxy(errors, implementation);
       constructionProxies.put(implementation, result);
       return result;
     }
@@ -118,7 +119,6 @@ class CodeGenReflectionFactory implements Reflection.Factory {
       out.writeImport(List.class);
       out.writeImport(Member.class);
       out.writeImport(Parameter.class);
-      out.writeImport(Nullability.class);
       out.writeImport(Arrays.class);
       out.writeImport(SuppressWarnings.class);
       out.writeImport(Key.class);
@@ -181,7 +181,7 @@ class CodeGenReflectionFactory implements Reflection.Factory {
         for (Iterator<Parameter<?>> i = entry.getValue().getParameters().iterator(); i.hasNext(); ) {
           Parameter<?> parameter = i.next();
           String separator = i.hasNext() ? "," : "";
-          out.writeLine("%s.create(%s, %s, %s.%s)%s", Parameter.class, argument, keyLiteral(parameter.getKey()), Nullability.class, parameter.getNullability(), separator);
+          out.writeLine("%s.create(%s, %s, %s)%s", Parameter.class, argument, keyLiteral(parameter.getKey()), parameter.allowsNull(), separator);
           argument++;
         }
         out.closeScope(");")

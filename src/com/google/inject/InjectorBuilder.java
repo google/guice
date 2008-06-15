@@ -16,17 +16,20 @@
 
 package com.google.inject;
 
-import com.google.common.collect.Iterables;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.inject.Reflection.Factory;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.SourceProviders;
 import java.lang.reflect.Member;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -42,28 +45,28 @@ class InjectorBuilder {
 
   private Injector parent;
   private Stage stage;
-  private Reflection.Factory reflectionFactory = new RuntimeReflectionFactory();
-  private final List<Module> modules = new LinkedList<Module>();
+  private Factory reflectionFactory = new RuntimeReflectionFactory();
+  private final List<Module> modules = Lists.newLinkedList();
 
   private InjectorImpl injector;
-  private DefaultErrorHandler errorHandler = new DefaultErrorHandler();
+  private Errors errors = new Errors();
 
   private final FutureInjector futureInjector = new FutureInjector();
-  private final List<Command> commands = new ArrayList<Command>();
+  private final List<Command> commands = Lists.newArrayList();
 
   private BindCommandProcessor bindCommandProcesor;
   private RequestStaticInjectionCommandProcessor requestStaticInjectionCommandProcessor;
 
   /**
-   * @param stage we're running in. If the stage is {@link Stage#PRODUCTION},
-   *  we will eagerly load singletons.
+   * @param stage we're running in. If the stage is {@link Stage#PRODUCTION}, we will eagerly load
+   * singletons.
    */
   InjectorBuilder stage(Stage stage) {
     this.stage = stage;
     return this;
   }
 
-  InjectorBuilder usingReflectionFactory(Reflection.Factory reflectionFactory) {
+  InjectorBuilder usingReflectionFactory(Factory reflectionFactory) {
     this.reflectionFactory = reflectionFactory;
     return this;
   }
@@ -85,7 +88,7 @@ class InjectorBuilder {
       throw new AssertionError("Already built, builders are not reusable.");
     }
 
-    injector = new InjectorImpl(parent, errorHandler);
+    injector = new InjectorImpl(parent);
 
     modules.add(0, new BuiltInModule(injector, stage));
 
@@ -97,7 +100,7 @@ class InjectorBuilder {
 
     validate();
 
-    errorHandler.switchToRuntime();
+    errors.throwCreationExceptionIfErrorsExist();
 
     // If we're in the tool stage, stop here. Don't eagerly inject or load
     // anything.
@@ -115,30 +118,26 @@ class InjectorBuilder {
     return injector;
   }
 
-  /**
-   * Builds the injector.
-   */
+  /** Builds the injector. */
   private void buildCoreInjector() {
-    new ErrorsCommandProcessor(errorHandler)
+    new ErrorsCommandProcessor(errors)
         .processCommands(commands);
 
     BindInterceptorCommandProcessor bindInterceptorCommandProcessor
-        = new BindInterceptorCommandProcessor(errorHandler);
+        = new BindInterceptorCommandProcessor(errors);
     bindInterceptorCommandProcessor.processCommands(commands);
     ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
-    injector.reflection = reflectionFactory.create(errorHandler, proxyFactory);
+    injector.reflection = reflectionFactory.create(proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
-    new ScopesCommandProcessor(errorHandler, injector.scopes)
-        .processCommands(commands);
+    new ScopesCommandProcessor(errors, injector.scopes).processCommands(commands);
     stopwatch.resetAndLog("Scopes creation");
 
-    new ConvertToTypesCommandProcessor(errorHandler, injector.converters)
-        .processCommands(commands);
+    new ConvertToTypesCommandProcessor(errors, injector.converters).processCommands(commands);
     stopwatch.resetAndLog("Converters creation");
 
     bindLogger();
-    bindCommandProcesor = new BindCommandProcessor(
+    bindCommandProcesor = new BindCommandProcessor(errors,
         injector, injector.scopes, injector.explicitBindings,
         injector.outstandingInjections);
     bindCommandProcesor.processCommands(commands);
@@ -149,16 +148,13 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Binding indexing");
 
     requestStaticInjectionCommandProcessor
-        = new RequestStaticInjectionCommandProcessor(errorHandler);
+        = new RequestStaticInjectionCommandProcessor(errors);
     requestStaticInjectionCommandProcessor
         .processCommands(commands);
     stopwatch.resetAndLog("Static injection");
   }
 
-  /**
-   * Validate everything that we can validate now that the injector is ready
-   * for use.
-   */
+  /** Validate everything that we can validate now that the injector is ready for use. */
   private void validate() {
     bindCommandProcesor.runCreationListeners(injector);
     stopwatch.resetAndLog("Validation");
@@ -166,25 +162,22 @@ class InjectorBuilder {
     requestStaticInjectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
-    injector.validateOustandingInjections();
+    injector.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
-    new GetProviderProcessor(injector)
-        .processCommands(commands);
+    new GetProviderProcessor(errors, injector).processCommands(commands);
     stopwatch.resetAndLog("Provider verification");
 
-    errorHandler.blowUpIfErrorsExist();
+    errors.throwCreationExceptionIfErrorsExist();
   }
 
-  /**
-   * Inject everything that can be injected. This uses runtime error handling.
-   */
+  /** Inject everything that can be injected. This uses runtime error handling. */
   private void fulfillInjectionRequests() {
     futureInjector.initialize(injector);
 
     requestStaticInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
-    injector.fulfillOutstandingInjections();
+    injector.fulfillOutstandingInjections(errors);
     stopwatch.resetAndLog("Instance injection");
 
     loadEagerSingletons();
@@ -197,22 +190,27 @@ class InjectorBuilder {
         : Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
       if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
-        injector.callInContext(new ContextualCallable<Void>() {
-          public Void call(InternalContext context) {
-            InjectionPoint<?> injectionPoint
-                = InjectionPoint.newInstance(binding.key, context.getInjector());
-            context.setInjectionPoint(injectionPoint);
-            try {
-              binding.internalFactory.get(context, injectionPoint);
+        try {
+          injector.callInContext(new ContextualCallable<Void>() {
+            public Void call(InternalContext context) {
+              InjectionPoint<?> injectionPoint = InjectionPoint.newInstance(binding.key);
+              context.setInjectionPoint(injectionPoint);
+              errors.pushInjectionPoint(injectionPoint);
+              try {
+                binding.internalFactory.get(errors, context, injectionPoint);
+              } catch (ResolveFailedException e) {
+                errors.merge(e.getErrors());
+              } finally {
+                context.setInjectionPoint(null);
+                errors.popInjectionPoint(injectionPoint);
+              }
+
               return null;
-            } catch(ProvisionException provisionException) {
-              provisionException.addContext(injectionPoint);
-              throw provisionException;
-            } finally {
-              context.setInjectionPoint(null);
             }
-          }
-        });
+          });
+        } catch (ResolveFailedException e) {
+          throw new AssertionError();
+        }
       }
     }
   }
@@ -258,8 +256,8 @@ class InjectorBuilder {
   }
 
   /**
-   * The Logger is a special case because it knows the injection point of the
-   * injected member. It's the only binding that does this.
+   * The Logger is a special case because it knows the injection point of the injected member. It's
+   * the only binding that does this.
    */
   private void bindLogger() {
     Key<Logger> key = Key.get(Logger.class);
@@ -271,7 +269,7 @@ class InjectorBuilder {
   }
 
   static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
-    public Logger get(InternalContext context, InjectionPoint<?> injectionPoint) {
+    public Logger get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint) {
       Member member = injectionPoint.getMember();
       return member == null
           ? Logger.getAnonymousLogger()

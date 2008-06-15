@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-
 package com.google.inject;
 
-import com.google.inject.internal.ErrorHandler;
+import com.google.common.collect.Lists;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.Keys;
-
+import com.google.inject.internal.Nullability;
+import com.google.inject.internal.ResolveFailedException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -38,54 +38,60 @@ import java.util.List;
 class Parameter<T> {
   private final int index;
   private final Key<T> key;
-  private final Nullability nullability;
+  private final boolean allowsNull;
 
-  private Parameter(int index, Key<T> key, Nullability nullability) {
+  private Parameter(int index, Key<T> key, boolean allowsNull) {
     this.index = index;
     this.key = key;
-    this.nullability = nullability;
+    this.allowsNull = allowsNull;
   }
 
-  public static <T> Parameter<T> create(int index, Key<T> key, Nullability nullability) {
-    return new Parameter<T>(index, key, nullability);
+  public static <T> Parameter<T> create(int index, Key<T> key, boolean allowsNull) {
+    return new Parameter<T>(index, key, allowsNull);
   }
 
   public Key<T> getKey() {
     return key;
   }
 
-  public Nullability getNullability() {
-    return nullability;
+  public boolean allowsNull() {
+    return allowsNull;
   }
 
   public int getIndex() {
     return index;
   }
 
-  public static List<Parameter<?>> forMethod(ErrorHandler errorHandler, Method method) {
-    return forMember(errorHandler, method, method.getGenericParameterTypes(),
-        method.getParameterAnnotations());
+  public static List<Parameter<?>> forMethod(Method method, Errors errors)
+      throws ResolveFailedException {
+    return forMember(method, method.getGenericParameterTypes(),
+        method.getParameterAnnotations(), errors);
   }
 
-  public static List<Parameter<?>> forConstructor(
-      ErrorHandler errorHandler, Constructor constructor) {
-    return forMember(errorHandler, constructor, constructor.getGenericParameterTypes(),
-        constructor.getParameterAnnotations());
+  public static List<Parameter<?>> forConstructor(Constructor constructor, Errors errors)
+      throws ResolveFailedException {
+    return forMember(constructor, constructor.getGenericParameterTypes(),
+        constructor.getParameterAnnotations(), errors);
   }
 
-  private static List<Parameter<?>> forMember(ErrorHandler errorHandler, Member member,
-      Type[] genericParameterTypes, Annotation[][] annotations) {
+  private static List<Parameter<?>> forMember(Member member, Type[] genericParameterTypes,
+      Annotation[][] annotations, Errors errors) throws ResolveFailedException {
     Iterator<Annotation[]> annotationsIterator = Arrays.asList(annotations).iterator();
 
-    List<Parameter<?>> parameters = new ArrayList<Parameter<?>>();
+    List<Parameter<?>> parameters = Lists.newArrayList();
     int index = 0;
     for (Type parameterType : genericParameterTypes) {
-      Annotation[] parameterAnnotations = annotationsIterator.next();
-      Key<?> key = Keys.get(parameterType, member, parameterAnnotations, errorHandler);
-      parameters.add(create(index, key, Nullability.forAnnotations(parameterAnnotations)));
-      index++;
+      try {
+        Annotation[] parameterAnnotations = annotationsIterator.next();
+        Key<?> key = Keys.get(parameterType, member, parameterAnnotations, errors);
+        parameters.add(create(index, key, Nullability.allowsNull(parameterAnnotations)));
+        index++;
+      } catch (ResolveFailedException e) {
+        errors.merge(e.getErrors());
+      }
     }
 
+    errors.throwIfNecessary();
     return parameters;
   }
 }

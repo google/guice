@@ -28,17 +28,16 @@ public class Keys {
   /**
    * Gets a key for the given type, member and annotations.
    */
-  public static Key<?> get(Type type, Member member, Annotation[] annotations,
-      ErrorHandler errorHandler) {
+  public static Key<?> get(Type type, Member member, Annotation[] annotations, Errors errors)
+      throws ResolveFailedException {
     Annotation found = null;
     for (Annotation annotation : annotations) {
       if (annotation.annotationType().getAnnotation(BindingAnnotation.class) != null) {
         if (found == null) {
           found = annotation;
         } else {
-          errorHandler.handle(StackTraceElements.forMember(member),
-              ErrorMessage.duplicateBindingAnnotations(
-                  found.annotationType(), annotation.annotationType()));
+          throw errors.duplicateBindingAnnotations(
+              member, found.annotationType(), annotation.annotationType()).toException();
         }
       }
     }

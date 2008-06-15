@@ -18,35 +18,32 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
-import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.Constructor;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class RuntimeReflectionFactory implements Reflection.Factory {
-  public Reflection create(ErrorHandler errorHandler,
-      ConstructionProxyFactory constructionProxyFactory) {
-    return new RuntimeReflection(errorHandler, constructionProxyFactory);
+  public Reflection create(ConstructionProxyFactory constructionProxyFactory) {
+    return new RuntimeReflection(constructionProxyFactory);
   }
 
   private static class RuntimeReflection implements Reflection {
-    private final ErrorHandler errorHandler;
     private final ConstructionProxyFactory constructionProxyFactory;
 
-    private RuntimeReflection(ErrorHandler errorHandler,
-        ConstructionProxyFactory constructionProxyFactory) {
-      this.errorHandler = checkNotNull(errorHandler, "errorHandler");
+    private RuntimeReflection(ConstructionProxyFactory constructionProxyFactory) {
       this.constructionProxyFactory = checkNotNull(constructionProxyFactory, "constructionProxyFatory");
     }
 
-    public <T> ConstructionProxy<T> getConstructionProxy(Class<T> implementation) {
-      return constructionProxyFactory.get(findConstructorIn(implementation));
+    public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
+        throws ResolveFailedException {
+      return constructionProxyFactory.get(errors, findConstructorIn(errors, implementation));
     }
 
-    private <T> Constructor<T> findConstructorIn(Class<T> implementation) {
+    private <T> Constructor<T> findConstructorIn(Errors errors, Class<T> implementation)
+        throws ResolveFailedException{
       Constructor<T> found = null;
       @SuppressWarnings("unchecked")
       Constructor<T>[] constructors
@@ -55,17 +52,13 @@ class RuntimeReflectionFactory implements Reflection.Factory {
         Inject inject = constructor.getAnnotation(Inject.class);
         if (inject != null) {
           if (inject.optional()) {
-            errorHandler.handle(
-                StackTraceElements.forMember(constructor),
-                ErrorMessage.optionalConstructor());
+            errors.optionalConstructor(constructor);
           }
 
           if (found != null) {
-            errorHandler.handle(
-                StackTraceElements.forMember(found),
-                ErrorMessage.tooManyConstructors());
-            return invalidConstructor();
+            errors.tooManyConstructors(implementation);
           }
+
           found = constructor;
         }
       }
@@ -79,11 +72,7 @@ class RuntimeReflectionFactory implements Reflection.Factory {
         return implementation.getDeclaredConstructor();
       }
       catch (NoSuchMethodException e) {
-        errorHandler.handle(
-            StackTraceElements.forMember(
-                implementation.getDeclaredConstructors()[0]),
-            ErrorMessage.missingConstructor(implementation));
-        return invalidConstructor();
+        throw errors.missingConstructor(implementation).toException();
       }
     }
 

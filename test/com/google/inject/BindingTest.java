@@ -18,12 +18,20 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
-import com.google.inject.spi.*;
-import junit.framework.TestCase;
-
+import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.ClassBinding;
+import com.google.inject.spi.ConstantBinding;
+import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.LinkedBinding;
+import com.google.inject.spi.LinkedProviderBinding;
+import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.ProviderInstanceBinding;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -34,7 +42,7 @@ public class BindingTest extends TestCase {
     Injector injector = Guice.createInjector();
     ClassBinding<Dependent> binding
         = (ClassBinding<Dependent>) injector.getBinding(Dependent.class);
-    Collection<Dependency<?>> dependencies = binding.getDependencies();
+    Collection<InjectionPoint<?>> dependencies = binding.getInjectionPoints();
     assertEquals(4, dependencies.size());
   }
 
@@ -205,7 +213,7 @@ public class BindingTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
+      assertContains(expected.getMessage(), "No implementation for java.util.List was bound.");
     }
   }
 

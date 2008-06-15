@@ -17,15 +17,18 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.SourceProviders;
+import java.util.concurrent.Callable;
 
 /**
  * A placeholder which enables us to swap in the real factory once the
  * container is created.
  */
-class FactoryProxy<T> implements InternalFactory<T>,
-    BindCommandProcessor.CreationListener {
+class FactoryProxy<T> implements InternalFactory<T>, BindCommandProcessor.CreationListener {
 
   private final Key<T> key;
   private final Key<? extends T> targetKey;
@@ -39,20 +42,29 @@ class FactoryProxy<T> implements InternalFactory<T>,
     this.source = source;
   }
 
-  public void notify(final InjectorImpl injector) {
-    injector.withDefaultSource(source, new Runnable() {
-      public void run() {
-        try {
-          targetFactory = injector.getInternalFactory(targetKey);
-        } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(e.getMessage(source));
+  public void notify(final InjectorImpl injector, final Errors errors) {
+    try {
+      SourceProviders.withDefaultChecked(source, new Callable<Void>() {
+        public Void call() throws ResolveFailedException {
+          targetFactory = injector.getInternalFactory(targetKey, errors);
+          return null;
         }
-      }
-    });
+      });
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (ResolveFailedException e) {
+      errors.merge(e.getErrors());
+    }
+    catch (Exception e) {
+      throw new AssertionError();
+    }
   }
 
-  public T get(InternalContext context, InjectionPoint<?> injectionPoint) {
-    return targetFactory.get(context, injectionPoint);
+  public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+      throws ResolveFailedException {
+    return targetFactory.get(errors, context, injectionPoint);
   }
 
   public String toString() {

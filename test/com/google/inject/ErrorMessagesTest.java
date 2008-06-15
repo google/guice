@@ -63,36 +63,8 @@ public class ErrorMessagesTest extends TestCase {
       injector.getInstance(LocalClass.class);
       fail();
     } catch (Exception expected) {
-      // TODO(kevinb): why does the source come out as unknown??
       assertContains(expected.getMessage(), "Injecting into inner classes is not supported.");
     }
-  }
-
-  public void testExplicitBindingOfAnAbstractClass() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(AbstractClass.class);
-        }
-      });
-      fail();
-    } catch(CreationException expected) {
-      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
-    }
-  }
-
-  public void testGetInstanceOfAnAbstractClass() {
-    Injector injector = Guice.createInjector();
-    try {
-      injector.getInstance(AbstractClass.class);
-      fail();
-    } catch(CreationException expected) {
-      assertContains(expected.getMessage(), "Injecting into abstract types is not supported.");
-    }
-  }
-
-  static abstract class AbstractClass {
-    @Inject AbstractClass() { }
   }
 
   public void testBindDisallowedTypes() throws NoSuchMethodException {
@@ -158,7 +130,7 @@ public class ErrorMessagesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(B.class);
       fail();
-    } catch (CreationException expected) {
+    } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "Binding annotations on injected methods are not supported. "
               + "Annotate the parameter instead?");
@@ -167,7 +139,7 @@ public class ErrorMessagesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(C.class);
       fail();
-    } catch (CreationException expected) {
+    } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "Binding annotations on injected constructors are not supported. "
               + "Annotate the parameter instead?");

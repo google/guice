@@ -16,8 +16,11 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.*;
-
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -96,13 +99,6 @@ class Parameter {
           || injector.getProvider(key) != null;
     } catch (ProvisionException e) {
       return false;
-    } catch (RuntimeException re) {
-      // TODO: make ConfigurationException public?
-      if (re.getClass().getName().contains("ConfigurationException")) {
-        return false;
-      } else {
-        throw re;
-      }
     }
   }
 

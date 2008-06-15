@@ -23,7 +23,7 @@ import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindScoping.Visitor;
 import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
@@ -48,11 +48,12 @@ class BindCommandProcessor extends CommandProcessor {
   private final Set<Object> outstandingInjections;
   private final List<Runnable> untargettedBindings = Lists.newArrayList();
 
-  BindCommandProcessor(InjectorImpl injector,
+  BindCommandProcessor(Errors errors,
+      InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
       Map<Key<?>, BindingImpl<?>> bindings,
       Set<Object> outstandingInjections) {
-    super(injector.errorHandler);
+    super(errors);
     this.injector = injector;
     this.scopes = scopes;
     this.bindings = bindings;
@@ -66,7 +67,7 @@ class BindCommandProcessor extends CommandProcessor {
     Class<? super T> rawType = key.getTypeLiteral().getRawType();
 
     if (rawType == Provider.class) {
-      addError(source, ErrorMessage.bindingToProvider());
+      errors.bindingToProvider();
       return true;
     }
 
@@ -89,8 +90,7 @@ class BindCommandProcessor extends CommandProcessor {
         if (scope != null) {
           return scope;
         } else {
-          addError(source, ErrorMessage.scopeNotFound(
-              "@" + scopeAnnotation.getSimpleName()));
+          errors.scopeNotFound(scopeAnnotation);
           return Scopes.NO_SCOPE;
         }
       }
@@ -102,12 +102,17 @@ class BindCommandProcessor extends CommandProcessor {
 
     command.getTarget().acceptVisitor(new BindTarget.Visitor<T, Void>() {
       public Void visitToInstance(T instance) {
+        if (instance == null) {
+          errors.cannotBindToNullInstance();
+          putBinding(invalidBinding(injector, key, source));
+          return null;
+        }
+
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
         outstandingInjections.add(instance);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
-        putBinding(new InstanceBindingImpl<T>(
-                injector, key, source, scopedFactory, instance));
+        putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, instance));
         return null;
       }
 
@@ -135,7 +140,7 @@ class BindCommandProcessor extends CommandProcessor {
 
       public Void visitToKey(Key<? extends T> targetKey) {
         if (key.equals(targetKey)) {
-          addError(source, ErrorMessage.recursiveBinding());
+          errors.recursiveBinding();
         }
 
         FactoryProxy<T> factory = new FactoryProxy<T>(key, targetKey, source);
@@ -155,7 +160,7 @@ class BindCommandProcessor extends CommandProcessor {
         // We can't assume abstract types aren't injectable. They may have an
         // @ImplementedBy annotation or something.
         if (key.hasAnnotationType() || !(type instanceof Class<?>)) {
-          addError(source, ErrorMessage.missingImplementation());
+          errors.missingImplementation(key);
           putBinding(invalidBinding(injector, key, source));
           return null;
         }
@@ -165,10 +170,10 @@ class BindCommandProcessor extends CommandProcessor {
         Class<T> clazz = (Class<T>) type;
         final BindingImpl<T> binding;
         try {
-          binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy);
+          binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy, errors);
           putBinding(binding);
         } catch (ResolveFailedException e) {
-          injector.errorHandler.handle(e.getMessage(source));
+          errors.merge(e.getErrors());
           putBinding(invalidBinding(injector, key, source));
           return null;
         }
@@ -176,9 +181,9 @@ class BindCommandProcessor extends CommandProcessor {
         untargettedBindings.add(new Runnable() {
           public void run() {
             try {
-              injector.initializeBinding(binding);
+              injector.initializeBinding(binding, errors);
             } catch (ResolveFailedException e) {
-              injector.errorHandler.handle(e.getMessage(source));
+              errors.merge(e.getErrors());
             }
           }
         });
@@ -195,13 +200,11 @@ class BindCommandProcessor extends CommandProcessor {
       Class<? extends Annotation> annotationType = key.getAnnotationType();
 
       if (!Annotations.isRetainedAtRuntime(annotationType)) {
-        addError(StackTraceElements.forType(annotationType),
-            ErrorMessage.missingRuntimeRetention(source));
+        errors.at(StackTraceElements.forType(annotationType)).missingRuntimeRetention(source);
       }
 
       if (!Key.isBindingAnnotation(annotationType)) {
-        addError(StackTraceElements.forType(annotationType),
-            ErrorMessage.missingBindingAnnotation(source));
+        errors.at(StackTraceElements.forType(annotationType)).missingBindingAnnotation(source);
       }
     }
   }
@@ -213,7 +216,7 @@ class BindCommandProcessor extends CommandProcessor {
   @Override public Boolean visitBindConstant(BindConstantCommand command) {
     BindTarget<?> target = command.getTarget();
     if (target == null) {
-      addError(command.getSource(), ErrorMessage.missingConstantValues());
+      errors.at(command.getSource()).missingConstantValues();
       return true;
     }
 
@@ -234,7 +237,7 @@ class BindCommandProcessor extends CommandProcessor {
 
   public void runCreationListeners(InjectorImpl injector) {
     for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(injector);
+      creationListener.notify(injector, errors);
     }
   }
 
@@ -244,14 +247,12 @@ class BindCommandProcessor extends CommandProcessor {
 
     Class<?> rawType = key.getRawType();
     if (FORBIDDEN_TYPES.contains(rawType)) {
-      addError(binding.getSource(), ErrorMessage.cannotBindToGuiceType(
-          rawType.getSimpleName()));
+      errors.at(binding.getSource()).cannotBindToGuiceType(rawType.getSimpleName());
       return;
     }
 
     if (bindings.containsKey(key)) {
-      addError(binding.getSource(), ErrorMessage.bindingAlreadySet(key,
-          original.getSource()));
+      errors.at(binding.getSource()).bindingAlreadySet(key, original.getSource());
     } else {
       bindings.put(key, binding);
     }
@@ -281,6 +282,6 @@ class BindCommandProcessor extends CommandProcessor {
   }
 
   interface CreationListener {
-    void notify(InjectorImpl injector);
+    void notify(InjectorImpl injector, Errors errors);
   }
 }

@@ -16,16 +16,16 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.GuiceFastClass;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
-
+import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastConstructor;
 
 /**
  * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
@@ -36,13 +36,10 @@ import java.util.List;
  */
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
-  private final ErrorHandler errorHandler;
+  public <T> ConstructionProxy<T> get(Errors errors, final Constructor<T> constructor)
+      throws ResolveFailedException {
+    final List<Parameter<?>> parameters = Parameter.forConstructor(constructor, errors);
 
-  DefaultConstructionProxyFactory(ErrorHandler errorHandler) {
-    this.errorHandler = errorHandler;
-  }
-
-  public <T> ConstructionProxy<T> get(final Constructor<T> constructor) {
     // We can't use FastConstructor if the constructor is private or protected.
     if (Modifier.isPrivate(constructor.getModifiers())
         || Modifier.isProtected(constructor.getModifiers())) {
@@ -61,7 +58,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
           }
         }
         public List<Parameter<?>> getParameters() {
-          return Parameter.forConstructor(errorHandler, constructor);
+          return parameters;
         }
         public Member getMember() {
           return constructor;
@@ -69,18 +66,17 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       };
     }
 
-    Class<T> classToConstruct = constructor.getDeclaringClass();
-    FastClass fastClass = GuiceFastClass.create(classToConstruct);
-    final FastConstructor fastConstructor
-        = fastClass.getConstructor(constructor);
     return new ConstructionProxy<T>() {
+      Class<T> classToConstruct = constructor.getDeclaringClass();
+      FastClass fastClass = GuiceFastClass.create(classToConstruct);
+      final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
+
       @SuppressWarnings("unchecked")
-      public T newInstance(Object... arguments)
-          throws InvocationTargetException {
+      public T newInstance(Object... arguments) throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
       }
       public List<Parameter<?>> getParameters() {
-        return Parameter.forConstructor(errorHandler, constructor);
+        return parameters;
       }
       public Member getMember() {
         return constructor;

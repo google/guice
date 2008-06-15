@@ -14,10 +14,9 @@ public class NullableInjectionPointTest extends TestCase {
       fail("Injecting null should fail with an error");
     }
     catch (ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
-      assertContains(cause.getMessage(), "FooConstructor");
-      assertContains(cause.getMessage(), "is not @Nullable");
+      assertContains(expected.getMessage(),
+          "null returned by binding at " + getClass().getName(),
+          "parameter 0 of constructor " + FooConstructor.class.getName() + "() is not @Nullable");
     }
   }
 
@@ -27,10 +26,9 @@ public class NullableInjectionPointTest extends TestCase {
       fail("Injecting null should fail with an error");
     }
     catch (ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
-      assertContains(cause.getMessage(), "FooMethod.setFoo");
-      assertContains(cause.getMessage(), "is not @Nullable");
+      assertContains(expected.getMessage(),
+          "null returned by binding at " + getClass().getName(),
+          "parameter 0 of method " + FooMethod.class.getName() + ".setFoo() is not @Nullable");
     }
   }
 
@@ -40,10 +38,9 @@ public class NullableInjectionPointTest extends TestCase {
       fail("Injecting null should fail with an error");
     }
     catch (ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
-      assertContains(cause.getMessage(), "FooField.foo");
-      assertContains(cause.getMessage(), "is not @Nullable");
+      assertContains(expected.getMessage(),
+          "null returned by binding at " + getClass().getName(),
+          " but field " + FooField.class.getName() + ".foo is not @Nullable");
     }
   }
 
@@ -90,20 +87,17 @@ public class NullableInjectionPointTest extends TestCase {
    * We haven't decided on what the desired behaviour of this test should be...
    */
   public void testBindNullToInstance() {
-    Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        try {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
           bind(Foo.class).toInstance(null);
-          fail();
         }
-        catch(NullPointerException expected) {
-          assertEquals("Binding to null instances is not allowed. "
-              + "Use toProvider(Providers.of(null)) if this is your intended behaviour.", 
-              expected.getMessage());
-        }
-      }
-    });
-
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Error at " + getClass().getName(),
+          "Binding to null instances is not allowed.");
+    }
   }
 
   public void testBindNullToProvider() {
@@ -122,8 +116,7 @@ public class NullableInjectionPointTest extends TestCase {
       injector.getInstance(FooField.class);
     }
     catch(ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
+      assertContains(expected.getMessage(), "null returned by binding at");
     }
   }
 
@@ -143,8 +136,7 @@ public class NullableInjectionPointTest extends TestCase {
       injector.getInstance(FooField.class);
     }
     catch(ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding at");
+      assertContains(expected.getMessage(), "null returned by binding at");
     }
   }
 
@@ -164,8 +156,7 @@ public class NullableInjectionPointTest extends TestCase {
       injector.getInstance(FooField.class);
     }
     catch(ProvisionException expected) {
-      NullPointerException cause = (NullPointerException)expected.getCause();
-      assertContains(cause.getMessage(), "null returned by binding "
+      assertContains(expected.getMessage(), "null returned by binding "
           + "at com.google.inject.NullableInjectionPointTest");
     }
   }

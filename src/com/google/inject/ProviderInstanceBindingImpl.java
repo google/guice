@@ -16,11 +16,11 @@ limitations under the License.
 
 package com.google.inject;
 
+import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
-
 import java.util.Collection;
 
 /**
@@ -48,9 +48,15 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
     return this.providerInstance;
   }
 
-  public Collection<Dependency<?>> getDependencies() {
-    return injector.getFieldAndMethodDependenciesFor(
-        providerInstance.getClass());
+  public Collection<InjectionPoint<?>> getInjectionPoints() {
+    try {
+      return injector.getFieldAndMethodInjectionsFor(providerInstance.getClass());
+    }
+    catch (ResolveFailedException e) {
+      // this would have been a creation exception
+      // TODO: initialize the dependencies via a callback
+      throw new AssertionError(e);
+    }
   }
 
   @Override

@@ -17,12 +17,12 @@
 package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleParameterInjector;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ClassBinding;
-import com.google.inject.spi.Dependency;
-
+import com.google.inject.spi.InjectionPoint;
 import java.util.Collection;
 
 /**
@@ -42,7 +42,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     this.lateBoundConstructor = lateBoundConstructor;
   }
 
-  @Override void initialize(InjectorImpl injector) throws ResolveFailedException {
+  @Override void initialize(InjectorImpl injector, Errors errors) throws ResolveFailedException {
     lateBoundConstructor.bind(injector, getBoundClass());
   }
 
@@ -56,14 +56,19 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     return (Class<T>) key.getRawType();
   }
 
-  public Collection<Dependency<?>> getDependencies() {
+  public Collection<InjectionPoint<?>> getInjectionPoints() {
     if (lateBoundConstructor == null) {
       throw new AssertionError();
     }
 
     Class<T> boundClass = getBoundClass();
-    Collection<Dependency<?>> injectors
-        = injector.getModifiableFieldAndMethodDependenciesFor(boundClass);
+    Collection<InjectionPoint<?>> injectors;
+    try {
+      injectors = injector.getModifiableFieldAndMethodInjectionsFor(boundClass);
+    } catch (ResolveFailedException e) {
+      throw new AssertionError("This should have failed at CreationTime");
+    }
+
     ConstructorInjector<T> constructor = lateBoundConstructor.constructorInjector;
     if (constructor.parameterInjectors != null) {
       for (SingleParameterInjector<?> parameterInjector
