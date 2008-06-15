@@ -19,8 +19,7 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -35,9 +34,9 @@ class ScopesCommandProcessor extends CommandProcessor {
 
   private final Map<Class<? extends Annotation>, Scope> scopes;
 
-  ScopesCommandProcessor(ErrorHandler errorHandler,
+  ScopesCommandProcessor(Errors errors,
       Map<Class<? extends Annotation>, Scope> scopes) {
-    super(errorHandler);
+    super(errors);
     this.scopes = scopes;
   }
 
@@ -46,20 +45,19 @@ class ScopesCommandProcessor extends CommandProcessor {
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 
     if (!Scopes.isScopeAnnotation(annotationType)) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessage.missingScopeAnnotation());
+      errors.at(StackTraceElements.forType(annotationType)).missingScopeAnnotation();
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
-      addError(StackTraceElements.forType(annotationType),
-          ErrorMessage.missingRuntimeRetention(command.getSource()));
+      errors.at(StackTraceElements.forType(annotationType))
+          .missingRuntimeRetention(command.getSource());
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     Scope existing = scopes.get(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
-      addError(command.getSource(), ErrorMessage.duplicateScopes(existing, annotationType, scope));
+      errors.at(command.getSource()).duplicateScopes(existing, annotationType, scope);
     } else {
       scopes.put(annotationType, checkNotNull(scope, "scope"));
     }

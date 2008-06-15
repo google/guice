@@ -18,7 +18,7 @@
 package com.google.inject;
 
 import com.google.inject.commands.ConvertToTypesCommand;
-import com.google.inject.internal.ErrorHandler;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Strings;
 import com.google.inject.matcher.AbstractMatcher;
@@ -26,7 +26,6 @@ import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.TypeConverter;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -42,9 +41,8 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
 
   private final List<MatcherAndConverter<?>> converters;
 
-  ConvertToTypesCommandProcessor(ErrorHandler errorHandler,
-      List<MatcherAndConverter<?>> converters) {
-    super(errorHandler);
+  ConvertToTypesCommandProcessor(Errors errors, List<MatcherAndConverter<?>> converters) {
+    super(errors);
     this.converters = converters;
 
     // Configure type converters.

@@ -16,8 +16,8 @@
 
 package com.google.inject.spi;
 
+import com.google.common.collect.Sets;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -55,7 +55,7 @@ public class SourceProviders {
    */
   public synchronized static void skip(Class<?> clazz) {
     // Poor man's copy-on-write hash set.
-    Set<String> copy = new HashSet<String>();
+    Set<String> copy = Sets.newHashSet();
     copy.addAll(skippedClassNames);
     copy.add(clazz.getName());
     skippedClassNames = Collections.unmodifiableSet(copy);
@@ -122,8 +122,6 @@ public class SourceProviders {
     try {
       holder[0] = sourceProvider;
       return c.call();
-    } catch (Error e) {
-      throw e;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

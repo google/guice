@@ -26,7 +26,7 @@ import com.google.inject.Binding;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ClassBinding<T> extends Binding<T>, HasDependencies {
+public interface ClassBinding<T> extends Binding<T>, HasInjections {
 
   /**
    * Gets the class associated with this binding.

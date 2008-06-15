@@ -26,7 +26,6 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.ErrorMessage;
 import com.google.inject.spi.SourceProviders;
 import java.lang.annotation.Annotation;
 
@@ -186,8 +185,6 @@ public final class BindCommand<T> implements Command {
     }
 
     public void toInstance(final T instance) {
-      checkNotNull(instance, ErrorMessage.cannotBindToNullInstance().toString());
-
       checkNotTargetted();
       bindTarget = new AbstractTarget<T>() {
         public ScopedBindingBuilder execute(LinkedBindingBuilder<T> linkedBindingBuilder) {

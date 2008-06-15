@@ -18,11 +18,7 @@ package com.google.inject;
 
 import com.google.inject.commands.AddMessageErrorCommand;
 import com.google.inject.commands.AddThrowableErrorCommand;
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
-import com.google.inject.spi.Message;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.inject.internal.Errors;
 
 /**
  * Handles {@link Binder#addError} commands.
@@ -32,25 +28,17 @@ import java.util.logging.Logger;
  */
 class ErrorsCommandProcessor extends CommandProcessor {
 
-  private static final Logger logger
-      = Logger.getLogger(ErrorsCommandProcessor.class.getName());
-
-  ErrorsCommandProcessor(ErrorHandler errorHandler) {
-    super(errorHandler);
+  ErrorsCommandProcessor(Errors errors) {
+    super(errors);
   }
 
   @Override public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    String message = String.format(command.getMessage(), command.getArguments());
-    errorHandler.handle(new Message(command.getSource(), message));
+    errors.at(command.getSource()).userReportedError(command.getMessage(), command.getArguments());
     return true;
   }
 
   @Override public Boolean visitAddError(AddThrowableErrorCommand command) {
-    Object source = command.getSource();
-    String message = ErrorMessage.getRootMessage(command.getThrowable());
-    String logMessage = ErrorMessage.exceptionReportedByModules(message).toString();
-    logger.log(Level.INFO, logMessage, command.getThrowable());
-    addError(source, ErrorMessage.exceptionReportedByModuleSeeLogs(message));
+    errors.at(command.getSource()).exceptionReportedByModuleSeeLogs(command.getThrowable());
     return true;
   }
 }

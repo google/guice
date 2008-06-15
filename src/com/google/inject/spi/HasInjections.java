@@ -16,19 +16,16 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
+import java.util.Collection;
 
 /**
- * A binding to a single instance.
- *
- * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
- *
- * @author crazybob@google.com (Bob Lee)
+ * Implemented by bindings which have implementation dependencies on other
+ * bindings.
  */
-public interface InstanceBinding<T> extends Binding<T>, HasInjections {
+public interface HasInjections {
 
   /**
-   * Gets the instance associated with this binding.
+   * Gets dependencies.
    */
-  T getInstance();
+  Collection<InjectionPoint<?>> getInjectionPoints();
 }

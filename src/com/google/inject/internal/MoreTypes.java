@@ -19,11 +19,16 @@ package com.google.inject.internal;
 
 import com.google.common.base.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Types;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -91,6 +96,17 @@ public class MoreTypes {
       // type is either serializable as-is or unsupported
       return type;
     }
+  }
+
+  /**
+   * Returns a type that's functionally equal but not necessarily equal
+   * according to {@link Object#equals(Object) Object.equals}. The returned
+   * member is {@link Serializable}.
+   */
+  public static Member canonicalize(Member member) {
+    return member instanceof MemberImpl
+        ? member
+        : new MemberImpl(member);
   }
 
   public static Class<?> getRawType(Type type) {
@@ -221,6 +237,55 @@ public class MoreTypes {
     }
   }
 
+  /**
+   * Returns {@code Field.class}, {@code Method.class} or {@code Constructor.class}.
+   */
+  public static Class<? extends Member> memberType(Member member) {
+    checkNotNull(member, "member");
+
+    if (member instanceof MemberImpl) {
+      return ((MemberImpl) member).memberType;
+
+    } else if (member instanceof Field) {
+      return Field.class;
+
+    } else if (member instanceof Method) {
+      return Method.class;
+
+    } else if (member instanceof Constructor) {
+      return Constructor.class;
+
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported implementation class for Member, " + member.getClass());
+    }
+  }
+
+  public static String memberKey(Member member) {
+    checkNotNull(member, "member");
+
+    if (member instanceof MemberImpl) {
+      return ((MemberImpl) member).memberKey;
+
+    } else if (member instanceof Field) {
+      return member.getName();
+
+    } else if (member instanceof Method) {
+      return member.getName() + org.objectweb.asm.Type.getMethodDescriptor((Method) member);
+
+    } else if (member instanceof Constructor) {
+      StringBuilder sb = new StringBuilder().append("<init>(");
+      for (Class param : ((Constructor) member).getParameterTypes()) {
+          sb.append(org.objectweb.asm.Type.getDescriptor(param));
+      }
+      return sb.append(")V").toString();
+
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported implementation class for Member, " + member.getClass());
+    }
+  }
+
   public static class ParameterizedTypeImpl implements ParameterizedType, Serializable {
     private final Type ownerType;
     private final Type rawType;
@@ -300,5 +365,56 @@ public class MoreTypes {
     }
 
     private static final long serialVersionUID = 0;
+  }
+
+  /**
+   * We cannot serialize the built-in Java member classes, which prevents us from using Members in
+   * our exception types. We workaround this with this serializable implementation. It includes all
+   * of the API methods, plus everything we use for line numbers and messaging.
+   */
+  public static class MemberImpl implements Member, Serializable {
+    private final Class<?> declaringClass;
+    private final String name;
+    private final int modifiers;
+    private final boolean synthetic;
+    private final Class<? extends Member> memberType;
+    private final String memberKey;
+
+    private MemberImpl(Member member) {
+      this.declaringClass = member.getDeclaringClass();
+      this.name = member.getName();
+      this.modifiers = member.getModifiers();
+      this.synthetic = member.isSynthetic();
+      this.memberType = memberType(member);
+      this.memberKey = memberKey(member);
+    }
+
+    public Class getDeclaringClass() {
+      return declaringClass;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getModifiers() {
+      return modifiers;
+    }
+
+    public boolean isSynthetic() {
+      return synthetic;
+    }
+
+    @Override public String toString() {
+      if (memberType == Method.class) {
+        return "method " + getDeclaringClass().getName() + "." + getName() + "()";
+      } else if (memberType == Field.class) {
+        return "field " + getDeclaringClass().getName() + "." + getName();
+      } else if (memberType == Constructor.class) {
+        return "constructor " + getDeclaringClass().getName() + "()";
+      } else {
+        throw new AssertionError();
+      }
+    }
   }
 }

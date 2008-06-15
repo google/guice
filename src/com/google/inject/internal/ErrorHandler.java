@@ -28,7 +28,7 @@ public interface ErrorHandler {
   /**
    * Handles an error.
    */
-  void handle(Object source, ErrorMessage errorMessage);
+  void handle(Object source, Errors errors);
 
   /**
    * Handles a user-reported error.

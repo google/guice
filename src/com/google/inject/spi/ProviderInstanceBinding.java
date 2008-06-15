@@ -26,8 +26,7 @@ import com.google.inject.Provider;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ProviderInstanceBinding<T> extends Binding<T>,
-    HasDependencies {
+public interface ProviderInstanceBinding<T> extends Binding<T>, HasInjections {
 
   /**
    * Gets the raw (unscoped) provider instance associated with this binding.

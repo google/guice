@@ -16,13 +16,11 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -32,7 +30,6 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 /**
  * Looks up line numbers for classes and their members.
@@ -41,26 +38,22 @@ import org.objectweb.asm.Type;
  */
 public class LineNumbers {
 
-  private final Class cls;
-  private Map<String, Integer> lines = new HashMap<String, Integer>();
+  private final Class type;
+  private final Map<String, Integer> lines = Maps.newHashMap();
   private String source;
   private int firstLine = Integer.MAX_VALUE;
 
   /**
    * Reads line number information from the given class, if available.
    *
-   * @param cls the class to read line number information from
-   * @throws IllegalArgumentException if the bytecode for the class cannot be
-   * found
-   * @throws IOException if an error occurs while reading bytecode
+   * @param type the class to read line number information from
+   * @throws IllegalArgumentException if the bytecode for the class cannot be found
+   * @throws java.io.IOException if an error occurs while reading bytecode
    */
-  public LineNumbers(Class cls) throws IOException {
-    this.cls = cls;
-    InputStream in = cls
-        .getResourceAsStream("/" + cls.getName().replace('.', '/') + ".class");
-    if (in == null) {
-      throw new IllegalArgumentException("Cannot find bytecode for " + cls);
-    }
+  public LineNumbers(Class type) throws IOException {
+    this.type = type;
+    InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
+    checkArgument(in != null, "Cannot find bytecode for %s", type);
     new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
   }
 
@@ -76,45 +69,20 @@ public class LineNumbers {
   /**
    * Get the line number associated with the given member.
    *
-   * @param member a field, constructor, or method belonging to the class used
-   * during construction
+   * @param member a field, constructor, or method belonging to the class used during construction
    * @return the wrapped line number, or null if not available
-   * @throws IllegalArgumentException if the member does not belong to the
-   * class used during construction
+   * @throws IllegalArgumentException if the member does not belong to the class used during
+   * construction
    */
   public Integer getLineNumber(Member member) {
-    if (!cls.equals(member.getDeclaringClass())) {
-      throw new IllegalArgumentException("Member " + member + " belongs to "
-          + member.getDeclaringClass() + ", not " + cls);
-    }
-    return lines.get(getKey(member));
+    checkArgument(type == member.getDeclaringClass(),
+        "Member %s belongs to %s, not %s", member, member.getDeclaringClass(), type);
+    return lines.get(MoreTypes.memberKey(member));
   }
 
-  /**
-   * Gets the first line number.
-   */
+  /** Gets the first line number. */
   public int getFirstLine() {
     return firstLine == Integer.MAX_VALUE ? 1 : firstLine;
-  }
-
-  private static String getKey(Member member) {
-    if (member instanceof Field) {
-      return member.getName();
-    }
-    else if (member instanceof Method) {
-      return member.getName() + Type.getMethodDescriptor((Method) member);
-    }
-    else {
-      return "<init>" + getConstructorDescriptor((Constructor) member);
-    }
-  }
-
-  public static String getConstructorDescriptor(Constructor c) {
-    StringBuilder sb = new StringBuilder();
-    sb.append('(');
-    for (Class param : c.getParameterTypes())
-        sb.append(Type.getDescriptor(param));
-    return sb.append(")V").toString();
   }
 
   private class LineNumberReader implements ClassVisitor, MethodVisitor, AnnotationVisitor {

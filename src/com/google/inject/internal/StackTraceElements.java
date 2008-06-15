@@ -51,12 +51,12 @@ public class StackTraceElements {
     Class declaringClass = member.getDeclaringClass();
     LineNumbers lineNumbers = lineNumbersCache.get(declaringClass);
     Integer lineNumber = lineNumbers.getLineNumber(member);
-    String memberName
-        = member instanceof Constructor ? "<init>" : member.getName();
-    StackTraceElement element = new StackTraceElement(
-      declaringClass.getName(), memberName, lineNumbers.getSource(),
+    Class<? extends Member> memberType = MoreTypes.memberType(member);
+
+
+    String memberName = memberType == Constructor.class ? "<init>" : member.getName();
+    return new StackTraceElement(declaringClass.getName(), memberName, lineNumbers.getSource(),
         lineNumber == null ? lineNumbers.getFirstLine() : lineNumber);
-    return element;
   }
 
   public static Object forType(Class<?> implementation) {

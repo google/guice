@@ -26,8 +26,7 @@ import com.google.inject.commands.Command;
 import com.google.inject.commands.ConvertToTypesCommand;
 import com.google.inject.commands.GetProviderCommand;
 import com.google.inject.commands.RequestStaticInjectionCommand;
-import com.google.inject.internal.ErrorHandler;
-import com.google.inject.internal.ErrorMessage;
+import com.google.inject.internal.Errors;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,23 +41,22 @@ import java.util.List;
  */
 abstract class CommandProcessor implements Command.Visitor<Boolean> {
 
-  protected final ErrorHandler errorHandler;
+  protected final Errors errors;
 
-  protected CommandProcessor(ErrorHandler errorHandler) {
-    this.errorHandler = errorHandler;
+  protected CommandProcessor(Errors errors) {
+    this.errors = errors;
   }
 
   public void processCommands(List<Command> commands) {
     for (Iterator<Command> i = commands.iterator(); i.hasNext(); ) {
-      Boolean allDone = i.next().acceptVisitor(this);
+      Command command = i.next();
+      errors.pushSource(command.getSource());
+      Boolean allDone = command.acceptVisitor(this);
       if (allDone) {
         i.remove();
       }
+      errors.popSource(command.getSource());
     }
-  }
-
-  protected void addError(Object source, ErrorMessage errorMessage) {
-    errorHandler.handle(source, errorMessage);
   }
 
   public Boolean visitAddMessageError(AddMessageErrorCommand command) {
