@@ -86,8 +86,7 @@ public class SourceProviders {
    * Sets the default source provider, runs the given command, and then
    * restores the previous default source provider.
    */
-  public static void withDefault(
-      SourceProvider sourceProvider, Runnable r) {
+  private static void withDefault(SourceProvider sourceProvider, Runnable r) {
     // We use a holder so we perform only 1 thread local access instead of 3.
     SourceProvider[] holder = localSourceProvider.get();
     SourceProvider previous = holder[0];

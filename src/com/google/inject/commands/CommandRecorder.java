@@ -16,18 +16,29 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.inject.Binder;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Scope;
+import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 import static com.google.inject.spi.SourceProviders.defaultSource;
 import com.google.inject.spi.TypeConverter;
-import org.aopalliance.intercept.MethodInterceptor;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Records commands executed by a module so they can be inspected or
@@ -78,8 +89,8 @@ public final class CommandRecorder {
   }
 
   private class RecordingBinder implements Binder {
-    private final Set<Module> modules = new HashSet<Module>();
-    private final List<Command> commands = new ArrayList<Command>();
+    private final Set<Module> modules = Sets.newHashSet();
+    private final List<Command> commands = Lists.newArrayList();
 
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
@@ -113,6 +124,10 @@ public final class CommandRecorder {
 
     public void addError(Throwable t) {
       commands.add(new AddThrowableErrorCommand(defaultSource(), t));
+    }
+
+    public void addError(Message message) {
+      throw new UnsupportedOperationException("TODO");
     }
 
     public <T> BindCommand<T>.BindingBuilder bind(Key<T> key) {

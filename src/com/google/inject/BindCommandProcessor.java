@@ -23,6 +23,7 @@ import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindScoping.Visitor;
 import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.StackTraceElements;
@@ -91,7 +92,7 @@ class BindCommandProcessor extends CommandProcessor {
           return scope;
         } else {
           errors.scopeNotFound(scopeAnnotation);
-          return Scopes.NO_SCOPE;
+          return null;
         }
       }
 
@@ -205,6 +206,15 @@ class BindCommandProcessor extends CommandProcessor {
 
       if (!Key.isBindingAnnotation(annotationType)) {
         errors.at(StackTraceElements.forType(annotationType)).missingBindingAnnotation(source);
+      }
+    }
+
+    Class<? super T> rawType = key.getRawType();
+    if (!Classes.isConcrete(rawType)) {
+      Class<? extends Annotation> scopeAnnotation = Scopes.getScopeAnnotation(errors, rawType);
+      if (scopeAnnotation != null) {
+        errors.at(StackTraceElements.forType(rawType))
+            .scopeAnnotationOnAbstractType(scopeAnnotation, rawType, source);
       }
     }
   }

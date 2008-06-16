@@ -18,12 +18,11 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.Keys;
 import com.google.inject.internal.StackTraceElements;
-import com.google.inject.spi.SourceProvider;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -47,24 +46,12 @@ public class ProviderMethods {
 
     final Object providers;
 
-    Object source;
-
-    final SourceProvider sourceProvider = new SourceProvider() {
-      public Object source() {
-        return source;
-      }
-    };
-
     ProviderMethodsModule(Object providers) {
       this.providers = providers;
     }
 
     protected void configure() {
-      SourceProviders.withDefault(sourceProvider, new Runnable() {
-        public void run() {
-          bindProviderMethods(providers.getClass());
-        }
-      });
+      bindProviderMethods(providers.getClass());
     }
 
     void bindProviderMethods(Class<?> clazz) {
@@ -82,21 +69,25 @@ public class ProviderMethods {
     }
 
     <T> void bindProviderMethod(final Method method) {
-      this.source = StackTraceElements.forMember(method);
+      Errors errors = new Errors()
+          .pushSource(StackTraceElements.forMember(method));
 
       method.setAccessible(true);
 
       Class<? extends Annotation> scopeAnnotation
-          = findScopeAnnotation(method.getAnnotations());
-      Annotation bindingAnnotation = findBindingAnnotation(method, method.getAnnotations());
+          = findScopeAnnotation(errors, method.getAnnotations());
+      Annotation bindingAnnotation
+          = Keys.findBindingAnnotation(errors, method, method.getAnnotations());
 
-      final List<Provider<?>> parameterProviders
-          = findParameterProviders(method);
+      final List<Provider<?>> parameterProviders = findParameterProviders(errors, method);
+
+      for (Message message : errors.getMessages()) {
+        addError(message);
+      }
 
       // Define T as the method's return type.
       @SuppressWarnings("unchecked")
-      TypeLiteral<T> returnType 
-          = (TypeLiteral<T>) TypeLiteral.get(method.getGenericReturnType());
+      TypeLiteral<T> returnType = (TypeLiteral<T>) TypeLiteral.get(method.getGenericReturnType());
 
       Provider<T> provider = new Provider<T>() {
         public T get() {
@@ -107,8 +98,8 @@ public class ProviderMethods {
 
           try {
             // We know this cast is safe becase T is the method's return type.
-            @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
-            T result = (T) method.invoke(providers, parameters);
+            @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" }) T result = (T) method
+                .invoke(providers, parameters);
             return result;
           }
           catch (IllegalAccessException e) {
@@ -134,13 +125,14 @@ public class ProviderMethods {
       }
     }
 
-    List<Provider<?>> findParameterProviders(Method method) {
+    List<Provider<?>> findParameterProviders(Errors errors, Method method) {
       List<Provider<?>> parameterProviders = Lists.newArrayList();
 
       Type[] parameterTypes = method.getGenericParameterTypes();
       Annotation[][] parameterAnnotations = method.getParameterAnnotations();
       for (int i = 0; i < parameterTypes.length; i++) {
-        Annotation bindingAnnotation = findBindingAnnotation(method, parameterAnnotations[i]);
+        Annotation bindingAnnotation
+            = Keys.findBindingAnnotation(errors, method, parameterAnnotations[i]);
         Key<?> key = bindingAnnotation == null ? Key.get(parameterTypes[i])
             : Key.get(parameterTypes[i], bindingAnnotation);
         Provider<?> provider = getProvider(key);
@@ -150,35 +142,19 @@ public class ProviderMethods {
       return parameterProviders;
     }
 
-    Class<? extends Annotation> findScopeAnnotation(Annotation[] annotations) {
+    /**
+     * Returns the scoping annotation, or null if there isn't one.
+     */
+    Class<? extends Annotation> findScopeAnnotation(Errors errors, Annotation[] annotations) {
       Class<? extends Annotation> found = null;
 
       for (Annotation annotation : annotations) {
         if (annotation.annotationType()
             .isAnnotationPresent(ScopeAnnotation.class)) {
           if (found != null) {
-            addError(new Errors().duplicateScopeAnnotations(
-                found, annotation.annotationType()).toString());
+            errors.duplicateScopeAnnotations(found, annotation.annotationType());
           } else {
             found = annotation.annotationType();
-          }
-        }
-      }
-
-      return found;
-    }
-
-    Annotation findBindingAnnotation(Member member, Annotation[] annotations) {
-      Annotation found = null;
-
-      for (Annotation annotation : annotations) {
-        if (annotation.annotationType()
-            .isAnnotationPresent(BindingAnnotation.class)) {
-          if (found != null) {
-            addError(new Errors().duplicateBindingAnnotations(member,
-                found.annotationType(), annotation.annotationType()).toString());
-          } else {
-            found = annotation;
           }
         }
       }

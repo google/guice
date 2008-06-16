@@ -260,6 +260,11 @@ public interface Binder {
   void addError(Throwable t);
 
   /**
+   * Records an error message to be presented to the user at a later time.
+   */
+  void addError(Message message);
+
+  /**
    * Returns the provider used to obtain instances for the given injection key.
    * The returned will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you

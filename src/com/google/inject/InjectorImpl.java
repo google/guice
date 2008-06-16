@@ -488,7 +488,13 @@ class InjectorImpl implements Injector {
     }
 
     if (scope == null) {
-      scope = Scopes.getScopeForType(errors, type, scopes);
+      Class<? extends Annotation> scopeAnnotation = Scopes.getScopeAnnotation(errors, type);
+      if (scopeAnnotation != null) {
+        scope = scopes.get(scopeAnnotation);
+        if (scope == null) {
+          errors.at(StackTraceElements.forType(type)).scopeNotFound(scopeAnnotation);
+        }
+      }
     }
 
     Key<T> key = Key.get(type);
@@ -830,8 +836,14 @@ class InjectorImpl implements Injector {
    * @param member to which the parameters belong
    * @return injections
    */
-  SingleParameterInjector<?>[] getParametersInjectors(
-      Member member, List<Parameter<?>> parameters, Errors errors) throws ErrorsException {
+  <M extends Member & AnnotatedElement> SingleParameterInjector<?>[] getParametersInjectors(
+      M member, List<Parameter<?>> parameters, Errors errors) throws ErrorsException {
+    Annotation misplacedBindingAnnotation
+        = Keys.findBindingAnnotation(errors, member, member.getAnnotations());
+    if (misplacedBindingAnnotation != null) {
+      errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+    }
+
     SingleParameterInjector<?>[] parameterInjectors
         = new SingleParameterInjector<?>[parameters.size()];
     int index = 0;

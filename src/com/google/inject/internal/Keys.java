@@ -30,17 +30,29 @@ public class Keys {
    */
   public static Key<?> get(Type type, Member member, Annotation[] annotations, Errors errors)
       throws ErrorsException {
+    Annotation found = findBindingAnnotation(errors, member, annotations);
+    errors.throwIfNecessary();
+    return found == null ? Key.get(type) : Key.get(type, found);
+  }
+
+  /**
+   * Returns the binding annotation on {@code member}, or null if there isn't one.
+   */
+  public static Annotation findBindingAnnotation(
+      Errors errors, Member member, Annotation[] annotations) {
     Annotation found = null;
+
     for (Annotation annotation : annotations) {
-      if (annotation.annotationType().getAnnotation(BindingAnnotation.class) != null) {
-        if (found == null) {
-          found = annotation;
+      if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
+        if (found != null) {
+          errors.duplicateBindingAnnotations(member,
+              found.annotationType(), annotation.annotationType());
         } else {
-          throw errors.duplicateBindingAnnotations(
-              member, found.annotationType(), annotation.annotationType()).toException();
+          found = annotation;
         }
       }
     }
-    return found == null ? Key.get(type) : Key.get(type, found);
+
+    return found;
   }
 }

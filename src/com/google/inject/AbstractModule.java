@@ -22,6 +22,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
@@ -136,6 +137,13 @@ public abstract class AbstractModule implements Module {
    */
   protected void addError(Throwable t) {
     binder.addError(t);
+  }
+
+  /**
+   * @see Binder#addError(Message)
+   */
+  protected void addError(Message message) {
+    binder.addError(message);
   }
 
   /**

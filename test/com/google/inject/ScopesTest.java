@@ -16,13 +16,14 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Maps;
+import static com.google.inject.Asserts.assertContains;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -106,6 +107,49 @@ public class ScopesTest extends TestCase {
         injector.getInstance(AnnotatedSingleton.class));
   }
 
+  public void testScopingAnnotationsOnAbstractTypes() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(A.class).to(AImpl.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + A.class.getName() + ".class(ScopesTest.java:",
+          A.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.");
+    }
+  }
+
+  @Singleton
+  interface A {}
+  static class AImpl implements A {}
+  
+  public void testScopeUsedButNotBound() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(B.class).in(CustomScoped.class);
+          bind(C.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + getClass().getName(), ".configure(ScopesTest.java:",
+          "No scope is bound to " + CustomScoped.class.getName(),
+          "2) Error at " + C.class.getName() + ".class",
+          "No scope is bound to " + CustomScoped.class.getName());
+    }
+  }
+
+  static class B {}
+
+  @CustomScoped
+  static class C {}
+
   public void testSingletonsInProductionStage() {
     Guice.createInjector(Stage.PRODUCTION, singletonsModule);
 
@@ -155,7 +199,7 @@ public class ScopesTest extends TestCase {
   }
 
   class RememberProviderScope implements Scope {
-    final Map<Key<?>, Provider<?>> providers = new HashMap<Key<?>, Provider<?>>();
+    final Map<Key<?>, Provider<?>> providers = Maps.newHashMap();
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
       providers.put(key, unscoped);
       return unscoped;

@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import java.lang.annotation.Annotation;
-import java.util.Map;
 
 /**
  * Built in scope implementations.
@@ -88,27 +87,22 @@ public class Scopes {
   };
 
   /**
-   * Gets the scope for a type based on its annotations. Returns {@code null}
-   * if none specified.
-   *
-   * @param implementation type
-   * @param scopes map of scope names to scopes
+   * Returns the scope annotation on {@code type}, or null if none is specified.
    */
-  static Scope getScopeForType(Errors errors, Class<?> implementation,
-      Map<Class<? extends Annotation>, Scope> scopes) {
+  static Class<? extends Annotation> getScopeAnnotation(
+      Errors errors, Class<?> implementation) {
     Class<? extends Annotation> found = null;
     for (Annotation annotation : implementation.getAnnotations()) {
       if (isScopeAnnotation(annotation)) {
         if (found != null) {
           errors.duplicateScopeAnnotations(found, annotation.annotationType());
-        }
-        else {
+        } else {
           found = annotation.annotationType();
         }
       }
     }
 
-    return scopes.get(found);
+    return found;
   }
 
   static boolean isScopeAnnotation(Annotation annotation) {

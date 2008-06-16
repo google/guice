@@ -20,6 +20,8 @@ import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.StackTraceElements;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -48,10 +50,17 @@ class ConstructorInjector<T> {
   SingleParameterInjector<?>[] createParameterInjector(Errors errors,
       InjectorImpl injector, ConstructionProxy<T> constructionProxy)
       throws ErrorsException {
-    return constructionProxy.getParameters().isEmpty()
-        ? null // default constructor.
-        : injector.getParametersInjectors(constructionProxy.getMember(),
-            constructionProxy.getParameters(), errors);
+    Constructor constructor = constructionProxy.getConstructor();
+    Object source = StackTraceElements.forMember(constructor);
+    errors.pushSource(source);
+    try {
+      return constructionProxy.getParameters().isEmpty()
+          ? null // default constructor.
+          : injector.getParametersInjectors(constructor,
+              constructionProxy.getParameters(), errors);
+    } finally {
+      errors.popSource(source);
+    }
   }
 
   /**

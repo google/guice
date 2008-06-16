@@ -175,11 +175,13 @@ public final class Errors implements Serializable {
   }
 
   public Errors missingBindingAnnotation(Object source) {
-    return addMessage("Please annotate with @BindingAnnotation. Bound at %s.", source);
+    return addMessage("Please annotate with @BindingAnnotation.%n"
+        + " Bound at %s.", source);
   }
 
   public Errors missingRuntimeRetention(Object source) {
-    return addMessage("Please annotate with @Retention(RUNTIME). Bound at %s.", source);
+    return addMessage("Please annotate with @Retention(RUNTIME).%n"
+        + " Bound at %s.", source);
   }
 
   public Errors missingScopeAnnotation() {
@@ -202,6 +204,17 @@ public final class Errors implements Serializable {
 
   public Errors scopeNotFound(Class<? extends Annotation> scopeAnnotation) {
     return addMessage("No scope is bound to %s.", scopeAnnotation);
+  }
+
+  public Errors scopeAnnotationOnAbstractType(
+      Class<? extends Annotation> scopeAnnotation, Class<?> type, Object source) {
+    return addMessage("%s is annotated with %s, but scope annotations are not supported "
+        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, source);
+  }
+
+  public Errors misplacedBindingAnnotation(Member member, Annotation bindingAnnotation) {
+    return addMessage("%s is annotated with %s, but binding annotations should be applied "
+        + "to its parameters instead.", member, bindingAnnotation);
   }
 
   private static final String CONSTRUCTOR_RULES =
@@ -463,6 +476,11 @@ public final class Errors implements Serializable {
       new Converter<Class>(Class.class) {
         public String toString(Class c) {
           return c.getName();
+        }
+      },
+      new Converter<Member>(Member.class) {
+        public String toString(Member member) {
+          return MoreTypes.canonicalize(member).toString();
         }
       },
       new Converter<Key>(Key.class) {

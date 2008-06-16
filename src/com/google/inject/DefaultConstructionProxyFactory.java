@@ -21,7 +21,6 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.GuiceFastClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import net.sf.cglib.reflect.FastClass;
@@ -60,7 +59,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         public List<Parameter<?>> getParameters() {
           return parameters;
         }
-        public Member getMember() {
+        public Constructor getConstructor() {
           return constructor;
         }
       };
@@ -78,7 +77,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       public List<Parameter<?>> getParameters() {
         return parameters;
       }
-      public Member getMember() {
+      public Constructor getConstructor() {
         return constructor;
       }
     };

@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.util.List;
 
 /**
@@ -36,9 +36,8 @@ interface ConstructionProxy<T> {
   List<Parameter<?>> getParameters();
 
   /**
-   * Returns the injected method or constructor. If the injected member is
-   * synthetic (such as generated code for method interception), the natural
-   * constructor is returned.
+   * Returns the injected constructor. If the injected constructor is synthetic (such as generated
+   * code for method interception), the natural constructor is returned.
    */
-  Member getMember();
+  Constructor getConstructor();
 }
