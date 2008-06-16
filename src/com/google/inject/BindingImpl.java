@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.ProviderBinding;
 
@@ -91,7 +91,7 @@ abstract class BindingImpl<T> implements Binding<T> {
    * Perform any post-creation initialization, that could require construction
    * of other bindings.
    */
-  void initialize(InjectorImpl injector, Errors errors) throws ResolveFailedException {}
+  void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {}
 
   public String toString() {
     return new ToStringBuilder(Binding.class)

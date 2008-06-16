@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ClassBinding;
@@ -42,7 +42,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     this.lateBoundConstructor = lateBoundConstructor;
   }
 
-  @Override void initialize(InjectorImpl injector, Errors errors) throws ResolveFailedException {
+  @Override void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     lateBoundConstructor.bind(injector, getBoundClass());
   }
 
@@ -65,7 +65,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     Collection<InjectionPoint<?>> injectors;
     try {
       injectors = injector.getModifiableFieldAndMethodInjectionsFor(boundClass);
-    } catch (ResolveFailedException e) {
+    } catch (ErrorsException e) {
       throw new AssertionError("This should have failed at CreationTime");
     }
 

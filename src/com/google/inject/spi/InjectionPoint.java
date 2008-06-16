@@ -19,8 +19,8 @@ package com.google.inject.spi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Key;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.MoreTypes;
-import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.ToStringBuilder;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -69,7 +69,7 @@ public final class InjectionPoint<T> implements Serializable {
         .toString();
   }
 
-  public <T> T checkForNull(Errors errors, T value, Object source) throws ResolveFailedException {
+  public <T> T checkForNull(Errors errors, T value, Object source) throws ErrorsException {
     if (value != null
         || allowsNull()
         || allowNullsBadBadBad()) {

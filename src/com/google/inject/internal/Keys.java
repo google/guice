@@ -29,7 +29,7 @@ public class Keys {
    * Gets a key for the given type, member and annotations.
    */
   public static Key<?> get(Type type, Member member, Annotation[] annotations, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     Annotation found = null;
     for (Annotation annotation : annotations) {
       if (annotation.annotationType().getAnnotation(BindingAnnotation.class) != null) {

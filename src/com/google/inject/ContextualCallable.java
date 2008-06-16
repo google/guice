@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 
 /**
  * @author crazybob@google.com (Bob Lee)
 */
 interface ContextualCallable<T> {
-  T call(InternalContext context) throws ResolveFailedException;
+  T call(InternalContext context) throws ErrorsException;
 }

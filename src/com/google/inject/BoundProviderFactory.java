@@ -18,9 +18,8 @@ package com.google.inject;
 
 import com.google.inject.BindCommandProcessor.CreationListener;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.internal.ResolveFailedException;
-import com.google.inject.spi.SourceProviders;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
@@ -39,24 +38,24 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
   }
 
   public void notify(final InjectorImpl injector, final Errors errors) {
-    SourceProviders.withDefault(source, new Runnable() {
-      public void run() {
-        try {
-          providerFactory = injector.getInternalFactory(providerKey, errors);
-        } catch (ResolveFailedException e) {
-          errors.merge(e.getErrors());
-        }
-      }
-    });
+    errors.pushSource(source);
+    try {
+      providerFactory = injector.getInternalFactory(providerKey, errors);
+    } catch (ErrorsException e) {
+      errors.merge(e.getErrors());
+    } finally {
+      errors.popSource(source);
+    }
   }
 
   public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
-      throws ResolveFailedException {
+      throws ErrorsException {
     Provider<? extends T> provider = providerFactory.get(errors, context, injectionPoint);
     try {
       return injectionPoint.checkForNull(errors, provider.get(), source);
-    } catch(RuntimeException userCodeFailed) {
-      throw errors.errorInProvider(userCodeFailed).toException();
+    } catch(RuntimeException userException) {
+      Errors userErrors = ProvisionException.getErrors(userException);
+      throw errors.errorInProvider(userException, userErrors).toException();
     }
   }
 

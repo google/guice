@@ -18,11 +18,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.InjectionPoint;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.SourceProviders;
-import java.util.concurrent.Callable;
+import com.google.inject.spi.InjectionPoint;
 
 /**
  * A placeholder which enables us to swap in the real factory once the
@@ -43,27 +41,18 @@ class FactoryProxy<T> implements InternalFactory<T>, BindCommandProcessor.Creati
   }
 
   public void notify(final InjectorImpl injector, final Errors errors) {
+    errors.pushSource(source);
     try {
-      SourceProviders.withDefaultChecked(source, new Callable<Void>() {
-        public Void call() throws ResolveFailedException {
-          targetFactory = injector.getInternalFactory(targetKey, errors);
-          return null;
-        }
-      });
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (ResolveFailedException e) {
+      targetFactory = injector.getInternalFactory(targetKey, errors);
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors());
-    }
-    catch (Exception e) {
-      throw new AssertionError();
+    } finally {
+      errors.popSource(source);
     }
   }
 
   public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return targetFactory.get(errors, context, injectionPoint);
   }
 

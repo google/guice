@@ -19,7 +19,7 @@ package com.google.inject;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -36,7 +36,7 @@ class ConstructorInjector<T> {
   final ConstructionProxy<T> constructionProxy;
 
   ConstructorInjector(Errors errors, InjectorImpl injector, Class<T> implementation)
-      throws ResolveFailedException {
+      throws ErrorsException {
     this.implementation = implementation;
     constructionProxy = injector.reflection.getConstructionProxy(errors, implementation);
     parameterInjectors = createParameterInjector(errors, injector, constructionProxy);
@@ -47,7 +47,7 @@ class ConstructorInjector<T> {
 
   SingleParameterInjector<?>[] createParameterInjector(Errors errors,
       InjectorImpl injector, ConstructionProxy<T> constructionProxy)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return constructionProxy.getParameters().isEmpty()
         ? null // default constructor.
         : injector.getParametersInjectors(constructionProxy.getMember(),
@@ -59,7 +59,7 @@ class ConstructorInjector<T> {
    * it may return a proxy.
    */
   Object construct(Errors errors, InternalContext context, Class<?> expectedType)
-      throws ResolveFailedException {
+      throws ErrorsException {
     ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.

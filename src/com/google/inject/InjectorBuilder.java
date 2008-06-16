@@ -25,9 +25,9 @@ import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
 import com.google.inject.commands.FutureInjector;
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.InjectionPoint;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Stopwatch;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.SourceProviders;
 import java.lang.reflect.Member;
 import java.util.List;
@@ -198,7 +198,7 @@ class InjectorBuilder {
               errors.pushInjectionPoint(injectionPoint);
               try {
                 binding.internalFactory.get(errors, context, injectionPoint);
-              } catch (ResolveFailedException e) {
+              } catch (ErrorsException e) {
                 errors.merge(e.getErrors());
               } finally {
                 context.setInjectionPoint(null);
@@ -208,7 +208,7 @@ class InjectorBuilder {
               return null;
             }
           });
-        } catch (ResolveFailedException e) {
+        } catch (ErrorsException e) {
           throw new AssertionError();
         }
       }

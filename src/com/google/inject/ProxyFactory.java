@@ -19,10 +19,10 @@ package com.google.inject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.GuiceNamingPolicy;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -56,7 +56,7 @@ class ProxyFactory implements ConstructionProxyFactory {
 
   @SuppressWarnings("unchecked")
   public <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return (ConstructionProxy<T>) getConstructionProxy(constructor);
   }
 
@@ -67,14 +67,14 @@ class ProxyFactory implements ConstructionProxyFactory {
         ConstructionProxy<?> result = createConstructionProxy(errors, constructor);
         errors.throwIfNecessary();
         return result;
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         return errors.merge(e.getErrors()).makeImmutable();
       }
     }
   };
 
   public ConstructionProxy<?> getConstructionProxy(Constructor<?> constructor)
-      throws ResolveFailedException {
+      throws ErrorsException {
     Object constructionProxyOrErrors = constructionProxies.get(constructor);
 
     if (constructionProxyOrErrors instanceof ConstructionProxy<?>) {
@@ -87,7 +87,7 @@ class ProxyFactory implements ConstructionProxyFactory {
   }
 
   <T> ConstructionProxy<T> createConstructionProxy(Errors errors, Constructor<T> constructor)
-      throws ResolveFailedException {
+      throws ErrorsException {
     Class<T> declaringClass = constructor.getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
@@ -171,7 +171,7 @@ class ProxyFactory implements ConstructionProxyFactory {
    * Creates a construction proxy given a class and parameter types.
    */
   private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
-      final Constructor standardConstructor) throws ResolveFailedException {
+      final Constructor standardConstructor) throws ErrorsException {
     FastClass fastClass = GuiceFastClass.create(clazz);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());

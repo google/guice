@@ -18,9 +18,9 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.Nullability;
-import com.google.inject.internal.ResolveFailedException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -63,19 +63,19 @@ class Parameter<T> {
   }
 
   public static List<Parameter<?>> forMethod(Method method, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return forMember(method, method.getGenericParameterTypes(),
         method.getParameterAnnotations(), errors);
   }
 
   public static List<Parameter<?>> forConstructor(Constructor constructor, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return forMember(constructor, constructor.getGenericParameterTypes(),
         constructor.getParameterAnnotations(), errors);
   }
 
   private static List<Parameter<?>> forMember(Member member, Type[] genericParameterTypes,
-      Annotation[][] annotations, Errors errors) throws ResolveFailedException {
+      Annotation[][] annotations, Errors errors) throws ErrorsException {
     Iterator<Annotation[]> annotationsIterator = Arrays.asList(annotations).iterator();
 
     List<Parameter<?>> parameters = Lists.newArrayList();
@@ -86,7 +86,7 @@ class Parameter<T> {
         Key<?> key = Keys.get(parameterType, member, parameterAnnotations, errors);
         parameters.add(create(index, key, Nullability.allowsNull(parameterAnnotations)));
         index++;
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }

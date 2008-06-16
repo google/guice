@@ -32,15 +32,20 @@ public final class ProvisionException extends RuntimeException {
   private final Errors errors;
 
   /**
-   * Creates a ProvisionException containing {@code errors}.
+   * Creates a ProvisionException containing {@code errors}. As a side effect,
+   * the errors are made immutable.
    */
-  public ProvisionException(Errors errors) { // TODO: make private
+  ProvisionException(Errors errors) {
+    errors.makeImmutable();
     this.errors = errors;
 
-    // include the cause in the common where there's just a single message
+    // find a cause
     List<Message> messages = errors.getMessages();
-    if (messages.size() == 1) {
-      initCause(messages.get(0).getCause());
+    for (Message message : messages) {
+      if (message.getCause() != null) {
+        initCause(message.getCause());
+        break;
+      }
     }
   }
 
@@ -60,9 +65,23 @@ public final class ProvisionException extends RuntimeException {
         : super.getMessage();
   }
 
-  public static Errors getErrors(RuntimeException userException) {
+  /**
+   * Returns any {@code errors} on {@code userException} if it is a
+   * ProvisionException.
+   */
+  static Errors getErrors(RuntimeException userException) {
     return userException instanceof ProvisionException
         ? ((ProvisionException) userException).errors
         : null;
+  }
+
+  /**
+   * Throws a new provision exception if {@code errors} contains any error
+   * messages.
+   */
+  static void throwNewIfNonEmpty(Errors errors) {
+    if (errors.hasErrors()) {
+      throw new ProvisionException(errors.makeImmutable());
+    }
   }
 }

@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.ResolveFailedException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -37,7 +37,7 @@ import net.sf.cglib.reflect.FastConstructor;
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
   public <T> ConstructionProxy<T> get(Errors errors, final Constructor<T> constructor)
-      throws ResolveFailedException {
+      throws ErrorsException {
     final List<Parameter<?>> parameters = Parameter.forConstructor(constructor, errors);
 
     // We can't use FastConstructor if the constructor is private or protected.

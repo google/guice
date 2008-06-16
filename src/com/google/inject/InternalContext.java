@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.internal.ResolveFailedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +73,7 @@ class InternalContext {
    * Ensures that an object requiring injection at Injector-creation time has
    * been injected before its use.
    */
-  public void ensureMemberInjected(Errors errors, Object toInject) throws ResolveFailedException {
+  public void ensureMemberInjected(Errors errors, Object toInject) throws ErrorsException {
     if (!injector.outstandingInjections.remove(toInject)) {
       return;
     }

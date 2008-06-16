@@ -24,7 +24,7 @@ import com.google.inject.commands.BindScoping.Visitor;
 import com.google.inject.commands.BindTarget;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -172,7 +172,7 @@ class BindCommandProcessor extends CommandProcessor {
         try {
           binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy, errors);
           putBinding(binding);
-        } catch (ResolveFailedException e) {
+        } catch (ErrorsException e) {
           errors.merge(e.getErrors());
           putBinding(invalidBinding(injector, key, source));
           return null;
@@ -182,7 +182,7 @@ class BindCommandProcessor extends CommandProcessor {
           public void run() {
             try {
               injector.initializeBinding(binding, errors);
-            } catch (ResolveFailedException e) {
+            } catch (ErrorsException e) {
               errors.merge(e.getErrors());
             }
           }
@@ -216,7 +216,7 @@ class BindCommandProcessor extends CommandProcessor {
   @Override public Boolean visitBindConstant(BindConstantCommand command) {
     BindTarget<?> target = command.getTarget();
     if (target == null) {
-      errors.at(command.getSource()).missingConstantValues();
+      errors.missingConstantValues();
       return true;
     }
 
@@ -247,12 +247,12 @@ class BindCommandProcessor extends CommandProcessor {
 
     Class<?> rawType = key.getRawType();
     if (FORBIDDEN_TYPES.contains(rawType)) {
-      errors.at(binding.getSource()).cannotBindToGuiceType(rawType.getSimpleName());
+      errors.cannotBindToGuiceType(rawType.getSimpleName());
       return;
     }
 
     if (bindings.containsKey(key)) {
-      errors.at(binding.getSource()).bindingAlreadySet(key, original.getSource());
+      errors.bindingAlreadySet(key, original.getSource());
     } else {
       bindings.put(key, binding);
     }

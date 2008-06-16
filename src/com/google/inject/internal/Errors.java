@@ -24,7 +24,6 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
@@ -45,19 +44,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A collection of error messages.
+ * A collection of error messages. If this type is passed as a method parameter, the method is
+ * considered to have executed succesfully only if new errors were not added to this collection.
  *
- * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Errors implements Serializable {
 
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
 
-  private boolean isMutable = true;
-  private List<Message> errors = Lists.newArrayList();
-  private List<InjectionPoint> injectionPoints = Lists.newArrayList();
-  private List<Object> sources = Lists.newArrayList();
   private Object sourceForNextError = null;
+  private final List<Object> sources = Lists.newArrayList();
+
+  /** false indicates that new errors should not be added */
+  private boolean isMutable = true;
+  private final List<Message> errors = Lists.newArrayList();
+  private final List<InjectionPoint> injectionPoints = Lists.newArrayList();
 
   public Errors userReportedError(String messageFormat, List<Object> arguments) {
     return addMessage(messageFormat, arguments);
@@ -72,6 +74,10 @@ public final class Errors implements Serializable {
     checkArgument(injectionPoint == popped);
   }
 
+  /**
+   * Specifies the source for every error added until the matching call to
+   * {@link #popSource(Object)}.
+   */
   public Errors pushSource(Object source) {
     sources.add(source);
     return this;
@@ -129,16 +135,13 @@ public final class Errors implements Serializable {
         stringValue, source, type, matchingConverter, cause);
   }
 
-  public Errors ambiguousTypeConversion(String stringValue, TypeLiteral<?> type,
-      MatcherAndConverter<?> matchingConverter, MatcherAndConverter<?> converter) {
-    return addMessage("Error converting '%s' to  %s. "
-        + "More than one type converter can apply: %s, and %s. "
-        + "Please adjust your type converter configuration to avoid  overlapping matches.",
-        stringValue, type, matchingConverter, converter);
-  }
-
-  public Errors bindingNotFound(Key<?> key, String message) {
-    return addMessage("Binding to %s not found: %s", key, message);
+  public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
+      MatcherAndConverter<?> a, MatcherAndConverter<?> b) {
+    return addMessage("Multiple converters can convert '%s' (bound at %s) to %s:%n"
+        + " %s and%n"
+        + " %s.%n"
+        + " Please adjust your type converter configuration to avoid overlapping matches.",
+        stringValue, source, type, a, b);
   }
 
   public Errors bindingToProvider() {
@@ -257,10 +260,9 @@ public final class Errors implements Serializable {
     return addMessage(cause, "Error injecting constructor, %s", cause);
   }
 
-  public Errors errorInProvider(RuntimeException runtimeException) {
-    Errors newErrors = ProvisionException.getErrors(runtimeException);
-    if (newErrors != null) {
-      return merge(newErrors);
+  public Errors errorInProvider(RuntimeException runtimeException, Errors errorsFromException) {
+    if (errorsFromException != null) {
+      return merge(errorsFromException);
     } else {
       return addMessage(runtimeException, "Error in custom provider, %s", runtimeException);
     }
@@ -288,6 +290,9 @@ public final class Errors implements Serializable {
         expectedType);
   }
 
+  /**
+   * Convenience method to set the source for a single error.
+   */
   public Errors at(Object source) {
     sourceForNextError = source;
     return this;
@@ -298,15 +303,6 @@ public final class Errors implements Serializable {
     return this;
   }
 
-  public void throwProvisionExceptionIfNecessary() {
-    makeImmutable();
-    if (!hasErrors()) {
-      return;
-    }
-
-    throw toProvisionException();
-  }
-
   public void throwCreationExceptionIfErrorsExist() {
     if (!hasErrors()) {
       return;
@@ -314,11 +310,6 @@ public final class Errors implements Serializable {
 
     makeImmutable();
     throw new CreationException(getMessages());
-  }
-
-
-  public ProvisionException toProvisionException() {
-    throw new ProvisionException(this);
   }
 
   public Errors merge(Errors moreErrors) {
@@ -337,7 +328,7 @@ public final class Errors implements Serializable {
     return this;
   }
 
-  public void throwIfNecessary() throws ResolveFailedException {
+  public void throwIfNecessary() throws ErrorsException {
     if (!hasErrors()) {
       return;
     }
@@ -345,8 +336,8 @@ public final class Errors implements Serializable {
     throw toException();
   }
 
-  public ResolveFailedException toException() {
-    return new ResolveFailedException(this);
+  public ErrorsException toException() {
+    return new ErrorsException(this);
   }
 
   public boolean hasErrors() {

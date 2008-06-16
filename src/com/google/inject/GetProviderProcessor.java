@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.commands.GetProviderCommand;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 
 /**
  * Handles {@link Binder#getProvider} commands.
@@ -39,7 +39,7 @@ class GetProviderProcessor extends CommandProcessor {
     // ensure the provider can be created
     try {
       injector.getProviderOrThrow(command.getKey(), errors);
-    } catch (ResolveFailedException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }
 

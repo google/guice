@@ -18,7 +18,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 
 /**
  * Abstraction for Java's reflection APIs. This interface exists to provide a
@@ -30,7 +30,7 @@ import com.google.inject.internal.ResolveFailedException;
 interface Reflection {
 
   public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
-      throws ResolveFailedException;
+      throws ErrorsException;
 
   interface Factory {
     Reflection create(ConstructionProxyFactory constructionProxyFactory);

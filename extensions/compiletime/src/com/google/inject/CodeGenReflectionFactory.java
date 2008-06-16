@@ -20,7 +20,7 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -82,7 +82,7 @@ class CodeGenReflectionFactory implements Reflection.Factory {
     }
 
     public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
-        throws ResolveFailedException {
+        throws ErrorsException {
       ConstructionProxy<T> result = delegate.getConstructionProxy(errors, implementation);
       constructionProxies.put(implementation, result);
       return result;

@@ -33,12 +33,12 @@ class ErrorsCommandProcessor extends CommandProcessor {
   }
 
   @Override public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    errors.at(command.getSource()).userReportedError(command.getMessage(), command.getArguments());
+    errors.userReportedError(command.getMessage(), command.getArguments());
     return true;
   }
 
   @Override public Boolean visitAddError(AddThrowableErrorCommand command) {
-    errors.at(command.getSource()).exceptionReportedByModuleSeeLogs(command.getThrowable());
+    errors.exceptionReportedByModuleSeeLogs(command.getThrowable());
     return true;
   }
 }

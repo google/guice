@@ -18,8 +18,8 @@ package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.spi.SourceProviders;
 
 /**
@@ -41,13 +41,14 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   }
 
   public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
-      throws ResolveFailedException {
+      throws ErrorsException {
     try {
       context.ensureMemberInjected(errors, provider);
       T result = provider.get();
       return injectionPoint.checkForNull(errors, result, source);
     } catch (RuntimeException userException) {
-      throw errors.errorInProvider(userException).toException();
+      Errors userErrors = ProvisionException.getErrors(userException);
+      throw errors.errorInProvider(userException, userErrors).toException();
     }
   }
 

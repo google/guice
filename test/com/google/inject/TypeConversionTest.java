@@ -22,12 +22,7 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import junit.framework.TestCase;
 
 /**
@@ -201,42 +196,24 @@ public class TypeConversionTest extends TestCase {
     @Inject Long foo;
   }
 
-  private final TypeConverter dateConverter = new TypeConverter() {
-    final DateFormat dateFormat = new SimpleDateFormat("d'-'MMM'-'yyyy");
-    public Object convert(String value, TypeLiteral<?> toType) {
-      try {
-        return dateFormat.parse(value);
-      } catch (ParseException e) {
-        throw new IllegalArgumentException("Unparseable date: \"" + value + "\"");
-      }
-    }
-
-    @Override public String toString() {
-      return "TypeConverter<Date>";
-    }
-  };
-
   public void testCustomTypeConversion() throws CreationException {
+    final Date result = new Date();
+
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)) , dateConverter);
-        bindConstant().annotatedWith(NumericValue.class).to("15-Aug-1981");
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)) , mockTypeConverter(result));
+        bindConstant().annotatedWith(NumericValue.class).to("Today");
         bind(DateHolder.class);
       }
     });
 
-    DateHolder dateHolder = injector.getInstance(DateHolder.class);
-    Calendar calendar = new GregorianCalendar();
-    calendar.setTime(dateHolder.date);
-    assertEquals(15, calendar.get(Calendar.DAY_OF_MONTH));
-    assertEquals(7, calendar.get(Calendar.MONTH));
-    assertEquals(1981, calendar.get(Calendar.YEAR));
+    assertSame(result, injector.getInstance(DateHolder.class).date);
   }
 
   public void testInvalidCustomValue() throws CreationException {
     Module module = new AbstractModule() {
       protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), dateConverter);
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), failingTypeConverter());
         bindConstant().annotatedWith(NumericValue.class).to("invalid");
         bind(DateHolder.class);
       }
@@ -247,29 +224,21 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       Throwable cause = Iterables.getOnlyElement(expected.getErrorMessages()).getCause();
-      assertTrue(cause instanceof IllegalArgumentException);
+      assertTrue(cause instanceof UnsupportedOperationException);
       assertContains(expected.getMessage(),
           "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
           "Error converting 'invalid' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
-          "using TypeConverter<Date> which matches only(java.util.Date) ",
+          "using BrokenConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
-          "Reason: java.lang.IllegalArgumentException: Unparseable date: \"invalid\"");
+          "Reason: java.lang.UnsupportedOperationException: Cannot convert");
     }
   }
 
   public void testNullCustomValue() {
     Module module = new AbstractModule() {
       protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), new TypeConverter() {
-          public Object convert(String value, TypeLiteral<?> toType) {
-            return null;
-          }
-
-          @Override public String toString() {
-            return "TypeConverter<Null>";
-          }
-        });
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(null));
         bindConstant().annotatedWith(NumericValue.class).to("foo");
         bind(DateHolder.class);
       }
@@ -283,7 +252,7 @@ public class TypeConversionTest extends TestCase {
           "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
           "Received null converting 'foo' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
-          "using TypeConverter<Null> which matches only(java.util.Date) ",
+          "using CustomConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:");
     }
   }
@@ -291,15 +260,7 @@ public class TypeConversionTest extends TestCase {
   public void testCustomValueTypeMismatch() {
     Module module = new AbstractModule() {
       protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), new TypeConverter() {
-          public Object convert(String value, TypeLiteral<?> toType) {
-            return -1;
-          }
-
-          @Override public String toString() {
-            return "TypeConverter<Date>";
-          }
-        });
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(-1));
         bindConstant().annotatedWith(NumericValue.class).to("foo");
         bind(DateHolder.class);
       }
@@ -313,10 +274,57 @@ public class TypeConversionTest extends TestCase {
           "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
           "Type mismatch converting 'foo' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
-          "using TypeConverter<Date> which matches only(java.util.Date) ",
+          "using CustomConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
           "Converter returned -1.");
     }
+  }
+
+  public void testAmbiguousTypeConversion() {
+    Module module = new AbstractModule() {
+      protected void configure() {
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(new Date()));
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), mockTypeConverter(new Date()));
+        bindConstant().annotatedWith(NumericValue.class).to("foo");
+        bind(DateHolder.class);
+      }
+    };
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
+          "Multiple converters can convert 'foo' (bound at ", getClass().getName(),
+          ".configure(TypeConversionTest.java:", "to java.util.Date:",
+          "CustomConverter which matches only(java.util.Date)", "and",
+          "CustomConverter which matches only(java.util.Date)",
+          "Please adjust your type converter configuration to avoid overlapping matches.");
+    }
+  }
+
+  TypeConverter mockTypeConverter(final Object result) {
+    return new TypeConverter() {
+      public Object convert(String value, TypeLiteral<?> toType) {
+        return result;
+      }
+
+      @Override public String toString() {
+        return "CustomConverter";
+      }
+    };
+  }
+
+  private TypeConverter failingTypeConverter() {
+    return new TypeConverter() {
+      public Object convert(String value, TypeLiteral<?> toType) {
+        throw new UnsupportedOperationException("Cannot convert");
+      }
+      @Override public String toString() {
+        return "BrokenConverter";
+      }
+    };
   }
 
   static class DateHolder {

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.inject;
 
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
-import java.lang.reflect.Constructor;
+package com.google.inject.internal;
 
 /**
- * Creates {@link ConstructionProxy} instances.
+ * Indicates that a result could not be returned while preparing or resolving a binding. The caller
+ * should {@link Errors#merge(Errors) merge} the errors from this exception with their existing
+ * errors.
  *
- * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
-interface ConstructionProxyFactory {
+public class ErrorsException extends Exception {
 
-  /**
-   * Gets a construction proxy for the given constructor.
-   */
-  <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
-      throws ErrorsException;
+  private final Errors errors;
+
+  public ErrorsException(Errors errors) {
+    this.errors = errors;
+  }
+
+  public Errors getErrors() {
+    return errors;
+  }
 }

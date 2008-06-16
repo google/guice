@@ -19,7 +19,7 @@ package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.Constructor;
 
 /**
@@ -38,12 +38,12 @@ class RuntimeReflectionFactory implements Reflection.Factory {
     }
 
     public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
-        throws ResolveFailedException {
+        throws ErrorsException {
       return constructionProxyFactory.get(errors, findConstructorIn(errors, implementation));
     }
 
     private <T> Constructor<T> findConstructorIn(Errors errors, Class<T> implementation)
-        throws ResolveFailedException{
+        throws ErrorsException {
       Constructor<T> found = null;
       @SuppressWarnings("unchecked")
       Constructor<T>[] constructors

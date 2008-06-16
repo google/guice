@@ -20,8 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.commands.RequestStaticInjectionCommand;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.internal.ErrorsException;
 import java.util.List;
 
 /**
@@ -69,14 +68,15 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
     }
 
     void validate(final InjectorImpl injector) {
-      SourceProviders.withDefault(source, new Runnable() {
-        public void run() {
-          injector.addSingleInjectorsForFields(
-              type.getDeclaredFields(), true, memberInjectors, errors);
-          injector.addSingleInjectorsForMethods(
-              type.getDeclaredMethods(), true, memberInjectors, errors);
-        }
-      });
+      errors.pushSource(source);
+      try {
+        injector.addSingleInjectorsForFields(
+            type.getDeclaredFields(), true, memberInjectors, errors);
+        injector.addSingleInjectorsForMethods(
+            type.getDeclaredMethods(), true, memberInjectors, errors);
+      } finally {
+        errors.popSource(source);
+      }
     }
 
     void injectMembers(InjectorImpl injector) {
@@ -89,7 +89,7 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
             return null;
           }
         });
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         throw new AssertionError();
       }
     }

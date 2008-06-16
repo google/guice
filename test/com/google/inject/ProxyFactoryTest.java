@@ -18,7 +18,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
@@ -36,7 +36,7 @@ import org.aopalliance.intercept.MethodInvocation;
 public class ProxyFactoryTest extends TestCase {
 
   public void testSimpleCase()
-      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
+      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
@@ -70,7 +70,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testInterceptOneMethod()
-      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
+      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
@@ -127,7 +127,7 @@ public class ProxyFactoryTest extends TestCase {
   @interface Intercept {}
 
   public void testWithConstructorArguments()
-      throws InvocationTargetException, NoSuchMethodException, ResolveFailedException {
+      throws InvocationTargetException, NoSuchMethodException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
@@ -143,7 +143,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testNotProxied()
-      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
+      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     SimpleInterceptor interceptor = new SimpleInterceptor();
 
     ProxyFactoryBuilder builder = new ProxyFactoryBuilder();
@@ -166,7 +166,7 @@ public class ProxyFactoryTest extends TestCase {
   }
 
   public void testMultipleInterceptors()
-      throws NoSuchMethodException, InvocationTargetException, ResolveFailedException {
+      throws NoSuchMethodException, InvocationTargetException, ErrorsException {
     DoubleInterceptor doubleInterceptor = new DoubleInterceptor();
     CountingInterceptor countingInterceptor = new CountingInterceptor();
 

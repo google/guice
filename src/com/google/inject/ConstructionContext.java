@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ResolveFailedException;
+import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,7 +62,7 @@ class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  Object createProxy(Errors errors, Class<?> expectedType) throws ResolveFailedException {
+  Object createProxy(Errors errors, Class<?> expectedType) throws ErrorsException {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).

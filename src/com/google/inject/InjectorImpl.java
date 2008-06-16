@@ -25,12 +25,12 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.ResolveFailedException;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingVisitor;
@@ -82,7 +82,7 @@ class InjectorImpl implements Injector {
     for (Object toInject : outstandingInjections) {
       try {
         getMemberInjectors(toInject.getClass());
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
@@ -104,7 +104,7 @@ class InjectorImpl implements Injector {
           for (Object toInject : Lists.newArrayList(outstandingInjections)) {
             try {
               context.ensureMemberInjected(errors, toInject);
-            } catch (ResolveFailedException e) {
+            } catch (ErrorsException e) {
               errors.merge(e.getErrors());
             }
           }
@@ -112,7 +112,7 @@ class InjectorImpl implements Injector {
         }
       });
     }
-    catch (ResolveFailedException e) {
+    catch (ErrorsException e) {
       throw new AssertionError(e);
     }
 
@@ -147,22 +147,16 @@ class InjectorImpl implements Injector {
     return names;
   }
 
-  /** This is only used during Injector building. */
-  void withDefaultSource(Object defaultSource, Runnable runnable) {
-    // TODO: inline/get rid of?
-    SourceProviders.withDefault(defaultSource, runnable);
-  }
-
   /** Returns the binding for {@code key} */
   public <T> BindingImpl<T> getBinding(Key<T> key) {
     Errors errors = new Errors();
     try {
       BindingImpl<T> result = getBindingOrThrow(key, errors);
-      errors.throwProvisionExceptionIfNecessary();
+      ProvisionException.throwNewIfNonEmpty(errors);
       return result;
     }
-    catch (ResolveFailedException e) {
-      throw errors.merge(e.getErrors()).toProvisionException();
+    catch (ErrorsException e) {
+      throw new ProvisionException(errors.merge(e.getErrors()));
     }
   }
 
@@ -173,7 +167,7 @@ class InjectorImpl implements Injector {
    * binding.
    */
   public <T> BindingImpl<T> getBindingOrThrow(Key<T> key, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     if (parentInjector != null) {
       BindingImpl<T> bindingImpl = getParentBinding(key);
       if (bindingImpl != null) {
@@ -243,10 +237,10 @@ class InjectorImpl implements Injector {
   /**
    * Returns a just-in-time binding for {@code key}, creating it if necessary.
    *
-   * @throws ResolveFailedException if the binding could not be created.
+   * @throws com.google.inject.internal.ErrorsException if the binding could not be created.
    */
   @SuppressWarnings("unchecked")
-  <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors) throws ResolveFailedException {
+  <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors) throws ErrorsException {
     synchronized (jitBindings) {
       // Support null values.
       if (!jitBindings.containsKey(key)) {
@@ -270,7 +264,7 @@ class InjectorImpl implements Injector {
 
   /** Creates a synthetic binding to Provider<T>, i.e. a binding to the provider from Binding<T>. */
   private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key,
-      LoadStrategy loadStrategy, Errors errors) throws ResolveFailedException {
+      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     Type providerType = key.getTypeLiteral().getType();
 
     // If the Provider has no type parameter (raw Provider)...
@@ -338,10 +332,10 @@ class InjectorImpl implements Injector {
    * Converts a constant string binding to the required type.
    *
    * @return the binding if it could be resolved, or null if the binding doesn't exist
-   * @throws ResolveFailedException if there was an error resolving the binding
+   * @throws com.google.inject.internal.ErrorsException if there was an error resolving the binding
    */
   private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     // Find a constant string binding.
     Key<String> stringKey = key.ofType(String.class);
     BindingImpl<String> stringBinding = getExplicitBindingImpl(stringKey);
@@ -350,6 +344,7 @@ class InjectorImpl implements Injector {
     }
 
     String stringValue = stringBinding.getProvider().get();
+    Object source = stringBinding.getSource();
 
     // Find a matching type converter.
     TypeLiteral<T> type = key.getTypeLiteral();
@@ -357,7 +352,7 @@ class InjectorImpl implements Injector {
     for (MatcherAndConverter<?> converter : converters) {
       if (converter.getTypeMatcher().matches(type)) {
         if (matchingConverter != null) {
-          errors.ambiguousTypeConversion(stringValue, type, matchingConverter, converter);
+          errors.ambiguousTypeConversion(stringValue, source, type, matchingConverter, converter);
         }
         matchingConverter = converter;
       }
@@ -369,7 +364,6 @@ class InjectorImpl implements Injector {
     }
 
     // Try to convert the string. A failed conversion results in an error.
-    Object source = stringBinding.getSource();
     try {
       @SuppressWarnings("unchecked") // This cast is safe because we double check below.
       T converted = (T) matchingConverter.getTypeConverter().convert(stringValue, type);
@@ -379,15 +373,14 @@ class InjectorImpl implements Injector {
             .toException();
       }
 
-      // We have to filter out primitive types because an Integer is not an instance of int, and we
-      // provide converters for all the primitive types and know that they work anyway.
       if (!type.getRawType().isInstance(converted)) {
         throw errors.conversionTypeError(stringValue, source, type, matchingConverter, converted)
             .toException();
       }
+
       return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
     }
-    catch (ResolveFailedException e) {
+    catch (ErrorsException e) {
       throw e;
     }
     catch (Exception e) {
@@ -437,14 +430,14 @@ class InjectorImpl implements Injector {
   }
 
   <T> BindingImpl<T> createBindingFromType(
-      Class<T> type, LoadStrategy loadStrategy, Errors errors) throws ResolveFailedException {
+      Class<T> type, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     BindingImpl<T> binding = createUnitializedBinding(
         type, null, SourceProviders.defaultSource(), loadStrategy, errors);
     initializeBinding(binding, errors);
     return binding;
   }
 
-  <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ResolveFailedException {
+  <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
     // Note: We don't need to synchronize on jitBindings during injector creation.
@@ -470,7 +463,7 @@ class InjectorImpl implements Injector {
    * none is specified.
    */
   <T> BindingImpl<T> createUnitializedBinding(Class<T> type, Scope scope, Object source,
-      LoadStrategy loadStrategy, Errors errors) throws ResolveFailedException {
+      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     // Don't try to inject arrays, or enums.
     if (type.isArray() || type.isEnum()) {
       throw errors.missingImplementation(type).toException();
@@ -518,13 +511,13 @@ class InjectorImpl implements Injector {
   static class LateBoundConstructor<T> implements InternalFactory<T> {
     ConstructorInjector<T> constructorInjector;
 
-    void bind(InjectorImpl injector, Class<T> implementation) throws ResolveFailedException {
+    void bind(InjectorImpl injector, Class<T> implementation) throws ErrorsException {
       constructorInjector = injector.getConstructor(implementation);
     }
 
     @SuppressWarnings("unchecked")
     public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
-        throws ResolveFailedException {
+        throws ErrorsException {
       checkState(constructorInjector != null, "Construct before bind, " + constructorInjector);
 
       // This may not actually be safe because it could return a super type of T (if that's all the
@@ -536,7 +529,7 @@ class InjectorImpl implements Injector {
 
   /** Creates a binding for a type annotated with @ProvidedBy. */
   <T> BindingImpl<T> createProvidedByBinding(final Class<T> type, ProvidedBy providedBy,
-      LoadStrategy loadStrategy, Errors errors) throws ResolveFailedException {
+      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
@@ -554,7 +547,7 @@ class InjectorImpl implements Injector {
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, InjectionPoint injectionPoint)
-          throws ResolveFailedException {
+          throws ErrorsException {
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, injectionPoint);
         Object o = provider.get();
         if (o != null && !type.isInstance(o)) {
@@ -580,7 +573,7 @@ class InjectorImpl implements Injector {
   /** Creates a binding for a type annotated with @ImplementedBy. */
   <T> BindingImpl<T> createImplementedByBinding(
       Class<T> type, ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     // TODO: Use scope annotation on type if present. Right now, we always use NO_SCOPE.
     Class<?> implementationType = implementedBy.value();
 
@@ -603,7 +596,7 @@ class InjectorImpl implements Injector {
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
-          throws ResolveFailedException {
+          throws ErrorsException {
         return targetBinding.internalFactory.get(errors, context, injectionPoint);
       }
     };
@@ -623,10 +616,10 @@ class InjectorImpl implements Injector {
    * injectable class (including those with @ImplementedBy, etc.), an automatically converted
    * constant, a {@code Provider<X>} binding, etc.
    *
-   * @throws ResolveFailedException if the binding cannot be created.
+   * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
    */
   <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
@@ -650,7 +643,7 @@ class InjectorImpl implements Injector {
         try {
           return getBindingOrThrow(key.withoutAttributes(), new Errors());
         }
-        catch (ResolveFailedException ignored) {
+        catch (ErrorsException ignored) {
           // throw with a more appropriate message below
         }
       }
@@ -664,7 +657,7 @@ class InjectorImpl implements Injector {
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return getBindingOrThrow(key, errors).internalFactory;
   }
 
@@ -679,7 +672,7 @@ class InjectorImpl implements Injector {
   };
 
   public List<SingleMemberInjector> getMemberInjectors(Class<?> type)
-      throws ResolveFailedException {
+      throws ErrorsException {
     Object injectorsOrError = injectors.get(type);
     if (injectorsOrError instanceof List) {
       @SuppressWarnings("unchecked") // the only type of list we use
@@ -714,7 +707,7 @@ class InjectorImpl implements Injector {
     addInjectorsForMembers(errors, Arrays.asList(methods), statics, injectors,
         new SingleInjectorFactory<Method>() {
           public SingleMemberInjector create(InjectorImpl injector, Method method, Errors errors)
-              throws ResolveFailedException {
+              throws ErrorsException {
             return new SingleMethodInjector(errors, injector, method);
           }
         });
@@ -725,7 +718,7 @@ class InjectorImpl implements Injector {
     addInjectorsForMembers(errors, Arrays.asList(fields), statics, injectors,
         new SingleInjectorFactory<Field>() {
           public SingleMemberInjector create(InjectorImpl injector, Field field, Errors errors)
-              throws ResolveFailedException {
+              throws ErrorsException {
             return new SingleFieldInjector(errors, injector, field);
           }
         });
@@ -749,7 +742,7 @@ class InjectorImpl implements Injector {
       errorsForMember.pushSource(source);
       try {
         injectors.add(injectorFactory.create(this, member, errorsForMember));
-      } catch (ResolveFailedException ignoredForNow) {
+      } catch (ErrorsException ignoredForNow) {
         // if this was an optional injection, it is completely ignored
       } finally {
         errorsForMember.popSource(source);
@@ -768,7 +761,7 @@ class InjectorImpl implements Injector {
 
   interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
     SingleMemberInjector create(InjectorImpl injector, M member, Errors errors)
-        throws ResolveFailedException;
+        throws ErrorsException;
   }
 
   private boolean isStatic(Member member) {
@@ -795,7 +788,7 @@ class InjectorImpl implements Injector {
     final InjectionPoint<?> injectionPoint;
 
     public SingleFieldInjector(final Errors errors, final InjectorImpl injector, Field field)
-        throws ResolveFailedException {
+        throws ErrorsException {
       this.field = field;
 
       // Ewwwww...
@@ -829,7 +822,7 @@ class InjectorImpl implements Injector {
       catch (IllegalAccessException e) {
         throw new AssertionError(e);
       }
-      catch (ResolveFailedException e) {
+      catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
       finally {
@@ -846,14 +839,14 @@ class InjectorImpl implements Injector {
    * @return injections
    */
   SingleParameterInjector<?>[] getParametersInjectors(
-      Member member, List<Parameter<?>> parameters, Errors errors) throws ResolveFailedException {
+      Member member, List<Parameter<?>> parameters, Errors errors) throws ErrorsException {
     SingleParameterInjector<?>[] parameterInjectors
         = new SingleParameterInjector<?>[parameters.size()];
     int index = 0;
     for (Parameter<?> parameter : parameters) {
       try {
         parameterInjectors[index] = createParameterInjector(parameter, member, errors);
-      } catch (ResolveFailedException rethrownBelow) {
+      } catch (ErrorsException rethrownBelow) {
       }
       index++;
     }
@@ -863,7 +856,7 @@ class InjectorImpl implements Injector {
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(final Parameter<T> parameter,
-      Member member, final Errors errors) throws ResolveFailedException {
+      Member member, final Errors errors) throws ErrorsException {
     InternalFactory<? extends T> factory;
     Object source = StackTraceElements.forMember(member);
     errors.pushSource(source);
@@ -883,7 +876,7 @@ class InjectorImpl implements Injector {
     final SingleParameterInjector<?>[] parameterInjectors;
 
     public SingleMethodInjector(Errors errors, InjectorImpl injector, final Method method)
-        throws ResolveFailedException {
+        throws ErrorsException {
       // We can't use FastMethod if the method is private.
       if (Modifier.isPrivate(method.getModifiers())
           || Modifier.isProtected(method.getModifiers())) {
@@ -926,7 +919,7 @@ class InjectorImpl implements Injector {
             : userException;
         errors.errorInjectingMethod(cause);
       }
-      catch (ResolveFailedException e) {
+      catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
@@ -956,7 +949,7 @@ class InjectorImpl implements Injector {
             errors, InjectorImpl.this, implementation);
         errors.throwIfNecessary();
         return result;
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         return errors.merge(e.getErrors()).makeImmutable();
       }
     }
@@ -972,7 +965,7 @@ class InjectorImpl implements Injector {
       this.factory = factory;
     }
 
-    T inject(Errors errors, InternalContext context) throws ResolveFailedException {
+    T inject(Errors errors, InternalContext context) throws ErrorsException {
       context.setInjectionPoint(injectionPoint);
       errors.pushInjectionPoint(injectionPoint);
       try {
@@ -987,7 +980,7 @@ class InjectorImpl implements Injector {
 
   /** Iterates over parameter injectors and creates an array of parameter values. */
   static Object[] getParameters(Errors errors, InternalContext context,
-      SingleParameterInjector[] parameterInjectors) throws ResolveFailedException {
+      SingleParameterInjector[] parameterInjectors) throws ErrorsException {
     if (parameterInjectors == null) {
       return null;
     }
@@ -996,7 +989,7 @@ class InjectorImpl implements Injector {
     for (int i = 0; i < parameters.length; i++) {
       try {
         parameters[i] = parameterInjectors[i].inject(errors, context);
-      } catch (ResolveFailedException e) {
+      } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
@@ -1006,7 +999,7 @@ class InjectorImpl implements Injector {
   }
 
   void injectMembers(Errors errors, Object o, InternalContext context)
-      throws ResolveFailedException {
+      throws ErrorsException {
     if (o == null) {
       return;
     }
@@ -1022,17 +1015,17 @@ class InjectorImpl implements Injector {
     try {
       injectMembersOrThrow(errors, o);
     }
-    catch (ResolveFailedException e) {
+    catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
 
-    errors.throwProvisionExceptionIfNecessary();
+    ProvisionException.throwNewIfNonEmpty(errors);
   }
 
   public void injectMembersOrThrow(final Errors errors, final Object o)
-      throws ResolveFailedException {
+      throws ErrorsException {
     callInContext(new ContextualCallable<Void>() {
-      public Void call(InternalContext context) throws ResolveFailedException {
+      public Void call(InternalContext context) throws ErrorsException {
         injectMembers(errors, o, context);
         return null;
       }
@@ -1044,7 +1037,7 @@ class InjectorImpl implements Injector {
   }
 
   <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors)
-      throws ResolveFailedException {
+      throws ErrorsException {
     final InternalFactory<? extends T> factory = getInternalFactory(key, errors);
 
     return new Provider<T>() {
@@ -1052,7 +1045,7 @@ class InjectorImpl implements Injector {
         final Errors errors = new Errors();
         try {
           T t = callInContext(new ContextualCallable<T>() {
-            public T call(InternalContext context) throws ResolveFailedException {
+            public T call(InternalContext context) throws ErrorsException {
               InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(key);
               context.setInjectionPoint(injectionPoint);
               errors.pushInjectionPoint(injectionPoint);
@@ -1067,9 +1060,8 @@ class InjectorImpl implements Injector {
           });
           errors.throwIfNecessary();
           return t;
-        } catch (ResolveFailedException e) {
-          errors.merge(e.getErrors());
-          throw errors.toProvisionException();
+        } catch (ErrorsException e) {
+          throw new ProvisionException(errors.merge(e.getErrors()));
         }
       }
 
@@ -1086,8 +1078,8 @@ class InjectorImpl implements Injector {
       errors.throwIfNecessary();
       return result;
     }
-    catch (ResolveFailedException e) {
-      throw errors.merge(e.getErrors()).toProvisionException();
+    catch (ErrorsException e) {
+      throw new ProvisionException(errors.merge(e.getErrors()));
     }
   }
 
@@ -1106,7 +1098,7 @@ class InjectorImpl implements Injector {
   };
 
   /** Looks up thread local context. Creates (and removes) a new context if necessary. */
-  <T> T callInContext(ContextualCallable<T> callable) throws ResolveFailedException {
+  <T> T callInContext(ContextualCallable<T> callable) throws ErrorsException {
     InternalContext[] reference = localContext.get();
     if (reference[0] == null) {
       reference[0] = new InternalContext(this);
@@ -1126,7 +1118,7 @@ class InjectorImpl implements Injector {
 
   /** Gets a constructor function for a given implementation class. */
   @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(Class<T> implementation) throws ResolveFailedException {
+  <T> ConstructorInjector<T> getConstructor(Class<T> implementation) throws ErrorsException {
     Object o = constructors.get(implementation);
     if (o instanceof Errors) {
       throw ((Errors) o).copy().toException();
@@ -1146,7 +1138,7 @@ class InjectorImpl implements Injector {
   }
 
   List<InjectionPoint<?>> getModifiableFieldAndMethodInjectionsFor(Class<?> clazz)
-      throws ResolveFailedException {
+      throws ErrorsException {
     List<InjectionPoint<?>> dependencies = Lists.newArrayList();
     for (SingleMemberInjector singleMemberInjector : getMemberInjectors(clazz)) {
       dependencies.addAll(singleMemberInjector.getDependencies());
@@ -1155,7 +1147,7 @@ class InjectorImpl implements Injector {
   }
 
   Collection<InjectionPoint<?>> getFieldAndMethodInjectionsFor(Class<?> clazz)
-      throws ResolveFailedException {
+      throws ErrorsException {
     return Collections.unmodifiableList(getModifiableFieldAndMethodInjectionsFor(clazz));
   }
 

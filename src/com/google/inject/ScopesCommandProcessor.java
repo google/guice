@@ -57,7 +57,7 @@ class ScopesCommandProcessor extends CommandProcessor {
 
     Scope existing = scopes.get(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
-      errors.at(command.getSource()).duplicateScopes(existing, annotationType, scope);
+      errors.duplicateScopes(existing, annotationType, scope);
     } else {
       scopes.put(annotationType, checkNotNull(scope, "scope"));
     }
