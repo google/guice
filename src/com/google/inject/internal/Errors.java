@@ -106,18 +106,27 @@ public final class Errors implements Serializable {
         otherNames);
   }
 
-  public Errors converterReturnedNull() {
-    return addMessage("Converter returned null.");
+  public Errors converterReturnedNull(String stringValue, Object source,
+      TypeLiteral<?> type, MatcherAndConverter<?> matchingConverter) {
+    return addMessage("Received null converting '%s' (bound at %s) to %s%n"
+        + " using %s.",
+        stringValue, source, type, matchingConverter);
   }
 
-  public Errors conversionTypeError(Object converted, TypeLiteral<?> type) {
-    return addMessage("Converter returned %s but we expected a[n] %s.", converted, type);
+  public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
+      MatcherAndConverter<?> matchingConverter, Object converted) {
+    return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
+        + " using %s.%n"
+        + " Converter returned %s.",
+        stringValue, source, type, matchingConverter, converted);
   }
 
   public Errors conversionError(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter<?> matchingConverter, String message) {
-    return addMessage("Error converting '%s' (bound at %s) to %s using %s. Reason: %s",
-        stringValue, source, type, matchingConverter, message);
+      TypeLiteral<?> type, MatcherAndConverter<?> matchingConverter, Exception cause) {
+    return addMessage(cause, "Error converting '%s' (bound at %s) to %s%n" 
+        + " using %s.%n"
+        + " Reason: %s",
+        stringValue, source, type, matchingConverter, cause);
   }
 
   public Errors ambiguousTypeConversion(String stringValue, TypeLiteral<?> type,

@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Iterables;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
@@ -245,11 +246,76 @@ public class TypeConversionTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error converting 'invalid'");
-      assertContains(expected.getMessage(), "Reason: Unparseable date: \"invalid\"");
-      assertContains(expected.getMessage(), "to java.util.Date");
-      assertContains(expected.getMessage(), "using TypeConverter<Date> which matches "
-          + "only(java.util.Date) (bound at " + module.getClass().getName());
+      Throwable cause = Iterables.getOnlyElement(expected.getErrorMessages()).getCause();
+      assertTrue(cause instanceof IllegalArgumentException);
+      assertContains(expected.getMessage(),
+          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
+          "Error converting 'invalid' (bound at ", getClass().getName(),
+          ".configure(TypeConversionTest.java:", "to java.util.Date",
+          "using TypeConverter<Date> which matches only(java.util.Date) ",
+          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
+          "Reason: java.lang.IllegalArgumentException: Unparseable date: \"invalid\"");
+    }
+  }
+
+  public void testNullCustomValue() {
+    Module module = new AbstractModule() {
+      protected void configure() {
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), new TypeConverter() {
+          public Object convert(String value, TypeLiteral<?> toType) {
+            return null;
+          }
+
+          @Override public String toString() {
+            return "TypeConverter<Null>";
+          }
+        });
+        bindConstant().annotatedWith(NumericValue.class).to("foo");
+        bind(DateHolder.class);
+      }
+    };
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
+          "Received null converting 'foo' (bound at ", getClass().getName(),
+          ".configure(TypeConversionTest.java:", "to java.util.Date",
+          "using TypeConverter<Null> which matches only(java.util.Date) ",
+          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:");
+    }
+  }
+
+  public void testCustomValueTypeMismatch() {
+    Module module = new AbstractModule() {
+      protected void configure() {
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), new TypeConverter() {
+          public Object convert(String value, TypeLiteral<?> toType) {
+            return -1;
+          }
+
+          @Override public String toString() {
+            return "TypeConverter<Date>";
+          }
+        });
+        bindConstant().annotatedWith(NumericValue.class).to("foo");
+        bind(DateHolder.class);
+      }
+    };
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
+          "Type mismatch converting 'foo' (bound at ", getClass().getName(),
+          ".configure(TypeConversionTest.java:", "to java.util.Date",
+          "using TypeConverter<Date> which matches only(java.util.Date) ",
+          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
+          "Converter returned -1.");
     }
   }
 

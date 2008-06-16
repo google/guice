@@ -369,19 +369,21 @@ class InjectorImpl implements Injector {
     }
 
     // Try to convert the string. A failed conversion results in an error.
+    Object source = stringBinding.getSource();
     try {
       @SuppressWarnings("unchecked") // This cast is safe because we double check below.
-      T converted = (T) matchingConverter.getTypeConverter()
-          .convert(stringValue, key.getTypeLiteral());
+      T converted = (T) matchingConverter.getTypeConverter().convert(stringValue, type);
 
       if (converted == null) {
-        throw errors.converterReturnedNull().toException();
+        throw errors.converterReturnedNull(stringValue, source, type, matchingConverter)
+            .toException();
       }
 
       // We have to filter out primitive types because an Integer is not an instance of int, and we
       // provide converters for all the primitive types and know that they work anyway.
       if (!type.getRawType().isInstance(converted)) {
-        throw errors.conversionTypeError(converted, type).toException();
+        throw errors.conversionTypeError(stringValue, source, type, matchingConverter, converted)
+            .toException();
       }
       return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
     }
@@ -389,8 +391,8 @@ class InjectorImpl implements Injector {
       throw e;
     }
     catch (Exception e) {
-      throw errors.conversionError(stringValue,
-          stringBinding.getSource(), type, matchingConverter, e.getMessage()).toException();
+      throw errors.conversionError(stringValue, source, type, matchingConverter, e)
+          .toException();
     }
   }
 
