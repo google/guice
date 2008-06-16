@@ -39,9 +39,9 @@ import java.util.List;
  */
 class ConvertToTypesCommandProcessor extends CommandProcessor {
 
-  private final List<MatcherAndConverter<?>> converters;
+  private final List<MatcherAndConverter> converters;
 
-  ConvertToTypesCommandProcessor(Errors errors, List<MatcherAndConverter<?>> converters) {
+  ConvertToTypesCommandProcessor(Errors errors, List<MatcherAndConverter> converters) {
     super(errors);
     this.converters = converters;
 
@@ -162,12 +162,11 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
 
   private void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    converters.add(MatcherAndConverter.newInstance(typeMatcher, converter,
-        SourceProviders.UNKNOWN_SOURCE));
+    converters.add(new MatcherAndConverter(typeMatcher, converter, SourceProviders.UNKNOWN_SOURCE));
   }
 
   @Override public Boolean visitConvertToTypes(ConvertToTypesCommand command) {
-    converters.add(MatcherAndConverter.newInstance(
+    converters.add(new MatcherAndConverter(
         command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;
   }

@@ -16,38 +16,25 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
-import com.google.inject.spi.SourceProviders;
-import com.google.inject.TypeLiteral;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- *
  * @author crazybob@google.com (Bob Lee)
  */
-public class MatcherAndConverter<T> {
+public final class MatcherAndConverter {
 
-  static {
-    SourceProviders.skip(MatcherAndConverter.class);
-  }
-  
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;
   private final Object source;
 
-  MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
+  public MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter, Object source) {
     this.typeMatcher = checkNotNull(typeMatcher, "type matcher");
     this.typeConverter = checkNotNull(typeConverter, "converter");
     this.source = source;
-  }
-
-  MatcherAndConverter(Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter typeConverter) {
-    this.typeMatcher = checkNotNull(typeMatcher, "type matcher");
-    this.typeConverter = checkNotNull(typeConverter, "converter");
-    this.source = SourceProviders.defaultSource();
   }
 
   public TypeConverter getTypeConverter() {
@@ -56,18 +43,6 @@ public class MatcherAndConverter<T> {
 
   public Matcher<? super TypeLiteral<?>> getTypeMatcher() {
     return typeMatcher;
-  }
-
-  public static <T> MatcherAndConverter<T> newInstance(
-      Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter typeConverter) {
-    return new MatcherAndConverter<T>(typeMatcher, typeConverter);
-  }
-
-  public static <T> MatcherAndConverter<T> newInstance(
-      Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter typeConverter, Object source) {
-    return new MatcherAndConverter<T>(typeMatcher, typeConverter, source);
   }
 
   public Object getSource() {

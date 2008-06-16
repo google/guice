@@ -113,14 +113,14 @@ public final class Errors implements Serializable {
   }
 
   public Errors converterReturnedNull(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter<?> matchingConverter) {
+      TypeLiteral<?> type, MatcherAndConverter matchingConverter) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
         + " using %s.",
         stringValue, source, type, matchingConverter);
   }
 
   public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
-      MatcherAndConverter<?> matchingConverter, Object converted) {
+      MatcherAndConverter matchingConverter, Object converted) {
     return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Converter returned %s.",
@@ -128,7 +128,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors conversionError(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter<?> matchingConverter, Exception cause) {
+      TypeLiteral<?> type, MatcherAndConverter matchingConverter, Exception cause) {
     return addMessage(cause, "Error converting '%s' (bound at %s) to %s%n" 
         + " using %s.%n"
         + " Reason: %s",
@@ -136,7 +136,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
-      MatcherAndConverter<?> a, MatcherAndConverter<?> b) {
+      MatcherAndConverter a, MatcherAndConverter b) {
     return addMessage("Multiple converters can convert '%s' (bound at %s) to %s:%n"
         + " %s and%n"
         + " %s.%n"

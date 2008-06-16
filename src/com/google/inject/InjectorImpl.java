@@ -69,7 +69,7 @@ class InjectorImpl implements Injector {
   final Map<Key<?>, BindingImpl<?>> explicitBindings = Maps.newHashMap();
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
-  final List<MatcherAndConverter<?>> converters = Lists.newArrayList();
+  final List<MatcherAndConverter> converters = Lists.newArrayList();
   final Map<Key<?>, BindingImpl<?>> parentBindings = Maps.newHashMap();
   final Set<Object> outstandingInjections = Sets.newIdentityHashSet(ReferenceType.STRONG);
   Reflection reflection;
@@ -320,14 +320,6 @@ class InjectorImpl implements Injector {
     }
   }
 
-  <T> BindingImpl<T> invalidBinding(Class<T> clazz) {
-    return invalidBinding(Key.get(clazz));
-  }
-
-  <T> BindingImpl<T> invalidBinding(Key<T> key) {
-    return new InvalidBindingImpl<T>(this, key, SourceProviders.defaultSource());
-  }
-
   /**
    * Converts a constant string binding to the required type.
    *
@@ -348,8 +340,8 @@ class InjectorImpl implements Injector {
 
     // Find a matching type converter.
     TypeLiteral<T> type = key.getTypeLiteral();
-    MatcherAndConverter<?> matchingConverter = null;
-    for (MatcherAndConverter<?> converter : converters) {
+    MatcherAndConverter matchingConverter = null;
+    for (MatcherAndConverter converter : converters) {
       if (converter.getTypeMatcher().matches(type)) {
         if (matchingConverter != null) {
           errors.ambiguousTypeConversion(stringValue, source, type, matchingConverter, converter);
