@@ -289,4 +289,16 @@ public interface Binder {
    */
   void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter);
+
+  /**
+   * Returns a binder that uses {@code source} as the reference location for
+   * errors in its configuration. This is typically a {@link StackTraceElement}
+   * for {@code .java} source but it could any binding source, such as the
+   * path to a {@code .properties} file.
+   *
+   * @param source any object representing the source location and has a
+   *     concise {@link Object#toString() toString()} value
+   * @return a binder that shares its configuration with this binder
+   */
+  Binder withSource(Object source);
 }

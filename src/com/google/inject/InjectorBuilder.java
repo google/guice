@@ -215,7 +215,7 @@ class InjectorBuilder {
     }
   }
 
-  private static class BuiltInModule extends AbstractModule {
+  private static class BuiltInModule implements Module {
     final Injector injector;
     final Stage stage;
 
@@ -224,18 +224,15 @@ class InjectorBuilder {
       this.stage = checkNotNull(stage, "stage");
     }
 
-    protected void configure() {
-      SourceProviders.withDefault(SourceProviders.UNKNOWN_SOURCE, new Runnable() {
-        public void run() {
-          bind(Stage.class).toInstance(stage);
-          bindScope(Singleton.class, SINGLETON);
-          // Create default bindings.
-          // We use toProvider() instead of toInstance() to avoid infinite recursion
-          // in toString().
-          bind(Injector.class).toProvider(new InjectorProvider(injector));
+    public void configure(Binder binder) {
+      binder = binder.withSource(SourceProviders.UNKNOWN_SOURCE);
 
-        }
-      });
+      binder.bind(Stage.class).toInstance(stage);
+      binder.bindScope(Singleton.class, SINGLETON);
+      // Create default bindings.
+      // We use toProvider() instead of toInstance() to avoid infinite recursion
+      // in toString().
+      binder.bind(Injector.class).toProvider(new InjectorProvider(injector));
     }
 
     class InjectorProvider implements Provider<Injector> {

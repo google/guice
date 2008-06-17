@@ -16,6 +16,7 @@
 
 package com.google.inject.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -30,7 +31,6 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.SourceProviders;
-import static com.google.inject.spi.SourceProviders.defaultSource;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -89,23 +89,36 @@ public final class CommandRecorder {
   }
 
   private class RecordingBinder implements Binder {
-    private final Set<Module> modules = Sets.newHashSet();
-    private final List<Command> commands = Lists.newArrayList();
+    private final Set<Module> modules;
+    private final List<Command> commands;
+
+    private RecordingBinder() {
+      modules = Sets.newHashSet();
+      commands = Lists.newArrayList();
+    }
+
+    /**
+     * Creates a recording binder that's backed by the same configuration as
+     * {@code backingBinder}.
+     */
+    private RecordingBinder(RecordingBinder backingBinder) {
+      modules = backingBinder.modules;
+      commands = backingBinder.commands;
+    }
 
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         MethodInterceptor... interceptors) {
-      commands.add(new BindInterceptorCommand(
-          defaultSource(), classMatcher, methodMatcher, interceptors));
+      commands.add(new BindInterceptorCommand(getSource(), classMatcher, methodMatcher, interceptors));
     }
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-      commands.add(new BindScopeCommand(defaultSource(), annotationType, scope));
+      commands.add(new BindScopeCommand(getSource(), annotationType, scope));
     }
 
     public void requestStaticInjection(Class<?>... types) {
-      commands.add(new RequestStaticInjectionCommand(defaultSource(), types));
+      commands.add(new RequestStaticInjectionCommand(getSource(), types));
     }
 
     public void install(Module module) {
@@ -119,11 +132,11 @@ public final class CommandRecorder {
     }
 
     public void addError(String message, Object... arguments) {
-      commands.add(new AddMessageErrorCommand(defaultSource(), message, arguments));
+      commands.add(new AddMessageErrorCommand(getSource(), message, arguments));
     }
 
     public void addError(Throwable t) {
-      commands.add(new AddThrowableErrorCommand(defaultSource(), t));
+      commands.add(new AddThrowableErrorCommand(getSource(), t));
     }
 
     public void addError(Message message) {
@@ -131,7 +144,7 @@ public final class CommandRecorder {
     }
 
     public <T> BindCommand<T>.BindingBuilder bind(Key<T> key) {
-      BindCommand<T> bindCommand = new BindCommand<T>(defaultSource(), key);
+      BindCommand<T> bindCommand = new BindCommand<T>(getSource(), key);
       commands.add(bindCommand);
       return bindCommand.bindingBuilder(RecordingBinder.this);
     }
@@ -145,13 +158,13 @@ public final class CommandRecorder {
     }
 
     public AnnotatedConstantBindingBuilder bindConstant() {
-      BindConstantCommand bindConstantCommand = new BindConstantCommand(defaultSource());
+      BindConstantCommand bindConstantCommand = new BindConstantCommand(getSource());
       commands.add(bindConstantCommand);
       return bindConstantCommand.bindingBuilder(RecordingBinder.this);
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      commands.add(new GetProviderCommand<T>(defaultSource(), key, earlyRequestsProvider));
+      commands.add(new GetProviderCommand<T>(getSource(), key, earlyRequestsProvider));
       return new Provider<T>() {
         public T get() {
           return earlyRequestsProvider.get(key);
@@ -169,7 +182,21 @@ public final class CommandRecorder {
 
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
         TypeConverter converter) {
-      commands.add(new ConvertToTypesCommand(defaultSource(), typeMatcher, converter));
+      commands.add(new ConvertToTypesCommand(getSource(), typeMatcher, converter));
+    }
+
+    public Binder withSource(final Object source) {
+      checkNotNull(source, "source");
+
+      return new RecordingBinder(this) {
+        @Override protected Object getSource() {
+          return source;
+        }
+      };
+    }
+
+    protected Object getSource() {
+      return SourceProviders.defaultSource();
     }
 
     @Override public String toString() {

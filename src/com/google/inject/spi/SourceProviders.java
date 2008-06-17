@@ -82,38 +82,6 @@ public class SourceProviders {
     return localSourceProvider.get()[0].source();
   }
 
-  /**
-   * Sets the default source provider, runs the given command, and then
-   * restores the previous default source provider.
-   */
-  private static void withDefault(SourceProvider sourceProvider, Runnable r) {
-    // We use a holder so we perform only 1 thread local access instead of 3.
-    SourceProvider[] holder = localSourceProvider.get();
-    SourceProvider previous = holder[0];
-    try {
-      holder[0] = sourceProvider;
-      r.run();
-    } finally {
-      holder[0] = previous;
-    }
-  }
-
-  /**
-   * Sets the default source, runs the given command, and then
-   * restores the previous default source provider.
-   */
-  public static void withDefault(final Object source, Runnable r) {
-    withDefault(sourceProviderFor(source), r);
-  }
-
-  private static SourceProvider sourceProviderFor(final Object source) {
-    return new SourceProvider() {
-      public Object source() {
-        return source;
-      }
-    };
-  }
-
   static class StacktraceSourceProvider implements SourceProvider {
     public Object source() {
       // Search up the stack until we find a class outside of this one.

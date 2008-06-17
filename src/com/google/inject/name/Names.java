@@ -47,19 +47,13 @@ public class Names {
    * Creates a constant binding to {@code @Named(key)} for each entry in
    * {@code properties}.
    */
-  public static void bindProperties(final Binder binder,
-      final Map<String, String> properties) {
-    SourceProviders.withDefault(
-        SourceProviders.defaultSource(),
-        new Runnable() {
-          public void run() {
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
-              String key = entry.getKey();
-              String value = entry.getValue();
-              binder.bind(Key.get(String.class, new NamedImpl(key))).toInstance(value);
-            }
-          }
-        });
+  public static void bindProperties(Binder binder, Map<String, String> properties) {
+    binder = binder.withSource(getSource());
+    for (Map.Entry<String, String> entry : properties.entrySet()) {
+      String key = entry.getKey();
+      String value = entry.getValue();
+      binder.bind(Key.get(String.class, new NamedImpl(key))).toInstance(value);
+    }
   }
 
   /**
@@ -67,19 +61,18 @@ public class Names {
    * method binds all properties including those inherited from 
    * {@link Properties#defaults defaults}.
    */
-  public static void bindProperties(final Binder binder,
-      final Properties properties) {
-    SourceProviders.withDefault(
-        SourceProviders.defaultSource(),
-        new Runnable() {
-          public void run() {
-            // use enumeration to include the default properties
-            for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {
-              String propertyName = (String) e.nextElement();
-              String value = properties.getProperty(propertyName);
-              binder.bind(Key.get(String.class, new NamedImpl(propertyName))).toInstance(value);
-            }
-          }
-        });
+  public static void bindProperties(Binder binder, Properties properties) {
+    binder = binder.withSource(getSource());
+
+    // use enumeration to include the default properties
+    for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {
+      String propertyName = (String) e.nextElement();
+      String value = properties.getProperty(propertyName);
+      binder.bind(Key.get(String.class, new NamedImpl(propertyName))).toInstance(value);
+    }
+  }
+
+  private static Object getSource() {
+    return SourceProviders.defaultSource();
   }
 }
