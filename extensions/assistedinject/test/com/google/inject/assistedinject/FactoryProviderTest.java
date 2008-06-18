@@ -16,16 +16,21 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
@@ -508,8 +513,8 @@ public class FactoryProviderTest extends TestCase {
         }
       });
       fail();
-    } catch (ProvisionException expected) {
-      assertContains(expected.getCause().getMessage(),
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
           "Parameter of type 'double' is not injectable or annotated with @Assisted");
     }
   }

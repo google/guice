@@ -16,9 +16,10 @@
 
 package com.google.inject.name;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -30,11 +31,10 @@ import java.util.Properties;
  */
 public class Names {
 
-  private Names() {}
+  private static final SourceProvider sourceProvider = new SourceProvider(
+      Names.class, AbstractModule.class);
 
-  static {
-    SourceProviders.skip(Names.class);
-  }
+  private Names() {}
 
   /**
    * Creates a {@link Named} annotation with {@code name} as the value.
@@ -48,7 +48,7 @@ public class Names {
    * {@code properties}.
    */
   public static void bindProperties(Binder binder, Map<String, String> properties) {
-    binder = binder.withSource(getSource());
+    binder = binder.withSource(sourceProvider.get());
     for (Map.Entry<String, String> entry : properties.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
@@ -62,7 +62,7 @@ public class Names {
    * {@link Properties#defaults defaults}.
    */
   public static void bindProperties(Binder binder, Properties properties) {
-    binder = binder.withSource(getSource());
+    binder = binder.withSource(sourceProvider.get());
 
     // use enumeration to include the default properties
     for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {
@@ -70,9 +70,5 @@ public class Names {
       String value = properties.getProperty(propertyName);
       binder.bind(Key.get(String.class, new NamedImpl(propertyName))).toInstance(value);
     }
-  }
-
-  private static Object getSource() {
-    return SourceProviders.defaultSource();
   }
 }

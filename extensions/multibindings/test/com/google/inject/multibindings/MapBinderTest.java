@@ -16,18 +16,26 @@
 
 package com.google.inject.multibindings;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.util.Providers;
-import junit.framework.TestCase;
-
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.TestCase;
 
 /**
  * @author dpb@google.com (David P. Baker)
@@ -212,9 +220,9 @@ public class MapBinderTest extends TestCase {
         }
       });
       fail();
-    } catch(ProvisionException expected) {
-      assertEquals("Map injection failed due to duplicated key \"a\"",
-          expected.getCause().getMessage());
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Map injection failed due to duplicated key \"a\"");
     }
   }
 
@@ -276,8 +284,8 @@ public class MapBinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error at " + getClass().getName());
-      assertContains(expected.getMessage(), "No implementation was specified.");
+      assertContains(expected.getMessage(), "Error at " + getClass().getName(),
+          "No implementation for java.lang.Integer");
     }
   }
 

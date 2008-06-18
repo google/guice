@@ -23,7 +23,6 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.SourceProviders;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -51,10 +50,6 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author crazybob@google.com (Bob Lee)
  */
 public abstract class AbstractModule implements Module {
-
-  static {
-    SourceProviders.skip(AbstractModule.class);
-  }
 
   Binder binder;
 

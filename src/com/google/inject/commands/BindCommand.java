@@ -26,7 +26,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import java.lang.annotation.Annotation;
 
 /**
@@ -36,9 +36,8 @@ import java.lang.annotation.Annotation;
  */
 public final class BindCommand<T> implements Command {
 
-  static {
-    SourceProviders.skip(BindCommand.BindingBuilder.class);
-  }
+  private static final SourceProvider sourceProvider = new SourceProvider(
+      BindCommand.BindingBuilder.class);
 
   private static final BindTarget<Object> EMPTY_BIND_TARGET = new AbstractTarget<Object>() {
     public ScopedBindingBuilder execute(LinkedBindingBuilder<Object> linkedBindingBuilder) {
@@ -317,25 +316,25 @@ public final class BindCommand<T> implements Command {
 
     private void checkNotTargetted() {
       if (bindTarget != EMPTY_BIND_TARGET) {
-        binder.addError(IMPLEMENTATION_ALREADY_SET);
+        binder.withSource(sourceProvider.get()).addError(IMPLEMENTATION_ALREADY_SET);
       }
     }
 
     private void checkNotAnnotated() {
       if (BindCommand.this.key.getAnnotationType() != null) {
-        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
+        binder.withSource(sourceProvider.get()).addError(ANNOTATION_ALREADY_SPECIFIED);
       }
     }
 
     private void checkNotScoped() {
       // Scoping isn't allowed when we have only one instance.
       if (bindTarget.get() != null) {
-        binder.addError(SINGLE_INSTANCE_AND_SCOPE);
+        binder.withSource(sourceProvider.get()).addError(SINGLE_INSTANCE_AND_SCOPE);
         return;
       }
 
       if (bindScoping != EMPTY_SCOPING) {
-        binder.addError(SCOPE_ALREADY_SET);
+        binder.withSource(sourceProvider.get()).addError(SCOPE_ALREADY_SET);
       }
     }
 

@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -31,7 +31,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   private final Object source;
 
   public InternalFactoryToProviderAdapter(Provider<? extends T> provider) {
-    this(provider, SourceProviders.UNKNOWN_SOURCE);
+    this(provider, SourceProvider.UNKNOWN_SOURCE);
   }
 
   public InternalFactoryToProviderAdapter(

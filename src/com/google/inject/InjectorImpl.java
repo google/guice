@@ -37,7 +37,7 @@ import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -294,7 +294,7 @@ class InjectorImpl implements Injector {
       super(
           injector,
           key,
-          SourceProviders.UNKNOWN_SOURCE,
+          SourceProvider.UNKNOWN_SOURCE,
           createInternalFactory(providedBinding),
           Scopes.NO_SCOPE,
           loadStrategy);
@@ -389,7 +389,7 @@ class InjectorImpl implements Injector {
 
     ConvertedConstantBindingImpl(
         InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding) {
-      super(injector, key, SourceProviders.UNKNOWN_SOURCE, new ConstantFactory<T>(value),
+      super(injector, key, SourceProvider.UNKNOWN_SOURCE, new ConstantFactory<T>(value),
           Scopes.NO_SCOPE, LoadStrategy.LAZY);
       this.value = value;
       provider = Providers.of(value);
@@ -424,7 +424,7 @@ class InjectorImpl implements Injector {
   <T> BindingImpl<T> createBindingFromType(
       Class<T> type, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     BindingImpl<T> binding = createUnitializedBinding(
-        type, null, SourceProviders.defaultSource(), loadStrategy, errors);
+        type, null, StackTraceElements.forType(type), loadStrategy, errors);
     initializeBinding(binding, errors);
     return binding;
   }

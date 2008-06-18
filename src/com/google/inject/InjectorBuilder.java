@@ -28,7 +28,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import java.lang.reflect.Member;
 import java.util.List;
 import java.util.logging.Logger;
@@ -171,17 +171,20 @@ class InjectorBuilder {
     errors.throwCreationExceptionIfErrorsExist();
   }
 
-  /** Inject everything that can be injected. This uses runtime error handling. */
+  /** Inject everything that can be injected. */
   private void fulfillInjectionRequests() {
     futureInjector.initialize(injector);
 
     requestStaticInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
+
     injector.fulfillOutstandingInjections(errors);
     stopwatch.resetAndLog("Instance injection");
+    errors.throwCreationExceptionIfErrorsExist();
 
     loadEagerSingletons();
     stopwatch.resetAndLog("Preloading");
+    errors.throwCreationExceptionIfErrorsExist();
   }
 
   public void loadEagerSingletons() {
@@ -225,7 +228,7 @@ class InjectorBuilder {
     }
 
     public void configure(Binder binder) {
-      binder = binder.withSource(SourceProviders.UNKNOWN_SOURCE);
+      binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
 
       binder.bind(Stage.class).toInstance(stage);
       binder.bindScope(Singleton.class, SINGLETON);
@@ -261,7 +264,7 @@ class InjectorBuilder {
     LoggerFactory loggerFactory = new LoggerFactory();
     injector.explicitBindings.put(key,
         new ProviderInstanceBindingImpl<Logger>(injector, key,
-            SourceProviders.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
+            SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
             loggerFactory, LoadStrategy.LAZY));
   }
 

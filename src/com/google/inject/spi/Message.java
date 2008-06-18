@@ -47,7 +47,7 @@ public final class Message implements Serializable {
   }
 
   public Message(String message) {
-    this(SourceProviders.UNKNOWN_SOURCE, message, ImmutableList.<InjectionPoint>of(), null);
+    this(SourceProvider.UNKNOWN_SOURCE, message, ImmutableList.<InjectionPoint>of(), null);
   }
 
   /**

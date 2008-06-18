@@ -24,7 +24,7 @@ import com.google.inject.internal.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.TypeConverter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -162,7 +162,7 @@ class ConvertToTypesCommandProcessor extends CommandProcessor {
 
   private void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    converters.add(new MatcherAndConverter(typeMatcher, converter, SourceProviders.UNKNOWN_SOURCE));
+    converters.add(new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
   }
 
   @Override public Boolean visitConvertToTypes(ConvertToTypesCommand command) {

@@ -19,6 +19,7 @@ package com.google.inject.commands;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -30,7 +31,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.SourceProviders;
+import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -47,12 +48,11 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class CommandRecorder {
+  private static final SourceProvider sourceProvider = new SourceProvider(
+      RecordingBinder.class, AbstractModule.class);
+
   private Stage currentStage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
-
-  static {
-    SourceProviders.skip(RecordingBinder.class);
-  }
 
   /**
    * @param earlyRequestsProvider satisfies requests to
@@ -196,7 +196,7 @@ public final class CommandRecorder {
     }
 
     protected Object getSource() {
-      return SourceProviders.defaultSource();
+      return sourceProvider.get();
     }
 
     @Override public String toString() {

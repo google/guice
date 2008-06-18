@@ -16,15 +16,27 @@
 
 package com.google.inject.multibindings;
 
-import com.google.inject.*;
-import com.google.inject.util.Types;
-import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.spi.SourceProviders;
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import static com.google.common.base.Preconditions.checkState;
+import com.google.inject.Binder;
+import com.google.inject.Binding;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
+import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.spi.SourceProvider;
+import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An API to bind multiple values separately, only to later inject them as a
@@ -72,9 +84,9 @@ import java.util.*;
  */
 public abstract class Multibinder<T> {
   private Multibinder() {}
-  static {
-    SourceProviders.skip(RealMultibinder.class);
-  }
+
+  private static final SourceProvider sourceProvider
+      = new SourceProvider(RealMultibinder.class, Multibinder.class);
 
   /**
    * Returns a new multibinder that collects instances of {@code type} in a
@@ -83,7 +95,7 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "",
         Key.get(Multibinder.<T>setOf(type)));
-    binder.install(result);
+    binder.withSource(sourceProvider.get()).install(result);
     return result;
   }
 
@@ -94,7 +106,7 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation.toString(),
         Key.get(Multibinder.<T>setOf(type), annotation));
-    binder.install(result);
+    binder.withSource(sourceProvider.get()).install(result);
     return result;
   }
 
@@ -106,7 +118,7 @@ public abstract class Multibinder<T> {
       Class<? extends Annotation> annotationType) {
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "@" + annotationType.getName(),
         Key.get(Multibinder.<T>setOf(type), annotationType));
-    binder.install(result);
+    binder.withSource(sourceProvider.get()).install(result);
     return result;
   }
 
@@ -172,20 +184,17 @@ public abstract class Multibinder<T> {
 
     @SuppressWarnings("unchecked")
     public void configure(Binder binder) {
-      if (isInitialized()) {
-        throw new IllegalStateException("Multibinder was already initialized");
-      }
+      checkState(!isInitialized(), "Multibinder was already initialized");
 
       binder.bind(setKey).toProvider(this);
     }
 
     @SuppressWarnings("unchecked")
     @Override public LinkedBindingBuilder<T> addBinding() {
-      if (isInitialized()) {
-        throw new IllegalStateException("Multibinder was already initialized");
-      }
+      checkState(!isInitialized(), "Multibinder was already initialized");
 
-      return binder.bind((Key<T>) Key.get(elementType, new RealElement(setName)));
+      return binder.withSource(sourceProvider.get())
+          .bind((Key<T>) Key.get(elementType, new RealElement(setName)));
     }
 
     /**
@@ -217,20 +226,14 @@ public abstract class Multibinder<T> {
     }
 
     public Set<T> get() {
-      if (!isInitialized()) {
-        throw new IllegalStateException("Multibinder is not initialized");
-      }
+      checkState(isInitialized(), "Multibinder is not initialized");
 
       Set<T> result = new LinkedHashSet<T>();
       for (Provider<T> provider : providers) {
         final T newValue = provider.get();
-        if (newValue == null) {
-          throw new IllegalStateException("Set injection failed due to null element");
-        }
-        if (!result.add(newValue)) {
-          throw new IllegalStateException("Set injection failed due to duplicated element \""
-              + newValue + "\"");
-        }
+        checkState(newValue != null, "Set injection failed due to null element");
+        checkState(result.add(newValue),
+            "Set injection failed due to duplicated element \"%s\"", newValue);
       }
       return Collections.unmodifiableSet(result);
     }

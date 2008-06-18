@@ -16,9 +16,9 @@
 
 package com.google.inject.commands;
 
+import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
 
 /**
  * Satisfies binding requests using an eventually-created Injector. To use:
@@ -43,18 +43,14 @@ public final class FutureInjector implements EarlyRequestsProvider {
   private Injector injector;
 
   public void initialize(Injector injector) {
-    if (this.injector != null) {
-      throw new IllegalStateException("Already initialized");
-    }
+    checkState(this.injector == null, "Already initialized");
 
     this.injector = injector;
   }
 
   public <T> T get(Key<T> key) {
-    if (injector == null) {
-      throw new IllegalStateException("This provider cannot be used until the"
-          + " Injector has been created.");
-    }
+    checkState(injector != null,
+        "This provider cannot be used until the Injector has been created.");
 
     return injector.getInstance(key);
   }

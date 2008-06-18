@@ -16,13 +16,18 @@
 
 package com.google.inject.multibindings;
 
-import com.google.inject.*;
-import com.google.inject.util.Types;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
-import com.google.inject.spi.SourceProviders;
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.inject.spi.SourceProvider;
+import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -88,9 +93,9 @@ import java.util.Set;
  */
 public abstract class MapBinder<K, V> {
   private MapBinder() {}
-  static {
-    SourceProviders.skip(RealMapBinder.class);
-  }
+
+  private static final SourceProvider sourceProvider
+      = new SourceProvider(MapBinder.class, RealMapBinder.class);
 
   /**
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code 
@@ -153,7 +158,7 @@ public abstract class MapBinder<K, V> {
       Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
     RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(binder, 
         valueType, mapKey, providerMapKey, entrySetBinder);
-    binder.install(mapBinder);
+    binder.withSource(sourceProvider.get()).install(mapBinder);
     return mapBinder;
   }
 
@@ -199,7 +204,7 @@ public abstract class MapBinder<K, V> {
     private final Key<Map<K, V>> mapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
-    
+
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
 
@@ -219,59 +224,52 @@ public abstract class MapBinder<K, V> {
      */
     @Override public LinkedBindingBuilder<V> addBinding(K key) {
       checkNotNull(key, "key");
-      if (isInitialized()) {
-        throw new IllegalStateException("MapBinder was already initialized");
-      }
+      checkState(!isInitialized(), "MapBinder was already initialized");
+      Object source = sourceProvider.get();
 
       @SuppressWarnings("unchecked")
       Key<V> valueKey = (Key<V>) Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
-      entrySetBinder.addBinding()
-          .toInstance(new MapEntry<K, Provider<V>>(key, binder.getProvider(valueKey)));
-      return binder.bind(valueKey);
+      entrySetBinder.addBinding().toInstance(new MapEntry<K, Provider<V>>(key,
+          binder.withSource(source).getProvider(valueKey)));
+      return binder.withSource(source).bind(valueKey);
     }
 
     public void configure(Binder binder) {
-      if (isInitialized()) {
-        throw new IllegalStateException("MapBinder was already initialized");
-      }
+      checkState(!isInitialized(), "MapBinder was already initialized");
 
       // binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>
-      final Provider<Set<Entry<K,Provider<V>>>> entrySetProvider
-          = binder.getProvider(entrySetBinder.getSetKey());
+      final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
+          .getProvider(entrySetBinder.getSetKey());
       binder.bind(providerMapKey).toProvider(new Provider<Map<K, Provider<V>>>() {
         private Map<K, Provider<V>> providerMap;
-    
+
         @SuppressWarnings("unused")
         @Inject void initialize() {
           RealMapBinder.this.binder = null;
-          
+
           Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
-          for (Map.Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-            if (providerMapMutable.put(entry.getKey(), entry.getValue()) != null) {
-              throw new IllegalStateException("Map injection failed due to duplicated key \""
-                  + entry.getKey() + "\"");
-            }
+          for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+            checkState(providerMapMutable.put(entry.getKey(), entry.getValue()) == null,
+                "Map injection failed due to duplicated key \"%s\"", entry.getKey());
           }
-    
+
           providerMap = Collections.unmodifiableMap(providerMapMutable);
         }
-    
+
         public Map<K, Provider<V>> get() {
           return providerMap;
         }
-       });
+      });
 
       final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
       binder.bind(mapKey).toProvider(new Provider<Map<K, V>>() {
         public Map<K, V> get() {
           Map<K, V> map = new LinkedHashMap<K, V>();
-          for (Map.Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
+          for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
             V value = entry.getValue().get();
             K key = entry.getKey();
-            if (value == null) {
-              throw new IllegalStateException("Map injection failed due to null value for key \"" 
-                  + key + "\"");
-            }
+            checkState(value != null,
+                "Map injection failed due to null value for key \"%s\"", key);
             map.put(key, value);
           }
           return Collections.unmodifiableMap(map);

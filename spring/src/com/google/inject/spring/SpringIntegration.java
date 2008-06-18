@@ -16,12 +16,12 @@
 
 package com.google.inject.spring;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
-import com.google.inject.spi.SourceProviders;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.spi.SourceProvider;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 
@@ -31,12 +31,11 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @author crazybob@google.com (Bob Lee)
  */
 public class SpringIntegration {
-
-  static {
-    SourceProviders.skip(SpringIntegration.class);
-  }
-
   private SpringIntegration() {}
+
+
+  private static final SourceProvider sourceProvider
+      = new SourceProvider(SpringIntegration.class);
 
   /**
    * Creates a provider which looks up objects from Spring using the given name.
@@ -61,6 +60,8 @@ public class SpringIntegration {
    * @see com.google.inject.name.Names#named(String) 
    */
   public static void bindAll(Binder binder, ListableBeanFactory beanFactory) {
+    binder = binder.withSource(sourceProvider.get());
+
     for (String name : beanFactory.getBeanDefinitionNames()) {
       Class<?> type = beanFactory.getType(name);
       bindBean(binder, beanFactory, name, type);

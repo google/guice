@@ -16,20 +16,37 @@
 
 package com.google.inject.spi;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+
 /**
- * Provides source objects to the {@link com.google.inject.Binder}.
- * A source object is any object which points back to the current location
- * within the configuration. Guice uses source objects in error messages
- * and associates them with bindings.
- *
+ * Provides access to the calling line of code.
+ * 
  * @author crazybob@google.com (Bob Lee)
  */
-public interface SourceProvider {
+public class SourceProvider {
 
-  /**
-   * Creates an object pointing to the current location within the
-   * configuration. If we run into a problem later, we'll be able to trace it
-   * back to the original source. Useful for debugging.
-   */
-  Object source();
+  /** Indicates that the source is unknown. */
+  public static final Object UNKNOWN_SOURCE = "[unknown source]";
+
+  private final Set<String> classNamesToSkip;
+
+  public SourceProvider(Class... classesToSkip) {
+    String[] classNamesToSkip = new String[classesToSkip.length + 1];
+    for (int i = 0; i < classesToSkip.length; i++) {
+      classNamesToSkip[i] = classesToSkip[i].getName();
+    }
+    classNamesToSkip[classesToSkip.length] = SourceProvider.class.getName();
+    this.classNamesToSkip = ImmutableSet.of(classNamesToSkip);
+  }
+
+  public Object get() {
+    for (final StackTraceElement element : new Throwable().getStackTrace()) {
+      String className = element.getClassName();
+      if (!classNamesToSkip.contains(className)) {
+        return element;
+      }
+    }
+    throw new AssertionError();
+  }
 }
