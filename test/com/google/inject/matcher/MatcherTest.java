@@ -18,16 +18,23 @@ package com.google.inject.matcher;
 
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import static com.google.inject.matcher.Matchers.*;
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.identicalTo;
+import static com.google.inject.matcher.Matchers.inPackage;
+import static com.google.inject.matcher.Matchers.inSubpackage;
+import static com.google.inject.matcher.Matchers.not;
+import static com.google.inject.matcher.Matchers.only;
+import static com.google.inject.matcher.Matchers.returns;
+import static com.google.inject.matcher.Matchers.subclassesOf;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -115,6 +122,17 @@ public class MatcherTest extends TestCase {
     assertFalse(inPackage(matchersPackage).equals(inPackage(Object.class.getPackage())));
   }
 
+  public void testInSubpackage() {
+    String stringPackageName = String.class.getPackage().getName();
+    assertEquals("inSubpackage(java.lang)", inSubpackage(stringPackageName).toString());
+    assertTrue(inSubpackage(stringPackageName).matches(Object.class));
+    assertTrue(inSubpackage(stringPackageName).matches(Method.class));
+    assertFalse(inSubpackage(stringPackageName).matches(Matchers.class));
+    assertFalse(inSubpackage("jav").matches(Object.class));
+    assertEqualsBothWays(inSubpackage(stringPackageName), inSubpackage(stringPackageName));
+    assertFalse(inSubpackage(stringPackageName).equals(inSubpackage(Matchers.class.getPackage().getName())));
+  }
+
   public void testReturns() throws NoSuchMethodException {
     Matcher<Method> predicate = returns(only(String.class));
     assertTrue(predicate.matches(
@@ -134,6 +152,7 @@ public class MatcherTest extends TestCase {
     assertEqualWhenReserialized(only("foo"));
     assertEqualWhenReserialized(identicalTo(Object.class));
     assertEqualWhenReserialized(inPackage(String.class.getPackage()));
+    assertEqualWhenReserialized(inSubpackage(String.class.getPackage().getName()));
     assertEqualWhenReserialized(returns(any()));
     assertEqualWhenReserialized(subclassesOf(AbstractList.class));
     assertEqualWhenReserialized(only("a").or(only("b")));

@@ -16,13 +16,14 @@
 
 package com.google.inject.matcher;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Matcher implementations. Supports matching classes and methods.
@@ -90,10 +91,8 @@ public class Matchers {
   private static void checkForRuntimeRetention(
       Class<? extends Annotation> annotationType) {
     Retention retention = annotationType.getAnnotation(Retention.class);
-    if (retention == null || retention.value() != RetentionPolicy.RUNTIME) {
-      throw new IllegalArgumentException("Annotation "
-          + annotationType.getSimpleName() + " is missing RUNTIME retention");
-    }
+    checkArgument(retention != null && retention.value() == RetentionPolicy.RUNTIME,
+        "Annotation " + annotationType.getSimpleName() + " is missing RUNTIME retention");
   }
 
   /**
@@ -270,7 +269,8 @@ public class Matchers {
   }
 
   /**
-   * Returns a matcher which matches classes in the given package.
+   * Returns a matcher which matches classes in the given package. Packages are specific to their
+   * classloader, so classes with the same package name may not have the same package at runtime.
    */
   public static Matcher<Class> inPackage(final Package targetPackage) {
     return new InPackage(targetPackage);
@@ -304,6 +304,41 @@ public class Matchers {
 
     public Object readResolve() {
       return inPackage(Package.getPackage(packageName));
+    }
+  }
+
+  /**
+   * Returns a matcher which matches classes in the given package and its subpackages. Unlike
+   * {@link #inPackage(Package) inPackage()}, this matches classes from any classloader.
+   */
+  public static Matcher<Class> inSubpackage(final String targetPackageName) {
+    return new InSubpackage(targetPackageName);
+  }
+
+  private static class InSubpackage extends AbstractMatcher<Class> implements Serializable {
+    private final String targetPackageName;
+
+    public InSubpackage(String targetPackageName) {
+      this.targetPackageName = targetPackageName;
+    }
+
+    public boolean matches(Class c) {
+      String classPackageName = c.getPackage().getName();
+      return classPackageName.equals(targetPackageName)
+          || classPackageName.startsWith(targetPackageName + ".");
+    }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof InSubpackage
+          && ((InSubpackage) other).targetPackageName.equals(targetPackageName);
+    }
+
+    @Override public int hashCode() {
+      return 37 * targetPackageName.hashCode();
+    }
+
+    @Override public String toString() {
+      return "inSubpackage(" + targetPackageName + ")";
     }
   }
 
