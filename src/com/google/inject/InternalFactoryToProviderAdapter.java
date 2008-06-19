@@ -19,8 +19,8 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.SourceProvider;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.SourceProvider;
 
 /**
  * @author crazybob@google.com (Bob Lee)

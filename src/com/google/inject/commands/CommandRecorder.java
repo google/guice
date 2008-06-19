@@ -16,7 +16,7 @@
 
 package com.google.inject.commands;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -29,9 +29,9 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.SourceProvider;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -48,9 +48,6 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class CommandRecorder {
-  private static final SourceProvider sourceProvider = new SourceProvider(
-      RecordingBinder.class, AbstractModule.class);
-
   private Stage currentStage = Stage.DEVELOPMENT;
   private final EarlyRequestsProvider earlyRequestsProvider;
 
@@ -91,19 +88,28 @@ public final class CommandRecorder {
   private class RecordingBinder implements Binder {
     private final Set<Module> modules;
     private final List<Command> commands;
+    private final Object source;
+    private final SourceProvider sourceProvider;
 
     private RecordingBinder() {
       modules = Sets.newHashSet();
       commands = Lists.newArrayList();
+      source = null;
+      sourceProvider
+          = new SourceProvider().plusSkippedClasses(RecordingBinder.class, AbstractModule.class);
     }
 
     /**
      * Creates a recording binder that's backed by the same configuration as
      * {@code backingBinder}.
      */
-    private RecordingBinder(RecordingBinder backingBinder) {
-      modules = backingBinder.modules;
-      commands = backingBinder.commands;
+    private RecordingBinder(RecordingBinder parent, Object source, SourceProvider sourceProvider) {
+      checkArgument(source == null ^ sourceProvider == null);
+
+      modules = parent.modules;
+      commands = parent.commands;
+      this.source = source;
+      this.sourceProvider = sourceProvider;
     }
 
     public void bindInterceptor(
@@ -186,17 +192,23 @@ public final class CommandRecorder {
     }
 
     public Binder withSource(final Object source) {
-      checkNotNull(source, "source");
+      return new RecordingBinder(this, source, null);
+    }
 
-      return new RecordingBinder(this) {
-        @Override protected Object getSource() {
-          return source;
-        }
-      };
+    public Binder skipSources(Class... classesToSkip) {
+      // if a source is specified explicitly, we don't need to skip sources
+      if (source != null) {
+        return this;
+      }
+
+      SourceProvider newSourceProvider = sourceProvider.plusSkippedClasses(classesToSkip);
+      return new RecordingBinder(this, null, newSourceProvider);
     }
 
     protected Object getSource() {
-      return sourceProvider.get();
+      return sourceProvider != null
+          ? sourceProvider.get()
+          : source;
     }
 
     @Override public String toString() {

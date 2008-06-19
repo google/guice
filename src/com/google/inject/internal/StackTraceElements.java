@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.inject.internal.ReferenceType.SOFT;
 import static com.google.inject.internal.ReferenceType.WEAK;
-import com.google.inject.spi.SourceProvider;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;

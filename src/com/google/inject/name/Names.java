@@ -16,10 +16,8 @@
 
 package com.google.inject.name;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.spi.SourceProvider;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -30,9 +28,6 @@ import java.util.Properties;
  * @author crazybob@google.com (Bob Lee)
  */
 public class Names {
-
-  private static final SourceProvider sourceProvider = new SourceProvider(
-      Names.class, AbstractModule.class);
 
   private Names() {}
 
@@ -48,7 +43,7 @@ public class Names {
    * {@code properties}.
    */
   public static void bindProperties(Binder binder, Map<String, String> properties) {
-    binder = binder.withSource(sourceProvider.get());
+    binder = binder.skipSources(Names.class);
     for (Map.Entry<String, String> entry : properties.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
@@ -62,7 +57,7 @@ public class Names {
    * {@link Properties#defaults defaults}.
    */
   public static void bindProperties(Binder binder, Properties properties) {
-    binder = binder.withSource(sourceProvider.get());
+    binder = binder.skipSources(Names.class);
 
     // use enumeration to include the default properties
     for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements(); ) {

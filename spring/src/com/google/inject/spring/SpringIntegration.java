@@ -21,7 +21,6 @@ import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
-import com.google.inject.spi.SourceProvider;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 
@@ -32,10 +31,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
  */
 public class SpringIntegration {
   private SpringIntegration() {}
-
-
-  private static final SourceProvider sourceProvider
-      = new SourceProvider(SpringIntegration.class);
 
   /**
    * Creates a provider which looks up objects from Spring using the given name.
@@ -60,7 +55,7 @@ public class SpringIntegration {
    * @see com.google.inject.name.Names#named(String) 
    */
   public static void bindAll(Binder binder, ListableBeanFactory beanFactory) {
-    binder = binder.withSource(sourceProvider.get());
+    binder = binder.skipSources(SpringIntegration.class);
 
     for (String name : beanFactory.getBeanDefinitionNames()) {
       Class<?> type = beanFactory.getType(name);

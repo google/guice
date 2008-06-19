@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.SourceProvider;
 import java.io.Serializable;
 import java.util.List;
 

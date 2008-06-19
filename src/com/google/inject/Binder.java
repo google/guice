@@ -292,7 +292,7 @@ public interface Binder {
 
   /**
    * Returns a binder that uses {@code source} as the reference location for
-   * errors in its configuration. This is typically a {@link StackTraceElement}
+   * configuration errors. This is typically a {@link StackTraceElement}
    * for {@code .java} source but it could any binding source, such as the
    * path to a {@code .properties} file.
    *
@@ -301,4 +301,15 @@ public interface Binder {
    * @return a binder that shares its configuration with this binder
    */
   Binder withSource(Object source);
+
+  /**
+   * Returns a binder that skips {@code classesToSkip} when identify the
+   * calling code. The caller's {@link StackTraceElement} is used to locate
+   * the source of configuration errors.
+   *
+   * @param classesToSkip library classes that create bindings on behalf of
+   *      their clients.
+   * @return a binder that shares its configuration with this binder.
+   */
+  Binder skipSources(Class... classesToSkip);
 }

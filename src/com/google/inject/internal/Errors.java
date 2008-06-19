@@ -28,7 +28,6 @@ import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.SourceProvider;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;

@@ -27,7 +27,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.spi.SourceProvider;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -85,17 +84,15 @@ import java.util.Set;
 public abstract class Multibinder<T> {
   private Multibinder() {}
 
-  private static final SourceProvider sourceProvider
-      = new SourceProvider(RealMultibinder.class, Multibinder.class);
-
   /**
    * Returns a new multibinder that collects instances of {@code type} in a
    * {@link Set} that is itself bound with no binding annotation.
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
+    binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "",
         Key.get(Multibinder.<T>setOf(type)));
-    binder.withSource(sourceProvider.get()).install(result);
+    binder.install(result);
     return result;
   }
 
@@ -104,9 +101,10 @@ public abstract class Multibinder<T> {
    * {@link Set} that is itself bound with {@code annotation}.
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
+    binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation.toString(),
         Key.get(Multibinder.<T>setOf(type), annotation));
-    binder.withSource(sourceProvider.get()).install(result);
+    binder.install(result);
     return result;
   }
 
@@ -116,9 +114,10 @@ public abstract class Multibinder<T> {
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
       Class<? extends Annotation> annotationType) {
+    binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "@" + annotationType.getName(),
         Key.get(Multibinder.<T>setOf(type), annotationType));
-    binder.withSource(sourceProvider.get()).install(result);
+    binder.install(result);
     return result;
   }
 
@@ -193,8 +192,7 @@ public abstract class Multibinder<T> {
     @Override public LinkedBindingBuilder<T> addBinding() {
       checkState(!isInitialized(), "Multibinder was already initialized");
 
-      return binder.withSource(sourceProvider.get())
-          .bind((Key<T>) Key.get(elementType, new RealElement(setName)));
+      return binder.bind((Key<T>) Key.get(elementType, new RealElement(setName)));
     }
 
     /**

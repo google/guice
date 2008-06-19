@@ -26,7 +26,6 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
-import com.google.inject.spi.SourceProvider;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -94,9 +93,6 @@ import java.util.Set;
 public abstract class MapBinder<K, V> {
   private MapBinder() {}
 
-  private static final SourceProvider sourceProvider
-      = new SourceProvider(MapBinder.class, RealMapBinder.class);
-
   /**
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code 
    * valueType} in a {@link Map} that is itself bound with no binding 
@@ -104,6 +100,7 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType) {
+    binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType)),
         Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType)), 
@@ -117,6 +114,7 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType, Annotation annotation) {
+    binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotation),
         Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotation), 
@@ -130,6 +128,7 @@ public abstract class MapBinder<K, V> {
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
       Type keyType, Type valueType, Class<? extends Annotation> annotationType) {
+    binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
         Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotationType),
         Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotationType), 
@@ -156,9 +155,9 @@ public abstract class MapBinder<K, V> {
   private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
       Type valueType, Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
       Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
-    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(binder, 
+    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(binder,
         valueType, mapKey, providerMapKey, entrySetBinder);
-    binder.withSource(sourceProvider.get()).install(mapBinder);
+    binder.install(mapBinder);
     return mapBinder;
   }
 
@@ -225,13 +224,12 @@ public abstract class MapBinder<K, V> {
     @Override public LinkedBindingBuilder<V> addBinding(K key) {
       checkNotNull(key, "key");
       checkState(!isInitialized(), "MapBinder was already initialized");
-      Object source = sourceProvider.get();
 
       @SuppressWarnings("unchecked")
       Key<V> valueKey = (Key<V>) Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
       entrySetBinder.addBinding().toInstance(new MapEntry<K, Provider<V>>(key,
-          binder.withSource(source).getProvider(valueKey)));
-      return binder.withSource(source).bind(valueKey);
+          binder.getProvider(valueKey)));
+      return binder.bind(valueKey);
     }
 
     public void configure(Binder binder) {

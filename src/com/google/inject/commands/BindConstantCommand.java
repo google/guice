@@ -17,7 +17,6 @@
 package com.google.inject.commands;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -25,7 +24,6 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.spi.SourceProvider;
 import java.lang.annotation.Annotation;
 
 /**
@@ -34,9 +32,6 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class BindConstantCommand implements Command {
-  private static final SourceProvider sourceProvider = new SourceProvider(
-      BindingBuilder.class, AbstractModule.class);
-
   private final Object source;
   private BindingAnnotation bindingAnnotation;
   private ConstantTarget<?> target;
@@ -112,7 +107,7 @@ public final class BindConstantCommand implements Command {
     private final Binder binder;
 
     BindingBuilder(Binder binder) {
-      this.binder = binder;
+      this.binder = binder.skipSources(BindingBuilder.class);
     }
 
     public ConstantBindingBuilder annotatedWith(final Class<? extends Annotation> annotationType) {
@@ -347,13 +342,13 @@ public final class BindConstantCommand implements Command {
 
     private void assertNoBindingAnnotation() {
       if (bindingAnnotation != null) {
-        binder.withSource(sourceProvider.get()).addError(ANNOTATION_ALREADY_SPECIFIED);
+        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
       }
     }
 
     private void assertNoTarget() {
       if (target != null) {
-        binder.withSource(sourceProvider.get()).addError(CONSTANT_VALUE_ALREADY_SET);
+        binder.addError(CONSTANT_VALUE_ALREADY_SET);
       }
     }
 
