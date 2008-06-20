@@ -16,11 +16,15 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import com.google.inject.util.Types;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
+import java.util.Set;
 import junit.framework.TestCase;
 
 /**
@@ -175,4 +179,35 @@ public class ProviderMethodsTest extends TestCase {
   @Retention(RUNTIME)
   @BindingAnnotation @interface Blue {}
 
+  public void testGenericProviderMethods() {
+    ProvideTs<String> source = new ProvideTs<String>("A", "B") {};
+    Injector injector = Guice.createInjector(ProviderMethods.from(source));
+    
+    assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("First"))));
+    assertEquals("B", injector.getInstance(Key.get(String.class, Names.named("First"))));
+    assertEquals(ImmutableSet.of("A", "B"),
+        injector.getInstance(Key.get(Types.setOf(String.class))));
+  }
+
+  abstract class ProvideTs<T> {
+    final T first;
+    final T second;
+
+    protected ProvideTs(T first, T second) {
+      this.first = first;
+      this.second = second;
+    }
+
+    @Named("First") @Provides T provideFirst() {
+      return first;
+    }
+
+    @Named("Second") @Provides T provideSecond() {
+      return second;
+    }
+
+    @Provides Set<T> provideBoth(@Named("First") T first, @Named("Second") T second) {
+      return ImmutableSet.of(first, second);
+    }
+  }
 }
