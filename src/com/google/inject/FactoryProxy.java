@@ -41,13 +41,10 @@ class FactoryProxy<T> implements InternalFactory<T>, BindCommandProcessor.Creati
   }
 
   public void notify(final InjectorImpl injector, final Errors errors) {
-    errors.pushSource(source);
     try {
-      targetFactory = injector.getInternalFactory(targetKey, errors);
+      targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source));
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
-    } finally {
-      errors.popSource(source);
     }
   }
 

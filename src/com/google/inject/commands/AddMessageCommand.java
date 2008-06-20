@@ -16,41 +16,41 @@
 
 package com.google.inject.commands;
 
-
-import java.util.Arrays;
-import static java.util.Collections.unmodifiableList;
-import java.util.List;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Message;
 
 /**
  * Immutable snapshot of a request to add a string message.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class AddMessageErrorCommand implements Command {
-  private final Object source;
-  private final String message;
-  private final List<Object> arguments;
+public final class AddMessageCommand implements Command {
+  private final Message message;
 
-  AddMessageErrorCommand(Object source, String message, Object[] arguments) {
-    this.source = checkNotNull(source, "source");
-    this.message = checkNotNull(message, "message");
-    this.arguments = unmodifiableList(Arrays.asList(arguments.clone()));
+  AddMessageCommand(Message message) {
+    this.message = message;
+  }
+
+  AddMessageCommand(Object source, String message, Object[] arguments) {
+    this.message = new Message(source, String.format(message, arguments));
+  }
+
+  AddMessageCommand(Object source, Throwable throwable) {
+    this.message = new Message(source,
+        "An exception was caught and reported. Message: " + throwable.getMessage(), 
+        ImmutableList.<InjectionPoint>of(), throwable);
   }
 
   public Object getSource() {
-    return source;
+    return message.getSource();
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitAddMessageError(this);
+    return visitor.visitAddMessage(this);
   }
 
-  public String getMessage() {
+  public Message getMessage() {
     return message;
-  }
-
-  public List<Object> getArguments() {
-    return arguments;
   }
 }

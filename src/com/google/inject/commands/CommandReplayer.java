@@ -54,13 +54,8 @@ public class CommandReplayer {
     checkNotNull(commands, "commands");
 
     Command.Visitor<Void> visitor = new Command.Visitor<Void>() {
-      public Void visitAddMessageError(AddMessageErrorCommand command) {
+      public Void visitAddMessage(AddMessageCommand command) {
         replayAddMessageError(binder, command);
-        return null;
-      }
-
-      public Void visitAddError(AddThrowableErrorCommand command) {
-        replayAddError(binder, command);
         return null;
       }
 
@@ -105,13 +100,8 @@ public class CommandReplayer {
     }
   }
 
-  public void replayAddMessageError(final Binder binder, final AddMessageErrorCommand command) {
-    binder.withSource(command.getSource())
-        .addError(command.getMessage(), command.getArguments().toArray());
-  }
-
-  public void replayAddError(final Binder binder, final AddThrowableErrorCommand command) {
-    binder.withSource(command.getSource()).addError(command.getThrowable());
+  public void replayAddMessageError(final Binder binder, final AddMessageCommand command) {
+    binder.withSource(command.getSource()).addError(command.getMessage());
   }
 
   public void replayBindInterceptor(final Binder binder, final BindInterceptorCommand command) {

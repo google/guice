@@ -68,15 +68,11 @@ class RequestStaticInjectionCommandProcessor extends CommandProcessor {
     }
 
     void validate(final InjectorImpl injector) {
-      errors.pushSource(source);
-      try {
-        injector.addSingleInjectorsForFields(
-            type.getDeclaredFields(), true, memberInjectors, errors);
-        injector.addSingleInjectorsForMethods(
-            type.getDeclaredMethods(), true, memberInjectors, errors);
-      } finally {
-        errors.popSource(source);
-      }
+      Errors errorsForMember = errors.withSource(source);
+      injector.addSingleInjectorsForFields(
+          type.getDeclaredFields(), true, memberInjectors, errorsForMember);
+      injector.addSingleInjectorsForMethods(
+          type.getDeclaredMethods(), true, memberInjectors, errorsForMember);
     }
 
     void injectMembers(InjectorImpl injector) {

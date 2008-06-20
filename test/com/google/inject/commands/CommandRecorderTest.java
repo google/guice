@@ -71,14 +71,16 @@ public class CommandRecorderTest extends TestCase {
     checkModule(
         new AbstractModule() {
           protected void configure() {
-            addError("Message", "A", "B", "C");
+            addError("Message %s %d %s", "A", 5, "C");
           }
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
-            assertEquals(Arrays.asList("A", "B", "C"), command.getArguments());
-            assertEquals("Message", command.getMessage());
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Message A 5 C", command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -94,8 +96,12 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddError(AddThrowableErrorCommand command) {
-            assertEquals("A", command.getThrowable().getMessage());
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("A", command.getMessage().getCause().getMessage());
+            assertEquals(command.getMessage().getMessage(),
+                "An exception was caught and reported. Message: A");
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -580,9 +586,12 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+          @Override public Void visitAddMessage(AddMessageCommand command) {
             assertEquals("More than one annotation is specified for this binding.",
-                command.getMessage());
+                command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -606,8 +615,12 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
-            assertEquals("Implementation is set more than once.", command.getMessage());
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Implementation is set more than once.",
+                command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -631,8 +644,11 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
-            assertEquals("Scope is set more than once.", command.getMessage());
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Scope is set more than once.", command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -656,9 +672,12 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
+          @Override public Void visitAddMessage(AddMessageCommand command) {
             assertEquals("More than one annotation is specified for this binding.",
-                command.getMessage());
+                command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -682,8 +701,12 @@ public class CommandRecorderTest extends TestCase {
         },
 
         new FailingVisitor() {
-          @Override public Void visitAddMessageError(AddMessageErrorCommand command) {
-            assertEquals("Constant value is set more than once.", command.getMessage());
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Constant value is set more than once.",
+                command.getMessage().getMessage());
+            assertNull(command.getMessage().getCause());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            assertContains(command.getMessage().getSource(), "CommandRecorderTest.java");
             return null;
           }
         }
@@ -739,11 +762,7 @@ public class CommandRecorderTest extends TestCase {
   }
 
   private static class FailingVisitor implements Command.Visitor<Void> {
-    public Void visitAddMessageError(AddMessageErrorCommand command) {
-      throw new AssertionFailedError();
-    }
-
-    public Void visitAddError(AddThrowableErrorCommand command) {
+    public Void visitAddMessage(AddMessageCommand command) {
       throw new AssertionFailedError();
     }
 

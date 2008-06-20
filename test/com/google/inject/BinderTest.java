@@ -201,9 +201,10 @@ public class BinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(),
+          "Error at " + getClass().getName(), ".configure(BinderTest.java",
           "A binding to java.lang.String[] was already configured");
-      Asserts.assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(),
           "1 error[s]");
     }
   }

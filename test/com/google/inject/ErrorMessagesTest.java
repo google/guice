@@ -28,7 +28,9 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (Exception expected) {
       // TODO(kevinb): why does the source come out as unknown??
-      assertContains(expected.getMessage(), "Injecting into inner classes is not supported.");
+      assertContains(expected.getMessage(),
+          "Error at " + InnerClass.class.getName() + ".class(ErrorMessagesTest.java:",
+          "Injecting into inner classes is not supported.");
     }
   }
 
@@ -40,7 +42,9 @@ public class ErrorMessagesTest extends TestCase {
       injector.getInstance(LocalClass.class);
       fail();
     } catch (Exception expected) {
-      assertContains(expected.getMessage(), "Injecting into inner classes is not supported.");
+      assertContains(expected.getMessage(),
+          "Error at " + LocalClass.class.getName() + ".class(ErrorMessagesTest.java:",
+          "Injecting into inner classes is not supported.");
     }
   }
 
@@ -66,6 +70,7 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
+          "Error at " + B.class.getName() + ".injectMe(ErrorMessagesTest.java:",
           "method " + B.class.getName() + ".injectMe() ",
           "is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.");
@@ -76,6 +81,7 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
+          "Error at " + C.class.getName() + ".<init>(ErrorMessagesTest.java:",
           "constructor " + C.class.getName() + "() ",
           "is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.");

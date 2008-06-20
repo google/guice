@@ -16,8 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.AddMessageErrorCommand;
-import com.google.inject.commands.AddThrowableErrorCommand;
+import com.google.inject.commands.AddMessageCommand;
 import com.google.inject.commands.BindCommand;
 import com.google.inject.commands.BindConstantCommand;
 import com.google.inject.commands.BindInterceptorCommand;
@@ -41,29 +40,29 @@ import java.util.List;
  */
 abstract class CommandProcessor implements Command.Visitor<Boolean> {
 
-  protected final Errors errors;
+  protected Errors errors;
 
   protected CommandProcessor(Errors errors) {
     this.errors = errors;
   }
 
   public void processCommands(List<Command> commands) {
-    for (Iterator<Command> i = commands.iterator(); i.hasNext(); ) {
-      Command command = i.next();
-      errors.pushSource(command.getSource());
-      Boolean allDone = command.acceptVisitor(this);
-      if (allDone) {
-        i.remove();
+    Errors errorsAnyCommand = this.errors;
+    try {
+      for (Iterator<Command> i = commands.iterator(); i.hasNext(); ) {
+        Command command = i.next();
+        this.errors = errorsAnyCommand.withSource(command.getSource());
+        Boolean allDone = command.acceptVisitor(this);
+        if (allDone) {
+          i.remove();
+        }
       }
-      errors.popSource(command.getSource());
+    } finally {
+      this.errors = errorsAnyCommand;
     }
   }
 
-  public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    return false;
-  }
-
-  public Boolean visitAddError(AddThrowableErrorCommand command) {
+  public Boolean visitAddMessage(AddMessageCommand command) {
     return false;
   }
 

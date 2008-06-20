@@ -69,13 +69,12 @@ public class ProviderMethods {
     }
 
     <T> void bindProviderMethod(final Method method) {
-      Errors errors = new Errors()
-          .pushSource(StackTraceElements.forMember(method));
+      Errors errors = new Errors(StackTraceElements.forMember(method));
 
       method.setAccessible(true);
 
       Class<? extends Annotation> scopeAnnotation
-          = findScopeAnnotation(errors, method.getAnnotations());
+          = Scopes.findScopeAnnotation(errors, method.getAnnotations());
       Annotation bindingAnnotation
           = Keys.findBindingAnnotation(errors, method, method.getAnnotations());
 
@@ -98,8 +97,8 @@ public class ProviderMethods {
 
           try {
             // We know this cast is safe becase T is the method's return type.
-            @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" }) T result = (T) method
-                .invoke(providers, parameters);
+            @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" })
+            T result = (T) method.invoke(providers, parameters);
             return result;
           }
           catch (IllegalAccessException e) {
@@ -140,26 +139,6 @@ public class ProviderMethods {
       }
 
       return parameterProviders;
-    }
-
-    /**
-     * Returns the scoping annotation, or null if there isn't one.
-     */
-    Class<? extends Annotation> findScopeAnnotation(Errors errors, Annotation[] annotations) {
-      Class<? extends Annotation> found = null;
-
-      for (Annotation annotation : annotations) {
-        if (annotation.annotationType()
-            .isAnnotationPresent(ScopeAnnotation.class)) {
-          if (found != null) {
-            errors.duplicateScopeAnnotations(found, annotation.annotationType());
-          } else {
-            found = annotation.annotationType();
-          }
-        }
-      }
-
-      return found;
     }
   }
 }

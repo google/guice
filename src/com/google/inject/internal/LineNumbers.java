@@ -52,9 +52,12 @@ public class LineNumbers {
    */
   public LineNumbers(Class type) throws IOException {
     this.type = type;
-    InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
-    checkArgument(in != null, "Cannot find bytecode for %s", type);
-    new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+
+    if (!type.isArray()) {
+      InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
+      checkArgument(in != null, "Cannot find bytecode for %s", type);
+      new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+    }
   }
 
   /**

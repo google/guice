@@ -23,6 +23,7 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.GuiceNamingPolicy;
 import com.google.inject.internal.ReferenceCache;
+import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,7 +62,7 @@ class ProxyFactory implements ConstructionProxyFactory {
 
   Map<Constructor<?>, Object> constructionProxies = new ReferenceCache<Constructor<?>, Object>() {
     protected Object create(Constructor<?> constructor) {
-      Errors errors = new Errors();
+      Errors errors = new Errors(StackTraceElements.forMember(constructor));
       try {
         ConstructionProxy<?> result = createConstructionProxy(errors, constructor);
         errors.throwIfNecessary();

@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
-import junit.framework.TestCase;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.google.inject.name.Named;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -29,11 +30,7 @@ public class ProviderMethodsTest extends TestCase {
 
   @SuppressWarnings("unchecked")
   public void testProviderMethods() {
-    Injector injector = Guice.createInjector(new Module() {
-      public void configure(Binder binder) {
-        binder.install(ProviderMethods.from(ProviderMethodsTest.this));
-      }
-    });
+    Injector injector = Guice.createInjector(ProviderMethods.from(ProviderMethodsTest.this));
 
     Bob bob = injector.getInstance(Bob.class);
     assertEquals("A Bob", bob.getName());
@@ -103,6 +100,8 @@ public class ProviderMethodsTest extends TestCase {
   @BindingAnnotation
   @interface Sole {}
 
+
+
 // We'll have to make getProvider() support circular dependencies before this
 // will work.
 //
@@ -154,4 +153,26 @@ public class ProviderMethodsTest extends TestCase {
 //      }
 //    };
 //  }
+
+
+  public void testMultipleBindingAnnotations() {
+    try {
+      Guice.createInjector(ProviderMethods.from(new Object() {
+        @Provides @Named("A") @Blue
+        public String provideString() {
+          return "a";
+        }
+      }));
+      fail();
+    } catch (CreationException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "Error at " + getClass().getName(), ".provideString()",
+          "more than one annotation annotated with @BindingAnnotation:", "Named", "Blue");
+    }
+
+  }
+
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface Blue {}
+
 }

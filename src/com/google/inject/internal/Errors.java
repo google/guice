@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.CreationException;
-import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -39,8 +38,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -50,15 +47,42 @@ import java.util.logging.Logger;
  */
 public final class Errors implements Serializable {
 
-  private static final Logger logger = Logger.getLogger(Guice.class.getName());
+  // TODO: Provide a policy on what the source line should be for a given member.
+  //       Should we prefer the line where the binding was made?
+  //       Should we prefer the member?
+  // For example, if we bind a class with two scope annotations, is that a problem
+  // with the binding, or a problem with the bound class? The catch being that if it's
+  // a problem with the binding, then we report a different source line if the class
+  // is retrieved via a JIT binding.
+  //
+  // What about a missing implementation? Is that at the caller?
+  // What about injection points?
 
-  private Object sourceForNextError = null;
-  private final List<Object> sources = Lists.newArrayList();
+  /** the stacktrace or member that will be the reference location for new errors */
+  private final Object source;
 
   /** false indicates that new errors should not be added */
   private boolean isMutable = true;
-  private final List<Message> errors = Lists.newArrayList();
-  private final List<InjectionPoint> injectionPoints = Lists.newArrayList();
+  private final List<Message> errors;
+  private final List<InjectionPoint> injectionPoints;
+
+  public Errors() {
+    this(SourceProvider.UNKNOWN_SOURCE);
+  }
+
+  public Errors(Object source) {
+    this.source = source;
+    isMutable = true;
+    errors = Lists.newArrayList();
+    injectionPoints = Lists.newArrayList();
+  }
+
+  public Errors(Errors parent, Object source) {
+    this.source = source;
+    isMutable = parent.isMutable;
+    errors = parent.errors;
+    injectionPoints = Lists.newArrayList(parent.injectionPoints);
+  }
 
   public Errors userReportedError(String messageFormat, List<Object> arguments) {
     return addMessage(messageFormat, arguments);
@@ -74,18 +98,11 @@ public final class Errors implements Serializable {
   }
 
   /**
-   * Specifies the source for every error added until the matching call to
-   * {@link #popSource(Object)}.
+   * Returns a new instance that uses {@code source} as a reference point for
+   * newly added errors.
    */
-  public Errors pushSource(Object source) {
-    sources.add(source);
-    return this;
-  }
-
-  public Errors popSource(Object source) {
-    Object popped = sources.remove(sources.size() - 1);
-    checkArgument(popped == source);
-    return this;
+  public Errors withSource(Object source) {
+    return new Errors(this, source);
   }
 
   /**
@@ -162,15 +179,6 @@ public final class Errors implements Serializable {
 
   public Errors recursiveProviderType() {
     return addMessage("@ProvidedBy points to the same class it annotates.");
-  }
-
-  public Errors exceptionReportedByModuleSeeLogs(Throwable throwable) {
-    String rootMessage = getRootMessage(throwable);
-
-    logger.log(Level.INFO, format("An exception was caught and reported. Message: %s", rootMessage),
-        throwable);
-    return addMessage(throwable,
-        "An exception was caught and reported. See log for details. Message: %s", rootMessage);
   }
 
   public Errors missingBindingAnnotation(Object source) {
@@ -302,14 +310,6 @@ public final class Errors implements Serializable {
         expectedType);
   }
 
-  /**
-   * Convenience method to set the source for a single error.
-   */
-  public Errors at(Object source) {
-    sourceForNextError = source;
-    return this;
-  }
-
   public Errors makeImmutable() {
     isMutable = false;
     return this;
@@ -327,7 +327,7 @@ public final class Errors implements Serializable {
   public Errors merge(Errors moreErrors) {
     checkState(isMutable);
 
-    if (moreErrors != this) {
+    if (moreErrors.errors != this.errors) {
       for (Message message : moreErrors.errors) {
         List<InjectionPoint> injectionPoints = Lists.newArrayList();
         injectionPoints.addAll(this.injectionPoints);
@@ -361,23 +361,17 @@ public final class Errors implements Serializable {
   }
 
   private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
+    String message = format(messageFormat, arguments);
+    addMessage(new Message(source, message, ImmutableList.copyOf(injectionPoints), cause));
+    return this;
+  }
+
+  public Errors addMessage(Message message) {
     if (!isMutable) {
       throw new AssertionError();
     }
 
-    String message = format(messageFormat, arguments);
-
-    Object source;
-    if (sourceForNextError != null) {
-      source = sourceForNextError;
-      sourceForNextError = null;
-    } else if (!sources.isEmpty()) {
-      source = sources.get(sources.size() - 1);
-    } else {
-      source = SourceProvider.UNKNOWN_SOURCE;
-    }
-
-    errors.add(new Message(source, message, ImmutableList.copyOf(injectionPoints), cause));
+    errors.add(message);
     return this;
   }
 
@@ -442,7 +436,7 @@ public final class Errors implements Serializable {
     return fmt.format("%s error[s]", errorMessages.size()).toString();
   }
 
-  static abstract class Converter<T> {
+  private static abstract class Converter<T> {
 
     final Class<T> type;
 
@@ -461,12 +455,7 @@ public final class Errors implements Serializable {
     abstract String toString(T t);
   }
 
-  public static String getRootMessage(Throwable t) {
-    Throwable cause = t.getCause();
-    return cause == null ? t.toString() : getRootMessage(cause);
-  }
-
-  static final Collection<Converter<?>> converters = ImmutableList.of(
+  private static final Collection<Converter<?>> converters = ImmutableList.of(
       new Converter<MatcherAndConverter>(MatcherAndConverter.class) {
         public String toString(MatcherAndConverter m) {
           return m.toString();

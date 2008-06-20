@@ -34,11 +34,7 @@ public class DefaultCommandVisitor<V> implements Command.Visitor<V> {
     return null;
   }
 
-  public V visitAddError(AddThrowableErrorCommand command) {
-    return visitCommand(command);
-  }
-
-  public V visitAddMessageError(AddMessageErrorCommand command) {
+  public V visitAddMessage(AddMessageCommand command) {
     return visitCommand(command);
   }
 

@@ -38,13 +38,10 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
   }
 
   public void notify(final InjectorImpl injector, final Errors errors) {
-    errors.pushSource(source);
     try {
-      providerFactory = injector.getInternalFactory(providerKey, errors);
+      providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source));
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
-    } finally {
-      errors.popSource(source);
     }
   }
 

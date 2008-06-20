@@ -29,8 +29,7 @@ public interface Command {
    * Visit commands.
    */
   public interface Visitor<V> {
-    V visitAddMessageError(AddMessageErrorCommand command);
-    V visitAddError(AddThrowableErrorCommand command);
+    V visitAddMessage(AddMessageCommand command);
     V visitBindInterceptor(BindInterceptorCommand command);
     V visitBindScope(BindScopeCommand command);
     V visitRequestStaticInjection(RequestStaticInjectionCommand command);

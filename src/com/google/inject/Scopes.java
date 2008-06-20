@@ -89,11 +89,21 @@ public class Scopes {
   /**
    * Returns the scope annotation on {@code type}, or null if none is specified.
    */
-  static Class<? extends Annotation> getScopeAnnotation(
+  static Class<? extends Annotation> findScopeAnnotation(
       Errors errors, Class<?> implementation) {
+    return findScopeAnnotation(errors, implementation.getAnnotations());
+  }
+
+
+  /**
+   * Returns the scoping annotation, or null if there isn't one.
+   */
+  static Class<? extends Annotation> findScopeAnnotation(Errors errors, Annotation[] annotations) {
     Class<? extends Annotation> found = null;
-    for (Annotation annotation : implementation.getAnnotations()) {
-      if (isScopeAnnotation(annotation)) {
+
+    for (Annotation annotation : annotations) {
+      if (annotation.annotationType()
+          .isAnnotationPresent(ScopeAnnotation.class)) {
         if (found != null) {
           errors.duplicateScopeAnnotations(found, annotation.annotationType());
         } else {

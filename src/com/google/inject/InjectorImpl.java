@@ -149,7 +149,7 @@ class InjectorImpl implements Injector {
 
   /** Returns the binding for {@code key} */
   public <T> BindingImpl<T> getBinding(Key<T> key) {
-    Errors errors = new Errors();
+    Errors errors = new Errors(StackTraceElements.forType(key.getRawType()));
     try {
       BindingImpl<T> result = getBindingOrThrow(key, errors);
       ProvisionException.throwNewIfNonEmpty(errors);
@@ -488,11 +488,11 @@ class InjectorImpl implements Injector {
     }
 
     if (scope == null) {
-      Class<? extends Annotation> scopeAnnotation = Scopes.getScopeAnnotation(errors, type);
+      Class<? extends Annotation> scopeAnnotation = Scopes.findScopeAnnotation(errors, type);
       if (scopeAnnotation != null) {
         scope = scopes.get(scopeAnnotation);
         if (scope == null) {
-          errors.at(StackTraceElements.forType(type)).scopeNotFound(scopeAnnotation);
+          errors.withSource(StackTraceElements.forType(type)).scopeNotFound(scopeAnnotation);
         }
       }
     }
@@ -639,9 +639,9 @@ class InjectorImpl implements Injector {
       // Look for a binding without annotation attributes or return null.
       if (key.hasAttributes()) {
         try {
-          return getBindingOrThrow(key.withoutAttributes(), new Errors());
-        }
-        catch (ErrorsException ignored) {
+          Errors ignored = new Errors();
+          return getBindingOrThrow(key.withoutAttributes(), ignored);
+        } catch (ErrorsException ignored) {
           // throw with a more appropriate message below
         }
       }
@@ -659,7 +659,10 @@ class InjectorImpl implements Injector {
     return getBindingOrThrow(key, errors).internalFactory;
   }
 
-  /** Field and method injectors. */
+  /**
+   * Field and method injectors. Each value is either an Errors or a
+   * {@code List<SingleMemberInjector>}.
+   */
   private final Map<Class<?>, Object> injectors = new ReferenceCache<Class<?>, Object>() {
     protected Object create(Class<?> key) {
       Errors errors = new Errors();
@@ -735,15 +738,14 @@ class InjectorImpl implements Injector {
         continue;
       }
 
-      Errors errorsForMember = inject.optional() ? new Errors() : errors;
       Object source = StackTraceElements.forMember(member);
-      errorsForMember.pushSource(source);
+      Errors errorsForMember = inject.optional()
+          ? new Errors(source)
+          : errors.withSource(source);
       try {
         injectors.add(injectorFactory.create(this, member, errorsForMember));
       } catch (ErrorsException ignoredForNow) {
         // if this was an optional injection, it is completely ignored
-      } finally {
-        errorsForMember.popSource(source);
       }
     }
   }
@@ -795,12 +797,7 @@ class InjectorImpl implements Injector {
       final Key<?> key = Keys.get(field.getGenericType(), field, field.getAnnotations(), errors);
 
       Object source = StackTraceElements.forMember(field);
-      errors.pushSource(source);
-      try {
-        factory = injector.getInternalFactory(key, errors);
-      } finally {
-        errors.popSource(source);
-      }
+      factory = injector.getInternalFactory(key, errors.withSource(source));
 
       injectionPoint = InjectionPoint.newInstance(
           field, Nullability.allowsNull(field.getAnnotations()), key);
@@ -863,12 +860,7 @@ class InjectorImpl implements Injector {
       Member member, final Errors errors) throws ErrorsException {
     InternalFactory<? extends T> factory;
     Object source = StackTraceElements.forMember(member);
-    errors.pushSource(source);
-    try {
-      factory = getInternalFactory(parameter.getKey(), errors);
-    } finally {
-      errors.popSource(source);
-    }
+    factory = getInternalFactory(parameter.getKey(), errors.withSource(source));
 
     InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(
         member, parameter.getIndex(), parameter.allowsNull(), parameter.getKey());
@@ -947,7 +939,7 @@ class InjectorImpl implements Injector {
   final Map<Class<?>, Object> constructors = new ReferenceCache<Class<?>, Object>() {
     @SuppressWarnings("unchecked")
     protected Object create(Class<?> implementation) {
-      Errors errors = new Errors();
+      Errors errors = new Errors(StackTraceElements.forType(implementation));
       try {
         ConstructorInjector result = new ConstructorInjector(
             errors, InjectorImpl.this, implementation);
@@ -1018,8 +1010,7 @@ class InjectorImpl implements Injector {
     Errors errors = new Errors();
     try {
       injectMembersOrThrow(errors, o);
-    }
-    catch (ErrorsException e) {
+    } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
 
@@ -1076,7 +1067,7 @@ class InjectorImpl implements Injector {
   }
 
   public <T> Provider<T> getProvider(final Key<T> key) {
-    Errors errors = new Errors();
+    Errors errors = new Errors(StackTraceElements.forType(key.getRawType()));
     try {
       Provider<T> result = getProviderOrThrow(key, errors);
       errors.throwIfNecessary();

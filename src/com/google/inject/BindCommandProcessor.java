@@ -201,19 +201,19 @@ class BindCommandProcessor extends CommandProcessor {
       Class<? extends Annotation> annotationType = key.getAnnotationType();
 
       if (!Annotations.isRetainedAtRuntime(annotationType)) {
-        errors.at(StackTraceElements.forType(annotationType)).missingRuntimeRetention(source);
+        errors.withSource(StackTraceElements.forType(annotationType)).missingRuntimeRetention(source);
       }
 
       if (!Key.isBindingAnnotation(annotationType)) {
-        errors.at(StackTraceElements.forType(annotationType)).missingBindingAnnotation(source);
+        errors.withSource(StackTraceElements.forType(annotationType)).missingBindingAnnotation(source);
       }
     }
 
     Class<? super T> rawType = key.getRawType();
     if (!Classes.isConcrete(rawType)) {
-      Class<? extends Annotation> scopeAnnotation = Scopes.getScopeAnnotation(errors, rawType);
+      Class<? extends Annotation> scopeAnnotation = Scopes.findScopeAnnotation(errors, rawType);
       if (scopeAnnotation != null) {
-        errors.at(StackTraceElements.forType(rawType))
+        errors.withSource(StackTraceElements.forType(rawType))
             .scopeAnnotationOnAbstractType(scopeAnnotation, rawType, source);
       }
     }

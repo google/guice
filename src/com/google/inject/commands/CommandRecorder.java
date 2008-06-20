@@ -138,15 +138,15 @@ public final class CommandRecorder {
     }
 
     public void addError(String message, Object... arguments) {
-      commands.add(new AddMessageErrorCommand(getSource(), message, arguments));
+      commands.add(new AddMessageCommand(getSource(), message, arguments));
     }
 
     public void addError(Throwable t) {
-      commands.add(new AddThrowableErrorCommand(getSource(), t));
+      commands.add(new AddMessageCommand(getSource(), t));
     }
 
     public void addError(Message message) {
-      throw new UnsupportedOperationException("TODO");
+      commands.add(new AddMessageCommand(message));
     }
 
     public <T> BindCommand<T>.BindingBuilder bind(Key<T> key) {

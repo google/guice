@@ -45,12 +45,12 @@ class ScopesCommandProcessor extends CommandProcessor {
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 
     if (!Scopes.isScopeAnnotation(annotationType)) {
-      errors.at(StackTraceElements.forType(annotationType)).missingScopeAnnotation();
+      errors.withSource(StackTraceElements.forType(annotationType)).missingScopeAnnotation();
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
-      errors.at(StackTraceElements.forType(annotationType))
+      errors.withSource(StackTraceElements.forType(annotationType))
           .missingRuntimeRetention(command.getSource());
       // Go ahead and bind anyway so we don't get collateral errors.
     }

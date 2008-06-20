@@ -52,15 +52,11 @@ class ConstructorInjector<T> {
       throws ErrorsException {
     Constructor constructor = constructionProxy.getConstructor();
     Object source = StackTraceElements.forMember(constructor);
-    errors.pushSource(source);
-    try {
-      return constructionProxy.getParameters().isEmpty()
-          ? null // default constructor.
-          : injector.getParametersInjectors(constructor,
-              constructionProxy.getParameters(), errors);
-    } finally {
-      errors.popSource(source);
-    }
+    errors = errors.withSource(source);
+    return constructionProxy.getParameters().isEmpty()
+        ? null // default constructor.
+        : injector.getParametersInjectors(constructor,
+            constructionProxy.getParameters(), errors);
   }
 
   /**

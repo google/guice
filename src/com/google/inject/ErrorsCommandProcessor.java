@@ -16,9 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.AddMessageErrorCommand;
-import com.google.inject.commands.AddThrowableErrorCommand;
+import com.google.inject.commands.AddMessageCommand;
 import com.google.inject.internal.Errors;
+import com.google.inject.spi.Message;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles {@link Binder#addError} commands.
@@ -28,17 +30,27 @@ import com.google.inject.internal.Errors;
  */
 class ErrorsCommandProcessor extends CommandProcessor {
 
+  private static final Logger logger = Logger.getLogger(Guice.class.getName());
+
   ErrorsCommandProcessor(Errors errors) {
     super(errors);
   }
 
-  @Override public Boolean visitAddMessageError(AddMessageErrorCommand command) {
-    errors.userReportedError(command.getMessage(), command.getArguments());
+  @Override public Boolean visitAddMessage(AddMessageCommand command) {
+    Message message = command.getMessage();
+    if (message.getCause() != null) {
+      String rootMessage = getRootMessage(message.getCause());
+      logger.log(Level.INFO,
+          "An exception was caught and reported. Message: " + rootMessage,
+          message.getCause());
+    }
+
+    errors.addMessage(message);
     return true;
   }
 
-  @Override public Boolean visitAddError(AddThrowableErrorCommand command) {
-    errors.exceptionReportedByModuleSeeLogs(command.getThrowable());
-    return true;
+  public static String getRootMessage(Throwable t) {
+    Throwable cause = t.getCause();
+    return cause == null ? t.toString() : getRootMessage(cause);
   }
 }
