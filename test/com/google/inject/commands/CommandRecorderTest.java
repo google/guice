@@ -552,6 +552,26 @@ public class CommandRecorderTest extends TestCase {
     );
   }
 
+  public void testRequestInjection() {
+    final Object firstObject = new Object();
+    final Object secondObject = new Object();
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            requestInjection(firstObject, secondObject);
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitRequestInjection(RequestInjectionCommand command) {
+            assertEquals(Arrays.asList(firstObject, secondObject), command.getInstances());
+            return null;
+          }
+        }
+    );
+  }
+
   public void testRequestStaticInjection() {
     checkModule(
         new AbstractModule() {
@@ -771,6 +791,10 @@ public class CommandRecorderTest extends TestCase {
     }
 
     public Void visitBindScope(BindScopeCommand command) {
+      throw new AssertionFailedError();
+    }
+
+    public Void visitRequestInjection(RequestInjectionCommand command) {
       throw new AssertionFailedError();
     }
 

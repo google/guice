@@ -225,6 +225,14 @@ public interface Binder {
   AnnotatedConstantBindingBuilder bindConstant();
 
   /**
+   * Upon successful creation, the {@link Injector} will inject instance fields
+   * and methods of the given objects.
+   *
+   * @param instances for which members will be injected
+   */
+  void requestInjection(Object... instances);
+
+  /**
    * Upon successful creation, the {@link Injector} will inject static fields
    * and methods in the given classes.
    *

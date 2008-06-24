@@ -55,7 +55,7 @@ class InjectorBuilder {
   private final List<Command> commands = Lists.newArrayList();
 
   private BindCommandProcessor bindCommandProcesor;
-  private RequestStaticInjectionCommandProcessor requestStaticInjectionCommandProcessor;
+  private RequestInjectionCommandProcessor requestInjectionCommandProcessor;
 
   /**
    * @param stage we're running in. If the stage is {@link Stage#PRODUCTION}, we will eagerly load
@@ -147,10 +147,9 @@ class InjectorBuilder {
     injector.index();
     stopwatch.resetAndLog("Binding indexing");
 
-    requestStaticInjectionCommandProcessor
-        = new RequestStaticInjectionCommandProcessor(errors);
-    requestStaticInjectionCommandProcessor
-        .processCommands(commands);
+    requestInjectionCommandProcessor
+        = new RequestInjectionCommandProcessor(errors, injector.outstandingInjections);
+    requestInjectionCommandProcessor.processCommands(commands);
     stopwatch.resetAndLog("Static injection");
   }
 
@@ -159,7 +158,7 @@ class InjectorBuilder {
     bindCommandProcesor.runCreationListeners(injector);
     stopwatch.resetAndLog("Validation");
 
-    requestStaticInjectionCommandProcessor.validate(injector);
+    requestInjectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
     injector.validateOustandingInjections(errors);
@@ -175,7 +174,7 @@ class InjectorBuilder {
   private void fulfillInjectionRequests() {
     futureInjector.initialize(injector);
 
-    requestStaticInjectionCommandProcessor.injectMembers(injector);
+    requestInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 
     injector.fulfillOutstandingInjections(errors);

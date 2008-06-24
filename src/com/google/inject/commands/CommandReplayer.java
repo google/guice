@@ -69,6 +69,11 @@ public class CommandReplayer {
         return null;
       }
 
+      public Void visitRequestInjection(RequestInjectionCommand command) {
+        replayRequestInjection(binder, command);
+        return null;
+      }
+
       public Void visitRequestStaticInjection(RequestStaticInjectionCommand command) {
         replayRequestStaticInjection(binder, command);
         return null;
@@ -114,6 +119,13 @@ public class CommandReplayer {
   public void replayBindScope(final Binder binder, final BindScopeCommand command) {
     binder.withSource(command.getSource()).bindScope(
         command.getAnnotationType(), command.getScope());
+  }
+
+  public void replayRequestInjection(final Binder binder,
+      final RequestInjectionCommand command) {
+    List<Object> objects = command.getInstances();
+    binder.withSource(command.getSource())
+        .requestInjection(objects.toArray());
   }
 
   public void replayRequestStaticInjection(final Binder binder,

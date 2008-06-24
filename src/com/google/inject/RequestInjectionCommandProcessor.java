@@ -18,28 +18,41 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
+import com.google.inject.commands.RequestInjectionCommand;
 import com.google.inject.commands.RequestStaticInjectionCommand;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Handles {@link Binder#requestStaticInjection} commands.
+ * Handles {@link Binder#requestInjection} and {@link Binder#requestStaticInjection} commands.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
+ * @author mikeward@google.com (Mike Ward)
  */
-class RequestStaticInjectionCommandProcessor extends CommandProcessor {
+class RequestInjectionCommandProcessor extends CommandProcessor {
 
   private final List<StaticInjection> staticInjections = Lists.newArrayList();
+  private final Set<Object> outstandingInjections;
 
-  RequestStaticInjectionCommandProcessor(Errors errors) {
+  RequestInjectionCommandProcessor(Errors errors,
+      Set<Object> outstandingInjections) {
     super(errors);
+    this.outstandingInjections = outstandingInjections;
   }
 
   @Override public Boolean visitRequestStaticInjection(RequestStaticInjectionCommand command) {
     for (Class<?> type : command.getTypes()) {
       staticInjections.add(new StaticInjection(command.getSource(), type));
+    }
+    return true;
+  }
+
+  @Override public Boolean visitRequestInjection(RequestInjectionCommand command) {
+    for (Object instance : command.getInstances()) {
+      outstandingInjections.add(instance);
     }
     return true;
   }

@@ -62,6 +62,10 @@ public class DefaultCommandVisitor<V> implements Command.Visitor<V> {
     return visitCommand(command);
   }
 
+  public V visitRequestInjection(RequestInjectionCommand command) {
+    return visitCommand(command);
+  }
+
   public V visitRequestStaticInjection(
       RequestStaticInjectionCommand command) {
     return visitCommand(command);

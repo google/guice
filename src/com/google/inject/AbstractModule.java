@@ -142,6 +142,13 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
+   * @see Binder#requestInjection(Object[])
+   */
+  protected void requestInjection(Object... objects) {
+    binder.requestInjection(objects);
+  }
+
+  /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {

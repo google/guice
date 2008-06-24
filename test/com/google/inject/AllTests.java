@@ -68,7 +68,7 @@ public class AllTests {
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
-    suite.addTestSuite(StaticInjectionTest.class);
+    suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
 

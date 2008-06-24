@@ -32,6 +32,7 @@ public interface Command {
     V visitAddMessage(AddMessageCommand command);
     V visitBindInterceptor(BindInterceptorCommand command);
     V visitBindScope(BindScopeCommand command);
+    V visitRequestInjection(RequestInjectionCommand command);
     V visitRequestStaticInjection(RequestStaticInjectionCommand command);
     V visitBindConstant(BindConstantCommand command);
     V visitConvertToTypes(ConvertToTypesCommand command);

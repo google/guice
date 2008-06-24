@@ -16,34 +16,33 @@
 
 package com.google.inject.commands;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 /**
- * Immutable snapshot of a request for static injection.
- * 
- * @author jessewilson@google.com (Jesse Wilson)
+ * Immutable snapshot of a request for injection.
+ *
+ * @author mikeward@google.com (Mike Ward)
  */
-public final class RequestStaticInjectionCommand implements Command {
-  private final Object source;
-  private final List<Class> types;
+public final class RequestInjectionCommand implements Command {
+  private Object source;
+  private List<Object> instances;
 
-  RequestStaticInjectionCommand(Object source, Class[] types) {
+  public RequestInjectionCommand(Object source, Object[] instances) {
     this.source = checkNotNull(source, "source");
-    this.types = ImmutableList.of(types);
+    this.instances = ImmutableList.of(instances);
   }
 
   public Object getSource() {
     return source;
   }
 
-  public List<Class> getTypes() {
-    return types;
+  public List<Object> getInstances() {
+    return instances;
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitRequestStaticInjection(this);
+    return visitor.visitRequestInjection(this);
   }
 }

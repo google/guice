@@ -1,0 +1,104 @@
+/**
+ * Copyright (C) 2006 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.inject;
+
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
+
+/**
+ * @author crazybob@google.com (Bob Lee)
+ */
+public class RequestInjectionTest extends TestCase {
+
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface ForField {}
+
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface ForMethod {}
+
+  protected void setUp() throws Exception {
+    super.setUp();
+    HasInjections.staticField = 0;
+    HasInjections.staticMethod = null;
+  }
+
+  public void testInjectMembers() {
+    final HasInjections hi = new HasInjections();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(ForMethod.class).to("test");
+        bindConstant().annotatedWith(ForField.class).to(5);
+        requestInjection(hi);
+      }
+    });
+
+    assertEquals("test", hi.instanceMethod);
+    assertEquals(5, hi.instanceField);
+    assertNull(HasInjections.staticMethod);
+    assertEquals(0, HasInjections.staticField);
+  }
+
+  public void testInjectStatics() throws CreationException {
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(ForMethod.class).to("test");
+        bindConstant().annotatedWith(ForField.class).to(5);
+        requestStaticInjection(HasInjections.class);
+      }
+    });
+
+    assertEquals("test", HasInjections.staticMethod);
+    assertEquals(5, HasInjections.staticField);
+  }
+  
+  public void testInjectMembersAndStatics() {
+    final HasInjections hi = new HasInjections();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindConstant().annotatedWith(ForMethod.class).to("test");
+        bindConstant().annotatedWith(ForField.class).to(5);
+        requestStaticInjection(HasInjections.class);
+        requestInjection(hi);
+      }
+    });
+
+    assertEquals("test", hi.instanceMethod);
+    assertEquals(5, hi.instanceField);
+    assertEquals("test", HasInjections.staticMethod);
+    assertEquals(5, HasInjections.staticField);
+  }
+
+  static class HasInjections {
+
+    @Inject @ForField static int staticField;
+    @Inject @ForField int instanceField;
+
+    static String staticMethod;
+    String instanceMethod;
+
+    @Inject static void setStaticMethod(@ForMethod String staticMethod) {
+      HasInjections.staticMethod = staticMethod;
+    }
+
+    @Inject void setInstanceS(@ForMethod String instanceS) {
+      this.instanceMethod = instanceS;
+    }
+  }
+}

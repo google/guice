@@ -24,6 +24,7 @@ import com.google.inject.commands.BindScopeCommand;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.ConvertToTypesCommand;
 import com.google.inject.commands.GetProviderCommand;
+import com.google.inject.commands.RequestInjectionCommand;
 import com.google.inject.commands.RequestStaticInjectionCommand;
 import com.google.inject.internal.Errors;
 import java.util.Iterator;
@@ -71,6 +72,10 @@ abstract class CommandProcessor implements Command.Visitor<Boolean> {
   }
 
   public Boolean visitBindScope(BindScopeCommand command) {
+    return false;
+  }
+
+  public Boolean visitRequestInjection(RequestInjectionCommand command) {
     return false;
   }
 

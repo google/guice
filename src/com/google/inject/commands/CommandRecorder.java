@@ -123,6 +123,10 @@ public final class CommandRecorder {
       commands.add(new BindScopeCommand(getSource(), annotationType, scope));
     }
 
+    public void requestInjection(Object... instances) {
+      commands.add(new RequestInjectionCommand(getSource(), instances));
+    }
+
     public void requestStaticInjection(Class<?>... types) {
       commands.add(new RequestStaticInjectionCommand(getSource(), types));
     }
