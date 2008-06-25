@@ -235,6 +235,62 @@ public class BinderTest extends TestCase {
     }
   }
 
+  /**
+   * Untargetted bindings should follow @ImplementedBy and @ProvidedBy
+   * annotations if they exist. Otherwise the class should be constructed
+   * directly.
+   */
+  public void testUntargettedBinding() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(HasProvidedBy1.class);
+        bind(HasImplementedBy1.class);
+        bind(HasProvidedBy2.class);
+        bind(HasImplementedBy2.class);
+        bind(JustAClass.class);
+      }
+    });
+    
+    assertNotNull(injector.getInstance(HasProvidedBy1.class));
+    assertNotNull(injector.getInstance(HasImplementedBy1.class));
+    assertNotSame(HasProvidedBy2.class,
+        injector.getInstance(HasProvidedBy2.class).getClass());
+    assertSame(ExtendsHasImplementedBy2.class,
+        injector.getInstance(HasImplementedBy2.class).getClass());
+    assertSame(JustAClass.class, injector.getInstance(JustAClass.class).getClass());
+  }
+
+  @ProvidedBy(HasProvidedBy1Provider.class)
+  interface HasProvidedBy1 {}
+
+  static class HasProvidedBy1Provider implements Provider<HasProvidedBy1> {
+    public HasProvidedBy1 get() {
+      return new HasProvidedBy1() {};
+    }
+  }
+
+  @ImplementedBy(ImplementsHasImplementedBy1.class)
+  interface HasImplementedBy1 {}
+
+  static class ImplementsHasImplementedBy1 implements HasImplementedBy1 {}
+
+  @ProvidedBy(HasProvidedBy2Provider.class)
+  static class HasProvidedBy2 {}
+
+  static class HasProvidedBy2Provider implements Provider<HasProvidedBy2> {
+    public HasProvidedBy2 get() {
+      return new HasProvidedBy2() {};
+    }
+  }
+
+  @ImplementedBy(ExtendsHasImplementedBy2.class)
+  static class HasImplementedBy2 {}
+
+  static class ExtendsHasImplementedBy2 extends HasImplementedBy2 {}
+
+  static class JustAClass {}
+
+
 //  public void testBindInterfaceWithoutImplementation() {
 //    Guice.createInjector(new AbstractModule() {
 //      protected void configure() {
