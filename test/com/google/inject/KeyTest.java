@@ -20,15 +20,16 @@ import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import junit.framework.TestCase;
-
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -37,9 +38,7 @@ public class KeyTest extends TestCase {
 
   public void foo(List<String> a, List<String> b) {}
   public void bar(Provider<List<String>> a) {}
-
-  @Retention(RUNTIME)
-  @BindingAnnotation @interface Foo {}
+  @Foo String baz;
 
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);
@@ -130,5 +129,16 @@ public class KeyTest extends TestCase {
     assertEqualWhenReserialized(new Key<List<B[]>>() {});
   }
 
+  public void testEqualityOfAnnotationTypesAndInstances() throws NoSuchFieldException {
+    Foo instance = getClass().getDeclaredField("baz").getAnnotation(Foo.class);
+    Key<String> keyWithInstance = Key.get(String.class, instance);
+    Key<String> keyWithLiteral = Key.get(String.class, Foo.class);
+    assertEqualsBothWays(keyWithInstance, keyWithLiteral);
+  }
+
   interface B {}
+
+  @Retention(RUNTIME)
+  @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+  @BindingAnnotation @interface Foo {}
 }
