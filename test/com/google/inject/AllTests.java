@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.commands.CommandRecorderTest;
 import com.google.inject.commands.CommandReplayerTest;
 import com.google.inject.commands.CommandRewriteTest;
+import com.google.inject.internal.BytecodeGenTest;
 import com.google.inject.internal.FinalizableReferenceQueueTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.ReferenceCacheTest;
@@ -84,6 +85,7 @@ public class AllTests {
     suite.addTestSuite(ReferenceMapTest.class);
     suite.addTestSuite(TypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
+    suite.addTestSuite(BytecodeGenTest.class);
 
     // matcher
     suite.addTestSuite(MatcherTest.class);

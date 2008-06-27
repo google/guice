@@ -41,7 +41,7 @@
     <property name="exclude.imports" value=""/>
     <property name="guice.imports" value="com.google.inject.*;version=${api.version}"/>
     <property name="Import-Package" value="${exclude.imports},${guice.imports},*;resolution:=optional"/>
-    <property name="Export-Package" value="${module}.*;version=${api.version}"/>
+    <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
     <property name="-nouses" value="true"/>
     <property name="-removeheaders" value="Bnd-LastModified,Ignore-Package,Include-Resource,Private-Package,Tool"/>
 

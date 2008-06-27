@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.InvocationHandler;
@@ -79,9 +80,9 @@ class ConstructionContext<T> {
         = new DelegatingInvocationHandler<T>();
     invocationHandlers.add(invocationHandler);
 
-    Object object = Proxy.newProxyInstance(expectedType.getClassLoader(),
-        new Class[] { expectedType }, invocationHandler);
-    return expectedType.cast(object);
+    ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);
+    return expectedType.cast(Proxy.newProxyInstance(classLoader,
+        new Class[] { expectedType }, invocationHandler));
   }
 
   void setProxyDelegates(T delegate) {

@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.GuiceFastClass;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -67,7 +67,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
     return new ConstructionProxy<T>() {
       Class<T> classToConstruct = constructor.getDeclaringClass();
-      FastClass fastClass = GuiceFastClass.create(classToConstruct);
+      FastClass fastClass = newFastClass(classToConstruct);
       final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
 
       @SuppressWarnings("unchecked")

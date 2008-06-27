@@ -18,10 +18,10 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import static com.google.inject.internal.BytecodeGen.newEnhancer;
+import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.GuiceFastClass;
-import com.google.inject.internal.GuiceNamingPolicy;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
@@ -147,17 +147,13 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
 
     // Create the proxied class.
-    Enhancer enhancer = new Enhancer();
-    enhancer.setSuperclass(declaringClass);
-    enhancer.setUseCache(false); // We do enough caching.
+    Enhancer enhancer = newEnhancer(declaringClass);
     enhancer.setCallbackFilter(new CallbackFilter() {
       public int accept(Method method) {
         return indices.get(method);
       }
     });
     enhancer.setCallbackTypes(callbackTypes);
-    enhancer.setUseFactory(false);
-    enhancer.setNamingPolicy(new GuiceNamingPolicy());
 
     Class<?> proxied = enhancer.createClass();
 
@@ -172,7 +168,7 @@ class ProxyFactory implements ConstructionProxyFactory {
    */
   private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
       final Constructor standardConstructor) throws ErrorsException {
-    FastClass fastClass = GuiceFastClass.create(clazz);
+    FastClass fastClass = newFastClass(clazz);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
     final List<Parameter<?>> parameters = Parameter.forConstructor(standardConstructor, errors);

@@ -23,10 +23,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.GuiceFastClass;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Nullability;
@@ -883,9 +883,8 @@ class InjectorImpl implements Injector {
             return method.invoke(target, parameters);
           }
         };
-      }
-      else {
-        FastClass fastClass = GuiceFastClass.create(method.getDeclaringClass());
+      } else {
+        FastClass fastClass = newFastClass(method.getDeclaringClass());
         final FastMethod fastMethod = fastClass.getMethod(method);
 
         methodInvoker = new MethodInvoker() {
@@ -1099,10 +1098,9 @@ class InjectorImpl implements Injector {
       reference[0] = new InternalContext(this);
       try {
         return callable.call(reference[0]);
-      }
-      finally {
+      } finally {
         // Only remove the context if this call created it.
-        reference[0] = null;
+        localContext.remove();
       }
     }
     else {
