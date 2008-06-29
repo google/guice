@@ -184,7 +184,7 @@ public class ProviderMethodsTest extends TestCase {
     Injector injector = Guice.createInjector(ProviderMethods.from(source));
     
     assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("First"))));
-    assertEquals("B", injector.getInstance(Key.get(String.class, Names.named("First"))));
+    assertEquals("B", injector.getInstance(Key.get(String.class, Names.named("Second"))));
     assertEquals(ImmutableSet.of("A", "B"),
         injector.getInstance(Key.get(Types.setOf(String.class))));
   }

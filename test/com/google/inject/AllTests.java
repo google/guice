@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.commands.CommandRecorderTest;
 import com.google.inject.commands.CommandReplayerTest;
 import com.google.inject.commands.CommandRewriteTest;
-import com.google.inject.internal.BytecodeGenTest;
 import com.google.inject.internal.FinalizableReferenceQueueTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.ReferenceCacheTest;
@@ -29,6 +28,7 @@ import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
+import com.googlecode.guice.BytecodeGenTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
