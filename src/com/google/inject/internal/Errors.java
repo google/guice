@@ -226,7 +226,7 @@ public final class Errors implements Serializable {
 
   private static final String CONSTRUCTOR_RULES =
       "Classes must have either one (and only one) constructor "
-          + "annotated with @Inject or a zero-argument constructor.";
+          + "annotated with @Inject or a zero-argument constructor that is not private.";
 
   public Errors missingConstructor(Class<?> implementation) {
     return addMessage("Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES,

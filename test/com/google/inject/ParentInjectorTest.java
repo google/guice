@@ -75,19 +75,19 @@ public class ParentInjectorTest extends TestCase {
     assertNotNull(truck);
   }
 
-  private interface Foo {}
+  interface Foo {}
   @Singleton
-  private static class FooImpl implements Foo {}
+  static class FooImpl implements Foo {}
 
-  private interface Bar {}
-  private static class BarOne implements Bar {}
-  private static class BarTwo implements Bar {}
+  interface Bar {}
+  static class BarOne implements Bar {}
+  static class BarTwo implements Bar {}
 
   @Singleton
-  private static class Car {}
+  static class Car {}
 
-  private interface Bus {}
-  private static class BusImpl implements Bus {}
+  interface Bus {}
+  static class BusImpl implements Bus {}
 
   @Singleton
   private static class Truck {

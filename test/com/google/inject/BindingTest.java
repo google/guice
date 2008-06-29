@@ -238,4 +238,65 @@ public class BindingTest extends TestCase {
       return next.getAndIncrement();
     }
   }
+
+  public void testAnnotatedNoArgConstructor() {
+    assertBindingSucceeds(PublicNoArgAnnotated.class);
+    assertBindingSucceeds(ProtectedNoArgAnnotated.class);
+    assertBindingSucceeds(PackagePrivateNoArgAnnotated.class);
+    assertBindingSucceeds(PrivateNoArgAnnotated.class);
+  }
+
+  static class PublicNoArgAnnotated {
+    @Inject public PublicNoArgAnnotated() { }
+  }
+
+  static class ProtectedNoArgAnnotated {
+    @Inject protected ProtectedNoArgAnnotated() { }
+  }
+
+  static class PackagePrivateNoArgAnnotated {
+    @Inject PackagePrivateNoArgAnnotated() { }
+  }
+
+  static class PrivateNoArgAnnotated {
+    @Inject private PrivateNoArgAnnotated() { }
+  }
+
+  public void testUnannotatedNoArgConstructor() throws Exception{
+    assertBindingSucceeds(PublicNoArg.class);
+    assertBindingSucceeds(ProtectedNoArg.class);
+    assertBindingSucceeds(PackagePrivateNoArg.class);
+    assertBindingFails(PrivateNoArg.class);
+  }
+
+  static class PublicNoArg {
+    public PublicNoArg() { }
+  }
+
+  static class ProtectedNoArg {
+    protected ProtectedNoArg() { }
+  }
+
+  static class PackagePrivateNoArg {
+    PackagePrivateNoArg() { }
+  }
+
+  static class PrivateNoArg {
+    private PrivateNoArg() { }
+  }
+
+  private void assertBindingSucceeds(final Class<?> clazz) {
+    assertNotNull(Guice.createInjector().getInstance(clazz));
+  }
+
+  private void assertBindingFails(final Class<?> clazz) throws NoSuchMethodException {
+    try {
+      Guice.createInjector().getInstance(clazz);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:",
+          "Could not find a suitable constructor in " + PrivateNoArg.class.getName());
+    }
+  }
 }

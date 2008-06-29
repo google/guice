@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -69,7 +70,13 @@ class RuntimeReflectionFactory implements Reflection.Factory {
       // If no annotated constructor is found, look for a no-arg constructor
       // instead.
       try {
-        return implementation.getDeclaredConstructor();
+        Constructor<T> noArgCtor = implementation.getDeclaredConstructor();
+
+        // Explicitly disallow private constructors that are missing @Inject
+        if (Modifier.isPrivate(noArgCtor.getModifiers())) {
+          errors.missingConstructor(implementation);
+        }
+        return noArgCtor;
       }
       catch (NoSuchMethodException e) {
         throw errors.missingConstructor(implementation).toException();
