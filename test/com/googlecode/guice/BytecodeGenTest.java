@@ -195,11 +195,17 @@ public class BytecodeGenTest extends TestCase {
   
   public void testProxyingPackagePrivateMethods() {
     Injector injector = Guice.createInjector(interceptorModule);
-    PackagePrivate instance = injector.getInstance(PackagePrivate.class);
-    assertEquals("HI WORLD", instance.sayHi());
+    assertEquals("HI WORLD", injector.getInstance(PackageClassPackageMethod.class).sayHi());
+    assertEquals("HI WORLD", injector.getInstance(PublicClassPackageMethod.class).sayHi());
   }
 
-  static class PackagePrivate {
+  static class PackageClassPackageMethod {
+    String sayHi() {
+      return "HI";
+    }
+  }
+
+  public static class PublicClassPackageMethod {
     String sayHi() {
       return "HI";
     }
