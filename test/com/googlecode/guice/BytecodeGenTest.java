@@ -25,6 +25,7 @@ import static com.google.inject.matcher.Matchers.any;
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -82,13 +83,20 @@ public class BytecodeGenTest extends TestCase {
     protected Class<?> loadClass(final String name, final boolean resolve)
         throws ClassNotFoundException {
 
+      synchronized (this) {
+        // check our local cache to avoid duplicates
+        final Class<?> clazz = findLoadedClass(name);
+        if (clazz != null) {
+          return clazz;
+        }
+      }
+
       if (name.startsWith("java.")) {
 
         // standard bootdelegation of java.*
         return super.loadClass(name, resolve);
 
-      } else if ((!name.contains(".internal.") && !name.contains(".cglib."))
-          || name.contains("Test")) {
+      } else if (!name.contains(".internal.") && !name.contains(".cglib.")) {
 
         /*
          * load public and test classes directly from the classpath - we don't
@@ -122,7 +130,7 @@ public class BytecodeGenTest extends TestCase {
   public static class ProxyTestImpl implements ProxyTest {
 
     static {
-      System.out.println(ProxyTestImpl.class.getClassLoader());
+      //System.out.println(ProxyTestImpl.class.getClassLoader());
     }
 
     public String sayHello() {
@@ -144,14 +152,19 @@ public class BytecodeGenTest extends TestCase {
       throw new RuntimeException(e);
     }
 
-    final ProxyTest test = Guice.createInjector(interceptorModule, new Module() {
+    final Object testObject = Guice.createInjector(interceptorModule, new Module() {
       public void configure(Binder binder) {
         binder.bind(testAPIClazz).to(testImplClazz);
       }
     }).getInstance(testAPIClazz);
 
-    // verify method interception still works
-    assertEquals("HELLO WORLD", test.sayHello());
+    try {
+      // verify method interception still works
+      Method m = testImplClazz.getMethod("sayHello");
+      assertEquals("HELLO WORLD", m.invoke(testObject));
+    } catch (final Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void testProxyClassUnloading() {

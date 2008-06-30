@@ -24,8 +24,8 @@ import java.lang.reflect.Modifier;
 public class Classes {
 
   public static boolean isInnerClass(Class<?> clazz) {
-    return clazz.getEnclosingClass() != null
-        && !Modifier.isStatic(clazz.getModifiers());
+    return !Modifier.isStatic(clazz.getModifiers())
+        && clazz.getEnclosingClass() != null;
   }
 
   public static boolean isConcrete(Class<?> clazz) {
