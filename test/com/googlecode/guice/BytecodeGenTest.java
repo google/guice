@@ -34,6 +34,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
+ * This test is in a separate package so we can test package-level visibility
+ * with confidence.
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 public class BytecodeGenTest extends TestCase {
@@ -125,7 +128,7 @@ public class BytecodeGenTest extends TestCase {
    * custom classloader will intercept it. Private and implementation classes
    * are not intercepted by the custom classloader.
    * 
-   * @see com.google.inject.internal.BytecodeGen#isHookable(Class)
+   * @see com.google.inject.internal.BytecodeGen.Visibility
    */
   public static class ProxyTestImpl implements ProxyTest {
 
@@ -190,6 +193,8 @@ public class BytecodeGenTest extends TestCase {
     System.gc();
     System.gc();
 
+    // This test could be somewhat flaky when the GC isn't working.
+    // If it fails, run the test again to make sure it's failing reliably.
     assertNull(clazzRef.get());
   }
   
@@ -197,6 +202,7 @@ public class BytecodeGenTest extends TestCase {
     Injector injector = Guice.createInjector(interceptorModule);
     assertEquals("HI WORLD", injector.getInstance(PackageClassPackageMethod.class).sayHi());
     assertEquals("HI WORLD", injector.getInstance(PublicClassPackageMethod.class).sayHi());
+    assertEquals("HI WORLD", injector.getInstance(ProtectedClassProtectedMethod.class).sayHi());
   }
 
   static class PackageClassPackageMethod {
@@ -207,6 +213,12 @@ public class BytecodeGenTest extends TestCase {
 
   public static class PublicClassPackageMethod {
     String sayHi() {
+      return "HI";
+    }
+  }
+
+  protected static class ProtectedClassProtectedMethod {
+    protected String sayHi() {
       return "HI";
     }
   }
