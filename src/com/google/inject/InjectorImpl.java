@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
@@ -884,7 +885,8 @@ class InjectorImpl implements Injector {
           }
         };
       } else {
-        FastClass fastClass = newFastClass(method.getDeclaringClass());
+        FastClass fastClass = newFastClass(method.getDeclaringClass(),
+            Visibility.forMember(method));
         final FastMethod fastMethod = fastClass.getMethod(method);
 
         methodInvoker = new MethodInvoker() {

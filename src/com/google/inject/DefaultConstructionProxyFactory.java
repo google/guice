@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -39,9 +40,8 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       throws ErrorsException {
     final List<Parameter<?>> parameters = Parameter.forConstructor(constructor, errors);
 
-    // We can't use FastConstructor if the constructor is private or protected.
-    if (Modifier.isPrivate(constructor.getModifiers())
-        || Modifier.isProtected(constructor.getModifiers())) {
+    // We can't use FastConstructor if the constructor is non-public.
+    if (!Modifier.isPublic(constructor.getModifiers())) {
       constructor.setAccessible(true);
       return new ConstructionProxy<T>() {
         public T newInstance(Object... arguments) throws
@@ -67,7 +67,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
     return new ConstructionProxy<T>() {
       Class<T> classToConstruct = constructor.getDeclaringClass();
-      FastClass fastClass = newFastClass(classToConstruct);
+      FastClass fastClass = newFastClass(classToConstruct, Visibility.PUBLIC);
       final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
 
       @SuppressWarnings("unchecked")

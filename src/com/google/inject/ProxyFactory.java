@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
@@ -114,11 +115,16 @@ class ProxyFactory implements ConstructionProxyFactory {
       indices.put(method, i);
     }
 
+    // true if all the methods we're intercepting are public. This impacts which classloader we
+    // should use for loading the enhanced class
+    Visibility visibility = Visibility.PUBLIC;
+
     // Iterate over aspects and add interceptors for the methods they apply to
     boolean anyMatched = false;
     for (MethodAspect methodAspect : applicableAspects) {
       for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
         if (methodAspect.matches(pair.method)) {
+          visibility = visibility.and(Visibility.forMember(pair.method));
           pair.addAll(methodAspect.interceptors());
           anyMatched = true;
         }
@@ -147,7 +153,7 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
 
     // Create the proxied class.
-    Enhancer enhancer = newEnhancer(declaringClass);
+    Enhancer enhancer = newEnhancer(declaringClass, visibility);
     enhancer.setCallbackFilter(new CallbackFilter() {
       public int accept(Method method) {
         return indices.get(method);
@@ -168,7 +174,7 @@ class ProxyFactory implements ConstructionProxyFactory {
    */
   private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
       final Constructor standardConstructor) throws ErrorsException {
-    FastClass fastClass = newFastClass(clazz);
+    FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
     final List<Parameter<?>> parameters = Parameter.forConstructor(standardConstructor, errors);
