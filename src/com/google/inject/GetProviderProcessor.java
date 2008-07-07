@@ -38,7 +38,8 @@ class GetProviderProcessor extends CommandProcessor {
   @Override public <T> Boolean visitGetProvider(GetProviderCommand<T> command) {
     // ensure the provider can be created
     try {
-      injector.getProviderOrThrow(command.getKey(), errors);
+      Provider<T> provider = injector.getProviderOrThrow(command.getKey(), errors);
+      command.initDelegate(provider);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }

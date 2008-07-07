@@ -16,8 +16,10 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.Key;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import com.google.inject.Key;
+import com.google.inject.Provider;
 
 /**
  * Immutable snapshot of a request for a provider.
@@ -27,12 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class GetProviderCommand<T> implements Command {
   private final Object source;
   private final Key<T> key;
-  private final EarlyRequestsProvider earlyRequestsProvider;
+  private Provider<T> delegate;
 
-  GetProviderCommand(Object source, Key<T> key, EarlyRequestsProvider earlyRequestsProvider) {
+  GetProviderCommand(Object source, Key<T> key) {
     this.source = checkNotNull(source, "source");
-    this.key = key;
-    this.earlyRequestsProvider = earlyRequestsProvider;
+    this.key = checkNotNull(key, "key");
   }
 
   public Object getSource() {
@@ -47,7 +48,17 @@ public final class GetProviderCommand<T> implements Command {
     return visitor.visitGetProvider(this);
   }
 
-  public EarlyRequestsProvider getEarlyRequestsProvider() {
-    return earlyRequestsProvider;
+  public void initDelegate(Provider<T> delegate) {
+    checkState(this.delegate == null, "delegate already initialized");
+    checkNotNull(delegate, "delegate");
+    this.delegate = delegate;
+  }
+
+  /**
+   * Returns the delegate provider, or {@code null} if it has not yet been initialized. The delegate
+   * will be initialized when this command is replayed, or otherwise used to create an injector.
+   */
+  public Provider<T> getDelegate() {
+    return delegate;
   }
 }

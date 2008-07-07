@@ -17,6 +17,7 @@
 package com.google.inject.commands;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -49,16 +50,6 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public final class CommandRecorder {
   private Stage currentStage = Stage.DEVELOPMENT;
-  private final EarlyRequestsProvider earlyRequestsProvider;
-
-  /**
-   * @param earlyRequestsProvider satisfies requests to
-   *     {@link Binder#getProvider} at module execution time. For modules that
-   *     will be used to create an injector, use {@link FutureInjector}.
-   */
-  public CommandRecorder(EarlyRequestsProvider earlyRequestsProvider) {
-    this.earlyRequestsProvider = earlyRequestsProvider;
-  }
 
   /**
    * Sets the stage reported by the binder.
@@ -174,10 +165,14 @@ public final class CommandRecorder {
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      commands.add(new GetProviderCommand<T>(getSource(), key, earlyRequestsProvider));
+      final GetProviderCommand<T> command = new GetProviderCommand<T>(getSource(), key);
+      commands.add(command);
       return new Provider<T>() {
         public T get() {
-          return earlyRequestsProvider.get(key);
+          Provider<T> delegate = command.getDelegate();
+          checkState(delegate != null,
+              "This provider cannot be used until the Injector has been created.");
+          return delegate.get();
         }
 
         @Override public String toString() {

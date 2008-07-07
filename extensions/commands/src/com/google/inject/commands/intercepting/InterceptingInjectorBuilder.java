@@ -16,15 +16,36 @@
 
 package com.google.inject.commands.intercepting;
 
-import com.google.inject.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Sets;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
+import com.google.inject.Guice;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.ProvidedBy;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.commands.*;
+import com.google.inject.commands.BindCommand;
+import com.google.inject.commands.BindScoping;
+import com.google.inject.commands.BindTarget;
+import com.google.inject.commands.Command;
+import com.google.inject.commands.CommandRecorder;
+import com.google.inject.commands.CommandReplayer;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Builds an {@link Injector} that intercepts provision.
@@ -59,7 +80,7 @@ public final class InterceptingInjectorBuilder {
       = Key.get(ProvisionInterceptor.class);
 
   private final Collection<Module> modules = new ArrayList<Module>();
-  private final Set<Key<?>> keysToIntercept = new HashSet<Key<?>>();
+  private final Set<Key<?>> keysToIntercept = Sets.newHashSet();
   private boolean tolerateUnmatchedInterceptions = false;
 
   public InterceptingInjectorBuilder() {
@@ -112,10 +133,8 @@ public final class InterceptingInjectorBuilder {
   }
 
   public Injector build() {
-    FutureInjector futureInjector = new FutureInjector();
-
     // record commands from the modules
-    List<Command> commands = new CommandRecorder(futureInjector).recordCommands(modules);
+    List<Command> commands = new CommandRecorder().recordCommands(modules);
 
     // rewrite the commands to insert interception
     CommandRewriter rewriter = new CommandRewriter();
@@ -127,14 +146,11 @@ public final class InterceptingInjectorBuilder {
     // fail if any interceptions were missing
     if (!tolerateUnmatchedInterceptions 
         && !rewriter.keysIntercepted.equals(keysToIntercept)) {
-      Set<Key> keysNotIntercepted = new HashSet<Key>(keysToIntercept);
+      Set<Key<?>> keysNotIntercepted = Sets.newHashSet(keysToIntercept);
       keysNotIntercepted.removeAll(rewriter.keysIntercepted);
       throw new IllegalArgumentException("An explicit binding is required for "
           + "all intercepted keys, but was not found for " + keysNotIntercepted);
     }
-
-    // make the injector available for callbacks from early providers
-    futureInjector.initialize(injector);
 
     return injector;
   }

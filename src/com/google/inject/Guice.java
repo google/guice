@@ -16,11 +16,13 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.*;
-import com.google.inject.internal.UniqueAnnotations;
-
+import com.google.common.collect.Sets;
+import com.google.inject.commands.BindCommand;
+import com.google.inject.commands.BindConstantCommand;
+import com.google.inject.commands.Command;
+import com.google.inject.commands.CommandRecorder;
+import com.google.inject.commands.CommandReplayer;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -152,21 +154,13 @@ public final class Guice {
    * </pre>
    */
   public static Module overrideModule(Module module, Module overridesModule) {
-    final FutureInjector futureInjector = new FutureInjector();
-    CommandRecorder commandRecorder = new CommandRecorder(futureInjector);
+    CommandRecorder commandRecorder = new CommandRecorder();
     final List<Command> commands = commandRecorder.recordCommands(module);
     final List<Command> overrideCommands = commandRecorder.recordCommands(overridesModule);
 
     return new AbstractModule() {
       public void configure() {
-        final Set<Key> overriddenKeys = new HashSet<Key>();
-
-        bind(Object.class).annotatedWith(UniqueAnnotations.create())
-            .toInstance(new Object() {
-              @Inject void initialize(Injector injector) {
-                futureInjector.initialize(injector);
-              }
-            });
+        final Set<Key> overriddenKeys = Sets.newHashSet();
 
         // execute the overrides module, keeping track of which keys were bound
         new CommandReplayer() {

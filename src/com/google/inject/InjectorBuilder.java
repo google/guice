@@ -23,7 +23,6 @@ import com.google.inject.Reflection.Factory;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.commands.Command;
 import com.google.inject.commands.CommandRecorder;
-import com.google.inject.commands.FutureInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.SourceProvider;
@@ -51,7 +50,6 @@ class InjectorBuilder {
   private InjectorImpl injector;
   private Errors errors = new Errors();
 
-  private final FutureInjector futureInjector = new FutureInjector();
   private final List<Command> commands = Lists.newArrayList();
 
   private BindCommandProcessor bindCommandProcesor;
@@ -92,7 +90,7 @@ class InjectorBuilder {
 
     modules.add(0, new BuiltInModule(injector, stage));
 
-    CommandRecorder commandRecorder = new CommandRecorder(futureInjector);
+    CommandRecorder commandRecorder = new CommandRecorder();
     commandRecorder.setCurrentStage(stage);
     commands.addAll(commandRecorder.recordCommands(modules));
 
@@ -172,8 +170,6 @@ class InjectorBuilder {
 
   /** Inject everything that can be injected. */
   private void fulfillInjectionRequests() {
-    futureInjector.initialize(injector);
-
     requestInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 

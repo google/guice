@@ -57,13 +57,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class CommandRecorderTest extends TestCase {
 
-  protected EarlyRequestsProvider earlyRequestProvider = new EarlyRequestsProvider() {
-    public <T> T get(Key<T> key) {
-      throw new AssertionFailedError();
-    }
-  };
-
-  private CommandRecorder commandRecorder = new CommandRecorder(earlyRequestProvider);
+  private CommandRecorder commandRecorder = new CommandRecorder();
 
   // Binder fidelity tests
 
@@ -508,36 +502,33 @@ public class CommandRecorderTest extends TestCase {
   }
 
   public void testGetProvider() {
-    final List<Key> calls = new ArrayList<Key>();
-
-    earlyRequestProvider = new EarlyRequestsProvider() {
-      @SuppressWarnings({"unchecked"})
-      public <T> T get(Key<T> key) {
-        calls.add(key);
-        return (T) "A";
-      }
-    };
-
-    commandRecorder = new CommandRecorder(earlyRequestProvider);
+    commandRecorder = new CommandRecorder();
 
     checkModule(
         new AbstractModule() {
           protected void configure() {
             Provider<String> keyGetProvider = getProvider(Key.get(String.class, SampleAnnotation.class));
-            assertEquals("A", keyGetProvider.get());
-            assertEquals(Key.get(String.class, SampleAnnotation.class), calls.get(0));
+            try {
+              keyGetProvider.get();
+            } catch (IllegalStateException e) {
+              assertEquals("This provider cannot be used until the Injector has been created.",
+                  e.getMessage());
+            }
 
             Provider<String> typeGetProvider = getProvider(String.class);
-            assertEquals("A", typeGetProvider.get());
-            assertEquals(Key.get(String.class), calls.get(1));
-            assertEquals(2, calls.size());
+            try {
+              typeGetProvider.get();
+            } catch (IllegalStateException e) {
+              assertEquals("This provider cannot be used until the Injector has been created.",
+                  e.getMessage());
+            }
           }
         },
 
         new FailingVisitor() {
           @Override public Void visitGetProvider(GetProviderCommand command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
-            assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
+            assertNull(command.getDelegate());
             return null;
           }
         },
@@ -545,7 +536,7 @@ public class CommandRecorderTest extends TestCase {
         new FailingVisitor() {
           @Override public Void visitGetProvider(GetProviderCommand command) {
             assertEquals(Key.get(String.class), command.getKey());
-            assertEquals(earlyRequestProvider, command.getEarlyRequestsProvider());
+            assertNull(command.getDelegate());
             return null;
           }
         }

@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -167,6 +168,7 @@ public class CommandReplayer {
   }
 
   public <T> void replayGetProvider(final Binder binder, final GetProviderCommand<T> command) {
-    binder.withSource(command.getSource()).getProvider(command.getKey());
+    Provider<T> provider = binder.withSource(command.getSource()).getProvider(command.getKey());
+    command.initDelegate(provider);
   }
 }

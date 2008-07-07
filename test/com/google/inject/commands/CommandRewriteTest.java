@@ -44,7 +44,7 @@ public class CommandRewriteTest extends TestCase {
     };
 
     // record the commands from that module
-    CommandRecorder commandRecorder = new CommandRecorder(new FutureInjector());
+    CommandRecorder commandRecorder = new CommandRecorder();
     List<Command> commands = commandRecorder.recordCommands(module);
 
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
@@ -93,11 +93,9 @@ public class CommandRewriteTest extends TestCase {
     assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("2"))));
 
     // and it should also work fine if we rewrite it
-    FutureInjector futureInjector = new FutureInjector();
-    List<Command> commands = new CommandRecorder(futureInjector).recordCommands(module);
+    List<Command> commands = new CommandRecorder().recordCommands(module);
     Module replayed = new CommandReplayer().createModule(commands);
     Injector replayedInjector = Guice.createInjector(replayed);
-    futureInjector.initialize(replayedInjector);
     assertEquals("A", replayedInjector.getInstance(Key.get(String.class, Names.named("2"))));
   }
 }

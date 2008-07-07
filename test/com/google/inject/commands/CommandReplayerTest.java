@@ -28,10 +28,10 @@ public class CommandReplayerTest extends CommandRecorderTest {
 
   protected void checkModule(Module module, Command.Visitor<?>... visitors) {
     // get some commands to replay
-    List<Command> commands = new CommandRecorder(earlyRequestProvider).recordCommands(module);
+    List<Command> commands = new CommandRecorder().recordCommands(module);
 
     // replay the recorded commands, and record them again!
-    List<Command> replayedCommands = new CommandRecorder(earlyRequestProvider)
+    List<Command> replayedCommands = new CommandRecorder()
         .recordCommands(new CommandReplayer().createModule(commands));
 
     // verify that the replayed commands are as expected
