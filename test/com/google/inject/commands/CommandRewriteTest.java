@@ -16,10 +16,17 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.*;
-import junit.framework.TestCase;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.name.Names;
 import java.util.List;
+import junit.framework.TestCase;
 
 
 /**
@@ -58,5 +65,39 @@ public class CommandRewriteTest extends TestCase {
     Injector injector = Guice.createInjector(rewrittenModule);
     assertEquals("Pizza", injector.getInstance(String.class));
     assertEquals("Beer", injector.getInstance(CharSequence.class));
+  }
+
+  public void testGetProviderAvailableAtInjectMembersTime() {
+    Module module = new AbstractModule() {
+      public void configure() {
+        final Provider<String> stringProvider = getProvider(String.class);
+
+        bind(String.class).annotatedWith(Names.named("2")).toProvider(new Provider<String>() {
+          private String value;
+
+          @Inject void initialize() {
+            value = stringProvider.get();
+          }
+
+          public String get() {
+            return value;
+          }
+        });
+
+        bind(String.class).toInstance("A");
+      }
+    };
+
+    // the module works fine normally
+    Injector injector = Guice.createInjector(module);
+    assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("2"))));
+
+    // and it should also work fine if we rewrite it
+    FutureInjector futureInjector = new FutureInjector();
+    List<Command> commands = new CommandRecorder(futureInjector).recordCommands(module);
+    Module replayed = new CommandReplayer().createModule(commands);
+    Injector replayedInjector = Guice.createInjector(replayed);
+    futureInjector.initialize(replayedInjector);
+    assertEquals("A", replayedInjector.getInstance(Key.get(String.class, Names.named("2"))));
   }
 }
