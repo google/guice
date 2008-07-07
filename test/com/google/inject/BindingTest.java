@@ -266,6 +266,7 @@ public class BindingTest extends TestCase {
     assertBindingSucceeds(PublicNoArg.class);
     assertBindingSucceeds(ProtectedNoArg.class);
     assertBindingSucceeds(PackagePrivateNoArg.class);
+    assertBindingSucceeds(PrivateNoArgInPrivateClass.class);
     assertBindingFails(PrivateNoArg.class);
   }
 
@@ -279,6 +280,10 @@ public class BindingTest extends TestCase {
 
   static class PackagePrivateNoArg {
     PackagePrivateNoArg() { }
+  }
+
+  private static class PrivateNoArgInPrivateClass {
+    PrivateNoArgInPrivateClass() { }
   }
 
   static class PrivateNoArg {

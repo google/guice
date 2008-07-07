@@ -72,8 +72,9 @@ class RuntimeReflectionFactory implements Reflection.Factory {
       try {
         Constructor<T> noArgCtor = implementation.getDeclaredConstructor();
 
-        // Explicitly disallow private constructors that are missing @Inject
-        if (Modifier.isPrivate(noArgCtor.getModifiers())) {
+        // Disallow private constructors on non-private classes (unless they have @Inject)
+        if (Modifier.isPrivate(noArgCtor.getModifiers())
+            && !Modifier.isPrivate(implementation.getModifiers())) {
           errors.missingConstructor(implementation);
         }
         return noArgCtor;
