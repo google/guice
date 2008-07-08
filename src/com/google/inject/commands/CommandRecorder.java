@@ -86,8 +86,8 @@ public final class CommandRecorder {
       modules = Sets.newHashSet();
       commands = Lists.newArrayList();
       source = null;
-      sourceProvider
-          = new SourceProvider().plusSkippedClasses(RecordingBinder.class, AbstractModule.class);
+      sourceProvider = new SourceProvider()
+          .plusSkippedClasses(CommandRecorder.class, RecordingBinder.class, AbstractModule.class);
     }
 
     /**
@@ -124,7 +124,11 @@ public final class CommandRecorder {
 
     public void install(Module module) {
       if (modules.add(module)) {
-        module.configure(this);
+        try {
+          module.configure(this);
+        } catch (RuntimeException e) {
+          addError(e);
+        }
       }
     }
 

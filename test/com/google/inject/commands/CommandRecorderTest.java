@@ -102,6 +102,39 @@ public class CommandRecorderTest extends TestCase {
     );
   }
 
+  public void testErrorsAddedWhenExceptionsAreThrown() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            install(new AbstractModule() {
+              protected void configure() {
+                throw new RuntimeException("Throwing RuntimeException in AbstractModule.configure().");
+              }
+            });
+
+            addError("Code after the exception still gets executed");
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Throwing RuntimeException in AbstractModule.configure().",
+                command.getMessage().getCause().getMessage());
+            assertTrue(command.getMessage().getInjectionPoints().isEmpty());
+            return null;
+          }
+        },
+
+        new FailingVisitor() {
+          @Override public Void visitAddMessage(AddMessageCommand command) {
+            assertEquals("Code after the exception still gets executed",
+                command.getMessage().getMessage());
+            return null;
+          }
+        }
+    );
+  }
+
   public void testBindConstantAnnotations() {
     checkModule(
         new AbstractModule() {
