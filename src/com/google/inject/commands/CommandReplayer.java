@@ -39,7 +39,7 @@ public class CommandReplayer {
    * Returns a module that executes the specified commands
    * using this executing visitor.
    */
-  public final Module createModule(final Iterable<Command> commands) {
+  public final Module createModule(final Iterable<? extends Command> commands) {
     return new Module() {
       public void configure(Binder binder) {
         replay(binder, commands);
@@ -50,7 +50,7 @@ public class CommandReplayer {
   /**
    * Replays {@code commands} against {@code binder}.
    */
-  public final void replay(final Binder binder, Iterable<Command> commands) {
+  public final void replay(final Binder binder, Iterable<? extends Command> commands) {
     checkNotNull(binder, "binder");
     checkNotNull(commands, "commands");
 

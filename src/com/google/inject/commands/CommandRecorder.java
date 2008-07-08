@@ -68,7 +68,7 @@ public final class CommandRecorder {
   /**
    * Records the commands executed by {@code modules}.
    */
-  public List<Command> recordCommands(Iterable<Module> modules) {
+  public List<Command> recordCommands(Iterable<? extends Module> modules) {
     RecordingBinder binder = new RecordingBinder();
     for (Module module : modules) {
       binder.install(module);
