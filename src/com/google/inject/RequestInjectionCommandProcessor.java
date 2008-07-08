@@ -23,7 +23,6 @@ import com.google.inject.commands.RequestStaticInjectionCommand;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Handles {@link Binder#requestInjection} and {@link Binder#requestStaticInjection} commands.
@@ -35,12 +34,12 @@ import java.util.Set;
 class RequestInjectionCommandProcessor extends CommandProcessor {
 
   private final List<StaticInjection> staticInjections = Lists.newArrayList();
-  private final Set<Object> outstandingInjections;
+  private final CreationTimeMemberInjector memberInjector;
 
   RequestInjectionCommandProcessor(Errors errors,
-      Set<Object> outstandingInjections) {
+      CreationTimeMemberInjector memberInjector) {
     super(errors);
-    this.outstandingInjections = outstandingInjections;
+    this.memberInjector = memberInjector;
   }
 
   @Override public Boolean visitRequestStaticInjection(RequestStaticInjectionCommand command) {
@@ -52,7 +51,7 @@ class RequestInjectionCommandProcessor extends CommandProcessor {
 
   @Override public Boolean visitRequestInjection(RequestInjectionCommand command) {
     for (Object instance : command.getInstances()) {
-      outstandingInjections.add(instance);
+      memberInjector.add(instance);
     }
     return true;
   }

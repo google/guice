@@ -17,12 +17,10 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkState;
-import com.google.common.base.ReferenceType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
@@ -55,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -72,54 +69,11 @@ class InjectorImpl implements Injector {
   final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
   final List<MatcherAndConverter> converters = Lists.newArrayList();
   final Map<Key<?>, BindingImpl<?>> parentBindings = Maps.newHashMap();
-  final Set<Object> outstandingInjections = Sets.newIdentityHashSet(ReferenceType.STRONG);
+  final CreationTimeMemberInjector memberInjector = new CreationTimeMemberInjector(this);
   Reflection reflection;
 
   InjectorImpl(Injector parentInjector) {
     this.parentInjector = parentInjector;
-  }
-
-  void validateOustandingInjections(Errors errors) {
-    for (Object toInject : outstandingInjections) {
-      try {
-        getMemberInjectors(toInject.getClass());
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
-    }
-  }
-
-  /**
-   * Performs creation-time injections on all objects that require it. Whenever fulfilling an
-   * injection depends on another object that requires injection, we use {@link
-   * InternalContext#ensureMemberInjected} to inject that member first.
-   *
-   * <p>If the two objects are codependent (directly or transitively), ordering of injection is
-   * arbitrary.
-   */
-  void fulfillOutstandingInjections(final Errors errors) {
-    try {
-      callInContext(new ContextualCallable<Void>() {
-        public Void call(InternalContext context) {
-          // loop over a defensive copy, since ensureMemberInjected() mutates the set
-          for (Object toInject : Lists.newArrayList(outstandingInjections)) {
-            try {
-              context.ensureMemberInjected(errors, toInject);
-            } catch (ErrorsException e) {
-              errors.merge(e.getErrors());
-            }
-          }
-          return null;
-        }
-      });
-    }
-    catch (ErrorsException e) {
-      throw new AssertionError(e);
-    }
-
-    if (!outstandingInjections.isEmpty()) {
-      throw new AssertionError("failed to satisfy " + outstandingInjections);
-    }
   }
 
   /** Indexes bindings by type. */

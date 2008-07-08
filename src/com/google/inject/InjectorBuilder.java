@@ -137,7 +137,7 @@ class InjectorBuilder {
     bindLogger();
     bindCommandProcesor = new BindCommandProcessor(errors,
         injector, injector.scopes, injector.explicitBindings,
-        injector.outstandingInjections);
+        injector.memberInjector);
     bindCommandProcesor.processCommands(commands);
     bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
@@ -146,7 +146,7 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Binding indexing");
 
     requestInjectionCommandProcessor
-        = new RequestInjectionCommandProcessor(errors, injector.outstandingInjections);
+        = new RequestInjectionCommandProcessor(errors, injector.memberInjector);
     requestInjectionCommandProcessor.processCommands(commands);
     stopwatch.resetAndLog("Static injection");
   }
@@ -159,7 +159,7 @@ class InjectorBuilder {
     requestInjectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
-    injector.validateOustandingInjections(errors);
+    injector.memberInjector.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
     new GetProviderProcessor(errors, injector).processCommands(commands);
@@ -173,7 +173,7 @@ class InjectorBuilder {
     requestInjectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 
-    injector.fulfillOutstandingInjections(errors);
+    injector.memberInjector.injectAll(errors);
     stopwatch.resetAndLog("Instance injection");
     errors.throwCreationExceptionIfErrorsExist();
 

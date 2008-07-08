@@ -46,19 +46,19 @@ class BindCommandProcessor extends CommandProcessor {
   private final Map<Class<? extends Annotation>, Scope> scopes;
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Map<Key<?>, BindingImpl<?>> bindings;
-  private final Set<Object> outstandingInjections;
+  private final CreationTimeMemberInjector memberInjector;
   private final List<Runnable> untargettedBindings = Lists.newArrayList();
 
   BindCommandProcessor(Errors errors,
       InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
       Map<Key<?>, BindingImpl<?>> bindings,
-      Set<Object> outstandingInjections) {
+      CreationTimeMemberInjector memberInjector) {
     super(errors);
     this.injector = injector;
     this.scopes = scopes;
     this.bindings = bindings;
-    this.outstandingInjections = outstandingInjections;
+    this.memberInjector = memberInjector;
   }
 
   @Override public <T> Boolean visitBind(BindCommand<T> command) {
@@ -110,7 +110,7 @@ class BindCommandProcessor extends CommandProcessor {
         }
 
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        outstandingInjections.add(instance);
+        memberInjector.add(instance);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, instance));
@@ -120,7 +120,7 @@ class BindCommandProcessor extends CommandProcessor {
       public Void visitToProvider(Provider<? extends T> provider) {
         InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
-        outstandingInjections.add(provider);
+        memberInjector.add(provider);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new ProviderInstanceBindingImpl<T>(

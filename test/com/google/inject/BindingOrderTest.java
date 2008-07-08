@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
 /**
@@ -47,12 +49,43 @@ public class BindingOrderTest extends TestCase {
       }
     });
 
-    // For untargetted bindings with scopes, sometimes we lose the scope at
-    // injector time. This is because we use the injector's just-in-time
-    // bindings to build these, rather than the bind command. This is a known
-    // bug.
-    assertSame("known bug: untargetted binding out-of-order",
-        injector.getInstance(A.class).b, injector.getInstance(A.class).b);
+    assertSame(injector.getInstance(A.class).b, injector.getInstance(A.class).b);
+  }
+
+  public void testBindingWithExtraThreads() throws InterruptedException {
+    final CountDownLatch ready = new CountDownLatch(1);
+    final CountDownLatch done = new CountDownLatch(1);
+    final AtomicReference<B> ref = new AtomicReference<B>();
+
+    final Object createsAThread = new Object() {
+      @Inject void createAnotherThread(final Injector injector) {
+        new Thread() {
+          public void run() {
+            ready.countDown();
+            A a = injector.getInstance(A.class);
+            ref.set(a.b);
+            done.countDown();
+          }
+        }.start();
+
+        // to encourage collisions, we make sure the other thread is running before returning
+        try {
+          ready.await();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+    
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        requestInjection(createsAThread);
+        bind(A.class).toInstance(new A());
+      }
+    });
+
+    done.await();
+    assertNotNull(ref.get());
   }
 
   static class A {

@@ -74,10 +74,6 @@ class InternalContext {
    * been injected before its use.
    */
   public void ensureMemberInjected(Errors errors, Object toInject) throws ErrorsException {
-    if (!injector.outstandingInjections.remove(toInject)) {
-      return;
-    }
-
-    injector.injectMembersOrThrow(errors, toInject);
+    injector.memberInjector.ensureInjected(errors, toInject);
   }
 }
