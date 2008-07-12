@@ -464,8 +464,8 @@ class InjectorImpl implements Injector {
   static class LateBoundConstructor<T> implements InternalFactory<T> {
     ConstructorInjector<T> constructorInjector;
 
-    void bind(InjectorImpl injector, Class<T> implementation) throws ErrorsException {
-      constructorInjector = injector.getConstructor(implementation);
+    void bind(InjectorImpl injector, Class<T> implementation, Errors errors) throws ErrorsException {
+      constructorInjector = injector.getConstructor(implementation, errors);
     }
 
     @SuppressWarnings("unchecked")
@@ -627,7 +627,7 @@ class InjectorImpl implements Injector {
     }
   };
 
-  public List<SingleMemberInjector> getMemberInjectors(Class<?> type)
+  public List<SingleMemberInjector> getMemberInjectors(Class<?> type, Errors errors)
       throws ErrorsException {
     Object injectorsOrError = injectors.get(type);
     if (injectorsOrError instanceof List) {
@@ -635,7 +635,8 @@ class InjectorImpl implements Injector {
       List<SingleMemberInjector> result = (List<SingleMemberInjector>) injectorsOrError;
       return result;
     } else if (injectorsOrError instanceof Errors) {
-      throw ((Errors) injectorsOrError).copy().toException();
+      errors.merge((Errors) injectorsOrError);
+      throw errors.toException();
     } else {
       throw new AssertionError();
     }
@@ -894,7 +895,7 @@ class InjectorImpl implements Injector {
   final Map<Class<?>, Object> constructors = new ReferenceCache<Class<?>, Object>() {
     @SuppressWarnings("unchecked")
     protected Object create(Class<?> implementation) {
-      Errors errors = new Errors(StackTraceElements.forType(implementation));
+      Errors errors = new Errors();
       try {
         ConstructorInjector result = new ConstructorInjector(
             errors, InjectorImpl.this, implementation);
@@ -955,7 +956,7 @@ class InjectorImpl implements Injector {
       return;
     }
 
-    for (SingleMemberInjector injector : getMemberInjectors(o.getClass())) {
+    for (SingleMemberInjector injector : getMemberInjectors(o.getClass(), errors)) {
       injector.inject(errors, context, o);
     }
   }
@@ -1067,10 +1068,12 @@ class InjectorImpl implements Injector {
 
   /** Gets a constructor function for a given implementation class. */
   @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(Class<T> implementation) throws ErrorsException {
+  <T> ConstructorInjector<T> getConstructor(Class<T> implementation, Errors errors)
+      throws ErrorsException {
     Object o = constructors.get(implementation);
     if (o instanceof Errors) {
-      throw ((Errors) o).copy().toException();
+      errors.merge((Errors) o);
+      throw errors.toException();
     }
     else if (o instanceof ConstructorInjector<?>) {
       return (ConstructorInjector<T>) o;
@@ -1088,10 +1091,12 @@ class InjectorImpl implements Injector {
 
   List<InjectionPoint<?>> getModifiableFieldAndMethodInjectionsFor(Class<?> clazz)
       throws ErrorsException {
+    Errors errors = new Errors();
     List<InjectionPoint<?>> dependencies = Lists.newArrayList();
-    for (SingleMemberInjector singleMemberInjector : getMemberInjectors(clazz)) {
+    for (SingleMemberInjector singleMemberInjector : getMemberInjectors(clazz, errors)) {
       dependencies.addAll(singleMemberInjector.getDependencies());
     }
+    errors.throwIfNecessary();
     return dependencies;
   }
 

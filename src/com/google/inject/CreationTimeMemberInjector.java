@@ -54,7 +54,7 @@ class CreationTimeMemberInjector {
   void validateOustandingInjections(Errors errors) {
     for (Object toInject : outstandingInjections) {
       try {
-        injector.getMemberInjectors(toInject.getClass());
+        injector.getMemberInjectors(toInject.getClass(), errors);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }

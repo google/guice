@@ -119,6 +119,26 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
+  /** as loaded by another class loader */
+  private Class<ProxyTest> proxyTestClass;
+  private Class<ProxyTestImpl> realClass;
+  private Module testModule;
+
+  @SuppressWarnings("unchecked")
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    ClassLoader testClassLoader = new TestVisibilityClassLoader();
+    proxyTestClass = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
+    realClass = (Class<ProxyTestImpl>) testClassLoader.loadClass(ProxyTestImpl.class.getName());
+
+    testModule = new AbstractModule() {
+      public void configure() {
+        bind(proxyTestClass).to(realClass);
+      }
+    };
+  }
+
   interface ProxyTest {
     String sayHello();
   }
@@ -141,33 +161,13 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public void testProxyClassLoading() {
-    final ClassLoader testClassLoader = new TestVisibilityClassLoader();
+  public void testProxyClassLoading() throws Exception {
+    Object testObject = Guice.createInjector(interceptorModule, testModule)
+        .getInstance(proxyTestClass);
 
-    final Class<ProxyTest> testAPIClazz;
-    final Class<ProxyTest> testImplClazz;
-
-    try {
-      testAPIClazz = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
-      testImplClazz = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTestImpl.class.getName());
-    } catch (final Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    final Object testObject = Guice.createInjector(interceptorModule, new Module() {
-      public void configure(Binder binder) {
-        binder.bind(testAPIClazz).to(testImplClazz);
-      }
-    }).getInstance(testAPIClazz);
-
-    try {
-      // verify method interception still works
-      Method m = testImplClazz.getMethod("sayHello");
-      assertEquals("HELLO WORLD", m.invoke(testObject));
-    } catch (final Exception e) {
-      throw new RuntimeException(e);
-    }
+    // verify method interception still works
+    Method m = realClass.getMethod("sayHello");
+    assertEquals("HELLO WORLD", m.invoke(testObject));
   }
 
   public void testProxyClassUnloading() {

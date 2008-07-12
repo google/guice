@@ -24,7 +24,6 @@ import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -58,12 +57,12 @@ class ProxyFactory implements ConstructionProxyFactory {
   @SuppressWarnings("unchecked")
   public <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
       throws ErrorsException {
-    return (ConstructionProxy<T>) getConstructionProxy(constructor);
+    return (ConstructionProxy<T>) getConstructionProxy(constructor, errors);
   }
 
   Map<Constructor<?>, Object> constructionProxies = new ReferenceCache<Constructor<?>, Object>() {
     protected Object create(Constructor<?> constructor) {
-      Errors errors = new Errors(StackTraceElements.forMember(constructor));
+      Errors errors = new Errors();
       try {
         ConstructionProxy<?> result = createConstructionProxy(errors, constructor);
         errors.throwIfNecessary();
@@ -74,14 +73,15 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
   };
 
-  public ConstructionProxy<?> getConstructionProxy(Constructor<?> constructor)
+  public ConstructionProxy<?> getConstructionProxy(Constructor<?> constructor, Errors errors)
       throws ErrorsException {
     Object constructionProxyOrErrors = constructionProxies.get(constructor);
 
     if (constructionProxyOrErrors instanceof ConstructionProxy<?>) {
       return (ConstructionProxy<?>) constructionProxyOrErrors;
     } else if (constructionProxyOrErrors instanceof Errors) {
-      throw ((Errors) constructionProxyOrErrors).copy().toException();
+      errors.merge((Errors) constructionProxyOrErrors);
+      throw errors.toException();
     } else {
       throw new AssertionError();
     }

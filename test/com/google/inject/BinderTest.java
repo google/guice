@@ -92,23 +92,23 @@ public class BinderTest extends TestCase {
     }
   }
 
-  public void testGetInstanceOfAnAbstractClass() {
-    Injector injector = Guice.createInjector();
+  public void testMissingDependency() {
     try {
-      injector.getInstance(Runnable.class);
-      fail();
-    } catch(ProvisionException expected) {
-      assertContains(expected.getMessage(),
+      Guice.createInjector(new AbstractModule() {
+        public void configure() {
+          bind(NeedsRunnable.class);
+        }
+      });
+    } catch (CreationException e) {
+      assertEquals(1, e.getErrorMessages().size());
+      assertContains(e.getMessage(),
+          "1) Error at " + getClass().getName(),
           "No implementation for java.lang.Runnable was bound.");
     }
+  }
 
-    try {
-      injector.getInstance(Key.get(Date.class, Names.named("date")));
-      fail();
-    } catch(ProvisionException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.util.Date "
-          + "annotated with @com.google.inject.name.Named(value=date) was bound.");
-    }
+  static class NeedsRunnable {
+    @Inject Runnable runnable;
   }
 
   public void testDanglingConstantBinding() {
@@ -120,7 +120,9 @@ public class BinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Missing constant value.");
+      assertContains(expected.getMessage(),
+          "1) Error at " + getClass().getName(),
+          "Missing constant value. Please call to(...).");
     }
   }
 
@@ -258,6 +260,26 @@ public class BinderTest extends TestCase {
     assertSame(ExtendsHasImplementedBy2.class,
         injector.getInstance(HasImplementedBy2.class).getClass());
     assertSame(JustAClass.class, injector.getInstance(JustAClass.class).getClass());
+  }
+
+  public void testPartialInjectorGetInstance() {
+    Injector injector = Guice.createInjector();
+    try {
+      injector.getInstance(MissingParameter.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + MissingParameter.class.getName() + ".<init>(BinderTest.java:",
+          "Could not find a suitable constructor in " + NoInjectConstructor.class.getName());
+    }
+  }
+
+  static class MissingParameter {
+    @Inject MissingParameter(NoInjectConstructor noInjectConstructor) {}
+  }
+
+  static class NoInjectConstructor {
+    private NoInjectConstructor() {}
   }
 
   @ProvidedBy(HasProvidedBy1Provider.class)

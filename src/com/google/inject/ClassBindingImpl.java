@@ -43,7 +43,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-    lateBoundConstructor.bind(injector, getBoundClass());
+    lateBoundConstructor.bind(injector, getBoundClass(), errors);
   }
 
   public void accept(BindingVisitor<? super T> visitor) {

@@ -42,7 +42,8 @@ class ConstructorInjector<T> {
     this.implementation = implementation;
     constructionProxy = injector.reflection.getConstructionProxy(errors, implementation);
     parameterInjectors = createParameterInjector(errors, injector, constructionProxy);
-    List<SingleMemberInjector> memberInjectorsList = injector.getMemberInjectors(implementation);
+    List<SingleMemberInjector> memberInjectorsList
+        = injector.getMemberInjectors(implementation, errors);
     memberInjectors = memberInjectorsList.toArray(
         new SingleMemberInjector[memberInjectorsList.size()]);
   }

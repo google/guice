@@ -332,8 +332,10 @@ public final class Errors implements Serializable {
         List<InjectionPoint> injectionPoints = Lists.newArrayList();
         injectionPoints.addAll(this.injectionPoints);
         injectionPoints.addAll(message.getInjectionPoints());
-        errors.add(new Message(message.getSource(), message.getMessage(), injectionPoints,
-            message.getCause()));
+        Object source = message.getSource() != SourceProvider.UNKNOWN_SOURCE
+            ? message.getSource()
+            : this.source;
+        errors.add(new Message(source, message.getMessage(), injectionPoints, message.getCause()));
       }
     }
 
