@@ -68,11 +68,13 @@
       <fileset dir="${build.dir}" includes="javadoc/**/*"/>
     </copy>
 
-    <zip destfile="${build.dir}/guice-${version}.zip"
-      basedir="${build.dir}/dist"/>
-    <zip destfile="${build.dir}/guice-${version}-src.zip"
-      basedir="." 
-      excludes="build/**/*,build,.svn,.svn/**/*,**/.svn,classes,classes/**/*"/>
+    <zip destfile="${build.dir}/guice-${version}.zip">
+      <zipfileset dir="${build.dir}/dist" prefix="guice-${version}"/>
+    </zip>
+    <zip destfile="${build.dir}/guice-${version}-src.zip">
+      <zipfileset dir="." prefix="guice-${version}-src"
+          excludes="build/**/*,build,.svn,.svn/**/*,**/.svn,classes,classes/**/*"/>
+    </zip>
   </target>
   
   <target name="test.dist"
