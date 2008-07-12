@@ -48,22 +48,6 @@ public class ErrorMessagesTest extends TestCase {
     }
   }
 
-  /** Demonstrates issue 64, when setAccessible() fails. */
-  public void testGetUninjectableClass() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(Class.class);
-        }
-      });
-      fail();
-    } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "Failed to inject java.lang.Class");
-      assertTrue(expected.getCause() instanceof SecurityException);
-    }
-  }
-
   public void testBindingAnnotationsOnMethodsAndConstructors() {
     try {
       Guice.createInjector().getInstance(B.class);

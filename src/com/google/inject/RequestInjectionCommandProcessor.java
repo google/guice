@@ -51,7 +51,7 @@ class RequestInjectionCommandProcessor extends CommandProcessor {
 
   @Override public Boolean visitRequestInjection(RequestInjectionCommand command) {
     for (Object instance : command.getInstances()) {
-      memberInjector.add(instance);
+      memberInjector.requestInjection(instance, command.getSource());
     }
     return true;
   }

@@ -76,6 +76,7 @@ class RuntimeReflectionFactory implements Reflection.Factory {
         if (Modifier.isPrivate(noArgCtor.getModifiers())
             && !Modifier.isPrivate(implementation.getModifiers())) {
           errors.missingConstructor(implementation);
+          throw errors.toException();
         }
         return noArgCtor;
       }

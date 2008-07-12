@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import junit.framework.TestCase;
@@ -83,6 +84,45 @@ public class RequestInjectionTest extends TestCase {
     assertEquals(5, hi.instanceField);
     assertEquals("test", HasInjections.staticMethod);
     assertEquals(5, HasInjections.staticField);
+  }
+
+  public void testValidationErrorOnInjectedMembers() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          requestInjection(new NeedsRunnable());
+        }
+      });
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + NeedsRunnable.class.getName(), ".runnable(RequestInjectionTest.java:",
+          "No implementation for java.lang.Runnable was bound");
+    }
+  }
+
+  public void testInjectionErrorOnInjectedMembers() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(Runnable.class).toProvider(new Provider<Runnable>() {
+            public Runnable get() {
+              throw new UnsupportedOperationException();
+            }
+          });
+          requestInjection(new NeedsRunnable());
+        }
+      });
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + getClass().getName(),
+          "Error in custom provider, java.lang.UnsupportedOperationException",
+          "while locating java.lang.Runnable",
+          "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:");
+    }
+  }
+
+  static class NeedsRunnable {
+    @Inject Runnable runnable;
   }
 
   static class HasInjections {

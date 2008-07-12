@@ -16,12 +16,12 @@
 
 package com.google.inject;
 
-import com.google.common.base.ReferenceType;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -36,15 +36,24 @@ class CreationTimeMemberInjector {
   /** zero means everything is injected. */
   private final CountDownLatch ready = new CountDownLatch(1);
 
-  private final Set<Object> outstandingInjections = Sets.newIdentityHashSet(ReferenceType.STRONG);
+  /** Maps instances that need injection to a source that registered them */
+  private final Map<Object, Object> outstandingInjections = Maps.newIdentityHashMap();
   private final InjectorImpl injector;
 
   CreationTimeMemberInjector(InjectorImpl injector) {
     this.injector = injector;
   }
 
-  public void add(Object instance) {
-    outstandingInjections.add(instance);
+  /**
+   * Registers an instance for member injection when that step is performed.
+   *
+   * @param instance an instance that optionally has members to be injected (each annotated with
+   *      @Inject).
+   * @param source the source location that this injection was requested
+   */
+  public void requestInjection(Object instance, Object source) {
+    checkNotNull(source);
+    outstandingInjections.put(instance, source);
   }
 
   /**
@@ -52,9 +61,11 @@ class CreationTimeMemberInjector {
    * on the injected instances.
    */
   void validateOustandingInjections(Errors errors) {
-    for (Object toInject : outstandingInjections) {
+    for (Map.Entry<Object, Object> entry : outstandingInjections.entrySet()) {
       try {
-        injector.getMemberInjectors(toInject.getClass(), errors);
+        Object toInject = entry.getKey();
+        Object source = entry.getValue();
+        injector.getMemberInjectors(toInject.getClass(), errors.withSource(source));
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
@@ -64,16 +75,18 @@ class CreationTimeMemberInjector {
   /**
    * Performs creation-time injections on all objects that require it. Whenever fulfilling an
    * injection depends on another object that requires injection, we use {@link
-   * #ensureInjected(Errors, Object)} to inject that member first.
+   * #ensureInjected(Object,com.google.inject.internal.Errors)} to inject that member first.
    *
    * <p>If the two objects are codependent (directly or transitively), ordering of injection is
    * arbitrary.
    */
   void injectAll(final Errors errors) {
     // loop over a defensive copy since ensureInjected() mutates the set
-    for (Object toInject : Lists.newArrayList(outstandingInjections)) {
+    for (Map.Entry<Object, Object> entry : Lists.newArrayList(outstandingInjections.entrySet())) {
       try {
-        ensureInjected(errors, toInject);
+        Object toInject = entry.getKey();
+        Object source = entry.getValue();
+        ensureInjected(toInject, errors.withSource(source));
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
@@ -92,7 +105,7 @@ class CreationTimeMemberInjector {
    * used both internally, and by {@code InternalContext} to satisfy injections while satisfying
    * other injections.
    */
-  void ensureInjected(Errors errors, Object toInject) throws ErrorsException {
+  void ensureInjected(Object toInject, Errors errors) throws ErrorsException {
     if (ready.getCount() == 0) {
       return;
     }
@@ -109,7 +122,7 @@ class CreationTimeMemberInjector {
     }
 
     // toInject needs injection, do it right away
-    if (outstandingInjections.remove(toInject)) {
+    if (outstandingInjections.remove(toInject) != null) {
       injector.injectMembersOrThrow(errors, toInject);
     }
   }

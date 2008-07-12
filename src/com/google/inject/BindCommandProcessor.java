@@ -110,7 +110,7 @@ class BindCommandProcessor extends CommandProcessor {
         }
 
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        memberInjector.add(instance);
+        memberInjector.requestInjection(instance, source);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, instance));
@@ -120,7 +120,7 @@ class BindCommandProcessor extends CommandProcessor {
       public Void visitToProvider(Provider<? extends T> provider) {
         InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
-        memberInjector.add(provider);
+        memberInjector.requestInjection(provider, source);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
         putBinding(new ProviderInstanceBindingImpl<T>(
@@ -182,7 +182,7 @@ class BindCommandProcessor extends CommandProcessor {
         untargettedBindings.add(new Runnable() {
           public void run() {
             try {
-              injector.initializeBinding(binding, errors);
+              injector.initializeBinding(binding, errors.withSource(source));
             } catch (ErrorsException e) {
               errors.merge(e.getErrors());
             }
