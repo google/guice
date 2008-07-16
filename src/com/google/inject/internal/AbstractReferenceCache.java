@@ -164,7 +164,7 @@ abstract class AbstractReferenceCache<K, V> extends ReferenceMap<K, V> {
      *
      * @return {@code true} if the thread was interrupted while waiting
      */
-    private synchronized boolean waitUntilSet() {
+    private boolean waitUntilSet() {
       boolean interrupted = false;
       while (!set) {
         try {
