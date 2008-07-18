@@ -107,7 +107,7 @@ public class ScopesTest extends TestCase {
         injector.getInstance(AnnotatedSingleton.class));
   }
 
-  public void testScopingAnnotationsOnAbstractTypes() {
+  public void testScopingAnnotationsOnAbstractTypeViaBind() {
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
@@ -126,7 +126,43 @@ public class ScopesTest extends TestCase {
   @Singleton
   interface A {}
   static class AImpl implements A {}
-  
+
+  public void testScopingAnnotationsOnAbstractTypeViaImplementedBy() {
+    try {
+      Guice.createInjector().getInstance(D.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + D.class.getName() + ".class(ScopesTest.java:",
+          D.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.");
+    }
+  }
+
+  @Singleton @ImplementedBy(DImpl.class)
+  interface D {}
+  static class DImpl implements D {}
+
+  public void testScopingAnnotationsOnAbstractTypeViaProvidedBy() {
+    try {
+      Guice.createInjector().getInstance(E.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + E.class.getName() + ".class(ScopesTest.java:",
+          E.class.getName() + " is annotated with " + Singleton.class.getName(),
+          "but scope annotations are not supported for abstract types.");
+    }
+  }
+
+  @Singleton @ProvidedBy(EProvider.class)
+  interface E {}
+  static class EProvider implements Provider<E> {
+    public E get() {
+      return null;
+    }
+  }
+
   public void testScopeUsedButNotBound() {
     try {
       Guice.createInjector(new AbstractModule() {
