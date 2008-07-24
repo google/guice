@@ -167,6 +167,26 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
+   * Adds a dependency from this module to {@code key}. When the injector is
+   * created, Guice will report an error if {@code key} cannot be injected.
+   * Note that this requirement may be satisfied by implicit binding, such as
+   * a public no-arguments constructor.
+   */
+  protected void requireBinding(Key<?> key) {
+    binder.getProvider(key);
+  }
+
+  /**
+   * Adds a dependency from this module to {@code type}. When the injector is
+   * created, Guice will report an error if {@code key} cannot be injected.
+   * Note that this requirement may be satisfied by implicit binding, such as
+   * a public no-arguments constructor.
+   */
+  protected void requireBinding(Class<?> type) {
+    binder.getProvider(type);
+  }
+
+  /**
    * @see Binder#getProvider(Key)
    */
   protected <T> Provider<T> getProvider(Key<T> key) {

@@ -28,6 +28,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import junit.framework.TestCase;
 
 /**
@@ -76,17 +77,20 @@ public class BinderTest extends TestCase {
         public void configure() {
           getProvider(Runnable.class);
           bind(Comparator.class);
+          requireBinding(Key.get(new TypeLiteral<Callable<String>>() {}));
           bind(Date.class).annotatedWith(Names.named("date"));
         }
       });
     } catch (CreationException e) {
-      assertEquals(3, e.getErrorMessages().size());
+      assertEquals(4, e.getErrorMessages().size());
       assertContains(e.getMessage(),
           "1) Error at " + getClass().getName(),
           "No implementation for java.lang.Runnable was bound.",
           "2) Error at " + getClass().getName(),
           "No implementation for " + Comparator.class.getName() + " was bound.",
           "3) Error at " + getClass().getName(),
+          "No implementation for java.util.concurrent.Callable<java.lang.String> was bound.",
+          "4) Error at " + getClass().getName(),
           "No implementation for java.util.Date annotated with "
               + "@com.google.inject.name.Named(value=date) was bound.");
     }

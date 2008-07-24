@@ -377,9 +377,9 @@ class InjectorImpl implements Injector {
   }
 
   <T> BindingImpl<T> createBindingFromType(
-      Class<T> type, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+      Key<T> key, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     BindingImpl<T> binding = createUnitializedBinding(
-        type, null, StackTraceElements.forType(type), loadStrategy, errors);
+        key, null, loadStrategy, errors);
     initializeBinding(binding, errors);
     return binding;
   }
@@ -405,11 +405,24 @@ class InjectorImpl implements Injector {
     }
   }
 
+  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope,
+      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+    @SuppressWarnings("unchecked")
+    Class<T> type = (Class<T>) key.getTypeLiteral().getRawType();
+    Object source = StackTraceElements.forType(type);
+    return createUnitializedBinding(key, type, scope, source, loadStrategy, errors);
+  }
+
   /**
    * Creates a binding for an injectable type with the given scope. Looks for a scope on the type if
    * none is specified.
+   *
+   * TODO(jessewilson): Fix raw types! this method makes a binding for {@code Foo} from a request
+   *     for {@code Foo<String>}
+   *
+   * @param type the raw type for {@code key}
    */
-  <T> BindingImpl<T> createUnitializedBinding(Class<T> type, Scope scope, Object source,
+  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Class<T> type, Scope scope, Object source,
       LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     // Don't try to inject arrays, or enums.
     if (type.isArray() || type.isEnum()) {
@@ -434,7 +447,7 @@ class InjectorImpl implements Injector {
     // TODO: Method interceptors could actually enable us to implement
     // abstract types. Should we remove this restriction?
     if (Modifier.isAbstract(type.getModifiers())) {
-      throw errors.missingImplementation(type).toException();
+      throw errors.missingImplementation(key).toException();
     }
 
     // Error: Inner class.
@@ -452,13 +465,13 @@ class InjectorImpl implements Injector {
       }
     }
 
-    Key<T> key = Key.get(type);
+    Key<T> keyForRawType = Key.get(type);
 
     LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
     InternalFactory<? extends T> scopedFactory
-        = Scopes.scope(key, this, lateBoundConstructor, scope);
+        = Scopes.scope(keyForRawType, this, lateBoundConstructor, scope);
     return new ClassBindingImpl<T>(
-        this, key, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
+        this, keyForRawType, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {
@@ -604,9 +617,7 @@ class InjectorImpl implements Injector {
     }
 
     // Create a binding based on the raw type.
-    @SuppressWarnings("unchecked")
-    Class<T> clazz = (Class<T>) key.getTypeLiteral().getRawType();
-    return createBindingFromType(clazz, LoadStrategy.LAZY, errors);
+    return createBindingFromType(key, LoadStrategy.LAZY, errors);
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key, Errors errors)

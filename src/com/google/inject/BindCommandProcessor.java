@@ -171,7 +171,8 @@ class BindCommandProcessor extends CommandProcessor {
         Class<T> clazz = (Class<T>) type;
         final BindingImpl<T> binding;
         try {
-          binding = injector.createUnitializedBinding(clazz, scope, source, loadStrategy, errors);
+          binding = injector.createUnitializedBinding(
+              key, clazz, scope, source, loadStrategy, errors);
           putBinding(binding);
         } catch (ErrorsException e) {
           errors.merge(e.getErrors());
