@@ -153,7 +153,7 @@ public class TypeResolverTest extends TestCase {
   }
 
   public void testRelatedTypeVariables() {
-    TypeResolver resolver = new TypeResolver(arrayListOfString);
+    TypeResolver resolver = new TypeResolver(hasRelatedOfString);
     assertEquals(String.class, resolver.getParameterTypes(echo).get(0));
     assertEquals(String.class, resolver.getReturnType(echo));
   }
