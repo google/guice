@@ -29,8 +29,11 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a request to bind a constant.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.BindConstant}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class BindConstantCommand implements Command {
   private final Object source;
   private BindingAnnotation bindingAnnotation;

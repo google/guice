@@ -16,16 +16,19 @@
 
 package com.google.inject.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Immutable snapshot of a request to convert binder types.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.ConvertToTypes}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class ConvertToTypesCommand implements Command {
   private final Object source;
   private final Matcher<? super TypeLiteral<?>> typeMatcher;

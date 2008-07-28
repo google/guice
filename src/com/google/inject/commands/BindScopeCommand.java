@@ -16,16 +16,18 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.Scope;
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.inject.Scope;
 import java.lang.annotation.Annotation;
 
 /**
  * Immutable snapshot of a request to bind a scope.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.BindScope}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class BindScopeCommand implements Command {
   private final Object source;
   private final Class<? extends Annotation> annotationType;

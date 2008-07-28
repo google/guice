@@ -19,8 +19,11 @@ package com.google.inject.commands;
 /**
  * Immutable snapshot of a binding command.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.Element}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public interface Command {
   Object getSource();
   <T> T acceptVisitor(Visitor<T> visitor);

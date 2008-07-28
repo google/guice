@@ -24,8 +24,12 @@ import com.google.inject.spi.HasInjections;
  *
  * <p>Example: {@code bind(Foo.class).toProvider(new FooProvider());}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitToProvider(com.google.inject.Provider)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface ProviderInstanceBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**

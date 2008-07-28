@@ -24,8 +24,12 @@ import com.google.inject.Provider;
  *
  * <p>Example: {@code bind(Foo.class).toProvider(FooProvider.class);}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitToProviderKey(com.google.inject.Key)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface LinkedProviderBinding<T> extends OldVersionBinding<T> {
 
   /**

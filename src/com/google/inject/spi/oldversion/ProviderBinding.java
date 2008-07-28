@@ -22,8 +22,12 @@ import com.google.inject.Provider;
  * A synthetic binding to {@code Provider<T>} which exists for any binding to
  * {@code T}.
  *
+ * @deprecated replaced with {@link 
+ * com.google.inject.Binding.TargetVisitor#visitProviderBinding(com.google.inject.Key)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface ProviderBinding<T> extends OldVersionBinding<Provider<T>> {
 
   /**

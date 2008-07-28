@@ -24,8 +24,11 @@ import com.google.inject.Provider;
 /**
  * Immutable snapshot of a request for a provider.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.GetProvider}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class GetProviderCommand<T> implements Command {
   private final Object source;
   private final Key<T> key;

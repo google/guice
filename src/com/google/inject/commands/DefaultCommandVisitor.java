@@ -21,8 +21,11 @@ package com.google.inject.commands;
  * No-op visitor for subclassing. All interface methods simply delegate to
  * {@link #visitCommand(Command)}, returning its result.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.DefaultElementVisitor}
+ *
  * @author sberlin@gmail.com (Sam Berlin)
  */
+@Deprecated
 public class DefaultCommandVisitor<V> implements Command.Visitor<V> {
 
   protected DefaultCommandVisitor() {}

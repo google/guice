@@ -24,8 +24,12 @@ import com.google.inject.spi.HasInjections;
  *
  * <p>Example: {@code bind(Concrete.class);}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitConstructor(java.lang.reflect.Constructor)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface ClassBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**

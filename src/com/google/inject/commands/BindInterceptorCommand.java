@@ -16,20 +16,22 @@
 
 package com.google.inject.commands;
 
-import com.google.inject.matcher.Matcher;
 import static com.google.common.base.Preconditions.checkNotNull;
-import org.aopalliance.intercept.MethodInterceptor;
-
+import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import static java.util.Collections.unmodifiableList;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Immutable snapshot of a request to bind an interceptor.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.BindInterceptor}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class BindInterceptorCommand implements Command {
   private final Object source;
   private final Matcher<? super Class<?>> classMatcher;

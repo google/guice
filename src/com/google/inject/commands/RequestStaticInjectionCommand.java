@@ -24,8 +24,11 @@ import java.util.List;
 /**
  * Immutable snapshot of a request for static injection.
  * 
+ * @deprecated replaced with {@link com.google.inject.spi.RequestStaticInjection}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class RequestStaticInjectionCommand implements Command {
   private final Object source;
   private final List<Class> types;

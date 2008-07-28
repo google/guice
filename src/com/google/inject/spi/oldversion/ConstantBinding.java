@@ -21,8 +21,12 @@ package com.google.inject.spi.oldversion;
  *
  * <p>Example: {@code bindConstant().annotatedWith(PoolSize.class).to(5);}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitConstant(Object)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface ConstantBinding<T> extends OldVersionBinding<T> {
 
   /**

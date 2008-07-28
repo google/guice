@@ -18,15 +18,17 @@ package com.google.inject.commands;
 
 import com.google.inject.Scope;
 import com.google.inject.binder.ScopedBindingBuilder;
-
 import java.lang.annotation.Annotation;
 
 
 /**
  * Immutable snapshot of a binding scope.
  *
+ * @deprecated replaced with {@link com.google.inject.Binding.ScopingVisitor}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public interface BindScoping {
   void execute(ScopedBindingBuilder scopedBindingBuilder);
   boolean isEagerSingleton();

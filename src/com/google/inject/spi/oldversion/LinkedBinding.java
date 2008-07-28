@@ -21,8 +21,12 @@ package com.google.inject.spi.oldversion;
  *
  * <p>Example: {@code bind(Collection.class).to(List.class);}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitToKey(com.google.inject.Key)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface LinkedBinding<T> extends OldVersionBinding<T> {
 
   /**

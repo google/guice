@@ -24,8 +24,11 @@ import com.google.inject.Scope;
  * instances of that type.  This interface is part of the {@link com.google.inject.Injector}
  * introspection API and is intended primary for use by tools.
  *
+ * @deprecated replaced with {@link com.google.inject.Binding}
+ * 
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface OldVersionBinding<T> extends Binding<T> {
 
   /**

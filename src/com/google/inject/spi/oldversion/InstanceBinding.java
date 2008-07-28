@@ -23,8 +23,12 @@ import com.google.inject.spi.HasInjections;
  *
  * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitToInstance(Object)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface InstanceBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**

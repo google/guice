@@ -31,8 +31,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 /**
  * Executes commands against a binder.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.ModuleWriter}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public class CommandReplayer {
 
   /**

@@ -19,8 +19,12 @@ package com.google.inject.spi.oldversion;
 /**
  * A binding which was converted from a string contant.
  *
+ * @deprecated replaced with {@link
+ * com.google.inject.Binding.TargetVisitor#visitConvertedConstant(Object)}
+ *
  * @author crazybob@google.com (Bob Lee)
  */
+@Deprecated
 public interface ConvertedConstantBinding<T> extends ConstantBinding<T> {
 
   /**

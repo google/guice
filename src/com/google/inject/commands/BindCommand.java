@@ -31,8 +31,11 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a request to bind a value.
  *
+ * @deprecated replaced with {@link com.google.inject.Binding}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class BindCommand<T> implements Command {
 
   private static final BindTarget<Object> EMPTY_BIND_TARGET = new AbstractTarget<Object>() {

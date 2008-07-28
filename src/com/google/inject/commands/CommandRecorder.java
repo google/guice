@@ -46,8 +46,11 @@ import org.aopalliance.intercept.MethodInterceptor;
  * Records commands executed by a module so they can be inspected or
  * {@link CommandReplayer replayed}.
  *
+ * @deprecated replaced with {@link com.google.inject.spi.Elements#getElements(Module[])}
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@Deprecated
 public final class CommandRecorder {
   private Stage currentStage = Stage.DEVELOPMENT;
 
