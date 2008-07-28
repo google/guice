@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.spi.oldversion;
 
-import com.google.inject.Binding;
-import com.google.inject.Provider;
+import com.google.inject.spi.HasInjections;
 
 /**
- * A synthetic binding to {@code Provider<T>} which exists for any binding to
- * {@code T}.
+ * A binding to a concrete, injectable class. Instantiates new instances of the
+ * class and injects its members.
+ *
+ * <p>Example: {@code bind(Concrete.class);}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ProviderBinding<T> extends Binding<Provider<T>> {
+public interface ClassBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**
-   * Gets the binding from which the provider comes.
+   * Gets the class associated with this binding.
    */
-  Binding<T> getTarget();
+  Class<T> getBoundClass();
+
+  // TODO: Expose information about method and constructor interceptors.
 }

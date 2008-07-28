@@ -17,33 +17,38 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
-import com.google.inject.spi.GetProvider;
+import com.google.inject.spi.Message;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Handles {@link Binder#getProvider} commands.
+ * Handles {@link Binder#addError} commands.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class GetProviderProcessor extends ElementProcessor {
+class ErrorsElementProcessor extends ElementProcessor {
 
-  private final InjectorImpl injector;
+  private static final Logger logger = Logger.getLogger(Guice.class.getName());
 
-  GetProviderProcessor(Errors errors, InjectorImpl injector) {
+  ErrorsElementProcessor(Errors errors) {
     super(errors);
-    this.injector = injector;
   }
 
-  @Override public <T> Boolean visitGetProvider(GetProvider<T> command) {
-    // ensure the provider can be created
-    try {
-      Provider<T> provider = injector.getProviderOrThrow(command.getKey(), errors);
-      command.initDelegate(provider);
-    } catch (ErrorsException e) {
-      errors.merge(e.getErrors()); // TODO: source
+  @Override public Boolean visitMessage(Message message) {
+    if (message.getCause() != null) {
+      String rootMessage = getRootMessage(message.getCause());
+      logger.log(Level.INFO,
+          "An exception was caught and reported. Message: " + rootMessage,
+          message.getCause());
     }
 
+    errors.addMessage(message);
     return true;
+  }
+
+  public static String getRootMessage(Throwable t) {
+    Throwable cause = t.getCause();
+    return cause == null ? t.toString() : getRootMessage(cause);
   }
 }

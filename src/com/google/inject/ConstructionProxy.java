@@ -39,5 +39,5 @@ interface ConstructionProxy<T> {
    * Returns the injected constructor. If the injected constructor is synthetic (such as generated
    * code for method interception), the natural constructor is returned.
    */
-  Constructor getConstructor();
+  Constructor<T> getConstructor();
 }

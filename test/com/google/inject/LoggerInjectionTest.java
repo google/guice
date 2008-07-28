@@ -2,10 +2,9 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
-import com.google.inject.spi.ProviderInstanceBinding;
-import junit.framework.TestCase;
-
+import com.google.inject.spi.oldversion.ProviderInstanceBinding;
 import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  * Test built-in injection of loggers.

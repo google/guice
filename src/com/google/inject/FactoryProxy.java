@@ -26,7 +26,7 @@ import com.google.inject.spi.InjectionPoint;
  * A placeholder which enables us to swap in the real factory once the
  * container is created.
  */
-class FactoryProxy<T> implements InternalFactory<T>, BindCommandProcessor.CreationListener {
+class FactoryProxy<T> implements InternalFactory<T>, BindElementProcessor.CreationListener {
 
   private final Key<T> key;
   private final Key<? extends T> targetKey;
@@ -53,7 +53,7 @@ class FactoryProxy<T> implements InternalFactory<T>, BindCommandProcessor.Creati
     return targetFactory.get(errors, context, injectionPoint);
   }
 
-  public String toString() {
+  @Override public String toString() {
     return new ToStringBuilder(FactoryProxy.class)
         .add("key", key)
         .add("provider", targetFactory)

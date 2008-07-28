@@ -17,33 +17,30 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
-import com.google.inject.spi.GetProvider;
+import com.google.inject.spi.BindInterceptor;
 
 /**
- * Handles {@link Binder#getProvider} commands.
+ * Handles {@link Binder#bindInterceptor} commands.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class GetProviderProcessor extends ElementProcessor {
+class BindInterceptorElementProcessor extends ElementProcessor {
 
-  private final InjectorImpl injector;
+  private final ProxyFactoryBuilder proxyFactoryBuilder;
 
-  GetProviderProcessor(Errors errors, InjectorImpl injector) {
+  BindInterceptorElementProcessor(Errors errors) {
     super(errors);
-    this.injector = injector;
+    proxyFactoryBuilder = new ProxyFactoryBuilder();
   }
 
-  @Override public <T> Boolean visitGetProvider(GetProvider<T> command) {
-    // ensure the provider can be created
-    try {
-      Provider<T> provider = injector.getProviderOrThrow(command.getKey(), errors);
-      command.initDelegate(provider);
-    } catch (ErrorsException e) {
-      errors.merge(e.getErrors()); // TODO: source
-    }
-
+  @Override public Boolean visitBindInterceptor(BindInterceptor command) {
+    proxyFactoryBuilder.intercept(
+        command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors());
     return true;
+  }
+
+  ProxyFactory createProxyFactory() {
+    return proxyFactoryBuilder.create();
   }
 }

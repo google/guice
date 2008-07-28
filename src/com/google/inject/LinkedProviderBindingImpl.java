@@ -17,8 +17,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.LinkedProviderBinding;
+import com.google.inject.spi.oldversion.BindingVisitor;
+import com.google.inject.spi.oldversion.LinkedProviderBinding;
+import com.google.inject.spi.oldversion.OldVersionBinding;
 
 /**
  *
@@ -41,8 +42,12 @@ class LinkedProviderBindingImpl<T> extends BindingImpl<T>
     bindingVisitor.visit(this);
   }
 
-  public Binding<? extends Provider<? extends T>> getTargetProvider() {
+  public OldVersionBinding<? extends Provider<? extends T>> getTargetProvider() {
     return injector.getBinding(providerKey);
+  }
+
+  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+    return visitor.visitToProviderKey(providerKey);
   }
 
   @Override public String toString() {

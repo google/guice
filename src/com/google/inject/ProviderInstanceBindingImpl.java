@@ -18,9 +18,9 @@ package com.google.inject;
 
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.BindingVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.oldversion.BindingVisitor;
+import com.google.inject.spi.oldversion.ProviderInstanceBinding;
 import java.util.Collection;
 
 /**
@@ -42,6 +42,10 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
 
   public void accept(BindingVisitor<? super T> bindingVisitor) {
     bindingVisitor.visit(this);
+  }
+
+  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+    return visitor.visitToProvider(providerInstance);
   }
 
   public Provider<? extends T> getProviderInstance() {

@@ -19,12 +19,14 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.oldversion.OldVersionBinding;
+import com.google.inject.spi.oldversion.ProviderBinding;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-abstract class BindingImpl<T> implements Binding<T> {
+abstract class BindingImpl<T> implements OldVersionBinding<T> {
 
   final InjectorImpl injector;
   final Key<T> key;
@@ -85,6 +87,20 @@ abstract class BindingImpl<T> implements Binding<T> {
 
   LoadStrategy getLoadStrategy() {
     return loadStrategy;
+  }
+
+  public <V> V acceptVisitor(Element.Visitor<V> visitor) {
+    return visitor.visitBinding(this);
+  }
+
+  public <V> V acceptScopingVisitor(ScopingVisitor<V> visitor) {
+    if (loadStrategy == LoadStrategy.EAGER) {
+      return visitor.visitEagerSingleton();
+    } else if (scope != Scopes.NO_SCOPE && scope != null) {
+      return visitor.visitScope(scope);
+    } else {
+      return visitor.visitNoScoping();
+    }
   }
 
   /**

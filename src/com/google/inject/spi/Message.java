@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class Message implements Serializable {
+public final class Message implements Serializable, Element {
   private final String source;
   private final String message;
   private final List<InjectionPoint> injectionPoints;
@@ -41,6 +41,11 @@ public final class Message implements Serializable {
     this.message = checkNotNull(message, "message");
     this.injectionPoints = ImmutableList.copyOf(injectionPoints);
     this.cause = cause;
+  }
+
+  public Message(Object source, Throwable throwable) {
+    this(source, "An exception was caught and reported. Message: " + throwable.getMessage(),
+        ImmutableList.<InjectionPoint>of(), throwable);
   }
 
   public Message(Object source, String message) {
@@ -67,6 +72,10 @@ public final class Message implements Serializable {
 
   public List<InjectionPoint> getInjectionPoints() {
     return injectionPoints;
+  }
+
+  public <T> T acceptVisitor(Visitor<T> visitor) {
+    return visitor.visitMessage(this);
   }
 
   /**

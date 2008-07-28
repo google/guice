@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2007 Google Inc.
+/**
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,10 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
+import junit.framework.AssertionFailedError;
 
-/**
- * A binding which was converted from a string contant.
- *
- * @author crazybob@google.com (Bob Lee)
- */
-public interface ConvertedConstantBinding<T> extends ConstantBinding<T> {
-
-  /**
-   * Gets the binding that we converted to create this binding.
-   */
-  Binding<String> getOriginal();
+public class FailingTargetVisitor<T> extends DefaultBindTargetVisitor<T, Void> {
+  @Override protected Void visitTarget() {
+    throw new AssertionFailedError();
+  }
 }

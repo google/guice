@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
-
-import com.google.inject.Binding;
-import com.google.inject.Provider;
-import com.google.inject.Key;
+package com.google.inject.spi.oldversion;
 
 /**
- * A binding which links to a provider binding which provides instances for
- * this binding.
+ * A binding that links to another binding.
  *
- * <p>Example: {@code bind(Foo.class).toProvider(FooProvider.class);}
+ * <p>Example: {@code bind(Collection.class).to(List.class);}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface LinkedProviderBinding<T> extends Binding<T> {
+public interface LinkedBinding<T> extends OldVersionBinding<T> {
 
   /**
-   * Gets the binding for the provider of this binding.
+   * Gets the target of this link.
    */
-  Binding<? extends Provider<? extends T>> getTargetProvider();
+  OldVersionBinding<? extends T> getTargetBinding();
 }

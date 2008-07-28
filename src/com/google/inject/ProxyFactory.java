@@ -173,7 +173,7 @@ class ProxyFactory implements ConstructionProxyFactory {
    * Creates a construction proxy given a class and parameter types.
    */
   private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
-      final Constructor standardConstructor) throws ErrorsException {
+      final Constructor<T> standardConstructor) throws ErrorsException {
     FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
@@ -190,7 +190,7 @@ class ProxyFactory implements ConstructionProxyFactory {
         return parameters;
       }
 
-      public Constructor getConstructor() {
+      public Constructor<T> getConstructor() {
         return standardConstructor;
       }
     };

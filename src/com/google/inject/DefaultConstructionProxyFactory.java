@@ -59,7 +59,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         public List<Parameter<?>> getParameters() {
           return parameters;
         }
-        public Constructor getConstructor() {
+        public Constructor<T> getConstructor() {
           return constructor;
         }
       };
@@ -77,7 +77,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       public List<Parameter<?>> getParameters() {
         return parameters;
       }
-      public Constructor getConstructor() {
+      public Constructor<T> getConstructor() {
         return constructor;
       }
     };

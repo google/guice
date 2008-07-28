@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.Element;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 
 /**
  * A mapping from a key (type and optional annotation) to a provider of
@@ -25,8 +26,9 @@ import com.google.inject.spi.ProviderBinding;
  * introspection API and is intended primary for use by tools.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
-public interface Binding<T> {
+public interface Binding<T> extends Element {
 
   /**
    * Returns the key for this binding.
@@ -47,24 +49,39 @@ public interface Binding<T> {
   /**
    * Returns the scoped provider guice uses to fulfill requests for this
    * binding.
+   *
+   * @throws UnsupportedOperationException when invoked on a {@link Binding}
+   *      created via {@link com.google.inject.spi.Elements#getElements}. This
+   *      method is only supported on {@link Binding}s returned from an injector.
    */
   Provider<T> getProvider();
 
-  /**
-   * Gets the synthetic binding to this binding's Provider.
-   */
-  ProviderBinding<T> getProviderBinding();
+  <V> V acceptVisitor(Visitor<V> visitor);
 
-  /**
-   * Returns the scope applied by this binding.
-   */
-  Scope getScope();
+  <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor);
 
-  /**
-   * Accepts a binding visitor. Invokes the visitor method specific to this
-   * binding's type.
-   *
-   * @param visitor to call back on
-   */
-  void accept(BindingVisitor<? super T> visitor);
+  <V> V acceptScopingVisitor(ScopingVisitor<V> visitor);
+
+  interface TargetVisitor<T, V> {
+    V visitToInstance(T instance);
+    V visitToProvider(Provider<? extends T> provider);
+    V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey);
+    V visitToKey(Key<? extends T> key);
+
+    // module-only bindings
+    V visitUntargetted();
+
+    // injector-only bindings
+    V visitConstructor(Constructor<? extends T> constructor);
+    V visitConstant(T value);
+    V visitConvertedConstant(T value);
+    V visitProviderBinding(Key<?> provided);
+  }
+
+  interface ScopingVisitor<V> {
+    V visitEagerSingleton();
+    V visitScope(Scope scope);
+    V visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation);
+    V visitNoScoping();
+  }
 }

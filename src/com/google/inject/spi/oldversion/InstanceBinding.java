@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.spi.oldversion;
 
-import com.google.inject.Binding;
-import com.google.inject.Provider;
+import com.google.inject.spi.HasInjections;
 
 /**
- * A binding to a single provider instance.
+ * A binding to a single instance.
  *
- * <p>Example: {@code bind(Foo.class).toProvider(new FooProvider());}
+ * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ProviderInstanceBinding<T> extends Binding<T>, HasInjections {
+public interface InstanceBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**
-   * Gets the raw (unscoped) provider instance associated with this binding.
+   * Gets the instance associated with this binding.
    */
-  Provider<? extends T> getProviderInstance();
+  T getInstance();
 }

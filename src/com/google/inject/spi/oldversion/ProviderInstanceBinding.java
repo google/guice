@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.spi.oldversion;
 
-import com.google.inject.Binding;
+import com.google.inject.Provider;
+import com.google.inject.spi.HasInjections;
 
 /**
- * A binding to a constant.
+ * A binding to a single provider instance.
  *
- * <p>Example: {@code bindConstant().annotatedWith(PoolSize.class).to(5);}
+ * <p>Example: {@code bind(Foo.class).toProvider(new FooProvider());}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ConstantBinding<T> extends Binding<T> {
+public interface ProviderInstanceBinding<T> extends OldVersionBinding<T>, HasInjections {
 
   /**
-   * Gets the constant value associated with this binding.
+   * Gets the raw (unscoped) provider instance associated with this binding.
    */
-  T getValue();
+  Provider<? extends T> getProviderInstance();
 }

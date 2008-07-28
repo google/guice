@@ -21,12 +21,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Reflection.Factory;
 import static com.google.inject.Scopes.SINGLETON;
-import com.google.inject.commands.Command;
-import com.google.inject.commands.CommandRecorder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.Stopwatch;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Member;
 import java.util.List;
@@ -50,10 +50,10 @@ class InjectorBuilder {
   private InjectorImpl injector;
   private Errors errors = new Errors();
 
-  private final List<Command> commands = Lists.newArrayList();
+  private final List<Element> elements = Lists.newArrayList();
 
-  private BindCommandProcessor bindCommandProcesor;
-  private RequestInjectionCommandProcessor requestInjectionCommandProcessor;
+  private BindElementProcessor bindCommandProcesor;
+  private RequestInjectionElementProcessor requestInjectionCommandProcessor;
 
   /**
    * @param stage we're running in. If the stage is {@link Stage#PRODUCTION}, we will eagerly load
@@ -90,9 +90,7 @@ class InjectorBuilder {
 
     modules.add(0, new BuiltInModule(injector, stage));
 
-    CommandRecorder commandRecorder = new CommandRecorder();
-    commandRecorder.setCurrentStage(stage);
-    commands.addAll(commandRecorder.recordCommands(modules));
+    elements.addAll(Elements.getElements(stage, modules));
 
     buildCoreInjector();
 
@@ -109,8 +107,8 @@ class InjectorBuilder {
 
     fulfillInjectionRequests();
 
-    if (!commands.isEmpty()) {
-      throw new AssertionError("Failed to execute " + commands);
+    if (!elements.isEmpty()) {
+      throw new AssertionError("Failed to execute " + elements);
     }
 
     return injector;
@@ -118,27 +116,27 @@ class InjectorBuilder {
 
   /** Builds the injector. */
   private void buildCoreInjector() {
-    new ErrorsCommandProcessor(errors)
-        .processCommands(commands);
+    new ErrorsElementProcessor(errors)
+        .processCommands(elements);
 
-    BindInterceptorCommandProcessor bindInterceptorCommandProcessor
-        = new BindInterceptorCommandProcessor(errors);
-    bindInterceptorCommandProcessor.processCommands(commands);
+    BindInterceptorElementProcessor bindInterceptorCommandProcessor
+        = new BindInterceptorElementProcessor(errors);
+    bindInterceptorCommandProcessor.processCommands(elements);
     ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
     injector.reflection = reflectionFactory.create(proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
-    new ScopesCommandProcessor(errors, injector.scopes).processCommands(commands);
+    new ScopesElementProcessor(errors, injector.scopes).processCommands(elements);
     stopwatch.resetAndLog("Scopes creation");
 
-    new ConvertToTypesCommandProcessor(errors, injector.converters).processCommands(commands);
+    new ConvertToTypesElementProcessor(errors, injector.converters).processCommands(elements);
     stopwatch.resetAndLog("Converters creation");
 
     bindLogger();
-    bindCommandProcesor = new BindCommandProcessor(errors,
+    bindCommandProcesor = new BindElementProcessor(errors,
         injector, injector.scopes, injector.explicitBindings,
         injector.memberInjector);
-    bindCommandProcesor.processCommands(commands);
+    bindCommandProcesor.processCommands(elements);
     bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
 
@@ -146,8 +144,8 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Binding indexing");
 
     requestInjectionCommandProcessor
-        = new RequestInjectionCommandProcessor(errors, injector.memberInjector);
-    requestInjectionCommandProcessor.processCommands(commands);
+        = new RequestInjectionElementProcessor(errors, injector.memberInjector);
+    requestInjectionCommandProcessor.processCommands(elements);
     stopwatch.resetAndLog("Static injection");
   }
 
@@ -162,7 +160,7 @@ class InjectorBuilder {
     injector.memberInjector.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
-    new GetProviderProcessor(errors, injector).processCommands(commands);
+    new GetProviderProcessor(errors, injector).processCommands(elements);
     stopwatch.resetAndLog("Provider verification");
 
     errors.throwCreationExceptionIfErrorsExist();

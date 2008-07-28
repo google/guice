@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.spi.oldversion;
 
 /**
  * Visits bindings. Pass an implementation of {@code BindingVisitor} to
- * {@link com.google.inject.Binding#accept(BindingVisitor)} and the binding
+ * {@link OldVersionBinding#accept(BindingVisitor)} and the binding
  * will call back to the appropriate visitor method for its type.
  *
  * @author crazybob@google.com (Bob Lee)

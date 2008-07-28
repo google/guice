@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
-
-import com.google.inject.Binding;
+package com.google.inject.spi.oldversion;
 
 /**
- * A binding to a single instance.
+ * A binding to a constant.
  *
- * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
+ * <p>Example: {@code bindConstant().annotatedWith(PoolSize.class).to(5);}
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface InstanceBinding<T> extends Binding<T>, HasInjections {
+public interface ConstantBinding<T> extends OldVersionBinding<T> {
 
   /**
-   * Gets the instance associated with this binding.
+   * Gets the constant value associated with this binding.
    */
-  T getInstance();
+  T getValue();
 }

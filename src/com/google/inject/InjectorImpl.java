@@ -30,16 +30,17 @@ import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.oldversion.BindingVisitor;
+import com.google.inject.spi.oldversion.ConvertedConstantBinding;
+import com.google.inject.spi.oldversion.OldVersionBinding;
+import com.google.inject.spi.oldversion.ProviderBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -150,12 +151,12 @@ class InjectorImpl implements Injector {
   private <T> BindingImpl<T> getParentBinding(Key<T> key) {
     synchronized (parentBindings) {
       // null values will mean that the parent doesn't have this binding
-      Binding<T> binding = (Binding<T>) parentBindings.get(key);
+      OldVersionBinding<T> binding = (OldVersionBinding<T>) parentBindings.get(key);
       if (binding != null) {
         return (BindingImpl<T>) binding;
       }
       try {
-        binding = parentInjector.getBinding(key);
+        binding = (OldVersionBinding) parentInjector.getBinding(key);
       }
       catch (ProvisionException e) {
         // if this happens, the parent can't create this key, and we ignore it
@@ -239,7 +240,7 @@ class InjectorImpl implements Injector {
   static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
       implements ProviderBinding<T> {
 
-    final Binding<T> providedBinding;
+    final OldVersionBinding<T> providedBinding;
 
     ProviderBindingImpl(
         InjectorImpl injector,
@@ -249,11 +250,11 @@ class InjectorImpl implements Injector {
       super(
           injector,
           key,
-          SourceProvider.UNKNOWN_SOURCE,
+          providedBinding.getSource(),
           createInternalFactory(providedBinding),
           Scopes.NO_SCOPE,
           loadStrategy);
-      this.providedBinding = providedBinding;
+      this.providedBinding = (OldVersionBinding<T>) providedBinding;
     }
 
     static <T> InternalFactory<Provider<T>> createInternalFactory(Binding<T> providedBinding) {
@@ -270,7 +271,11 @@ class InjectorImpl implements Injector {
       bindingVisitor.visit(this);
     }
 
-    public Binding<T> getTarget() {
+    public <V> V acceptTargetVisitor(TargetVisitor<? super Provider<T>, V> visitor) {
+      return visitor.visitProviderBinding(providedBinding.getKey());
+    }
+
+    public OldVersionBinding<T> getTargetBinding() {
       return providedBinding;
     }
   }
@@ -344,7 +349,7 @@ class InjectorImpl implements Injector {
 
     ConvertedConstantBindingImpl(
         InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding) {
-      super(injector, key, SourceProvider.UNKNOWN_SOURCE, new ConstantFactory<T>(value),
+      super(injector, key, originalBinding.getSource(), new ConstantFactory<T>(value),
           Scopes.NO_SCOPE, LoadStrategy.LAZY);
       this.value = value;
       provider = Providers.of(value);
@@ -363,8 +368,12 @@ class InjectorImpl implements Injector {
       return value;
     }
 
-    public Binding<String> getOriginal() {
-      return originalBinding;
+    public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+      return visitor.visitConvertedConstant(value);
+    }
+
+    public OldVersionBinding<String> getOriginal() {
+      return (OldVersionBinding) originalBinding;
     }
 
     @Override public String toString() {
@@ -479,6 +488,11 @@ class InjectorImpl implements Injector {
 
     void bind(InjectorImpl injector, Class<T> implementation, Errors errors) throws ErrorsException {
       constructorInjector = injector.getConstructor(implementation, errors);
+    }
+
+    public Constructor<T> getConstructor() {
+      checkState(constructorInjector != null, "Constructor is not ready");
+      return constructorInjector.constructionProxy.getConstructor();
     }
 
     @SuppressWarnings("unchecked")

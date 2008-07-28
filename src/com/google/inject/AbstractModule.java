@@ -178,7 +178,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * Adds a dependency from this module to {@code type}. When the injector is
-   * created, Guice will report an error if {@code key} cannot be injected.
+   * created, Guice will report an error if {@code type} cannot be injected.
    * Note that this requirement may be satisfied by implicit binding, such as
    * a public no-arguments constructor.
    */

@@ -18,16 +18,17 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.spi.ClassBinding;
-import com.google.inject.spi.ConstantBinding;
-import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.InstanceBinding;
-import com.google.inject.spi.LinkedBinding;
-import com.google.inject.spi.LinkedProviderBinding;
-import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.oldversion.BindingVisitor;
+import com.google.inject.spi.oldversion.ClassBinding;
+import com.google.inject.spi.oldversion.ConstantBinding;
+import com.google.inject.spi.oldversion.ConvertedConstantBinding;
+import com.google.inject.spi.oldversion.InstanceBinding;
+import com.google.inject.spi.oldversion.LinkedBinding;
+import com.google.inject.spi.oldversion.LinkedProviderBinding;
+import com.google.inject.spi.oldversion.OldVersionBinding;
+import com.google.inject.spi.oldversion.ProviderBinding;
+import com.google.inject.spi.oldversion.ProviderInstanceBinding;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,11 +67,11 @@ public class BindingTest extends TestCase {
 
   public void testProviderBinding() {
     Injector injector = Guice.createInjector();
-    Binding<Bob> bobBinding = injector.getBinding(Bob.class);
+    OldVersionBinding<Bob> bobBinding = (OldVersionBinding) injector.getBinding(Bob.class);
     assertTrue(bobBinding.getProvider().get() instanceof Bob);
-    Binding<Provider<Bob>> bobProviderBinding = bobBinding.getProviderBinding();
+    OldVersionBinding<Provider<Bob>> bobProviderBinding = bobBinding.getProviderBinding();
     assertTrue(bobProviderBinding.getProvider().get().get() instanceof Bob);
-    Binding<Provider<Provider<Bob>>> bobProviderProviderBinding
+    OldVersionBinding<Provider<Provider<Bob>>> bobProviderProviderBinding
         = bobProviderBinding.getProviderBinding();
     assertTrue(bobProviderProviderBinding.getProvider().get().get().get()
         instanceof Bob);
@@ -84,7 +85,7 @@ public class BindingTest extends TestCase {
     Injector injector = Guice.createInjector(new MyModule());
 
     for (Binding<?> binding : injector.getBindings().values()) {
-      binding.accept(myVisitor);
+      ((OldVersionBinding) binding).accept(myVisitor);
     }
 
     myVisitor.verify();
@@ -138,7 +139,7 @@ public class BindingTest extends TestCase {
     public void visit(LinkedBinding<?> linkedBinding) {
       linkedVisited = true;
       assertEquals(Runnable.class,
-          linkedBinding.getTarget().getKey().getTypeLiteral().getType());
+          linkedBinding.getTargetBinding().getKey().getTypeLiteral().getType());
       assertEquals(Scopes.SINGLETON, linkedBinding.getScope());
     }
 

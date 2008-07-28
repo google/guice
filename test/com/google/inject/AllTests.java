@@ -16,9 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.commands.CommandRecorderTest;
-import com.google.inject.commands.CommandReplayerTest;
-import com.google.inject.commands.CommandRewriteTest;
 import com.google.inject.internal.FinalizableReferenceQueueTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.ReferenceCacheTest;
@@ -26,6 +23,10 @@ import com.google.inject.internal.ReferenceMapTest;
 import com.google.inject.internal.ReferenceMapTestSuite;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
+import com.google.inject.spi.ElementsTest;
+import com.google.inject.spi.ModuleRewriterTest;
+import com.google.inject.spi.ModuleWriterTest;
+import com.google.inject.spi.SpiBindingsTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
 import com.googlecode.guice.BytecodeGenTest;
@@ -74,9 +75,10 @@ public class AllTests {
     suite.addTestSuite(TypeLiteralTest.class);
 
     // commands
-    suite.addTestSuite(CommandRecorderTest.class);
-    suite.addTestSuite(CommandReplayerTest.class);
-    suite.addTestSuite(CommandRewriteTest.class);
+    suite.addTestSuite(ElementsTest.class);
+    suite.addTestSuite(ModuleWriterTest.class);
+    suite.addTestSuite(ModuleRewriterTest.class);
+    suite.addTestSuite(SpiBindingsTest.class);
 
     // internal
     suite.addTestSuite(FinalizableReferenceQueueTest.class);

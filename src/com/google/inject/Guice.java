@@ -17,11 +17,10 @@
 package com.google.inject;
 
 import com.google.common.collect.Sets;
-import com.google.inject.commands.BindCommand;
-import com.google.inject.commands.BindConstantCommand;
-import com.google.inject.commands.Command;
-import com.google.inject.commands.CommandRecorder;
-import com.google.inject.commands.CommandReplayer;
+import com.google.inject.spi.BindConstant;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
+import com.google.inject.spi.ModuleWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -154,41 +153,40 @@ public final class Guice {
    * </pre>
    */
   public static Module overrideModule(Module module, Module overridesModule) {
-    CommandRecorder commandRecorder = new CommandRecorder();
-    final List<Command> commands = commandRecorder.recordCommands(module);
-    final List<Command> overrideCommands = commandRecorder.recordCommands(overridesModule);
+    final List<Element> elements = Elements.getElements(module);
+    final List<Element> overrideElements = Elements.getElements(overridesModule);
 
     return new AbstractModule() {
       public void configure() {
         final Set<Key> overriddenKeys = Sets.newHashSet();
 
         // execute the overrides module, keeping track of which keys were bound
-        new CommandReplayer() {
-          @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
-            overriddenKeys.add(command.getKey());
-            super.replayBind(binder, command);
+        new ModuleWriter() {
+          @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
+            overriddenKeys.add(binding.getKey());
+            super.writeBind(binder, binding);
           }
-          @Override public void replayBindConstant(Binder binder, BindConstantCommand command) {
+          @Override public void writeBindConstant(Binder binder, BindConstant command) {
             overriddenKeys.add(command.getKey());
-            super.replayBindConstant(binder, command);
+            super.writeBindConstant(binder, command);
           }
-        }.replay(binder(), overrideCommands);
+        }.apply(binder(), overrideElements);
 
         // bind the regular module, skipping overridden keys. We only skip each
         // overridden key once, so things still blow up if the module binds the
         // same key multiple times
-        new CommandReplayer() {
-          @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
-            if (!overriddenKeys.remove(command.getKey())) {
-              super.replayBind(binder, command);
+        new ModuleWriter() {
+          @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
+            if (!overriddenKeys.remove(binding.getKey())) {
+              super.writeBind(binder, binding);
             }
           }
-          @Override public void replayBindConstant(Binder binder, BindConstantCommand command) {
+          @Override public void writeBindConstant(Binder binder, BindConstant command) {
             if (!overriddenKeys.remove(command.getKey())) {
-              super.replayBindConstant(binder, command);
+              super.writeBindConstant(binder, command);
             }
           }
-        }.replay(binder(), commands);
+        }.apply(binder(), elements);
 
         // TODO: bind the overridden keys using multibinder
       }

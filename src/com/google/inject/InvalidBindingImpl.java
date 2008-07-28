@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.BindingVisitor;
+import com.google.inject.spi.oldversion.BindingVisitor;
 
 class InvalidBindingImpl<T> extends BindingImpl<T> {
 
@@ -32,6 +32,10 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
 
   public void accept(BindingVisitor<? super T> bindingVisitor) {
     throw new AssertionError();
+  }
+
+  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> vVisitor) {
+    throw new UnsupportedOperationException();
   }
 
   @Override public String toString() {

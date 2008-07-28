@@ -17,10 +17,10 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.ConstantBinding;
-import com.google.inject.spi.BindingVisitor;
-import com.google.inject.util.Providers;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.oldversion.BindingVisitor;
+import com.google.inject.spi.oldversion.ConstantBinding;
+import com.google.inject.util.Providers;
 
 /**
  * A constant binding.
@@ -40,6 +40,10 @@ class ConstantBindingImpl<T> extends BindingImpl<T>
 
   @Override public Provider<T> getProvider() {
     return this.provider;
+  }
+
+  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+    return visitor.visitConstant(value);
   }
 
   public void accept(BindingVisitor<? super T> bindingVisitor) {

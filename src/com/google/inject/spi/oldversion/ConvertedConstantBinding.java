@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
-
-import com.google.inject.Binding;
+package com.google.inject.spi.oldversion;
 
 /**
- * A binding that links to another binding.
- *
- * <p>Example: {@code bind(Collection.class).to(List.class);}
+ * A binding which was converted from a string contant.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface LinkedBinding<T> extends Binding<T> {
+public interface ConvertedConstantBinding<T> extends ConstantBinding<T> {
 
   /**
-   * Gets the target of this link.
+   * Gets the binding that we converted to create this binding.
    */
-  Binding<? extends T> getTarget();
+  OldVersionBinding<String> getOriginal();
 }

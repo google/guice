@@ -16,10 +16,12 @@
 
 package com.google.inject.commands.intercepting;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -31,19 +33,16 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.commands.BindCommand;
-import com.google.inject.commands.BindScoping;
-import com.google.inject.commands.BindTarget;
-import com.google.inject.commands.Command;
-import com.google.inject.commands.CommandRecorder;
-import com.google.inject.commands.CommandReplayer;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
+import com.google.inject.spi.DefaultBindTargetVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
+import com.google.inject.spi.ModuleWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -110,9 +109,8 @@ public final class InterceptingInjectorBuilder {
   }
 
   public InterceptingInjectorBuilder intercept(Collection<Key<?>> keys) {
-    if (keys.contains(INJECTION_INTERCEPTOR_KEY)) {
-      throw new IllegalArgumentException("Cannot intercept the interceptor!");
-    }
+    checkArgument(!keys.contains(INJECTION_INTERCEPTOR_KEY),
+        "Cannot intercept the interceptor!");
 
     keysToIntercept.addAll(keys);
     return this;
@@ -134,11 +132,11 @@ public final class InterceptingInjectorBuilder {
 
   public Injector build() {
     // record commands from the modules
-    List<Command> commands = new CommandRecorder().recordCommands(modules);
+    List<Element> elements = Elements.getElements(modules);
 
     // rewrite the commands to insert interception
-    CommandRewriter rewriter = new CommandRewriter();
-    Module module = rewriter.createModule(commands);
+    ModuleRewriter rewriter = new ModuleRewriter();
+    Module module = rewriter.create(elements);
 
     // create and injector with the rewritten commands
     Injector injector = Guice.createInjector(module);
@@ -155,21 +153,19 @@ public final class InterceptingInjectorBuilder {
     return injector;
   }
 
-  /**
-   * Replays commands, inserting the InterceptingProvider where necessary.
-   */
-  private class CommandRewriter extends CommandReplayer {
-    private Set<Key> keysIntercepted = new HashSet<Key>();
+  /** Replays commands, inserting the InterceptingProvider where necessary. */
+  private class ModuleRewriter extends ModuleWriter {
+    private Set<Key<?>> keysIntercepted = Sets.newHashSet();
 
-    @Override public <T> void replayBind(Binder binder, BindCommand<T> command) {
-      final Key<T> key = command.getKey();
+    @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
+      final Key<T> key = binding.getKey();
 
       if (!keysToIntercept.contains(key)) {
-        super.replayBind(binder, command);
+        super.writeBind(binder, binding);
         return;
       }
 
-      command.getTarget().acceptVisitor(new NoOpBindTargetVisitor<T, Void>() {
+      binding.acceptTargetVisitor(new DefaultBindTargetVisitor<T, Void>() {
         @Override public Void visitUntargetted() {
           throw new UnsupportedOperationException(
               String.format("Cannot intercept bare binding of %s.", key));
@@ -180,15 +176,12 @@ public final class InterceptingInjectorBuilder {
       binder.bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
 
       LinkedBindingBuilder<T> linkedBindingBuilder = binder.bind(anonymousKey);
-      ScopedBindingBuilder scopedBindingBuilder = command.getTarget().execute(linkedBindingBuilder);
+      ScopedBindingBuilder scopedBindingBuilder = applyTarget(binding, linkedBindingBuilder);
 
       // we scope the user's provider, not the interceptor. This is dangerous,
       // but convenient. It means that although the user's provider will live
       // in its proper scope, the intereptor gets invoked without a scope
-      BindScoping scoping = command.getScoping();
-      if (scoping != null) {
-        scoping.execute(scopedBindingBuilder);
-      }
+      applyScoping(binding, scopedBindingBuilder);
 
       keysIntercepted.add(key);
     }
@@ -220,28 +213,6 @@ public final class InterceptingInjectorBuilder {
       checkNotNull(injectionInterceptorProvider, "injectionInterceptorProvider");
       checkNotNull(delegateProvider, "delegateProvider");
       return injectionInterceptorProvider.get().intercept(key, delegateProvider);
-    }
-  }
-
-  private static class NoOpBindTargetVisitor<T, V> implements BindTarget.Visitor<T, V> {
-    public V visitToInstance(T instance) {
-      return null;
-    }
-
-    public V visitToProvider(Provider<? extends T> provider) {
-      return null;
-    }
-
-    public V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-      return null;
-    }
-
-    public V visitToKey(Key<? extends T> key) {
-      return null;
-    }
-
-    public V visitUntargetted() {
-      return null;
     }
   }
 }
