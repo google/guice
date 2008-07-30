@@ -171,20 +171,20 @@ public class ModuleWriter {
   public <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
       final LinkedBindingBuilder<T> linkedBindingBuilder) {
     return binding.acceptTargetVisitor(new com.google.inject.Binding.TargetVisitor<T, ScopedBindingBuilder>() {
-      public ScopedBindingBuilder visitToInstance(T instance) {
+      public ScopedBindingBuilder visitInstance(T instance) {
         linkedBindingBuilder.toInstance(instance);
         return null;
       }
 
-      public ScopedBindingBuilder visitToProvider(Provider<? extends T> provider) {
+      public ScopedBindingBuilder visitProvider(Provider<? extends T> provider) {
         return linkedBindingBuilder.toProvider(provider);
       }
 
-      public ScopedBindingBuilder visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+      public ScopedBindingBuilder visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
         return linkedBindingBuilder.toProvider(providerKey);
       }
 
-      public ScopedBindingBuilder visitToKey(Key<? extends T> key) {
+      public ScopedBindingBuilder visitKey(Key<? extends T> key) {
         return linkedBindingBuilder.to(key);
       }
 

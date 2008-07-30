@@ -45,7 +45,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-    return visitor.visitToProvider(providerInstance);
+    return visitor.visitProvider(providerInstance);
   }
 
   public Provider<? extends T> getProviderInstance() {

@@ -21,9 +21,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
 /**
- * A mapping from a key (type and optional annotation) to a provider of
- * instances of that type.  This interface is part of the {@link Injector}
- * introspection API and is intended primary for use by tools.
+ * A mapping from a key (type and optional annotation) to the strategy for getting instances of the
+ * type. This interface is part of the introspection API and is intended primarily for use by 
+ * tools. Bindings exist on both {@link Module}s and on {@link Injector}s, and their behaviour is
+ * different for each.
+ *
+ * <p><strong>Module bindings</storng> are incomplete and cannot be used to provide instances. This
+ * is because the applicable scopes and interceptors may not be known until an injector is created.
+ * From a tool's perspective, module bindings are like the injector's source code. They can be
+ * inspected or rewritten, but this analysis must be done statically.
+ *
+ * <p><strong>Injector bindings</strong> are complete and valid and can be used to provide
+ * instances. From a tools' perspective, injector bindings are like reflection for an injector.
+ * They have full runtime information, including the complete graph of injections necessary to
+ * satisfy a binding.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -62,11 +73,20 @@ public interface Binding<T> extends Element {
 
   <V> V acceptScopingVisitor(ScopingVisitor<V> visitor);
 
+  /**
+   * A strategy to find an instance that satisfies an injection.
+   */
   interface TargetVisitor<T, V> {
-    V visitToInstance(T instance);
-    V visitToProvider(Provider<? extends T> provider);
-    V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey);
-    V visitToKey(Key<? extends T> key);
+
+    /**
+     * Visit a instance binding. The same instance is returned for every injection. This target is
+     * used in both module and injector bindings.
+     */
+    V visitInstance(T instance);
+
+    V visitProvider(Provider<? extends T> provider);
+    V visitProviderKey(Key<? extends Provider<? extends T>> providerKey);
+    V visitKey(Key<? extends T> key);
 
     // module-only bindings
     V visitUntargetted();

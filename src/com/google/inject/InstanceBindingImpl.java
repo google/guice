@@ -47,7 +47,7 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-    return visitor.visitToInstance(instance);
+    return visitor.visitInstance(instance);
   }
 
   public T getInstance() {

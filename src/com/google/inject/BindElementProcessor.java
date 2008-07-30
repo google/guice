@@ -118,7 +118,7 @@ class BindElementProcessor extends ElementProcessor {
     });
 
     command.acceptTargetVisitor(new com.google.inject.Binding.TargetVisitor<T, Void>() {
-      public Void visitToInstance(T instance) {
+      public Void visitInstance(T instance) {
         if (instance == null) {
           errors.cannotBindToNullInstance();
           putBinding(invalidBinding(injector, key, source));
@@ -133,7 +133,7 @@ class BindElementProcessor extends ElementProcessor {
         return null;
       }
 
-      public Void visitToProvider(Provider<? extends T> provider) {
+      public Void visitProvider(Provider<? extends T> provider) {
         InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
         memberInjector.requestInjection(provider, source);
@@ -144,7 +144,7 @@ class BindElementProcessor extends ElementProcessor {
         return null;
       }
 
-      public Void visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+      public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
         final BoundProviderFactory<T> boundProviderFactory =
             new BoundProviderFactory<T>(providerKey, source);
         creationListeners.add(boundProviderFactory);
@@ -155,7 +155,7 @@ class BindElementProcessor extends ElementProcessor {
         return null;
       }
 
-      public Void visitToKey(Key<? extends T> targetKey) {
+      public Void visitKey(Key<? extends T> targetKey) {
         if (key.equals(targetKey)) {
           errors.recursiveBinding();
         }
@@ -258,7 +258,7 @@ class BindElementProcessor extends ElementProcessor {
 
   @Override public Boolean visitBindConstant(BindConstant command) {
     Object value = command.acceptTargetVisitor(new DefaultBindTargetVisitor<Object, Object>() {
-      @Override public Object visitToInstance(Object instance) {
+      @Override public Object visitInstance(Object instance) {
         return instance;
       }
 

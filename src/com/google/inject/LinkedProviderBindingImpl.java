@@ -47,7 +47,7 @@ class LinkedProviderBindingImpl<T> extends BindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-    return visitor.visitToProviderKey(providerKey);
+    return visitor.visitProviderKey(providerKey);
   }
 
   @Override public String toString() {

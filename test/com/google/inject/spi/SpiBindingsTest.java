@@ -76,7 +76,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitToInstance(T instance) {
+              @Override public Void visitInstance(T instance) {
                 assertEquals("A", instance);
                 return null;
               }
@@ -102,7 +102,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitToProvider(Provider<? extends T> provider) {
+              @Override public Void visitProvider(Provider<? extends T> provider) {
                 assertSame(stringProvider, provider);
                 return null;
               }
@@ -126,7 +126,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitToProviderKey(Key<? extends Provider<? extends T>> key) {
+              @Override public Void visitProviderKey(Key<? extends Provider<? extends T>> key) {
                 assertEquals(Key.get(StringProvider.class), key);
                 return null;
               }
@@ -154,7 +154,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(aKey, command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitToKey(Key<? extends T> key) {
+              @Override public Void visitKey(Key<? extends T> key) {
                 assertEquals(bKey, key);
                 return null;
               }

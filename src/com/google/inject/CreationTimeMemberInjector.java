@@ -17,11 +17,11 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -81,8 +81,11 @@ class CreationTimeMemberInjector {
    * arbitrary.
    */
   void injectAll(final Errors errors) {
-    // loop over a defensive copy since ensureInjected() mutates the set
-    for (Map.Entry<Object, Object> entry : Lists.newArrayList(outstandingInjections.entrySet())) {
+    // loop over a defensive copy since ensureInjected() mutates the set. Unfortunately, that copy
+    // is made complicated by a bug in IBM's JDK, wherein entrySet().toArray(Object[]) doesn't work
+    for (Object entryObject : outstandingInjections.entrySet().toArray()) {
+      @SuppressWarnings("unchecked")
+      Entry<Object, Object> entry = (Entry<Object, Object>) entryObject;
       try {
         Object toInject = entry.getKey();
         Object source = entry.getValue();

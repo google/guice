@@ -85,7 +85,7 @@ public final class BindConstant implements Element {
       return type;
     }
     public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-      return visitor.visitToInstance(value);
+      return visitor.visitInstance(value);
     }
     @Override public String toString() {
       return String.valueOf(value);

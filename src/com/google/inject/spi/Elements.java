@@ -51,7 +51,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 public final class Elements {
   private static final TargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindTargetVisitor<Object, Object>() {
-    @Override public Object visitToInstance(Object instance) {
+    @Override public Object visitInstance(Object instance) {
       return instance;
     }
 

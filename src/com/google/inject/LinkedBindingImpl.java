@@ -43,7 +43,7 @@ class LinkedBindingImpl<T> extends BindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-    return visitor.visitToKey(targetKey);
+    return visitor.visitKey(targetKey);
   }
 
   public OldVersionBinding<? extends T> getTargetBinding() {

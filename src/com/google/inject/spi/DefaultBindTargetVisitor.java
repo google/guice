@@ -27,19 +27,19 @@ public class DefaultBindTargetVisitor<T, V> implements TargetVisitor<T, V> {
     return null;
   }
 
-  public V visitToInstance(T instance) {
+  public V visitInstance(T instance) {
     return visitTarget();
   }
 
-  public V visitToProvider(Provider<? extends T> provider) {
+  public V visitProvider(Provider<? extends T> provider) {
     return visitTarget();
   }
 
-  public V visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+  public V visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
     return visitTarget();
   }
 
-  public V visitToKey(Key<? extends T> key) {
+  public V visitKey(Key<? extends T> key) {
     return visitTarget();
   }
 

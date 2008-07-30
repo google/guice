@@ -351,7 +351,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToProvider(Provider<? extends T> provider) {
+              public Void visitProvider(Provider<? extends T> provider) {
                 assertSame(aProvider, provider);
                 return null;
               }
@@ -364,7 +364,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+              public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
                 assertEquals(Key.get(ListProvider.class), providerKey);
                 return null;
               }
@@ -377,7 +377,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Collection.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+              public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
                 assertEquals(Key.get(ListProvider.class), providerKey);
                 return null;
               }
@@ -402,7 +402,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToKey(Key<? extends T> key) {
+              public Void visitKey(Key<? extends T> key) {
                 assertEquals(Key.get(ArrayList.class), key);
                 return null;
               }
@@ -415,7 +415,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Map.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToKey(Key<? extends T> key) {
+              public Void visitKey(Key<? extends T> key) {
                 assertEquals(Key.get(new TypeLiteral<HashMap<Integer, String>>() {}), key);
                 return null;
               }
@@ -428,7 +428,7 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitToKey(Key<? extends T> key) {
+              public Void visitKey(Key<? extends T> key) {
                 assertEquals(Key.get(TreeSet.class, SampleAnnotation.class), key);
                 return null;
               }

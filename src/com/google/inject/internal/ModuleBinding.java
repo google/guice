@@ -54,7 +54,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       return true;
     }
 
-    @Override public Boolean visitToInstance(Object instance) {
+    @Override public Boolean visitInstance(Object instance) {
       return false;
     }
   };
@@ -157,7 +157,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-          return visitor.visitToKey(targetKey);
+          return visitor.visitKey(targetKey);
         }
         @Override public String toString() {
           return String.valueOf(targetKey);
@@ -170,7 +170,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-          return visitor.visitToInstance(instance);
+          return visitor.visitInstance(instance);
         }
       };
     }
@@ -180,7 +180,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-          return visitor.visitToProvider(provider);
+          return visitor.visitProvider(provider);
         }
       };
       return this;
@@ -197,7 +197,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-          return visitor.visitToProviderKey(providerKey);
+          return visitor.visitProviderKey(providerKey);
         }
       };
       return this;
