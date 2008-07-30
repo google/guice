@@ -35,10 +35,7 @@ import junit.framework.TestCase;
  * @author crazybob@google.com (Bob Lee)
  */
 public class BinderTest extends TestCase {
-  private static final Boolean CONSTANT = false;
-  CONSTANT.toString()
-public static final Date PROMOTION_END_DATE = new Date(2008, 12, 31);
-  
+
   private ParameterizedType parameterizedWithVariable;
   private ParameterizedType parameterizedWithWildcard;
   private TypeVariable typeVariable;
