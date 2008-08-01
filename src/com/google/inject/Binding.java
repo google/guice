@@ -83,40 +83,124 @@ public interface Binding<T> extends Element {
    */
   Provider<T> getProvider();
 
-  <V> V acceptVisitor(Visitor<V> visitor);
-
+  /**
+   * Accepts a target visitor. Invokes the visitor method specific to this binding's target.
+   *
+   * @param visitor to call back on
+   */
   <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor);
 
+  /**
+   * Accepts a scoping visitor. Invokes the visitor method specific to this binding's scoping.
+   *
+   * @param visitor to call back on
+   */
   <V> V acceptScopingVisitor(ScopingVisitor<V> visitor);
 
   /**
-   * A strategy to find an instance that satisfies an injection.
+   * Visits each of the strategies used to find an instance to satisfy an injection.
    */
   interface TargetVisitor<T, V> {
 
     /**
      * Visit a instance binding. The same instance is returned for every injection. This target is
-     * used in both module and injector bindings.
+     * found in both module and injector bindings.
+     *
+     * @param instance the user-supplied value
      */
     V visitInstance(T instance);
 
+    /**
+     * Visit a provider instance binding. The provider's {@code get} method is invoked to resolve
+     * injections. This target is found in both module and injector bindings.
+     *
+     * @param provider the user-supplied, unscoped provider
+     */
     V visitProvider(Provider<? extends T> provider);
+
+    /**
+     * Visit a provider key binding. To resolve injections, the provider injection is first
+     * resolved, then that provider's {@code get} method is invoked. This target is found in both
+     * module and injector bindings.
+     *
+     * @param providerKey the key used to resolve the provider's binding. That binding can be 
+     *      retrieved from an injector using {@link Injector#getBinding(Key)
+     *      Injector.getBinding(providerKey)}
+     */
     V visitProviderKey(Key<? extends Provider<? extends T>> providerKey);
+
+    /**
+     * Visit a linked key binding. The other key's binding is used to resolve injections. This
+     * target is found in both module and injector bindings.
+     *
+     * @param key the linked key used to resolve injections. That binding can be retrieved from an
+     *      injector using {@link Injector#getBinding(Key) Injector.getBinding(key)}
+     */
     V visitKey(Key<? extends T> key);
 
-    // module-only bindings
+    /**
+     * Visit an untargetted binding. This target is found only on module bindings. It indicates
+     * that the injector should use its implicit binding strategies to resolve injections.
+     */
     V visitUntargetted();
 
-    // injector-only bindings
+    /**
+     * Visit a constructor binding. To resolve injections, an instance is instantiated by invoking
+     * {@code constructor}. This target is found only on injector bindings.
+     *
+     * @param constructor the {@link Inject annotated} or default constructor that is invoked for
+     *      creating values
+     */
     V visitConstructor(Constructor<? extends T> constructor);
+
+    /**
+     * Visit a binding created from converting a bound instance to a new type. The source binding
+     * has the same binding annotation but a different type. This target is found only on injector
+     * bindings.
+     *
+     * @param value the converted value
+     */
     V visitConvertedConstant(T value);
+
+    /**
+     * Visit a binding to a {@link Provider} that delegates to the binding for the provided type.
+     * This target is found only on injector bindings.
+     *
+     * @param provided the key whose binding is used to {@link Provider#get provide instances}. That
+     *      binding can be retrieved from an injector using {@link Injector#getBinding(Key)
+     *      Injector.getBinding(provided)}
+     */
     V visitProviderBinding(Key<?> provided);
   }
 
+  /**
+   * Visits each of the strategies used to scope an injection.
+   */
   interface ScopingVisitor<V> {
+
+    /**
+     * Visit an eager singleton or single instance. This scope strategy is found on both module and
+     * injector bindings.
+     */
     V visitEagerSingleton();
+
+    /**
+     * Visit a scope instance. This scope strategy is found on both module and injector bindings.
+     */
     V visitScope(Scope scope);
+
+    /**
+     * Visit a scope annotation. This scope strategy is found only on module bindings. The instance
+     * that implements this scope is registered by {@link Binder#bindScope(Class, Scope)}.
+     */
     V visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation);
+
+    /**
+     * Visit an unspecified or unscoped strategy. On a module, this strategy indicates that the
+     * injector should use scoping annotations to find a scope. On an injector, it indicates that
+     * no scope is applied to the binding. An unscoped binding will behave like a scoped one when it
+     * is linked to a scoped binding.
+     */
     V visitNoScoping();
   }
 }

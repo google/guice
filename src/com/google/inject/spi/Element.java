@@ -25,6 +25,12 @@ import com.google.inject.Binding;
  */
 public interface Element {
   Object getSource();
+
+  /**
+   * Accepts an element visitor. Invokes the visitor method specific to this element's type.
+   *
+   * @param visitor to call back on
+   */
   <T> T acceptVisitor(Visitor<T> visitor);
 
   /**
