@@ -55,7 +55,7 @@ public final class Elements {
       return instance;
     }
 
-    @Override protected Object visitTarget() {
+    @Override protected Object visitOther() {
       throw new IllegalArgumentException();
     }
   };
@@ -172,10 +172,10 @@ public final class Elements {
       elements.add(message);
     }
 
-    public <T> ModuleBinding<T>.BindingBuilder bind(Key<T> key) {
+    public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
       ModuleBinding<T> moduleBindingCommand = new ModuleBinding<T>(getSource(), key);
       elements.add(moduleBindingCommand);
-      return moduleBindingCommand.bindingBuilder(RecordingBinder.this);
+      return moduleBindingCommand.regularBuilder(RecordingBinder.this);
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
@@ -187,9 +187,9 @@ public final class Elements {
     }
 
     public AnnotatedConstantBindingBuilder bindConstant() {
-      BindConstant bindConstantCommand = new BindConstant(getSource());
-      elements.add(bindConstantCommand);
-      return bindConstantCommand.bindingBuilder(RecordingBinder.this);
+      ModuleBinding<Object> moduleBindingCommand = new ModuleBinding<Object>(getSource());
+      elements.add(moduleBindingCommand);
+      return moduleBindingCommand.constantBuilder(RecordingBinder.this);
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {

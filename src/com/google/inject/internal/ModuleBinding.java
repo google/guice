@@ -24,6 +24,8 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.DefaultBindTargetVisitor;
@@ -35,6 +37,8 @@ import java.lang.annotation.Annotation;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ModuleBinding<T> implements Binding<T> {
+
+  private final Key<?> NULL_KEY = Key.get(Void.class);
 
   private static final Target<Object> EMPTY_TARGET = new Target<Object>() {
     public <V> V acceptTargetVisitor(TargetVisitor<? super Object, V> visitor) {
@@ -50,12 +54,12 @@ public final class ModuleBinding<T> implements Binding<T> {
 
   private static final TargetVisitor<Object, Boolean> SUPPORTS_SCOPES
       = new DefaultBindTargetVisitor<Object, Boolean>() {
-    @Override protected Boolean visitTarget() {
-      return true;
-    }
-
     @Override public Boolean visitInstance(Object instance) {
       return false;
+    }
+
+    @Override protected Boolean visitOther() {
+      return true;
     }
   };
 
@@ -69,6 +73,14 @@ public final class ModuleBinding<T> implements Binding<T> {
   public ModuleBinding(Object source, Key<T> key) {
     this.source = checkNotNull(source, "source");
     this.key = checkNotNull(key, "key");
+  }
+
+  public ModuleBinding(Object source) {
+    @SuppressWarnings("unchecked") // unsafe, but we won't ever return this (Key.get fails)
+    Key<T> NULL_KEY_OF_T = (Key<T>) NULL_KEY;
+
+    this.source = checkNotNull(source);
+    this.key = NULL_KEY_OF_T;
   }
 
   public Object getSource() {
@@ -99,6 +111,10 @@ public final class ModuleBinding<T> implements Binding<T> {
     return scoping.acceptVisitor(visitor);
   }
 
+  private boolean keyTypeIsSet() {
+    return !Void.class.equals(key.getTypeLiteral().getType());
+  }
+
   @Override public String toString() {
     return "bind " + key
         + (target == EMPTY_TARGET ? "" : (" to " + target))
@@ -114,18 +130,18 @@ public final class ModuleBinding<T> implements Binding<T> {
     }
   }
 
-  public BindingBuilder bindingBuilder(Binder binder) {
-    return new BindingBuilder(binder);
+  public RegularBuilder regularBuilder(Binder binder) {
+    return new RegularBuilder(binder);
   }
 
   /**
-   * Write access to the internal state of this command. Not for use by the public API.
+   * Write access to the internal state of this element. Not for use by the public API.
    */
-  public class BindingBuilder implements AnnotatedBindingBuilder<T> {
+  public class RegularBuilder implements AnnotatedBindingBuilder<T> {
     private final Binder binder;
 
-    BindingBuilder(Binder binder) {
-      this.binder = binder.skipSources(BindingBuilder.class);
+    RegularBuilder(Binder binder) {
+      this.binder = binder.skipSources(RegularBuilder.class);
     }
 
     public LinkedBindingBuilder<T> annotatedWith(
@@ -168,11 +184,7 @@ public final class ModuleBinding<T> implements Binding<T> {
 
     public void toInstance(final T instance) {
       checkNotTargetted();
-      target = new Target<T>() {
-        public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
-          return visitor.visitInstance(instance);
-        }
-      };
+      target = new InstanceTarget<T>(instance);
     }
 
     public ScopedBindingBuilder toProvider(final Provider<? extends T> provider) {
@@ -291,6 +303,118 @@ public final class ModuleBinding<T> implements Binding<T> {
     }
   }
 
+  public ConstantBuilder constantBuilder(Binder binder) {
+    return new ConstantBuilder(binder);
+  }
+
+  /**
+   * Package-private write access to the internal state of this element.
+   */
+  class ConstantBuilder
+      implements AnnotatedConstantBindingBuilder, ConstantBindingBuilder {
+    private final Binder binder;
+
+    ConstantBuilder(Binder binder) {
+      this.binder = binder.skipSources(ConstantBuilder.class);
+    }
+
+    public ConstantBindingBuilder annotatedWith(final Class<? extends Annotation> annotationType) {
+      checkNotNull(annotationType, "annotationType");
+      if (key.getAnnotationType() != null) {
+        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
+      } else {
+        key = Key.get(key.getTypeLiteral(), annotationType);
+      }
+      return this;
+    }
+
+    public ConstantBindingBuilder annotatedWith(final Annotation annotation) {
+      checkNotNull(annotation, "annotation");
+      if (key.getAnnotationType() != null) {
+        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
+      } else {
+        key = Key.get(key.getTypeLiteral(), annotation);
+      }
+      return this;
+    }
+
+    public void to(final String value) {
+      to(String.class, value);
+    }
+
+    public void to(final int value) {
+      to(Integer.class, value);
+    }
+
+    public void to(final long value) {
+      to(Long.class, value);
+    }
+
+    public void to(final boolean value) {
+      to(Boolean.class, value);
+    }
+
+    public void to(final double value) {
+      to(Double.class, value);
+    }
+
+    public void to(final float value) {
+      to(Float.class, value);
+    }
+
+    public void to(final short value) {
+      to(Short.class, value);
+    }
+
+    public void to(final char value) {
+      to(Character.class, value);
+    }
+
+    public void to(final Class<?> value) {
+      to(Class.class, value);
+    }
+
+    public <E extends Enum<E>> void to(final E value) {
+      to(value.getDeclaringClass(), value);
+    }
+
+    static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
+        + " than once.";
+    static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
+        + " is specified for this binding.";
+
+    private void to(Class<?> type, Object instance) {
+      checkNotNull(instance, "instance");
+
+      // this type will define T, so these assignments are safe
+      @SuppressWarnings("unchecked")
+      Class<T> typeAsClassT = (Class<T>) type;
+      @SuppressWarnings("unchecked")
+      T instanceAsT = (T) instance;
+
+      if (keyTypeIsSet()) {
+        binder.addError(CONSTANT_VALUE_ALREADY_SET);
+        return;
+      }
+
+      if (key.getAnnotation() != null) {
+        key = Key.get(typeAsClassT, key.getAnnotation());
+      } else if (key.getAnnotationType() != null) {
+        key = Key.get(typeAsClassT, key.getAnnotationType());
+      } else {
+        key = Key.get(typeAsClassT);
+      }
+
+      ModuleBinding.this.target = new InstanceTarget<T>(instanceAsT);
+    }
+
+    @Override public String toString() {
+      return key.getAnnotationType() == null
+          ? "AnnotatedConstantBindingBuilder"
+          : "ConstantBindingBuilder";
+    }
+  }
+
   /** A binding target, which provides instances from a specific key. */
   private interface Target<T> {
     <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor);
@@ -299,5 +423,17 @@ public final class ModuleBinding<T> implements Binding<T> {
   /** Immutable snapshot of a binding scope. */
   private interface Scoping {
     <V> V acceptVisitor(ScopingVisitor<V> visitor);
+  }
+
+  static class InstanceTarget<T> implements Target<T> {
+    private final T instance;
+
+    public InstanceTarget(T instance) {
+      this.instance = instance;
+    }
+
+    public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+      return visitor.visitInstance(instance);
+    }
   }
 }

@@ -36,7 +36,6 @@ public interface Element {
     V visitBindScope(BindScope bindScope);
     V visitRequestInjection(RequestInjection requestInjection);
     V visitRequestStaticInjection(RequestStaticInjection requestStaticInjection);
-    V visitBindConstant(BindConstant bindConstant);
     V visitConvertToTypes(ConvertToTypes convertToTypes);
     <T> V visitBinding(Binding<T> binding);
     <T> V visitGetProvider(GetProvider<T> getProvider);

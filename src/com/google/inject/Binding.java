@@ -23,18 +23,34 @@ import java.lang.reflect.Constructor;
 /**
  * A mapping from a key (type and optional annotation) to the strategy for getting instances of the
  * type. This interface is part of the introspection API and is intended primarily for use by 
- * tools. Bindings exist on both {@link Module}s and on {@link Injector}s, and their behaviour is
- * different for each.
+ * tools.
  *
- * <p><strong>Module bindings</storng> are incomplete and cannot be used to provide instances. This
- * is because the applicable scopes and interceptors may not be known until an injector is created.
- * From a tool's perspective, module bindings are like the injector's source code. They can be
- * inspected or rewritten, but this analysis must be done statically.
+ * <p>Bindings are created in several ways:
+ * <ul>
+ *     <li>Explicitly in a module, via {@code bind()} and {@code bindConstant()}
+ *         statements:
+ * <pre>
+ *     bind(Service.class).annotatedWith(Red.class).to(ServiceImpl.class);
+ *     bindConstant().annotatedWith(ServerHost.class).to(args[0]);</pre></li>
+ *     <li>Implicitly by the Injector by following a type's {@link ImplementedBy
+ *         pointer} {@link ProvidedBy annotations} or by using its {@link Inject annotated} or
+ *         default constructor.</li>
+ *     <li>By converting a bound instance to a different type.</li>
+ *     <li>For {@link Provider providers}, by delegating to the binding for the provided type.</li>
+ * </ul>
  *
- * <p><strong>Injector bindings</strong> are complete and valid and can be used to provide
- * instances. From a tools' perspective, injector bindings are like reflection for an injector.
- * They have full runtime information, including the complete graph of injections necessary to
- * satisfy a binding.
+ *
+ * <p>They exist on both modules and on injectors, and their behaviour is different for each:
+ * <ul>
+ *     <li><strong>Module bindings</strong> are incomplete and cannot be used to provide instances.
+ *         This is because the applicable scopes and interceptors may not be known until an injector
+ *         is created. From a tool's perspective, module bindings are like the injector's source
+ *         code. They can be inspected or rewritten, but this analysis must be done statically.</li>
+ *     <li><strong>Injector bindings</strong> are complete and valid and can be used to provide
+ *         instances. From a tools' perspective, injector bindings are like reflection for an
+ *         injector. They have full runtime information, including the complete graph of injections
+ *         necessary to satisfy a binding.</li>
+ * </ul>
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -93,7 +109,6 @@ public interface Binding<T> extends Element {
 
     // injector-only bindings
     V visitConstructor(Constructor<? extends T> constructor);
-    V visitConstant(T value);
     V visitConvertedConstant(T value);
     V visitProviderBinding(Key<?> provided);
   }

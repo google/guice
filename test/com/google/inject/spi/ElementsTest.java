@@ -138,10 +138,6 @@ public class ElementsTest extends TestCase {
     return binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
   }
 
-  private <T> T getInstance(BindConstant bindConstant) {
-    return bindConstant.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
-  }
-
   public void testBindConstantAnnotations() {
     checkModule(
         new AbstractModule() {
@@ -152,7 +148,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
@@ -160,7 +156,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("Bee")), command.getKey());
             assertEquals("B", getInstance(command));
             return null;
@@ -187,7 +183,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("String")), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
@@ -195,7 +191,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
             assertEquals(2, getInstance(command));
             return null;
@@ -203,7 +199,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
             assertEquals(3L, getInstance(command));
             return null;
@@ -211,7 +207,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, getInstance(command));
             return null;
@@ -219,7 +215,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, getInstance(command));
             return null;
@@ -227,7 +223,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, getInstance(command));
             return null;
@@ -235,7 +231,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, getInstance(command));
             return null;
@@ -243,7 +239,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', getInstance(command));
             return null;
@@ -251,7 +247,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Class.class, Names.named("Class")), command.getKey());
             assertEquals(Iterator.class, getInstance(command));
             return null;
@@ -259,7 +255,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(CoinSide.class, Names.named("Enum")), command.getKey());
             assertEquals(CoinSide.TAILS, getInstance(command));
             return null;
@@ -762,7 +758,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             return null;
           }
         },
@@ -791,7 +787,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindConstant(BindConstant command) {
+          @Override public <T> Void visitBinding(Binding<T> command) {
             return null;
           }
         },

@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.common.collect.Sets;
-import com.google.inject.spi.BindConstant;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.ModuleWriter;
@@ -166,10 +165,6 @@ public final class Guice {
             overriddenKeys.add(binding.getKey());
             super.writeBind(binder, binding);
           }
-          @Override public void writeBindConstant(Binder binder, BindConstant command) {
-            overriddenKeys.add(command.getKey());
-            super.writeBindConstant(binder, command);
-          }
         }.apply(binder(), overrideElements);
 
         // bind the regular module, skipping overridden keys. We only skip each
@@ -179,11 +174,6 @@ public final class Guice {
           @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
             if (!overriddenKeys.remove(binding.getKey())) {
               super.writeBind(binder, binding);
-            }
-          }
-          @Override public void writeBindConstant(Binder binder, BindConstant command) {
-            if (!overriddenKeys.remove(command.getKey())) {
-              super.writeBindConstant(binder, command);
             }
           }
         }.apply(binder(), elements);

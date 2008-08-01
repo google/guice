@@ -29,7 +29,7 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a request to bind a constant.
  *
- * @deprecated replaced with {@link com.google.inject.spi.BindConstant}
+ * @deprecated replaced with {@link com.google.inject.Binding}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

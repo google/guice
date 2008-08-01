@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.BindConstant;
 import com.google.inject.spi.BindInterceptor;
 import com.google.inject.spi.BindScope;
 import com.google.inject.spi.ConvertToTypes;
@@ -79,10 +78,6 @@ abstract class ElementProcessor implements Element.Visitor<Boolean> {
   }
 
   public Boolean visitRequestStaticInjection(RequestStaticInjection requestStaticInjection) {
-    return false;
-  }
-
-  public Boolean visitBindConstant(BindConstant bindConstant) {
     return false;
   }
 

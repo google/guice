@@ -23,8 +23,6 @@ import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.StackTraceElements;
-import com.google.inject.spi.BindConstant;
-import com.google.inject.spi.DefaultBindTargetVisitor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -81,6 +79,11 @@ class BindElementProcessor extends ElementProcessor {
 
   @Override public <T> Boolean visitBinding(Binding<T> command) {
     final Object source = command.getSource();
+
+    if (Void.class.equals(command.getKey().getRawType())) {
+      errors.missingConstantValues();
+      return true;
+    }
 
     final Key<T> key = command.getKey();
     Class<? super T> rawType = key.getTypeLiteral().getRawType();
@@ -209,10 +212,6 @@ class BindElementProcessor extends ElementProcessor {
         return null;
       }
 
-      public Void visitConstant(T value) {
-        throw new IllegalArgumentException("Cannot apply a non-module element");
-      }
-
       public Void visitConvertedConstant(T value) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
@@ -254,30 +253,6 @@ class BindElementProcessor extends ElementProcessor {
 
   <T> InvalidBindingImpl<T> invalidBinding(InjectorImpl injector, Key<T> key, Object source) {
     return new InvalidBindingImpl<T>(injector, key, source);
-  }
-
-  @Override public Boolean visitBindConstant(BindConstant command) {
-    Object value = command.acceptTargetVisitor(new DefaultBindTargetVisitor<Object, Object>() {
-      @Override public Object visitInstance(Object instance) {
-        return instance;
-      }
-
-      @Override protected Object visitTarget() {
-        errors.missingConstantValues();
-        return null;
-      }
-    });
-
-    if (value == null) {
-      return true;
-    }
-
-    validateKey(command.getSource(), command.getKey());
-    ConstantFactory<Object> factory = new ConstantFactory<Object>(value);
-    putBinding(new ConstantBindingImpl<Object>(
-        injector, command.getKey(), command.getSource(), factory, value));
-
-    return true;
   }
 
   public void createUntargettedBindings() {

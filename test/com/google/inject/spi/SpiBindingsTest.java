@@ -210,8 +210,8 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(Integer.class, Names.named("one")), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitConstant(T value) {
-                assertEquals((Integer) 1, value);
+              @Override public Void visitInstance(T instance) {
+                assertEquals((Integer) 1, instance);
                 return null;
               }
             });

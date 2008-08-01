@@ -23,43 +23,39 @@ import java.lang.reflect.Constructor;
 
 public class DefaultBindTargetVisitor<T, V> implements TargetVisitor<T, V> {
 
-  protected V visitTarget() {
+  protected V visitOther() {
     return null;
   }
 
   public V visitInstance(T instance) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitProvider(Provider<? extends T> provider) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitKey(Key<? extends T> key) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitUntargetted() {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitConstructor(Constructor<? extends T> constructor) {
-    return visitTarget();
-  }
-
-  public V visitConstant(T value) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitConvertedConstant(T value) {
-    return visitTarget();
+    return visitOther();
   }
 
   public V visitProviderBinding(Key<?> provided) {
-    return visitTarget();
+    return visitOther();
   }
 }

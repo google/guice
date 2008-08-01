@@ -19,9 +19,12 @@ package com.google.inject.spi.oldversion;
 import com.google.inject.spi.HasInjections;
 
 /**
- * A binding to a single instance.
+ * A binding to a single instance or constant.
  *
- * <p>Example: {@code bind(Runnable.class).toInstance(new MyRunnable());}
+ * <p>Examples: <pre>
+ *   bind(Runnable.class).toInstance(new MyRunnable());
+ *   bindConstant().annotatedWith(PoolSize.class).to(5);
+ * </pre>
  *
  * @deprecated replaced with {@link
  * com.google.inject.Binding.TargetVisitor#visitInstance(Object)}

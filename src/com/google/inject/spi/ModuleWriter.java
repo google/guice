@@ -23,8 +23,6 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.binder.AnnotatedConstantBindingBuilder;
-import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
@@ -85,11 +83,6 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visitBindConstant(BindConstant command) {
-        writeBindConstant(binder, command);
-        return null;
-      }
-
       public Void visitConvertToTypes(ConvertToTypes command) {
         writeConvertToTypes(binder, command);
         return null;
@@ -141,18 +134,6 @@ public class ModuleWriter {
         .requestStaticInjection(types.toArray(new Class[types.size()]));
   }
 
-  public void writeBindConstant(final Binder binder, final BindConstant command) {
-    AnnotatedConstantBindingBuilder constantBindingBuilder
-        = binder.withSource(command.getSource()).bindConstant();
-
-    Key<Object> key = command.getKey();
-    ConstantBindingBuilder builder = key.getAnnotation() != null
-        ? constantBindingBuilder.annotatedWith(key.getAnnotation())
-        : constantBindingBuilder.annotatedWith(key.getAnnotationType());
-
-    apply(command, builder);
-  }
-
   public void writeConvertToTypes(final Binder binder, final ConvertToTypes command) {
     binder.withSource(command.getSource())
         .convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
@@ -192,10 +173,6 @@ public class ModuleWriter {
         return linkedBindingBuilder;
       }
 
-      public ScopedBindingBuilder visitConstant(T value) {
-        throw new IllegalArgumentException("Non-module element");
-      }
-
       public ScopedBindingBuilder visitConvertedConstant(T value) {
         throw new IllegalArgumentException("Non-module element");
       }
@@ -208,37 +185,6 @@ public class ModuleWriter {
         throw new IllegalArgumentException("Non-module element");
       }
     });
-  }
-
-  /**
-   * Execute this target against the constant binding builder.
-   */
-  public <T> void apply(BindConstant bindConstant, ConstantBindingBuilder builder) {
-    T t = bindConstant.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
-    Class<?> targetType = t.getClass();
-    if (targetType == String.class) {
-      builder.to((String) t);
-    } else if (targetType == Integer.class) {
-      builder.to((Integer) t);
-    } else if (targetType == Long.class) {
-      builder.to((Long) t);
-    } else if (targetType == Boolean.class) {
-      builder.to((Boolean) t);
-    } else if (targetType == Double.class) {
-      builder.to((Double) t);
-    } else if (targetType == Float.class) {
-      builder.to((Float) t);
-    } else if (targetType == Short.class) {
-      builder.to((Short) t);
-    } else if (targetType == Character.class) {
-      builder.to((Character) t);
-    } else if (targetType == Class.class) {
-      builder.to((Class) t);
-    } else if (Enum.class.isAssignableFrom(targetType)) {
-      builder.to((Enum) t);
-    } else {
-      throw new IllegalArgumentException("Non-constant target " + targetType);
-    }
   }
 
   public void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {

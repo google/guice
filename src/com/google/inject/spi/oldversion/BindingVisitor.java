@@ -61,11 +61,6 @@ public interface BindingVisitor<T> {
   void visit(ClassBinding<? extends T> binding);
 
   /**
-   * Visits a constant binding.
-   */
-  void visit(ConstantBinding<? extends T> binding);
-
-  /**
    * Visits a converted constant binding.
    */
   void visit(ConvertedConstantBinding<? extends T> binding);

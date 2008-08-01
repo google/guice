@@ -44,10 +44,6 @@ public class DefaultElementVisitor<V> implements Element.Visitor<V> {
     return visitElement(command);
   }
 
-  public V visitBindConstant(BindConstant command) {
-    return visitElement(command);
-  }
-
   public V visitBindInterceptor(BindInterceptor command) {
     return visitElement(command);
   }

@@ -21,7 +21,6 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.oldversion.BindingVisitor;
 import com.google.inject.spi.oldversion.ClassBinding;
-import com.google.inject.spi.oldversion.ConstantBinding;
 import com.google.inject.spi.oldversion.ConvertedConstantBinding;
 import com.google.inject.spi.oldversion.InstanceBinding;
 import com.google.inject.spi.oldversion.LinkedBinding;
@@ -144,10 +143,17 @@ public class BindingTest extends TestCase {
     }
 
     boolean sawRunnable;
+    boolean constantVisited;
 
     public void visit(InstanceBinding<?> instanceBinding) {
       if (instanceBinding.getInstance() instanceof Runnable) {
         sawRunnable = true;
+
+      } else if (instanceBinding.getInstance() instanceof String) {
+        constantVisited = true;
+        assertEquals("Bob", instanceBinding.getInstance());
+        assertEquals(Key.get(String.class, Names.named("name")),
+            instanceBinding.getKey());
       }
       assertEquals(Scopes.NO_SCOPE, instanceBinding.getScope());
     }
@@ -177,15 +183,6 @@ public class BindingTest extends TestCase {
         classVisitied = true;
         assertEquals(Scopes.SINGLETON, classBinding.getScope());
       }
-    }
-
-    boolean constantVisited;
-
-    public void visit(ConstantBinding<?> constantBinding) {
-      constantVisited = true;
-      assertEquals(Key.get(String.class, Names.named("name")),
-          constantBinding.getKey());
-      assertEquals("Bob", constantBinding.getValue());
     }
 
     public void visit(ProviderBinding<?> binding) {

@@ -25,10 +25,15 @@ package com.google.inject.spi.oldversion;
  * @author crazybob@google.com (Bob Lee)
  */
 @Deprecated
-public interface ConvertedConstantBinding<T> extends ConstantBinding<T> {
+public interface ConvertedConstantBinding<T> extends OldVersionBinding<T> {
 
   /**
    * Gets the binding that we converted to create this binding.
    */
   OldVersionBinding<String> getOriginal();
+
+  /**
+   * Gets the constant value associated with this binding.
+   */
+  T getValue();
 }
