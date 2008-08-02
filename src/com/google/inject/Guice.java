@@ -16,13 +16,8 @@
 
 package com.google.inject;
 
-import com.google.common.collect.Sets;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
-import com.google.inject.spi.ModuleWriter;
+import com.google.inject.util.Modules;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
@@ -142,44 +137,11 @@ public final class Guice {
   }
 
   /**
-   * Returns a new {@link Module} that overlays {@code overridesModule} over
-   * {@code module}. If a key is bound by both modules, only the binding in
-   * overrides is kept. This can be used to replace bindings in a production
-   * module with test bindings:
-   * <pre>
-   * Module functionalTestModule
-   *     = Guice.overrideModule(new ProductionModule(), new TestModule());
-   * </pre>
+   * @deprecated replaced with a two-step EDSL via {@link Modules#override(Module[])}. Inline calls
+   *     to this method.
    */
+  @Deprecated
   public static Module overrideModule(Module module, Module overridesModule) {
-    final List<Element> elements = Elements.getElements(module);
-    final List<Element> overrideElements = Elements.getElements(overridesModule);
-
-    return new AbstractModule() {
-      public void configure() {
-        final Set<Key> overriddenKeys = Sets.newHashSet();
-
-        // execute the overrides module, keeping track of which keys were bound
-        new ModuleWriter() {
-          @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
-            overriddenKeys.add(binding.getKey());
-            super.writeBind(binder, binding);
-          }
-        }.apply(binder(), overrideElements);
-
-        // bind the regular module, skipping overridden keys. We only skip each
-        // overridden key once, so things still blow up if the module binds the
-        // same key multiple times
-        new ModuleWriter() {
-          @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
-            if (!overriddenKeys.remove(binding.getKey())) {
-              super.writeBind(binder, binding);
-            }
-          }
-        }.apply(binder(), elements);
-
-        // TODO: bind the overridden keys using multibinder
-      }
-    };
+    return Modules.override(module).with(overridesModule);
   }
 }

@@ -92,7 +92,7 @@ public final class Elements {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> BindingTargetVisitor<T, T> getInstanceVisitor() {
+  static <T> BindingTargetVisitor<T, T> getInstanceVisitor() {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
