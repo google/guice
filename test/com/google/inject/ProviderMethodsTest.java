@@ -180,13 +180,19 @@ public class ProviderMethodsTest extends TestCase {
   @BindingAnnotation @interface Blue {}
 
   public void testGenericProviderMethods() {
-    ProvideTs<String> source = new ProvideTs<String>("A", "B") {};
-    Injector injector = Guice.createInjector(ProviderMethods.from(source));
+    Injector injector = Guice.createInjector(
+        ProviderMethods.from(new ProvideTs<String>("A", "B") {}),
+        ProviderMethods.from(new ProvideTs<Integer>(1, 2) {}));
     
     assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("First"))));
     assertEquals("B", injector.getInstance(Key.get(String.class, Names.named("Second"))));
     assertEquals(ImmutableSet.of("A", "B"),
         injector.getInstance(Key.get(Types.setOf(String.class))));
+
+    assertEquals(1, injector.getInstance(Key.get(Integer.class, Names.named("First"))).intValue());
+    assertEquals(2, injector.getInstance(Key.get(Integer.class, Names.named("Second"))).intValue());
+    assertEquals(ImmutableSet.of(1, 2),
+        injector.getInstance(Key.get(Types.setOf(Integer.class))));
   }
 
   abstract class ProvideTs<T> {

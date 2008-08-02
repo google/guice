@@ -16,10 +16,12 @@
 
 package com.google.inject;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.TypeResolver;
 import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -43,11 +45,12 @@ public class ProviderMethods {
   }
 
   static class ProviderMethodsModule extends AbstractModule {
-
     final Object providers;
+    final TypeResolver typeResolver;
 
     ProviderMethodsModule(Object providers) {
-      this.providers = providers;
+      this.providers = checkNotNull(providers, "providers");
+      this.typeResolver = new TypeResolver(providers.getClass());
     }
 
     protected void configure() {
@@ -86,7 +89,8 @@ public class ProviderMethods {
 
       // Define T as the method's return type.
       @SuppressWarnings("unchecked")
-      TypeLiteral<T> returnType = (TypeLiteral<T>) TypeLiteral.get(method.getGenericReturnType());
+      TypeLiteral<T> returnType
+          = (TypeLiteral<T>) TypeLiteral.get(typeResolver.getReturnType(method));
 
       Provider<T> provider = new Provider<T>() {
         public T get() {
@@ -127,13 +131,14 @@ public class ProviderMethods {
     List<Provider<?>> findParameterProviders(Errors errors, Method method) {
       List<Provider<?>> parameterProviders = Lists.newArrayList();
 
-      Type[] parameterTypes = method.getGenericParameterTypes();
+      List<Type> parameterTypes = typeResolver.getParameterTypes(method);
       Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-      for (int i = 0; i < parameterTypes.length; i++) {
+      for (int i = 0; i < parameterTypes.size(); i++) {
+        Type parameterType = parameterTypes.get(i);
         Annotation bindingAnnotation
             = Keys.findBindingAnnotation(errors, method, parameterAnnotations[i]);
-        Key<?> key = bindingAnnotation == null ? Key.get(parameterTypes[i])
-            : Key.get(parameterTypes[i], bindingAnnotation);
+        Key<?> key = bindingAnnotation == null ? Key.get(parameterType)
+            : Key.get(parameterType, bindingAnnotation);
         Provider<?> provider = getProvider(key);
         parameterProviders.add(provider);
       }
