@@ -23,6 +23,8 @@ import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.StackTraceElements;
+import com.google.inject.spi.BindScopingVisitor;
+import com.google.inject.spi.BindTargetVisitor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -39,8 +41,8 @@ import java.util.Set;
  */
 class BindingProcessor extends AbstractProcessor {
 
-  private static final com.google.inject.Binding.ScopingVisitor<LoadStrategy> LOAD_STRATEGY_VISITOR
-      = new com.google.inject.Binding.ScopingVisitor<LoadStrategy>() {
+  private static final BindScopingVisitor<LoadStrategy> LOAD_STRATEGY_VISITOR
+      = new BindScopingVisitor<LoadStrategy>() {
     public LoadStrategy visitEagerSingleton() {
       return LoadStrategy.EAGER;
     }
@@ -96,7 +98,7 @@ class BindingProcessor extends AbstractProcessor {
     validateKey(command.getSource(), command.getKey());
 
     final LoadStrategy loadStrategy = command.acceptScopingVisitor(LOAD_STRATEGY_VISITOR);
-    final Scope scope = command.acceptScopingVisitor(new com.google.inject.Binding.ScopingVisitor<Scope>() {
+    final Scope scope = command.acceptScopingVisitor(new BindScopingVisitor<Scope>() {
       public Scope visitEagerSingleton() {
         return Scopes.SINGLETON;
       }
@@ -120,7 +122,7 @@ class BindingProcessor extends AbstractProcessor {
       }
     });
 
-    command.acceptTargetVisitor(new com.google.inject.Binding.TargetVisitor<T, Void>() {
+    command.acceptTargetVisitor(new BindTargetVisitor<T, Void>() {
       public Void visitInstance(T instance) {
         if (instance == null) {
           errors.cannotBindToNullInstance();

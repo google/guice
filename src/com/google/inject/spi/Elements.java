@@ -22,7 +22,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
-import com.google.inject.Binding.TargetVisitor;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -49,7 +48,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Elements {
-  private static final TargetVisitor<Object, Object> GET_INSTANCE_VISITOR
+  private static final BindTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindTargetVisitor<Object, Object>() {
     @Override public Object visitInstance(Object instance) {
       return instance;
@@ -93,8 +92,8 @@ public final class Elements {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> com.google.inject.Binding.TargetVisitor<T, T> getInstanceVisitor() {
-    return (com.google.inject.Binding.TargetVisitor<T, T>) GET_INSTANCE_VISITOR;
+  public static <T> BindTargetVisitor<T, T> getInstanceVisitor() {
+    return (BindTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
   private static class RecordingBinder implements Binder {

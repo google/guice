@@ -151,7 +151,7 @@ public class ModuleWriter {
    */
   public <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
       final LinkedBindingBuilder<T> linkedBindingBuilder) {
-    return binding.acceptTargetVisitor(new com.google.inject.Binding.TargetVisitor<T, ScopedBindingBuilder>() {
+    return binding.acceptTargetVisitor(new BindTargetVisitor<T, ScopedBindingBuilder>() {
       public ScopedBindingBuilder visitInstance(T instance) {
         linkedBindingBuilder.toInstance(instance);
         return null;
@@ -188,7 +188,7 @@ public class ModuleWriter {
   }
 
   public void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {
-    binding.acceptScopingVisitor(new com.google.inject.Binding.ScopingVisitor<Void>() {
+    binding.acceptScopingVisitor(new BindScopingVisitor<Void>() {
       public Void visitEagerSingleton() {
         scopedBindingBuilder.asEagerSingleton();
         return null;

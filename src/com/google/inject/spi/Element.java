@@ -22,12 +22,12 @@ import com.google.inject.Binding;
  * A core component of a module or injector.
  *
  * <p>The elements of a module can be inspected, validated and rewritten. Use {@link
- * Elements#getElements(com.google.inject.Module[])} to read the elements from a module, and
- * {@link com.google.inject.spi.ModuleWriter} to rewrite them. This can be used for static analysis
- * and generation of Guice modules.
+ * Elements#getElements(com.google.inject.Module[]) Elements.getElements()} to read the elements
+ * from a module, and {@link com.google.inject.spi.ModuleWriter} to rewrite them. This can be used
+ * for static analysis and generation of Guice modules.
  *
  * <p>The elements of an injector can be inspected and exercised. Use {@link
- * com.google.inject.Injector#getBindings} to reflect on Guice injectors.
+ * com.google.inject.Injector#getBindings Injector.getBindings()} to reflect on Guice injectors.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

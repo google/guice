@@ -16,12 +16,16 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding.TargetVisitor;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.lang.reflect.Constructor;
 
-public class DefaultBindTargetVisitor<T, V> implements TargetVisitor<T, V> {
+/**
+ * No-op visitor for subclassing.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
+public class DefaultBindTargetVisitor<T, V> implements BindTargetVisitor<T, V> {
 
   protected V visitOther() {
     return null;

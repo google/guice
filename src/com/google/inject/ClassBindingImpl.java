@@ -20,6 +20,7 @@ import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.spi.BindTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.oldversion.BindingVisitor;
 import com.google.inject.spi.oldversion.ClassBinding;
@@ -50,7 +51,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
     visitor.visit(this);
   }
 
-  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
     return visitor.visitConstructor(lateBoundConstructor.getConstructor());
   }
 

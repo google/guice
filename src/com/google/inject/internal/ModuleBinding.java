@@ -28,6 +28,8 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.spi.BindScopingVisitor;
+import com.google.inject.spi.BindTargetVisitor;
 import com.google.inject.spi.DefaultBindTargetVisitor;
 import java.lang.annotation.Annotation;
 
@@ -41,18 +43,18 @@ public final class ModuleBinding<T> implements Binding<T> {
   private final Key<?> NULL_KEY = Key.get(Void.class);
 
   private static final Target<Object> EMPTY_TARGET = new Target<Object>() {
-    public <V> V acceptTargetVisitor(TargetVisitor<? super Object, V> visitor) {
+    public <V> V acceptTargetVisitor(BindTargetVisitor<? super Object, V> visitor) {
       return visitor.visitUntargetted();
     }
   };
 
   private static final Scoping EMPTY_SCOPING = new AbstractScoping() {
-    public <V> V acceptVisitor(ScopingVisitor<V> visitor) {
+    public <V> V acceptVisitor(BindScopingVisitor<V> visitor) {
       return visitor.visitNoScoping();
     }
   };
 
-  private static final TargetVisitor<Object, Boolean> SUPPORTS_SCOPES
+  private static final BindTargetVisitor<Object, Boolean> SUPPORTS_SCOPES
       = new DefaultBindTargetVisitor<Object, Boolean>() {
     @Override public Boolean visitInstance(Object instance) {
       return false;
@@ -103,11 +105,11 @@ public final class ModuleBinding<T> implements Binding<T> {
     return key;
   }
 
-  public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
     return target.acceptTargetVisitor(visitor);
   }
 
-  public <V> V acceptScopingVisitor(ScopingVisitor<V> visitor) {
+  public <V> V acceptScopingVisitor(BindScopingVisitor<V> visitor) {
     return scoping.acceptVisitor(visitor);
   }
 
@@ -172,7 +174,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotNull(targetKey, "targetKey");
       checkNotTargetted();
       target = new Target<T>() {
-        public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+        public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
           return visitor.visitKey(targetKey);
         }
         @Override public String toString() {
@@ -191,7 +193,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotNull(provider, "provider");
       checkNotTargetted();
       target = new Target<T>() {
-        public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+        public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
           return visitor.visitProvider(provider);
         }
       };
@@ -208,7 +210,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotNull(providerKey, "providerKey");
       checkNotTargetted();
       target = new Target<T>() {
-        public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+        public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
           return visitor.visitProviderKey(providerKey);
         }
       };
@@ -223,7 +225,7 @@ public final class ModuleBinding<T> implements Binding<T> {
         @Override public Class<? extends Annotation> getScopeAnnotation() {
           return scopeAnnotation;
         }
-        public <V> V acceptVisitor(ScopingVisitor<V> visitor) {
+        public <V> V acceptVisitor(BindScopingVisitor<V> visitor) {
           return visitor.visitScopeAnnotation(scopeAnnotation);
         }
         @Override public String toString() {
@@ -239,7 +241,7 @@ public final class ModuleBinding<T> implements Binding<T> {
         @Override public Scope getScope() {
           return scope;
         }
-        public <V> V acceptVisitor(ScopingVisitor<V> visitor) {
+        public <V> V acceptVisitor(BindScopingVisitor<V> visitor) {
           return visitor.visitScope(scope);
         }
         @Override public String toString() {
@@ -251,7 +253,7 @@ public final class ModuleBinding<T> implements Binding<T> {
     public void asEagerSingleton() {
       checkNotScoped();
       scoping = new AbstractScoping() {
-        public <V> V acceptVisitor(ScopingVisitor<V> visitor) {
+        public <V> V acceptVisitor(BindScopingVisitor<V> visitor) {
           return visitor.visitEagerSingleton();
         }
         @Override public String toString() {
@@ -281,8 +283,8 @@ public final class ModuleBinding<T> implements Binding<T> {
     }
 
     private void checkNotScoped() {
-      @SuppressWarnings("unchecked") TargetVisitor<T,Boolean> supportsScopesOfT
-          = (TargetVisitor<T,Boolean>) SUPPORTS_SCOPES;
+      @SuppressWarnings("unchecked") BindTargetVisitor<T,Boolean> supportsScopesOfT
+          = (BindTargetVisitor<T,Boolean>) SUPPORTS_SCOPES;
 
       // Scoping isn't allowed when we have only one instance.
       if (!target.acceptTargetVisitor(supportsScopesOfT)) {
@@ -417,12 +419,12 @@ public final class ModuleBinding<T> implements Binding<T> {
 
   /** A binding target, which provides instances from a specific key. */
   private interface Target<T> {
-    <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor);
+    <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor);
   }
 
   /** Immutable snapshot of a binding scope. */
   private interface Scoping {
-    <V> V acceptVisitor(ScopingVisitor<V> visitor);
+    <V> V acceptVisitor(BindScopingVisitor<V> visitor);
   }
 
   static class InstanceTarget<T> implements Target<T> {
@@ -432,7 +434,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       this.instance = instance;
     }
 
-    public <V> V acceptTargetVisitor(TargetVisitor<? super T, V> visitor) {
+    public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
       return visitor.visitInstance(instance);
     }
   }
