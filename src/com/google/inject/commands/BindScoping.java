@@ -24,7 +24,7 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a binding scope.
  *
- * @deprecated replaced with {@link com.google.inject.Binding.ScopingVisitor}
+ * @deprecated replaced with {@link com.google.inject.spi.BindScopingVisitor}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
