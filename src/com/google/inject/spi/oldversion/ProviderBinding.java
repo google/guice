@@ -23,7 +23,7 @@ import com.google.inject.Provider;
  * {@code T}.
  *
  * @deprecated replaced with {@link 
- * com.google.inject.spi.BindTargetVisitor#visitProviderBinding(com.google.inject.Key)}
+ * com.google.inject.spi.BindingTargetVisitor#visitProviderBinding(com.google.inject.Key)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

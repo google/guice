@@ -28,7 +28,7 @@ import com.google.inject.Binding;
  *
  * @author sberlin@gmail.com (Sam Berlin)
  */
-public abstract class DefaultElementVisitor<V> implements Element.Visitor<V> {
+public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
 
   protected DefaultElementVisitor() {}
 

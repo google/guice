@@ -20,7 +20,7 @@ package com.google.inject.spi.oldversion;
  * A binding which was converted from a string contant.
  *
  * @deprecated replaced with {@link
- * com.google.inject.spi.BindTargetVisitor#visitConvertedConstant(Object)}
+ * com.google.inject.spi.BindingTargetVisitor#visitConvertedConstant(Object)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

@@ -467,7 +467,7 @@ public class ElementsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitNoScoping() {
                 return null;
               }
@@ -479,7 +479,7 @@ public class ElementsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(List.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitScope(Scope scope) {
                 assertEquals(Scopes.SINGLETON, scope);
                 return null;
@@ -492,7 +492,7 @@ public class ElementsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Map.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
                 assertEquals(Singleton.class, annotation);
                 return null;
@@ -505,7 +505,7 @@ public class ElementsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(Set.class), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               public Void visitEagerSingleton() {
                 return null;
               }
@@ -833,13 +833,13 @@ public class ElementsTest extends TestCase {
   /**
    * Ensures the module performs the commands consistent with {@code visitors}.
    */
-  protected void checkModule(Module module, Element.Visitor<?>... visitors) {
+  protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     List<Element> elements = Elements.getElements(module);
 
     assertEquals(elements.size(), visitors.length);
 
     for (int i = 0; i < visitors.length; i++) {
-      Element.Visitor<?> visitor = visitors[i];
+      ElementVisitor<?> visitor = visitors[i];
       Element element = elements.get(i);
       Asserts.assertContains(element.getSource().toString(), "ElementsTest.java");
       element.acceptVisitor(visitor);

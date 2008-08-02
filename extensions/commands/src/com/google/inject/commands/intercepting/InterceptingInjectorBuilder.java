@@ -35,7 +35,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
-import com.google.inject.spi.DefaultBindTargetVisitor;
+import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.ModuleWriter;
@@ -165,7 +165,7 @@ public final class InterceptingInjectorBuilder {
         return;
       }
 
-      binding.acceptTargetVisitor(new DefaultBindTargetVisitor<T, Void>() {
+      binding.acceptTargetVisitor(new DefaultBindingTargetVisitor<T, Void>() {
         @Override public Void visitUntargetted() {
           throw new UnsupportedOperationException(
               String.format("Cannot intercept bare binding of %s.", key));

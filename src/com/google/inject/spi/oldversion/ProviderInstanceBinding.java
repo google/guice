@@ -25,7 +25,7 @@ import com.google.inject.spi.HasInjections;
  * <p>Example: {@code bind(Foo.class).toProvider(new FooProvider());}
  *
  * @deprecated replaced with {@link
- * com.google.inject.spi.BindTargetVisitor#visitProvider(com.google.inject.Provider)}
+ * com.google.inject.spi.BindingTargetVisitor#visitProvider(com.google.inject.Provider)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

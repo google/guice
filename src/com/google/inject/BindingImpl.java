@@ -19,8 +19,8 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.BindScopingVisitor;
-import com.google.inject.spi.Element;
+import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.oldversion.OldVersionBinding;
 import com.google.inject.spi.oldversion.ProviderBinding;
 
@@ -90,11 +90,11 @@ abstract class BindingImpl<T> implements OldVersionBinding<T> {
     return loadStrategy;
   }
 
-  public <V> V acceptVisitor(Element.Visitor<V> visitor) {
+  public <V> V acceptVisitor(ElementVisitor<V> visitor) {
     return visitor.visitBinding(this);
   }
 
-  public <V> V acceptScopingVisitor(BindScopingVisitor<V> visitor) {
+  public <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor) {
     if (loadStrategy == LoadStrategy.EAGER) {
       return visitor.visitEagerSingleton();
     } else if (scope != Scopes.NO_SCOPE && scope != null) {

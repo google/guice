@@ -32,7 +32,7 @@ import com.google.inject.internal.Nullability;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.BindTargetVisitor;
+import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.oldversion.BindingVisitor;
 import com.google.inject.spi.oldversion.ConvertedConstantBinding;
@@ -272,7 +272,7 @@ class InjectorImpl implements Injector {
       bindingVisitor.visit(this);
     }
 
-    public <V> V acceptTargetVisitor(BindTargetVisitor<? super Provider<T>, V> visitor) {
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
       return visitor.visitProviderBinding(providedBinding.getKey());
     }
 
@@ -369,7 +369,7 @@ class InjectorImpl implements Injector {
       return value;
     }
 
-    public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> visitor) {
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
       return visitor.visitConvertedConstant(value);
     }
 

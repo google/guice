@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.BindTargetVisitor;
+import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.oldversion.BindingVisitor;
 
@@ -35,7 +35,7 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
     throw new AssertionError();
   }
 
-  public <V> V acceptTargetVisitor(BindTargetVisitor<? super T, V> vVisitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> vVisitor) {
     throw new UnsupportedOperationException();
   }
 

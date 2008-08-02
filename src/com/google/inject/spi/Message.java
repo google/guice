@@ -78,7 +78,7 @@ public final class Message implements Serializable, Element {
     return injectionPoints;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitMessage(this);
   }
 

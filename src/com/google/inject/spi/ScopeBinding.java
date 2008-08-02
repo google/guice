@@ -53,7 +53,7 @@ public final class ScopeBinding implements Element {
     return scope;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitScopeBinding(this);
   }
 }

@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class ModuleWriterTest extends ElementsTest {
 
-  protected void checkModule(Module module, Element.Visitor<?>... visitors) {
+  protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     // get some elements to apply
     List<Element> elements = Elements.getElements(module);
 
@@ -36,7 +36,7 @@ public class ModuleWriterTest extends ElementsTest {
     // verify that the replayed elements are as expected
     assertEquals(rewrittenElements.size(), visitors.length);
     for (int i = 0; i < visitors.length; i++) {
-      Element.Visitor<?> visitor = visitors[i];
+      ElementVisitor<?> visitor = visitors[i];
       Element element = rewrittenElements.get(i);
       element.acceptVisitor(visitor);
     }

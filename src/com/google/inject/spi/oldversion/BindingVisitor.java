@@ -21,7 +21,7 @@ package com.google.inject.spi.oldversion;
  * {@link OldVersionBinding#accept(BindingVisitor)} and the binding
  * will call back to the appropriate visitor method for its type.
  *
- * @deprecated replaced with {@link com.google.inject.Binding.Visitor}
+ * @deprecated replaced with {@link com.google.inject.spi.ElementVisitor}
  *
  * @author crazybob@google.com (Bob Lee)
  */

@@ -68,7 +68,7 @@ public final class InterceptorBinding implements Element {
     return interceptors;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitInterceptorBinding(this);
   }
 }

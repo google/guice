@@ -26,7 +26,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 /**
  * A binding target, which provides instances from a specific key. 
  *
- * @deprecated replaced with {@link com.google.inject.spi.BindTargetVisitor}
+ * @deprecated replaced with {@link com.google.inject.spi.BindingTargetVisitor}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

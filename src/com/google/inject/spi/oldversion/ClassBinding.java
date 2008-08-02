@@ -25,7 +25,7 @@ import com.google.inject.spi.HasInjections;
  * <p>Example: {@code bind(Concrete.class);}
  *
  * @deprecated replaced with {@link
- * com.google.inject.spi.BindTargetVisitor#visitConstructor(java.lang.reflect.Constructor)}
+ * com.google.inject.spi.BindingTargetVisitor#visitConstructor(java.lang.reflect.Constructor)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

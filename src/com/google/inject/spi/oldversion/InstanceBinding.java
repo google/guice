@@ -27,7 +27,7 @@ import com.google.inject.spi.HasInjections;
  * </pre>
  *
  * @deprecated replaced with {@link
- * com.google.inject.spi.BindTargetVisitor#visitInstance(Object)}
+ * com.google.inject.spi.BindingTargetVisitor#visitInstance(Object)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

@@ -16,8 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
-
 /**
  * A core component of a module or injector.
  *
@@ -48,55 +46,6 @@ public interface Element {
    *
    * @param visitor to call back on
    */
-  <T> T acceptVisitor(Visitor<T> visitor);
+  <T> T acceptVisitor(ElementVisitor<T> visitor);
 
-  /**
-   * Visit elements.
-   *
-   * @param <V> any type to be returned by the visit method. Use {@link Void} with
-   *     {@code return null} if no return type is needed.
-   */
-  public interface Visitor<V> {
-
-    /**
-     * Visit a mapping from a key (type and optional annotation) to the strategy for getting
-     * instances of the type.
-     */
-    <T> V visitBinding(Binding<T> binding);
-
-    /**
-     * Visit a registration of interceptors for matching methods of matching classes.
-     */
-    V visitInterceptorBinding(InterceptorBinding interceptorBinding);
-
-    /**
-     * Visit a registration of a scope annotation with the scope that implements it.
-     */
-    V visitScopeBinding(ScopeBinding scopeBinding);
-
-    /**
-     * Visit a registration of type converters for matching target types.
-     */
-    V visitTypeConverterBinding(TypeConverterBinding typeConverterBinding);
-
-    /**
-     * Visit a request to inject the instance fields and methods of an instance.
-     */
-    V visitInjectionRequest(InjectionRequest injectionRequest);
-
-    /**
-     * Visit a request to inject the static fields and methods of type.
-     */
-    V visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest);
-
-    /**
-     * Visit a lookup of the provider for a type.
-     */
-    <T> V visitProviderLookup(ProviderLookup<T> providerLookup);
-
-    /**
-     * Visit an error message and the context in which it occured.
-     */
-    V visitMessage(Message message);
-  }
 }

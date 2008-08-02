@@ -46,7 +46,7 @@ public final class InjectionRequest implements Element {
     return instances;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitInjectionRequest(this);
   }
 }

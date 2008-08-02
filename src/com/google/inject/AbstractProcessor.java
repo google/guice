@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
@@ -37,7 +38,7 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-abstract class AbstractProcessor implements Element.Visitor<Boolean> {
+abstract class AbstractProcessor implements ElementVisitor<Boolean> {
 
   protected Errors errors;
 

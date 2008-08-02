@@ -48,8 +48,8 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Elements {
-  private static final BindTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
-      = new DefaultBindTargetVisitor<Object, Object>() {
+  private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
+      = new DefaultBindingTargetVisitor<Object, Object>() {
     @Override public Object visitInstance(Object instance) {
       return instance;
     }
@@ -92,8 +92,8 @@ public final class Elements {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> BindTargetVisitor<T, T> getInstanceVisitor() {
-    return (BindTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
+  public static <T> BindingTargetVisitor<T, T> getInstanceVisitor() {
+    return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
   private static class RecordingBinder implements Binder {

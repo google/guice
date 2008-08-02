@@ -48,7 +48,7 @@ public final class ProviderLookup<T> implements Element {
     return key;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitProviderLookup(this);
   }
 

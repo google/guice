@@ -53,7 +53,7 @@ public final class TypeConverterBinding implements Element {
     return typeConverter;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitTypeConverterBinding(this);
   }
 }

@@ -276,7 +276,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("a")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitScope(Scope scope) {
                 // even though we bound with an annotation, the injector always uses instances
                 assertSame(Scopes.SINGLETON, scope);
@@ -290,7 +290,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("b")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitScope(Scope scope) {
                 assertSame(Scopes.SINGLETON, scope);
                 return null;
@@ -303,7 +303,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("c")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitEagerSingleton() {
                 return null;
               }
@@ -315,7 +315,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class, Names.named("d")), command.getKey());
-            command.acceptScopingVisitor(new FailingBindScopingVisitor() {
+            command.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitNoScoping() {
                 return null;
               }
@@ -326,7 +326,7 @@ public class SpiBindingsTest extends TestCase {
     );
   }
 
-  public void checkInjector(Module module, Element.Visitor<?>... visitors) {
+  public void checkInjector(Module module, ElementVisitor<?>... visitors) {
     Injector injector = Guice.createInjector(module);
 
     List<Binding<?>> bindings = Lists.newArrayList(
@@ -336,7 +336,7 @@ public class SpiBindingsTest extends TestCase {
     assertEquals(bindings.size(), visitors.length);
 
     for (int i = 0; i < visitors.length; i++) {
-      Element.Visitor<?> visitor = visitors[i];
+      ElementVisitor<?> visitor = visitors[i];
       Binding<?> binding = bindings.get(i);
       binding.acceptVisitor(visitor);
     }

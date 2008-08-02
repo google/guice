@@ -22,7 +22,7 @@ package com.google.inject.spi.oldversion;
  * <p>Example: {@code bind(Collection.class).to(List.class);}
  *
  * @deprecated replaced with {@link
- * com.google.inject.spi.BindTargetVisitor#visitKey(com.google.inject.Key)}
+ * com.google.inject.spi.BindingTargetVisitor#visitKey(com.google.inject.Key)}
  *
  * @author crazybob@google.com (Bob Lee)
  */

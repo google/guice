@@ -47,7 +47,7 @@ public final class StaticInjectionRequest implements Element {
     return types;
   }
 
-  public <T> T acceptVisitor(Visitor<T> visitor) {
+  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitStaticInjectionRequest(this);
   }
 }

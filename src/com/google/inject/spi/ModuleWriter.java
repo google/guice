@@ -56,7 +56,7 @@ public class ModuleWriter {
     checkNotNull(binder, "binder");
     checkNotNull(elements, "elements");
 
-    Element.Visitor<Void> visitor = new Element.Visitor<Void>() {
+    ElementVisitor<Void> visitor = new ElementVisitor<Void>() {
 
       public Void visitMessage(Message message) {
         writeMessage(binder, message);
@@ -151,7 +151,7 @@ public class ModuleWriter {
    */
   public <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
       final LinkedBindingBuilder<T> linkedBindingBuilder) {
-    return binding.acceptTargetVisitor(new BindTargetVisitor<T, ScopedBindingBuilder>() {
+    return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
       public ScopedBindingBuilder visitInstance(T instance) {
         linkedBindingBuilder.toInstance(instance);
         return null;
@@ -188,7 +188,7 @@ public class ModuleWriter {
   }
 
   public void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {
-    binding.acceptScopingVisitor(new BindScopingVisitor<Void>() {
+    binding.acceptScopingVisitor(new BindingScopingVisitor<Void>() {
       public Void visitEagerSingleton() {
         scopedBindingBuilder.asEagerSingleton();
         return null;
