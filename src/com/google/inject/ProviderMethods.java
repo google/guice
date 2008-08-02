@@ -17,12 +17,15 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Lists;
+import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.TypeResolver;
 import com.google.inject.spi.Message;
+import com.google.inject.util.Modules;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,9 +33,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * Creates bindings to methods annotated with {@literal @}
- * {@link com.google.inject.Provides}. Use the scope and binding annotations
- * on the provider method to configure the binding.
+ * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
+ * binding annotations on the provider method to configure the binding.
  */
 public class ProviderMethods {
 
@@ -41,32 +43,39 @@ public class ProviderMethods {
    * given object.
    */
   public static Module from(Object providers) {
+    // avoid infinite recursion, since installing a module always installs itself
+    if (providers instanceof ProviderMethodsModule) {
+      return Modules.EMPTY_MODULE;
+    }
+
     return new ProviderMethodsModule(providers);
   }
 
-  static class ProviderMethodsModule extends AbstractModule {
+  static class ProviderMethodsModule implements Module {
     final Object providers;
     final TypeResolver typeResolver;
+    Binder binder;
 
     ProviderMethodsModule(Object providers) {
       this.providers = checkNotNull(providers, "providers");
       this.typeResolver = new TypeResolver(providers.getClass());
     }
 
-    protected void configure() {
-      bindProviderMethods(providers.getClass());
-    }
+    public synchronized void configure(Binder binder) {
+      checkState(this.binder == null, "Re-entry is not allowed.");
 
-    void bindProviderMethods(Class<?> clazz) {
-      if (clazz == Object.class) {
-        return;
-      }
+      for (Class c = providers.getClass(); c != Object.class; c = c.getSuperclass()) {
+        for (Method method : c.getDeclaredMethods()) {
+          if (!method.isAnnotationPresent(Provides.class)) {
+            continue;
+          }
 
-      bindProviderMethods(clazz.getSuperclass());
-
-      for (Method method : clazz.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Provides.class)) {
-          bindProviderMethod(method);
+          this.binder = binder.withSource(StackTraceElements.forMember(method));
+          try {
+            bindProviderMethod(method);
+          } finally {
+            this.binder = null;
+          }
         }
       }
     }
@@ -84,7 +93,7 @@ public class ProviderMethods {
       final List<Provider<?>> parameterProviders = findParameterProviders(errors, method);
 
       for (Message message : errors.getMessages()) {
-        addError(message);
+        binder.addError(message);
       }
 
       // Define T as the method's return type.
@@ -114,17 +123,16 @@ public class ProviderMethods {
         }
       };
 
-      if (scopeAnnotation == null && bindingAnnotation == null) {
-        bind(returnType).toProvider(provider);
-      } else if (scopeAnnotation == null) {
-        bind(returnType).annotatedWith(bindingAnnotation).toProvider(provider);
-      } else if (bindingAnnotation == null) {
-        bind(returnType).toProvider(provider).in(scopeAnnotation);
-      } else {
-        bind(returnType)
-            .annotatedWith(bindingAnnotation)
-            .toProvider(provider)
-            .in(scopeAnnotation);
+      AnnotatedBindingBuilder<T> builder = binder.bind(returnType);
+
+      if (bindingAnnotation != null) {
+        builder.annotatedWith(bindingAnnotation);
+      }
+
+      builder.toProvider(provider);
+
+      if (scopeAnnotation != null) {
+        builder.in(scopeAnnotation);
       }
     }
 
@@ -139,11 +147,20 @@ public class ProviderMethods {
             = Keys.findBindingAnnotation(errors, method, parameterAnnotations[i]);
         Key<?> key = bindingAnnotation == null ? Key.get(parameterType)
             : Key.get(parameterType, bindingAnnotation);
-        Provider<?> provider = getProvider(key);
+        Provider<?> provider = binder.getProvider(key);
         parameterProviders.add(provider);
       }
 
       return parameterProviders;
+    }
+
+    @Override public boolean equals(Object o) {
+      return o instanceof ProviderMethodsModule
+          && ((ProviderMethodsModule) o).providers == providers;
+    }
+
+    @Override public int hashCode() {
+      return providers.hashCode();
     }
   }
 }

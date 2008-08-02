@@ -38,6 +38,10 @@ import java.util.Set;
 public class Modules {
   private Modules() {}
 
+  public static final Module EMPTY_MODULE = new Module() {
+    public void configure(Binder binder) {}
+  };
+
   /**
    * Returns a builder that creates a module that overlays override modules over the given
    * modules. If a key is bound in both sets of modules, only the binding from the override modules

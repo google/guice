@@ -216,4 +216,39 @@ public class ProviderMethodsTest extends TestCase {
       return ImmutableSet.of(first, second);
     }
   }
+  
+  public void testAutomaticProviderMethods() {
+    Injector injector = Guice.createInjector((Module) new AbstractModule() {
+      protected void configure() { }
+      private int next = 1;
+
+      @Provides @Named("count")
+      public Integer provideCount() {
+        return next++;
+      }
+    });
+
+    assertEquals(1, injector.getInstance(Key.get(Integer.class, Names.named("count"))).intValue());
+    assertEquals(2, injector.getInstance(Key.get(Integer.class, Names.named("count"))).intValue());
+    assertEquals(3, injector.getInstance(Key.get(Integer.class, Names.named("count"))).intValue());
+  }
+
+  /**
+   * If the user installs provider methods for the module manually, that shouldn't cause a double
+   * binding of the provider methods' types.
+   */
+  public void testAutomaticProviderMethodsDoNotCauseDoubleBinding() {
+    Module installsSelf = new AbstractModule() {
+      protected void configure() {
+        install(ProviderMethods.from(this));
+        bind(Integer.class).toInstance(5);
+      }
+      @Provides public String provideString(Integer count) {
+        return "A" + count;
+      }
+    };
+
+    Injector injector = Guice.createInjector(installsSelf);
+    assertEquals("A5", injector.getInstance(String.class));
+  }
 }

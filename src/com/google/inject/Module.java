@@ -24,6 +24,11 @@ package com.google.inject;
  *
  * <p>Your Module classes can use a more streamlined syntax by extending
  * {@link AbstractModule} rather than implementing this interface directly.
+ *
+ * <p>In addition to the bindings configured via {@link #configure}, bindings
+ * will be created for all methods annotated with {@literal @}{@link Provides}.
+ * Use scope and binding annotations on these methods to configure the
+ * bindings.
  */
 public interface Module {
 

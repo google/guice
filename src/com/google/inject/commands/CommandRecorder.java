@@ -25,6 +25,7 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.ProviderMethods;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
@@ -132,6 +133,7 @@ public final class CommandRecorder {
         } catch (RuntimeException e) {
           addError(e);
         }
+        install(ProviderMethods.from(module));
       }
     }
 
