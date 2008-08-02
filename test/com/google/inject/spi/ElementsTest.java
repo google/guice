@@ -533,7 +533,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindInterceptor(BindInterceptor command) {
+          @Override public Void visitInterceptorBinding(InterceptorBinding command) {
             assertSame(classMatcher, command.getClassMatcher());
             assertSame(methodMatcher, command.getMethodMatcher());
             assertEquals(Arrays.asList(methodInterceptor), command.getInterceptors());
@@ -552,7 +552,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitBindScope(BindScope command) {
+          @Override public Void visitScopeBinding(ScopeBinding command) {
             assertSame(SampleAnnotation.class, command.getAnnotationType());
             assertSame(Scopes.NO_SCOPE, command.getScope());
             return null;
@@ -576,7 +576,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitConvertToTypes(ConvertToTypes command) {
+          @Override public Void visitTypeConverterBinding(TypeConverterBinding command) {
             assertSame(typeConverter, command.getTypeConverter());
             assertSame(Matchers.any(), command.getTypeMatcher());
             return null;
@@ -608,7 +608,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitGetProvider(GetProvider command) {
+          @Override public Void visitProviderLookup(ProviderLookup command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertNull(command.getDelegate());
             return null;
@@ -616,7 +616,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitGetProvider(GetProvider command) {
+          @Override public Void visitProviderLookup(ProviderLookup command) {
             assertEquals(Key.get(String.class), command.getKey());
             assertNull(command.getDelegate());
             return null;
@@ -637,7 +637,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitRequestInjection(RequestInjection command) {
+          @Override public Void visitInjectionRequest(InjectionRequest command) {
             assertEquals(Arrays.asList(firstObject, secondObject), command.getInstances());
             return null;
           }
@@ -654,7 +654,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitRequestStaticInjection(RequestStaticInjection command) {
+          @Override public Void visitStaticInjectionRequest(StaticInjectionRequest command) {
             assertEquals(Arrays.asList(ArrayList.class), command.getTypes());
             return null;
           }

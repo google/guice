@@ -52,6 +52,8 @@ import java.lang.reflect.Constructor;
  *         necessary to satisfy a binding.</li>
  * </ul>
  *
+ * @param <T> the bound type. The injected is always assignable to this type.
+ *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -61,17 +63,6 @@ public interface Binding<T> extends Element {
    * Returns the key for this binding.
    */
   Key<T> getKey();
-
-  /**
-   * Returns an arbitrary object containing information about the "place"
-   * where this binding was configured. Used by Guice in the production of
-   * descriptive error messages.
-   *
-   * <p>Tools might specially handle types they know about;
-   * {@code StackTraceElement} is a good example. Tools should simply call
-   * {@code toString()} on the source object if the type is unfamiliar.
-   */
-  Object getSource();
 
   /**
    * Returns the scoped provider guice uses to fulfill requests for this
@@ -99,6 +90,9 @@ public interface Binding<T> extends Element {
 
   /**
    * Visits each of the strategies used to find an instance to satisfy an injection.
+   *
+   * @param <V> any type to be returned by the visit method. Use {@link Void} with
+   *     {@code return null} if no return type is needed.
    */
   interface TargetVisitor<T, V> {
 
@@ -175,6 +169,9 @@ public interface Binding<T> extends Element {
 
   /**
    * Visits each of the strategies used to scope an injection.
+   *
+   * @param <V> any type to be returned by the visit method. Use {@link Void} with
+   *     {@code return null} if no return type is needed.
    */
   interface ScopingVisitor<V> {
 

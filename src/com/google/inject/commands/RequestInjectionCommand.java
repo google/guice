@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Immutable snapshot of a request for injection.
  *
- * @deprecated replaced with {@link com.google.inject.spi.RequestInjection}
+ * @deprecated replaced with {@link com.google.inject.spi.InjectionRequest}
  *
  * @author mikeward@google.com (Mike Ward)
  */

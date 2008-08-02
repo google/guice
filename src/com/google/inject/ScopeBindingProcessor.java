@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.StackTraceElements;
-import com.google.inject.spi.BindScope;
+import com.google.inject.spi.ScopeBinding;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
@@ -30,17 +30,17 @@ import java.util.Map;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class ScopesElementProcessor extends ElementProcessor {
+class ScopeBindingProcessor extends AbstractProcessor {
 
   private final Map<Class<? extends Annotation>, Scope> scopes;
 
-  ScopesElementProcessor(Errors errors,
+  ScopeBindingProcessor(Errors errors,
       Map<Class<? extends Annotation>, Scope> scopes) {
     super(errors);
     this.scopes = scopes;
   }
 
-  @Override public Boolean visitBindScope(BindScope command) {
+  @Override public Boolean visitScopeBinding(ScopeBinding command) {
     Scope scope = command.getScope();
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 

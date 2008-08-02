@@ -43,8 +43,8 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Records elements executed by a module so they can be inspected or
- * {@link ModuleWriter replayed}.
+ * Exposes elements of a module so they can be inspected, validated or {@link ModuleWriter 
+ * rewritten}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -131,19 +131,19 @@ public final class Elements {
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         MethodInterceptor... interceptors) {
-      elements.add(new BindInterceptor(getSource(), classMatcher, methodMatcher, interceptors));
+      elements.add(new InterceptorBinding(getSource(), classMatcher, methodMatcher, interceptors));
     }
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-      elements.add(new BindScope(getSource(), annotationType, scope));
+      elements.add(new ScopeBinding(getSource(), annotationType, scope));
     }
 
     public void requestInjection(Object... instances) {
-      elements.add(new RequestInjection(getSource(), instances));
+      elements.add(new InjectionRequest(getSource(), instances));
     }
 
     public void requestStaticInjection(Class<?>... types) {
-      elements.add(new RequestStaticInjection(getSource(), types));
+      elements.add(new StaticInjectionRequest(getSource(), types));
     }
 
     public void install(Module module) {
@@ -193,7 +193,7 @@ public final class Elements {
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      final GetProvider<T> command = new GetProvider<T>(getSource(), key);
+      final ProviderLookup<T> command = new ProviderLookup<T>(getSource(), key);
       elements.add(command);
       return new Provider<T>() {
         public T get() {
@@ -215,7 +215,7 @@ public final class Elements {
 
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
         TypeConverter converter) {
-      elements.add(new ConvertToTypes(getSource(), typeMatcher, converter));
+      elements.add(new TypeConverterBinding(getSource(), typeMatcher, converter));
     }
 
     public Binder withSource(final Object source) {

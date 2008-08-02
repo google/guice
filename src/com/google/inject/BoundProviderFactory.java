@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.BindElementProcessor.CreationListener;
+import com.google.inject.BindingProcessor.CreationListener;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;

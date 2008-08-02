@@ -21,15 +21,19 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 /**
- * Immutable snapshot of a request for injection.
+ * A request to inject the instance fields and methods of an instance. Requests are created
+ * explicitly in a module using {@link com.google.inject.Binder#requestInjection(Object[])
+ * requestInjection()} statements:
+ * <pre>
+ *     requestInjection(serviceInstance);</pre>
  *
  * @author mikeward@google.com (Mike Ward)
  */
-public final class RequestInjection implements Element {
+public final class InjectionRequest implements Element {
   private Object source;
   private List<Object> instances;
 
-  public RequestInjection(Object source, Object[] instances) {
+  public InjectionRequest(Object source, Object[] instances) {
     this.source = checkNotNull(source, "source");
     this.instances = ImmutableList.of(instances);
   }
@@ -43,6 +47,6 @@ public final class RequestInjection implements Element {
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitRequestInjection(this);
+    return visitor.visitInjectionRequest(this);
   }
 }

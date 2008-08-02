@@ -37,7 +37,7 @@ import java.util.Set;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class BindElementProcessor extends ElementProcessor {
+class BindingProcessor extends AbstractProcessor {
 
   private static final com.google.inject.Binding.ScopingVisitor<LoadStrategy> LOAD_STRATEGY_VISITOR
       = new com.google.inject.Binding.ScopingVisitor<LoadStrategy>() {
@@ -65,7 +65,7 @@ class BindElementProcessor extends ElementProcessor {
   private final CreationTimeMemberInjector memberInjector;
   private final List<Runnable> untargettedBindings = Lists.newArrayList();
 
-  BindElementProcessor(Errors errors,
+  BindingProcessor(Errors errors,
       InjectorImpl injector,
       Map<Class<? extends Annotation>, Scope> scopes,
       Map<Key<?>, BindingImpl<?>> bindings,

@@ -23,7 +23,7 @@ import java.lang.annotation.Annotation;
 /**
  * Immutable snapshot of a request to bind a scope.
  *
- * @deprecated replaced with {@link com.google.inject.spi.BindScope}
+ * @deprecated replaced with {@link com.google.inject.spi.ScopeBinding}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

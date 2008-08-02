@@ -24,8 +24,15 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * A message. Contains a source pointing to the code which resulted
- * in this message and a text message.
+ * An error message and the context in which it occured. Messages are usually created internally by
+ * Guice and its extensions. Messages can be created explicitly in a module using {@link
+ * com.google.inject.Binder#addError(Throwable) addError()} statements:
+ * <pre>
+ *     try {
+ *       bindPropertiesFromFile();
+ *     } catch (IOException e) {
+ *       addError(e);
+ *     }</pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -56,9 +63,6 @@ public final class Message implements Serializable, Element {
     this(SourceProvider.UNKNOWN_SOURCE, message, ImmutableList.<InjectionPoint>of(), null);
   }
 
-  /**
-   * Returns a string representation of the source object. 
-   */
   public String getSource() {
     return source;
   }

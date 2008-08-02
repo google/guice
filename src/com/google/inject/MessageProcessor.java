@@ -27,11 +27,11 @@ import java.util.logging.Logger;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class ErrorsElementProcessor extends ElementProcessor {
+class MessageProcessor extends AbstractProcessor {
 
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
 
-  ErrorsElementProcessor(Errors errors) {
+  MessageProcessor(Errors errors) {
     super(errors);
   }
 

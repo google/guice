@@ -19,11 +19,28 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 
 /**
- * Immutable snapshot of a binding command.
+ * A core component of a module or injector.
+ *
+ * <p>The elements of a module can be inspected, validated and rewritten. Use {@link
+ * Elements#getElements(com.google.inject.Module[])} to read the elements from a module, and
+ * {@link com.google.inject.spi.ModuleWriter} to rewrite them. This can be used for static analysis
+ * and generation of Guice modules.
+ *
+ * <p>The elements of an injector can be inspected and exercised. Use {@link
+ * com.google.inject.Injector#getBindings} to reflect on Guice injectors.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Element {
+
+  /**
+   * Returns an arbitrary object containing information about the "place" where this element was
+   * configured. Used by Guice in the production of descriptive error messages.
+   *
+   * <p>Tools might specially handle types they know about; {@code StackTraceElement} is a good
+   * example. Tools should simply call {@code toString()} on the source object if the type is
+   * unfamiliar.
+   */
   Object getSource();
 
   /**
@@ -34,16 +51,52 @@ public interface Element {
   <T> T acceptVisitor(Visitor<T> visitor);
 
   /**
-   * Visit commands.
+   * Visit elements.
+   *
+   * @param <V> any type to be returned by the visit method. Use {@link Void} with
+   *     {@code return null} if no return type is needed.
    */
   public interface Visitor<V> {
-    V visitMessage(Message message);
-    V visitBindInterceptor(BindInterceptor bindInterceptor);
-    V visitBindScope(BindScope bindScope);
-    V visitRequestInjection(RequestInjection requestInjection);
-    V visitRequestStaticInjection(RequestStaticInjection requestStaticInjection);
-    V visitConvertToTypes(ConvertToTypes convertToTypes);
+
+    /**
+     * Visit a mapping from a key (type and optional annotation) to the strategy for getting
+     * instances of the type.
+     */
     <T> V visitBinding(Binding<T> binding);
-    <T> V visitGetProvider(GetProvider<T> getProvider);
+
+    /**
+     * Visit a registration of interceptors for matching methods of matching classes.
+     */
+    V visitInterceptorBinding(InterceptorBinding interceptorBinding);
+
+    /**
+     * Visit a registration of a scope annotation with the scope that implements it.
+     */
+    V visitScopeBinding(ScopeBinding scopeBinding);
+
+    /**
+     * Visit a registration of type converters for matching target types.
+     */
+    V visitTypeConverterBinding(TypeConverterBinding typeConverterBinding);
+
+    /**
+     * Visit a request to inject the instance fields and methods of an instance.
+     */
+    V visitInjectionRequest(InjectionRequest injectionRequest);
+
+    /**
+     * Visit a request to inject the static fields and methods of type.
+     */
+    V visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest);
+
+    /**
+     * Visit a lookup of the provider for a type.
+     */
+    <T> V visitProviderLookup(ProviderLookup<T> providerLookup);
+
+    /**
+     * Visit an error message and the context in which it occured.
+     */
+    V visitMessage(Message message);
   }
 }

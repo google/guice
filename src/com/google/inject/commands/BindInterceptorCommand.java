@@ -27,7 +27,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 /**
  * Immutable snapshot of a request to bind an interceptor.
  *
- * @deprecated replaced with {@link com.google.inject.spi.BindInterceptor}
+ * @deprecated replaced with {@link com.google.inject.spi.InterceptorBinding}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

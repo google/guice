@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.commands;
+package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.spi.TypeConverter;
 
 /**
- * Immutable snapshot of a request to convert binder types.
- *
- * @deprecated replaced with {@link com.google.inject.spi.TypeConverterBinding}
+ * Registration of type converters for matching target types. Instances are created
+ * explicitly in a module using {@link com.google.inject.Binder#convertToTypes(Matcher,
+ * TypeConverter) convertToTypes()} statements:
+ * <pre>
+ *     convertToTypes(Matchers.only(DateTime.class), new DateTimeConverter());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-@Deprecated
-public final class ConvertToTypesCommand implements Command {
+public final class TypeConverterBinding implements Element {
   private final Object source;
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;
 
-  ConvertToTypesCommand(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
+  TypeConverterBinding(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     this.source = checkNotNull(source, "source");
     this.typeMatcher = checkNotNull(typeMatcher, "typeMatcher");
@@ -54,6 +54,6 @@ public final class ConvertToTypesCommand implements Command {
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitConvertToTypes(this);
+    return visitor.visitTypeConverterBinding(this);
   }
 }

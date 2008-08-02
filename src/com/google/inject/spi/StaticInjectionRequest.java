@@ -16,40 +16,38 @@
 
 package com.google.inject.spi;
 
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matcher;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 /**
- * Immutable snapshot of a request to convert binder types.
+ * A request to inject the static fields and methods of type. Requests are created
+ * explicitly in a module using {@link com.google.inject.Binder#requestStaticInjection(Class[])
+ * requestStaticInjection()} statements:
+ * <pre>
+ *     requestStaticInjection(MyLegacyService.class);</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class ConvertToTypes implements Element {
+public final class StaticInjectionRequest implements Element {
   private final Object source;
-  private final Matcher<? super TypeLiteral<?>> typeMatcher;
-  private final TypeConverter typeConverter;
+  private final List<Class> types;
 
-  ConvertToTypes(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter typeConverter) {
+  StaticInjectionRequest(Object source, Class[] types) {
     this.source = checkNotNull(source, "source");
-    this.typeMatcher = checkNotNull(typeMatcher, "typeMatcher");
-    this.typeConverter = checkNotNull(typeConverter, "typeConverter");
+    this.types = ImmutableList.of(types);
   }
 
   public Object getSource() {
     return source;
   }
 
-  public Matcher<? super TypeLiteral<?>> getTypeMatcher() {
-    return typeMatcher;
-  }
-
-  public TypeConverter getTypeConverter() {
-    return typeConverter;
+  public List<Class> getTypes() {
+    return types;
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitConvertToTypes(this);
+    return visitor.visitStaticInjectionRequest(this);
   }
 }

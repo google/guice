@@ -52,8 +52,8 @@ class InjectorBuilder {
 
   private final List<Element> elements = Lists.newArrayList();
 
-  private BindElementProcessor bindCommandProcesor;
-  private RequestInjectionElementProcessor requestInjectionCommandProcessor;
+  private BindingProcessor bindCommandProcesor;
+  private InjectionRequestProcessor injectionCommandProcessor;
 
   /**
    * @param stage we're running in. If the stage is {@link Stage#PRODUCTION}, we will eagerly load
@@ -116,24 +116,24 @@ class InjectorBuilder {
 
   /** Builds the injector. */
   private void buildCoreInjector() {
-    new ErrorsElementProcessor(errors)
+    new MessageProcessor(errors)
         .processCommands(elements);
 
-    BindInterceptorElementProcessor bindInterceptorCommandProcessor
-        = new BindInterceptorElementProcessor(errors);
-    bindInterceptorCommandProcessor.processCommands(elements);
-    ConstructionProxyFactory proxyFactory = bindInterceptorCommandProcessor.createProxyFactory();
+    InterceptorBindingProcessor interceptorCommandProcessor
+        = new InterceptorBindingProcessor(errors);
+    interceptorCommandProcessor.processCommands(elements);
+    ConstructionProxyFactory proxyFactory = interceptorCommandProcessor.createProxyFactory();
     injector.reflection = reflectionFactory.create(proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
-    new ScopesElementProcessor(errors, injector.scopes).processCommands(elements);
+    new ScopeBindingProcessor(errors, injector.scopes).processCommands(elements);
     stopwatch.resetAndLog("Scopes creation");
 
-    new ConvertToTypesElementProcessor(errors, injector.converters).processCommands(elements);
+    new TypeConverterBindingProcessor(errors, injector.converters).processCommands(elements);
     stopwatch.resetAndLog("Converters creation");
 
     bindLogger();
-    bindCommandProcesor = new BindElementProcessor(errors,
+    bindCommandProcesor = new BindingProcessor(errors,
         injector, injector.scopes, injector.explicitBindings,
         injector.memberInjector);
     bindCommandProcesor.processCommands(elements);
@@ -143,9 +143,9 @@ class InjectorBuilder {
     injector.index();
     stopwatch.resetAndLog("Binding indexing");
 
-    requestInjectionCommandProcessor
-        = new RequestInjectionElementProcessor(errors, injector.memberInjector);
-    requestInjectionCommandProcessor.processCommands(elements);
+    injectionCommandProcessor
+        = new InjectionRequestProcessor(errors, injector.memberInjector);
+    injectionCommandProcessor.processCommands(elements);
     stopwatch.resetAndLog("Static injection");
   }
 
@@ -154,13 +154,13 @@ class InjectorBuilder {
     bindCommandProcesor.runCreationListeners(injector);
     stopwatch.resetAndLog("Validation");
 
-    requestInjectionCommandProcessor.validate(injector);
+    injectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
     injector.memberInjector.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
-    new GetProviderProcessor(errors, injector).processCommands(elements);
+    new ProviderLookupProcessor(errors, injector).processCommands(elements);
     stopwatch.resetAndLog("Provider verification");
 
     errors.throwCreationExceptionIfErrorsExist();
@@ -168,7 +168,7 @@ class InjectorBuilder {
 
   /** Inject everything that can be injected. */
   private void fulfillInjectionRequests() {
-    requestInjectionCommandProcessor.injectMembers(injector);
+    injectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 
     injector.memberInjector.injectAll(errors);

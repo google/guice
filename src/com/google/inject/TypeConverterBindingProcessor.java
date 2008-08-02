@@ -24,8 +24,8 @@ import com.google.inject.internal.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
-import com.google.inject.spi.ConvertToTypes;
 import com.google.inject.spi.TypeConverter;
+import com.google.inject.spi.TypeConverterBinding;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -37,11 +37,11 @@ import java.util.List;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class ConvertToTypesElementProcessor extends ElementProcessor {
+class TypeConverterBindingProcessor extends AbstractProcessor {
 
   private final List<MatcherAndConverter> converters;
 
-  ConvertToTypesElementProcessor(Errors errors, List<MatcherAndConverter> converters) {
+  TypeConverterBindingProcessor(Errors errors, List<MatcherAndConverter> converters) {
     super(errors);
     this.converters = converters;
 
@@ -165,7 +165,7 @@ class ConvertToTypesElementProcessor extends ElementProcessor {
     converters.add(new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
   }
 
-  @Override public Boolean visitConvertToTypes(ConvertToTypes command) {
+  @Override public Boolean visitTypeConverterBinding(TypeConverterBinding command) {
     converters.add(new MatcherAndConverter(
         command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;

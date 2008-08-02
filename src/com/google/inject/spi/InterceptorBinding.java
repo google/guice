@@ -25,17 +25,23 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Immutable snapshot of a request to bind an interceptor.
+ * Registration of interceptors for matching methods of matching classes. Instances are created
+ * explicitly in a module using {@link com.google.inject.Binder#bindInterceptor(
+ * Matcher, Matcher, MethodInterceptor[]) bindInterceptor()} statements:
+ * <pre>
+ *     bindInterceptor(Matchers.subclassesOf(MyAction.class),
+ *         Matchers.annotatedWith(Transactional.class),
+ *         new MyTransactionInterceptor());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class BindInterceptor implements Element {
+public final class InterceptorBinding implements Element {
   private final Object source;
   private final Matcher<? super Class<?>> classMatcher;
   private final Matcher<? super Method> methodMatcher;
   private final List<MethodInterceptor> interceptors;
 
-  BindInterceptor(
+  InterceptorBinding(
       Object source,
       Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
@@ -63,6 +69,6 @@ public final class BindInterceptor implements Element {
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitBindInterceptor(this);
+    return visitor.visitInterceptorBinding(this);
   }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Immutable snapshot of a request for static injection.
  * 
- * @deprecated replaced with {@link com.google.inject.spi.RequestStaticInjection}
+ * @deprecated replaced with {@link com.google.inject.spi.StaticInjectionRequest}
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */

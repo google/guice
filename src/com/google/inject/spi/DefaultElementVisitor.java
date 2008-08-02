@@ -23,9 +23,12 @@ import com.google.inject.Binding;
  * No-op visitor for subclassing. All interface methods simply delegate to
  * {@link #visitElement(Element)}, returning its result.
  *
+ * @param <V> any type to be returned by the visit method. Use {@link Void} with
+ *     {@code return null} if no return type is needed.
+ *
  * @author sberlin@gmail.com (Sam Berlin)
  */
-public class DefaultElementVisitor<V> implements Element.Visitor<V> {
+public abstract class DefaultElementVisitor<V> implements Element.Visitor<V> {
 
   protected DefaultElementVisitor() {}
 
@@ -44,27 +47,27 @@ public class DefaultElementVisitor<V> implements Element.Visitor<V> {
     return visitElement(command);
   }
 
-  public V visitBindInterceptor(BindInterceptor command) {
+  public V visitInterceptorBinding(InterceptorBinding command) {
     return visitElement(command);
   }
 
-  public V visitBindScope(BindScope command) {
+  public V visitScopeBinding(ScopeBinding command) {
     return visitElement(command);
   }
 
-  public V visitConvertToTypes(ConvertToTypes command) {
+  public V visitTypeConverterBinding(TypeConverterBinding command) {
     return visitElement(command);
   }
 
-  public <T> V visitGetProvider(GetProvider<T> command) {
+  public <T> V visitProviderLookup(ProviderLookup<T> command) {
     return visitElement(command);
   }
 
-  public V visitRequestInjection(RequestInjection command) {
+  public V visitInjectionRequest(InjectionRequest command) {
     return visitElement(command);
   }
 
-  public V visitRequestStaticInjection(RequestStaticInjection command) {
+  public V visitStaticInjectionRequest(StaticInjectionRequest command) {
     return visitElement(command);
   }
 }

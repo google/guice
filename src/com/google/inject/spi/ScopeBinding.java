@@ -21,16 +21,21 @@ import com.google.inject.Scope;
 import java.lang.annotation.Annotation;
 
 /**
- * Immutable snapshot of a request to bind a scope.
+ * Registration of a scope annotation with the scope that implements it. Instances are created
+ * explicitly in a module using {@link com.google.inject.Binder#bindScope(Class, Scope) bindScope()}
+ * statements:
+ * <pre>
+ *     Scope recordScope = new RecordScope();
+ *     bindScope(RecordScoped.class, new RecordScope());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class BindScope implements Element {
+public final class ScopeBinding implements Element {
   private final Object source;
   private final Class<? extends Annotation> annotationType;
   private final Scope scope;
 
-  BindScope(Object source, Class<? extends Annotation> annotationType, Scope scope) {
+  ScopeBinding(Object source, Class<? extends Annotation> annotationType, Scope scope) {
     this.source = checkNotNull(source, "source");
     this.annotationType = checkNotNull(annotationType, "annotationType");
     this.scope = checkNotNull(scope, "scope");
@@ -49,6 +54,6 @@ public final class BindScope implements Element {
   }
 
   public <T> T acceptVisitor(Visitor<T> visitor) {
-    return visitor.visitBindScope(this);
+    return visitor.visitScopeBinding(this);
   }
 }

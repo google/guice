@@ -31,7 +31,7 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Converts elements into a Module.
+ * Creates a Module from a collection of component elements.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -63,38 +63,38 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visitBindInterceptor(BindInterceptor command) {
-        writeBindInterceptor(binder, command);
+      public Void visitInterceptorBinding(InterceptorBinding element) {
+        writeBindInterceptor(binder, element);
         return null;
       }
 
-      public Void visitBindScope(BindScope command) {
-        writeBindScope(binder, command);
+      public Void visitScopeBinding(ScopeBinding element) {
+        writeBindScope(binder, element);
         return null;
       }
 
-      public Void visitRequestInjection(RequestInjection command) {
-        writeRequestInjection(binder, command);
+      public Void visitInjectionRequest(InjectionRequest element) {
+        writeRequestInjection(binder, element);
         return null;
       }
 
-      public Void visitRequestStaticInjection(RequestStaticInjection command) {
-        writeRequestStaticInjection(binder, command);
+      public Void visitStaticInjectionRequest(StaticInjectionRequest element) {
+        writeRequestStaticInjection(binder, element);
         return null;
       }
 
-      public Void visitConvertToTypes(ConvertToTypes command) {
-        writeConvertToTypes(binder, command);
+      public Void visitTypeConverterBinding(TypeConverterBinding element) {
+        writeConvertToTypes(binder, element);
         return null;
       }
 
-      public <T> Void visitBinding(Binding<T> command) {
-        writeBind(binder, command);
+      public <T> Void visitBinding(Binding<T> element) {
+        writeBind(binder, element);
         return null;
       }
 
-      public <T> Void visitGetProvider(GetProvider<T> command) {
-        writeGetProvider(binder, command);
+      public <T> Void visitProviderLookup(ProviderLookup<T> element) {
+        writeGetProvider(binder, element);
         return null;
       }
     };
@@ -104,46 +104,46 @@ public class ModuleWriter {
     }
   }
 
-  public void writeMessage(final Binder binder, final Message message) {
-    binder.addError(message);
+  public void writeMessage(final Binder binder, final Message element) {
+    binder.addError(element);
   }
 
-  public void writeBindInterceptor(final Binder binder, final BindInterceptor command) {
-    List<MethodInterceptor> interceptors = command.getInterceptors();
-    binder.withSource(command.getSource()).bindInterceptor(
-        command.getClassMatcher(), command.getMethodMatcher(),
+  public void writeBindInterceptor(final Binder binder, final InterceptorBinding element) {
+    List<MethodInterceptor> interceptors = element.getInterceptors();
+    binder.withSource(element.getSource()).bindInterceptor(
+        element.getClassMatcher(), element.getMethodMatcher(),
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
 
-  public void writeBindScope(final Binder binder, final BindScope command) {
-    binder.withSource(command.getSource()).bindScope(
-        command.getAnnotationType(), command.getScope());
+  public void writeBindScope(final Binder binder, final ScopeBinding element) {
+    binder.withSource(element.getSource()).bindScope(
+        element.getAnnotationType(), element.getScope());
   }
 
   public void writeRequestInjection(final Binder binder,
-      final RequestInjection command) {
+      final InjectionRequest command) {
     List<Object> objects = command.getInstances();
     binder.withSource(command.getSource())
         .requestInjection(objects.toArray());
   }
 
   public void writeRequestStaticInjection(final Binder binder,
-      final RequestStaticInjection command) {
-    List<Class> types = command.getTypes();
-    binder.withSource(command.getSource())
+      final StaticInjectionRequest element) {
+    List<Class> types = element.getTypes();
+    binder.withSource(element.getSource())
         .requestStaticInjection(types.toArray(new Class[types.size()]));
   }
 
-  public void writeConvertToTypes(final Binder binder, final ConvertToTypes command) {
-    binder.withSource(command.getSource())
-        .convertToTypes(command.getTypeMatcher(), command.getTypeConverter());
+  public void writeConvertToTypes(final Binder binder, final TypeConverterBinding element) {
+    binder.withSource(element.getSource())
+        .convertToTypes(element.getTypeMatcher(), element.getTypeConverter());
   }
 
-  public <T> void writeBind(final Binder binder, final Binding<T> binding) {
-    LinkedBindingBuilder<T> lbb = binder.withSource(binding.getSource()).bind(binding.getKey());
+  public <T> void writeBind(final Binder binder, final Binding<T> element) {
+    LinkedBindingBuilder<T> lbb = binder.withSource(element.getSource()).bind(element.getKey());
 
-    ScopedBindingBuilder sbb = applyTarget(binding, lbb);
-    applyScoping(binding, sbb);
+    ScopedBindingBuilder sbb = applyTarget(element, lbb);
+    applyScoping(element, sbb);
   }
 
   /**
@@ -211,8 +211,8 @@ public class ModuleWriter {
     });
   }
 
-  public <T> void writeGetProvider(final Binder binder, final GetProvider<T> command) {
-    Provider<T> provider = binder.withSource(command.getSource()).getProvider(command.getKey());
-    command.initDelegate(provider);
+  public <T> void writeGetProvider(final Binder binder, final ProviderLookup<T> element) {
+    Provider<T> provider = binder.withSource(element.getSource()).getProvider(element.getKey());
+    element.initDelegate(provider);
   }
 }

@@ -26,7 +26,7 @@ import com.google.inject.spi.InjectionPoint;
  * A placeholder which enables us to swap in the real factory once the
  * container is created.
  */
-class FactoryProxy<T> implements InternalFactory<T>, BindElementProcessor.CreationListener {
+class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationListener {
 
   private final Key<T> key;
   private final Key<? extends T> targetKey;
