@@ -18,8 +18,6 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Key;
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.ToStringBuilder;
 import java.io.Serializable;
@@ -67,22 +65,6 @@ public final class InjectionPoint<T> implements Serializable {
         .add("member", member)
         .add("key", key)
         .toString();
-  }
-
-  public <T> T checkForNull(Errors errors, T value, Object source) throws ErrorsException {
-    if (value != null
-        || allowsNull()
-        || allowNullsBadBadBad()) {
-      return value;
-    }
-
-    throw errors.cannotInjectNull(source, getMember(), parameterIndex).toException();
-  }
-
-  // TODO(kevinb): gee, ya think we might want to remove this?
-  private static boolean allowNullsBadBadBad() {
-    return "I'm a bad hack".equals(
-          System.getProperty("guice.allow.nulls.bad.bad.bad"));
   }
 
   public static <T> InjectionPoint<T> newInstance(

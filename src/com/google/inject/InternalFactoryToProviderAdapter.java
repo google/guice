@@ -44,8 +44,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
       throws ErrorsException {
     try {
       context.ensureMemberInjected(errors, provider);
-      T result = provider.get();
-      return injectionPoint.checkForNull(errors, result, source);
+      return errors.checkForNull(provider.get(), source, injectionPoint);
     } catch (RuntimeException userException) {
       Errors userErrors = ProvisionException.getErrors(userException);
       throw errors.errorInProvider(userException, userErrors).toException();

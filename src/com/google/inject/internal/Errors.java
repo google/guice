@@ -47,6 +47,10 @@ import java.util.List;
  */
 public final class Errors implements Serializable {
 
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static final boolean allowNullsBadBadBad
+      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+
   // TODO: Provide a policy on what the source line should be for a given member.
   //       Should we prefer the line where the binding was made?
   //       Should we prefer the member?
@@ -292,14 +296,6 @@ public final class Errors implements Serializable {
     return addMessage("null returned by binding at %s", source);
   }
 
-  public Errors cannotInjectNull(Object source, Member member, int parameterIndex) {
-    String parameterName = (parameterIndex != -1)
-        ? "parameter " + parameterIndex + " of "
-        : "";
-    return addMessage("null returned by binding at %s%n but %s%s is not @Nullable",
-        source, parameterName, member);
-  }
-
   public Errors cannotInjectRawProvider() {
     return addMessage("Cannot inject a Provider that has no type parameter");
   }
@@ -436,6 +432,28 @@ public final class Errors implements Serializable {
     }
 
     return fmt.format("%s error[s]", errorMessages.size()).toString();
+  }
+
+  /**
+   * Returns {@code value} if it is non-null allowed to be null. Otherwise a message is added and
+   * an {@code ErrorsException} is thrown.
+   */
+  public <T> T checkForNull(T value, Object source, InjectionPoint<?> injectionPoint) 
+      throws ErrorsException {
+    if (value != null
+        || injectionPoint.allowsNull()
+        || allowNullsBadBadBad) {
+      return value;
+    }
+
+    int parameterIndex = injectionPoint.getParameterIndex();
+    String parameterName = (parameterIndex != -1)
+        ? "parameter " + parameterIndex + " of "
+        : "";
+    addMessage("null returned by binding at %s%n but %s%s is not @Nullable",
+        source, parameterName, injectionPoint.getMember());
+
+    throw toException();
   }
 
   private static abstract class Converter<T> {

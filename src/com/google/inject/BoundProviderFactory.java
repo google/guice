@@ -49,7 +49,7 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
       throws ErrorsException {
     Provider<? extends T> provider = providerFactory.get(errors, context, injectionPoint);
     try {
-      return injectionPoint.checkForNull(errors, provider.get(), source);
+      return errors.checkForNull(provider.get(), source, injectionPoint);
     } catch(RuntimeException userException) {
       Errors userErrors = ProvisionException.getErrors(userException);
       throw errors.errorInProvider(userException, userErrors).toException();
