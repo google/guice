@@ -30,6 +30,7 @@ import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Member;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -101,8 +102,7 @@ class InjectorBuilder {
     // If we're in the tool stage, stop here. Don't eagerly inject or load
     // anything.
     if (stage == Stage.TOOL) {
-      // TODO: Wrap this and prevent usage of anything besides getBindings().
-      return injector;
+      return new ToolStageInjector(injector);
     }
 
     fulfillInjectionRequests();
@@ -278,4 +278,44 @@ class InjectorBuilder {
     }
   }
 
+  /** {@link Injector} exposed to users in {@link Stage#TOOL}. */
+  static class ToolStageInjector implements Injector {
+    private final Injector delegateInjector;
+    
+    ToolStageInjector(Injector delegateInjector) {
+      this.delegateInjector = delegateInjector;
+    }
+    public void injectMembers(Object o) {
+      throw new UnsupportedOperationException(
+        "Injector.injectMembers(Object) is not supported in Stage.TOOL");
+    }
+    public Map<Key<?>, Binding<?>> getBindings() {
+      return this.delegateInjector.getBindings();
+    }
+    public <T> Binding<T> getBinding(Key<T> key) {
+      return this.delegateInjector.getBinding(key);
+    }
+    public <T> Binding<T> getBinding(Class<T> type) {
+      return this.delegateInjector.getBinding(type);
+    }
+    public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
+      return this.delegateInjector.findBindingsByType(type);
+    }
+    public <T> Provider<T> getProvider(Key<T> key) {
+      throw new UnsupportedOperationException(
+        "Injector.getProvider(Key<T>) is not supported in Stage.TOOL");
+    }
+    public <T> Provider<T> getProvider(Class<T> type) {
+      throw new UnsupportedOperationException(
+        "Injector.getProvider(Class<T>) is not supported in Stage.TOOL");
+    }
+    public <T> T getInstance(Key<T> key) {
+      throw new UnsupportedOperationException(
+        "Injector.getInstance(Key<T>) is not supported in Stage.TOOL");
+    }
+    public <T> T getInstance(Class<T> type) {
+      throw new UnsupportedOperationException(
+        "Injector.getInstance(Class<T>) is not supported in Stage.TOOL");
+    }
+  }
 }

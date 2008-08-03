@@ -17,11 +17,10 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertNotSerializable;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -282,6 +281,39 @@ public class InjectorTest extends TestCase {
         bind(Runnable.class).to(MyRunnable.class);
       }
     });
+  }
+
+  public void testToolStageInjectorRestrictions() {
+    Injector injector = Guice.createInjector(Stage.TOOL);
+    try {
+      injector.injectMembers(new Object());
+      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
+    } catch (UnsupportedOperationException expected) {
+    }
+
+    try {
+      injector.getInstance(Injector.class);
+      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
+    } catch (UnsupportedOperationException expected) {
+    }
+
+    try {
+      injector.getInstance(Key.get(Injector.class));
+      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
+    } catch (UnsupportedOperationException expected) {
+    }
+
+    try {
+      injector.getProvider(Injector.class);
+      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
+    } catch (UnsupportedOperationException expected) {
+    }
+
+    try {
+      injector.getProvider(Key.get(Injector.class));
+      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
+    } catch (UnsupportedOperationException expected) {
+    }
   }
 
   static class MyRunnable implements Runnable {

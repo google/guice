@@ -27,7 +27,8 @@ public enum Stage {
    * We're running in a tool (an IDE plugin for example). We need binding
    * meta data but not a functioning Injector. Do not inject members of
    * instances. Do not load eager singletons. Do as little as possible so
-   * our tools run nice and snappy.
+   * our tools run nice and snappy. Injectors created in this stage cannot
+   * be used to satisfy injections.
    */
   TOOL,
 
