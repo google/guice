@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -57,6 +58,13 @@ public final class ProvisionException extends RuntimeException {
   public ProvisionException(String message) {
     super(message);
     this.errors = null;
+  }
+
+  /**
+   * Gets the error messages which resulted in this exception.
+   */
+  public Collection<Message> getErrorMessages() {
+    return errors.getMessages();
   }
 
   @Override public String getMessage() {

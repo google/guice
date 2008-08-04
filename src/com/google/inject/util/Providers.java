@@ -42,6 +42,10 @@ public final class Providers {
       public T get() {
         return instance;
       }
+
+      @Override public String toString() {
+        return "of(" + instance + ")";
+      }
     };
   }
 }

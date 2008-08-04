@@ -16,9 +16,8 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -28,7 +27,6 @@ import com.google.inject.spi.BindingTargetVisitor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -231,18 +229,6 @@ class BindingProcessor extends AbstractProcessor {
   }
 
   private <T> void validateKey(Object source, Key<T> key) {
-    if (key.hasAnnotationType()) {
-      Class<? extends Annotation> annotationType = key.getAnnotationType();
-
-      if (!Annotations.isRetainedAtRuntime(annotationType)) {
-        errors.withSource(StackTraceElements.forType(annotationType)).missingRuntimeRetention(source);
-      }
-
-      if (!Key.isBindingAnnotation(annotationType)) {
-        errors.withSource(StackTraceElements.forType(annotationType)).missingBindingAnnotation(source);
-      }
-    }
-
     Class<? super T> rawType = key.getRawType();
     if (!Classes.isConcrete(rawType)) {
       Class<? extends Annotation> scopeAnnotation = Scopes.findScopeAnnotation(errors, rawType);
@@ -286,28 +272,20 @@ class BindingProcessor extends AbstractProcessor {
     }
   }
 
-  private static Set<Class<?>> FORBIDDEN_TYPES = forbiddenTypes();
-
-  @SuppressWarnings("unchecked") // For generic array creation.
-  private static Set<Class<?>> forbiddenTypes() {
-    Set<Class<?>> set = Sets.newHashSet();
-
-    Collections.addAll(set,
-
-        // It's unfortunate that we have to maintain a blacklist of specific
-        // classes, but we can't easily block the whole package because of
-        // all our unit tests.
-
-        AbstractModule.class,
-        Binder.class,
-        Binding.class,
-        Key.class,
-        Module.class,
-        Provider.class,
-        Scope.class,
-        TypeLiteral.class);
-    return Collections.unmodifiableSet(set);
-  }
+  // It's unfortunate that we have to maintain a blacklist of specific
+  // classes, but we can't easily block the whole package because of
+  // all our unit tests.
+  private static final Set<Class<?>> FORBIDDEN_TYPES = ImmutableSet.of(
+      AbstractModule.class,
+      Binder.class,
+      Binding.class,
+      // Injector.class,
+      Key.class,
+      Module.class,
+      Provider.class, 
+      Scope.class,
+      TypeLiteral.class);
+  // TODO(jessewilson): fix BuiltInModule, then add Injector and Stage
 
   interface CreationListener {
     void notify(InjectorImpl injector, Errors errors);

@@ -16,9 +16,12 @@
 
 package com.google.inject;
 
+import com.google.common.collect.Iterables;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -275,6 +278,70 @@ public class BinderTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) Error at " + MissingParameter.class.getName() + ".<init>(BinderTest.java:",
           "Could not find a suitable constructor in " + NoInjectConstructor.class.getName());
+    }
+  }
+
+  public void testUserReportedError() {
+    final Message message = new Message(getClass(), "Whoops!");
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          addError(message);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertSame(message, Iterables.getOnlyElement(expected.getErrorMessages()));
+    }
+  }
+
+  public void testBindingToProvider() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(new TypeLiteral<Provider<String>>() {}).toInstance(Providers.of("A"));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + BinderTest.class.getName(), "configure(BinderTest.java:",
+          "Binding to Provider is not allowed.");
+    }
+  }
+
+  public void testCannotBindToGuiceTypes() {
+    final Named red = Names.named("red");
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(AbstractModule.class).annotatedWith(red)
+              .toProvider(Providers.<AbstractModule>of(null));
+          bind(Binder.class).annotatedWith(red).toProvider(Providers.<Binder>of(null));
+          bind(Binding.class).annotatedWith(red).toProvider(Providers.<Binding>of(null));
+          bind(Injector.class).annotatedWith(red).toProvider(Providers.<Injector>of(null));
+          bind(Key.class).annotatedWith(red).toProvider(Providers.<Key>of(null));
+          bind(Module.class).annotatedWith(red).toProvider(Providers.<Module>of(null));
+          bind(Provider.class).annotatedWith(red).toProvider(Providers.<Provider>of(null));
+          bind(Scope.class).annotatedWith(red).toProvider(Providers.<Scope>of(null));
+          bind(TypeLiteral.class).annotatedWith(red).toProvider(Providers.<TypeLiteral>of(null));
+          bind(new TypeLiteral<Key<String>>() {}).toProvider(Providers.<Key<String>>of(null));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Binding to core guice framework type is not allowed: AbstractModule.",
+          "Binding to core guice framework type is not allowed: Binder.",
+          "Binding to core guice framework type is not allowed: Binding.",
+          "Binding to core guice framework type is not allowed: Injector.",
+          "Binding to core guice framework type is not allowed: Key.",
+          "Binding to core guice framework type is not allowed: Module.",
+          "Binding to Provider is not allowed.",
+          "Binding to core guice framework type is not allowed: Scope.",
+          "Binding to core guice framework type is not allowed: TypeLiteral.",
+          "Binding to core guice framework type is not allowed: Key.");
     }
   }
 

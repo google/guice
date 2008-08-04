@@ -184,7 +184,7 @@ class InjectorBuilder {
     // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
     for (final BindingImpl<?> binding
         : Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
-      if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
+      if ((stage == Stage.PRODUCTION && binding.getScope() == SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         try {
           injector.callInContext(new ContextualCallable<Void>() {

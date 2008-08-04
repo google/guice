@@ -234,6 +234,21 @@ public class ScopesTest extends TestCase {
     assertTrue(listProvider.get() instanceof ArrayList);
   }
 
+  public void testScopeAnnotationWithoutRuntimeRetention() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bindScope(NotRuntimeRetainedScoped.class, Scopes.NO_SCOPE);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + NotRuntimeRetainedScoped.class.getName() + ".class(ScopesTest.java:",
+          "Please annotate with @Retention(RUNTIME).");
+    }
+  }
+
   class RememberProviderScope implements Scope {
     final Map<Key<?>, Provider<?>> providers = Maps.newHashMap();
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
@@ -246,6 +261,10 @@ public class ScopesTest extends TestCase {
   @Retention(RUNTIME)
   @ScopeAnnotation
   public @interface CustomScoped {}
+
+  @Target({ ElementType.TYPE, ElementType.METHOD })
+  @ScopeAnnotation
+  public @interface NotRuntimeRetainedScoped {}
 
   @Singleton
   static class AnnotatedSingleton {

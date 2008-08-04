@@ -126,12 +126,6 @@ public final class Errors implements Serializable {
     return addMessage("No implementation for %s was bound.", keyOrType);
   }
 
-  public Errors missingBindingButOthersExist(Key<?> key, List<String> otherNames) {
-    return addMessage(
-        "Binding to %s not found. Annotations on other bindings to that type include: %s", key,
-        otherNames);
-  }
-
   public Errors converterReturnedNull(String stringValue, Object source,
       TypeLiteral<?> type, MatcherAndConverter matchingConverter) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
@@ -183,11 +177,6 @@ public final class Errors implements Serializable {
 
   public Errors recursiveProviderType() {
     return addMessage("@ProvidedBy points to the same class it annotates.");
-  }
-
-  public Errors missingBindingAnnotation(Object source) {
-    return addMessage("Please annotate with @BindingAnnotation.%n"
-        + " Bound at %s.", source);
   }
 
   public Errors missingRuntimeRetention(Object source) {

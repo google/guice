@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.name.Named;
@@ -136,9 +137,32 @@ public class KeyTest extends TestCase {
     assertEqualsBothWays(keyWithInstance, keyWithLiteral);
   }
 
+  public void testNonBindingAnnotationOnKey() {
+    try {
+      Key.get(String.class, Deprecated.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(), "java.lang.Deprecated is not a binding annotation. ",
+          "Please annotate it with @BindingAnnotation.");
+    }
+  }
+
+  public void testBindingAnnotationWithoutRuntimeRetention() {
+    try {
+      Key.get(String.class, Bar.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(), Bar.class.getName() + " is not retained at runtime.",
+          "Please annotate it with @Retention(RUNTIME).");
+    }
+  }
+
   interface B {}
 
   @Retention(RUNTIME)
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @BindingAnnotation @interface Foo {}
+
+  @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+  @BindingAnnotation @interface Bar {}
 }

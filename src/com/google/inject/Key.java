@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Annotations;
-import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.internal.MoreTypes;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.inject.internal.Annotations;
+import com.google.inject.internal.MoreTypes;
+import com.google.inject.internal.ToStringBuilder;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -363,20 +363,16 @@ public class Key<T> implements Serializable {
 
   private static void ensureRetainedAtRuntime(
       Class<? extends Annotation> annotationType) {
-    if (!Annotations.isRetainedAtRuntime(annotationType)) {
-      throw new IllegalArgumentException(annotationType.getName()
-          + " is not retained at runtime."
-          + " Please annotate it with @Retention(RUNTIME).");
-    }
+    checkArgument(Annotations.isRetainedAtRuntime(annotationType),
+        "%s is not retained at runtime. Please annotate it with @Retention(RUNTIME).",
+        annotationType.getName());
   }
 
   private static void ensureIsBindingAnnotation(
       Class<? extends Annotation> annotationType) {
-    if (!isBindingAnnotation(annotationType)) {
-      throw new IllegalArgumentException(annotationType.getName()
-          + " is not a binding annotation."
-          + " Please annotate it with @BindingAnnotation.");
-    }
+    checkArgument(isBindingAnnotation(annotationType),
+        "%s is not a binding annotation. Please annotate it with @BindingAnnotation.",
+        annotationType.getName());
   }
 
   static enum NullAnnotationStrategy implements AnnotationStrategy {

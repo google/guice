@@ -532,7 +532,8 @@ class InjectorImpl implements Injector {
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, injectionPoint);
         Object o = provider.get();
         if (o != null && !type.isInstance(o)) {
-          throw errors.subtypeNotProvided(providerType, type).toException();
+          throw errors.withSource(StackTraceElements.forType(type))
+              .subtypeNotProvided(providerType, type).toException();
         }
 
         @SuppressWarnings("unchecked") // protected by isInstance() check above

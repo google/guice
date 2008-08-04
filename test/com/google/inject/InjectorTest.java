@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -316,7 +317,74 @@ public class InjectorTest extends TestCase {
     }
   }
 
+  public void testSubtypeNotProvided() {
+    try {
+      Guice.createInjector().getInstance(Money.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at ", Money.class.getName() + ".class(InjectorTest.java:",
+          Tree.class.getName() + " doesn't provide instances of " + Money.class.getName(),
+          "while locating com.google.inject.InjectorTest$Money");
+    }
+  }
+
+  public void testNotASubtype() {
+    try {
+      Guice.createInjector().getInstance(PineTree.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at ", PineTree.class.getName() + ".class(InjectorTest.java:",
+          Tree.class.getName() + " doesn't extend " + PineTree.class.getName());
+    }
+  }
+
+  public void testRecursiveImplementationType() {
+    try {
+      Guice.createInjector().getInstance(SeaHorse.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at ", SeaHorse.class.getName() + ".class(InjectorTest.java:",
+          "@ImplementedBy points to the same class it annotates.");
+    }
+  }
+
+  public void testRecursiveProviderType() {
+    try {
+      Guice.createInjector().getInstance(Chicken.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at ", Chicken.class.getName() + ".class(InjectorTest.java:",
+          "@ProvidedBy points to the same class it annotates");
+    }
+  }
+
   static class MyRunnable implements Runnable {
    public void run() {}
-  }  
+  }
+
+  @ProvidedBy(Tree.class)
+  static class Money {}
+
+  static class Tree implements Provider<Object> {
+    public Object get() {
+      return "Money doesn't grow on trees";
+    }
+  }
+
+  @ImplementedBy(Tree.class)
+  static class PineTree extends Tree {}
+
+  @ImplementedBy(SeaHorse.class)
+  static class SeaHorse {}
+
+  @ProvidedBy(Chicken.class)
+  static class Chicken implements Provider<Chicken> {
+    public Chicken get() {
+      return this;
+    }
+  }
 }
