@@ -65,4 +65,22 @@ public class CircularDependencyTest extends TestCase {
     }
   }
 
+  public void testUnresolvableCircularDependency() {
+    try {
+      Guice.createInjector().getInstance(C.class);
+      fail();
+    } catch (ProvisionException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "Tried proxying " + C.class.getName() + " to support a circular dependency, ",
+          "but it is not an interface.");
+    }
+  }
+
+  static class C {
+    @Inject C(D d) {}
+  }
+
+  static class D {
+    @Inject D(C c) {}
+  }
 }

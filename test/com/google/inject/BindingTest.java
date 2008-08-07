@@ -302,4 +302,21 @@ public class BindingTest extends TestCase {
           "Could not find a suitable constructor in " + PrivateNoArg.class.getName());
     }
   }
+
+  public void testTooManyConstructors() {
+    try {
+      Guice.createInjector().getInstance(TooManyConstructors.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Error at " + TooManyConstructors.class.getName() + ".class(BindingTest.java:",
+          TooManyConstructors.class.getName() + " has more than one constructor annotated with " 
+              + "@Inject. Classes must have either one (and only one) constructor");
+    }
+  }
+
+  static class TooManyConstructors {
+    @Inject TooManyConstructors(Injector i) {}
+    @Inject TooManyConstructors() {}
+  }
 }

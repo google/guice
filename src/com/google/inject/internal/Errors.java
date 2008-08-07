@@ -281,10 +281,6 @@ public final class Errors implements Serializable {
     }
   }
 
-  public Errors cannotInjectNull(Object source) {
-    return addMessage("null returned by binding at %s", source);
-  }
-
   public Errors cannotInjectRawProvider() {
     return addMessage("Cannot inject a Provider that has no type parameter");
   }
@@ -367,13 +363,6 @@ public final class Errors implements Serializable {
       arguments[i] = Errors.convert(arguments[i]);
     }
     return String.format(messageFormat, arguments);
-  }
-
-  /**
-   * Returns a mutable copy.
-   */
-  public Errors copy() {
-    return new Errors().merge(this);
   }
 
   public List<Message> getMessages() {

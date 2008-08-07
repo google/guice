@@ -249,6 +249,49 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  public void testBindScopeToAnnotationWithoutScopeAnnotation() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bindScope(Deprecated.class, Scopes.NO_SCOPE);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + Deprecated.class.getName() + ".class(",
+          "Please annotate with @ScopeAnnotation.");
+    }
+  }
+
+  public void testBindScopeTooManyTimes() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+          bindScope(CustomScoped.class, Scopes.SINGLETON);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + ScopesTest.class.getName(), ".configure(ScopesTest.java:",
+          "Scope Scopes.NO_SCOPE is already bound to " + CustomScoped.class.getName(), 
+          "Cannot bind Scopes.SINGLETON.\n\n" + "1 error[s]");
+    }
+  }
+
+  public void testDuplicateScopeAnnotations() {
+    try {
+      Guice.createInjector().getInstance(SingletonAndCustomScoped.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + SingletonAndCustomScoped.class.getName(), ".class(ScopesTest.java:",
+          "More than one scope annotation was found: ");
+    }
+  }
+
   class RememberProviderScope implements Scope {
     final Map<Key<?>, Provider<?>> providers = Maps.newHashMap();
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
@@ -304,4 +347,7 @@ public class ScopesTest extends TestCase {
     static int nextInstanceId;
     final int instanceId = nextInstanceId++;
   }
+
+  @Singleton @CustomScoped
+  static class SingletonAndCustomScoped {}
 }

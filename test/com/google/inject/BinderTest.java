@@ -133,6 +133,21 @@ public class BinderTest extends TestCase {
     }
   }
 
+  public void testRecursiveBinding() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override public void configure() {
+          bind(Runnable.class).to(Runnable.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error at " + getClass().getName(), ".configure(BinderTest.java:",
+          "Binding points to itself.");
+    }
+  }
+
   public void testToStringOnBinderApi() {
     try {
       Guice.createInjector(new AbstractModule() {
@@ -393,4 +408,15 @@ public class BinderTest extends TestCase {
 //  }
 
   enum Roshambo { ROCK, SCISSORS, PAPER }
+
+  public void testInjectRawProvider() {
+    try {
+      Guice.createInjector().getInstance(Provider.class);
+      fail();
+    } catch (ProvisionException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "1) Error at " + Provider.class.getName(),
+          "Cannot inject a Provider that has no type parameter");
+    }
+  }
 }
