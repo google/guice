@@ -442,15 +442,15 @@ class InjectorImpl implements Injector {
     // Handle @ImplementedBy
     ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
-      // TODO: Scope internal factory.
-      return createImplementedByBinding(type, implementedBy, loadStrategy, errors);
+      Scopes.checkForMisplacedScopeAnnotations(type, source, errors);
+      return createImplementedByBinding(type, scope, implementedBy, loadStrategy, errors);
     }
 
     // Handle @ProvidedBy.
     ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
-      // TODO: Scope internal factory.
-      return createProvidedByBinding(type, providedBy, loadStrategy, errors);
+      Scopes.checkForMisplacedScopeAnnotations(type, source, errors);
+      return createProvidedByBinding(type, scope, providedBy, loadStrategy, errors);
     }
 
     // We can't inject abstract classes.
@@ -509,8 +509,8 @@ class InjectorImpl implements Injector {
   }
 
   /** Creates a binding for a type annotated with @ProvidedBy. */
-  <T> BindingImpl<T> createProvidedByBinding(final Class<T> type, ProvidedBy providedBy,
-      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+  <T> BindingImpl<T> createProvidedByBinding(final Class<T> type, Scope scope,
+      ProvidedBy providedBy, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
@@ -542,19 +542,20 @@ class InjectorImpl implements Injector {
       }
     };
 
+    Key<T> key = Key.get(type);
     return new LinkedProviderBindingImpl<T>(
         this,
-        Key.get(type),
+        key,
         StackTraceElements.forType(type),
-        internalFactory,
-        Scopes.NO_SCOPE,
+        Scopes.<T>scope(key, this, internalFactory, scope),
+        scope,
         providerKey,
         loadStrategy);
   }
 
   /** Creates a binding for a type annotated with @ImplementedBy. */
-  <T> BindingImpl<T> createImplementedByBinding(
-      Class<T> type, ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
+  <T> BindingImpl<T> createImplementedByBinding(Class<T> type, Scope scope,
+      ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
       throws ErrorsException {
     // TODO: Use scope annotation on type if present. Right now, we always use NO_SCOPE.
     Class<?> implementationType = implementedBy.value();
@@ -583,12 +584,13 @@ class InjectorImpl implements Injector {
       }
     };
 
+    Key<T> key = Key.get(type);
     return new LinkedBindingImpl<T>(
         this,
-        Key.get(type),
+        key,
         StackTraceElements.forType(type),
-        internalFactory,
-        Scopes.NO_SCOPE,
+        Scopes.<T>scope(key, this, internalFactory, scope),
+        scope,
         Key.get(subclass),
         loadStrategy);
   }

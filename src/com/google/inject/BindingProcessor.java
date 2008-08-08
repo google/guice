@@ -18,10 +18,8 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import java.lang.annotation.Annotation;
@@ -229,14 +227,7 @@ class BindingProcessor extends AbstractProcessor {
   }
 
   private <T> void validateKey(Object source, Key<T> key) {
-    Class<? super T> rawType = key.getRawType();
-    if (!Classes.isConcrete(rawType)) {
-      Class<? extends Annotation> scopeAnnotation = Scopes.findScopeAnnotation(errors, rawType);
-      if (scopeAnnotation != null) {
-        errors.withSource(StackTraceElements.forType(rawType))
-            .scopeAnnotationOnAbstractType(scopeAnnotation, rawType, source);
-      }
-    }
+    Scopes.checkForMisplacedScopeAnnotations(key.getRawType(), source, errors);
   }
 
   <T> InvalidBindingImpl<T> invalidBinding(InjectorImpl injector, Key<T> key, Object source) {

@@ -41,6 +41,8 @@ public class ScopesTest extends TestCase {
       bind(LinkedSingleton.class).to(RealLinkedSingleton.class);
       bind(DependsOnJustInTimeSingleton.class);
       bind(NotASingleton.class);
+      bind(ImplementedBySingleton.class).in(Scopes.SINGLETON);
+      bind(ProvidedBySingleton.class).in(Scopes.SINGLETON);
     }
   };
 
@@ -51,6 +53,8 @@ public class ScopesTest extends TestCase {
     RealLinkedSingleton.nextInstanceId = 0;
     JustInTimeSingleton.nextInstanceId = 0;
     NotASingleton.nextInstanceId = 0;
+    Implementation.nextInstanceId = 0;
+    ProvidedBySingleton.nextInstanceId = 0;
   }
 
   public void testSingletons() {
@@ -79,6 +83,14 @@ public class ScopesTest extends TestCase {
     assertNotSame(
         injector.getInstance(NotASingleton.class),
         injector.getInstance(NotASingleton.class));
+
+    assertSame(
+        injector.getInstance(ImplementedBySingleton.class),
+        injector.getInstance(ImplementedBySingleton.class));
+
+    assertSame(
+        injector.getInstance(ProvidedBySingleton.class),
+        injector.getInstance(ProvidedBySingleton.class));
   }
 
   public void testJustInTimeAnnotatedSingleton() {
@@ -350,4 +362,24 @@ public class ScopesTest extends TestCase {
 
   @Singleton @CustomScoped
   static class SingletonAndCustomScoped {}
+
+  @ImplementedBy(Implementation.class)
+  static interface ImplementedBySingleton {}
+
+  @ProvidedBy(ImplementationProvider.class)
+  static class ProvidedBySingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  static class Implementation implements ImplementedBySingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+  }
+
+  static class ImplementationProvider implements Provider<ProvidedBySingleton> {
+    public ProvidedBySingleton get() {
+      return new ProvidedBySingleton();
+    }
+  }
 }

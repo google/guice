@@ -16,7 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 
 /**
@@ -121,6 +123,22 @@ public class Scopes {
 
   static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
     return annotationType.isAnnotationPresent(ScopeAnnotation.class);
+  }
+
+  /**
+   * Adds an error if there is a misplaced annotations on {@code type}. Scoping
+   * annotations are not allowed on abstract classes or interfaces.
+   */
+  static void checkForMisplacedScopeAnnotations(Class<?> type, Object source, Errors errors) {
+    if (Classes.isConcrete(type)) {
+      return;
+    }
+
+    Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, type);
+    if (scopeAnnotation != null) {
+      errors.withSource(StackTraceElements.forType(type))
+          .scopeAnnotationOnAbstractType(scopeAnnotation, type, source);
+    }
   }
 
   /**
