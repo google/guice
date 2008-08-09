@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -24,6 +25,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
+import java.util.List;
 import java.util.Set;
 import junit.framework.TestCase;
 
@@ -250,5 +252,36 @@ public class ProviderMethodsTest extends TestCase {
 
     Injector injector = Guice.createInjector(installsSelf);
     assertEquals("A5", injector.getInstance(String.class));
+  }
+  
+  public void testWildcardProviderMethods() {
+    final List<String> strings = ImmutableList.of("A", "B", "C");
+    final List<Number> numbers = ImmutableList.<Number>of(1, 2, 3);
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        install(ProviderMethods.from(this));
+        @SuppressWarnings("unchecked")
+        Key<List<? super Integer>> listOfSupertypesOfInteger = (Key<List<? super Integer>>)
+            Key.get(Types.listOf(Types.supertypeOf(Integer.class)));
+        bind(listOfSupertypesOfInteger).toInstance(numbers);
+      }
+      @Provides public List<? extends CharSequence> provideCharSequences() {
+        return strings;
+      }
+      @Provides public Class<?> provideType() {
+        return Float.class;
+      }
+    });
+
+    assertSame(strings, injector.getInstance(HasWildcardInjection.class).charSequences);
+    assertSame(numbers, injector.getInstance(HasWildcardInjection.class).numbers);
+    assertSame(Float.class, injector.getInstance(HasWildcardInjection.class).type);
+  }
+
+  static class HasWildcardInjection {
+    @Inject List<? extends CharSequence> charSequences;
+    @Inject List<? super Integer> numbers;
+    @Inject Class<?> type;
   }
 }

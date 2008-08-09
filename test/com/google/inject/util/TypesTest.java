@@ -18,11 +18,16 @@
 package com.google.inject.util;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.internal.MoreTypes;
+import static com.google.inject.util.Types.subtypeOf;
+import static com.google.inject.util.Types.supertypeOf;
+import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,8 +92,48 @@ public class TypesTest extends TestCase {
       fail();
     } catch (IllegalArgumentException expected) {
       assertContains(expected.getMessage(),
-          "Parameterized types may not have primitive arguments: int");
+          "Primitive types are not allowed in type parameters: int");
     }
+  }
+
+  public List<? extends CharSequence> wildcardExtends;
+  public List<? super CharSequence> wildcardSuper;
+  public List<?> wildcardObject;
+
+  public void testWildcardTypes() throws NoSuchFieldException, IOException {
+    assertEqualsBothWays(getWildcard("wildcardSuper"), supertypeOf(CharSequence.class));
+    assertEqualsBothWays(getWildcard("wildcardExtends"), subtypeOf(CharSequence.class));
+    assertEqualsBothWays(getWildcard("wildcardObject"), subtypeOf(Object.class));
+
+    assertEquals("? super java.lang.CharSequence", supertypeOf(CharSequence.class).toString());
+    assertEquals("? extends java.lang.CharSequence", subtypeOf(CharSequence.class).toString());
+    assertEquals("?", subtypeOf(Object.class).toString());
+
+    assertEqualWhenReserialized(supertypeOf(CharSequence.class));
+    assertEqualWhenReserialized(subtypeOf(CharSequence.class));
+  }
+  
+  public void testWildcardBoundsMustNotBePrimitives() {
+    try {
+      supertypeOf(int.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(),
+          "Primitive types are not allowed in wildcard bounds: int");
+    }
+
+    try {
+      subtypeOf(int.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertContains(expected.getMessage(),
+          "Primitive types are not allowed in wildcard bounds: int");
+    }
+  }
+
+  private WildcardType getWildcard(String fieldName) throws NoSuchFieldException {
+    ParameterizedType type = (ParameterizedType) getClass().getField(fieldName).getGenericType();
+    return (WildcardType) type.getActualTypeArguments()[0];
   }
 
   public void testEqualsAndHashcode() {

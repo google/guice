@@ -21,6 +21,7 @@ import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.util.Types;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -40,6 +41,7 @@ public class KeyTest extends TestCase {
   public void foo(List<String> a, List<String> b) {}
   public void bar(Provider<List<String>> a) {}
   @Foo String baz;
+  List<? extends CharSequence> wildcardExtends;
 
   public void testOfType() {
     Key<Object> k = Key.get(Object.class, Foo.class);
@@ -120,7 +122,7 @@ public class KeyTest extends TestCase {
     assertEquals(integerKey3, Key.get(intTypeLiteral, Names.named("int")));
   }
 
-  public void testSerialization() throws IOException {
+  public void testSerialization() throws IOException, NoSuchFieldException {
     assertEqualWhenReserialized(Key.get(B.class));
     assertEqualWhenReserialized(Key.get(B.class, Names.named("bee")));
     assertEqualWhenReserialized(Key.get(B.class, Named.class));
@@ -128,6 +130,7 @@ public class KeyTest extends TestCase {
     assertEqualWhenReserialized(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
     assertEqualWhenReserialized(Key.get(new TypeLiteral<List<B[]>>() {}));
     assertEqualWhenReserialized(new Key<List<B[]>>() {});
+    assertEqualWhenReserialized(Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
   }
 
   public void testEqualityOfAnnotationTypesAndInstances() throws NoSuchFieldException {

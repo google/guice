@@ -22,7 +22,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.TypeLiteral;
-import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -31,6 +30,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -41,6 +41,9 @@ import java.util.Map;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class MoreTypes {
+
+  public static final Type[] EMPTY_TYPE_ARRAY = new Type[] {};
+
   private MoreTypes() {}
 
   private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER
@@ -76,21 +79,26 @@ public class MoreTypes {
    */
   public static Type canonicalize(Type type) {
     if (type instanceof ParameterizedTypeImpl
-        || type instanceof GenericArrayTypeImpl) {
+        || type instanceof GenericArrayTypeImpl
+        || type instanceof WildcardTypeImpl) {
       return type;
 
     } else if (type instanceof ParameterizedType) {
       ParameterizedType p = (ParameterizedType) type;
-      return Types.newParameterizedTypeWithOwner(p.getOwnerType(),
+      return new ParameterizedTypeImpl(p.getOwnerType(),
           p.getRawType(), p.getActualTypeArguments());
 
     } else if (type instanceof GenericArrayType) {
       GenericArrayType g = (GenericArrayType) type;
-      return Types.arrayOf(g.getGenericComponentType());
+      return new GenericArrayTypeImpl(g.getGenericComponentType());
 
-    } else if (type instanceof Class<?> && ((Class<?>) type).isArray()) {
+    } else if (type instanceof Class && ((Class<?>) type).isArray()) {
       Class<?> c = (Class<?>) type;
-      return Types.arrayOf(c.getComponentType());
+      return new GenericArrayTypeImpl(c.getComponentType());
+
+    } else if (type instanceof WildcardType) {
+      WildcardType w = (WildcardType) type;
+      return new WildcardTypeImpl(w.getUpperBounds(), w.getLowerBounds());
 
     } else {
       // type is either serializable as-is or unsupported
@@ -121,9 +129,8 @@ public class MoreTypes {
       // Neal isn't either but suspects some pathological case related
       // to nested classes exists.
       Type rawType = parameterizedType.getRawType();
-      if (!(rawType instanceof Class<?>)) {
-        throw unexpectedType(rawType, Class.class);
-      }
+      checkArgument(rawType instanceof Class,
+          "Expected a Class, but <%s> is of type %s", type, type.getClass().getName());
       return (Class<?>) rawType;
 
     } else if (type instanceof GenericArrayType) {
@@ -131,16 +138,9 @@ public class MoreTypes {
       return Object[].class;
 
     } else {
-      // type is a parameterized type.
-      throw unexpectedType(type, ParameterizedType.class);
+      throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
+          + "GenericArrayType, but <" + type + "> is of type " + type.getClass().getName());
     }
-  }
-
-  private static AssertionError unexpectedType(Type type, Class<?> expected) {
-    return new AssertionError(
-        "Unexpected type. Expected: " + expected.getName()
-        + ", got: " + type.getClass().getName()
-        + ", for type literal: " + type.toString() + ".");
   }
 
   /**
@@ -160,6 +160,7 @@ public class MoreTypes {
         return false;
       }
 
+      // TODO(jessewilson): save a .clone() call
       ParameterizedType pa = (ParameterizedType) a;
       ParameterizedType pb = (ParameterizedType) b;
       return Objects.equal(pa.getOwnerType(), pb.getOwnerType())
@@ -174,6 +175,16 @@ public class MoreTypes {
       GenericArrayType ga = (GenericArrayType) a;
       GenericArrayType gb = (GenericArrayType) b;
       return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
+
+    } else if (a instanceof WildcardType) {
+      if (!(b instanceof WildcardType)) {
+        return false;
+      }
+
+      WildcardType wa = (WildcardType) a;
+      WildcardType wb = (WildcardType) b;
+      return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
+          && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
 
     } else {
       // This isn't a type we support. Could be a generic array type, wildcard
@@ -198,6 +209,10 @@ public class MoreTypes {
 
     } else if (type instanceof GenericArrayType) {
       return hashCode(((GenericArrayType) type).getGenericComponentType());
+
+    } else if (type instanceof WildcardType) {
+      WildcardType w = (WildcardType) type;
+      return Arrays.hashCode(w.getLowerBounds()) ^ Arrays.hashCode(w.getUpperBounds());
 
     } else {
       // This isn't a type we support. Could be a generic array type, wildcard type, etc.
@@ -231,6 +246,26 @@ public class MoreTypes {
 
     } else if (type instanceof GenericArrayType) {
       return toString(((GenericArrayType) type).getGenericComponentType()) + "[]";
+
+    } else if (type instanceof WildcardType) {
+      WildcardType wildcardType = (WildcardType) type;
+      Type[] lowerBounds = wildcardType.getLowerBounds();
+      Type[] upperBounds = wildcardType.getUpperBounds();
+
+      if (upperBounds.length != 1 || lowerBounds.length > 1) {
+        throw new UnsupportedOperationException("Unsupported wildcard type " + type);
+      }
+
+      if (lowerBounds.length == 1) {
+        if (upperBounds[0] != Object.class) {
+          throw new UnsupportedOperationException("Unsupported wildcard type " + type);
+        }
+        return "? super " + toString(lowerBounds[0]);
+      } else if (upperBounds[0] == Object.class) {
+        return "?";
+      } else {
+        return "? extends " + toString(upperBounds[0]);
+      }
 
     } else {
       return type.toString();
@@ -305,9 +340,8 @@ public class MoreTypes {
       this.rawType = canonicalize(rawType);
       this.typeArguments = typeArguments.clone();
       for (int t = 0; t < this.typeArguments.length; t++) {
-        checkArgument(!(this.typeArguments[t] instanceof Class<?>)
-            || !((Class) this.typeArguments[t]).isPrimitive(),
-            "Parameterized types may not have primitive arguments: %s", this.typeArguments[t]);
+        checkNotNull(this.typeArguments[t], "type parameter");
+        checkNotPrimitive(this.typeArguments[t], "type parameters");
         this.typeArguments[t] = canonicalize(this.typeArguments[t]);
       }
     }
@@ -365,6 +399,63 @@ public class MoreTypes {
     }
 
     private static final long serialVersionUID = 0;
+  }
+
+  /**
+   * The WildcardType interface supports multiple upper bounds and multiple
+   * lower bounds. We only support what the Java 6 language needs - at most one
+   * bound. If a lower bound is set, the upper bound must be Object.class.
+   */
+  public static class WildcardTypeImpl implements WildcardType, Serializable {
+    private final Type upperBound;
+    private final Type lowerBound;
+
+    public WildcardTypeImpl(Type[] upperBounds, Type[] lowerBounds) {
+      checkArgument(upperBounds.length <= 1, "Must have at most one lower bound.");
+      checkArgument(upperBounds.length == 1, "Must have exactly one upper bound.");
+
+      if (lowerBounds.length == 1) {
+        checkNotNull(lowerBounds[0], "lowerBound");
+        checkNotPrimitive(lowerBounds[0], "wildcard bounds");
+        checkArgument(upperBounds[0] == Object.class, "bounded both ways");
+        this.lowerBound = canonicalize(lowerBounds[0]);
+        this.upperBound = Object.class;
+
+      } else {
+        checkNotNull(upperBounds[0], "upperBound");
+        checkNotPrimitive(upperBounds[0], "wildcard bounds");
+        this.lowerBound = null;
+        this.upperBound = canonicalize(upperBounds[0]);
+      }
+    }
+
+    public Type[] getUpperBounds() {
+      return new Type[] { upperBound };
+    }
+
+    public Type[] getLowerBounds() {
+      return lowerBound != null ? new Type[] { lowerBound } : EMPTY_TYPE_ARRAY;
+    }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof WildcardType
+          && MoreTypes.equals(this, (WildcardType) other);
+    }
+
+    @Override public int hashCode() {
+      return MoreTypes.hashCode(this);
+    }
+
+    @Override public String toString() {
+      return MoreTypes.toString(this);
+    }
+
+    private static final long serialVersionUID = 0;
+  }
+
+  private static void checkNotPrimitive(Type type, String use) {
+    checkArgument(!(type instanceof Class<?>) || !((Class) type).isPrimitive(),
+        "Primitive types are not allowed in %s: %s", use, type);
   }
 
   /**

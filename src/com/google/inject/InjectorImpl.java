@@ -557,7 +557,6 @@ class InjectorImpl implements Injector {
   <T> BindingImpl<T> createImplementedByBinding(Class<T> type, Scope scope,
       ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
       throws ErrorsException {
-    // TODO: Use scope annotation on type if present. Right now, we always use NO_SCOPE.
     Class<?> implementationType = implementedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper cycles?

@@ -18,11 +18,14 @@
 package com.google.inject.util;
 
 import com.google.inject.Provider;
+import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.MoreTypes.GenericArrayTypeImpl;
 import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
+import com.google.inject.internal.MoreTypes.WildcardTypeImpl;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,13 +60,27 @@ public class Types {
   }
 
   /**
-   * Returns an array whose elements are all instances of
+   * Returns an array type whose elements are all instances of
    * {@code componentType}.
    *
    * @return a {@link java.io.Serializable serializable} generic array type.
    */
   public static GenericArrayType arrayOf(Type componentType) {
     return new GenericArrayTypeImpl(componentType);
+  }
+
+  /**
+   * Returns a type that represents an unknown type that extends {@code bound}.
+   */
+  public static WildcardType subtypeOf(Type bound) {
+    return new WildcardTypeImpl(new Type[] { bound }, MoreTypes.EMPTY_TYPE_ARRAY);
+  }
+
+  /**
+   * Returns a type that represents an unknown supertype of {@code bound}.
+   */
+  public static WildcardType supertypeOf(Type bound) {
+    return new WildcardTypeImpl(new Type[] { Object.class }, new Type[] { bound });
   }
 
   /**
