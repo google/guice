@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import junit.framework.TestCase;
 
 /**
@@ -78,6 +80,19 @@ public class ImplicitBindingTest extends TestCase {
   @ProvidedBy(ProvidedProvider.class)
   interface Provided {
     void go();
+  }
+
+  public void testNoImplicitBindingIsCreatedForAnnotatedKeys() {
+    try {
+      Guice.createInjector().getInstance(Key.get(I.class, Names.named("i")));
+      fail();
+    } catch (ProvisionException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "1) Error at " + I.class.getName() + ".class(ImplicitBindingTest.java:",
+          "No implementation for " + I.class.getName(),
+          "annotated with @" + Named.class.getName() + "(value=i) was bound.");
+    }
+
   }
 
   static class ProvidedProvider implements Provider<Provided> {
