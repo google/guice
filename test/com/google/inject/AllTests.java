@@ -58,6 +58,7 @@ public class AllTests {
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
     suite.addTestSuite(ModuleTest.class);
+    suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
     suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(OverrideModuleTest.class);

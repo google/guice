@@ -77,6 +77,20 @@ public class Modules {
   }
 
   /**
+   * Returns a new module that installs all of {@code modules}.
+   */
+  public static Module combine(Module... modules) {
+    final Set<Module> modulesSet = ImmutableSet.of(modules);
+    return new AbstractModule() {
+      public void configure() {
+        for (Module module : modulesSet) {
+          install(module);
+        }
+      }
+    };
+  }
+
+  /**
    * See the EDSL example at {@link Modules#override(Module[]) override()}.
    */
   public interface OverriddenModuleBuilder {
