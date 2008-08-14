@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.Key;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.ToStringBuilder;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -38,7 +39,7 @@ public final class InjectionPoint<T> implements Serializable {
 
   private InjectionPoint(Member member, int paramterIndex,
       boolean allowsNull, Key<T> key) {
-    this.member = member == null ? null : MoreTypes.canonicalize(member);
+    this.member = member;
     this.parameterIndex = paramterIndex;
     this.allowsNull = allowsNull;
     this.key = checkNotNull(key, "key");
@@ -60,11 +61,18 @@ public final class InjectionPoint<T> implements Serializable {
     return allowsNull;
   }
 
-  public String toString() {
-    return new ToStringBuilder(InjectionPoint.class)
-        .add("member", member)
+  @Override public String toString() {
+    ToStringBuilder builder = new ToStringBuilder(InjectionPoint.class)
         .add("key", key)
-        .toString();
+        .add("allowsNull", allowsNull);
+
+    if (member != null) {
+      builder.add("member", MoreTypes.toString(member));
+    }
+    if (parameterIndex != -1) {
+      builder.add("parameterIndex", parameterIndex);
+    }
+    return builder.toString();
   }
 
   public static <T> InjectionPoint<T> newInstance(
@@ -79,5 +87,10 @@ public final class InjectionPoint<T> implements Serializable {
   public static <T> InjectionPoint<T> newInstance(Member member, int parameterIndex,
       boolean allowsNull, Key<T> key) {
     return new InjectionPoint<T>(member, parameterIndex, allowsNull, key);
+  }
+
+  private Object writeReplace() throws ObjectStreamException {
+    Member serializableMember = member != null ? MoreTypes.serializableCopy(member) : null;
+    return new InjectionPoint<T>(serializableMember, parameterIndex, allowsNull, key);
   }
 }

@@ -467,7 +467,7 @@ public final class Errors implements Serializable {
       },
       new Converter<Member>(Member.class) {
         public String toString(Member member) {
-          return MoreTypes.canonicalize(member).toString();
+          return MoreTypes.toString(member);
         }
       },
       new Converter<Key>(Key.class) {

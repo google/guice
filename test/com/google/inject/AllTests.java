@@ -53,6 +53,7 @@ public class AllTests {
     suite.addTestSuite(ErrorMessagesTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
+    suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(InjectorTest.class);
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(KeyTest.class);

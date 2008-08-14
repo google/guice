@@ -55,8 +55,7 @@ public class ErrorMessagesTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "Error at " + B.class.getName() + ".injectMe(ErrorMessagesTest.java:",
-          "method " + B.class.getName() + ".injectMe() ",
-          "is annotated with @", Green.class.getName() + "(), ",
+          B.class.getName() + ".injectMe() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.");
     }
 
@@ -66,8 +65,7 @@ public class ErrorMessagesTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "Error at " + C.class.getName() + ".<init>(ErrorMessagesTest.java:",
-          "constructor " + C.class.getName() + "() ",
-          "is annotated with @", Green.class.getName() + "(), ",
+          C.class.getName() + ".<init>() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.");
     }
   }

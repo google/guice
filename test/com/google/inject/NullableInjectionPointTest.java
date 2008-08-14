@@ -16,7 +16,7 @@ public class NullableInjectionPointTest extends TestCase {
     catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "null returned by binding at " + getClass().getName(),
-          "parameter 0 of constructor " + FooConstructor.class.getName() + "() is not @Nullable");
+          "parameter 0 of " + FooConstructor.class.getName() + ".<init>() is not @Nullable");
     }
   }
 
@@ -28,7 +28,7 @@ public class NullableInjectionPointTest extends TestCase {
     catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "null returned by binding at " + getClass().getName(),
-          "parameter 0 of method " + FooMethod.class.getName() + ".setFoo() is not @Nullable");
+          "parameter 0 of " + FooMethod.class.getName() + ".setFoo() is not @Nullable");
     }
   }
 
@@ -40,7 +40,7 @@ public class NullableInjectionPointTest extends TestCase {
     catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "null returned by binding at " + getClass().getName(),
-          " but field " + FooField.class.getName() + ".foo is not @Nullable");
+          " but " + FooField.class.getName() + ".foo is not @Nullable");
     }
   }
 

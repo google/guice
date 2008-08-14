@@ -111,7 +111,7 @@ public class MoreTypes {
    * according to {@link Object#equals(Object) Object.equals}. The returned
    * member is {@link Serializable}.
    */
-  public static Member canonicalize(Member member) {
+  public static Member serializableCopy(Member member) {
     return member instanceof MemberImpl
         ? member
         : new MemberImpl(member);
@@ -293,6 +293,24 @@ public class MoreTypes {
     } else {
       throw new IllegalArgumentException(
           "Unsupported implementation class for Member, " + member.getClass());
+    }
+  }
+
+  /**
+   * Formats a member as concise string, such as {@code java.util.ArrayList.size},
+   * {@code java.util.ArrayList<init>()} or {@code java.util.List.remove()}.
+   */
+  public static String toString(Member member) {
+    Class<? extends Member> memberType = memberType(member);
+
+    if (memberType == Method.class) {
+      return member.getDeclaringClass().getName() + "." + member.getName() + "()";
+    } else if (memberType == Field.class) {
+      return member.getDeclaringClass().getName() + "." + member.getName();
+    } else if (memberType == Constructor.class) {
+      return member.getDeclaringClass().getName() + ".<init>()";
+    } else {
+      throw new AssertionError();
     }
   }
 
@@ -497,15 +515,7 @@ public class MoreTypes {
     }
 
     @Override public String toString() {
-      if (memberType == Method.class) {
-        return "method " + getDeclaringClass().getName() + "." + getName() + "()";
-      } else if (memberType == Field.class) {
-        return "field " + getDeclaringClass().getName() + "." + getName();
-      } else if (memberType == Constructor.class) {
-        return "constructor " + getDeclaringClass().getName() + "()";
-      } else {
-        throw new AssertionError();
-      }
+      return MoreTypes.toString(this);
     }
   }
 }
