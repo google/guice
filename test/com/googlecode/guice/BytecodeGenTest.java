@@ -22,6 +22,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import static com.google.inject.matcher.Matchers.any;
+import com.googlecode.guice.PackageVisilibityTestModule.PublicUserOfPackagePrivate;
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -51,6 +52,11 @@ public class BytecodeGenTest extends TestCase {
       });
     }
   };
+
+  public void testPackageVisibility() {
+    Injector injector = Guice.createInjector(new PackageVisilibityTestModule());
+    injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
+  }
 
   /**
    * Custom URL classloader with basic visibility rules
