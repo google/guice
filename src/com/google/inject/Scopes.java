@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.StackTraceElements;
 import java.lang.annotation.Annotation;
 
 /**
@@ -136,8 +135,7 @@ public class Scopes {
 
     Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, type);
     if (scopeAnnotation != null) {
-      errors.withSource(StackTraceElements.forType(type))
-          .scopeAnnotationOnAbstractType(scopeAnnotation, type, source);
+      errors.withSource(type).scopeAnnotationOnAbstractType(scopeAnnotation, type, source);
     }
   }
 

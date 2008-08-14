@@ -22,7 +22,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.Keys;
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.TypeResolver;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Modules;
@@ -70,7 +69,7 @@ public class ProviderMethods {
             continue;
           }
 
-          this.binder = binder.withSource(StackTraceElements.forMember(method));
+          this.binder = binder.withSource(method);
           try {
             bindProviderMethod(method);
           } finally {
@@ -81,7 +80,7 @@ public class ProviderMethods {
     }
 
     <T> void bindProviderMethod(final Method method) {
-      Errors errors = new Errors(StackTraceElements.forMember(method));
+      Errors errors = new Errors(method);
 
       method.setAccessible(true);
 

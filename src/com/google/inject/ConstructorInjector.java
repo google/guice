@@ -20,7 +20,6 @@ import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.StackTraceElements;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -52,8 +51,7 @@ class ConstructorInjector<T> {
       InjectorImpl injector, ConstructionProxy<T> constructionProxy)
       throws ErrorsException {
     Constructor constructor = constructionProxy.getConstructor();
-    Object source = StackTraceElements.forMember(constructor);
-    errors = errors.withSource(source);
+    errors = errors.withSource(constructor);
     return constructionProxy.getParameters().isEmpty()
         ? null // default constructor.
         : injector.getParametersInjectors(constructor,

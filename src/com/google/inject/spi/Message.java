@@ -44,7 +44,7 @@ public final class Message implements Serializable, Element {
 
   public Message(Object source, String message, List<InjectionPoint> injectionPoints,
       Throwable cause) {
-    this.source = Errors.convert(checkNotNull(source, "source")).toString();
+    this.source = Errors.sourceToString(source);
     this.message = checkNotNull(message, "message");
     this.injectionPoints = ImmutableList.copyOf(injectionPoints);
     this.cause = cause;

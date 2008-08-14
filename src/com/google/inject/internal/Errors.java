@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -488,5 +489,21 @@ public final class Errors implements Serializable {
       }
     }
     return o;
+  }
+
+  /**
+   * This method returns a String that indicates an element source. We do a
+   * best effort to include a line number in this String.
+   */
+  public static String sourceToString(Object source) {
+    checkNotNull(source, "source");
+
+    if (source instanceof Member) {
+      return StackTraceElements.forMember((Member) source).toString();
+    } else if (source instanceof Class) {
+      return StackTraceElements.forType(((Class<?>) source)).toString();
+    } else {
+      return convert(source).toString();
+    }
   }
 }

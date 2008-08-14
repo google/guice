@@ -30,7 +30,6 @@ import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Nullability;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
@@ -106,7 +105,7 @@ class InjectorImpl implements Injector {
 
   /** Returns the binding for {@code key} */
   public <T> BindingImpl<T> getBinding(Key<T> key) {
-    Errors errors = new Errors(StackTraceElements.forType(key.getRawType()));
+    Errors errors = new Errors(key.getRawType());
     try {
       BindingImpl<T> result = getBindingOrThrow(key, errors);
       ProvisionException.throwNewIfNonEmpty(errors);
@@ -418,9 +417,8 @@ class InjectorImpl implements Injector {
   <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope,
       LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     @SuppressWarnings("unchecked")
-    Class<T> type = (Class<T>) key.getTypeLiteral().getRawType();
-    Object source = StackTraceElements.forType(type);
-    return createUnitializedBinding(key, type, scope, source, loadStrategy, errors);
+    Class<T> type = (Class<T>) key.getRawType();
+    return createUnitializedBinding(key, type, scope, type, loadStrategy, errors);
   }
 
   /**
@@ -470,7 +468,7 @@ class InjectorImpl implements Injector {
       if (scopeAnnotation != null) {
         scope = scopes.get(scopeAnnotation);
         if (scope == null) {
-          errors.withSource(StackTraceElements.forType(type)).scopeNotFound(scopeAnnotation);
+          errors.withSource(type).scopeNotFound(scopeAnnotation);
         }
       }
     }
@@ -532,8 +530,7 @@ class InjectorImpl implements Injector {
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, injectionPoint);
         Object o = provider.get();
         if (o != null && !type.isInstance(o)) {
-          throw errors.withSource(StackTraceElements.forType(type))
-              .subtypeNotProvided(providerType, type).toException();
+          throw errors.withSource(type).subtypeNotProvided(providerType, type).toException();
         }
 
         @SuppressWarnings("unchecked") // protected by isInstance() check above
@@ -546,7 +543,7 @@ class InjectorImpl implements Injector {
     return new LinkedProviderBindingImpl<T>(
         this,
         key,
-        StackTraceElements.forType(type),
+        type,
         Scopes.<T>scope(key, this, internalFactory, scope),
         scope,
         providerKey,
@@ -587,7 +584,7 @@ class InjectorImpl implements Injector {
     return new LinkedBindingImpl<T>(
         this,
         key,
-        StackTraceElements.forType(type),
+        type,
         Scopes.<T>scope(key, this, internalFactory, scope),
         scope,
         Key.get(subclass),
@@ -722,10 +719,9 @@ class InjectorImpl implements Injector {
         continue;
       }
 
-      Object source = StackTraceElements.forMember(member);
       Errors errorsForMember = inject.optional()
-          ? new Errors(source)
-          : errors.withSource(source);
+          ? new Errors(member)
+          : errors.withSource(member);
       try {
         injectors.add(injectorFactory.create(this, member, errorsForMember));
       } catch (ErrorsException ignoredForNow) {
@@ -780,8 +776,7 @@ class InjectorImpl implements Injector {
 
       final Key<?> key = Keys.get(field.getGenericType(), field, field.getAnnotations(), errors);
 
-      Object source = StackTraceElements.forMember(field);
-      factory = injector.getInternalFactory(key, errors.withSource(source));
+      factory = injector.getInternalFactory(key, errors.withSource(field));
 
       injectionPoint = InjectionPoint.newInstance(
           field, Nullability.allowsNull(field.getAnnotations()), key);
@@ -843,8 +838,7 @@ class InjectorImpl implements Injector {
   <T> SingleParameterInjector<T> createParameterInjector(final Parameter<T> parameter,
       Member member, final Errors errors) throws ErrorsException {
     InternalFactory<? extends T> factory;
-    Object source = StackTraceElements.forMember(member);
-    factory = getInternalFactory(parameter.getKey(), errors.withSource(source));
+    factory = getInternalFactory(parameter.getKey(), errors.withSource(member));
 
     InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(
         member, parameter.getIndex(), parameter.allowsNull(), parameter.getKey());
@@ -1051,7 +1045,7 @@ class InjectorImpl implements Injector {
   }
 
   public <T> Provider<T> getProvider(final Key<T> key) {
-    Errors errors = new Errors(StackTraceElements.forType(key.getRawType()));
+    Errors errors = new Errors(key.getRawType());
     try {
       Provider<T> result = getProviderOrThrow(key, errors);
       errors.throwIfNecessary();

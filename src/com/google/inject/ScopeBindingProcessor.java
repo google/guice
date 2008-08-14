@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.StackTraceElements;
 import com.google.inject.spi.ScopeBinding;
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -45,12 +44,12 @@ class ScopeBindingProcessor extends AbstractProcessor {
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 
     if (!Scopes.isScopeAnnotation(annotationType)) {
-      errors.withSource(StackTraceElements.forType(annotationType)).missingScopeAnnotation();
+      errors.withSource(annotationType).missingScopeAnnotation();
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
-      errors.withSource(StackTraceElements.forType(annotationType))
+      errors.withSource(annotationType)
           .missingRuntimeRetention(command.getSource());
       // Go ahead and bind anyway so we don't get collateral errors.
     }
