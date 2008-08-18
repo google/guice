@@ -38,6 +38,14 @@ public class CreationException extends RuntimeException {
    */
   public CreationException(Collection<? extends Message> errorMessages) {
     this.errorMessages = ImmutableList.copyOf(errorMessages);
+
+    // find a cause
+    for (Message message : errorMessages) {
+      if (message.getCause() != null) {
+        initCause(message.getCause());
+        break;
+      }
+    }
   }
 
   /**
