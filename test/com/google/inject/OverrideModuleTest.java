@@ -20,6 +20,10 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
 import com.google.inject.util.Modules;
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 import java.util.Date;
 import junit.framework.TestCase;
 
@@ -57,13 +61,13 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideConstant() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindConstant().annotatedWith(named("Test")).to("A");
       }
     };
 
     Module replacements = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindConstant().annotatedWith(named("Test")).to("B");
       }
     };
@@ -74,7 +78,7 @@ public class OverrideModuleTest extends TestCase {
 
   public void testGetProviderInModule() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("A");
         bind(key2).toProvider(getProvider(String.class));
       }
@@ -87,7 +91,7 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideWhatGetProviderProvided() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("A");
         bind(key2).toProvider(getProvider(String.class));
       }
@@ -102,14 +106,14 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideUsingOriginalsGetProvider() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("A");
         bind(key2).toInstance("B");
       }
     };
 
     Module replacements = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toProvider(getProvider(key2));
       }
     };
@@ -121,7 +125,7 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideOfOverride() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("A1");
         bind(key2).toInstance("A2");
         bind(key3).toInstance("A3");
@@ -129,7 +133,7 @@ public class OverrideModuleTest extends TestCase {
     };
 
     Module replacements1 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("B1");
         bind(key2).toInstance("B2");
       }
@@ -138,7 +142,7 @@ public class OverrideModuleTest extends TestCase {
     Module overrides = Modules.override(original).with(replacements1);
 
     Module replacements2 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("C1");
         bind(key3).toInstance("C3");
       }
@@ -154,7 +158,7 @@ public class OverrideModuleTest extends TestCase {
     Module original = newModule("A");
 
     Module replacements = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("B");
         bind(String.class).toInstance("C");
       }
@@ -173,14 +177,14 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverridesDoesntFixTwiceBoundInOriginal() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("A");
         bind(String.class).toInstance("B");
       }
     };
 
     Module replacements = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).toInstance("C");
       }
     };
@@ -198,13 +202,13 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideUntargettedBinding() {
     Module original = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Date.class);
       }
     };
 
     Module replacements = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Date.class).toInstance(new Date(0));
       }
     };
@@ -213,9 +217,83 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(0, injector.getInstance(Date.class).getTime());
   }
 
+  public void testOverrideScopeAnnotation() {
+    final Scope scope = new Scope() {
+      public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+        throw new AssertionError("Should not be called");
+      }
+    };
+
+    final SingleUseScope replacementScope = new SingleUseScope();
+
+    Module original = new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(TestScopeAnnotation.class, scope);
+        bind(Date.class).in(TestScopeAnnotation.class);
+      }
+    };
+
+    Module replacements = new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(TestScopeAnnotation.class, replacementScope);
+      }
+    };
+
+    Injector injector = createInjector(Modules.override(original).with(replacements));
+    injector.getInstance(Date.class);
+    assertTrue(replacementScope.used);
+  }
+
+  public void testFailsIfOverridenScopeInstanceHasBeenUsed() {
+    final Scope scope = new Scope() {
+      public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+        return unscoped;
+      }
+
+      @Override public String toString() {
+        return "ORIGINAL SCOPE";
+      }
+    };
+
+    Module original = new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(TestScopeAnnotation.class, scope);
+        bind(Date.class).in(scope);
+      }
+    };
+
+    Module replacements = new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(TestScopeAnnotation.class, new SingleUseScope());
+      }
+    };
+
+    try {
+      createInjector(Modules.override(original).with(replacements));
+      fail("Exception expected");
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), "Error at ", getClass().getName(), ".configure(",
+          "The scope for @TestScopeAnnotation is bound directly and cannot be overridden.");
+    }
+  }
+
+  @Retention(RUNTIME)
+  @Target(TYPE)
+  @ScopeAnnotation
+  private static @interface TestScopeAnnotation {}
+
+  private static class SingleUseScope implements Scope {
+    boolean used = false;
+    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+      assertFalse(used);
+      used = true;
+      return unscoped;
+    }
+  }
+
   private static <T> Module newModule(final T bound) {
     return new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) bound.getClass();
         bind(type).toInstance(bound);
