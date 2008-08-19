@@ -16,9 +16,8 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import java.lang.reflect.Constructor;
+import com.google.inject.Scope;
+import java.lang.annotation.Annotation;
 
 /**
  * No-op visitor for subclassing. All interface methods simply delegate to
@@ -26,44 +25,28 @@ import java.lang.reflect.Constructor;
  *
  * @param <V> any type to be returned by the visit method. Use {@link Void} with
  *     {@code return null} if no return type is needed.
- *
+ * 
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTargetVisitor<T, V> {
+public class DefaultBindingScopingVisitor<V> implements BindingScopingVisitor<V> {
 
   protected V visitOther() {
     return null;
   }
 
-  public V visitInstance(T instance) {
+  public V visitEagerSingleton() {
     return visitOther();
   }
 
-  public V visitProvider(Provider<? extends T> provider) {
+  public V visitScope(Scope scope) {
     return visitOther();
   }
 
-  public V visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+  public V visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
     return visitOther();
   }
 
-  public V visitKey(Key<? extends T> key) {
-    return visitOther();
-  }
-
-  public V visitUntargetted() {
-    return visitOther();
-  }
-
-  public V visitConstructor(Constructor<? extends T> constructor) {
-    return visitOther();
-  }
-
-  public V visitConvertedConstant(T value) {
-    return visitOther();
-  }
-
-  public V visitProviderBinding(Key<?> provided) {
+  public V visitNoScoping() {
     return visitOther();
   }
 }

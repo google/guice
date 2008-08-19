@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
@@ -29,8 +28,6 @@ import com.google.inject.Binding;
  * @author sberlin@gmail.com (Sam Berlin)
  */
 public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
-
-  protected DefaultElementVisitor() {}
 
   /**
    * Visit {@code element} and return a result.
