@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.oldversion.BindingVisitor;
 
 class InvalidBindingImpl<T> extends BindingImpl<T> {
 
@@ -29,10 +28,6 @@ class InvalidBindingImpl<T> extends BindingImpl<T> {
         throw new AssertionError();
       }
     }, Scopes.NO_SCOPE, LoadStrategy.LAZY);
-  }
-
-  public void accept(BindingVisitor<? super T> bindingVisitor) {
-    throw new AssertionError();
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> vVisitor) {

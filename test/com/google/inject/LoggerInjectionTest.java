@@ -2,7 +2,6 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.name.Names;
-import com.google.inject.spi.oldversion.ProviderInstanceBinding;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
@@ -26,8 +25,6 @@ public class LoggerInjectionTest extends TestCase {
     assertNull(injector.getInstance(Logger.class).getName());
     assertNull(injector.getProvider(Logger.class).get().getName());
     assertNull(injector.getBinding(Logger.class).getProvider().get().getName());
-    assertNull(((ProviderInstanceBinding<Logger>) injector.getBinding(Logger.class))
-        .getProviderInstance().get().getName());
     assertEquals("Provider<Logger>", injector.getProvider(Logger.class).toString());
   }
 

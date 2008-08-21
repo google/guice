@@ -21,13 +21,10 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.oldversion.BindingVisitor;
-import com.google.inject.spi.oldversion.InstanceBinding;
 import com.google.inject.util.Providers;
 import java.util.Collection;
 
-class InstanceBindingImpl<T> extends BindingImpl<T>
-    implements InstanceBinding<T> {
+class InstanceBindingImpl<T> extends BindingImpl<T> {
 
   final T instance;
   final Provider<T> provider;
@@ -41,10 +38,6 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
 
   @Override public Provider<T> getProvider() {
     return this.provider;
-  }
-
-  public void accept(BindingVisitor<? super T> bindingVisitor) {
-    bindingVisitor.visit(this);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -67,7 +60,7 @@ class InstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(InstanceBinding.class)
+    return new ToStringBuilder(Binding.class)
         .add("key", key)
         .add("instance", instance)
         .add("source", source)

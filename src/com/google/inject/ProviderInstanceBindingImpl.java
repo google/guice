@@ -20,15 +20,12 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.oldversion.BindingVisitor;
-import com.google.inject.spi.oldversion.ProviderInstanceBinding;
 import java.util.Collection;
 
 /**
  *
  */
-class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
-    implements ProviderInstanceBinding<T> {
+class ProviderInstanceBindingImpl<T> extends BindingImpl<T> {
 
   final Provider<? extends T> providerInstance;
 
@@ -39,10 +36,6 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
       LoadStrategy loadStrategy) {
     super(injector, key, source, internalFactory, scope, loadStrategy);
     this.providerInstance = providerInstance;
-  }
-
-  public void accept(BindingVisitor<? super T> bindingVisitor) {
-    bindingVisitor.visit(this);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -66,7 +59,7 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
 
   @Override
   public String toString() {
-    return new ToStringBuilder(ProviderInstanceBinding.class)
+    return new ToStringBuilder(Binding.class)
         .add("key", key)
         .add("provider", providerInstance)
         .add("scope", scope)

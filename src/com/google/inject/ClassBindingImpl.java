@@ -22,16 +22,13 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.oldversion.BindingVisitor;
-import com.google.inject.spi.oldversion.ClassBinding;
 import java.util.Collection;
 
 /**
  *
  *
  */
-class ClassBindingImpl<T> extends BindingImpl<T>
-    implements ClassBinding<T> {
+class ClassBindingImpl<T> extends BindingImpl<T> {
 
   private final InjectorImpl.LateBoundConstructor<T> lateBoundConstructor;
 
@@ -45,10 +42,6 @@ class ClassBindingImpl<T> extends BindingImpl<T>
 
   @Override void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     lateBoundConstructor.bind(injector, getBoundClass(), errors);
-  }
-
-  public void accept(BindingVisitor<? super T> visitor) {
-    visitor.visit(this);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -85,7 +78,7 @@ class ClassBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(ClassBinding.class)
+    return new ToStringBuilder(Binding.class)
         .add("class", getBoundClass())
         .add("scope", scope)
         .add("source", source)

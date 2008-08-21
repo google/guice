@@ -33,10 +33,6 @@ import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.oldversion.BindingVisitor;
-import com.google.inject.spi.oldversion.ConvertedConstantBinding;
-import com.google.inject.spi.oldversion.OldVersionBinding;
-import com.google.inject.spi.oldversion.ProviderBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -151,12 +147,12 @@ class InjectorImpl implements Injector {
   private <T> BindingImpl<T> getParentBinding(Key<T> key) {
     synchronized (parentBindings) {
       // null values will mean that the parent doesn't have this binding
-      OldVersionBinding<T> binding = (OldVersionBinding<T>) parentBindings.get(key);
+      BindingImpl<T> binding = (BindingImpl<T>) parentBindings.get(key);
       if (binding != null) {
         return (BindingImpl<T>) binding;
       }
       try {
-        binding = (OldVersionBinding) parentInjector.getBinding(key);
+        binding = (BindingImpl) parentInjector.getBinding(key);
       }
       catch (ProvisionException e) {
         // if this happens, the parent can't create this key, and we ignore it
@@ -237,10 +233,9 @@ class InjectorImpl implements Injector {
     return new ProviderBindingImpl<T>(this, key, delegate, loadStrategy);
   }
 
-  static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
-      implements ProviderBinding<T> {
+  static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>> {
 
-    final OldVersionBinding<T> providedBinding;
+    final BindingImpl<T> providedBinding;
 
     ProviderBindingImpl(
         InjectorImpl injector,
@@ -254,7 +249,7 @@ class InjectorImpl implements Injector {
           createInternalFactory(providedBinding),
           Scopes.NO_SCOPE,
           loadStrategy);
-      this.providedBinding = (OldVersionBinding<T>) providedBinding;
+      this.providedBinding = (BindingImpl<T>) providedBinding;
     }
 
     static <T> InternalFactory<Provider<T>> createInternalFactory(Binding<T> providedBinding) {
@@ -267,15 +262,11 @@ class InjectorImpl implements Injector {
       };
     }
 
-    public void accept(BindingVisitor<? super Provider<T>> bindingVisitor) {
-      bindingVisitor.visit(this);
-    }
-
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
       return visitor.visitProviderBinding(providedBinding.getKey());
     }
 
-    public OldVersionBinding<T> getTargetBinding() {
+    public BindingImpl<T> getTargetBinding() {
       return providedBinding;
     }
   }
@@ -341,8 +332,7 @@ class InjectorImpl implements Injector {
     }
   }
 
-  private static class ConvertedConstantBindingImpl<T> extends BindingImpl<T>
-      implements ConvertedConstantBinding<T> {
+  private static class ConvertedConstantBindingImpl<T> extends BindingImpl<T> {
     final T value;
     final Provider<T> provider;
     final Binding<String> originalBinding;
@@ -360,10 +350,6 @@ class InjectorImpl implements Injector {
       return provider;
     }
 
-    public void accept(BindingVisitor<? super T> bindingVisitor) {
-      bindingVisitor.visit(this);
-    }
-
     public T getValue() {
       return value;
     }
@@ -372,12 +358,12 @@ class InjectorImpl implements Injector {
       return visitor.visitConvertedConstant(value);
     }
 
-    public OldVersionBinding<String> getOriginal() {
-      return (OldVersionBinding) originalBinding;
+    public BindingImpl<String> getOriginal() {
+      return (BindingImpl<String>) originalBinding;
     }
 
     @Override public String toString() {
-      return new ToStringBuilder(ConvertedConstantBinding.class)
+      return new ToStringBuilder(Binding.class)
           .add("key", key)
           .add("value", value)
           .add("original", originalBinding)

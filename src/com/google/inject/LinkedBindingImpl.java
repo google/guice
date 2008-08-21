@@ -18,16 +18,12 @@ package com.google.inject;
 
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.oldversion.BindingVisitor;
-import com.google.inject.spi.oldversion.LinkedBinding;
-import com.google.inject.spi.oldversion.OldVersionBinding;
 
 /**
  *
  *
  */
-class LinkedBindingImpl<T> extends BindingImpl<T>
-    implements LinkedBinding<T> {
+class LinkedBindingImpl<T> extends BindingImpl<T> {
 
   final Key<? extends T> targetKey;
 
@@ -39,20 +35,12 @@ class LinkedBindingImpl<T> extends BindingImpl<T>
     this.targetKey = targetKey;
   }
 
-  public void accept(BindingVisitor<? super T> bindingVisitor) {
-    bindingVisitor.visit(this);
-  }
-
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitKey(targetKey);
   }
 
-  public OldVersionBinding<? extends T> getTargetBinding() {
-    return injector.getBinding(targetKey);
-  }
-
   @Override public String toString() {
-    return new ToStringBuilder(LinkedBinding.class)
+    return new ToStringBuilder(Binding.class)
         .add("key", key)
         .add("target", targetKey)
         .add("scope", scope)

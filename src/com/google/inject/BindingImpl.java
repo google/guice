@@ -21,13 +21,11 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ElementVisitor;
-import com.google.inject.spi.oldversion.OldVersionBinding;
-import com.google.inject.spi.oldversion.ProviderBinding;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-abstract class BindingImpl<T> implements OldVersionBinding<T> {
+abstract class BindingImpl<T> implements Binding<T> {
 
   final InjectorImpl injector;
   final Key<T> key;
@@ -61,13 +59,6 @@ abstract class BindingImpl<T> implements OldVersionBinding<T> {
       provider = injector.getProvider(key);
     }
     return provider;
-  }
-
-  @SuppressWarnings("unchecked")
-  public ProviderBinding<T> getProviderBinding() {
-    // ProviderBinding is the only type of binding that can be generated for
-    // a Provider<T>.
-    return (ProviderBinding<T>) injector.getBinding(key.providerKey());
   }
 
   InternalFactory<? extends T> getInternalFactory() {
