@@ -49,8 +49,9 @@ import java.util.List;
 public final class Errors implements Serializable {
 
   // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad
-      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  }
 
   // TODO: Provide a policy on what the source line should be for a given member.
   //       Should we prefer the line where the binding was made?
@@ -421,7 +422,7 @@ public final class Errors implements Serializable {
       throws ErrorsException {
     if (value != null
         || injectionPoint.allowsNull()
-        || allowNullsBadBadBad) {
+        || allowNullsBadBadBad()) {
       return value;
     }
 

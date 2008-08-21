@@ -88,4 +88,10 @@ public interface Binding<T> extends Element {
    */
   <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor);
 
+  /**
+   * @deprecated use BindingScopingVisitor instead. This method doesn't work
+   *     for Module Bindings.
+   */
+  @Deprecated
+  Scope getScope();
 }

@@ -106,6 +106,10 @@ public final class ModuleBinding<T> implements Binding<T> {
     return key;
   }
 
+  public Scope getScope() {
+    throw new UnsupportedOperationException();
+  }
+
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return target.acceptTargetVisitor(visitor);
   }
