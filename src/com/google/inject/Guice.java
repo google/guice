@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.util.Modules;
 import java.util.Arrays;
 
 /**
@@ -134,14 +133,5 @@ public final class Guice {
         .parentInjector(parent)
         .addModules(modules)
         .build();
-  }
-
-  /**
-   * @deprecated replaced with a two-step EDSL via {@link Modules#override(Module[])}. Inline calls
-   *     to this method.
-   */
-  @Deprecated
-  public static Module overrideModule(Module module, Module overridesModule) {
-    return Modules.override(module).with(overridesModule);
   }
 }

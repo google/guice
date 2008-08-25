@@ -20,7 +20,7 @@ import com.google.inject.Scope;
 import java.lang.annotation.Annotation;
 import junit.framework.AssertionFailedError;
 
-class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
+public class FailingBindingScopingVisitor implements BindingScopingVisitor<Void> {
 
   public Void visitEagerSingleton() {
     throw new AssertionFailedError();

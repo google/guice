@@ -42,6 +42,7 @@ public class AllTests {
     TestSuite suite = new TestSuite();
 
     suite.addTestSuite(BinderTest.class);
+    suite.addTest(BinderTestSuite.suite());
     suite.addTestSuite(BindingAnnotationTest.class);
     suite.addTestSuite(BindingOrderTest.class);
     suite.addTestSuite(BindingTest.class);
