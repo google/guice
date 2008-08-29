@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.Dependency;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -115,10 +116,9 @@ class CodeGenReflectionFactory implements Reflection.Factory {
       out.writeImport(Reflection.class);
       out.writeImport(ConstructionProxy.class);
       out.writeImport(InvocationTargetException.class);
-      out.writeImport(Parameter.class);
+      out.writeImport(Dependency.class);
       out.writeImport(List.class);
       out.writeImport(Member.class);
-      out.writeImport(Parameter.class);
       out.writeImport(Arrays.class);
       out.writeImport(SuppressWarnings.class);
       out.writeImport(Key.class);
@@ -126,8 +126,8 @@ class CodeGenReflectionFactory implements Reflection.Factory {
       out.writeImport(Object.class);
       for (Map.Entry<Class<?>, ConstructionProxy<?>> entry : constructionProxies.entrySet()) {
         out.writeImport(entry.getKey());
-        for (Parameter<?> parameter : entry.getValue().getParameters()) {
-          out.writeImport(parameter.getKey().getTypeLiteral().getType());
+        for (Dependency<?> dependency : entry.getValue().getInjectionPoint().getDependencies()) {
+          out.writeImport(dependency.getKey().getTypeLiteral().getType());
         }
       }
 
@@ -165,8 +165,9 @@ class CodeGenReflectionFactory implements Reflection.Factory {
         out.openScope("public %s newInstance(final %s... arguments) throws %s {", implementation, Object.class, InvocationTargetException.class)
             .openScope("return new %s(", implementation);
         int argument = 0;
-        for (Iterator<Parameter<?>> i = entry.getValue().getParameters().iterator(); i.hasNext(); ) {
-          Parameter<?> parameter = i.next();
+        for (Iterator<Dependency<?>> i
+            = entry.getValue().getInjectionPoint().getDependencies().iterator(); i.hasNext(); ) {
+          Dependency<?> parameter = i.next();
           String separator = i.hasNext() ? "," : "";
           out.writeLine("(%s) arguments[%d]%s", parameter.getKey().getTypeLiteral().getType(), argument, separator);
           argument++;
@@ -175,13 +176,14 @@ class CodeGenReflectionFactory implements Reflection.Factory {
             .closeScope("}");
 
         // getParameters
-        out.openScope("public %s<%s<?>> getParameters() {", List.class, Parameter.class)
-            .openScope("return %s.<%s<?>>asList(", Arrays.class, Parameter.class);
+        out.openScope("public %s<%s<?>> getParameters() {", List.class, Dependency.class)
+            .openScope("return %s.<%s<?>>asList(", Arrays.class, Dependency.class);
         argument = 0;
-        for (Iterator<Parameter<?>> i = entry.getValue().getParameters().iterator(); i.hasNext(); ) {
-          Parameter<?> parameter = i.next();
+        for (Iterator<Dependency<?>> i
+            = entry.getValue().getInjectionPoint().getDependencies().iterator(); i.hasNext(); ) {
+          Dependency<?> parameter = i.next();
           String separator = i.hasNext() ? "," : "";
-          out.writeLine("%s.create(%s, %s, %s)%s", Parameter.class, argument, keyLiteral(parameter.getKey()), parameter.allowsNull(), separator);
+          out.writeLine("%s.create(%s, %s, %s)%s", Dependency.class, argument, keyLiteral(parameter.getKey()), parameter.isNullable(), separator);
           argument++;
         }
         out.closeScope(");")

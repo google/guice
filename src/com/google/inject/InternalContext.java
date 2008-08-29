@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +32,7 @@ class InternalContext {
 
   private final InjectorImpl injector;
   private Map<Object, ConstructionContext<?>> constructionContexts;
-  private InjectionPoint injectionPoint;
+  private Dependency dependency;
 
   public InternalContext(InjectorImpl injector) {
     this.injector = injector;
@@ -61,12 +61,12 @@ class InternalContext {
     }
   }
 
-  public InjectionPoint getInjectionPoint() {
-    return injectionPoint;
+  public Dependency getDependency() {
+    return dependency;
   }
 
-  public void setInjectionPoint(InjectionPoint injectionPoint) {
-    this.injectionPoint = injectionPoint;
+  public void setDependency(Dependency dependency) {
+    this.dependency = dependency;
   }
 
   /**

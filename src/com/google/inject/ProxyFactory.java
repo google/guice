@@ -24,6 +24,7 @@ import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ReferenceCache;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -177,19 +178,16 @@ class ProxyFactory implements ConstructionProxyFactory {
     FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
-    final List<Parameter<?>> parameters = Parameter.forConstructor(standardConstructor, errors);
+    final InjectionPoint injectionPoint = InjectionPoint.get(standardConstructor, errors);
 
     return new ConstructionProxy<T>() {
       @SuppressWarnings("unchecked")
-      public T newInstance(Object... arguments)
-          throws InvocationTargetException {
+      public T newInstance(Object... arguments) throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
       }
-
-      public List<Parameter<?>> getParameters() {
-        return parameters;
+      public InjectionPoint getInjectionPoint() {
+        return injectionPoint;
       }
-
       public Constructor<T> getConstructor() {
         return standardConstructor;
       }

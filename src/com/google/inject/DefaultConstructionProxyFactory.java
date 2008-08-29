@@ -20,10 +20,10 @@ import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 
@@ -38,7 +38,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
   public <T> ConstructionProxy<T> get(Errors errors, final Constructor<T> constructor)
       throws ErrorsException {
-    final List<Parameter<?>> parameters = Parameter.forConstructor(constructor, errors);
+    final InjectionPoint injectionPoint = InjectionPoint.get(constructor, errors);
 
     // We can't use FastConstructor if the constructor is non-public.
     if (!Modifier.isPublic(constructor.getModifiers())) {
@@ -56,8 +56,8 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
             throw new AssertionError(e);
           }
         }
-        public List<Parameter<?>> getParameters() {
-          return parameters;
+        public InjectionPoint getInjectionPoint() {
+          return injectionPoint;
         }
         public Constructor<T> getConstructor() {
           return constructor;
@@ -74,8 +74,8 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       public T newInstance(Object... arguments) throws InvocationTargetException {
         return (T) fastConstructor.newInstance(arguments);
       }
-      public List<Parameter<?>> getParameters() {
-        return parameters;
+      public InjectionPoint getInjectionPoint() {
+        return injectionPoint;
       }
       public Constructor<T> getConstructor() {
         return constructor;

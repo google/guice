@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 
 /**
  * Creates objects which will be injected.
@@ -34,6 +34,6 @@ interface InternalFactory<T> {
    * @throws com.google.inject.internal.ErrorsException if a value cannot be provided
    * @return instance to be injected
    */
-  T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+  T get(Errors errors, InternalContext context, Dependency<?> dependency)
       throws ErrorsException;
 }

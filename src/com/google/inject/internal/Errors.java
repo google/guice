@@ -26,6 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import java.io.Serializable;
@@ -69,7 +70,7 @@ public final class Errors implements Serializable {
   /** false indicates that new errors should not be added */
   private boolean isMutable = true;
   private final List<Message> errors;
-  private final List<InjectionPoint> injectionPoints;
+  private final List<Dependency> dependencies;
 
   public Errors() {
     this(SourceProvider.UNKNOWN_SOURCE);
@@ -79,27 +80,27 @@ public final class Errors implements Serializable {
     this.source = source;
     isMutable = true;
     errors = Lists.newArrayList();
-    injectionPoints = Lists.newArrayList();
+    dependencies = Lists.newArrayList();
   }
 
   public Errors(Errors parent, Object source) {
     this.source = source;
     isMutable = parent.isMutable;
     errors = parent.errors;
-    injectionPoints = Lists.newArrayList(parent.injectionPoints);
+    dependencies = Lists.newArrayList(parent.dependencies);
   }
 
   public Errors userReportedError(String messageFormat, List<Object> arguments) {
     return addMessage(messageFormat, arguments);
   }
 
-  public void pushInjectionPoint(InjectionPoint<?> injectionPoint) {
-    injectionPoints.add(injectionPoint);
+  public void pushInjectionPoint(Dependency<?> dependency) {
+    dependencies.add(dependency);
   }
 
-  public void popInjectionPoint(InjectionPoint<?> injectionPoint) {
-    InjectionPoint popped = injectionPoints.remove(injectionPoints.size() - 1);
-    checkArgument(injectionPoint == popped);
+  public void popInjectionPoint(Dependency<?> dependency) {
+    Dependency popped = dependencies.remove(dependencies.size() - 1);
+    checkArgument(dependency == popped);
   }
 
   /**
@@ -311,13 +312,13 @@ public final class Errors implements Serializable {
 
     if (moreErrors.errors != this.errors) {
       for (Message message : moreErrors.errors) {
-        List<InjectionPoint> injectionPoints = Lists.newArrayList();
-        injectionPoints.addAll(this.injectionPoints);
-        injectionPoints.addAll(message.getInjectionPoints());
+        List<Dependency> dependencies = Lists.newArrayList();
+        dependencies.addAll(this.dependencies);
+        dependencies.addAll(message.getDependencies());
         Object source = message.getSource() != SourceProvider.UNKNOWN_SOURCE
             ? message.getSource()
             : this.source;
-        errors.add(new Message(source, message.getMessage(), injectionPoints, message.getCause()));
+        errors.add(new Message(source, message.getMessage(), dependencies, message.getCause()));
       }
     }
 
@@ -346,7 +347,7 @@ public final class Errors implements Serializable {
 
   private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
     String message = format(messageFormat, arguments);
-    addMessage(new Message(source, message, ImmutableList.copyOf(injectionPoints), cause));
+    addMessage(new Message(source, message, ImmutableList.copyOf(dependencies), cause));
     return this;
   }
 
@@ -385,25 +386,26 @@ public final class Errors implements Serializable {
       fmt.format("%s) Error at %s:%n", index++, errorMessage.getSource())
          .format(" %s%n", errorMessage.getMessage());
 
-      List<InjectionPoint> injectionPoints = errorMessage.getInjectionPoints();
-      for (int i = injectionPoints.size() - 1; i >= 0; i--) {
-        InjectionPoint injectionPoint = injectionPoints.get(i);
+      List<Dependency> dependencies = errorMessage.getDependencies();
+      for (int i = dependencies.size() - 1; i >= 0; i--) {
+        Dependency dependency = dependencies.get(i);
 
-        Key key = injectionPoint.getKey();
+        Key key = dependency.getKey();
         fmt.format("  while locating %s%n", convert(key));
 
-        Member member = injectionPoint.getMember();
-        if (member == null) {
+        InjectionPoint injectionPoint = dependency.getInjectionPoint();
+        if (injectionPoint == null) {
           continue;
         }
 
+        Member member = injectionPoint.getMember();
         Class<? extends Member> memberType = MoreTypes.memberType(member);
         if (memberType == Field.class) {
           fmt.format("    for field at %s%n", StackTraceElements.forMember(member));
 
         } else if (memberType == Method.class || memberType == Constructor.class) {
           fmt.format("    for parameter %s at %s%n",
-              injectionPoint.getParameterIndex(), StackTraceElements.forMember(member));
+              dependency.getParameterIndex(), StackTraceElements.forMember(member));
         }
       }
 
@@ -417,20 +419,20 @@ public final class Errors implements Serializable {
    * Returns {@code value} if it is non-null allowed to be null. Otherwise a message is added and
    * an {@code ErrorsException} is thrown.
    */
-  public <T> T checkForNull(T value, Object source, InjectionPoint<?> injectionPoint) 
+  public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
       throws ErrorsException {
     if (value != null
-        || injectionPoint.allowsNull()
+        || dependency.isNullable()
         || allowNullsBadBadBad) {
       return value;
     }
 
-    int parameterIndex = injectionPoint.getParameterIndex();
+    int parameterIndex = dependency.getParameterIndex();
     String parameterName = (parameterIndex != -1)
         ? "parameter " + parameterIndex + " of "
         : "";
     addMessage("null returned by binding at %s%n but %s%s is not @Nullable",
-        source, parameterName, injectionPoint.getMember());
+        source, parameterName, dependency.getInjectionPoint().getMember());
 
     throw toException();
   }

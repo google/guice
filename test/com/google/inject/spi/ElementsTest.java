@@ -72,7 +72,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visitMessage(Message command) {
             assertEquals("Message A 5 C", command.getMessage());
             assertNull(command.getCause());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -93,7 +93,7 @@ public class ElementsTest extends TestCase {
             assertEquals("A", command.getCause().getMessage());
             assertEquals(command.getMessage(),
                 "An exception was caught and reported. Message: A");
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -119,7 +119,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visitMessage(Message command) {
             assertEquals("Throwing RuntimeException in AbstractModule.configure().",
                 command.getCause().getMessage());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             return null;
           }
         },
@@ -683,7 +683,7 @@ public class ElementsTest extends TestCase {
             assertEquals("More than one annotation is specified for this binding.",
                 command.getMessage());
             assertNull(command.getCause());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -711,7 +711,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visitMessage(Message command) {
             assertEquals("Implementation is set more than once.", command.getMessage());
             assertNull(command.getCause());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -739,7 +739,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visitMessage(Message command) {
             assertEquals("Scope is set more than once.", command.getMessage());
             assertNull(command.getCause());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -768,7 +768,7 @@ public class ElementsTest extends TestCase {
             assertEquals("More than one annotation is specified for this binding.",
                 command.getMessage());
             assertNull(command.getCause());
-            assertTrue(command.getInjectionPoints().isEmpty());
+            assertTrue(command.getDependencies().isEmpty());
             Asserts.assertContains(command.getSource(), "ElementsTest.java");
             return null;
           }
@@ -796,7 +796,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visitMessage(Message message) {
             assertEquals("Constant value is set more than once.", message.getMessage());
             assertNull(message.getCause());
-            assertTrue(message.getInjectionPoints().isEmpty());
+            assertTrue(message.getDependencies().isEmpty());
             Asserts.assertContains(message.getSource(), "ElementsTest.java");
             return null;
           }

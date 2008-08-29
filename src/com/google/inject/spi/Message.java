@@ -39,28 +39,28 @@ import java.util.List;
 public final class Message implements Serializable, Element {
   private final String source;
   private final String message;
-  private final List<InjectionPoint> injectionPoints;
+  private final List<Dependency> dependencies;
   private final Throwable cause;
 
-  public Message(Object source, String message, List<InjectionPoint> injectionPoints,
+  public Message(Object source, String message, List<Dependency> dependencies,
       Throwable cause) {
     this.source = Errors.sourceToString(source);
     this.message = checkNotNull(message, "message");
-    this.injectionPoints = ImmutableList.copyOf(injectionPoints);
+    this.dependencies = ImmutableList.copyOf(dependencies);
     this.cause = cause;
   }
 
   public Message(Object source, Throwable throwable) {
     this(source, "An exception was caught and reported. Message: " + throwable.getMessage(),
-        ImmutableList.<InjectionPoint>of(), throwable);
+        ImmutableList.<Dependency>of(), throwable);
   }
 
   public Message(Object source, String message) {
-    this(source, message, ImmutableList.<InjectionPoint>of(), null);
+    this(source, message, ImmutableList.<Dependency>of(), null);
   }
 
   public Message(String message) {
-    this(SourceProvider.UNKNOWN_SOURCE, message, ImmutableList.<InjectionPoint>of(), null);
+    this(SourceProvider.UNKNOWN_SOURCE, message, ImmutableList.<Dependency>of(), null);
   }
 
   public String getSource() {
@@ -74,8 +74,8 @@ public final class Message implements Serializable, Element {
     return message;
   }
 
-  public List<InjectionPoint> getInjectionPoints() {
-    return injectionPoints;
+  public List<Dependency> getDependencies() {
+    return dependencies;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {

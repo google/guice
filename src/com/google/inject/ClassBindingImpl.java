@@ -16,19 +16,21 @@
 
 package com.google.inject;
 
-import com.google.inject.InjectorImpl.SingleParameterInjector;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.HasInjections;
 import com.google.inject.spi.InjectionPoint;
-import java.util.Collection;
+import java.util.Set;
 
 /**
  *
  *
  */
-class ClassBindingImpl<T> extends BindingImpl<T> {
+class ClassBindingImpl<T> extends BindingImpl<T> implements HasInjections {
 
   private final InjectorImpl.LateBoundConstructor<T> lateBoundConstructor;
 
@@ -54,27 +56,24 @@ class ClassBindingImpl<T> extends BindingImpl<T> {
     return (Class<T>) key.getRawType();
   }
 
-  public Collection<InjectionPoint<?>> getInjectionPoints() {
+  public Set<InjectionPoint> getInjectionPoints() {
     if (lateBoundConstructor == null) {
       throw new AssertionError();
     }
 
+    Set<InjectionPoint> injectionPoints = Sets.newLinkedHashSet();
+
     Class<T> boundClass = getBoundClass();
-    Collection<InjectionPoint<?>> injectors;
+    ConstructorInjector<T> constructor = lateBoundConstructor.constructorInjector;
+    injectionPoints.add(constructor.getInjectionPoint());
+
     try {
-      injectors = injector.getModifiableFieldAndMethodInjectionsFor(boundClass);
+      injectionPoints.addAll(injector.getFieldAndMethodInjectionsFor(boundClass));
     } catch (ErrorsException e) {
       throw new AssertionError("This should have failed at CreationTime");
     }
 
-    ConstructorInjector<T> constructor = lateBoundConstructor.constructorInjector;
-    if (constructor.parameterInjectors != null) {
-      for (SingleParameterInjector<?> parameterInjector
-          : constructor.parameterInjectors) {
-        injectors.add(parameterInjector.injectionPoint);
-      }
-    }
-    return injectors;
+    return ImmutableSet.copyOf(injectionPoints);
   }
 
   @Override public String toString() {

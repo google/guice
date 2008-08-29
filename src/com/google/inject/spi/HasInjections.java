@@ -16,7 +16,7 @@
 
 package com.google.inject.spi;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Implemented by bindings which have implementation dependencies on other
@@ -25,7 +25,7 @@ import java.util.Collection;
 public interface HasInjections {
 
   /**
-   * Gets dependencies.
+   * Gets the injection points for this binding.
    */
-  Collection<InjectionPoint<?>> getInjectionPoints();
+  Set<InjectionPoint> getInjectionPoints();
 }

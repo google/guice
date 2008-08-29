@@ -20,6 +20,7 @@ import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -52,10 +53,14 @@ class ConstructorInjector<T> {
       throws ErrorsException {
     Constructor constructor = constructionProxy.getConstructor();
     errors = errors.withSource(constructor);
-    return constructionProxy.getParameters().isEmpty()
+    return getInjectionPoint().getDependencies().isEmpty()
         ? null // default constructor.
         : injector.getParametersInjectors(constructor,
-            constructionProxy.getParameters(), errors);
+            constructionProxy.getInjectionPoint().getDependencies(), errors);
+  }
+
+  InjectionPoint getInjectionPoint() {
+    return constructionProxy.getInjectionPoint();
   }
 
   /**

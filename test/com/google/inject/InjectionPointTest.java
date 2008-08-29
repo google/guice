@@ -16,8 +16,14 @@
 
 package com.google.inject;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.inject.Asserts.assertEqualsBothWays;
+import static com.google.inject.Asserts.assertSimilarWhenReserialized;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -37,67 +43,74 @@ public class InjectionPointTest extends TestCase {
     @Inject public Constructable(@Named("c") String param) {}
   }
 
-  public void testFieldInjectionPoint() throws NoSuchFieldException, IOException {
+  public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
     Field fooField = getClass().getField("foo");
-    InjectionPoint<String> injectionPoint
-        = InjectionPoint.newInstance(fooField, false, Key.get(String.class, Names.named("a")));
 
-    assertEquals("InjectionPoint["
-        + "key=Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)], "
-        + "allowsNull=false, "
-        + "member=com.google.inject.InjectionPointTest.foo]", injectionPoint.toString());
-    assertEquals(fooField, injectionPoint.getMember());
-    assertEquals(-1, injectionPoint.getParameterIndex());
-    assertEquals(Key.get(String.class, Names.named("a")), injectionPoint.getKey());
-    assertEquals(false, injectionPoint.allowsNull());
-    Asserts.assertSimilarWhenReserialized(injectionPoint);
+    InjectionPoint injectionPoint = InjectionPoint.get(fooField);
+    assertSame(fooField, injectionPoint.getMember());
+    assertFalse(injectionPoint.isOptional());
+    assertEquals("com.google.inject.InjectionPointTest.foo", injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, InjectionPoint.get(fooField));
+    assertSimilarWhenReserialized(injectionPoint);
+
+    Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]"
+        + "@com.google.inject.InjectionPointTest.foo", dependency.toString());
+    assertEquals(fooField, dependency.getInjectionPoint().getMember());
+    assertEquals(-1, dependency.getParameterIndex());
+    assertEquals(Key.get(String.class, Names.named("a")), dependency.getKey());
+    assertEquals(false, dependency.isNullable());
+    assertSimilarWhenReserialized(dependency);
   }
 
-  public void testMethodInjectionPoint() throws NoSuchMethodException, IOException {
+  public void testMethodInjectionPoint() throws NoSuchMethodException, IOException, ErrorsException {
     Method barMethod = getClass().getMethod("bar", String.class);
-    InjectionPoint<String> injectionPoint
-        = InjectionPoint.newInstance(barMethod, 0, false, Key.get(String.class, Names.named("b")));
+    InjectionPoint injectionPoint = InjectionPoint.get(barMethod);
+    assertSame(barMethod, injectionPoint.getMember());
+    assertFalse(injectionPoint.isOptional());
+    assertEquals("com.google.inject.InjectionPointTest.bar()", injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, InjectionPoint.get(barMethod));
+    assertSimilarWhenReserialized(injectionPoint);
 
-    assertEquals("InjectionPoint["
-        + "key=Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)], "
-        + "allowsNull=false, "
-        + "member=com.google.inject.InjectionPointTest.bar(), "
-        + "parameterIndex=0]", injectionPoint.toString());
-    assertEquals(barMethod, injectionPoint.getMember());
-    assertEquals(0, injectionPoint.getParameterIndex());
-    assertEquals(Key.get(String.class, Names.named("b")), injectionPoint.getKey());
-    assertEquals(false, injectionPoint.allowsNull());
-    Asserts.assertSimilarWhenReserialized(injectionPoint);
+    Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]"
+        + "@com.google.inject.InjectionPointTest.bar()[0]", dependency.toString());
+    assertEquals(barMethod, dependency.getInjectionPoint().getMember());
+    assertEquals(0, dependency.getParameterIndex());
+    assertEquals(Key.get(String.class, Names.named("b")), dependency.getKey());
+    assertEquals(false, dependency.isNullable());
+    assertSimilarWhenReserialized(dependency);
   }
 
-  public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException {
+  public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException,
+      ErrorsException {
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);
-    InjectionPoint<String> injectionPoint
-        = InjectionPoint.newInstance(constructor, 0, true, Key.get(String.class, Names.named("c")));
+    InjectionPoint injectionPoint = InjectionPoint.get(constructor, new Errors());
+    assertSame(constructor, injectionPoint.getMember());
+    assertFalse(injectionPoint.isOptional());
+    assertEquals("com.google.inject.InjectionPointTest$Constructable.<init>()",
+        injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, InjectionPoint.get(constructor, new Errors()));
+    assertSimilarWhenReserialized(injectionPoint);
 
-    assertEquals("InjectionPoint["
-        + "key=Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)], "
-        + "allowsNull=true, "
-        + "member=com.google.inject.InjectionPointTest$Constructable.<init>(), "
-        + "parameterIndex=0]", injectionPoint.toString());
-    assertEquals(constructor, injectionPoint.getMember());
-    assertEquals(0, injectionPoint.getParameterIndex());
-    assertEquals(Key.get(String.class, Names.named("c")), injectionPoint.getKey());
-    assertEquals(true, injectionPoint.allowsNull());
-    Asserts.assertSimilarWhenReserialized(injectionPoint);
+    Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]"
+        + "@com.google.inject.InjectionPointTest$Constructable.<init>()[0]", dependency.toString());
+    assertEquals(constructor, dependency.getInjectionPoint().getMember());
+    assertEquals(0, dependency.getParameterIndex());
+    assertEquals(Key.get(String.class, Names.named("c")), dependency.getKey());
+    assertEquals(false, dependency.isNullable());
+    assertSimilarWhenReserialized(dependency);
   }
   
-  public void testPlainKeyInjectionPoint() throws IOException {
-    InjectionPoint<String> injectionPoint
-        = InjectionPoint.newInstance(Key.get(String.class, Names.named("d")));
-
-    assertEquals("InjectionPoint["
-        + "key=Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)], "
-        + "allowsNull=true]", injectionPoint.toString());
-    assertNull(injectionPoint.getMember());
-    assertEquals(-1, injectionPoint.getParameterIndex());
-    assertEquals(Key.get(String.class, Names.named("d")), injectionPoint.getKey());
-    assertEquals(true, injectionPoint.allowsNull());
-    Asserts.assertSimilarWhenReserialized(injectionPoint);
+  public void testUnattachedDependency() throws IOException {
+    Dependency<String> dependency = Dependency.get(Key.get(String.class, Names.named("d")));
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)]",
+        dependency.toString());
+    assertNull(dependency.getInjectionPoint());
+    assertEquals(-1, dependency.getParameterIndex());
+    assertEquals(Key.get(String.class, Names.named("d")), dependency.getKey());
+    assertEquals(true, dependency.isNullable());
+    assertSimilarWhenReserialized(dependency);
   }
 }

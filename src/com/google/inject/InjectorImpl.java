@@ -17,10 +17,12 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
@@ -28,10 +30,10 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.MatcherAndConverter;
-import com.google.inject.internal.Nullability;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
@@ -44,12 +46,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -255,8 +257,7 @@ class InjectorImpl implements Injector {
     static <T> InternalFactory<Provider<T>> createInternalFactory(Binding<T> providedBinding) {
       final Provider<T> provider = providedBinding.getProvider();
       return new InternalFactory<Provider<T>>() {
-        public Provider<T> get(Errors errors, InternalContext context,
-            InjectionPoint injectionPoint) {
+        public Provider<T> get(Errors errors, InternalContext context, Dependency dependency) {
           return provider;
         }
       };
@@ -481,14 +482,14 @@ class InjectorImpl implements Injector {
     }
 
     @SuppressWarnings("unchecked")
-    public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+    public T get(Errors errors, InternalContext context, Dependency<?> dependency)
         throws ErrorsException {
       checkState(constructorInjector != null, "Construct before bind, " + constructorInjector);
 
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
       return (T) constructorInjector.construct(
-          errors, context, injectionPoint.getKey().getRawType());
+          errors, context, dependency.getKey().getRawType());
     }
   }
 
@@ -511,9 +512,9 @@ class InjectorImpl implements Injector {
         = getBindingOrThrow(providerKey, errors);
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
-      public T get(Errors errors, InternalContext context, InjectionPoint injectionPoint)
+      public T get(Errors errors, InternalContext context, Dependency dependency)
           throws ErrorsException {
-        Provider<?> provider = providerBinding.internalFactory.get(errors, context, injectionPoint);
+        Provider<?> provider = providerBinding.internalFactory.get(errors, context, dependency);
         Object o = provider.get();
         if (o != null && !type.isInstance(o)) {
           throw errors.withSource(type).subtypeNotProvided(providerType, type).toException();
@@ -560,9 +561,9 @@ class InjectorImpl implements Injector {
     final BindingImpl<? extends T> targetBinding = getBindingOrThrow(Key.get(subclass), errors);
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
-      public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+      public T get(Errors errors, InternalContext context, Dependency<?> dependency)
           throws ErrorsException {
-        return targetBinding.internalFactory.get(errors, context, injectionPoint);
+        return targetBinding.internalFactory.get(errors, context, dependency);
       }
     };
 
@@ -751,7 +752,8 @@ class InjectorImpl implements Injector {
   class SingleFieldInjector implements SingleMemberInjector {
     final Field field;
     final InternalFactory<?> factory;
-    final InjectionPoint<?> injectionPoint;
+    final InjectionPoint injectionPoint;
+    final Dependency<?> dependency;
 
     public SingleFieldInjector(final Errors errors, final InjectorImpl injector, Field field)
         throws ErrorsException {
@@ -760,23 +762,24 @@ class InjectorImpl implements Injector {
       // Ewwwww...
       field.setAccessible(true);
 
-      final Key<?> key = Keys.get(field.getGenericType(), field, field.getAnnotations(), errors);
-
-      factory = injector.getInternalFactory(key, errors.withSource(field));
-
-      injectionPoint = InjectionPoint.newInstance(
-          field, Nullability.allowsNull(field.getAnnotations()), key);
+      injectionPoint = InjectionPoint.get(field);
+      dependency = injectionPoint.getDependencies().get(0);
+      factory = injector.getInternalFactory(dependency.getKey(), errors.withSource(field));
     }
 
-    public Collection<InjectionPoint<?>> getDependencies() {
-      return Collections.<InjectionPoint<?>>singleton(injectionPoint);
+    public InjectionPoint getInjectionPoint() {
+      return injectionPoint;
+    }
+
+    public Collection<Dependency<?>> getDependencies() {
+      return injectionPoint.getDependencies();
     }
 
     public void inject(Errors errors, InternalContext context, Object o) {
-      context.setInjectionPoint(injectionPoint);
-      errors.pushInjectionPoint(injectionPoint);
+      context.setDependency(dependency);
+      errors.pushInjectionPoint(dependency);
       try {
-        Object value = factory.get(errors, context, injectionPoint);
+        Object value = factory.get(errors, context, dependency);
         field.set(o, value);
       }
       catch (IllegalAccessException e) {
@@ -786,8 +789,8 @@ class InjectorImpl implements Injector {
         errors.merge(e.getErrors());
       }
       finally {
-        context.setInjectionPoint(null);
-        errors.popInjectionPoint(injectionPoint);
+        context.setDependency(null);
+        errors.popInjectionPoint(dependency);
       }
     }
   }
@@ -799,7 +802,7 @@ class InjectorImpl implements Injector {
    * @return injections
    */
   <M extends Member & AnnotatedElement> SingleParameterInjector<?>[] getParametersInjectors(
-      M member, List<Parameter<?>> parameters, Errors errors) throws ErrorsException {
+      M member, List<Dependency<?>> parameters, Errors errors) throws ErrorsException {
     Annotation misplacedBindingAnnotation
         = Keys.findBindingAnnotation(errors, member, member.getAnnotations());
     if (misplacedBindingAnnotation != null) {
@@ -809,7 +812,7 @@ class InjectorImpl implements Injector {
     SingleParameterInjector<?>[] parameterInjectors
         = new SingleParameterInjector<?>[parameters.size()];
     int index = 0;
-    for (Parameter<?> parameter : parameters) {
+    for (Dependency<?> parameter : parameters) {
       try {
         parameterInjectors[index] = createParameterInjector(parameter, member, errors);
       } catch (ErrorsException rethrownBelow) {
@@ -821,19 +824,17 @@ class InjectorImpl implements Injector {
     return parameterInjectors;
   }
 
-  <T> SingleParameterInjector<T> createParameterInjector(final Parameter<T> parameter,
+  <T> SingleParameterInjector<T> createParameterInjector(final Dependency<T> dependency,
       Member member, final Errors errors) throws ErrorsException {
     InternalFactory<? extends T> factory;
-    factory = getInternalFactory(parameter.getKey(), errors.withSource(member));
-
-    InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(
-        member, parameter.getIndex(), parameter.allowsNull(), parameter.getKey());
-    return new SingleParameterInjector<T>(injectionPoint, factory);
+    factory = getInternalFactory(dependency.getKey(), errors.withSource(member));
+    return new SingleParameterInjector<T>(dependency, factory);
   }
 
   static class SingleMethodInjector implements SingleMemberInjector {
     final MethodInvoker methodInvoker;
     final SingleParameterInjector<?>[] parameterInjectors;
+    final InjectionPoint injectionPoint;
 
     public SingleMethodInjector(Errors errors, InjectorImpl injector, final Method method)
         throws ErrorsException {
@@ -860,9 +861,11 @@ class InjectorImpl implements Injector {
         };
       }
 
-      parameterInjectors = method.getGenericParameterTypes().length > 0
-          ? injector.getParametersInjectors(method, Parameter.forMethod(method, errors), errors)
-          : null;
+      injectionPoint = InjectionPoint.get(method);
+
+      parameterInjectors = injectionPoint.getDependencies().isEmpty()
+          ? null
+          : injector.getParametersInjectors(method, injectionPoint.getDependencies(), errors);
     }
 
     public void inject(Errors errors, InternalContext context, Object o) {
@@ -884,13 +887,8 @@ class InjectorImpl implements Injector {
       }
     }
 
-    public Collection<InjectionPoint<?>> getDependencies() {
-      List<InjectionPoint<?>> dependencies
-          = new ArrayList<InjectionPoint<?>>(parameterInjectors.length);
-      for (SingleParameterInjector<?> parameterInjector : parameterInjectors) {
-        dependencies.add(parameterInjector.injectionPoint);
-      }
-      return Collections.unmodifiableList(dependencies);
+    public InjectionPoint getInjectionPoint() {
+      return injectionPoint;
     }
   }
 
@@ -916,24 +914,24 @@ class InjectorImpl implements Injector {
   };
 
   static class SingleParameterInjector<T> {
-    final InjectionPoint<T> injectionPoint;
+    final Dependency<T> dependency;
     final InternalFactory<? extends T> factory;
 
-    public SingleParameterInjector(InjectionPoint<T> injectionPoint,
+    public SingleParameterInjector(Dependency<T> dependency,
         InternalFactory<? extends T> factory) {
-      this.injectionPoint = injectionPoint;
+      this.dependency = dependency;
       this.factory = factory;
     }
 
     T inject(Errors errors, InternalContext context) throws ErrorsException {
-      context.setInjectionPoint(injectionPoint);
-      errors.pushInjectionPoint(injectionPoint);
+      context.setDependency(dependency);
+      errors.pushInjectionPoint(dependency);
       try {
-        return factory.get(errors, context, injectionPoint);
+        return factory.get(errors, context, dependency);
       }
       finally {
-        errors.popInjectionPoint(injectionPoint);
-        context.setInjectionPoint(null);
+        errors.popInjectionPoint(dependency);
+        context.setDependency(null);
       }
     }
   }
@@ -1005,15 +1003,15 @@ class InjectorImpl implements Injector {
         try {
           T t = callInContext(new ContextualCallable<T>() {
             public T call(InternalContext context) throws ErrorsException {
-              InjectionPoint<T> injectionPoint = InjectionPoint.newInstance(key);
-              context.setInjectionPoint(injectionPoint);
-              errors.pushInjectionPoint(injectionPoint);
+              Dependency<T> dependency = Dependency.get(key);
+              context.setDependency(dependency);
+              errors.pushInjectionPoint(dependency);
               try {
-                return factory.get(errors, context, injectionPoint);
+                return factory.get(errors, context, dependency);
               }
               finally {
-                context.setInjectionPoint(null);
-                errors.popInjectionPoint(injectionPoint);
+                context.setDependency(null);
+                errors.popInjectionPoint(dependency);
               }
             }
           });
@@ -1094,23 +1092,18 @@ class InjectorImpl implements Injector {
   /** Injects a field or method in a given object. */
   public interface SingleMemberInjector {
     void inject(Errors errors, InternalContext context, Object o);
-    Collection<InjectionPoint<?>> getDependencies();
+    InjectionPoint getInjectionPoint();
   }
 
-  List<InjectionPoint<?>> getModifiableFieldAndMethodInjectionsFor(Class<?> clazz)
+  Set<InjectionPoint> getFieldAndMethodInjectionsFor(Class<?> clazz)
       throws ErrorsException {
     Errors errors = new Errors();
-    List<InjectionPoint<?>> dependencies = Lists.newArrayList();
+    Set<InjectionPoint> dependencies = Sets.newLinkedHashSet();
     for (SingleMemberInjector singleMemberInjector : getMemberInjectors(clazz, errors)) {
-      dependencies.addAll(singleMemberInjector.getDependencies());
+      dependencies.add(singleMemberInjector.getInjectionPoint());
     }
     errors.throwIfNecessary();
-    return dependencies;
-  }
-
-  Collection<InjectionPoint<?>> getFieldAndMethodInjectionsFor(Class<?> clazz)
-      throws ErrorsException {
-    return Collections.unmodifiableList(getModifiableFieldAndMethodInjectionsFor(clazz));
+    return ImmutableSet.copyOf(dependencies);
   }
 
   public String toString() {

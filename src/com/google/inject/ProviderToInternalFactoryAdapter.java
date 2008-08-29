@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -39,8 +39,8 @@ class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
     try {
       T t = injector.callInContext(new ContextualCallable<T>() {
         public T call(InternalContext context) throws ErrorsException {
-          InjectionPoint injectionPoint = context.getInjectionPoint();
-          return internalFactory.get(errors, context, injectionPoint);
+          Dependency dependency = context.getDependency();
+          return internalFactory.get(errors, context, dependency);
         }
       });
       errors.throwIfNecessary();

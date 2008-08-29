@@ -25,10 +25,10 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.Stopwatch;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
-import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -189,16 +189,16 @@ class InjectorBuilder {
         try {
           injector.callInContext(new ContextualCallable<Void>() {
             public Void call(InternalContext context) {
-              InjectionPoint<?> injectionPoint = InjectionPoint.newInstance(binding.key);
-              context.setInjectionPoint(injectionPoint);
-              errors.pushInjectionPoint(injectionPoint);
+              Dependency<?> dependency = Dependency.get(binding.key);
+              context.setDependency(dependency);
+              errors.pushInjectionPoint(dependency);
               try {
-                binding.internalFactory.get(errors, context, injectionPoint);
+                binding.internalFactory.get(errors, context, dependency);
               } catch (ErrorsException e) {
                 errors.merge(e.getErrors());
               } finally {
-                context.setInjectionPoint(null);
-                errors.popInjectionPoint(injectionPoint);
+                context.setDependency(null);
+                errors.popInjectionPoint(dependency);
               }
 
               return null;
@@ -262,11 +262,11 @@ class InjectorBuilder {
   }
 
   static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
-    public Logger get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint) {
-      Member member = injectionPoint.getMember();
-      return member == null
+    public Logger get(Errors errors, InternalContext context, Dependency<?> dependency) {
+      InjectionPoint injectionPoint = dependency.getInjectionPoint();
+      return injectionPoint == null
           ? Logger.getAnonymousLogger()
-          : Logger.getLogger(member.getDeclaringClass().getName());
+          : Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
     }
 
     public Logger get() {

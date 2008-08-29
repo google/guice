@@ -20,7 +20,7 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 
 /**
  * A placeholder which enables us to swap in the real factory once the
@@ -48,9 +48,9 @@ class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationLi
     }
   }
 
-  public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint)
+  public T get(Errors errors, InternalContext context, Dependency<?> dependency)
       throws ErrorsException {
-    return targetFactory.get(errors, context, injectionPoint);
+    return targetFactory.get(errors, context, dependency);
   }
 
   @Override public String toString() {

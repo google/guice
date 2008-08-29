@@ -22,7 +22,7 @@ import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.util.Providers;
-import java.util.Collection;
+import java.util.Set;
 
 class InstanceBindingImpl<T> extends BindingImpl<T> {
 
@@ -48,11 +48,10 @@ class InstanceBindingImpl<T> extends BindingImpl<T> {
     return this.instance;
   }
 
-  public Collection<InjectionPoint<?>> getInjectionPoints() {
+  public Set<InjectionPoint> getInjectionPoints() {
     try {
       return injector.getFieldAndMethodInjectionsFor(instance.getClass());
-    }
-    catch (ErrorsException e) {
+    } catch (ErrorsException e) {
       // this would have been a creation exception
       // TODO: initialize the dependencies via a callback
       throw new AssertionError(e);

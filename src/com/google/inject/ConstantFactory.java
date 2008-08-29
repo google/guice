@@ -19,7 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -32,7 +32,7 @@ class ConstantFactory<T> implements InternalFactory<T> {
     this.value = value;
   }
 
-  public T get(Errors errors, InternalContext context, InjectionPoint injectionPoint)
+  public T get(Errors errors, InternalContext context, Dependency dependency)
       throws ErrorsException {
     context.ensureMemberInjected(errors, value);
     return value;

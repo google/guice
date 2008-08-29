@@ -19,13 +19,14 @@ package com.google.inject;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.HasInjections;
 import com.google.inject.spi.InjectionPoint;
-import java.util.Collection;
+import java.util.Set;
 
 /**
  *
  */
-class ProviderInstanceBindingImpl<T> extends BindingImpl<T> {
+class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements HasInjections {
 
   final Provider<? extends T> providerInstance;
 
@@ -46,11 +47,10 @@ class ProviderInstanceBindingImpl<T> extends BindingImpl<T> {
     return this.providerInstance;
   }
 
-  public Collection<InjectionPoint<?>> getInjectionPoints() {
+  public Set<InjectionPoint> getInjectionPoints() {
     try {
       return injector.getFieldAndMethodInjectionsFor(providerInstance.getClass());
-    }
-    catch (ErrorsException e) {
+    } catch (ErrorsException e) {
       // this would have been a creation exception
       // TODO: initialize the dependencies via a callback
       throw new AssertionError(e);

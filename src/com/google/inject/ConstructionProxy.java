@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 /**
  * Proxies calls to a {@link java.lang.reflect.Constructor} for a class
@@ -33,7 +33,10 @@ interface ConstructionProxy<T> {
    */
   T newInstance(Object... arguments) throws InvocationTargetException;
 
-  List<Parameter<?>> getParameters();
+  /**
+   * Returns the injection point for this constructor.
+   */
+  InjectionPoint getInjectionPoint();
 
   /**
    * Returns the injected constructor. If the injected constructor is synthetic (such as generated

@@ -18,13 +18,13 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Dependency;
 
 class InvalidBindingImpl<T> extends BindingImpl<T> {
 
   InvalidBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
     super(injector, key, source, new InternalFactory<T>() {
-      public T get(Errors errors, InternalContext context, InjectionPoint<?> injectionPoint) {
+      public T get(Errors errors, InternalContext context, Dependency<?> dependency) {
         throw new AssertionError();
       }
     }, Scopes.NO_SCOPE, LoadStrategy.LAZY);
