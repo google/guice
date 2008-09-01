@@ -515,14 +515,17 @@ class InjectorImpl implements Injector {
       public T get(Errors errors, InternalContext context, Dependency dependency)
           throws ErrorsException {
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, dependency);
-        Object o = provider.get();
-        if (o != null && !type.isInstance(o)) {
-          throw errors.withSource(type).subtypeNotProvided(providerType, type).toException();
+        try {
+          Object o = provider.get();
+          if (o != null && !type.isInstance(o)) {
+            throw errors.withSource(type).subtypeNotProvided(providerType, type).toException();
+          }
+          @SuppressWarnings("unchecked") // protected by isInstance() check above
+          T t = (T) o;
+          return t;
+        } catch (RuntimeException e) {
+          throw errors.withSource(type).errorInProvider(e, null).toException();
         }
-
-        @SuppressWarnings("unchecked") // protected by isInstance() check above
-        T t = (T) o;
-        return t;
       }
     };
 

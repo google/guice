@@ -21,7 +21,9 @@ import com.google.common.collect.Lists;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
+import com.google.inject.util.Providers;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;
@@ -73,37 +75,39 @@ public class BinderTestSuite {
 
     new Builder()
         .name("no binding, AWithProvidedBy")
-        .key(Key.get(AWithProvidedBy.class))
+        .key(Key.get(AWithProvidedBy.class), InjectsAWithProvidedBy.class)
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, AWithImplementedBy")
-        .key(Key.get(AWithImplementedBy.class))
+        .key(Key.get(AWithImplementedBy.class), InjectsAWithImplementedBy.class)
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA")
-        .key(Key.get(ScopedA.class))
+        .key(Key.get(ScopedA.class), InjectsScopedA.class)
         .expectedValues(new PlainA(201), new PlainA(201), new PlainA(202), new PlainA(202))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, AWithProvidedBy named apple")
-        .key(Key.get(AWithProvidedBy.class, named("apple")))
+        .key(Key.get(AWithProvidedBy.class, named("apple")),
+            InjectsAWithProvidedByNamedApple.class)
         .provisionException("No implementation for %s annotated with %s was bound",
             AWithProvidedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, AWithImplementedBy named apple")
-        .key(Key.get(AWithImplementedBy.class, named("apple")))
+        .key(Key.get(AWithImplementedBy.class, named("apple")),
+            InjectsAWithImplementedByNamedApple.class)
         .provisionException("No implementation for %s annotated with %s was bound",
             AWithImplementedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA named apple")
-        .key(Key.get(ScopedA.class, named("apple")))
+        .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
         .provisionException("No implementation for %s annotated with %s was bound",
             ScopedA.class.getName(), named("apple"))
         .addToSuite(suite);
@@ -111,7 +115,7 @@ public class BinderTestSuite {
     for (final Scoper scoper : Scoper.values()) {
       new Builder()
           .name("bind PlainA")
-          .key(Key.get(PlainA.class))
+          .key(Key.get(PlainA.class), InjectsPlainA.class)
           .module(new AbstractModule() {
             protected void configure() {
               AnnotatedBindingBuilder<PlainA> abb = bind(PlainA.class);
@@ -156,7 +160,7 @@ public class BinderTestSuite {
 
       new Builder()
           .name("bind AWithProvidedBy")
-          .key(Key.get(AWithProvidedBy.class))
+          .key(Key.get(AWithProvidedBy.class), InjectsAWithProvidedBy.class)
           .module(new AbstractModule() {
             protected void configure() {
               ScopedBindingBuilder sbb = bind(AWithProvidedBy.class);
@@ -168,7 +172,7 @@ public class BinderTestSuite {
 
       new Builder()
           .name("bind AWithImplementedBy")
-          .key(Key.get(AWithImplementedBy.class))
+          .key(Key.get(AWithImplementedBy.class), InjectsAWithImplementedBy.class)
           .module(new AbstractModule() {
             protected void configure() {
               ScopedBindingBuilder sbb = bind(AWithImplementedBy.class);
@@ -180,7 +184,7 @@ public class BinderTestSuite {
 
       new Builder()
           .name("bind ScopedA")
-          .key(Key.get(ScopedA.class))
+          .key(Key.get(ScopedA.class), InjectsScopedA.class)
           .module(new AbstractModule() {
             protected void configure() {
               ScopedBindingBuilder sbb = bind(ScopedA.class);
@@ -294,6 +298,7 @@ public class BinderTestSuite {
   public static class Builder {
     private String name = "test";
     private Key<?> key = Key.get(A.class);
+    private Class<? extends Injectable> injectsKey = InjectsA.class;
     private List<Module> modules = Lists.<Module>newArrayList(new AbstractModule() {
       protected void configure() {
         bindScope(TwoAtATimeScoped.class, new TwoAtATimeScope());
@@ -320,8 +325,9 @@ public class BinderTestSuite {
       return this;
     }
 
-    public Builder key(Key<?> key) {
+    public Builder key(Key<?> key, Class<? extends Injectable> injectsKey) {
       this.key = key;
+      this.injectsKey = injectsKey;
       return this;
     }
 
@@ -366,6 +372,7 @@ public class BinderTestSuite {
   public static class SuccessTest extends TestCase {
     final String name;
     final Key<?> key;
+    final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
     final ImmutableList<Object> expectedValues;
 
@@ -373,6 +380,7 @@ public class BinderTestSuite {
       super("test");
       name = builder.name;
       key = builder.key;
+      injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
       expectedValues = ImmutableList.copyOf(builder.expectedValues);
     }
@@ -381,26 +389,51 @@ public class BinderTestSuite {
       return name;
     }
 
-    public void test() {
+    Injector newInjector() {
       nextId.set(101);
-      Injector injector = Guice.createInjector(modules);
+      return Guice.createInjector(modules);
+    }
 
-      Provider<?> provider = injector.getProvider(key);
-      Provider<?> bindingProvider = injector.getBinding(key).getProvider();
-
+    public void test() throws IllegalAccessException, InstantiationException {
+      Injector injector = newInjector();
       nextId.set(201);
       for (Object value : expectedValues) {
         assertEquals(value, injector.getInstance(key));
       }
 
+      Provider<?> provider = newInjector().getProvider(key);
       nextId.set(201);
       for (Object value : expectedValues) {
         assertEquals(value, provider.get());
       }
 
+      Provider<?> bindingProvider = newInjector().getBinding(key).getProvider();
       nextId.set(201);
       for (Object value : expectedValues) {
         assertEquals(value, bindingProvider.get());
+      }
+
+      injector = newInjector();
+      nextId.set(201);
+      for (Object value : expectedValues) {
+        assertEquals(value, injector.getInstance(injectsKey).value);
+      }
+
+      injector = newInjector();
+      nextId.set(201);
+      for (Object value : expectedValues) {
+        Injectable injectable = injectsKey.newInstance();
+        injector.injectMembers(injectable);
+        assertEquals(value, injectable.value);
+      }
+
+      Injector injector1 = newInjector();
+      nextId.set(201);
+      Injectable hasProvider = injector1.getInstance(injectsKey);
+      hasProvider.provider.get();
+      nextId.set(201);
+      for (Object value : expectedValues) {
+        assertEquals(value, hasProvider.provider.get());
       }
     }
   }
@@ -436,6 +469,7 @@ public class BinderTestSuite {
   public static class ProvisionExceptionTest extends TestCase {
     final String name;
     final Key<?> key;
+    final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
     final String provisionException;
 
@@ -443,6 +477,7 @@ public class BinderTestSuite {
       super("test");
       name = builder.name;
       key = builder.key;
+      injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
       provisionException = builder.provisionException;
     }
@@ -451,28 +486,51 @@ public class BinderTestSuite {
       return "provision errors:" + name;
     }
 
-    public void test() {
-      Injector injector = Guice.createInjector(modules);
+    Injector newInjector() {
+      return Guice.createInjector(modules);
+    }
 
+    public void test() throws IllegalAccessException, InstantiationException {
       try {
-        injector.getProvider(key);
+        newInjector().getProvider(key);
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), provisionException);
       }
 
       try {
-        injector.getBinding(key).getProvider();
+        newInjector().getBinding(key).getProvider();
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), provisionException);
       }
 
       try {
-        injector.getInstance(key);
+        newInjector().getInstance(key);
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), provisionException);
+      }
+
+      try {
+        newInjector().getInstance(injectsKey);
+        fail();
+      } catch (ProvisionException expected) {
+        assertContains(expected.getMessage(),
+            injectsKey.getName() + ".inject", provisionException,
+            injectsKey.getName() + ".inject", provisionException,
+            "2 error[s]");
+      }
+
+      try {
+        Injectable injectable = injectsKey.newInstance();
+        newInjector().injectMembers(injectable);
+        fail();
+      } catch (ProvisionException expected) {
+        assertContains(expected.getMessage(),
+            injectsKey.getName() + ".inject", provisionException,
+            injectsKey.getName() + ".inject", provisionException,
+            "2 error[s]");
       }
     }
   }
@@ -480,6 +538,7 @@ public class BinderTestSuite {
   public static class UserExceptionsTest extends TestCase {
     final String name;
     final Key<?> key;
+    final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
     final ImmutableList<Object> expectedValues;
     final CreationTime creationTime;
@@ -488,6 +547,7 @@ public class BinderTestSuite {
       super("test");
       name = builder.name;
       key = builder.key;
+      injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
       expectedValues = ImmutableList.copyOf(builder.expectedValues);
       creationTime = builder.creationTime;
@@ -497,11 +557,14 @@ public class BinderTestSuite {
       return "provision errors:" + name;
     }
 
-    public void test() {
-      Injector injector;
+    Injector newInjector() {
+      return Guice.createInjector(modules);
+    }
+
+    public void test() throws IllegalAccessException, InstantiationException {
+      nextId.set(-1);
       try {
-        nextId.set(-1);
-        injector = Guice.createInjector(modules);
+        newInjector();
         assertEquals(CreationTime.LAZY, creationTime);
       } catch (CreationException expected) {
         assertEquals(CreationTime.EAGER, creationTime);
@@ -509,12 +572,12 @@ public class BinderTestSuite {
         return;
       }
 
-      Provider<?> provider = injector.getProvider(key);
-      Provider<?> bindingProvider = injector.getBinding(key).getProvider();
+      Provider<?> provider = newInjector().getProvider(key);
+      Provider<?> bindingProvider = newInjector().getBinding(key).getProvider();
 
       nextId.set(-1);
       try {
-        injector.getInstance(key);
+        newInjector().getInstance(key);
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), "Illegal value: -1");
@@ -535,6 +598,37 @@ public class BinderTestSuite {
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), "Illegal value: -1");
       }
+
+      try {
+        nextId.set(-1);
+        newInjector().getInstance(injectsKey);
+      } catch (ProvisionException expected) {
+        assertContains(expected.getMessage(), "Illegal value: -1",
+            "while locating ", key.getTypeLiteral().toString(),
+            "for parameter 0 at " + injectsKey.getName() + ".inject");
+      }
+
+      nextId.set(201);
+      Injectable injectable = injectsKey.newInstance();
+      try {
+        nextId.set(-1);
+        newInjector().injectMembers(injectable);
+      } catch (ProvisionException expected) {
+        assertContains(expected.getMessage(), "Illegal value: -1",
+            "while locating ", key.getTypeLiteral().toString(),
+            "for parameter 0 at " + injectsKey.getName() + ".inject");
+      }
+
+      nextId.set(201);
+      Injectable hasProvider = newInjector().getInstance(injectsKey);
+      hasProvider.provider.get();
+      try {
+        nextId.set(-1);
+        hasProvider.provider.get();
+      } catch (ProvisionException expected) {
+        assertContains(expected.getMessage(), "Illegal value: -1",
+            "while locating ", key.getTypeLiteral().toString());
+      }
     }
   }
 
@@ -544,10 +638,49 @@ public class BinderTestSuite {
   @ProvidedBy(PlainAProvider.class)
   interface AWithProvidedBy {}
 
+  static class InjectsAWithProvidedBy extends Injectable {
+    @Inject public void inject(AWithProvidedBy aWithProvidedBy,
+        Provider<AWithProvidedBy> aWithProvidedByProvider) {
+      this.value = aWithProvidedBy;
+      this.provider = aWithProvidedByProvider;
+    }
+  }
+
+  static class InjectsAWithProvidedByNamedApple extends Injectable {
+    @Inject public void inject(@Named("apple") AWithProvidedBy aWithProvidedBy,
+        @Named("apple") Provider<AWithProvidedBy> aWithProvidedByProvider) {
+      this.value = aWithProvidedBy;
+      this.provider = aWithProvidedByProvider;
+    }
+  }
+
   @ImplementedBy(PlainA.class)
   interface AWithImplementedBy {}
 
+  static class InjectsAWithImplementedBy extends Injectable {
+    @Inject public void inject(AWithImplementedBy aWithImplementedBy,
+        Provider<AWithImplementedBy> aWithImplementedByProvider) {
+      this.value = aWithImplementedBy;
+      this.provider = aWithImplementedByProvider;
+    }
+  }
+
+  static class InjectsAWithImplementedByNamedApple extends Injectable {
+    @Inject public void inject(@Named("apple") AWithImplementedBy aWithImplementedBy,
+        @Named("apple") Provider<AWithImplementedBy> aWithImplementedByProvider) {
+      this.value = aWithImplementedBy;
+      this.provider = aWithImplementedByProvider;
+    }
+  }
+
   interface A extends AWithProvidedBy, AWithImplementedBy {}
+
+  static class InjectsA extends Injectable {
+    @Inject public void inject(A a, Provider<A> aProvider) {
+      this.value = a;
+      this.provider = aProvider;
+    }
+  }
 
   static class PlainA implements A {
     final int value;
@@ -578,6 +711,13 @@ public class BinderTestSuite {
     }
   }
 
+  static class InjectsPlainA extends Injectable {
+    @Inject public void inject(PlainA plainA, Provider<PlainA> plainAProvider) {
+      this.value = plainA;
+      this.provider = plainAProvider;
+    }
+  }
+
   /** This scope hands out each value exactly twice  */
   static class TwoAtATimeScope implements Scope {
     public <T> Provider<T> scope(Key<T> key, final Provider<T> unscoped) {
@@ -602,4 +742,24 @@ public class BinderTestSuite {
 
   @TwoAtATimeScoped
   static class ScopedA extends PlainA {}
+
+  static class InjectsScopedA extends Injectable {
+    @Inject public void inject(ScopedA scopedA, Provider<ScopedA> scopedAProvider) {
+      this.value = scopedA;
+      this.provider = scopedAProvider;
+    }
+  }
+
+  static class InjectsScopedANamedApple extends Injectable {
+    @Inject public void inject(@Named("apple") ScopedA scopedA,
+        @Named("apple") Provider<ScopedA> scopedAProvider) {
+      this.value = scopedA;
+      this.provider = scopedAProvider;
+    }
+  }
+
+  static class Injectable {
+    Object value = new Object();
+    Provider<?> provider = Providers.of(new Object());
+  }
 }
