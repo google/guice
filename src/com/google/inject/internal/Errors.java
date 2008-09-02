@@ -307,21 +307,29 @@ public final class Errors implements Serializable {
     throw new CreationException(getMessages());
   }
 
-  public Errors merge(Errors moreErrors) {
-    checkState(isMutable);
+  private Message merge(Message message) {
+    List<Dependency> dependencies = Lists.newArrayList();
+    dependencies.addAll(this.dependencies);
+    dependencies.addAll(message.getDependencies());
+    Object source = message.getSource() != SourceProvider.UNKNOWN_SOURCE
+        ? message.getSource()
+        : this.source;
+    return new Message(source, message.getMessage(), dependencies, message.getCause());
+  }
 
-    if (moreErrors.errors != this.errors) {
-      for (Message message : moreErrors.errors) {
-        List<Dependency> dependencies = Lists.newArrayList();
-        dependencies.addAll(this.dependencies);
-        dependencies.addAll(message.getDependencies());
-        Object source = message.getSource() != SourceProvider.UNKNOWN_SOURCE
-            ? message.getSource()
-            : this.source;
-        errors.add(new Message(source, message.getMessage(), dependencies, message.getCause()));
+  public Errors merge(Collection<Message> messages) {
+    checkState(isMutable);
+    if (messages != this.errors) {
+      for (Message message : messages) {
+        errors.add(merge(message));
       }
     }
+    return this;
+  }
 
+  public Errors merge(Errors moreErrors) {
+    checkState(isMutable);
+    merge(moreErrors.errors);
     return this;
   }
 
@@ -352,6 +360,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors addMessage(Message message) {
+    // TODO: merge the sources?
     if (!isMutable) {
       throw new AssertionError();
     }

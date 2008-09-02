@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
-import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -85,12 +84,12 @@ public class InjectionPointTest extends TestCase {
   public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException,
       ErrorsException {
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);
-    InjectionPoint injectionPoint = InjectionPoint.get(constructor, new Errors());
+    InjectionPoint injectionPoint = InjectionPoint.get(constructor);
     assertSame(constructor, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
     assertEquals("com.google.inject.InjectionPointTest$Constructable.<init>()",
         injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, InjectionPoint.get(constructor, new Errors()));
+    assertEqualsBothWays(injectionPoint, InjectionPoint.get(constructor));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());

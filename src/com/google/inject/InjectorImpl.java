@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -26,6 +27,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
+import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Keys;
@@ -46,7 +48,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -634,10 +635,15 @@ class InjectorImpl implements Injector {
    * {@code List<SingleMemberInjector>}.
    */
   private final Map<Class<?>, Object> injectors = new ReferenceCache<Class<?>, Object>() {
-    protected Object create(Class<?> key) {
+    protected Object create(Class<?> type) {
       Errors errors = new Errors();
-      List<SingleMemberInjector> injectors = Lists.newArrayList();
-      addInjectors(key, injectors, errors);
+      List<InjectionPoint> injectionPoints = Lists.newArrayList();
+      try {
+        InjectionPoint.addForInstanceMethodsAndFields(type, injectionPoints);
+      } catch (ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
+      }
+      ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
       return errors.hasErrors() ? errors.makeImmutable() : injectors;
     }
   };
@@ -658,66 +664,24 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Recursively adds injectors for fields and methods from the given class to the given list.
-   * Injects parent classes before sub classes.
+   * Returns the injectors for the specified injection points.
    */
-  void addInjectors(Class clazz, List<SingleMemberInjector> injectors, Errors errors) {
-    if (clazz == Object.class) {
-      return;
-    }
-
-    // Add injectors for superclass first.
-    addInjectors(clazz.getSuperclass(), injectors, errors);
-
-    // TODO (crazybob): Filter out overridden members.
-    addSingleInjectorsForFields(clazz.getDeclaredFields(), false, injectors, errors);
-    addSingleInjectorsForMethods(clazz.getDeclaredMethods(), false, injectors, errors);
-  }
-
-  void addSingleInjectorsForMethods(Method[] methods, boolean statics,
-      List<SingleMemberInjector> injectors, Errors errors) {
-    addInjectorsForMembers(errors, Arrays.asList(methods), statics, injectors,
-        new SingleInjectorFactory<Method>() {
-          public SingleMemberInjector create(InjectorImpl injector, Method method, Errors errors)
-              throws ErrorsException {
-            return new SingleMethodInjector(errors, injector, method);
-          }
-        });
-  }
-
-  void addSingleInjectorsForFields(Field[] fields, boolean statics,
-      List<SingleMemberInjector> injectors, Errors errors) {
-    addInjectorsForMembers(errors, Arrays.asList(fields), statics, injectors,
-        new SingleInjectorFactory<Field>() {
-          public SingleMemberInjector create(InjectorImpl injector, Field field, Errors errors)
-              throws ErrorsException {
-            return new SingleFieldInjector(errors, injector, field);
-          }
-        });
-  }
-
-  <M extends Member & AnnotatedElement> void addInjectorsForMembers(
-      Errors errors, List<M> members, boolean statics, List<SingleMemberInjector> injectors,
-      SingleInjectorFactory<M> injectorFactory) {
-    for (M member : members) {
-      if (isStatic(member) != statics) {
-        continue;
-      }
-
-      Inject inject = member.getAnnotation(Inject.class);
-      if (inject == null) {
-        continue;
-      }
-
-      Errors errorsForMember = inject.optional()
-          ? new Errors(member)
-          : errors.withSource(member);
+  ImmutableList<SingleMemberInjector> getInjectors(
+      List<InjectionPoint> injectionPoints, Errors errors) {
+    List<SingleMemberInjector> injectors = Lists.newArrayList();
+    for (InjectionPoint injectionPoint : injectionPoints) {
       try {
-        injectors.add(injectorFactory.create(this, member, errorsForMember));
+        Errors errorsForMember = injectionPoint.isOptional()
+            ? new Errors(injectionPoint.getMember())
+            : errors.withSource(injectionPoint.getMember());
+        SingleMemberInjector injector = injectionPoint.getMember() instanceof Field
+            ? new SingleFieldInjector(errorsForMember, this, injectionPoint)
+            : new SingleMethodInjector(errorsForMember, this, injectionPoint);
+        injectors.add(injector);
       } catch (ErrorsException ignoredForNow) {
-        // if this was an optional injection, it is completely ignored
       }
     }
+    return ImmutableList.copyOf(injectors);
   }
 
   Map<Key<?>, BindingImpl<?>> internalBindings() {
@@ -732,10 +696,6 @@ class InjectorImpl implements Injector {
   interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
     SingleMemberInjector create(InjectorImpl injector, M member, Errors errors)
         throws ErrorsException;
-  }
-
-  private boolean isStatic(Member member) {
-    return Modifier.isStatic(member.getModifiers());
   }
 
   private static class BindingsMultimap {
@@ -758,15 +718,14 @@ class InjectorImpl implements Injector {
     final InjectionPoint injectionPoint;
     final Dependency<?> dependency;
 
-    public SingleFieldInjector(final Errors errors, final InjectorImpl injector, Field field)
+    public SingleFieldInjector(Errors errors, InjectorImpl injector, InjectionPoint injectionPoint)
         throws ErrorsException {
-      this.field = field;
+      this.injectionPoint = injectionPoint;
+      this.field = (Field) injectionPoint.getMember();
+      this.dependency = injectionPoint.getDependencies().get(0);
 
       // Ewwwww...
       field.setAccessible(true);
-
-      injectionPoint = InjectionPoint.get(field);
-      dependency = injectionPoint.getDependencies().get(0);
       factory = injector.getInternalFactory(dependency.getKey(), errors.withSource(field));
     }
 
@@ -839,8 +798,11 @@ class InjectorImpl implements Injector {
     final SingleParameterInjector<?>[] parameterInjectors;
     final InjectionPoint injectionPoint;
 
-    public SingleMethodInjector(Errors errors, InjectorImpl injector, final Method method)
+    public SingleMethodInjector(Errors errors, InjectorImpl injector, InjectionPoint injectionPoint)
         throws ErrorsException {
+      this.injectionPoint = injectionPoint;
+      final Method method = (Method) injectionPoint.getMember();
+
       // We can't use FastMethod if the method is private.
       if (Modifier.isPrivate(method.getModifiers())
           || Modifier.isProtected(method.getModifiers())) {
@@ -864,7 +826,12 @@ class InjectorImpl implements Injector {
         };
       }
 
-      injectionPoint = InjectionPoint.get(method);
+      try {
+        injectionPoint = InjectionPoint.get(method);
+      } catch (ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
+        throw errors.toException();
+      }
 
       parameterInjectors = injectionPoint.getDependencies().isEmpty()
           ? null

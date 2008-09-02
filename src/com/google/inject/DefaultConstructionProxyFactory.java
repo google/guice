@@ -20,6 +20,7 @@ import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ConfigurationException;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +39,14 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
   public <T> ConstructionProxy<T> get(Errors errors, final Constructor<T> constructor)
       throws ErrorsException {
-    final InjectionPoint injectionPoint = InjectionPoint.get(constructor, errors);
+    final InjectionPoint injectionPoint;
+
+    try {
+      injectionPoint = InjectionPoint.get(constructor);
+    } catch (ConfigurationException e) {
+      errors.merge(e.getErrorMessages());
+      throw errors.toException();
+    }
 
     // We can't use FastConstructor if the constructor is non-public.
     if (!Modifier.isPublic(constructor.getModifiers())) {

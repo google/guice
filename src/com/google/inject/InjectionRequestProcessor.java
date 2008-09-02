@@ -16,10 +16,13 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ConfigurationException;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
 import java.util.List;
@@ -72,7 +75,7 @@ class InjectionRequestProcessor extends AbstractProcessor {
   private class StaticInjection {
     final Object source;
     final Class<?> type;
-    final List<SingleMemberInjector> memberInjectors = Lists.newArrayList();
+    ImmutableList<SingleMemberInjector> memberInjectors;
 
     public StaticInjection(Object source, Class type) {
       this.source = source;
@@ -81,10 +84,13 @@ class InjectionRequestProcessor extends AbstractProcessor {
 
     void validate(final InjectorImpl injector) {
       Errors errorsForMember = errors.withSource(source);
-      injector.addSingleInjectorsForFields(
-          type.getDeclaredFields(), true, memberInjectors, errorsForMember);
-      injector.addSingleInjectorsForMethods(
-          type.getDeclaredMethods(), true, memberInjectors, errorsForMember);
+      List<InjectionPoint> injectionPoints = Lists.newArrayList();
+      try {
+        InjectionPoint.addForStaticMethodsAndFields(type, injectionPoints);
+      } catch (ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
+      }
+      memberInjectors = injector.getInjectors(injectionPoints, errorsForMember);
     }
 
     void injectMembers(InjectorImpl injector) {
