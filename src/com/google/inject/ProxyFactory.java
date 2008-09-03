@@ -21,10 +21,10 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
+import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ReferenceCache;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -57,16 +57,16 @@ class ProxyFactory implements ConstructionProxyFactory {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
+  public <T> ConstructionProxy<T> get(Errors errors, InjectionPoint injectionPoint)
       throws ErrorsException {
-    return (ConstructionProxy<T>) getConstructionProxy(constructor, errors);
+    return (ConstructionProxy<T>) getConstructionProxy(injectionPoint, errors);
   }
 
-  Map<Constructor<?>, Object> constructionProxies = new ReferenceCache<Constructor<?>, Object>() {
-    protected Object create(Constructor<?> constructor) {
+  Map<InjectionPoint, Object> constructionProxies = new ReferenceCache<InjectionPoint, Object>() {
+    protected Object create(InjectionPoint injectionPoint) {
       Errors errors = new Errors();
       try {
-        ConstructionProxy<?> result = createConstructionProxy(errors, constructor);
+        ConstructionProxy<?> result = createConstructionProxy(errors, injectionPoint);
         errors.throwIfNecessary();
         return result;
       } catch (ErrorsException e) {
@@ -75,9 +75,9 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
   };
 
-  public ConstructionProxy<?> getConstructionProxy(Constructor<?> constructor, Errors errors)
+  public ConstructionProxy<?> getConstructionProxy(InjectionPoint injectionPoint, Errors errors)
       throws ErrorsException {
-    Object constructionProxyOrErrors = constructionProxies.get(constructor);
+    Object constructionProxyOrErrors = constructionProxies.get(injectionPoint);
 
     if (constructionProxyOrErrors instanceof ConstructionProxy<?>) {
       return (ConstructionProxy<?>) constructionProxyOrErrors;
@@ -89,8 +89,10 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
   }
 
-  <T> ConstructionProxy<T> createConstructionProxy(Errors errors, Constructor<T> constructor)
+  <T> ConstructionProxy<T> createConstructionProxy(Errors errors, InjectionPoint injectionPoint)
       throws ErrorsException {
+    @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
+    Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
     Class<T> declaringClass = constructor.getDeclaringClass();
 
     // Find applicable aspects. Bow out if none are applicable to this class.
@@ -101,7 +103,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
     }
     if (applicableAspects.isEmpty()) {
-      return defaultFactory.get(errors, constructor);
+      return defaultFactory.get(errors, injectionPoint);
     }
 
     // Get list of methods from cglib.
@@ -134,7 +136,7 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
     if (!anyMatched) {
       // not test-covered
-      return defaultFactory.get(errors, constructor);
+      return defaultFactory.get(errors, injectionPoint);
     }
 
     // Create callbacks.

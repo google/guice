@@ -19,8 +19,6 @@ package com.google.inject;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -37,16 +35,9 @@ import net.sf.cglib.reflect.FastConstructor;
  */
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
-  public <T> ConstructionProxy<T> get(Errors errors, final Constructor<T> constructor)
-      throws ErrorsException {
-    final InjectionPoint injectionPoint;
-
-    try {
-      injectionPoint = InjectionPoint.get(constructor);
-    } catch (ConfigurationException e) {
-      errors.merge(e.getErrorMessages());
-      throw errors.toException();
-    }
+  public <T> ConstructionProxy<T> get(Errors errors, final InjectionPoint injectionPoint) {
+    @SuppressWarnings("unchecked") // the injection point is for a constructor of T
+    final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
     // We can't use FastConstructor if the constructor is non-public.
     if (!Modifier.isPublic(constructor.getModifiers())) {
@@ -56,11 +47,9 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
             InvocationTargetException {
           try {
             return constructor.newInstance(arguments);
-          }
-          catch (InstantiationException e) {
+          } catch (InstantiationException e) {
             throw new RuntimeException(e);
-          }
-          catch (IllegalAccessException e) {
+          } catch (IllegalAccessException e) {
             throw new AssertionError(e);
           }
         }

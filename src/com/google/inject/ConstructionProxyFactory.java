@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import java.lang.reflect.Constructor;
+import com.google.inject.spi.InjectionPoint;
 
 /**
  * Creates {@link ConstructionProxy} instances.
@@ -29,7 +29,9 @@ interface ConstructionProxyFactory {
 
   /**
    * Gets a construction proxy for the given constructor.
+   *
+   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
    */
-  <T> ConstructionProxy<T> get(Errors errors, Constructor<T> constructor)
+  <T> ConstructionProxy<T> get(Errors errors, InjectionPoint injectionPoint)
       throws ErrorsException;
 }

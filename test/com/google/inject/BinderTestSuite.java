@@ -517,8 +517,8 @@ public class BinderTestSuite {
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(),
-            injectsKey.getName() + ".inject", provisionException,
-            injectsKey.getName() + ".inject", provisionException,
+            provisionException, injectsKey.getName() + ".inject",
+            provisionException, injectsKey.getName() + ".inject",
             "2 error[s]");
       }
 
@@ -528,8 +528,8 @@ public class BinderTestSuite {
         fail();
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(),
-            injectsKey.getName() + ".inject", provisionException,
-            injectsKey.getName() + ".inject", provisionException,
+            provisionException, injectsKey.getName() + ".inject",
+            provisionException, injectsKey.getName() + ".inject",
             "2 error[s]");
       }
     }
@@ -604,7 +604,6 @@ public class BinderTestSuite {
         newInjector().getInstance(injectsKey);
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), "Illegal value: -1",
-            "while locating ", key.getTypeLiteral().toString(),
             "for parameter 0 at " + injectsKey.getName() + ".inject");
       }
 
@@ -615,7 +614,6 @@ public class BinderTestSuite {
         newInjector().injectMembers(injectable);
       } catch (ProvisionException expected) {
         assertContains(expected.getMessage(), "Illegal value: -1",
-            "while locating ", key.getTypeLiteral().toString(),
             "for parameter 0 at " + injectsKey.getName() + ".inject");
       }
 
@@ -626,8 +624,7 @@ public class BinderTestSuite {
         nextId.set(-1);
         hasProvider.provider.get();
       } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), "Illegal value: -1",
-            "while locating ", key.getTypeLiteral().toString());
+        assertContains(expected.getMessage(), "Illegal value: -1");
       }
     }
   }

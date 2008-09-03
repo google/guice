@@ -226,12 +226,12 @@ public class TypeConversionTest extends TestCase {
       Throwable cause = Iterables.getOnlyElement(expected.getErrorMessages()).getCause();
       assertTrue(cause instanceof UnsupportedOperationException);
       assertContains(expected.getMessage(),
-          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          "Error converting 'invalid' (bound at ", getClass().getName(),
+          "1) Error converting 'invalid' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
           "using BrokenConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
-          "Reason: java.lang.UnsupportedOperationException: Cannot convert");
+          "Reason: java.lang.UnsupportedOperationException: Cannot convert",
+          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
   }
 
@@ -249,11 +249,11 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          "Received null converting 'foo' (bound at ", getClass().getName(),
+          "1) Received null converting 'foo' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
           "using CustomConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:");
+          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
+          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
   }
 
@@ -271,12 +271,12 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          "Type mismatch converting 'foo' (bound at ", getClass().getName(),
+          "1) Type mismatch converting 'foo' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date",
           "using CustomConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
-          "Converter returned -1.");
+          "Converter returned -1.",
+          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
   }
 
@@ -295,12 +295,12 @@ public class TypeConversionTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
-          "Multiple converters can convert 'foo' (bound at ", getClass().getName(),
+          "1) Multiple converters can convert 'foo' (bound at ", getClass().getName(),
           ".configure(TypeConversionTest.java:", "to java.util.Date:",
           "CustomConverter which matches only(java.util.Date)", "and",
           "CustomConverter which matches only(java.util.Date)",
-          "Please adjust your type converter configuration to avoid overlapping matches.");
+          "Please adjust your type converter configuration to avoid overlapping matches.",
+          "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
   }
 

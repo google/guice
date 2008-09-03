@@ -88,9 +88,9 @@ public class ImplicitBindingTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       Asserts.assertContains(expected.getMessage(),
-          "1) Error at " + I.class.getName() + ".class(ImplicitBindingTest.java:",
-          "No implementation for " + I.class.getName(),
-          "annotated with @" + Named.class.getName() + "(value=i) was bound.");
+          "1) No implementation for " + I.class.getName(),
+          "annotated with @" + Named.class.getName() + "(value=i) was bound.",
+          "at " + I.class.getName() + ".class(ImplicitBindingTest.java:");
     }
 
   }

@@ -87,15 +87,15 @@ public class BinderTest extends TestCase {
     } catch (CreationException e) {
       assertEquals(4, e.getErrorMessages().size());
       assertContains(e.getMessage(),
-          "1) Error at " + getClass().getName(),
-          "No implementation for java.lang.Runnable was bound.",
-          "2) Error at " + getClass().getName(),
-          "No implementation for " + Comparator.class.getName() + " was bound.",
-          "3) Error at " + getClass().getName(),
-          "No implementation for java.util.concurrent.Callable<java.lang.String> was bound.",
-          "4) Error at " + getClass().getName(),
-          "No implementation for java.util.Date annotated with "
-              + "@com.google.inject.name.Named(value=date) was bound.");
+          "1) No implementation for java.lang.Runnable was bound.",
+          "at " + getClass().getName(),
+          "2) No implementation for " + Comparator.class.getName() + " was bound.",
+          "at " + getClass().getName(),
+          "3) No implementation for java.util.concurrent.Callable<java.lang.String> was bound.",
+          "at " + getClass().getName(),
+          "4) No implementation for java.util.Date annotated with @"
+              + Named.class.getName() + "(value=date) was bound.",
+          "at " + getClass().getName());
     }
   }
 
@@ -109,8 +109,9 @@ public class BinderTest extends TestCase {
     } catch (CreationException e) {
       assertEquals(1, e.getErrorMessages().size());
       assertContains(e.getMessage(),
-          "1) Error at " + getClass().getName(),
-          "No implementation for java.lang.Runnable was bound.");
+          "No implementation for java.lang.Runnable was bound.",
+          "for field at " + NeedsRunnable.class.getName(), ".runnable(BinderTest.java:",
+          "at " + getClass().getName(), ".configure(BinderTest.java:");
     }
   }
 
@@ -128,8 +129,8 @@ public class BinderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at " + getClass().getName(),
-          "Missing constant value. Please call to(...).");
+          "1) Missing constant value. Please call to(...).",
+          "at " + getClass().getName());
     }
   }
 
@@ -143,8 +144,8 @@ public class BinderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at " + getClass().getName(), ".configure(BinderTest.java:",
-          "Binding points to itself.");
+          "1) Binding points to itself.",
+          "at " + getClass().getName(), ".configure(BinderTest.java:");
     }
   }
 
@@ -226,10 +227,9 @@ public class BinderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + getClass().getName(), ".configure(BinderTest.java",
-          "A binding to java.lang.String[] was already configured");
-      assertContains(expected.getMessage(),
-          "1 error[s]");
+          "1) A binding to java.lang.String[] was already configured at " + getClass().getName(),
+          "at " + getClass().getName(), ".configure(BinderTest.java:");
+      assertContains(expected.getMessage(), "1 error[s]");
     }
   }
 
@@ -291,8 +291,8 @@ public class BinderTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at " + MissingParameter.class.getName() + ".<init>(BinderTest.java:",
-          "Could not find a suitable constructor in " + NoInjectConstructor.class.getName());
+          "1) Could not find a suitable constructor in " + NoInjectConstructor.class.getName(),
+          "at " + MissingParameter.class.getName() + ".<init>(BinderTest.java:");
     }
   }
 
@@ -320,8 +320,8 @@ public class BinderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at " + BinderTest.class.getName(), "configure(BinderTest.java:",
-          "Binding to Provider is not allowed.");
+          "1) Binding to Provider is not allowed.",
+          "at " + BinderTest.class.getName(), "configure(BinderTest.java:");
     }
   }
 
@@ -415,8 +415,8 @@ public class BinderTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       Asserts.assertContains(expected.getMessage(),
-          "1) Error at " + Provider.class.getName(),
-          "Cannot inject a Provider that has no type parameter");
+          "1) Cannot inject a Provider that has no type parameter",
+          "at " + Provider.class.getName());
     }
   }
 }

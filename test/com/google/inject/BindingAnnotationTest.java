@@ -52,9 +52,9 @@ public class BindingAnnotationTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "BindingAnnotationTest$Foo.s",
-          "No implementation for java.lang.String annotated with",
-          "BindingAnnotationTest$Blue(value=5) was bound");
+      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+          "BindingAnnotationTest$Blue(value=5) was bound",
+          "at " + BindingAnnotationTest.class.getName(), ".configure(BindingAnnotationTest.java:");
     }
   }
 

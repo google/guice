@@ -16,6 +16,7 @@
 
 package com.google.inject.spi;
 
+import com.google.common.base.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.Errors;
@@ -37,34 +38,37 @@ import java.util.List;
  * @author crazybob@google.com (Bob Lee)
  */
 public final class Message implements Serializable, Element {
-  private final String source;
   private final String message;
-  private final List<Dependency> dependencies;
   private final Throwable cause;
+  private final List<Object> sources;
 
-  public Message(Object source, String message, List<Dependency> dependencies,
-      Throwable cause) {
-    this.source = Errors.sourceToString(source);
+  public Message(String message, Throwable cause, List<Object> sources) {
     this.message = checkNotNull(message, "message");
-    this.dependencies = ImmutableList.copyOf(dependencies);
     this.cause = cause;
+    this.sources = ImmutableList.copyOf(sources);
   }
 
   public Message(Object source, Throwable throwable) {
-    this(source, "An exception was caught and reported. Message: " + throwable.getMessage(),
-        ImmutableList.<Dependency>of(), throwable);
+    this("An exception was caught and reported. Message: " + throwable.getMessage(),
+        throwable, ImmutableList.of(source));
   }
 
   public Message(Object source, String message) {
-    this(source, message, ImmutableList.<Dependency>of(), null);
+    this(message, null, ImmutableList.of(source));
   }
 
   public Message(String message) {
-    this(SourceProvider.UNKNOWN_SOURCE, message, ImmutableList.<Dependency>of(), null);
+    this(message, (Throwable) null);
   }
 
   public String getSource() {
-    return source;
+    return sources.isEmpty()
+        ? SourceProvider.UNKNOWN_SOURCE.toString()
+        : Errors.sourceToString(sources.get(sources.size() - 1));
+  }
+
+  public List<Object> getSources() {
+    return sources;
   }
 
   /**
@@ -72,10 +76,6 @@ public final class Message implements Serializable, Element {
    */
   public String getMessage() {
     return message;
-  }
-
-  public List<Dependency> getDependencies() {
-    return dependencies;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -91,11 +91,11 @@ public final class Message implements Serializable, Element {
   }
 
   @Override public String toString() {
-    return source + " " + message;
+    return message;
   }
 
   @Override public int hashCode() {
-    return source.hashCode() * 31 + message.hashCode();
+    return message.hashCode();
   }
 
   @Override public boolean equals(Object o) {
@@ -103,6 +103,6 @@ public final class Message implements Serializable, Element {
       return false;
     }
     Message e = (Message) o;
-    return source.equals(e.source) && message.equals(e.message);
+    return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
   }
 }

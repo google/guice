@@ -169,9 +169,9 @@ public class OverrideModuleTest extends TestCase {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error at " + replacements.getClass().getName());
       assertContains(expected.getMessage(), "A binding to java.lang.String "
-          + "was already configured at " + replacements.getClass().getName());
+              + "was already configured at " + replacements.getClass().getName(),
+          "at " + replacements.getClass().getName());
     }
   }
 
@@ -194,9 +194,9 @@ public class OverrideModuleTest extends TestCase {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error at " + original.getClass().getName());
-      assertContains(expected.getMessage(), "A binding to java.lang.String "
-          + "was already configured at " + replacements.getClass().getName());
+      assertContains(expected.getMessage(), "1) A binding to java.lang.String "
+          + "was already configured at " + replacements.getClass().getName(),
+          "at " + original.getClass().getName());
     }
   }
 
@@ -272,8 +272,9 @@ public class OverrideModuleTest extends TestCase {
       createInjector(Modules.override(original).with(replacements));
       fail("Exception expected");
     } catch (CreationException e) {
-      assertContains(e.getMessage(), "Error at ", getClass().getName(), ".configure(",
-          "The scope for @TestScopeAnnotation is bound directly and cannot be overridden.");
+      assertContains(e.getMessage(),
+          "1) The scope for @TestScopeAnnotation is bound directly and cannot be overridden.",
+          "at ", getClass().getName(), ".configure(");
     }
   }
 

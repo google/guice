@@ -27,10 +27,9 @@ public class ErrorMessagesTest extends TestCase {
       injector.getInstance(InnerClass.class);
       fail();
     } catch (Exception expected) {
-      // TODO(kevinb): why does the source come out as unknown??
       assertContains(expected.getMessage(),
-          "Error at " + InnerClass.class.getName() + ".class(ErrorMessagesTest.java:",
-          "Injecting into inner classes is not supported.");
+          "Injecting into inner classes is not supported.",
+          "at " + InnerClass.class.getName() + ".class(ErrorMessagesTest.java:");
     }
   }
 
@@ -43,8 +42,8 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (Exception expected) {
       assertContains(expected.getMessage(),
-          "Error at " + LocalClass.class.getName() + ".class(ErrorMessagesTest.java:",
-          "Injecting into inner classes is not supported.");
+          "Injecting into inner classes is not supported.",
+          "at " + LocalClass.class.getName() + ".class(ErrorMessagesTest.java:");
     }
   }
 
@@ -54,9 +53,9 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + B.class.getName() + ".injectMe(ErrorMessagesTest.java:",
           B.class.getName() + ".injectMe() is annotated with @", Green.class.getName() + "(), ",
-          "but binding annotations should be applied to its parameters instead.");
+          "but binding annotations should be applied to its parameters instead.",
+          "at " + B.class.getName() + ".injectMe(ErrorMessagesTest.java:");
     }
 
     try {
@@ -64,9 +63,9 @@ public class ErrorMessagesTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + C.class.getName() + ".<init>(ErrorMessagesTest.java:",
           C.class.getName() + ".<init>() is annotated with @", Green.class.getName() + "(), ",
-          "but binding annotations should be applied to its parameters instead.");
+          "but binding annotations should be applied to its parameters instead.",
+          "at " + C.class.getName() + ".<init>(ErrorMessagesTest.java:");
     }
   }
 

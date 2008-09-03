@@ -95,8 +95,8 @@ public class RequestInjectionTest extends TestCase {
       });
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at " + NeedsRunnable.class.getName(), ".runnable(RequestInjectionTest.java:",
-          "No implementation for java.lang.Runnable was bound");
+          "1) No implementation for java.lang.Runnable was bound",
+          "at " + NeedsRunnable.class.getName(), ".runnable(RequestInjectionTest.java:");
     }
   }
 
@@ -114,10 +114,9 @@ public class RequestInjectionTest extends TestCase {
       });
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + getClass().getName(),
-          "Error in custom provider, java.lang.UnsupportedOperationException",
-          "while locating java.lang.Runnable",
-          "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:");
+          "1) Error in custom provider, java.lang.UnsupportedOperationException",
+          "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:",
+          "at " + getClass().getName(), ".configure(RequestInjectionTest.java:");
     }
   }
 

@@ -18,6 +18,7 @@ package com.google.inject.throwingproviders;
 
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -172,7 +173,7 @@ public class ThrowingProviderBinderTest extends TestCase {
         }
       });
       fail();
-    } catch (IllegalArgumentException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
@@ -186,7 +187,7 @@ public class ThrowingProviderBinderTest extends TestCase {
         }
       });
       fail();
-    } catch (IllegalArgumentException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
@@ -202,7 +203,7 @@ public class ThrowingProviderBinderTest extends TestCase {
         }
       });
       fail();
-    } catch (IllegalArgumentException expected) {
+    } catch (CreationException expected) {
       assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }

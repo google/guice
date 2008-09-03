@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.CreationException;
@@ -40,6 +39,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -53,62 +53,45 @@ public final class Errors implements Serializable {
   private static final boolean allowNullsBadBadBad
       = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
 
-  // TODO: Provide a policy on what the source line should be for a given member.
-  //       Should we prefer the line where the binding was made?
-  //       Should we prefer the member?
-  // For example, if we bind a class with two scope annotations, is that a problem
-  // with the binding, or a problem with the bound class? The catch being that if it's
-  // a problem with the binding, then we report a different source line if the class
-  // is retrieved via a JIT binding.
-  //
-  // What about a missing implementation? Is that at the caller?
-  // What about injection points?
-
-  /** the stacktrace or member that will be the reference location for new errors */
-  private final Object source;
-
-  /** false indicates that new errors should not be added */
-  private boolean isMutable = true;
-  private final List<Message> errors;
-  private final List<Dependency> dependencies;
+  private List<Message> errors;
+  private final List<Object> sources;
 
   public Errors() {
-    this(SourceProvider.UNKNOWN_SOURCE);
+    sources = Lists.newArrayList();
+    errors = Lists.newArrayList();
   }
 
   public Errors(Object source) {
-    this.source = source;
-    isMutable = true;
+    sources = Lists.newArrayList(source);
     errors = Lists.newArrayList();
-    dependencies = Lists.newArrayList();
   }
 
-  public Errors(Errors parent, Object source) {
-    this.source = source;
-    isMutable = parent.isMutable;
+  private Errors(Errors parent, Object source) {
     errors = parent.errors;
-    dependencies = Lists.newArrayList(parent.dependencies);
+    sources = Lists.newArrayList(parent.sources);
+    sources.add(source);
+  }
+
+  /**
+   * Returns an instance that uses {@code source} as a reference point for newly added errors.
+   */
+  public Errors withSource(Object source) {
+    return source == SourceProvider.UNKNOWN_SOURCE
+        ? this
+        : new Errors(this, source);
+  }
+
+  public void pushSource(Object source) {
+    sources.add(source);
+  }
+
+  public void popSource(Object source) {
+    Object popped = sources.remove(sources.size() - 1);
+    checkArgument(source == popped);
   }
 
   public Errors userReportedError(String messageFormat, List<Object> arguments) {
     return addMessage(messageFormat, arguments);
-  }
-
-  public void pushInjectionPoint(Dependency<?> dependency) {
-    dependencies.add(dependency);
-  }
-
-  public void popInjectionPoint(Dependency<?> dependency) {
-    Dependency popped = dependencies.remove(dependencies.size() - 1);
-    checkArgument(dependency == popped);
-  }
-
-  /**
-   * Returns a new instance that uses {@code source} as a reference point for
-   * newly added errors.
-   */
-  public Errors withSource(Object source) {
-    return new Errors(this, source);
   }
 
   /**
@@ -294,7 +277,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors makeImmutable() {
-    isMutable = false;
+    errors = ImmutableList.copyOf(errors);
     return this;
   }
 
@@ -308,17 +291,13 @@ public final class Errors implements Serializable {
   }
 
   private Message merge(Message message) {
-    List<Dependency> dependencies = Lists.newArrayList();
-    dependencies.addAll(this.dependencies);
-    dependencies.addAll(message.getDependencies());
-    Object source = message.getSource() != SourceProvider.UNKNOWN_SOURCE
-        ? message.getSource()
-        : this.source;
-    return new Message(source, message.getMessage(), dependencies, message.getCause());
+    List<Object> sources = Lists.newArrayList();
+    sources.addAll(this.sources);
+    sources.addAll(message.getSources());
+    return new Message(message.getMessage(), message.getCause(), stripDuplicates(sources));
   }
 
   public Errors merge(Collection<Message> messages) {
-    checkState(isMutable);
     if (messages != this.errors) {
       for (Message message : messages) {
         errors.add(merge(message));
@@ -328,7 +307,6 @@ public final class Errors implements Serializable {
   }
 
   public Errors merge(Errors moreErrors) {
-    checkState(isMutable);
     merge(moreErrors.errors);
     return this;
   }
@@ -355,16 +333,11 @@ public final class Errors implements Serializable {
 
   private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
     String message = format(messageFormat, arguments);
-    addMessage(new Message(source, message, ImmutableList.copyOf(dependencies), cause));
+    addMessage(new Message(message, cause, stripDuplicates(sources)));
     return this;
   }
 
   public Errors addMessage(Message message) {
-    // TODO: merge the sources?
-    if (!isMutable) {
-      throw new AssertionError();
-    }
-
     errors.add(message);
     return this;
   }
@@ -392,30 +365,32 @@ public final class Errors implements Serializable {
     Formatter fmt = new Formatter().format(heading).format(":%n%n");
     int index = 1;
     for (Message errorMessage : errorMessages) {
-      fmt.format("%s) Error at %s:%n", index++, errorMessage.getSource())
-         .format(" %s%n", errorMessage.getMessage());
+      fmt.format("%s) %s%n", index++, errorMessage.getMessage());
 
-      List<Dependency> dependencies = errorMessage.getDependencies();
+      List<Object> dependencies = errorMessage.getSources();
       for (int i = dependencies.size() - 1; i >= 0; i--) {
-        Dependency dependency = dependencies.get(i);
+        Object source = dependencies.get(i);
 
-        Key key = dependency.getKey();
-        fmt.format("  while locating %s%n", convert(key));
+        if (source instanceof Dependency) {
+          Dependency<?> dependency = (Dependency<?>) source;
 
-        InjectionPoint injectionPoint = dependency.getInjectionPoint();
-        if (injectionPoint == null) {
+          InjectionPoint injectionPoint = dependency.getInjectionPoint();
+          if (injectionPoint != null) {
+            Member member = injectionPoint.getMember();
+            Class<? extends Member> memberType = MoreTypes.memberType(member);
+            if (memberType == Field.class) {
+              fmt.format("  for field at %s%n", StackTraceElements.forMember(member));
+            } else if (memberType == Method.class || memberType == Constructor.class) {
+              fmt.format("  for parameter %s at %s%n",
+                  dependency.getParameterIndex(), StackTraceElements.forMember(member));
+            } else {
+              throw new AssertionError();
+            }
+          }
           continue;
         }
 
-        Member member = injectionPoint.getMember();
-        Class<? extends Member> memberType = MoreTypes.memberType(member);
-        if (memberType == Field.class) {
-          fmt.format("    for field at %s%n", StackTraceElements.forMember(member));
-
-        } else if (memberType == Method.class || memberType == Constructor.class) {
-          fmt.format("    for parameter %s at %s%n",
-              dependency.getParameterIndex(), StackTraceElements.forMember(member));
-        }
+        fmt.format("  at %s%n", sourceToString(source));
       }
 
       fmt.format("%n");
@@ -509,12 +484,33 @@ public final class Errors implements Serializable {
   public static String sourceToString(Object source) {
     checkNotNull(source, "source");
 
-    if (source instanceof Member) {
+    if (source instanceof InjectionPoint) {
+      return sourceToString(((InjectionPoint) source).getMember());
+    } else if (source instanceof Member) {
       return StackTraceElements.forMember((Member) source).toString();
     } else if (source instanceof Class) {
       return StackTraceElements.forType(((Class<?>) source)).toString();
     } else {
       return convert(source).toString();
     }
+  }
+  
+  /**
+   * Removes consecutive duplicates, so that [A B B C D A] becomes [A B C D A].
+   */
+  private <T> List<T> stripDuplicates(List<T> list) {
+    list = Lists.newArrayList(list);
+
+    Iterator i = list.iterator();
+    if (i.hasNext()) {
+      for (Object last = i.next(), current; i.hasNext(); last = current) {
+        current = i.next();
+        if (last.equals(current)) {
+          i.remove();
+        }
+      }
+    }
+
+    return ImmutableList.copyOf(list);
   }
 }

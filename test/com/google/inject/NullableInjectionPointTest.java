@@ -95,8 +95,9 @@ public class NullableInjectionPointTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error at " + getClass().getName(),
-          "Binding to null instances is not allowed.");
+      assertContains(expected.getMessage(),
+          "Binding to null instances is not allowed.",
+          "at " + getClass().getName(), ".configure(NullableInjectionPointTest.java:");
     }
   }
 

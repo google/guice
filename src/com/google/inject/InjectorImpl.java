@@ -672,8 +672,8 @@ class InjectorImpl implements Injector {
     for (InjectionPoint injectionPoint : injectionPoints) {
       try {
         Errors errorsForMember = injectionPoint.isOptional()
-            ? new Errors(injectionPoint.getMember())
-            : errors.withSource(injectionPoint.getMember());
+            ? new Errors(injectionPoint)
+            : errors;
         SingleMemberInjector injector = injectionPoint.getMember() instanceof Field
             ? new SingleFieldInjector(errorsForMember, this, injectionPoint)
             : new SingleMethodInjector(errorsForMember, this, injectionPoint);
@@ -726,7 +726,7 @@ class InjectorImpl implements Injector {
 
       // Ewwwww...
       field.setAccessible(true);
-      factory = injector.getInternalFactory(dependency.getKey(), errors.withSource(field));
+      factory = injector.getInternalFactory(dependency.getKey(), errors.withSource(dependency));
     }
 
     public InjectionPoint getInjectionPoint() {
@@ -739,7 +739,7 @@ class InjectorImpl implements Injector {
 
     public void inject(Errors errors, InternalContext context, Object o) {
       context.setDependency(dependency);
-      errors.pushInjectionPoint(dependency);
+      errors.pushSource(dependency);
       try {
         Object value = factory.get(errors, context, dependency);
         field.set(o, value);
@@ -752,32 +752,44 @@ class InjectorImpl implements Injector {
       }
       finally {
         context.setDependency(null);
-        errors.popInjectionPoint(dependency);
+        errors.popSource(dependency);
       }
     }
   }
 
   /**
-   * Gets parameter injectors.
-   *
-   * @param member to which the parameters belong
-   * @return injections
+   * Returns parameter injectors, or {@code null} if there are no parameters.
    */
-  <M extends Member & AnnotatedElement> SingleParameterInjector<?>[] getParametersInjectors(
-      M member, List<Dependency<?>> parameters, Errors errors) throws ErrorsException {
-    Annotation misplacedBindingAnnotation
-        = Keys.findBindingAnnotation(errors, member, member.getAnnotations());
-    if (misplacedBindingAnnotation != null) {
-      errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+  SingleParameterInjector<?>[] getParametersInjectors(InjectionPoint injectionPoint, Errors errors)
+      throws ErrorsException {
+    errors.pushSource(injectionPoint);
+    try {
+      Member member = injectionPoint.getMember();
+      Annotation misplacedBindingAnnotation = Keys.findBindingAnnotation(
+          errors, member, ((AnnotatedElement) member).getAnnotations());
+      if (misplacedBindingAnnotation != null) {
+        errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+      }
+    } finally {
+      errors.popSource(injectionPoint);
+    }
+
+    List<Dependency<?>> parameters = injectionPoint.getDependencies();
+    if (parameters.isEmpty()) {
+      return null;
     }
 
     SingleParameterInjector<?>[] parameterInjectors
         = new SingleParameterInjector<?>[parameters.size()];
     int index = 0;
     for (Dependency<?> parameter : parameters) {
+      errors.pushSource(parameter);
       try {
-        parameterInjectors[index] = createParameterInjector(parameter, member, errors);
+        parameterInjectors[index] = createParameterInjector(parameter, errors);
       } catch (ErrorsException rethrownBelow) {
+        // rethrown below
+      } finally {
+        errors.popSource(parameter);
       }
       index++;
     }
@@ -787,9 +799,9 @@ class InjectorImpl implements Injector {
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(final Dependency<T> dependency,
-      Member member, final Errors errors) throws ErrorsException {
-    InternalFactory<? extends T> factory;
-    factory = getInternalFactory(dependency.getKey(), errors.withSource(member));
+      final Errors errors) throws ErrorsException {
+    InternalFactory<? extends T> factory
+        = getInternalFactory(dependency.getKey(), errors.withSource(dependency));
     return new SingleParameterInjector<T>(dependency, factory);
   }
 
@@ -833,26 +845,21 @@ class InjectorImpl implements Injector {
         throw errors.toException();
       }
 
-      parameterInjectors = injectionPoint.getDependencies().isEmpty()
-          ? null
-          : injector.getParametersInjectors(method, injectionPoint.getDependencies(), errors);
+      parameterInjectors = injector.getParametersInjectors(injectionPoint, errors);
     }
 
     public void inject(Errors errors, InternalContext context, Object o) {
       try {
         Object[] parameters = getParameters(errors, context, parameterInjectors);
         methodInvoker.invoke(o, parameters);
-      }
-      catch (IllegalAccessException e) {
+      } catch (IllegalAccessException e) {
         throw new AssertionError(e);
-      }
-      catch (InvocationTargetException userException) {
+      } catch (InvocationTargetException userException) {
         Throwable cause = userException.getCause() != null
             ? userException.getCause()
             : userException;
-        errors.errorInjectingMethod(cause);
-      }
-      catch (ErrorsException e) {
+        errors.withSource(injectionPoint).errorInjectingMethod(cause);
+      } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
@@ -895,12 +902,12 @@ class InjectorImpl implements Injector {
 
     T inject(Errors errors, InternalContext context) throws ErrorsException {
       context.setDependency(dependency);
-      errors.pushInjectionPoint(dependency);
+      errors.pushSource(dependency);
       try {
         return factory.get(errors, context, dependency);
       }
       finally {
-        errors.popInjectionPoint(dependency);
+        errors.popSource(dependency);
         context.setDependency(null);
       }
     }
@@ -975,13 +982,13 @@ class InjectorImpl implements Injector {
             public T call(InternalContext context) throws ErrorsException {
               Dependency<T> dependency = Dependency.get(key);
               context.setDependency(dependency);
-              errors.pushInjectionPoint(dependency);
+              errors.pushSource(dependency);
               try {
                 return factory.get(errors, context, dependency);
               }
               finally {
                 context.setDependency(null);
-                errors.popInjectionPoint(dependency);
+                errors.popSource(dependency);
               }
             }
           });

@@ -52,7 +52,8 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch(RuntimeException userException) {
       Errors userErrors = ProvisionException.getErrors(userException);
-      throw errors.errorInProvider(userException, userErrors).toException();
+      throw errors.withSource(source)
+          .errorInProvider(userException, userErrors).toException();
     }
   }
 

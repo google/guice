@@ -191,14 +191,14 @@ class InjectorBuilder {
             public Void call(InternalContext context) {
               Dependency<?> dependency = Dependency.get(binding.key);
               context.setDependency(dependency);
-              errors.pushInjectionPoint(dependency);
+              errors.pushSource(dependency);
               try {
                 binding.internalFactory.get(errors, context, dependency);
               } catch (ErrorsException e) {
                 errors.merge(e.getErrors());
               } finally {
                 context.setDependency(null);
-                errors.popInjectionPoint(dependency);
+                errors.popSource(dependency);
               }
 
               return null;

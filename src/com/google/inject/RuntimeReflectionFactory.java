@@ -18,10 +18,11 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -35,54 +36,21 @@ class RuntimeReflectionFactory implements Reflection.Factory {
     private final ConstructionProxyFactory constructionProxyFactory;
 
     private RuntimeReflection(ConstructionProxyFactory constructionProxyFactory) {
-      this.constructionProxyFactory = checkNotNull(constructionProxyFactory, "constructionProxyFatory");
+      this.constructionProxyFactory
+          = checkNotNull(constructionProxyFactory, "constructionProxyFatory");
     }
 
     public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
         throws ErrorsException {
-      return constructionProxyFactory.get(errors, findConstructorIn(errors, implementation));
-    }
-
-    private <T> Constructor<T> findConstructorIn(Errors errors, Class<T> implementation)
-        throws ErrorsException {
-      Constructor<T> found = null;
-      @SuppressWarnings("unchecked")
-      Constructor<T>[] constructors
-          = (Constructor<T>[]) implementation.getDeclaredConstructors();
-      for (Constructor<T> constructor : constructors) {
-        Inject inject = constructor.getAnnotation(Inject.class);
-        if (inject != null) {
-          if (inject.optional()) {
-            errors.optionalConstructor(constructor);
-          }
-
-          if (found != null) {
-            errors.tooManyConstructors(implementation);
-          }
-
-          found = constructor;
-        }
-      }
-      if (found != null) {
-        return found;
-      }
-
-      // If no annotated constructor is found, look for a no-arg constructor
-      // instead.
+      InjectionPoint injectionPoint;
       try {
-        Constructor<T> noArgCtor = implementation.getDeclaredConstructor();
+        injectionPoint = InjectionPoint.forConstructorOf(implementation);
+      } catch (ConfigurationException e) {
+        throw errors.merge(e.getErrorMessages()).toException();
+      }
 
-        // Disallow private constructors on non-private classes (unless they have @Inject)
-        if (Modifier.isPrivate(noArgCtor.getModifiers())
-            && !Modifier.isPrivate(implementation.getModifiers())) {
-          errors.missingConstructor(implementation);
-          throw errors.toException();
-        }
-        return noArgCtor;
-      }
-      catch (NoSuchMethodException e) {
-        throw errors.missingConstructor(implementation).toException();
-      }
+      errors = errors.withSource(injectionPoint);
+      return constructionProxyFactory.get(errors, injectionPoint);
     }
 
     /**

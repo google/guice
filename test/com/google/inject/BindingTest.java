@@ -185,8 +185,8 @@ public class BindingTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:",
-          "Could not find a suitable constructor in " + PrivateNoArg.class.getName());
+          "Could not find a suitable constructor in " + PrivateNoArg.class.getName(),
+          "at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:");
     }
   }
 
@@ -196,9 +196,9 @@ public class BindingTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + TooManyConstructors.class.getName() + ".class(BindingTest.java:",
           TooManyConstructors.class.getName() + " has more than one constructor annotated with " 
-              + "@Inject. Classes must have either one (and only one) constructor");
+              + "@Inject. Classes must have either one (and only one) constructor",
+          "at " + TooManyConstructors.class.getName() + ".class(BindingTest.java:");
     }
   }
 

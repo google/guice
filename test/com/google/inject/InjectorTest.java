@@ -323,9 +323,8 @@ public class InjectorTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at ", Money.class.getName() + ".class(InjectorTest.java:",
           Tree.class.getName() + " doesn't provide instances of " + Money.class.getName(),
-          "while locating com.google.inject.InjectorTest$Money");
+          "at ", Money.class.getName() + ".class(InjectorTest.java:");
     }
   }
 
@@ -335,8 +334,8 @@ public class InjectorTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at ", PineTree.class.getName() + ".class(InjectorTest.java:",
-          Tree.class.getName() + " doesn't extend " + PineTree.class.getName());
+          Tree.class.getName() + " doesn't extend " + PineTree.class.getName(),
+          "at ", PineTree.class.getName() + ".class(InjectorTest.java:");
     }
   }
 
@@ -346,8 +345,8 @@ public class InjectorTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at ", SeaHorse.class.getName() + ".class(InjectorTest.java:",
-          "@ImplementedBy points to the same class it annotates.");
+          "@ImplementedBy points to the same class it annotates.",
+          "at ", SeaHorse.class.getName() + ".class(InjectorTest.java:");
     }
   }
 
@@ -357,8 +356,8 @@ public class InjectorTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Error at ", Chicken.class.getName() + ".class(InjectorTest.java:",
-          "@ProvidedBy points to the same class it annotates");
+          "@ProvidedBy points to the same class it annotates",
+          "at ", Chicken.class.getName() + ".class(InjectorTest.java:");
     }
   }
 

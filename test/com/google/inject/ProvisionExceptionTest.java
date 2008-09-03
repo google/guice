@@ -34,13 +34,9 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(e.getMessage(), "Error injecting constructor",
-          "while locating com.google.inject.ProvisionExceptionTest$D",
           "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
-          "while locating com.google.inject.ProvisionExceptionTest$C",
           "for field at com.google.inject.ProvisionExceptionTest$B.c",
-          "while locating com.google.inject.ProvisionExceptionTest$B",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A",
-          "while locating com.google.inject.ProvisionExceptionTest$A");
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -60,13 +56,9 @@ public class ProvisionExceptionTest extends TestCase {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertFalse(e.getMessage().contains("custom provider"));
       assertContains(e.getMessage(), "Error injecting constructor",
-          "while locating com.google.inject.ProvisionExceptionTest$D",
           "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
-          "while locating com.google.inject.ProvisionExceptionTest$C",
           "for field at com.google.inject.ProvisionExceptionTest$B.c",
-          "while locating com.google.inject.ProvisionExceptionTest$B",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A",
-          "while locating com.google.inject.ProvisionExceptionTest$A");
+          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -76,9 +68,8 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "Error injecting method");
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$E");
+      assertContains(e.getMessage(), "Error injecting method",
+          "at " + E.class.getName() + ".setObject(ProvisionExceptionTest.java:");
     }
   }
 
@@ -92,9 +83,9 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "Error in custom provider");
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$D");
+      assertContains(e.getMessage(),
+          "1) Error in custom provider, java.lang.UnsupportedOperationException",
+          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
 
@@ -104,8 +95,9 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$D");
+      assertContains(e.getMessage(),
+          "1) Error injecting constructor, java.lang.UnsupportedOperationException",
+          "at " + D.class.getName() + ".<init>(ProvisionExceptionTest.java:");
     }
   }
 
@@ -119,8 +111,9 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$D");
+      assertContains(e.getMessage(),
+          "1) Error in custom provider, java.lang.UnsupportedOperationException",
+          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
 
@@ -132,9 +125,9 @@ public class ProvisionExceptionTest extends TestCase {
       Guice.createInjector().getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertEquals("User Exception", e.getCause().getMessage());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$F");
+      assertContains(e.getMessage(),
+          "1) Error injecting constructor, com.google.inject.ProvisionException: User Exception",
+          "at " + F.class.getName() + ".<init>(ProvisionExceptionTest.java:");
     }
   }
 
@@ -147,9 +140,9 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertEquals("User Exception", e.getCause().getMessage());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$F");
+      assertContains(e.getMessage(),
+          "1) Error in custom provider, com.google.inject.ProvisionException: User Exception",
+          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
 
@@ -162,9 +155,9 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertEquals("User Exception", e.getCause().getMessage());
-      assertContains(e.getMessage(), "while locating "
-          + "com.google.inject.ProvisionExceptionTest$F");
+      assertContains(e.getMessage(),
+          "1) Error in custom provider, com.google.inject.ProvisionException: User Exception",
+          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
 

@@ -235,7 +235,7 @@ public class MapBinderTest extends TestCase {
         }
       });
       fail();
-    } catch (NullPointerException expected) {}
+    } catch (CreationException expected) {}
   }
 
   public void testMapBinderMapForbidsNullValues() {
@@ -284,8 +284,9 @@ public class MapBinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Error at " + getClass().getName(),
-          "No implementation for java.lang.Integer");
+      assertContains(expected.getMessage(),
+          "1) No implementation for java.lang.Integer",
+          "at " + getClass().getName());
     }
   }
 

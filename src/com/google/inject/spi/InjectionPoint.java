@@ -26,8 +26,8 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.Keys;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.Nullability;
-import java.io.Serializable;
 import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -220,6 +220,59 @@ public final class InjectionPoint implements Serializable {
     addInjectionPoints(type, Factory.FIELDS, false, injectionPoints, errors);
     addInjectionPoints(type, Factory.METHODS, false, injectionPoints, errors);
     ConfigurationException.throwNewIfNonEmpty(errors);
+  }
+
+  /**
+   * Returns a new injection point for the injectable constructor of {@code type}.
+   *
+   * @param type a concrete type with exactly one constructor annotated {@literal @}{@link Inject},
+   *     or a no-arguments constructor that is not private.
+   * @throws RuntimeException if there is no injectable constructor, more than one injectable
+   *     constructor, or if parameters of the injectable constructor are malformed, such as a
+   *     parameter with multiple binding annotations.
+   */
+  public static InjectionPoint forConstructorOf(Class<?> type) {
+    Errors errors = new Errors(type);
+
+    Constructor<?> found = null;
+    for (Constructor<?> constructor : type.getDeclaredConstructors()) {
+      Inject inject = constructor.getAnnotation(Inject.class);
+      if (inject != null) {
+        if (inject.optional()) {
+          errors.optionalConstructor(constructor);
+        }
+
+        if (found != null) {
+          errors.tooManyConstructors(type);
+        }
+
+        found = constructor;
+      }
+    }
+
+    ConfigurationException.throwNewIfNonEmpty(errors);
+
+    if (found != null) {
+      return get(found);
+    }
+
+    // If no annotated constructor is found, look for a no-arg constructor
+    // instead.
+    try {
+      Constructor<?> noArgCtor = type.getDeclaredConstructor();
+
+      // Disallow private constructors on non-private classes (unless they have @Inject)
+      if (Modifier.isPrivate(noArgCtor.getModifiers())
+          && !Modifier.isPrivate(type.getModifiers())) {
+        errors.missingConstructor(type);
+        throw new ConfigurationException(errors);
+      }
+
+      return get(noArgCtor);
+    } catch (NoSuchMethodException e) {
+      errors.missingConstructor(type);
+      throw new ConfigurationException(errors);
+    }
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectionPoints(Class<?> type,

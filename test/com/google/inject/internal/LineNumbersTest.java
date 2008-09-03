@@ -49,8 +49,9 @@ public class LineNumbersTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Error at " + A.class.getName() + ".<init>(LineNumbersTest.java",
-          "No implementation for " + B.class.getName() + " was bound.");
+          "1) No implementation for " + B.class.getName() + " was bound.",
+          "for parameter 0 at " + A.class.getName() + ".<init>(LineNumbersTest.java:",
+          "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
     }
   }
 

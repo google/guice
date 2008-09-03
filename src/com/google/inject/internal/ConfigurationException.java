@@ -32,7 +32,7 @@ public class ConfigurationException extends RuntimeException {
   /**
    * Constructs a new exception for the given errors.
    */
-  ConfigurationException(Errors errors) {
+  public ConfigurationException(Errors errors) {
     errors.makeImmutable();
     this.errors = errors;
 

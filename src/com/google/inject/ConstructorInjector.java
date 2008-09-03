@@ -21,7 +21,6 @@ import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -51,12 +50,7 @@ class ConstructorInjector<T> {
   SingleParameterInjector<?>[] createParameterInjector(Errors errors,
       InjectorImpl injector, ConstructionProxy<T> constructionProxy)
       throws ErrorsException {
-    Constructor constructor = constructionProxy.getConstructor();
-    errors = errors.withSource(constructor);
-    return getInjectionPoint().getDependencies().isEmpty()
-        ? null // default constructor.
-        : injector.getParametersInjectors(constructor,
-            constructionProxy.getInjectionPoint().getDependencies(), errors);
+    return injector.getParametersInjectors(constructionProxy.getInjectionPoint(), errors);
   }
 
   InjectionPoint getInjectionPoint() {
@@ -106,14 +100,13 @@ class ConstructorInjector<T> {
       }
 
       return t;
-    }
-    catch (InvocationTargetException userException) {
+    } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null
           ? userException.getCause()
           : userException;
-      throw errors.errorInjectingConstructor(cause).toException();
-    }
-    finally {
+      throw errors.withSource(constructionProxy.getInjectionPoint())
+          .errorInjectingConstructor(cause).toException();
+    } finally {
       constructionContext.removeCurrentReference();
     }
   }

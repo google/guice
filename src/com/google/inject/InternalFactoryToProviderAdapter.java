@@ -47,7 +47,8 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch (RuntimeException userException) {
       Errors userErrors = ProvisionException.getErrors(userException);
-      throw errors.errorInProvider(userException, userErrors).toException();
+      throw errors.withSource(source)
+          .errorInProvider(userException, userErrors).toException();
     }
   }
 

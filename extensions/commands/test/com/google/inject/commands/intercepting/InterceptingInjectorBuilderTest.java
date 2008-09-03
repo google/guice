@@ -16,12 +16,26 @@
 
 package com.google.inject.commands.intercepting;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.CreationException;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Scopes;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-
-import java.util.*;
 
 
 /**
@@ -148,7 +162,7 @@ public class InterceptingInjectorBuilderTest extends TestCase {
     try {
       builder.build();
       fail();
-    } catch(UnsupportedOperationException expected) {
+    } catch(CreationException expected) {
     }
   }
 

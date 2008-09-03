@@ -172,8 +172,8 @@ public class ProviderMethodsTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       Asserts.assertContains(expected.getMessage(),
-          "Error at " + getClass().getName(), ".provideString()",
-          "more than one annotation annotated with @BindingAnnotation:", "Named", "Blue");
+          "more than one annotation annotated with @BindingAnnotation:", "Named", "Blue",
+          "at " + getClass().getName(), ".provideString(ProviderMethodsTest.java:");
     }
 
   }
