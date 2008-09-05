@@ -54,6 +54,8 @@ public class Matchers {
     public Object readResolve() {
       return any();
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -86,6 +88,8 @@ public class Matchers {
     @Override public String toString() {
       return "not(" + delegate + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   private static void checkForRuntimeRetention(
@@ -129,6 +133,8 @@ public class Matchers {
     @Override public String toString() {
       return "annotatedWith(" + annotationType.getSimpleName() + ".class)";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -166,6 +172,8 @@ public class Matchers {
     @Override public String toString() {
       return "annotatedWith(" + annotation + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -200,6 +208,8 @@ public class Matchers {
     @Override public String toString() {
       return "subclassesOf(" + superclass.getSimpleName() + ".class)";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -233,6 +243,8 @@ public class Matchers {
     @Override public String toString() {
       return "only(" + value + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -266,6 +278,8 @@ public class Matchers {
     @Override public String toString() {
       return "identicalTo(" + value + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -305,6 +319,8 @@ public class Matchers {
     public Object readResolve() {
       return inPackage(Package.getPackage(packageName));
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -340,6 +356,8 @@ public class Matchers {
     @Override public String toString() {
       return "inSubpackage(" + targetPackageName + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   /**
@@ -373,5 +391,7 @@ public class Matchers {
     @Override public String toString() {
       return "returns(" + returnType + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 }

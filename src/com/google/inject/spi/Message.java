@@ -42,23 +42,18 @@ public final class Message implements Serializable, Element {
   private final Throwable cause;
   private final List<Object> sources;
 
-  public Message(String message, Throwable cause, List<Object> sources) {
+  public Message(List<Object> sources, String message, Throwable cause) {
+    this.sources = ImmutableList.copyOf(sources);
     this.message = checkNotNull(message, "message");
     this.cause = cause;
-    this.sources = ImmutableList.copyOf(sources);
-  }
-
-  public Message(Object source, Throwable throwable) {
-    this("An exception was caught and reported. Message: " + throwable.getMessage(),
-        throwable, ImmutableList.of(source));
   }
 
   public Message(Object source, String message) {
-    this(message, null, ImmutableList.of(source));
+    this(ImmutableList.of(source), message, null);
   }
 
   public Message(String message) {
-    this(message, (Throwable) null);
+    this(ImmutableList.of(), message, null);
   }
 
   public String getSource() {

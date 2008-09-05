@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import static com.google.common.collect.Iterables.concat;
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Provides access to the calling line of code.
@@ -57,11 +56,6 @@ public class SourceProvider {
       strings.add(c.getName());
     }
     return strings;
-  }
-
-  /** Returns an immutable set with the names of the classes that are skipped. */
-  public Set<String> getSkippedClassNames() {
-    return classNamesToSkip;
   }
 
   /**

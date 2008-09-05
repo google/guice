@@ -38,10 +38,6 @@ class InternalContext {
     this.injector = injector;
   }
 
-  public InjectorImpl getInjector() {
-    return injector;
-  }
-
   @SuppressWarnings("unchecked")
   public <T> ConstructionContext<T> getConstructionContext(Object key) {
     if (constructionContexts == null) {

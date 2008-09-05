@@ -17,7 +17,7 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorsException;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
@@ -28,10 +28,13 @@ class InstanceBindingImpl<T> extends BindingImpl<T> {
 
   final T instance;
   final Provider<T> provider;
+  final ImmutableSet<InjectionPoint> injectionPoints;
 
   InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> internalFactory, T instance) {
+      InternalFactory<? extends T> internalFactory, Set<InjectionPoint> injectionPoints,
+      T instance) {
     super(injector, key, source, internalFactory, Scopes.NO_SCOPE, LoadStrategy.EAGER);
+    this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
     this.provider = Providers.of(instance);
   }
@@ -41,21 +44,7 @@ class InstanceBindingImpl<T> extends BindingImpl<T> {
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitInstance(instance);
-  }
-
-  public T getInstance() {
-    return this.instance;
-  }
-
-  public Set<InjectionPoint> getInjectionPoints() {
-    try {
-      return injector.getFieldAndMethodInjectionsFor(instance.getClass());
-    } catch (ErrorsException e) {
-      // this would have been a creation exception
-      // TODO: initialize the dependencies via a callback
-      throw new AssertionError(e);
-    }
+    return visitor.visitInstance(instance, injectionPoints);
   }
 
   @Override public String toString() {

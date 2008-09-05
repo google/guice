@@ -38,8 +38,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -88,10 +88,6 @@ public final class Errors implements Serializable {
   public void popSource(Object source) {
     Object popped = sources.remove(sources.size() - 1);
     checkArgument(source == popped);
-  }
-
-  public Errors userReportedError(String messageFormat, List<Object> arguments) {
-    return addMessage(messageFormat, arguments);
   }
 
   /**
@@ -180,11 +176,6 @@ public final class Errors implements Serializable {
 
   public Errors cannotBindToGuiceType(String simpleName) {
     return addMessage("Binding to core guice framework type is not allowed: %s.", simpleName);
-  }
-
-  public Errors cannotBindToNullInstance() {
-    return addMessage("Binding to null instances is not allowed. "
-        + "Use toProvider(Providers.of(null)) if this is your intended behaviour.");
   }
 
   public Errors scopeNotFound(Class<? extends Annotation> scopeAnnotation) {
@@ -294,7 +285,7 @@ public final class Errors implements Serializable {
     List<Object> sources = Lists.newArrayList();
     sources.addAll(this.sources);
     sources.addAll(message.getSources());
-    return new Message(message.getMessage(), message.getCause(), stripDuplicates(sources));
+    return new Message(stripDuplicates(sources), message.getMessage(), message.getCause());
   }
 
   public Errors merge(Collection<Message> messages) {
@@ -333,7 +324,7 @@ public final class Errors implements Serializable {
 
   private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
     String message = format(messageFormat, arguments);
-    addMessage(new Message(message, cause, stripDuplicates(sources)));
+    addMessage(new Message(stripDuplicates(sources), message, cause));
     return this;
   }
 

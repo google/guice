@@ -66,6 +66,7 @@ public class Asserts {
    */
   public static void assertEqualWhenReserialized(Object object)
       throws IOException {
+    Assert.assertTrue("Expected serialVersionUID", hasSerialVersionUid(object));
     Object reserialized = reserialize(object);
     Assert.assertEquals(object, reserialized);
     Assert.assertEquals(object.hashCode(), reserialized.hashCode());
@@ -75,8 +76,17 @@ public class Asserts {
    * Fails unless {@code object} has the same toString value when reserialized.
    */
   public static void assertSimilarWhenReserialized(Object object) throws IOException {
+    Assert.assertTrue("Expected serialVersionUID", hasSerialVersionUid(object));
     Object reserialized = reserialize(object);
     Assert.assertEquals(object.toString(), reserialized.toString());
+  }
+
+  static boolean hasSerialVersionUid(Object object) {
+    try {
+      return null != object.getClass().getDeclaredField("serialVersionUID");
+    } catch (NoSuchFieldException e) {
+      return false;
+    }
   }
 
   static Object reserialize(Object object) throws IOException {
@@ -91,6 +101,7 @@ public class Asserts {
   }
 
   public static void assertNotSerializable(Object object) throws IOException {
+    Assert.assertFalse("Unexpected serialVersionUID", hasSerialVersionUid(object));
     try {
       reserialize(object);
       Assert.fail();

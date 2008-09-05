@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.lang.reflect.Constructor;
+import java.util.Set;
 
 /**
  * Visits each of the strategies used to find an instance to satisfy an injection.
@@ -33,16 +34,20 @@ public interface BindingTargetVisitor<T, V> {
    * found in both module and injector bindings.
    *
    * @param instance the user-supplied value
+   * @param injectionPoints the field and method injection points of the instance, injected at
+   *      injector-creation time only.
    */
-  V visitInstance(T instance);
+  V visitInstance(T instance, Set<InjectionPoint> injectionPoints);
 
   /**
    * Visit a provider instance binding. The provider's {@code get} method is invoked to resolve
    * injections. This target is found in both module and injector bindings.
    *
    * @param provider the user-supplied, unscoped provider
+   * @param injectionPoints the field and method injection points of the provider, injected at
+   *      injector-creation time only.
    */
-  V visitProvider(Provider<? extends T> provider);
+  V visitProvider(Provider<? extends T> provider, Set<InjectionPoint> injectionPoints);
 
   /**
    * Visit a provider key binding. To resolve injections, the provider injection is first
@@ -76,8 +81,10 @@ public interface BindingTargetVisitor<T, V> {
    *
    * @param constructor the {@link com.google.inject.Inject annotated} or default constructor that
    *      is invoked for creating values
+   * @param injectionPoints the constructor, field and method injection points to create and
+   *      populate a new instance. The set contains exactly one constructor injection point.
    */
-  V visitConstructor(Constructor<? extends T> constructor);
+  V visitConstructor(Constructor<? extends T> constructor, Set<InjectionPoint> injectionPoints);
 
   /**
    * Visit a binding created from converting a bound instance to a new type. The source binding

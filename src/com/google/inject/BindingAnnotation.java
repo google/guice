@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * <pre>
  *   {@code @}Retention(RUNTIME)
- *   {@code @}Target({ FIELD, PARAMETER })
+ *   {@code @}Target({ FIELD, PARAMETER, METHOD })
  *   {@code @}BindingAnnotation
  *   public {@code @}interface Transactional {}
  * </pre>

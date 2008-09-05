@@ -38,6 +38,7 @@ import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
 
@@ -76,7 +77,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitInstance(T instance) {
+              @Override public Void visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
                 assertEquals("A", instance);
                 return null;
               }
@@ -102,7 +103,8 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitProvider(Provider<? extends T> provider) {
+              @Override public Void visitProvider(Provider<? extends T> provider,
+                  Set<InjectionPoint> injectionPoints) {
                 assertSame(stringProvider, provider);
                 return null;
               }
@@ -185,7 +187,8 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(D.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitConstructor(Constructor<? extends T> constructor) {
+              @Override public Void visitConstructor(Constructor<? extends T> constructor,
+                  Set<InjectionPoint> injectionPoints) {
                 Constructor<?> expected = D.class.getDeclaredConstructors()[0];
                 assertEquals(expected, constructor);
                 return null;
@@ -210,7 +213,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(command.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(Integer.class, Names.named("one")), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitInstance(T instance) {
+              @Override public Void visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
                 assertEquals((Integer) 1, instance);
                 return null;
               }

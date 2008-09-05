@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.spi;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
+import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectionPoint;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 /**
@@ -45,61 +46,66 @@ public class InjectionPointTest extends TestCase {
   public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
     Field fooField = getClass().getField("foo");
 
-    InjectionPoint injectionPoint = InjectionPoint.get(fooField);
+    InjectionPoint injectionPoint = new InjectionPoint(fooField);
     assertSame(fooField, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
-    assertEquals("com.google.inject.InjectionPointTest.foo", injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, InjectionPoint.get(fooField));
+    assertEquals(getClass().getName() + ".foo", injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(fooField));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]"
-        + "@com.google.inject.InjectionPointTest.foo", dependency.toString());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]@"
+        + getClass().getName() + ".foo", dependency.toString());
     assertEquals(fooField, dependency.getInjectionPoint().getMember());
     assertEquals(-1, dependency.getParameterIndex());
-    assertEquals(Key.get(String.class, Names.named("a")), dependency.getKey());
+    Assert.assertEquals(Key.get(String.class, Names.named("a")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
+    assertEqualsBothWays(dependency,
+        getOnlyElement(new InjectionPoint(fooField).getDependencies()));
   }
 
-  public void testMethodInjectionPoint() throws NoSuchMethodException, IOException, ErrorsException {
+  public void testMethodInjectionPoint() throws Exception {
     Method barMethod = getClass().getMethod("bar", String.class);
-    InjectionPoint injectionPoint = InjectionPoint.get(barMethod);
+    InjectionPoint injectionPoint = new InjectionPoint(barMethod);
     assertSame(barMethod, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
-    assertEquals("com.google.inject.InjectionPointTest.bar()", injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, InjectionPoint.get(barMethod));
+    assertEquals(getClass().getName() + ".bar()", injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(barMethod));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]"
-        + "@com.google.inject.InjectionPointTest.bar()[0]", dependency.toString());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]@"
+        + getClass().getName() + ".bar()[0]", dependency.toString());
     assertEquals(barMethod, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, Names.named("b")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
+    assertEqualsBothWays(dependency,
+        getOnlyElement(new InjectionPoint(barMethod).getDependencies()));
   }
 
   public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException,
       ErrorsException {
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);
-    InjectionPoint injectionPoint = InjectionPoint.get(constructor);
+    InjectionPoint injectionPoint = new InjectionPoint(constructor);
     assertSame(constructor, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
-    assertEquals("com.google.inject.InjectionPointTest$Constructable.<init>()",
-        injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, InjectionPoint.get(constructor));
+    assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(constructor));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
-    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]"
-        + "@com.google.inject.InjectionPointTest$Constructable.<init>()[0]", dependency.toString());
+    assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]@"
+        + Constructable.class.getName() + ".<init>()[0]", dependency.toString());
     assertEquals(constructor, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, Names.named("c")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
+    assertEqualsBothWays(dependency,
+        getOnlyElement(new InjectionPoint(constructor).getDependencies()));
   }
   
   public void testUnattachedDependency() throws IOException {
@@ -111,5 +117,6 @@ public class InjectionPointTest extends TestCase {
     assertEquals(Key.get(String.class, Names.named("d")), dependency.getKey());
     assertEquals(true, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
+    assertEqualsBothWays(dependency, Dependency.get(Key.get(String.class, Names.named("d"))));
   }
 }

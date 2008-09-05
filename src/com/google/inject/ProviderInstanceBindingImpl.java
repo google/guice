@@ -16,45 +16,33 @@ limitations under the License.
 
 package com.google.inject;
 
-import com.google.inject.internal.ErrorsException;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.HasInjections;
 import com.google.inject.spi.InjectionPoint;
 import java.util.Set;
 
 /**
  *
  */
-class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements HasInjections {
+class ProviderInstanceBindingImpl<T> extends BindingImpl<T> {
 
   final Provider<? extends T> providerInstance;
+  final ImmutableSet<InjectionPoint> injectionPoints;
 
   ProviderInstanceBindingImpl(InjectorImpl injector, Key<T> key,
       Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
       Provider<? extends T> providerInstance,
-      LoadStrategy loadStrategy) {
+      LoadStrategy loadStrategy,
+      Set<InjectionPoint> injectionPoints) {
     super(injector, key, source, internalFactory, scope, loadStrategy);
     this.providerInstance = providerInstance;
+    this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitProvider(providerInstance);
-  }
-
-  public Provider<? extends T> getProviderInstance() {
-    return this.providerInstance;
-  }
-
-  public Set<InjectionPoint> getInjectionPoints() {
-    try {
-      return injector.getFieldAndMethodInjectionsFor(providerInstance.getClass());
-    } catch (ErrorsException e) {
-      // this would have been a creation exception
-      // TODO: initialize the dependencies via a callback
-      throw new AssertionError(e);
-    }
+    return visitor.visitProvider(providerInstance, injectionPoints);
   }
 
   @Override

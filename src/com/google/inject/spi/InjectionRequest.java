@@ -17,8 +17,6 @@
 package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 
 /**
  * A request to inject the instance fields and methods of an instance. Requests are created
@@ -31,19 +29,19 @@ import java.util.List;
  */
 public final class InjectionRequest implements Element {
   private Object source;
-  private List<Object> instances;
+  private Object instance;
 
-  public InjectionRequest(Object source, Object[] instances) {
+  public InjectionRequest(Object source, Object instance) {
     this.source = checkNotNull(source, "source");
-    this.instances = ImmutableList.of(instances);
+    this.instance = checkNotNull(instance, "instance");
   }
 
   public Object getSource() {
     return source;
   }
 
-  public List<Object> getInstances() {
-    return instances;
+  public Object getInstance() {
+    return instance;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {

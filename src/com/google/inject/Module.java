@@ -33,8 +33,11 @@ package com.google.inject;
 public interface Module {
 
   /**
-   * Contributes bindings and other configurations for this module to a
-   * {@code Binder}.
+   * Contributes bindings and other configurations for this module to a {@code Binder}.
+   *
+   * <p><strong>Do not invoke this method directly</strong> to install submodules. Instead use
+   * {@link Binder#install(Module)}, which ensures that {@link Provides provider methods} are
+   * discovered.
    */
   void configure(Binder binder);
 }

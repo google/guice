@@ -346,7 +346,8 @@ public class ElementsTest extends TestCase {
           @Override public <T> Void visitBinding(Binding<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitProvider(Provider<? extends T> provider) {
+              public Void visitProvider(Provider<? extends T> provider,
+                  Set<InjectionPoint> injectionPoints) {
                 assertSame(aProvider, provider);
                 return null;
               }
@@ -637,7 +638,14 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public Void visitInjectionRequest(InjectionRequest command) {
-            assertEquals(Arrays.asList(firstObject, secondObject), command.getInstances());
+            assertEquals(firstObject, command.getInstance());
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visitInjectionRequest(InjectionRequest command) {
+            assertEquals(secondObject, command.getInstance());
             return null;
           }
         }
@@ -654,7 +662,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public Void visitStaticInjectionRequest(StaticInjectionRequest command) {
-            assertEquals(Arrays.asList(ArrayList.class), command.getTypes());
+            assertEquals(ArrayList.class, command.getType());
             return null;
           }
         }

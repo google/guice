@@ -16,15 +16,15 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Annotates methods which can be used as providers. Guice will pass
- * dependencies to the method as parameters.
+ * Annotates methods of a {@link Module} to create a provider method binding. The method's return
+ * type is bound to it's returned value. Guice will pass dependencies to the method as parameters.
  *
  * @author crazybob@google.com (Bob Lee)
  */

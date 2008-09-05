@@ -20,10 +20,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.Keys;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.Nullability;
 import java.io.ObjectStreamException;
@@ -42,7 +42,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A constructor, method or field that can receive injections.
+ * A constructor, field or method that can receive injections. Typically this is a member with the
+ * {@literal @}{@link Inject} annotation. For non-private, no argument constructors, the member may
+ * omit the annotation. 
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -59,7 +61,7 @@ public final class InjectionPoint implements Serializable {
     this.optional = optional;
   }
 
-  private InjectionPoint(Method method) {
+  InjectionPoint(Method method) {
     this.member = method;
 
     Inject inject = method.getAnnotation(Inject.class);
@@ -69,7 +71,7 @@ public final class InjectionPoint implements Serializable {
         method.getParameterAnnotations());
   }
 
-  private InjectionPoint(Constructor<?> constructor) {
+  InjectionPoint(Constructor<?> constructor) {
     this.member = constructor;
     this.optional = false;
     // TODO(jessewilson): make sure that if @Inject it exists, its not optional
@@ -77,7 +79,7 @@ public final class InjectionPoint implements Serializable {
         constructor.getParameterAnnotations());
   }
 
-  private InjectionPoint(Field field) {
+  InjectionPoint(Field field) {
     this.member = field;
 
     Inject inject = field.getAnnotation(Inject.class);
@@ -88,7 +90,7 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors(field);
     Key<?> key = null;
     try {
-      key = Keys.get(field.getGenericType(), field, annotations, errors);
+      key = Annotations.getKey(field.getGenericType(), field, annotations, errors);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -108,7 +110,7 @@ public final class InjectionPoint implements Serializable {
     for (Type parameterType : genericParameterTypes) {
       try {
         Annotation[] parameterAnnotations = annotationsIterator.next();
-        Key<?> key = Keys.get(parameterType, member, parameterAnnotations, errors);
+        Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         dependencies.add(newDependency(key, Nullability.allowsNull(parameterAnnotations), index));
         index++;
       } catch (ErrorsException e) {
@@ -120,10 +122,14 @@ public final class InjectionPoint implements Serializable {
     return ImmutableList.copyOf(dependencies);
   }
 
+  // This metohd is necessary to create a Dependency<T> with proper generic type information
   private <T> Dependency<T> newDependency(Key<T> key, boolean allowsNull, int parameterIndex) {
     return new Dependency<T>(this, key, allowsNull, parameterIndex);
   }
 
+  /**
+   * Returns the injected constructor, field, or method.
+   */
   public Member getMember() {
     return member;
   }
@@ -132,11 +138,19 @@ public final class InjectionPoint implements Serializable {
    * Returns the dependencies for this injection point. If the injection point is for a method or
    * constructor, the dependencies will correspond to that member's parameters. Field injection
    * points always have a single dependency for the field itself.
+   *
+   * @return a possibly-empty list
    */
   public List<Dependency<?>> getDependencies() {
     return dependencies;
   }
 
+  /**
+   * Returns true if this injection point shall be skipped if the injector cannot resolve bindings
+   * for all required dependencies. Both explicit bindings (as specified in a module), and implicit
+   * bindings ({@literal @}{@link com.google.inject.ImplementedBy ImplementedBy}, default
+   * constructors etc.) may be used to satisfy optional injection points.
+   */
   public boolean isOptional() {
     return optional;
   }
@@ -157,69 +171,6 @@ public final class InjectionPoint implements Serializable {
   private Object writeReplace() throws ObjectStreamException {
     Member serializableMember = member != null ? MoreTypes.serializableCopy(member) : null;
     return new InjectionPoint(serializableMember, dependencies, optional);
-  }
-
-  /**
-   * Returns a new injection point for {@code constructor}.
-   *
-   * @param constructor a no arguments constructor, or a constructor with any number of arguments
-   *      and the {@literal @}{@link Inject} annotation.
-   */
-  public static InjectionPoint get(Constructor constructor) {
-    return new InjectionPoint(constructor);
-  }
-
-  /**
-   * Returns a new injection point for {@code method}.
-   *
-   * @param method a method with the {@literal @}{@link Inject} annotation.
-   */
-  public static InjectionPoint get(Method method) {
-    return new InjectionPoint(method);
-  }
-
-  /**
-   * Returns a new injection point for {@code field}.
-   *
-   * @param field a field with the {@literal @}{@link Inject} annotation.
-   */
-  public static InjectionPoint get(Field field) {
-    return new InjectionPoint(field);
-  }
-
-  /**
-   * Adds all static method and field injection points on {@code type} to {@code injectionPoints}.
-   * All fields are added first, and then all methods. Within the fields, supertype fields are added
-   * before subtype fields. Similarly, supertype methods are added before subtype methods.
-   *
-   * @throws RuntimeException if there is a malformed injection point on {@code type}, such as a
-   *      field with multiple binding annotations. When such an exception is thrown, the valid
-   *      injection points are still added to the collection.
-   */
-  public static void addForStaticMethodsAndFields(Class<?> type,
-      Collection<InjectionPoint> injectionPoints) {
-    Errors errors = new Errors();
-    addInjectionPoints(type, Factory.FIELDS, true, injectionPoints, errors);
-    addInjectionPoints(type, Factory.METHODS, true, injectionPoints, errors);
-    ConfigurationException.throwNewIfNonEmpty(errors);
-  }
-
-  /**
-   * Adds all instance method and field injection points on {@code type} to {@code injectionPoints}.
-   * All fields are added first, and then all methods. Within the fields, supertype fields are added
-   * before subtype fields. Similarly, supertype methods are added before subtype methods.
-   *
-   * @throws RuntimeException if there is a malformed injection point on {@code type}, such as a
-   *      field with multiple binding annotations. When such an exception is thrown, the valid
-   *      injection points are still added to the collection.
-   */
-  public static void addForInstanceMethodsAndFields(Class<?> type,
-      List<InjectionPoint> injectionPoints) {
-    // TODO (crazybob): Filter out overridden members.
-    Errors errors = new Errors();
-    addInjectionPoints(type, Factory.FIELDS, false, injectionPoints, errors);
-    addInjectionPoints(type, Factory.METHODS, false, injectionPoints, errors);
-    ConfigurationException.throwNewIfNonEmpty(errors);
   }
 
   /**
@@ -253,7 +204,7 @@ public final class InjectionPoint implements Serializable {
     ConfigurationException.throwNewIfNonEmpty(errors);
 
     if (found != null) {
-      return get(found);
+      return new InjectionPoint(found);
     }
 
     // If no annotated constructor is found, look for a no-arg constructor
@@ -268,11 +219,45 @@ public final class InjectionPoint implements Serializable {
         throw new ConfigurationException(errors);
       }
 
-      return get(noArgCtor);
+      return new InjectionPoint(noArgCtor);
     } catch (NoSuchMethodException e) {
       errors.missingConstructor(type);
       throw new ConfigurationException(errors);
     }
+  }
+
+  /**
+   * Adds all static method and field injection points on {@code type} to {@code injectionPoints}.
+   * All fields are added first, and then all methods. Within the fields, supertype fields are added
+   * before subtype fields. Similarly, supertype methods are added before subtype methods.
+   *
+   * @throws RuntimeException if there is a malformed injection point on {@code type}, such as a
+   *      field with multiple binding annotations. When such an exception is thrown, the valid
+   *      injection points are still added to the collection.
+   */
+  public static void addForStaticMethodsAndFields(Class<?> type, Collection<InjectionPoint> sink) {
+    Errors errors = new Errors();
+    addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
+    addInjectionPoints(type, Factory.METHODS, true, sink, errors);
+    ConfigurationException.throwNewIfNonEmpty(errors);
+  }
+
+  /**
+   * Adds all instance method and field injection points on {@code type} to {@code injectionPoints}.
+   * All fields are added first, and then all methods. Within the fields, supertype fields are added
+   * before subtype fields. Similarly, supertype methods are added before subtype methods.
+   *
+   * @throws RuntimeException if there is a malformed injection point on {@code type}, such as a
+   *      field with multiple binding annotations. When such an exception is thrown, the valid
+   *      injection points are still added to the collection.
+   */
+  public static void addForInstanceMethodsAndFields(Class<?> type,
+      Collection<InjectionPoint> sink) {
+    // TODO (crazybob): Filter out overridden members.
+    Errors errors = new Errors();
+    addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
+    addInjectionPoints(type, Factory.METHODS, false, sink, errors);
+    ConfigurationException.throwNewIfNonEmpty(errors);
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectionPoints(Class<?> type,
@@ -322,7 +307,7 @@ public final class InjectionPoint implements Serializable {
         return type.getDeclaredFields();
       }
       public InjectionPoint create(Field member) {
-        return get(member);
+        return new InjectionPoint(member);
       }
     };
 
@@ -331,11 +316,13 @@ public final class InjectionPoint implements Serializable {
         return type.getDeclaredMethods();
       }
       public InjectionPoint create(Method member) {
-        return get(member);
+        return new InjectionPoint(member);
       }
     };
 
     M[] getMembers(Class<?> type);
     InjectionPoint create(M member);
   }
+
+  private static final long serialVersionUID = 0;
 }

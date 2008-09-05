@@ -58,6 +58,8 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
     @Override public String toString() {
       return "and(" + a + ", " + b + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 
   private static class OrMatcher<T> extends AbstractMatcher<T> implements Serializable {
@@ -85,5 +87,7 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
     @Override public String toString() {
       return "or(" + a + ", " + b + ")";
     }
+
+    private static final long serialVersionUID = 0;
   }
 }

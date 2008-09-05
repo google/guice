@@ -18,8 +18,6 @@ package com.google.inject.spi;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 
 /**
  * A request to inject the static fields and methods of type. Requests are created
@@ -32,19 +30,19 @@ import java.util.List;
  */
 public final class StaticInjectionRequest implements Element {
   private final Object source;
-  private final List<Class> types;
+  private final Class<?> type;
 
-  StaticInjectionRequest(Object source, Class[] types) {
+  StaticInjectionRequest(Object source, Class<?> type) {
     this.source = checkNotNull(source, "source");
-    this.types = ImmutableList.of(types);
+    this.type = checkNotNull(type, "type");
   }
 
   public Object getSource() {
     return source;
   }
 
-  public List<Class> getTypes() {
-    return types;
+  public Class<?> getType() {
+    return type;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {

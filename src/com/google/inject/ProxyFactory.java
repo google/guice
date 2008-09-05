@@ -21,10 +21,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ReferenceCache;
+import com.google.inject.internal.FailableCache;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -56,38 +55,19 @@ class ProxyFactory implements ConstructionProxyFactory {
     defaultFactory = new DefaultConstructionProxyFactory();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked") // the constructed T is the same as the injection point's T
   public <T> ConstructionProxy<T> get(Errors errors, InjectionPoint injectionPoint)
       throws ErrorsException {
-    return (ConstructionProxy<T>) getConstructionProxy(injectionPoint, errors);
+    return (ConstructionProxy<T>) constructionProxies.get(injectionPoint, errors);
   }
 
-  Map<InjectionPoint, Object> constructionProxies = new ReferenceCache<InjectionPoint, Object>() {
-    protected Object create(InjectionPoint injectionPoint) {
-      Errors errors = new Errors();
-      try {
-        ConstructionProxy<?> result = createConstructionProxy(errors, injectionPoint);
-        errors.throwIfNecessary();
-        return result;
-      } catch (ErrorsException e) {
-        return errors.merge(e.getErrors()).makeImmutable();
-      }
+  /** Cached construction proxies for each injection point */
+  FailableCache<InjectionPoint, ConstructionProxy> constructionProxies
+      = new FailableCache<InjectionPoint, ConstructionProxy>() {
+    protected ConstructionProxy create(InjectionPoint key, Errors errors) throws ErrorsException {
+      return createConstructionProxy(errors, key);
     }
   };
-
-  public ConstructionProxy<?> getConstructionProxy(InjectionPoint injectionPoint, Errors errors)
-      throws ErrorsException {
-    Object constructionProxyOrErrors = constructionProxies.get(injectionPoint);
-
-    if (constructionProxyOrErrors instanceof ConstructionProxy<?>) {
-      return (ConstructionProxy<?>) constructionProxyOrErrors;
-    } else if (constructionProxyOrErrors instanceof Errors) {
-      errors.merge((Errors) constructionProxyOrErrors);
-      throw errors.toException();
-    } else {
-      throw new AssertionError();
-    }
-  }
 
   <T> ConstructionProxy<T> createConstructionProxy(Errors errors, InjectionPoint injectionPoint)
       throws ErrorsException {
@@ -170,25 +150,19 @@ class ProxyFactory implements ConstructionProxyFactory {
     // Store callbacks.
     Enhancer.registerStaticCallbacks(proxied, callbacks);
 
-    return createConstructionProxy(errors, proxied, constructor);
+    return createConstructionProxy(proxied, injectionPoint);
   }
 
   /**
    * Creates a construction proxy given a class and parameter types.
    */
-  private <T> ConstructionProxy<T> createConstructionProxy(Errors errors, final Class<?> clazz,
-      final Constructor<T> standardConstructor) throws ErrorsException {
+  private <T> ConstructionProxy<T> createConstructionProxy(final Class<?> clazz,
+      final InjectionPoint injectionPoint) throws ErrorsException {
+    @SuppressWarnings("unchecked") // injection point's member must be a Constructor<T>
+    final Constructor<T> standardConstructor = (Constructor<T>) injectionPoint.getMember();
     FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
-    final InjectionPoint injectionPoint;
-
-    try {
-      injectionPoint = InjectionPoint.get(standardConstructor);
-    } catch (ConfigurationException e) {
-      errors.merge(e.getErrorMessages());
-      throw errors.toException();
-    }
 
     return new ConstructionProxy<T>() {
       @SuppressWarnings("unchecked")

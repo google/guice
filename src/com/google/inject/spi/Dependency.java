@@ -108,4 +108,6 @@ public final class Dependency<T> implements Serializable {
     }
     return builder.toString();
   }
+
+  private static final long serialVersionUID = 0;
 }

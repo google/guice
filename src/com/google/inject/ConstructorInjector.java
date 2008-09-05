@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
 import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
@@ -41,8 +42,7 @@ class ConstructorInjector<T> {
     this.implementation = implementation;
     constructionProxy = injector.reflection.getConstructionProxy(errors, implementation);
     parameterInjectors = createParameterInjector(errors, injector, constructionProxy);
-    List<SingleMemberInjector> memberInjectorsList
-        = injector.getMemberInjectors(implementation, errors);
+    List<SingleMemberInjector> memberInjectorsList = injector.injectors.get(implementation, errors);
     memberInjectors = memberInjectorsList.toArray(
         new SingleMemberInjector[memberInjectorsList.size()]);
   }
@@ -53,8 +53,13 @@ class ConstructorInjector<T> {
     return injector.getParametersInjectors(constructionProxy.getInjectionPoint(), errors);
   }
 
-  InjectionPoint getInjectionPoint() {
-    return constructionProxy.getInjectionPoint();
+  ImmutableSet<InjectionPoint> getInjectionPoints() {
+    InjectionPoint[] injectionPoints = new InjectionPoint[memberInjectors.length + 1];
+    injectionPoints[0] = constructionProxy.getInjectionPoint();
+    for (int i = 0; i < memberInjectors.length; i++) {
+      injectionPoints[i+1] = memberInjectors[i].getInjectionPoint();
+    }
+    return ImmutableSet.of(injectionPoints);
   }
 
   /**

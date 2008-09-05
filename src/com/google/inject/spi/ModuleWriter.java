@@ -28,6 +28,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -122,16 +123,13 @@ public class ModuleWriter {
 
   public void writeRequestInjection(final Binder binder,
       final InjectionRequest command) {
-    List<Object> objects = command.getInstances();
-    binder.withSource(command.getSource())
-        .requestInjection(objects.toArray());
+    binder.withSource(command.getSource()).requestInjection(command.getInstance());
   }
 
   public void writeRequestStaticInjection(final Binder binder,
       final StaticInjectionRequest element) {
-    List<Class> types = element.getTypes();
-    binder.withSource(element.getSource())
-        .requestStaticInjection(types.toArray(new Class[types.size()]));
+    Class<?> type = element.getType();
+    binder.withSource(element.getSource()).requestStaticInjection(type);
   }
 
   public void writeConvertToTypes(final Binder binder, final TypeConverterBinding element) {
@@ -152,12 +150,13 @@ public class ModuleWriter {
   public <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
       final LinkedBindingBuilder<T> linkedBindingBuilder) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
-      public ScopedBindingBuilder visitInstance(T instance) {
+      public ScopedBindingBuilder visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
         linkedBindingBuilder.toInstance(instance);
         return null;
       }
 
-      public ScopedBindingBuilder visitProvider(Provider<? extends T> provider) {
+      public ScopedBindingBuilder visitProvider(Provider<? extends T> provider,
+          Set<InjectionPoint> injectionPoints) {
         return linkedBindingBuilder.toProvider(provider);
       }
 
@@ -177,7 +176,8 @@ public class ModuleWriter {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitConstructor(Constructor<? extends T> constructor) {
+      public ScopedBindingBuilder visitConstructor(Constructor<? extends T> constructor,
+          Set<InjectionPoint> injectionPoints) {
         throw new IllegalArgumentException("Non-module element");
       }
 

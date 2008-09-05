@@ -17,6 +17,8 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
@@ -32,7 +34,12 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.ElementVisitor;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Message;
+import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Immutable snapshot of a request to bind a value.
@@ -57,7 +64,7 @@ public final class ModuleBinding<T> implements Binding<T> {
 
   private static final BindingTargetVisitor<Object, Boolean> SUPPORTS_SCOPES
       = new DefaultBindingTargetVisitor<Object, Boolean>() {
-    @Override public Boolean visitInstance(Object instance) {
+    @Override public Boolean visitInstance(Object instance, Set<InjectionPoint> injectionPoints) {
       return false;
     }
 
@@ -187,15 +194,47 @@ public final class ModuleBinding<T> implements Binding<T> {
 
     public void toInstance(final T instance) {
       checkNotTargetted();
-      target = new InstanceTarget<T>(instance);
+
+      if (instance == null) {
+        binder.addError("Binding to null instances is not allowed. "
+            + "Use toProvider(Providers.of(null)) if this is your intended behaviour.");
+        // we finish the binding to prevent additional errors
+        toProvider(Providers.<T>of(null));
+        return;
+      }
+
+      // lookup the injection points, adding any errors to the binder's errors list
+      List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+      try {
+        InjectionPoint.addForInstanceMethodsAndFields(instance.getClass(), injectionPointsList);
+      } catch (ConfigurationException e) {
+        for (Message message : e.getErrorMessages()) {
+          binder.addError(message);
+        }
+      }
+      ImmutableSet<InjectionPoint> injectionPoints = ImmutableSet.copyOf(injectionPointsList);
+
+      target = new InstanceTarget<T>(instance, injectionPoints);
     }
 
     public ScopedBindingBuilder toProvider(final Provider<? extends T> provider) {
       checkNotNull(provider, "provider");
       checkNotTargetted();
+
+      // lookup the injection points, adding any errors to the binder's errors list
+      List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+      try {
+        InjectionPoint.addForInstanceMethodsAndFields(provider.getClass(), injectionPointsList);
+      } catch (ConfigurationException e) {
+        for (Message message : e.getErrorMessages()) {
+          binder.addError(message);
+        }
+      }
+      final ImmutableSet<InjectionPoint> injectionPoints = ImmutableSet.copyOf(injectionPointsList);
+
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-          return visitor.visitProvider(provider);
+          return visitor.visitProvider(provider, injectionPoints);
         }
       };
       return this;
@@ -408,7 +447,8 @@ public final class ModuleBinding<T> implements Binding<T> {
         key = Key.get(typeAsClassT);
       }
 
-      ModuleBinding.this.target = new InstanceTarget<T>(instanceAsT);
+      ModuleBinding.this.target = new InstanceTarget<T>(instanceAsT,
+          ImmutableSet.<InjectionPoint>of());
     }
 
     @Override public String toString() {
@@ -430,13 +470,15 @@ public final class ModuleBinding<T> implements Binding<T> {
 
   static class InstanceTarget<T> implements Target<T> {
     private final T instance;
+    private final ImmutableSet<InjectionPoint> injectionPoints;
 
-    public InstanceTarget(T instance) {
+    public InstanceTarget(T instance, ImmutableSet<InjectionPoint> injectionPoints) {
       this.instance = instance;
+      this.injectionPoints = injectionPoints;
     }
 
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-      return visitor.visitInstance(instance);
+      return visitor.visitInstance(instance, injectionPoints);
     }
   }
 }

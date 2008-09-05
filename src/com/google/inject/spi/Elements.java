@@ -18,6 +18,7 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -25,7 +26,6 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.ProviderMethods;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
@@ -51,7 +51,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 public final class Elements {
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
-    @Override public Object visitInstance(Object instance) {
+    @Override public Object visitInstance(Object instance, Set<InjectionPoint> injectionPoints) {
       return instance;
     }
 
@@ -139,11 +139,15 @@ public final class Elements {
     }
 
     public void requestInjection(Object... instances) {
-      elements.add(new InjectionRequest(getSource(), instances));
+      for (Object instance : instances) {
+        elements.add(new InjectionRequest(getSource(), instance));
+      }
     }
 
     public void requestStaticInjection(Class<?>... types) {
-      elements.add(new StaticInjectionRequest(getSource(), types));
+      for (Class<?> type : types) {
+        elements.add(new StaticInjectionRequest(getSource(), type));
+      }
     }
 
     public void install(Module module) {
@@ -166,7 +170,8 @@ public final class Elements {
     }
 
     public void addError(Throwable t) {
-      elements.add(new Message(getSource(), t));
+      String message = "An exception was caught and reported. Message: " + t.getMessage();
+      elements.add(new Message(ImmutableList.of(getSource()), message, t));
     }
 
     public void addError(Message message) {

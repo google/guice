@@ -92,4 +92,6 @@ public final class ProvisionException extends RuntimeException {
       throw new ProvisionException(errors.makeImmutable());
     }
   }
+
+  private static final long serialVersionUID = 0;
 }

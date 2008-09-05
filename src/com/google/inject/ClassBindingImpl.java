@@ -16,27 +16,27 @@
 
 package com.google.inject;
 
+import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.inject.InjectorImpl.LateBoundConstructor;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.HasInjections;
 import com.google.inject.spi.InjectionPoint;
-import java.util.Set;
 
 /**
  *
  *
  */
-class ClassBindingImpl<T> extends BindingImpl<T> implements HasInjections {
+class ClassBindingImpl<T> extends BindingImpl<T> {
 
-  private final InjectorImpl.LateBoundConstructor<T> lateBoundConstructor;
+  private final LateBoundConstructor<T> lateBoundConstructor;
+  private ImmutableSet<InjectionPoint> injectionPoints;
 
   ClassBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scope scope,
-      InjectorImpl.LateBoundConstructor<T> lateBoundConstructor,
+      LateBoundConstructor<T> lateBoundConstructor,
       LoadStrategy loadStrategy) {
     super(injector, key, source, internalFactory, scope, loadStrategy);
     this.lateBoundConstructor = lateBoundConstructor;
@@ -44,36 +44,18 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements HasInjections {
 
   @Override void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     lateBoundConstructor.bind(injector, getBoundClass(), errors);
+    injectionPoints = lateBoundConstructor.constructorInjector.getInjectionPoints();
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitConstructor(lateBoundConstructor.getConstructor());
+    checkState(injectionPoints != null, "not initialized");
+    return visitor.visitConstructor(lateBoundConstructor.getConstructor(), injectionPoints);
   }
 
   @SuppressWarnings("unchecked")
   public Class<T> getBoundClass() {
     // T should always be the class itself.
     return (Class<T>) key.getRawType();
-  }
-
-  public Set<InjectionPoint> getInjectionPoints() {
-    if (lateBoundConstructor == null) {
-      throw new AssertionError();
-    }
-
-    Set<InjectionPoint> injectionPoints = Sets.newLinkedHashSet();
-
-    Class<T> boundClass = getBoundClass();
-    ConstructorInjector<T> constructor = lateBoundConstructor.constructorInjector;
-    injectionPoints.add(constructor.getInjectionPoint());
-
-    try {
-      injectionPoints.addAll(injector.getFieldAndMethodInjectionsFor(boundClass));
-    } catch (ErrorsException e) {
-      throw new AssertionError("This should have failed at CreationTime");
-    }
-
-    return ImmutableSet.copyOf(injectionPoints);
   }
 
   @Override public String toString() {

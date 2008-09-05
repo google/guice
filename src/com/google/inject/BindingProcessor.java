@@ -18,10 +18,12 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -119,29 +121,24 @@ class BindingProcessor extends AbstractProcessor {
     });
 
     command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
-      public Void visitInstance(T instance) {
-        if (instance == null) {
-          errors.cannotBindToNullInstance();
-          putBinding(invalidBinding(injector, key, source));
-          return null;
-        }
-
+      public Void visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        memberInjector.requestInjection(instance, source);
-        InternalFactory<? extends T> scopedFactory
-            = Scopes.scope(key, injector, factory, scope);
-        putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, instance));
+        memberInjector.requestInjection(instance, source, injectionPoints);
+        InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
+        putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, injectionPoints,
+            instance));
         return null;
       }
 
-      public Void visitProvider(Provider<? extends T> provider) {
+      public Void visitProvider(Provider<? extends T> provider,
+          Set<InjectionPoint> injectionPoints) {
         InternalFactoryToProviderAdapter<? extends T> factory
             = new InternalFactoryToProviderAdapter<T>(provider, source);
-        memberInjector.requestInjection(provider, source);
+        memberInjector.requestInjection(provider, source, injectionPoints);
         InternalFactory<? extends T> scopedFactory
             = Scopes.scope(key, injector, factory, scope);
-        putBinding(new ProviderInstanceBindingImpl<T>(
-                injector, key, source, scopedFactory, scope, provider, loadStrategy));
+        putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scope,
+            provider, loadStrategy, injectionPoints));
         return null;
       }
 
@@ -214,7 +211,8 @@ class BindingProcessor extends AbstractProcessor {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visitConstructor(Constructor<? extends T> constructor) {
+      public Void visitConstructor(Constructor<? extends T> constructor,
+          Set<InjectionPoint> injectionPoints) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
@@ -227,7 +225,7 @@ class BindingProcessor extends AbstractProcessor {
   }
 
   private <T> void validateKey(Object source, Key<T> key) {
-    Scopes.checkForMisplacedScopeAnnotations(key.getRawType(), source, errors);
+    Annotations.checkForMisplacedScopeAnnotations(key.getRawType(), source, errors);
   }
 
   <T> InvalidBindingImpl<T> invalidBinding(InjectorImpl injector, Key<T> key, Object source) {

@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Reflection.Factory;
@@ -258,7 +259,7 @@ class InjectorBuilder {
     injector.explicitBindings.put(key,
         new ProviderInstanceBindingImpl<Logger>(injector, key,
             SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
-            loggerFactory, LoadStrategy.LAZY));
+            loggerFactory, LoadStrategy.LAZY, ImmutableSet.<InjectionPoint>of()));
   }
 
   static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {

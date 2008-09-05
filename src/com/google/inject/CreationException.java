@@ -58,4 +58,6 @@ public class CreationException extends RuntimeException {
   @Override public String getMessage() {
     return Errors.format("Guice configuration errors", errorMessages);
   }
+
+  private static final long serialVersionUID = 0;
 }

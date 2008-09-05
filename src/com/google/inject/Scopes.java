@@ -16,10 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Classes;
-import com.google.inject.internal.Errors;
-import java.lang.annotation.Annotation;
-
 /**
  * Built in scope implementations.
  *
@@ -87,61 +83,7 @@ public class Scopes {
     }
   };
 
-  /**
-   * Returns the scope annotation on {@code type}, or null if none is specified.
-   */
-  static Class<? extends Annotation> findScopeAnnotation(
-      Errors errors, Class<?> implementation) {
-    return findScopeAnnotation(errors, implementation.getAnnotations());
-  }
-
-
-  /**
-   * Returns the scoping annotation, or null if there isn't one.
-   */
-  static Class<? extends Annotation> findScopeAnnotation(Errors errors, Annotation[] annotations) {
-    Class<? extends Annotation> found = null;
-
-    for (Annotation annotation : annotations) {
-      if (annotation.annotationType()
-          .isAnnotationPresent(ScopeAnnotation.class)) {
-        if (found != null) {
-          errors.duplicateScopeAnnotations(found, annotation.annotationType());
-        } else {
-          found = annotation.annotationType();
-        }
-      }
-    }
-
-    return found;
-  }
-
-  static boolean isScopeAnnotation(Annotation annotation) {
-    return isScopeAnnotation(annotation.annotationType());
-  }
-
-  static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
-    return annotationType.isAnnotationPresent(ScopeAnnotation.class);
-  }
-
-  /**
-   * Adds an error if there is a misplaced annotations on {@code type}. Scoping
-   * annotations are not allowed on abstract classes or interfaces.
-   */
-  static void checkForMisplacedScopeAnnotations(Class<?> type, Object source, Errors errors) {
-    if (Classes.isConcrete(type)) {
-      return;
-    }
-
-    Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, type);
-    if (scopeAnnotation != null) {
-      errors.withSource(type).scopeAnnotationOnAbstractType(scopeAnnotation, type, source);
-    }
-  }
-
-  /**
-   * Scopes an internal factory.
-   */
+  /** Scopes an internal factory. */
   static <T> InternalFactory<? extends T> scope(Key<T> key,
       InjectorImpl injector, InternalFactory<? extends T> creator,
       Scope scope) {

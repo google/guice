@@ -43,7 +43,7 @@ class ScopeBindingProcessor extends AbstractProcessor {
     Scope scope = command.getScope();
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 
-    if (!Scopes.isScopeAnnotation(annotationType)) {
+    if (!Annotations.isScopeAnnotation(annotationType)) {
       errors.withSource(annotationType).missingScopeAnnotation();
       // Go ahead and bind anyway so we don't get collateral errors.
     }

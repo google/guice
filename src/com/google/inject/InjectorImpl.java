@@ -23,16 +23,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.Keys;
+import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.MatcherAndConverter;
-import com.google.inject.internal.ReferenceCache;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -48,11 +47,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -165,6 +162,7 @@ class InjectorImpl implements Injector {
       if (binding != null
           && binding.getScope() != null
           && !binding.getScope().equals(Scopes.NO_SCOPE)) {
+        // TODO: this binding won't report its injection points or scoping properly
         bindingImpl = new ProviderInstanceBindingImpl(
             this,
             key,
@@ -172,7 +170,8 @@ class InjectorImpl implements Injector {
             new InternalFactoryToProviderAdapter(binding.getProvider(), binding.getSource()),
             Scopes.NO_SCOPE,
             binding.getProvider(),
-            LoadStrategy.LAZY);
+            LoadStrategy.LAZY,
+            ImmutableSet.<InjectionPoint>of());
       }
       parentBindings.put(key, bindingImpl); // this kinda scares me
       return bindingImpl;
@@ -267,10 +266,6 @@ class InjectorImpl implements Injector {
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
       return visitor.visitProviderBinding(providedBinding.getKey());
     }
-
-    public BindingImpl<T> getTargetBinding() {
-      return providedBinding;
-    }
   }
 
   /**
@@ -352,16 +347,8 @@ class InjectorImpl implements Injector {
       return provider;
     }
 
-    public T getValue() {
-      return value;
-    }
-
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
       return visitor.visitConvertedConstant(value);
-    }
-
-    public BindingImpl<String> getOriginal() {
-      return (BindingImpl<String>) originalBinding;
     }
 
     @Override public String toString() {
@@ -428,14 +415,14 @@ class InjectorImpl implements Injector {
     // Handle @ImplementedBy
     ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
-      Scopes.checkForMisplacedScopeAnnotations(type, source, errors);
+      Annotations.checkForMisplacedScopeAnnotations(type, source, errors);
       return createImplementedByBinding(type, scope, implementedBy, loadStrategy, errors);
     }
 
     // Handle @ProvidedBy.
     ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
-      Scopes.checkForMisplacedScopeAnnotations(type, source, errors);
+      Annotations.checkForMisplacedScopeAnnotations(type, source, errors);
       return createProvidedByBinding(type, scope, providedBy, loadStrategy, errors);
     }
 
@@ -452,7 +439,7 @@ class InjectorImpl implements Injector {
     }
 
     if (scope == null) {
-      Class<? extends Annotation> scopeAnnotation = Scopes.findScopeAnnotation(errors, type);
+      Class<? extends Annotation> scopeAnnotation = Annotations.findScopeAnnotation(errors, type);
       if (scopeAnnotation != null) {
         scope = scopes.get(scopeAnnotation);
         if (scope == null) {
@@ -473,8 +460,11 @@ class InjectorImpl implements Injector {
   static class LateBoundConstructor<T> implements InternalFactory<T> {
     ConstructorInjector<T> constructorInjector;
 
-    void bind(InjectorImpl injector, Class<T> implementation, Errors errors) throws ErrorsException {
-      constructorInjector = injector.getConstructor(implementation, errors);
+    @SuppressWarnings("unchecked") // the constructor T is the same as the implementation T
+    void bind(InjectorImpl injector, Class<T> implementation, Errors errors)
+        throws ErrorsException {
+      constructorInjector = (ConstructorInjector<T>) injector.constructors.get(
+          implementation, errors);
     }
 
     public Constructor<T> getConstructor() {
@@ -630,13 +620,11 @@ class InjectorImpl implements Injector {
     return getBindingOrThrow(key, errors).internalFactory;
   }
 
-  /**
-   * Field and method injectors. Each value is either an Errors or a
-   * {@code List<SingleMemberInjector>}.
-   */
-  private final Map<Class<?>, Object> injectors = new ReferenceCache<Class<?>, Object>() {
-    protected Object create(Class<?> type) {
-      Errors errors = new Errors();
+  /** Cached field and method injectors for a type. */
+  final FailableCache<Class<?>, List<SingleMemberInjector>> injectors
+      = new FailableCache<Class<?>, List<SingleMemberInjector>>() {
+    protected List<SingleMemberInjector> create(Class<?> type, Errors errors)
+        throws ErrorsException {
       List<InjectionPoint> injectionPoints = Lists.newArrayList();
       try {
         InjectionPoint.addForInstanceMethodsAndFields(type, injectionPoints);
@@ -644,28 +632,12 @@ class InjectorImpl implements Injector {
         errors.merge(e.getErrorMessages());
       }
       ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
-      return errors.hasErrors() ? errors.makeImmutable() : injectors;
+      errors.throwIfNecessary();
+      return injectors;
     }
   };
 
-  public List<SingleMemberInjector> getMemberInjectors(Class<?> type, Errors errors)
-      throws ErrorsException {
-    Object injectorsOrError = injectors.get(type);
-    if (injectorsOrError instanceof List) {
-      @SuppressWarnings("unchecked") // the only type of list we use
-      List<SingleMemberInjector> result = (List<SingleMemberInjector>) injectorsOrError;
-      return result;
-    } else if (injectorsOrError instanceof Errors) {
-      errors.merge((Errors) injectorsOrError);
-      throw errors.toException();
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  /**
-   * Returns the injectors for the specified injection points.
-   */
+  /** Returns the injectors for the specified injection points. */
   ImmutableList<SingleMemberInjector> getInjectors(
       List<InjectionPoint> injectionPoints, Errors errors) {
     List<SingleMemberInjector> injectors = Lists.newArrayList();
@@ -682,10 +654,6 @@ class InjectorImpl implements Injector {
       }
     }
     return ImmutableList.copyOf(injectors);
-  }
-
-  Map<Key<?>, BindingImpl<?>> internalBindings() {
-    return explicitBindings;
   }
 
   // not test-covered
@@ -733,10 +701,6 @@ class InjectorImpl implements Injector {
       return injectionPoint;
     }
 
-    public Collection<Dependency<?>> getDependencies() {
-      return injectionPoint.getDependencies();
-    }
-
     public void inject(Errors errors, InternalContext context, Object o) {
       context.setDependency(dependency);
       errors.pushSource(dependency);
@@ -765,7 +729,7 @@ class InjectorImpl implements Injector {
     errors.pushSource(injectionPoint);
     try {
       Member member = injectionPoint.getMember();
-      Annotation misplacedBindingAnnotation = Keys.findBindingAnnotation(
+      Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
           errors, member, ((AnnotatedElement) member).getAnnotations());
       if (misplacedBindingAnnotation != null) {
         errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
@@ -838,13 +802,6 @@ class InjectorImpl implements Injector {
         };
       }
 
-      try {
-        injectionPoint = InjectionPoint.get(method);
-      } catch (ConfigurationException e) {
-        errors.merge(e.getErrorMessages());
-        throw errors.toException();
-      }
-
       parameterInjectors = injector.getParametersInjectors(injectionPoint, errors);
     }
 
@@ -875,18 +832,12 @@ class InjectorImpl implements Injector {
         throws IllegalAccessException, InvocationTargetException;
   }
 
-  final Map<Class<?>, Object> constructors = new ReferenceCache<Class<?>, Object>() {
+  /** Cached constructor injectors for each type */
+  final FailableCache<Class<?>, ConstructorInjector<?>> constructors
+      = new FailableCache<Class<?>, ConstructorInjector<?>>() {
     @SuppressWarnings("unchecked")
-    protected Object create(Class<?> implementation) {
-      Errors errors = new Errors();
-      try {
-        ConstructorInjector result = new ConstructorInjector(
-            errors, InjectorImpl.this, implementation);
-        errors.throwIfNecessary();
-        return result;
-      } catch (ErrorsException e) {
-        return errors.merge(e.getErrors()).makeImmutable();
-      }
+    protected ConstructorInjector<?> create(Class<?> key, Errors errors) throws ErrorsException {
+      return new ConstructorInjector(errors, InjectorImpl.this, key);
     }
   };
 
@@ -939,7 +890,7 @@ class InjectorImpl implements Injector {
       return;
     }
 
-    for (SingleMemberInjector injector : getMemberInjectors(o.getClass(), errors)) {
+    for (SingleMemberInjector injector : injectors.get(o.getClass(), errors)) {
       injector.inject(errors, context, o);
     }
   }
@@ -970,8 +921,7 @@ class InjectorImpl implements Injector {
     return getProvider(Key.get(type));
   }
 
-  <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors)
-      throws ErrorsException {
+  <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors) throws ErrorsException {
     final InternalFactory<? extends T> factory = getInternalFactory(key, errors);
 
     return new Provider<T>() {
@@ -1049,38 +999,10 @@ class InjectorImpl implements Injector {
     }
   }
 
-  /** Gets a constructor function for a given implementation class. */
-  @SuppressWarnings("unchecked")
-  <T> ConstructorInjector<T> getConstructor(Class<T> implementation, Errors errors)
-      throws ErrorsException {
-    Object o = constructors.get(implementation);
-    if (o instanceof Errors) {
-      errors.merge((Errors) o);
-      throw errors.toException();
-    }
-    else if (o instanceof ConstructorInjector<?>) {
-      return (ConstructorInjector<T>) o;
-    }
-    else {
-      throw new AssertionError();
-    }
-  }
-
   /** Injects a field or method in a given object. */
   public interface SingleMemberInjector {
     void inject(Errors errors, InternalContext context, Object o);
     InjectionPoint getInjectionPoint();
-  }
-
-  Set<InjectionPoint> getFieldAndMethodInjectionsFor(Class<?> clazz)
-      throws ErrorsException {
-    Errors errors = new Errors();
-    Set<InjectionPoint> dependencies = Sets.newLinkedHashSet();
-    for (SingleMemberInjector singleMemberInjector : getMemberInjectors(clazz, errors)) {
-      dependencies.add(singleMemberInjector.getInjectionPoint());
-    }
-    errors.throwIfNecessary();
-    return ImmutableSet.copyOf(dependencies);
   }
 
   public String toString() {

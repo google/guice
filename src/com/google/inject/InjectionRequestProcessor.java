@@ -17,11 +17,12 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.InjectorImpl.SingleMemberInjector;
+import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -46,16 +47,21 @@ class InjectionRequestProcessor extends AbstractProcessor {
   }
 
   @Override public Boolean visitStaticInjectionRequest(StaticInjectionRequest command) {
-    for (Class<?> type : command.getTypes()) {
-      staticInjections.add(new StaticInjection(command.getSource(), type));
-    }
+    staticInjections.add(new StaticInjection(command.getSource(), command.getType()));
     return true;
   }
 
   @Override public Boolean visitInjectionRequest(InjectionRequest command) {
-    for (Object instance : command.getInstances()) {
-      memberInjector.requestInjection(instance, command.getSource());
+    List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+    try {
+      InjectionPoint.addForInstanceMethodsAndFields(
+          command.getInstance().getClass(), injectionPointsList);
+    } catch (ConfigurationException e) {
+      errors.merge(e.getErrorMessages());
     }
+
+    memberInjector.requestInjection(command.getInstance(), command.getSource(),
+        ImmutableSet.copyOf(injectionPointsList));
     return true;
   }
 

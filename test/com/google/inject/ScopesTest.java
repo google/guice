@@ -294,8 +294,14 @@ public class ScopesTest extends TestCase {
   }
 
   public void testDuplicateScopeAnnotations() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+      }
+    });
+
     try {
-      Guice.createInjector().getInstance(SingletonAndCustomScoped.class);
+      injector.getInstance(SingletonAndCustomScoped.class);
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),

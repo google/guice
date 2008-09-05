@@ -20,8 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.InjectionPoint;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -51,7 +53,8 @@ class CreationTimeMemberInjector {
    *      @Inject).
    * @param source the source location that this injection was requested
    */
-  public void requestInjection(Object instance, Object source) {
+  public void requestInjection(Object instance, Object source,
+      Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
     outstandingInjections.put(instance, source);
   }
@@ -65,7 +68,7 @@ class CreationTimeMemberInjector {
       try {
         Object toInject = entry.getKey();
         Object source = entry.getValue();
-        injector.getMemberInjectors(toInject.getClass(), errors.withSource(source));
+        injector.injectors.get(toInject.getClass(), errors.withSource(source));
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }

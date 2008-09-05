@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.lang.reflect.Constructor;
+import java.util.Set;
 
 /**
  * No-op visitor for subclassing. All interface methods simply delegate to
@@ -35,11 +36,11 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
     return null;
   }
 
-  public V visitInstance(T instance) {
+  public V visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
     return visitOther();
   }
 
-  public V visitProvider(Provider<? extends T> provider) {
+  public V visitProvider(Provider<? extends T> provider, Set<InjectionPoint> injectionPoints) {
     return visitOther();
   }
 
@@ -55,7 +56,8 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
     return visitOther();
   }
 
-  public V visitConstructor(Constructor<? extends T> constructor) {
+  public V visitConstructor(Constructor<? extends T> constructor,
+      Set<InjectionPoint> injectionPoints) {
     return visitOther();
   }
 
