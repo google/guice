@@ -129,7 +129,7 @@ public class KeyTest extends TestCase {
     assertEqualWhenReserialized(Key.get(B[].class));
     assertEqualWhenReserialized(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
     assertEqualWhenReserialized(Key.get(new TypeLiteral<List<B[]>>() {}));
-    assertEqualWhenReserialized(new Key<List<B[]>>() {});
+    assertEquals(new Key<List<B[]>>() {}, Asserts.reserialize(new Key<List<B[]>>() {}));
     assertEqualWhenReserialized(Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
   }
 

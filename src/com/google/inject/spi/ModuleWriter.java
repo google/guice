@@ -105,39 +105,39 @@ public class ModuleWriter {
     }
   }
 
-  public void writeMessage(final Binder binder, final Message element) {
+  protected void writeMessage(final Binder binder, final Message element) {
     binder.addError(element);
   }
 
-  public void writeBindInterceptor(final Binder binder, final InterceptorBinding element) {
+  protected void writeBindInterceptor(final Binder binder, final InterceptorBinding element) {
     List<MethodInterceptor> interceptors = element.getInterceptors();
     binder.withSource(element.getSource()).bindInterceptor(
         element.getClassMatcher(), element.getMethodMatcher(),
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
 
-  public void writeBindScope(final Binder binder, final ScopeBinding element) {
+  protected void writeBindScope(final Binder binder, final ScopeBinding element) {
     binder.withSource(element.getSource()).bindScope(
         element.getAnnotationType(), element.getScope());
   }
 
-  public void writeRequestInjection(final Binder binder,
+  protected void writeRequestInjection(final Binder binder,
       final InjectionRequest command) {
     binder.withSource(command.getSource()).requestInjection(command.getInstance());
   }
 
-  public void writeRequestStaticInjection(final Binder binder,
+  protected void writeRequestStaticInjection(final Binder binder,
       final StaticInjectionRequest element) {
     Class<?> type = element.getType();
     binder.withSource(element.getSource()).requestStaticInjection(type);
   }
 
-  public void writeConvertToTypes(final Binder binder, final TypeConverterBinding element) {
+  protected void writeConvertToTypes(final Binder binder, final TypeConverterBinding element) {
     binder.withSource(element.getSource())
         .convertToTypes(element.getTypeMatcher(), element.getTypeConverter());
   }
 
-  public <T> void writeBind(final Binder binder, final Binding<T> element) {
+  protected <T> void writeBind(final Binder binder, final Binding<T> element) {
     LinkedBindingBuilder<T> lbb = binder.withSource(element.getSource()).bind(element.getKey());
 
     ScopedBindingBuilder sbb = applyTarget(element, lbb);
@@ -147,7 +147,7 @@ public class ModuleWriter {
   /**
    * Execute this target against the linked binding builder.
    */
-  public <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
+  protected <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
       final LinkedBindingBuilder<T> linkedBindingBuilder) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
       public ScopedBindingBuilder visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
@@ -187,7 +187,7 @@ public class ModuleWriter {
     });
   }
 
-  public void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {
+  protected void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {
     binding.acceptScopingVisitor(new BindingScopingVisitor<Void>() {
       public Void visitEagerSingleton() {
         scopedBindingBuilder.asEagerSingleton();
@@ -211,7 +211,7 @@ public class ModuleWriter {
     });
   }
 
-  public <T> void writeGetProvider(final Binder binder, final ProviderLookup<T> element) {
+  protected <T> void writeGetProvider(final Binder binder, final ProviderLookup<T> element) {
     Provider<T> provider = binder.withSource(element.getSource()).getProvider(element.getKey());
     element.initDelegate(provider);
   }

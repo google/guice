@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.util.Types;
 import java.io.IOException;
 import java.util.List;
@@ -61,8 +61,8 @@ public class TypeLiteralTest extends TestCase {
     assertEqualsBothWays(a, b);
     assertEquals("java.util.List<? extends java.lang.CharSequence>", a.toString());
     assertEquals("java.util.List<? extends java.lang.CharSequence>", b.toString());
-    assertEqualWhenReserialized(a);
-    assertEqualWhenReserialized(b);
+    assertNotSerializable(a);
+    assertNotSerializable(b);
   }
 
   public void testMissingTypeParameter() {
@@ -127,6 +127,6 @@ public class TypeLiteralTest extends TestCase {
   }
 
   public void testSerialization() throws IOException {
-    assertEqualWhenReserialized(new TypeLiteral<List<String>>() {});
+    assertNotSerializable(new TypeLiteral<List<String>>() {});
   }
 }

@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.ToStringBuilder;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -503,15 +505,34 @@ public class Key<T> implements Serializable {
   }
 
   /**
-   * Returns the canonical form of this key for serialization. The returned
-   * instance is always a {@code Key}, never a subclass. This prevents problems
-   * caused by serializing anonymous types.
+   * Serializes the key without its type literal, annotation strategy, or
+   * hash code.
    */
-  protected final Object writeReplace() {
-    return getClass() == Key.class
-        ? this
-        : new Key<T>(typeLiteral, annotationStrategy);
+  private static class SerializedForm implements Serializable {
+    final Type type;
+    final Class<? extends Annotation> annotationType;
+    final Annotation annotationInstance;
+
+    SerializedForm(Key<?> key) {
+      this.type = key.getTypeLiteral().getType();
+      this.annotationType = key.getAnnotationType();
+      this.annotationInstance = key.getAnnotation();
+    }
+
+    final Object readResolve() {
+      return annotationInstance != null ? Key.get(type, annotationInstance)
+          : annotationType != null ? Key.get(type, annotationType)
+          : Key.get(type);
+    }
+
+    private static final long serialVersionUID = 0;
   }
 
-  private static final long serialVersionUID = 0;
+  protected void readObject(ObjectInputStream stream) throws InvalidObjectException {
+    throw new InvalidObjectException("Use SerializedForm");
+  }
+
+  protected final Object writeReplace() {
+    return new SerializedForm(this);
+  }
 }

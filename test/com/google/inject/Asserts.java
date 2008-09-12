@@ -24,6 +24,9 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import junit.framework.Assert;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -37,11 +40,11 @@ public class Asserts {
    * for testing the equals method itself.
    */
   public static void assertEqualsBothWays(Object expected, Object actual) {
-    Assert.assertNotNull(expected);
-    Assert.assertNotNull(actual);
-    Assert.assertTrue("expected.equals(actual)", expected.equals(actual));
-    Assert.assertTrue("actual.equals(expected)", actual.equals(expected));
-    Assert.assertEquals("hashCode", expected.hashCode(), actual.hashCode());
+    assertNotNull(expected);
+    assertNotNull(actual);
+    assertTrue("expected.equals(actual)", expected.equals(actual));
+    assertTrue("actual.equals(expected)", actual.equals(expected));
+    assertEquals("hashCode", expected.hashCode(), actual.hashCode());
   }
 
   /**
@@ -49,15 +52,15 @@ public class Asserts {
    */
   public static void assertContains(String text, String... substrings) {
     int startingFrom = 0;
-    for (int i = 0; i < substrings.length; i++) {
-      int index = text.indexOf(substrings[i], startingFrom);
-      Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"",
-          text, substrings[i]), index >= startingFrom);
-      startingFrom = index + substrings[i].length();
+    for (String substring : substrings) {
+      int index = text.indexOf(substring, startingFrom);
+      assertTrue(String.format("Expected \"%s\" to contain substring \"%s\"", text, substring),
+          index >= startingFrom);
+      startingFrom = index + substring.length();
     }
 
     String lastSubstring = substrings[substrings.length - 1];
-    Assert.assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
+    assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
         text, lastSubstring), text.indexOf(lastSubstring, startingFrom) == -1);
   }
 
@@ -66,42 +69,33 @@ public class Asserts {
    */
   public static void assertEqualWhenReserialized(Object object)
       throws IOException {
-    Assert.assertTrue("Expected serialVersionUID", hasSerialVersionUid(object));
     Object reserialized = reserialize(object);
-    Assert.assertEquals(object, reserialized);
-    Assert.assertEquals(object.hashCode(), reserialized.hashCode());
+    assertEquals(object, reserialized);
+    assertEquals(object.hashCode(), reserialized.hashCode());
   }
 
   /**
    * Fails unless {@code object} has the same toString value when reserialized.
    */
   public static void assertSimilarWhenReserialized(Object object) throws IOException {
-    Assert.assertTrue("Expected serialVersionUID", hasSerialVersionUid(object));
     Object reserialized = reserialize(object);
-    Assert.assertEquals(object.toString(), reserialized.toString());
+    assertEquals(object.toString(), reserialized.toString());
   }
 
-  static boolean hasSerialVersionUid(Object object) {
-    try {
-      return null != object.getClass().getDeclaredField("serialVersionUID");
-    } catch (NoSuchFieldException e) {
-      return false;
-    }
-  }
-
-  static Object reserialize(Object object) throws IOException {
+  public static <E> E reserialize(E original) throws IOException {
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
-      new ObjectOutputStream(out).writeObject(object);
+      new ObjectOutputStream(out).writeObject(original);
       ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-      return new ObjectInputStream(in).readObject();
+      @SuppressWarnings("unchecked") // the reserialized type is assignable
+      E reserialized = (E) new ObjectInputStream(in).readObject();
+      return reserialized;
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }
 
   public static void assertNotSerializable(Object object) throws IOException {
-    Assert.assertFalse("Unexpected serialVersionUID", hasSerialVersionUid(object));
     try {
       reserialize(object);
       Assert.fail();

@@ -16,12 +16,10 @@
 
 package com.google.inject;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.canonicalize;
 import com.google.inject.util.Types;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -42,7 +40,7 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class TypeLiteral<T> implements Serializable {
+public class TypeLiteral<T> {
 
   final Class<? super T> rawType;
   final Type type;
@@ -143,17 +141,4 @@ public class TypeLiteral<T> implements Serializable {
   public static <T> TypeLiteral<T> get(Class<T> type) {
     return new TypeLiteral<T>(type);
   }
-
-  /**
-   * Returns the canonical form of this type literal for serialization. The
-   * returned instance is always a {@code TypeLiteral}, never a subclass. This
-   * prevents problems caused by serializing anonymous types.
-   */
-  protected final Object writeReplace() {
-    return getClass() == TypeLiteral.class
-        ? this
-        : get(type);
-  }
-
-  private static final long serialVersionUID = 0;
 }
