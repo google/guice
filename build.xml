@@ -12,7 +12,7 @@
   <target name="jar" depends="compile, manifest"
        description="Build jar.">
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" 
-      classpath="lib/build/jarjar-1.0rc7.jar"/>
+      classpath="lib/build/jarjar-1.0rc8.jar"/>
     <mkdir dir="${build.dir}/dist"/>
     <jarjar jarfile="${build.dir}/dist/guice-${version}.jar"
         manifest="${build.dir}/META-INF/MANIFEST.MF">
