@@ -32,6 +32,7 @@ import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -183,8 +184,10 @@ class InjectorBuilder {
 
   public void loadEagerSingletons() {
     // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
-    for (final BindingImpl<?> binding
-        : Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values())) {
+    // Bindings discovered while we're binding these singletons are not be eager.
+    Set<BindingImpl<?>> candidateBindings = ImmutableSet.copyOf(
+        Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values()));
+    for (final BindingImpl<?> binding : candidateBindings) {
       if ((stage == Stage.PRODUCTION && binding.getScope() == SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         try {

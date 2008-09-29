@@ -36,6 +36,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+/**
+ * @author jessewilson@google.com (Jesse Wilson)
+ */
 public class BinderTestSuite {
 
   public static Test suite() {
