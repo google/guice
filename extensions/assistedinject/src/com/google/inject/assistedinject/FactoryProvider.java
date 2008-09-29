@@ -209,8 +209,12 @@ public class FactoryProvider<F, R> implements Provider<F> {
     InvocationHandler invocationHandler = new InvocationHandler() {
 
       public Object invoke(Object proxy, Method method, Object[] creationArgs) throws Throwable {
+        // pass methods from Object.class to the proxy
+        if (method.getDeclaringClass().equals(Object.class)) {
+          return method.invoke(this, creationArgs);
+        }
+        
         AssistedConstructor<?> constructor = factoryMethodToConstructor.get(method);
-
         Object[] constructorArgs = gatherArgsForConstructor(
             constructor, creationArgs);
         Object objectToReturn = constructor.newInstance(constructorArgs);

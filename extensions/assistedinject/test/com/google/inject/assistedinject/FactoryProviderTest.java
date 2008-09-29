@@ -518,6 +518,22 @@ public class FactoryProviderTest extends TestCase {
           "Parameter of type 'double' is not injectable or annotated with @Assisted");
     }
   }
+  
+  public void testMethodsDeclaredInObject() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(Double.class).toInstance(5.0d);
+          bind(ColoredCarFactory.class)
+              .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+        }
+      });
+    
+    ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
+    
+    carFactory.equals(carFactory);
+    carFactory.hashCode();
+    carFactory.toString();
+  }
 
   // TODO(jessewilson): test for duplicate constructors
 }
