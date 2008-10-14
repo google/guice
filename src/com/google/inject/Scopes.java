@@ -93,6 +93,7 @@ public class Scopes {
     }
     Provider<T> scoped = scope.scope(key,
         new ProviderToInternalFactoryAdapter<T>(injector, creator));
-    return new InternalFactoryToProviderAdapter<T>(scoped);
+    return new InternalFactoryToProviderAdapter<T>(
+        Initializables.<Provider<? extends T>>of(scoped));
   }
 }

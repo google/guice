@@ -29,7 +29,6 @@ import com.google.inject.spi.TypeConverterBinding;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * Handles {@link Binder#convertToTypes} commands.
@@ -39,11 +38,11 @@ import java.util.List;
  */
 class TypeConverterBindingProcessor extends AbstractProcessor {
 
-  private final List<MatcherAndConverter> converters;
+  private final State state;
 
-  TypeConverterBindingProcessor(Errors errors, List<MatcherAndConverter> converters) {
+  TypeConverterBindingProcessor(Errors errors, State state) {
     super(errors);
-    this.converters = converters;
+    this.state = state;
 
     // Configure type converters.
     convertToPrimitiveType(int.class, Integer.class);
@@ -162,11 +161,12 @@ class TypeConverterBindingProcessor extends AbstractProcessor {
 
   private void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    converters.add(new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
+    state.addConverter(
+        new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
   }
 
   @Override public Boolean visitTypeConverterBinding(TypeConverterBinding command) {
-    converters.add(new MatcherAndConverter(
+    state.addConverter(new MatcherAndConverter(
         command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;
   }

@@ -241,6 +241,10 @@ public final class Errors implements Serializable {
     return addMessage("A binding to %s was already configured at %s.", key, source);
   }
 
+  public Errors childBindingAlreadySet(Key<?> key) {
+    return addMessage("A binding to %s already exists on a child injector.", key);
+  }
+
   public Errors errorInjectingMethod(Throwable cause) {
     return addMessage(cause, "Error injecting method, %s", cause);
   }

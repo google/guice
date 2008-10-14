@@ -16,83 +16,204 @@ limitations under the License.
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
+import static com.google.inject.Asserts.assertContains;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Names;
+import com.google.inject.spi.TypeConverter;
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+import java.util.List;
 import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
- *
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public class ParentInjectorTest extends TestCase {
 
-  Module baseModule = new AbstractModule() {
+  public void testParentAndChildCannotShareExplicitBindings() {
+    Injector parent = Guice.createInjector(bindsA);
+    try {
+      parent.createChildInjector(bindsA);
+      fail("Created the same explicit binding on both parent and child");
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), "A binding to ", A.class.getName(), " was already configured",
+          " at ", getClass().getName(), ".configure(ParentInjectorTest.java:",
+          " at ", getClass().getName(), ".configure(ParentInjectorTest.java:");
+    }
+  }
+
+  public void testParentJitBindingWontClobberChildBinding() {
+    Injector parent = Guice.createInjector();
+    parent.createChildInjector(bindsA);
+    try {
+      parent.getInstance(A.class);
+      fail("Created a just-in-time binding on the parent that's the same as a child's binding");
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(), "A binding to ", A.class.getName(),
+          " already exists on a child injector.");
+    }
+  }
+
+  public void testJustInTimeBindingsAreSharedWithParentIfPossible() {
+    Injector parent = Guice.createInjector();
+    Injector child = parent.createChildInjector();
+    assertSame(child.getInstance(A.class), parent.getInstance(A.class));
+
+    Injector anotherChild = parent.createChildInjector();
+    assertSame(anotherChild.getInstance(A.class), parent.getInstance(A.class));
+
+    Injector grandchild = child.createChildInjector();
+    assertSame(grandchild.getInstance(A.class), parent.getInstance(A.class));
+  }
+
+  public void testBindingsInherited() {
+    Injector parent = Guice.createInjector(bindsB);
+    Injector child = parent.createChildInjector();
+    assertSame(RealB.class, child.getInstance(B.class).getClass());
+  }
+
+  public void testChildBindingsNotVisibleToParent() {
+    Injector parent = Guice.createInjector();
+    parent.createChildInjector(bindsB);
+    try {
+      parent.getBinding(B.class);
+      fail();
+    } catch (ProvisionException expected) {
+    }
+  }
+
+  public void testScopesInherited() {
+    Injector parent = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindScope(MyScope.class, Scopes.SINGLETON);
+      }
+    });
+    Injector child = parent.createChildInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bind(A.class).in(MyScope.class);
+      }
+    });
+    assertSame(child.getInstance(A.class), child.getInstance(A.class));
+  }
+
+  public void testInterceptorsInherited() {
+    Injector parent = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        super.bindInterceptor(Matchers.any(), Matchers.returns(Matchers.identicalTo(A.class)),
+            returnNullInterceptor);
+      }
+    });
+
+    Injector child = parent.createChildInjector(new AbstractModule() {
+      protected void configure() {
+        bind(C.class);
+      }
+    });
+
+    assertNull(child.getInstance(C.class).interceptedMethod());
+  }
+
+  public void testTypeConvertersInherited() {
+    Injector parent = Guice.createInjector(bindListConverterModule);
+    Injector child = parent.createChildInjector(bindStringNamedB);
+
+    assertEquals(ImmutableList.of(), child.getInstance(Key.get(List.class, Names.named("B"))));
+  }
+
+  public void testTypeConvertersConflicting() {
+    Injector parent = Guice.createInjector(bindListConverterModule);
+    Injector child = parent.createChildInjector(bindListConverterModule, bindStringNamedB);
+
+    try {
+      child.getInstance(Key.get(List.class, Names.named("B")));
+      fail();
+    } catch (ProvisionException expected) {
+      Asserts.assertContains(expected.getMessage(), "Multiple converters can convert");
+    }
+  }
+
+  public void testInjectorInjectionSpanningInjectors() {
+    Injector parent = Guice.createInjector();
+    Injector child = parent.createChildInjector(new AbstractModule() {
+      protected void configure() {
+        bind(D.class);
+      }
+    });
+
+    D d = child.getInstance(D.class);
+    assertSame(d.injector, child);
+
+    E e = child.getInstance(E.class);
+    assertSame(e.injector, parent);
+  }
+
+  @Singleton
+  static class A {}
+
+  private final Module bindsA = new AbstractModule() {
     protected void configure() {
-      bind(Foo.class).to(FooImpl.class).in(Scopes.SINGLETON);
-      bind(Bar.class).to(BarOne.class);
+      bind(A.class).toInstance(new A());
     }
   };
 
-  Injector injector = Guice.createInjector(baseModule);
-  Injector childInjector = Guice.createInjector(injector,
-      new AbstractModule() {
-        protected void configure() {
-          bind(Bar.class).to(BarTwo.class);
-          bind(Bus.class).to(BusImpl.class);
-        }
-      });
+  interface B {}
+  static class RealB implements B {}
 
-  /** Make sure that singletons are properly handled **/
-  public void testExplicitSingleton() throws Exception {
-    Foo fooParent = injector.getInstance(Foo.class);
-    Foo fooChild = childInjector.getInstance(Foo.class);
+  private final Module bindsB = new AbstractModule() {
+    protected void configure() {
+      bind(B.class).to(RealB.class);
+    }
+  };
 
-    assertTrue(fooChild instanceof FooImpl);
-    assertSame(fooParent, fooChild);
+  @Target(TYPE) @Retention(RUNTIME) @ScopeAnnotation
+  public @interface MyScope {}
+
+  private final MethodInterceptor returnNullInterceptor = new MethodInterceptor() {
+    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+      return null;
+    }
+  };
+
+  private final TypeConverter listConverter = new TypeConverter() {
+    public Object convert(String value, TypeLiteral<?> toType) {
+      return ImmutableList.of();
+    }
+  };
+
+  private final Module bindListConverterModule = new AbstractModule() {
+    protected void configure() {
+      convertToTypes(Matchers.any(), listConverter);
+    }
+  };
+
+  private final Module bindStringNamedB = new AbstractModule() {
+    protected void configure() {
+      bind(String.class).annotatedWith(Names.named("B")).toInstance("buzz");
+    }
+  };
+
+  public static class C {
+    public A interceptedMethod() {
+      return new A();
+    }
   }
 
-  /**
-   * Make sure that when there are non scoped bindings in the parent,
-   * they are not used.
-   */
-  public void testNonSingletons() throws Exception {
-    Bar barParent = injector.getInstance(Bar.class);
-    Bar barChild = childInjector.getInstance(Bar.class);
-
-    assertNotSame(barParent, barChild);
-    assertTrue(barParent instanceof BarOne);
-    assertTrue(barChild instanceof BarTwo);
+  static class D {
+    @Inject Injector injector;
   }
 
-  public void testImplicitSingleton() throws Exception {
-    Car carParent = injector.getInstance(Car.class);
-    Car carChild = childInjector.getInstance(Car.class);
-
-    assertNotNull(carParent);
-    assertNotNull(carChild);
-    assertSame(carParent, carChild);
+  static class E {
+    @Inject Injector injector;
   }
 
-  public void testImplicitSingletonFromChild() throws Exception {
-    Truck truck = childInjector.getInstance(Truck.class);
-    assertNotNull(truck);
-  }
-
-  interface Foo {}
-  @Singleton
-  static class FooImpl implements Foo {}
-
-  interface Bar {}
-  static class BarOne implements Bar {}
-  static class BarTwo implements Bar {}
-
-  @Singleton
-  static class Car {}
-
-  interface Bus {}
-  static class BusImpl implements Bus {}
-
-  @Singleton
-  private static class Truck {
-    @Inject
-    Truck(Bus bus) {}
-  }
-
+  private final Module bindsD = new AbstractModule() {
+    protected void configure() {
+      bind(D.class);
+    }
+  };
 }

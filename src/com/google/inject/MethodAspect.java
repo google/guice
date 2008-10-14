@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.matcher.Matcher;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
-
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -34,11 +34,23 @@ class MethodAspect {
   final Matcher<? super Method> methodMatcher;
   final List<MethodInterceptor> interceptors;
 
+  /**
+   * @param classMatcher matches classes the interceptor should apply to. For example: {@code
+   *     only(Runnable.class)}.
+   * @param methodMatcher matches methods the interceptor should apply to. For example: {@code
+   *     annotatedWith(Transactional.class)}.
+   * @param interceptors to apply
+   */
   MethodAspect(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, List<MethodInterceptor> interceptors) {
     this.classMatcher = checkNotNull(classMatcher, "class matcher");
     this.methodMatcher = checkNotNull(methodMatcher, "method matcher");
     this.interceptors = checkNotNull(interceptors, "interceptors");
+  }
+
+  MethodAspect(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+    this(classMatcher, methodMatcher, Arrays.asList(interceptors));
   }
 
   boolean matches(Class<?> clazz) {

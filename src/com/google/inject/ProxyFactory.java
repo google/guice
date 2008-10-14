@@ -40,8 +40,7 @@ import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Proxies classes applying interceptors to methods as specified in
- * {@link ProxyFactoryBuilder}.
+ * Proxies classes applying interceptors to methods.
  *
  * @author crazybob@google.com (Bob Lee)
  */

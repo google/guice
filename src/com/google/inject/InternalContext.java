@@ -16,8 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Dependency;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +28,8 @@ import java.util.Map;
  */
 class InternalContext {
 
-  private final InjectorImpl injector;
   private Map<Object, ConstructionContext<?>> constructionContexts;
   private Dependency dependency;
-
-  public InternalContext(InjectorImpl injector) {
-    this.injector = injector;
-  }
 
   @SuppressWarnings("unchecked")
   public <T> ConstructionContext<T> getConstructionContext(Object key) {
@@ -63,13 +56,5 @@ class InternalContext {
 
   public void setDependency(Dependency dependency) {
     this.dependency = dependency;
-  }
-
-  /**
-   * Ensures that an object requiring injection at Injector-creation time has
-   * been injected before its use.
-   */
-  public void ensureMemberInjected(Errors errors, Object toInject) throws ErrorsException {
-    injector.memberInjector.ensureInjected(toInject, errors);
   }
 }

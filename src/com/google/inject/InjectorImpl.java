@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import com.google.common.base.Nullable;
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -60,43 +60,40 @@ import net.sf.cglib.reflect.FastMethod;
  * @see InjectorBuilder
  */
 class InjectorImpl implements Injector {
-  final Injector parentInjector;
-  final Map<Key<?>, BindingImpl<?>> explicitBindings = Maps.newHashMap();
+  final State state;
+  final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
-  final List<MatcherAndConverter> converters = Lists.newArrayList();
-  final Map<Key<?>, BindingImpl<?>> parentBindings = Maps.newHashMap();
-  final CreationTimeMemberInjector memberInjector = new CreationTimeMemberInjector(this);
+  final Initializer initializer = new Initializer(this);
   Reflection reflection;
 
-  InjectorImpl(Injector parentInjector) {
-    this.parentInjector = parentInjector;
+  InjectorImpl(@Nullable InjectorImpl parent) {
+    this.parent = parent;
+    this.state = new InheritingState(parent != null ? parent.state : State.NONE);
+
+    if (parent != null) {
+      localContext = parent.localContext;
+    } else {
+      localContext = new ThreadLocal<InternalContext[]>() {
+        protected InternalContext[] initialValue() {
+          return new InternalContext[1];
+        }
+      };
+    }
   }
 
   /** Indexes bindings by type. */
   void index() {
-    for (BindingImpl<?> binding : explicitBindings.values()) {
+    for (Binding<?> binding : state.getExplicitBindingsThisLevel().values()) {
       index(binding);
     }
   }
 
-  <T> void index(BindingImpl<T> binding) {
+  <T> void index(Binding<T> binding) {
     bindingsMultimap.put(binding.getKey().getTypeLiteral(), binding);
   }
 
-  // not test-covered
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
     return Collections.<Binding<T>>unmodifiableList(bindingsMultimap.getAll(type));
-  }
-
-  // not test-covered
-  <T> List<String> getNamesOfBindingAnnotations(TypeLiteral<T> type) {
-    List<String> names = Lists.newArrayList();
-    for (Binding<T> binding : findBindingsByType(type)) {
-      Key<T> key = binding.getKey();
-      names.add(key.hasAnnotationType() ? key.getAnnotationName() : "[no annotation]");
-    }
-    return names;
   }
 
   /** Returns the binding for {@code key} */
@@ -120,15 +117,8 @@ class InjectorImpl implements Injector {
    */
   public <T> BindingImpl<T> getBindingOrThrow(Key<T> key, Errors errors)
       throws ErrorsException {
-    if (parentInjector != null) {
-      BindingImpl<T> bindingImpl = getParentBinding(key);
-      if (bindingImpl != null) {
-        return bindingImpl;
-      }
-    }
-
     // Check explicit bindings, i.e. bindings created by modules.
-    BindingImpl<T> binding = getExplicitBindingImpl(key);
+    BindingImpl<T> binding = state.getExplicitBinding(key);
     if (binding != null) {
       return binding;
     }
@@ -137,55 +127,20 @@ class InjectorImpl implements Injector {
     return getJustInTimeBinding(key, errors);
   }
 
-  /**
-   * Checks the parent injector for a scoped binding, and if available, creates an appropriate
-   * binding local to this injector and remembers it.
-   *
-   * TODO: think about this wrt parent jit bindings
-   */
-  @SuppressWarnings("unchecked")
-  private <T> BindingImpl<T> getParentBinding(Key<T> key) {
-    synchronized (parentBindings) {
-      // null values will mean that the parent doesn't have this binding
-      BindingImpl<T> binding = (BindingImpl<T>) parentBindings.get(key);
-      if (binding != null) {
-        return (BindingImpl<T>) binding;
-      }
-      try {
-        binding = (BindingImpl) parentInjector.getBinding(key);
-      }
-      catch (ProvisionException e) {
-        // if this happens, the parent can't create this key, and we ignore it
-      }
-
-      BindingImpl<T> bindingImpl = null;
-      if (binding != null
-          && binding.getScope() != null
-          && !binding.getScope().equals(Scopes.NO_SCOPE)) {
-        // TODO: this binding won't report its injection points or scoping properly
-        bindingImpl = new ProviderInstanceBindingImpl(
-            this,
-            key,
-            binding.getSource(),
-            new InternalFactoryToProviderAdapter(binding.getProvider(), binding.getSource()),
-            Scopes.NO_SCOPE,
-            binding.getProvider(),
-            LoadStrategy.LAZY,
-            ImmutableSet.<InjectionPoint>of());
-      }
-      parentBindings.put(key, bindingImpl); // this kinda scares me
-      return bindingImpl;
-    }
-  }
-
   public <T> Binding<T> getBinding(Class<T> type) {
     return getBinding(Key.get(type));
   }
 
-  /** Gets a binding which was specified explicitly in a module. */
-  @SuppressWarnings("unchecked")
-  <T> BindingImpl<T> getExplicitBindingImpl(Key<T> key) {
-    return (BindingImpl<T>) explicitBindings.get(key);
+  public Injector createChildInjector(Iterable<? extends Module> modules) {
+    return new InjectorBuilder()
+        .parentInjector(this)
+        .stage(getInstance(Stage.class))
+        .addModules(modules)
+        .build();
+  }
+
+  public Injector createChildInjector(Module... modules) {
+    return createChildInjector(ImmutableList.of(modules));
   }
 
   /**
@@ -194,17 +149,33 @@ class InjectorImpl implements Injector {
    * @throws com.google.inject.internal.ErrorsException if the binding could not be created.
    */
   @SuppressWarnings("unchecked")
-  <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors) throws ErrorsException {
+  private <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors)
+      throws ErrorsException {
+
+    // TODO: synch should span parent and child
+
     synchronized (jitBindings) {
-      // Support null values.
-      if (!jitBindings.containsKey(key)) {
-        BindingImpl<T> binding = createJustInTimeBinding(key, errors);
-        jitBindings.put(key, binding);
-        return binding;
+      // try to get the JIT binding from the parent injector
+      if (parent != null) {
+        try {
+          return parent.getJustInTimeBinding(key, new Errors());
+        } catch (ErrorsException ignored) {
+        }
       }
-      else {
+
+      // Support null values.
+      if (jitBindings.containsKey(key)) {
         return (BindingImpl<T>) jitBindings.get(key);
       }
+
+      if (state.isBlacklisted(key)) {
+        throw errors.childBindingAlreadySet(key).toException();
+      }
+
+      BindingImpl<T> binding = createJustInTimeBinding(key, errors);
+      state.parent().blacklist(key);
+      jitBindings.put(key, binding);
+      return binding;
     }
   }
 
@@ -278,7 +249,7 @@ class InjectorImpl implements Injector {
       throws ErrorsException {
     // Find a constant string binding.
     Key<String> stringKey = key.ofType(String.class);
-    BindingImpl<String> stringBinding = getExplicitBindingImpl(stringKey);
+    BindingImpl<String> stringBinding = state.getExplicitBinding(stringKey);
     if (stringBinding == null || !stringBinding.isConstant()) {
       return null;
     }
@@ -288,15 +259,7 @@ class InjectorImpl implements Injector {
 
     // Find a matching type converter.
     TypeLiteral<T> type = key.getTypeLiteral();
-    MatcherAndConverter matchingConverter = null;
-    for (MatcherAndConverter converter : converters) {
-      if (converter.getTypeMatcher().matches(type)) {
-        if (matchingConverter != null) {
-          errors.ambiguousTypeConversion(stringValue, source, type, matchingConverter, converter);
-        }
-        matchingConverter = converter;
-      }
-    }
+    MatcherAndConverter matchingConverter = state.getConverter(stringValue, type, errors, source);
 
     if (matchingConverter == null) {
       // No converter can handle the given type.
@@ -336,8 +299,8 @@ class InjectorImpl implements Injector {
 
     ConvertedConstantBindingImpl(
         InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding) {
-      super(injector, key, originalBinding.getSource(), new ConstantFactory<T>(value),
-          Scopes.NO_SCOPE, LoadStrategy.LAZY);
+      super(injector, key, originalBinding.getSource(),
+          new ConstantFactory<T>(Initializables.of(value)), Scopes.NO_SCOPE, LoadStrategy.LAZY);
       this.value = value;
       provider = Providers.of(value);
       this.originalBinding = originalBinding;
@@ -360,14 +323,6 @@ class InjectorImpl implements Injector {
     }
   }
 
-  <T> BindingImpl<T> createBindingFromType(
-      Key<T> key, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
-    BindingImpl<T> binding = createUnitializedBinding(
-        key, null, loadStrategy, errors);
-    initializeBinding(binding, errors);
-    return binding;
-  }
-
   <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
@@ -387,13 +342,6 @@ class InjectorImpl implements Injector {
         }
       }
     }
-  }
-
-  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope,
-      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
-    @SuppressWarnings("unchecked")
-    Class<T> type = (Class<T>) key.getRawType();
-    return createUnitializedBinding(key, type, scope, type, loadStrategy, errors);
   }
 
   /**
@@ -441,7 +389,7 @@ class InjectorImpl implements Injector {
     if (scope == null) {
       Class<? extends Annotation> scopeAnnotation = Annotations.findScopeAnnotation(errors, type);
       if (scopeAnnotation != null) {
-        scope = scopes.get(scopeAnnotation);
+        scope = state.getScope(scopeAnnotation);
         if (scope == null) {
           errors.withSource(type).scopeNotFound(scopeAnnotation);
         }
@@ -573,14 +521,23 @@ class InjectorImpl implements Injector {
   }
 
   /**
-   * Returns a new just-in-time binding created by resolving {@code key}. This could be an
-   * injectable class (including those with @ImplementedBy, etc.), an automatically converted
-   * constant, a {@code Provider<X>} binding, etc.
+   * Returns a new just-in-time binding created by resolving {@code key}. The strategies used to
+   * create just-in-time bindings are:
+   * <ol>
+   *   <li>Internalizing Providers. If the requested binding is for {@code Provider<T>}, we delegate
+   *     to the binding for {@code T}.
+   *   <li>Converting constants.
+   *   <li>ImplementedBy and ProvidedBy annotations. Only for unannotated keys.
+   *   <li>The constructor of the raw type. Only for unannotated keys.
+   * </ol>
    *
    * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
    */
-  <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors)
-      throws ErrorsException {
+  <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors) throws ErrorsException {
+    if (state.isBlacklisted(key)) {
+      throw errors.childBindingAlreadySet(key).toException();
+    }
+
     // Handle cases where T is a Provider<?>.
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
@@ -612,7 +569,12 @@ class InjectorImpl implements Injector {
     }
 
     // Create a binding based on the raw type.
-    return createBindingFromType(key, LoadStrategy.LAZY, errors);
+    @SuppressWarnings("unchecked")
+    Class<T> rawType = (Class<T>) key.getRawType();
+    BindingImpl<T> binding = createUnitializedBinding(key, rawType, null /* scope */, rawType,
+        LoadStrategy.LAZY, errors);
+    initializeBinding(binding, errors);
+    return binding;
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key, Errors errors)
@@ -658,7 +620,7 @@ class InjectorImpl implements Injector {
 
   // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
-    return Collections.<Key<?>, Binding<?>>unmodifiableMap(explicitBindings);
+    return state.getExplicitBindingsThisLevel();
   }
 
   interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
@@ -669,7 +631,7 @@ class InjectorImpl implements Injector {
   private static class BindingsMultimap {
     final Multimap<TypeLiteral<?>, Binding<?>> multimap = Multimaps.newArrayListMultimap();
 
-    <T> void put(TypeLiteral<T> type, BindingImpl<T> binding) {
+    <T> void put(TypeLiteral<T> type, Binding<T> binding) {
       multimap.put(type, binding);
     }
 
@@ -975,17 +937,13 @@ class InjectorImpl implements Injector {
     return getProvider(type).get();
   }
 
-  final ThreadLocal<InternalContext[]> localContext = new ThreadLocal<InternalContext[]>() {
-    protected InternalContext[] initialValue() {
-      return new InternalContext[1];
-    }
-  };
+  final ThreadLocal<InternalContext[]> localContext;
 
   /** Looks up thread local context. Creates (and removes) a new context if necessary. */
   <T> T callInContext(ContextualCallable<T> callable) throws ErrorsException {
     InternalContext[] reference = localContext.get();
     if (reference[0] == null) {
-      reference[0] = new InternalContext(this);
+      reference[0] = new InternalContext();
       try {
         return callable.call(reference[0]);
       } finally {
@@ -1007,7 +965,7 @@ class InjectorImpl implements Injector {
 
   public String toString() {
     return new ToStringBuilder(Injector.class)
-        .add("bindings", explicitBindings)
+        .add("bindings", state.getExplicitBindingsThisLevel())
         .toString();
   }
 }

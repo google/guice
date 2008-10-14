@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,24 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ToStringBuilder;
-import com.google.inject.spi.Dependency;
 
 /**
- * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
-class ConstantFactory<T> implements InternalFactory<T> {
+class Initializables {
 
-  private final Initializable<T> initializable;
+  /**
+   * Returns an initializable for an instance that requires no initialization.
+   */
+  static <T> Initializable<T> of(final T instance) {
+    return new Initializable<T>() {
+      public T get(Errors errors) throws ErrorsException {
+        return instance;
+      }
 
-  public ConstantFactory(Initializable<T> initializable) {
-    this.initializable = initializable;
-  }
-
-  public T get(Errors errors, InternalContext context, Dependency dependency)
-      throws ErrorsException {
-    return initializable.get(errors);
-  }
-
-  public String toString() {
-    return new ToStringBuilder(ConstantFactory.class)
-        .add("value", initializable)
-        .toString();
+      @Override public String toString() {
+        return String.valueOf(instance);
+      }
+    };
   }
 }

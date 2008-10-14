@@ -21,7 +21,6 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.ScopeBinding;
 import java.lang.annotation.Annotation;
-import java.util.Map;
 
 /**
  * Handles {@link Binder#bindScope} commands.
@@ -31,12 +30,12 @@ import java.util.Map;
  */
 class ScopeBindingProcessor extends AbstractProcessor {
 
-  private final Map<Class<? extends Annotation>, Scope> scopes;
+  private final State state;
 
   ScopeBindingProcessor(Errors errors,
-      Map<Class<? extends Annotation>, Scope> scopes) {
+      State state) {
     super(errors);
-    this.scopes = scopes;
+    this.state = state;
   }
 
   @Override public Boolean visitScopeBinding(ScopeBinding command) {
@@ -54,11 +53,11 @@ class ScopeBindingProcessor extends AbstractProcessor {
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    Scope existing = scopes.get(checkNotNull(annotationType, "annotation type"));
+    Scope existing = state.getScope(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
       errors.duplicateScopes(existing, annotationType, scope);
     } else {
-      scopes.put(annotationType, checkNotNull(scope, "scope"));
+      state.putAnnotation(annotationType, checkNotNull(scope, "scope"));
     }
 
     return true;

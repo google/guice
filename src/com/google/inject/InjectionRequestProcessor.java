@@ -38,10 +38,10 @@ import java.util.List;
 class InjectionRequestProcessor extends AbstractProcessor {
 
   private final List<StaticInjection> staticInjections = Lists.newArrayList();
-  private final CreationTimeMemberInjector memberInjector;
+  private final Initializer memberInjector;
 
   InjectionRequestProcessor(Errors errors,
-      CreationTimeMemberInjector memberInjector) {
+      Initializer memberInjector) {
     super(errors);
     this.memberInjector = memberInjector;
   }

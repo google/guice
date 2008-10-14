@@ -30,6 +30,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,7 @@ class InjectorBuilder {
 
   private final Stopwatch stopwatch = new Stopwatch();
 
-  private Injector parent;
+  private InjectorImpl parent = null;
   private Stage stage;
   private Factory reflectionFactory = new RuntimeReflectionFactory();
   private final List<Module> modules = Lists.newLinkedList();
@@ -72,7 +73,7 @@ class InjectorBuilder {
     return this;
   }
 
-  InjectorBuilder parentInjector(Injector parent) {
+  InjectorBuilder parentInjector(InjectorImpl parent) {
     this.parent = parent;
     return this;
   }
@@ -91,7 +92,10 @@ class InjectorBuilder {
 
     injector = new InjectorImpl(parent);
 
-    modules.add(0, new BuiltInModule(injector, stage));
+    // bind Stage and Singleton if this is a top-level injector
+    if (parent == null) {
+      modules.add(0, new RootModule(stage));
+    }
 
     elements.addAll(Elements.getElements(stage, modules));
 
@@ -122,22 +126,22 @@ class InjectorBuilder {
         .processCommands(elements);
 
     InterceptorBindingProcessor interceptorCommandProcessor
-        = new InterceptorBindingProcessor(errors);
+        = new InterceptorBindingProcessor(errors, injector.state);
     interceptorCommandProcessor.processCommands(elements);
     ConstructionProxyFactory proxyFactory = interceptorCommandProcessor.createProxyFactory();
     injector.reflection = reflectionFactory.create(proxyFactory);
     stopwatch.resetAndLog("Interceptors creation");
 
-    new ScopeBindingProcessor(errors, injector.scopes).processCommands(elements);
+    new ScopeBindingProcessor(errors, injector.state).processCommands(elements);
     stopwatch.resetAndLog("Scopes creation");
 
-    new TypeConverterBindingProcessor(errors, injector.converters).processCommands(elements);
+    new TypeConverterBindingProcessor(errors, injector.state).processCommands(elements);
     stopwatch.resetAndLog("Converters creation");
 
+    bindInjector();
     bindLogger();
     bindCommandProcesor = new BindingProcessor(errors,
-        injector, injector.scopes, injector.explicitBindings,
-        injector.memberInjector);
+        injector, injector.state, injector.initializer);
     bindCommandProcesor.processCommands(elements);
     bindCommandProcesor.createUntargettedBindings();
     stopwatch.resetAndLog("Binding creation");
@@ -145,8 +149,7 @@ class InjectorBuilder {
     injector.index();
     stopwatch.resetAndLog("Binding indexing");
 
-    injectionCommandProcessor
-        = new InjectionRequestProcessor(errors, injector.memberInjector);
+    injectionCommandProcessor = new InjectionRequestProcessor(errors, injector.initializer);
     injectionCommandProcessor.processCommands(elements);
     stopwatch.resetAndLog("Static injection");
   }
@@ -159,7 +162,7 @@ class InjectorBuilder {
     injectionCommandProcessor.validate(injector);
     stopwatch.resetAndLog("Static validation");
 
-    injector.memberInjector.validateOustandingInjections(errors);
+    injector.initializer.validateOustandingInjections(errors);
     stopwatch.resetAndLog("Instance member validation");
 
     new ProviderLookupProcessor(errors, injector).processCommands(elements);
@@ -173,7 +176,7 @@ class InjectorBuilder {
     injectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 
-    injector.memberInjector.injectAll(errors);
+    injector.initializer.injectAll(errors);
     stopwatch.resetAndLog("Instance injection");
     errors.throwCreationExceptionIfErrorsExist();
 
@@ -185,8 +188,10 @@ class InjectorBuilder {
   public void loadEagerSingletons() {
     // load eager singletons, or all singletons if we're in Stage.PRODUCTION.
     // Bindings discovered while we're binding these singletons are not be eager.
-    Set<BindingImpl<?>> candidateBindings = ImmutableSet.copyOf(
-        Iterables.concat(injector.explicitBindings.values(), injector.jitBindings.values()));
+    @SuppressWarnings("unchecked") // casting Collection<Binding> to Collection<BindingImpl> is safe
+    Set<BindingImpl<?>> candidateBindings = ImmutableSet.copyOf(Iterables.concat(
+        (Collection) injector.state.getExplicitBindingsThisLevel().values(),
+        injector.jitBindings.values()));
     for (final BindingImpl<?> binding : candidateBindings) {
       if ((stage == Stage.PRODUCTION && binding.getScope() == SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
@@ -215,40 +220,51 @@ class InjectorBuilder {
     }
   }
 
-  private static class BuiltInModule implements Module {
-    final Injector injector;
+  private static class RootModule implements Module {
     final Stage stage;
 
-    private BuiltInModule(Injector injector, Stage stage) {
-      this.injector = checkNotNull(injector, "injector");
+    private RootModule(Stage stage) {
       this.stage = checkNotNull(stage, "stage");
     }
 
     public void configure(Binder binder) {
       binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
-
       binder.bind(Stage.class).toInstance(stage);
       binder.bindScope(Singleton.class, SINGLETON);
-      // Create default bindings.
-      // We use toProvider() instead of toInstance() to avoid infinite recursion
-      // in toString().
-      binder.bind(Injector.class).toProvider(new InjectorProvider(injector));
+    }
+  }
+
+  /**
+   * The Injector is a special case because we allow both parent and child injectors to both have
+   * a binding for that key.
+   */
+  private void bindInjector() {
+    Key<Injector> key = Key.get(Injector.class);
+    InjectorFactory injectorFactory = new InjectorFactory(injector);
+    injector.state.putBinding(key,
+        new ProviderInstanceBindingImpl<Injector>(injector, key, SourceProvider.UNKNOWN_SOURCE,
+            injectorFactory, Scopes.NO_SCOPE, injectorFactory, LoadStrategy.LAZY,
+            ImmutableSet.<InjectionPoint>of()));
+  }
+
+  static class InjectorFactory implements  InternalFactory<Injector>, Provider<Injector> {
+    private final Injector injector;
+
+    private InjectorFactory(Injector injector) {
+      this.injector = injector;
     }
 
-    class InjectorProvider implements Provider<Injector> {
-      final Injector injector;
+    public Injector get(Errors errors, InternalContext context, Dependency<?> dependency)
+        throws ErrorsException {
+      return injector;
+    }
 
-      InjectorProvider(Injector injector) {
-        this.injector = injector;
-      }
+    public Injector get() {
+      return injector;
+    }
 
-      public Injector get() {
-        return injector;
-      }
-
-      public String toString() {
-        return "Provider<Injector>";
-      }
+    public String toString() {
+      return "Provider<Injector>";
     }
   }
 
@@ -259,7 +275,7 @@ class InjectorBuilder {
   private void bindLogger() {
     Key<Logger> key = Key.get(Logger.class);
     LoggerFactory loggerFactory = new LoggerFactory();
-    injector.explicitBindings.put(key,
+    injector.state.putBinding(key,
         new ProviderInstanceBindingImpl<Logger>(injector, key,
             SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
             loggerFactory, LoadStrategy.LAZY, ImmutableSet.<InjectionPoint>of()));
@@ -304,6 +320,12 @@ class InjectorBuilder {
     }
     public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
       return this.delegateInjector.findBindingsByType(type);
+    }
+    public Injector createChildInjector(Iterable<? extends Module> modules) {
+      return delegateInjector.createChildInjector(modules);
+    }
+    public Injector createChildInjector(Module... modules) {
+      return delegateInjector.createChildInjector(modules);
     }
     public <T> Provider<T> getProvider(Key<T> key) {
       throw new UnsupportedOperationException(

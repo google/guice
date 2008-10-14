@@ -28,7 +28,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,22 +58,17 @@ class BindingProcessor extends AbstractProcessor {
   };
 
   private final InjectorImpl injector;
-  private final Map<Class<? extends Annotation>, Scope> scopes;
+  private final State state;
   private final List<CreationListener> creationListeners = Lists.newArrayList();
-  private final Map<Key<?>, BindingImpl<?>> bindings;
-  private final CreationTimeMemberInjector memberInjector;
+  private final Initializer initializer;
   private final List<Runnable> untargettedBindings = Lists.newArrayList();
 
-  BindingProcessor(Errors errors,
-      InjectorImpl injector,
-      Map<Class<? extends Annotation>, Scope> scopes,
-      Map<Key<?>, BindingImpl<?>> bindings,
-      CreationTimeMemberInjector memberInjector) {
+  BindingProcessor(Errors errors, InjectorImpl injector, State state,
+      Initializer initializer) {
     super(errors);
     this.injector = injector;
-    this.scopes = scopes;
-    this.bindings = bindings;
-    this.memberInjector = memberInjector;
+    this.state = state;
+    this.initializer = initializer;
   }
 
   @Override public <T> Boolean visitBinding(Binding<T> command) {
@@ -106,7 +100,7 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Scope visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-        Scope scope = scopes.get(scopeAnnotation);
+        Scope scope = state.getScope(scopeAnnotation);
         if (scope != null) {
           return scope;
         } else {
@@ -122,8 +116,8 @@ class BindingProcessor extends AbstractProcessor {
 
     command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
       public Void visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
-        ConstantFactory<? extends T> factory = new ConstantFactory<T>(instance);
-        memberInjector.requestInjection(instance, source, injectionPoints);
+        Initializable<T> ref = initializer.requestInjection(instance, source, injectionPoints);
+        ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, injectionPoints,
             instance));
@@ -132,11 +126,10 @@ class BindingProcessor extends AbstractProcessor {
 
       public Void visitProvider(Provider<? extends T> provider,
           Set<InjectionPoint> injectionPoints) {
-        InternalFactoryToProviderAdapter<? extends T> factory
-            = new InternalFactoryToProviderAdapter<T>(provider, source);
-        memberInjector.requestInjection(provider, source, injectionPoints);
-        InternalFactory<? extends T> scopedFactory
-            = Scopes.scope(key, injector, factory, scope);
+        Initializable<Provider<? extends T>> initializable = initializer
+            .<Provider<? extends T>>requestInjection(provider, source, injectionPoints);
+        InternalFactory<T> factory = new InternalFactoryToProviderAdapter<T>(initializable, source);
+        InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scope,
             provider, loadStrategy, injectionPoints));
         return null;
@@ -246,7 +239,6 @@ class BindingProcessor extends AbstractProcessor {
 
   private void putBinding(BindingImpl<?> binding) {
     Key<?> key = binding.getKey();
-    Binding<?> original = bindings.get(key);
 
     Class<?> rawType = key.getRawType();
     if (FORBIDDEN_TYPES.contains(rawType)) {
@@ -254,11 +246,17 @@ class BindingProcessor extends AbstractProcessor {
       return;
     }
 
-    if (bindings.containsKey(key)) {
+    Binding<?> original = state.getExplicitBinding(key);
+    if (original != null) {
       errors.bindingAlreadySet(key, original.getSource());
-    } else {
-      bindings.put(key, binding);
+      return;
     }
+
+    // TODO: make getExplicitBinding() and blacklist() atomic
+
+    // prevent the parent from creating a JIT binding for this key
+    state.parent().blacklist(key);
+    state.putBinding(key, binding);
   }
 
   // It's unfortunate that we have to maintain a blacklist of specific
@@ -268,7 +266,6 @@ class BindingProcessor extends AbstractProcessor {
       AbstractModule.class,
       Binder.class,
       Binding.class,
-      // Injector.class,
       Key.class,
       Module.class,
       Provider.class, 
