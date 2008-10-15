@@ -17,17 +17,19 @@
 package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Manages and injects instances at injector-creation time.
+ * Manages and injects instances at injector-creation time. This is made more complicated by
+ * instances that request other instances while they're being injected. We overcome this by using
+ * {@link Initializable}, which attempts to perform injection before use.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -39,7 +41,7 @@ class Initializer {
   private final CountDownLatch ready = new CountDownLatch(1);
 
   /** Maps instances that need injection to a source that registered them */
-  private final Map<Object, Object> outstandingInjections = Maps.newIdentityHashMap();
+  private final Map<Object, InjectableReference<?>> pendingInjection = Maps.newIdentityHashMap();
   private final InjectorImpl injector;
 
   Initializer(InjectorImpl injector) {
@@ -56,8 +58,15 @@ class Initializer {
   public <T> Initializable<T> requestInjection(T instance, Object source,
       Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
-    outstandingInjections.put(instance, source);
-    return new InjectableReference<T>(this, instance);
+
+    // short circuit if the object doesn't have any @Inject members
+    if (injectionPoints.isEmpty()) {
+      return Initializables.of(instance);
+    }
+
+    InjectableReference<T> initializable = new InjectableReference<T>(instance, source);
+    pendingInjection.put(instance, initializable);
+    return initializable;
   }
 
   /**
@@ -65,11 +74,9 @@ class Initializer {
    * on the injected instances.
    */
   void validateOustandingInjections(Errors errors) {
-    for (Map.Entry<Object, Object> entry : outstandingInjections.entrySet()) {
+    for (InjectableReference<?> reference : pendingInjection.values()) {
       try {
-        Object toInject = entry.getKey();
-        Object source = entry.getValue();
-        injector.injectors.get(toInject.getClass(), errors.withSource(source));
+        reference.validate(errors);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
@@ -78,82 +85,70 @@ class Initializer {
 
   /**
    * Performs creation-time injections on all objects that require it. Whenever fulfilling an
-   * injection depends on another object that requires injection, we use {@link
-   * #ensureInjected(Object,com.google.inject.internal.Errors)} to inject that member first.
-   *
-   * <p>If the two objects are codependent (directly or transitively), ordering of injection is
-   * arbitrary.
+   * injection depends on another object that requires injection, we inject it first. If the two
+   * instances are codependent (directly or transitively), ordering of injection is arbitrary.
    */
   void injectAll(final Errors errors) {
     // loop over a defensive copy since ensureInjected() mutates the set. Unfortunately, that copy
     // is made complicated by a bug in IBM's JDK, wherein entrySet().toArray(Object[]) doesn't work
-    for (Object entryObject : outstandingInjections.entrySet().toArray()) {
-      @SuppressWarnings("unchecked")
-      Entry<Object, Object> entry = (Entry<Object, Object>) entryObject;
+    for (InjectableReference<?> reference : Lists.newArrayList(pendingInjection.values())) {
       try {
-        Object toInject = entry.getKey();
-        Object source = entry.getValue();
-        ensureInjected(toInject, errors.withSource(source));
+        reference.get(errors);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
 
-    if (!outstandingInjections.isEmpty()) {
-      throw new AssertionError("Failed to satisfy " + outstandingInjections);
+    if (!pendingInjection.isEmpty()) {
+      throw new AssertionError("Failed to satisfy " + pendingInjection);
     }
 
     ready.countDown();
   }
 
   private class InjectableReference<T> implements Initializable<T> {
-    private final Initializer initializer;
     private final T instance;
+    private final Object source;
 
-    public InjectableReference(Initializer initializer, T instance) {
-      this.initializer = checkNotNull(initializer, "initializer");
+    public InjectableReference(T instance, Object source) {
       this.instance = checkNotNull(instance, "instance");
+      this.source = checkNotNull(source, "source");
+    }
+
+    public void validate(Errors errors) throws ErrorsException {
+      injector.injectors.get(instance.getClass(), errors.withSource(source));
     }
 
     /**
-     * Ensures that the instance has been injected, and returns it.
+     * Reentrant. If {@code instance} was registered for injection at injector-creation time, this
+     * method will ensure that all its members have been injected before returning.
      */
     public T get(Errors errors) throws ErrorsException {
-      initializer.ensureInjected(instance, errors);
+      if (ready.getCount() == 0) {
+        return instance;
+      }
+
+      // just wait for everything to be injected by another thread
+      if (Thread.currentThread() != creatingThread) {
+        try {
+          ready.await();
+          return instance;
+        } catch (InterruptedException e) {
+          // Give up, since we don't know if our injection is ready
+          throw new RuntimeException(e);
+        }
+      }
+
+      // toInject needs injection, do it right away
+      if (pendingInjection.remove(instance) != null) {
+        injector.injectMembersOrThrow(errors.withSource(source), instance);
+      }
+
       return instance;
     }
 
     @Override public String toString() {
       return instance.toString();
-    }
-  }
-
-
-  /**
-   * Reentrant. If {@code toInject} was registered for injection at injector-creation time, this
-   * method will ensure that all its members have been injected before returning. This method is
-   * used both internally, and by {@code InternalContext} to satisfy injections while satisfying
-   * other injections.
-   */
-  void ensureInjected(Object toInject, Errors errors) throws ErrorsException {
-    if (ready.getCount() == 0) {
-      return;
-    }
-
-    // just wait for everything to be injected by another thread
-    if (Thread.currentThread() != creatingThread) {
-      try {
-        ready.await();
-        return;
-      } catch (InterruptedException e) {
-        // Give up, since we don't know if our injection is ready
-        throw new RuntimeException(e);
-      }
-    }
-
-    // toInject needs injection, do it right away
-    if (outstandingInjections.remove(toInject) != null) {
-      injector.injectMembersOrThrow(errors, toInject);
     }
   }
 }
