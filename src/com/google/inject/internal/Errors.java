@@ -111,7 +111,7 @@ public final class Errors implements Serializable {
       TypeLiteral<?> type, MatcherAndConverter matchingConverter) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
         + " using %s.",
-        stringValue, source, type, matchingConverter);
+        stringValue, sourceToString(source), type, matchingConverter);
   }
 
   public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
@@ -119,7 +119,7 @@ public final class Errors implements Serializable {
     return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Converter returned %s.",
-        stringValue, source, type, matchingConverter, converted);
+        stringValue, sourceToString(source), type, matchingConverter, converted);
   }
 
   public Errors conversionError(String stringValue, Object source,
@@ -127,7 +127,7 @@ public final class Errors implements Serializable {
     return addMessage(cause, "Error converting '%s' (bound at %s) to %s%n" 
         + " using %s.%n"
         + " Reason: %s",
-        stringValue, source, type, matchingConverter, cause);
+        stringValue, sourceToString(source), type, matchingConverter, cause);
   }
 
   public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
@@ -136,7 +136,7 @@ public final class Errors implements Serializable {
         + " %s and%n"
         + " %s.%n"
         + " Please adjust your type converter configuration to avoid overlapping matches.",
-        stringValue, source, type, a, b);
+        stringValue, sourceToString(source), type, a, b);
   }
 
   public Errors bindingToProvider() {
@@ -162,7 +162,7 @@ public final class Errors implements Serializable {
 
   public Errors missingRuntimeRetention(Object source) {
     return addMessage("Please annotate with @Retention(RUNTIME).%n"
-        + " Bound at %s.", source);
+        + " Bound at %s.", sourceToString(source));
   }
 
   public Errors missingScopeAnnotation() {
@@ -185,7 +185,7 @@ public final class Errors implements Serializable {
   public Errors scopeAnnotationOnAbstractType(
       Class<? extends Annotation> scopeAnnotation, Class<?> type, Object source) {
     return addMessage("%s is annotated with %s, but scope annotations are not supported "
-        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, source);
+        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, sourceToString(source));
   }
 
   public Errors misplacedBindingAnnotation(Member member, Annotation bindingAnnotation) {
@@ -238,7 +238,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors bindingAlreadySet(Key<?> key, Object source) {
-    return addMessage("A binding to %s was already configured at %s.", key, source);
+    return addMessage("A binding to %s was already configured at %s.", key, sourceToString(source));
   }
 
   public Errors childBindingAlreadySet(Key<?> key) {

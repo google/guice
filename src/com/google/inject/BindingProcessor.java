@@ -39,11 +39,11 @@ import java.util.Set;
  */
 class BindingProcessor extends AbstractProcessor {
 
-  private BindingTargetVisitor<Object, Object> GET_BINDING_PROVIDER
-      = new DefaultBindingTargetVisitor<Object, Object>() {
-    public Object visitProvider(
-        Provider<?> provider, Set<InjectionPoint> injectionPoints) {
-      return provider;
+  /** Returns the class name of the bound provider, or null */
+  private BindingTargetVisitor<Object, String> GET_BOUND_PROVIDER_CLASS_NAME
+      = new DefaultBindingTargetVisitor<Object, String>() {
+    public String visitProvider(Provider<?> provider, Set<InjectionPoint> injectionPoints) {
+      return provider.getClass().getName();
     }
   };
 
@@ -257,8 +257,8 @@ class BindingProcessor extends AbstractProcessor {
 
     Binding<?> original = state.getExplicitBinding(key);
     if (original != null && !"com.google.inject.privatemodules.PrivateModule$Expose"
-        .equals(original.acceptTargetVisitor(GET_BINDING_PROVIDER).getClass().getName())) {
-      // the hard-coded class name is certainly lame, but it avoids an even lamer dependency... 
+        .equals(original.acceptTargetVisitor(GET_BOUND_PROVIDER_CLASS_NAME))) {
+      // the hard-coded class name is certainly lame, but it avoids an even lamer dependency...
       errors.bindingAlreadySet(key, original.getSource());
       return;
     }
@@ -277,12 +277,13 @@ class BindingProcessor extends AbstractProcessor {
       AbstractModule.class,
       Binder.class,
       Binding.class,
+      Injector.class,
       Key.class,
       Module.class,
       Provider.class, 
       Scope.class,
       TypeLiteral.class);
-  // TODO(jessewilson): fix BuiltInModule, then add Injector and Stage
+  // TODO(jessewilson): fix BuiltInModule, then add Stage
 
   interface CreationListener {
     void notify(InjectorImpl injector, Errors errors);

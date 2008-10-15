@@ -32,6 +32,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.internal.ModuleBinding;
+import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
@@ -157,7 +158,7 @@ public final class Elements {
         } catch (RuntimeException e) {
           addError(e);
         }
-        install(ProviderMethods.from(module));
+        install(ProviderMethodsModule.forModule(module));
       }
     }
 

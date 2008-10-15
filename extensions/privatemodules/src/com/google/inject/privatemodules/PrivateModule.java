@@ -20,27 +20,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.ProviderMethod;
+import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ModuleWriter;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -69,15 +75,24 @@ public abstract class PrivateModule implements Module {
     // otherwise we're being run for the private injector
     } else {
       checkState(this.privateBinder == null, "Re-entry is not allowed.");
-      this.privateBinder = binder.skipSources(PrivateModule.class);
+      privateBinder = binder.skipSources(PrivateModule.class);
       try {
         configurePrivateBindings();
+
+        ProviderMethodsModule providerMethodsModule = ProviderMethodsModule.forPrivateModule(this);
+        for (ProviderMethod<?> providerMethod
+            : providerMethodsModule.getProviderMethods(privateBinder)) {
+          providerMethod.configure(privateBinder);
+          if (providerMethod.getMethod().isAnnotationPresent(Exposed.class)) {
+            expose(providerMethod.getKey());
+          }
+        }
 
         for (Expose<?> expose : exposes) {
           expose.initPrivateProvider(binder);
         }
       } finally {
-        this.privateBinder = null;
+        privateBinder = null;
       }
     }
   }
@@ -87,10 +102,17 @@ public abstract class PrivateModule implements Module {
     Key<Ready> readyKey = Key.get(Ready.class, UniqueAnnotations.create());
     readyProvider = publicBinder.getProvider(readyKey);
     try {
-      // gather elements and exposes from the private module by being re-entrant on configure()
-      final Module privateModule = new ModuleWriter().create(Elements.getElements(this));
+      List<Element> privateElements = Elements.getElements(this); // reentrant on configure()
+      Set<Key<?>> privatelyBoundKeys = getBoundKeys(privateElements);
+      final Module privateModule = new ModuleWriter().create(privateElements);
+
       for (Expose<?> expose : exposes) {
-        expose.configure(publicBinder);
+        if (!privatelyBoundKeys.contains(expose.key)) {
+          publicBinder.addError("Could not expose() at %s%n %s must be explicitly bound.", 
+              expose.source, expose.key);
+        } else {
+          expose.configure(publicBinder);
+        }
       }
 
       // create the private injector while the public injector is injecting its members
@@ -101,7 +123,7 @@ public abstract class PrivateModule implements Module {
           publicInjector.createChildInjector(privateModule);
           return new Ready();
         }
-      }).in(Scopes.SINGLETON);
+      }).asEagerSingleton();
 
     } finally {
       readyProvider = null;
@@ -113,19 +135,19 @@ public abstract class PrivateModule implements Module {
 
   public abstract void configurePrivateBindings();
 
-  protected <T> void expose(Key<T> key) {
+  protected final <T> void expose(Key<T> key) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     exposes.add(new Expose<T>(sourceProvider.get(), readyProvider, key));
   }
 
-  protected <T> ExposedKeyBuilder expose(Class<T> type) {
+  protected final <T> ExposedKeyBuilder expose(Class<T> type) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
     exposes.add(expose);
     return expose;
   }
 
-  protected <T> ExposedKeyBuilder expose(TypeLiteral<T> type) {
+  protected final <T> ExposedKeyBuilder expose(TypeLiteral<T> type) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
     exposes.add(expose);
@@ -164,7 +186,7 @@ public abstract class PrivateModule implements Module {
 
     /** Sets the provider in the private injector, to be used by the public injector */
     private void initPrivateProvider(Binder privateBinder) {
-      privateProvider = privateBinder.getProvider(key);
+      privateProvider = privateBinder.withSource(source).getProvider(key);
     }
 
     /** Creates a binding in the public binder */
@@ -178,83 +200,102 @@ public abstract class PrivateModule implements Module {
     }
   }
 
+  /**
+   * Returns the set of keys bound by {@code elements}.
+   */
+  private Set<Key<?>> getBoundKeys(Iterable<? extends Element> elements) {
+    final Set<Key<?>> privatelyBoundKeys = Sets.newHashSet();
+    ElementVisitor<Void> visitor = new DefaultElementVisitor<Void>() {
+      public <T> Void visitBinding(Binding<T> command) {
+        privatelyBoundKeys.add(command.getKey());
+        return null;
+      }
+    };
+
+    for (Element element : elements) {
+      element.acceptVisitor(visitor);
+    }
+
+    return privatelyBoundKeys;
+  }
+
   // everything below is copied from AbstractModule
 
-  protected Binder binder() {
+  protected final Binder binder() {
     return privateBinder;
   }
 
-  protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
+  protected final void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
     privateBinder.bindScope(scopeAnnotation, scope);
   }
 
-  protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+  protected final <T> LinkedBindingBuilder<T> bind(Key<T> key) {
     return privateBinder.bind(key);
   }
 
-  protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+  protected final <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return privateBinder.bind(typeLiteral);
   }
 
-  protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+  protected final <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
     return privateBinder.bind(clazz);
   }
 
-  protected AnnotatedConstantBindingBuilder bindConstant() {
+  protected final AnnotatedConstantBindingBuilder bindConstant() {
     return privateBinder.bindConstant();
   }
 
-  protected void install(Module module) {
+  protected final void install(Module module) {
     privateBinder.install(module);
   }
 
-  protected void addError(String message, Object... arguments) {
+  protected final void addError(String message, Object... arguments) {
     privateBinder.addError(message, arguments);
   }
 
-  protected void addError(Throwable t) {
+  protected final void addError(Throwable t) {
     privateBinder.addError(t);
   }
 
-  protected void addError(Message message) {
+  protected final void addError(Message message) {
     privateBinder.addError(message);
   }
 
-  protected void requestInjection(Object... objects) {
+  protected final void requestInjection(Object... objects) {
     privateBinder.requestInjection(objects);
   }
 
-  protected void requestStaticInjection(Class<?>... types) {
+  protected final void requestStaticInjection(Class<?>... types) {
     privateBinder.requestStaticInjection(types);
   }
 
-  protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
+  protected final void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
     privateBinder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
 
-  protected void requireBinding(Key<?> key) {
+  protected final void requireBinding(Key<?> key) {
     privateBinder.getProvider(key);
   }
 
-  protected void requireBinding(Class<?> type) {
+  protected final void requireBinding(Class<?> type) {
     privateBinder.getProvider(type);
   }
 
-  protected <T> Provider<T> getProvider(Key<T> key) {
+  protected final <T> Provider<T> getProvider(Key<T> key) {
     return privateBinder.getProvider(key);
   }
 
-  protected <T> Provider<T> getProvider(Class<T> type) {
+  protected final <T> Provider<T> getProvider(Class<T> type) {
     return privateBinder.getProvider(type);
   }
 
-  protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+  protected final void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
     privateBinder.convertToTypes(typeMatcher, converter);
   }
 
-  protected Stage currentStage() {
+  protected final Stage currentStage() {
     return privateBinder.currentStage();
   }
 }
