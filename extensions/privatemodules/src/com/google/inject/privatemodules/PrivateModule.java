@@ -51,6 +51,40 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
+ * A module whose configuration information is hidden from other modules. Only bindings that are
+ * explicitly {@link #expose(Class) exposed} will be available to other modules and to the injector.
+ * Exposed keys must be explicitly bound, either directly or via another module that's installed
+ * by the private module.
+ *
+ * <p>In addition to the bindings configured via {@link #configurePrivateBindings()}, bindings will
+ * be created for all methods with the {@literal @}{@link com.google.inject.Provides Provides}
+ * annotation. These bindings will be hidden from other modules unless the methods also have the
+ * {@literal @}{@link Exposed} annotation:
+ *
+ * <pre>
+ * public class FooBarBazModule extends PrivateModule {
+ *   protected void configurePrivateBindings() {
+ *     bind(Foo.class).to(RealFoo.class);
+ *     expose(Foo.class);
+ *
+ *     install(new TransactionalBarModule());
+ *     expose(Bar.class).annotatedWith(Transactional.class);
+ *
+ *     bind(SomeImplementationDetail.class);
+ *     install(new MoreImplementationDetailsModule());
+ *   }
+ *
+ *   {@literal @}Provides {@literal @}Exposed
+ *   public Baz provideBaz() {
+ *     return new SuperBaz();
+ *   }
+ * }
+ * </pre>
+ *
+ * <p>Private modules are implemented with {@link Injector#createChildInjector(Module[]) parent
+ * injectors.} Types that inject an {@link Injector} will be provided with the child injector. This
+ * injector includes private bindings that are not available from the parent injector.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public abstract class PrivateModule implements Module {
@@ -68,32 +102,31 @@ public abstract class PrivateModule implements Module {
   private Binder privateBinder;
 
   public final synchronized void configure(Binder binder) {
-    // when exposes is null, we're being run for the public injector
+    // when 'exposes' is null, we're being run for the public injector
     if (exposes == null) {
       configurePublicBindings(binder);
+      return;
+    }
 
     // otherwise we're being run for the private injector
-    } else {
-      checkState(this.privateBinder == null, "Re-entry is not allowed.");
-      privateBinder = binder.skipSources(PrivateModule.class);
-      try {
-        configurePrivateBindings();
+    checkState(this.privateBinder == null, "Re-entry is not allowed.");
+    privateBinder = binder.skipSources(PrivateModule.class);
+    try {
+      configurePrivateBindings();
 
-        ProviderMethodsModule providerMethodsModule = ProviderMethodsModule.forPrivateModule(this);
-        for (ProviderMethod<?> providerMethod
-            : providerMethodsModule.getProviderMethods(privateBinder)) {
-          providerMethod.configure(privateBinder);
-          if (providerMethod.getMethod().isAnnotationPresent(Exposed.class)) {
-            expose(providerMethod.getKey());
-          }
+      ProviderMethodsModule providerMethods = ProviderMethodsModule.forPrivateModule(this);
+      for (ProviderMethod<?> providerMethod : providerMethods.getProviderMethods(privateBinder)) {
+        providerMethod.configure(privateBinder);
+        if (providerMethod.getMethod().isAnnotationPresent(Exposed.class)) {
+          expose(providerMethod.getKey());
         }
-
-        for (Expose<?> expose : exposes) {
-          expose.initPrivateProvider(binder);
-        }
-      } finally {
-        privateBinder = null;
       }
+
+      for (Expose<?> expose : exposes) {
+        expose.initPrivateProvider(binder);
+      }
+    } finally {
+      privateBinder = null;
     }
   }
 
@@ -131,15 +164,26 @@ public abstract class PrivateModule implements Module {
     }
   }
 
+  /** Marker object used to indicate the private injector has been created */
   private static class Ready {}
 
-  public abstract void configurePrivateBindings();
+  /**
+   * Creates bindings and other configurations private to this module. Use {@link #expose(Class)
+   * expose()} to make the bindings in this module available externally.
+   */
+  protected abstract void configurePrivateBindings();
 
+  /** Makes the binding for {@code key} available to other modules and the injector. */
   protected final <T> void expose(Key<T> key) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     exposes.add(new Expose<T>(sourceProvider.get(), readyProvider, key));
   }
 
+  /**
+   * Makes a binding for {@code type} available to other modules and the injector. Use {@link
+   * ExposedKeyBuilder#annotatedWith(Class) annotatedWith()} to expose {@code type} with a binding
+   * annotation.
+   */
   protected final <T> ExposedKeyBuilder expose(Class<T> type) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
@@ -147,6 +191,11 @@ public abstract class PrivateModule implements Module {
     return expose;
   }
 
+  /**
+   * Makes a binding for {@code type} available to other modules and the injector. Use {@link
+   * ExposedKeyBuilder#annotatedWith(Class) annotatedWith()} to expose {@code type} with a binding
+   * annotation.
+   */
   protected final <T> ExposedKeyBuilder expose(TypeLiteral<T> type) {
     checkState(exposes != null, "Cannot expose %s, private module is not ready");
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
@@ -154,14 +203,13 @@ public abstract class PrivateModule implements Module {
     return expose;
   }
 
+  /** Qualifies an exposed type with a binding annotation. */
   public interface ExposedKeyBuilder {
     void annotatedWith(Class<? extends Annotation> annotationType);
     void annotatedWith(Annotation annotation);
   }
 
-  /**
-   * A binding from the private injector exposed to the public injector.
-   */
+  /** A binding from the private injector exposed to the public injector. */
   private static class Expose<T> implements ExposedKeyBuilder, Provider<T> {
     private final Object source;
     private final Provider<Ready> readyProvider;
@@ -200,9 +248,7 @@ public abstract class PrivateModule implements Module {
     }
   }
 
-  /**
-   * Returns the set of keys bound by {@code elements}.
-   */
+  /** Returns the set of keys bound by {@code elements}. */
   private Set<Key<?>> getBoundKeys(Iterable<? extends Element> elements) {
     final Set<Key<?>> privatelyBoundKeys = Sets.newHashSet();
     ElementVisitor<Void> visitor = new DefaultElementVisitor<Void>() {
