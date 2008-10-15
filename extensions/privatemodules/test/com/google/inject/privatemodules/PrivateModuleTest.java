@@ -23,6 +23,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
@@ -181,8 +182,114 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("nested", injector.getInstance(String.class));
   }
 
+  public void testDependenciesBetweenPrivateAndPublic() {
+    Injector injector = Guice.createInjector(
+        new PrivateModule() {
+          protected void configurePrivateBindings() {}
+
+          @Provides @Exposed @Named("a") String provideA() {
+            return "A";
+          }
+
+          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+            return ab + "C";
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {}
+
+          @Provides @Named("ab") String provideB(@Named("a") String a) {
+            return a + "B";
+          }
+
+          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+            return abc + "D";
+          }
+        }
+    );
+
+    assertEquals("ABCD", injector.getInstance(Key.get(String.class, named("abcd"))));
+  }
+
+  public void testDependenciesBetweenPrivateAndPublicWithPublicEagerSingleton() {
+    Injector injector = Guice.createInjector(
+        new PrivateModule() {
+          protected void configurePrivateBindings() {}
+
+          @Provides @Exposed @Named("a") String provideA() {
+            return "A";
+          }
+
+          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+            return ab + "C";
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).annotatedWith(named("abcde")).toProvider(new Provider<String>() {
+              @Inject @Named("abcd") String abcd;
+
+              public String get() {
+                return abcd + "E";
+              }
+            }).asEagerSingleton();
+          }
+
+          @Provides @Named("ab") String provideB(@Named("a") String a) {
+            return a + "B";
+          }
+
+          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+            return abc + "D";
+          }
+        }
+    );
+
+    assertEquals("ABCDE", injector.getInstance(Key.get(String.class, named("abcde"))));
+  }
+
+  public void testDependenciesBetweenPrivateAndPublicWithPrivateEagerSingleton() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          protected void configure() {}
+
+          @Provides @Named("ab") String provideB(@Named("a") String a) {
+            return a + "B";
+          }
+
+          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+            return abc + "D";
+          }
+        },
+        new PrivateModule() {
+          protected void configurePrivateBindings() {
+            bind(String.class).annotatedWith(named("abcde")).toProvider(new Provider<String>() {
+              @Inject @Named("abcd") String abcd;
+
+              public String get() {
+                return abcd + "E";
+              }
+            }).asEagerSingleton();
+            expose(String.class).annotatedWith(named("abcde"));
+          }
+
+          @Provides @Exposed @Named("a") String provideA() {
+            return "A";
+          }
+
+          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+            return ab + "C";
+          }
+        }
+    );
+
+    assertEquals("ABCDE", injector.getInstance(Key.get(String.class, named("abcde"))));
+  }
+
   static class AB {
     @Inject @Named("a") String a;
     @Inject @Named("b") String b;
   }
+
+  interface C {}
 }

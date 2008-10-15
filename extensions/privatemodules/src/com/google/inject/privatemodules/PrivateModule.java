@@ -92,7 +92,7 @@ public abstract class PrivateModule implements Module {
   private final SourceProvider sourceProvider
       = new SourceProvider().plusSkippedClasses(PrivateModule.class);
 
-  /** When this provider returns, the private injector is ready. */
+  /** When this provider returns, the private injector creation has started. */
   private Provider<Ready> readyProvider;
 
   /** Keys exposed to the public injector */
@@ -148,13 +148,20 @@ public abstract class PrivateModule implements Module {
         }
       }
 
-      // create the private injector while the public injector is injecting its members
+      // create the private injector while the public injector is injecting its members. This is
+      // necessary so the providers from getProvider() will work.
       publicBinder.bind(readyKey).toProvider(new Provider<Ready>() {
         @Inject Injector publicInjector;
+        private Ready result;
         public Ready get() {
-          // this is necessary so the providers from getProvider() will work
-          publicInjector.createChildInjector(privateModule);
-          return new Ready();
+          // Build the child injector once. This method is called multiple times when we have
+          // creation-time dependencies from private on public and from public to private.
+          if (result == null) {
+            result = new Ready();
+            publicInjector.createChildInjector(privateModule);
+          }
+
+          return result;
         }
       }).asEagerSingleton();
 
@@ -209,7 +216,7 @@ public abstract class PrivateModule implements Module {
     void annotatedWith(Annotation annotation);
   }
 
-  /** A binding from the private injector exposed to the public injector. */
+  /** A binding from the private injector make visible to the public injector. */
   private static class Expose<T> implements ExposedKeyBuilder, Provider<T> {
     private final Object source;
     private final Provider<Ready> readyProvider;
@@ -264,6 +271,9 @@ public abstract class PrivateModule implements Module {
 
     return privatelyBoundKeys;
   }
+
+  // prevent classes migrated from AbstractModule from implementing the wrong method.
+  protected final void configure() {}
 
   // everything below is copied from AbstractModule
 
