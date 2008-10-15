@@ -152,6 +152,33 @@ public class ParentInjectorTest extends TestCase {
     assertSame(e.injector, parent);
   }
 
+  public void testSeveralLayersOfHierarchy() {
+    Injector top = Guice.createInjector(bindsA);
+    Injector left = top.createChildInjector();
+    Injector leftLeft = left.createChildInjector(bindsD);
+    Injector right = top.createChildInjector(bindsD);
+    
+    assertSame(leftLeft, leftLeft.getInstance(D.class).injector);
+    assertSame(right, right.getInstance(D.class).injector);
+    assertSame(top, leftLeft.getInstance(E.class).injector);
+    assertSame(top.getInstance(A.class), leftLeft.getInstance(A.class));
+
+    Injector leftRight = left.createChildInjector(bindsD);
+    assertSame(leftRight, leftRight.getInstance(D.class).injector);
+
+    try {
+      top.getInstance(D.class);
+      fail();
+    } catch (ProvisionException expected) {
+    }
+
+    try {
+      left.getInstance(D.class);
+      fail();
+    } catch (ProvisionException expected) {
+    }
+  }
+
   @Singleton
   static class A {}
 

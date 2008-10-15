@@ -23,6 +23,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -37,6 +38,14 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class BindingProcessor extends AbstractProcessor {
+
+  private BindingTargetVisitor<Object, Object> GET_BINDING_PROVIDER
+      = new DefaultBindingTargetVisitor<Object, Object>() {
+    public Object visitProvider(
+        Provider<?> provider, Set<InjectionPoint> injectionPoints) {
+      return provider;
+    }
+  };
 
   private static final BindingScopingVisitor<LoadStrategy> LOAD_STRATEGY_VISITOR
       = new BindingScopingVisitor<LoadStrategy>() {
@@ -247,7 +256,9 @@ class BindingProcessor extends AbstractProcessor {
     }
 
     Binding<?> original = state.getExplicitBinding(key);
-    if (original != null) {
+    if (original != null && !"com.google.inject.privatemodules.PrivateModule$Expose"
+        .equals(original.acceptTargetVisitor(GET_BINDING_PROVIDER).getClass().getName())) {
+      // the hard-coded class name is certainly lame, but it avoids an even lamer dependency... 
       errors.bindingAlreadySet(key, original.getSource());
       return;
     }
