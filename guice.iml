@@ -73,7 +73,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib/build/cglib-src-2.2.jar!/src/proxy" />
+          <root url="file://$MODULE_DIR$/lib/build/cglib-src-2.2/src/proxy" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/lib/build" recursive="false" />
       </library>
