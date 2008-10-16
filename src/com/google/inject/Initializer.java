@@ -139,7 +139,7 @@ class Initializer {
         }
       }
 
-      // toInject needs injection, do it right away
+      // toInject needs injection, do it right away. we only do this once, even if it fails
       if (pendingInjection.remove(instance) != null) {
         injector.injectMembersOrThrow(errors.withSource(source), instance);
       }

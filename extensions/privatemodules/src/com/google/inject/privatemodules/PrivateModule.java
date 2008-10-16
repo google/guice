@@ -172,21 +172,17 @@ public abstract class PrivateModule implements Module {
       }
 
       // create the private injector while the public injector is injecting its members. This is
-      // necessary so the providers from getProvider() will work.
+      // necessary so the providers from getProvider() will work. We use provider injection as our
+      // hook. Guice promises that initialize() will be called before a Ready is returned.
       publicBinder.bind(readyKey).toProvider(new Provider<Ready>() {
-        @Inject Injector publicInjector;
-        private Ready result;
-        public Ready get() {
-          // Build the child injector once. This method is called multiple times when we have
-          // creation-time dependencies from private on public and from public to private.
-          if (result == null) {
-            result = new Ready();
-            publicInjector.createChildInjector(privateModule);
-          }
-
-          return result;
+        @Inject void initialize(Injector publicInjector) {
+          publicInjector.createChildInjector(privateModule);
         }
-      }).asEagerSingleton();
+
+        public Ready get() {
+          return new Ready();
+        }
+      });
 
     } finally {
       readyProvider = null;
