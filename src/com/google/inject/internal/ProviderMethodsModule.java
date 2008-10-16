@@ -39,10 +39,10 @@ import java.util.List;
  * @author crazybob@google.com (Bob Lee)
  */
 public final class ProviderMethodsModule implements Module {
-  private final Module delegate;
+  private final Object delegate;
   private final TypeResolver typeResolver;
 
-  private ProviderMethodsModule(Module delegate) {
+  private ProviderMethodsModule(Object delegate) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.typeResolver = new TypeResolver(this.delegate.getClass());
   }
@@ -50,7 +50,7 @@ public final class ProviderMethodsModule implements Module {
   /**
    * Returns a module which creates bindings for provider methods from the given module.
    */
-  public static Module forModule(Module module) {
+  public static Module forModule(Object module) {
     // avoid infinite recursion, since installing a module always installs itself
     if (module instanceof ProviderMethodsModule) {
       return Modules.EMPTY_MODULE;

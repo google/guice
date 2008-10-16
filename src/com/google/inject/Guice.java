@@ -94,4 +94,23 @@ public final class Guice {
         .addModules(modules)
         .build();
   }
+
+  /** @deprecated replaced with {@link Injector#createChildInjector(Iterable)}. Inline this. */
+  @Deprecated
+  public static Injector createInjector(Injector parent, Iterable<? extends Module> modules) {
+    return parent.createChildInjector(modules);
+  }
+
+  /** @deprecated replaced with {@link Injector#createChildInjector(Module[])}. Inline this. */
+  @Deprecated
+  public static Injector createInjector(Injector parent, Module... modules) {
+    return parent.createChildInjector(modules);
+  }
+
+  /** @deprecated replaced with {@link Injector#createChildInjector(Iterable)}. Inline this. */
+  @Deprecated
+  public static Injector createInjector(Injector parent, Stage stage,
+      Iterable<? extends Module> modules) {
+    return parent.createChildInjector(modules);
+  }
 }
