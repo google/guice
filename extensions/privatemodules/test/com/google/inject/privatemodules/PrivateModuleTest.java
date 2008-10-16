@@ -191,18 +191,18 @@ public class PrivateModuleTest extends TestCase {
             return "A";
           }
 
-          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+          @Provides @Exposed @Named("abc") String provideAbc(@Named("ab") String ab) {
             return ab + "C";
           }
         },
         new AbstractModule() {
           protected void configure() {}
 
-          @Provides @Named("ab") String provideB(@Named("a") String a) {
+          @Provides @Named("ab") String provideAb(@Named("a") String a) {
             return a + "B";
           }
 
-          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+          @Provides @Named("abcd") String provideAbcd(@Named("abc") String abc) {
             return abc + "D";
           }
         }
@@ -220,7 +220,7 @@ public class PrivateModuleTest extends TestCase {
             return "A";
           }
 
-          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+          @Provides @Exposed @Named("abc") String provideAbc(@Named("ab") String ab) {
             return ab + "C";
           }
         },
@@ -235,11 +235,11 @@ public class PrivateModuleTest extends TestCase {
             }).asEagerSingleton();
           }
 
-          @Provides @Named("ab") String provideB(@Named("a") String a) {
+          @Provides @Named("ab") String provideAb(@Named("a") String a) {
             return a + "B";
           }
 
-          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+          @Provides @Named("abcd") String provideAbcd(@Named("abc") String abc) {
             return abc + "D";
           }
         }
@@ -253,11 +253,11 @@ public class PrivateModuleTest extends TestCase {
         new AbstractModule() {
           protected void configure() {}
 
-          @Provides @Named("ab") String provideB(@Named("a") String a) {
+          @Provides @Named("ab") String provideAb(@Named("a") String a) {
             return a + "B";
           }
 
-          @Provides @Named("abcd") String provideD(@Named("abc") String abc) {
+          @Provides @Named("abcd") String provideAbcd(@Named("abc") String abc) {
             return abc + "D";
           }
         },
@@ -277,7 +277,7 @@ public class PrivateModuleTest extends TestCase {
             return "A";
           }
 
-          @Provides @Exposed @Named("abc") String provideC(@Named("ab") String ab) {
+          @Provides @Exposed @Named("abc") String provideAbc(@Named("ab") String ab) {
             return ab + "C";
           }
         }

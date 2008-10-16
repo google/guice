@@ -82,7 +82,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * </pre>
  *
  * <p>Private modules are implemented with {@link Injector#createChildInjector(Module[]) parent
- * injectors.} Types that inject an {@link Injector} will be provided with the child injector. This
+ * injectors}. Types that inject an {@link Injector} will be provided with the child injector. This
  * injector includes private bindings that are not available from the parent injector.
  *
  * @author jessewilson@google.com (Jesse Wilson)
@@ -101,6 +101,28 @@ public abstract class PrivateModule implements Module {
   /** Like abstract module, the binder of the current private module */
   private Binder privateBinder;
 
+  /*
+   * This implementation is complicated in order to satisfy two different roles in one class:
+   *
+   *  1. As a public module (the one that installs this), we bind only the exposed keys. This is the
+   *     role we play first, when configure() is called by the installing binder. It collects the
+   *     exposed keys and their corresponding providers by executing itself as a private module.
+   *
+   *  2. As a private module, we bind everything. This is performed our own indirect re-entrant call
+   *     to configure() via the Elements.getElements() API.
+   *
+   * Throwing further wrenches into the mix:
+   *
+   *  o Provider methods. The ProviderMethodsModule class special cases modules that extend
+   *    PrivateModules to skip them by default. We have our own provider methods backdoor API
+   *    called ProviderMethodsModule.forPrivateModule so provider methods are only applied when
+   *    we're running as a private module. We also need to iterate through the provider methods
+   *    by hand to gather the ones with the @Exposed annotation
+   *
+   *  o Injector creation time. Dependencies can flow freely between child and parent injectors.
+   *    When providers are being exercised, we need to make sure the child injector construction
+   *    has started.
+   */
   public final synchronized void configure(Binder binder) {
     // when 'exposes' is null, we're being run for the public injector
     if (exposes == null) {
@@ -130,6 +152,7 @@ public abstract class PrivateModule implements Module {
     }
   }
 
+
   private void configurePublicBindings(Binder publicBinder) {
     exposes = Sets.newLinkedHashSet();
     Key<Ready> readyKey = Key.get(Ready.class, UniqueAnnotations.create());
@@ -141,7 +164,7 @@ public abstract class PrivateModule implements Module {
 
       for (Expose<?> expose : exposes) {
         if (!privatelyBoundKeys.contains(expose.key)) {
-          publicBinder.addError("Could not expose() at %s%n %s must be explicitly bound.", 
+          publicBinder.addError("Could not expose() at %s%n %s must be explicitly bound.",
               expose.source, expose.key);
         } else {
           expose.configure(publicBinder);
