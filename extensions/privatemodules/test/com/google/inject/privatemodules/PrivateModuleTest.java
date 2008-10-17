@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import junit.framework.TestCase;
@@ -180,6 +181,42 @@ public class PrivateModuleTest extends TestCase {
     });
 
     assertEquals("nested", injector.getInstance(String.class));
+  }
+
+  public void testNestedPrivateModulesWithSomeKeysUnexposed() {
+    Injector injector = Guice.createInjector(new PrivateModule() {
+      public void configurePrivateBindings() {
+        bind(String.class).annotatedWith(named("bound outer, exposed outer")).toInstance("boeo");
+        expose(String.class).annotatedWith(named("bound outer, exposed outer"));
+        bind(String.class).annotatedWith(named("bound outer, exposed none")).toInstance("boen");
+        expose(String.class).annotatedWith(named("bound inner, exposed both"));
+
+        install(new PrivateModule() {
+          public void configurePrivateBindings() {
+            bind(String.class).annotatedWith(named("bound inner, exposed both")).toInstance("bieb");
+            expose(String.class).annotatedWith(named("bound inner, exposed both"));
+            bind(String.class).annotatedWith(named("bound inner, exposed none")).toInstance("bien");
+          }
+        });
+      }
+    });
+
+    assertEquals("boeo", injector.getInstance(
+        Key.get(String.class, named("bound outer, exposed outer"))));
+    assertEquals("bieb", injector.getInstance(
+        Key.get(String.class, named("bound inner, exposed both"))));
+
+    try {
+      injector.getInstance(Key.get(String.class, named("bound outer, exposed none")));
+      fail();
+    } catch (ProvisionException expected) {
+    }
+
+    try {
+      injector.getInstance(Key.get(String.class, named("bound inner, exposed none")));
+      fail();
+    } catch (ProvisionException expected) {
+    }
   }
 
   public void testDependenciesBetweenPrivateAndPublic() {
