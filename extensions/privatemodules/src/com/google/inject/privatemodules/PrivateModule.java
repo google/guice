@@ -201,7 +201,7 @@ public abstract class PrivateModule implements Module {
 
   /** Makes the binding for {@code key} available to other modules and the injector. */
   protected final <T> void expose(Key<T> key) {
-    checkState(exposes != null, "Cannot expose %s, private module is not ready");
+    checkState(exposes != null, "Cannot expose %s, private module is not ready", key);
     exposes.add(new Expose<T>(sourceProvider.get(), readyProvider, key));
   }
 
@@ -211,7 +211,7 @@ public abstract class PrivateModule implements Module {
    * annotation.
    */
   protected final <T> ExposedKeyBuilder expose(Class<T> type) {
-    checkState(exposes != null, "Cannot expose %s, private module is not ready");
+    checkState(exposes != null, "Cannot expose %s, private module is not ready", type);
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
     exposes.add(expose);
     return expose;
@@ -223,7 +223,7 @@ public abstract class PrivateModule implements Module {
    * annotation.
    */
   protected final <T> ExposedKeyBuilder expose(TypeLiteral<T> type) {
-    checkState(exposes != null, "Cannot expose %s, private module is not ready");
+    checkState(exposes != null, "Cannot expose %s, private module is not ready", type);
     Expose<T> expose = new Expose<T>(sourceProvider.get(), readyProvider, Key.get(type));
     exposes.add(expose);
     return expose;
