@@ -122,6 +122,12 @@ public interface Injector {
   <T> T getInstance(Class<T> type);
 
   /**
+   * Returns this injector's parent injector, or {@code null} if this is a top-
+   * level injector.
+   */
+  Injector getParent();
+
+  /**
    * Returns a new injector that inherits all state from this injector. All
    * bindings, scopes, interceptors and type converters are inherited -- they
    * are visible to the child injector. Elements of the child injector are not

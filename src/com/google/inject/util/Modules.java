@@ -132,13 +132,13 @@ public class Modules {
       return with(Arrays.asList(overrides));
     }
 
-    public Module with(Iterable<? extends Module> overrides) {
-      final List<Element> elements = Elements.getElements(baseModules);
-      final List<Element> overrideElements = Elements.getElements(overrides);
-
+    public Module with(final Iterable<? extends Module> overrides) {
       return new AbstractModule() {
         @Override
         public void configure() {
+          final List<Element> elements = Elements.getElements(baseModules);
+          final List<Element> overrideElements = Elements.getElements(overrides);
+
           final Set<Key> overriddenKeys = Sets.newHashSet();
           final Set<Class<? extends Annotation>> overridesScopeAnnotations = Sets.newHashSet();
 

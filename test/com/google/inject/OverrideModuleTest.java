@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
 /**
@@ -276,6 +277,25 @@ public class OverrideModuleTest extends TestCase {
           "1) The scope for @TestScopeAnnotation is bound directly and cannot be overridden.",
           "at ", getClass().getName(), ".configure(");
     }
+  }
+
+  public void testOverrideIsLazy() {
+    final AtomicReference<String> value = new AtomicReference<String>("A");
+    Module overridden = Modules.override(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).annotatedWith(named("original")).toInstance(value.get());
+      }
+    }).with(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).annotatedWith(named("override")).toInstance(value.get());
+      }
+    });
+
+    // the value.get() call should be deferred until Guice.createInjector
+    value.set("B");
+    Injector injector = Guice.createInjector(overridden);
+    assertEquals("B", injector.getInstance(Key.get(String.class, named("original"))));
+    assertEquals("B", injector.getInstance(Key.get(String.class, named("override"))));
   }
 
   @Retention(RUNTIME)

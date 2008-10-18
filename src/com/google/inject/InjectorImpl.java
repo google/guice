@@ -131,6 +131,10 @@ class InjectorImpl implements Injector {
     return getBinding(Key.get(type));
   }
 
+  public Injector getParent() {
+    return parent;
+  }
+
   public Injector createChildInjector(Iterable<? extends Module> modules) {
     return new InjectorBuilder()
         .parentInjector(this)

@@ -77,6 +77,15 @@ public class ParentInjectorTest extends TestCase {
     assertSame(RealB.class, child.getInstance(B.class).getClass());
   }
 
+  public void testGetParent() {
+    Injector top = Guice.createInjector(bindsA);
+    Injector middle = top.createChildInjector(bindsB);
+    Injector bottom = middle.createChildInjector();
+    assertSame(middle, bottom.getParent());
+    assertSame(top, middle.getParent());
+    assertNull(top.getParent());
+  }
+
   public void testChildBindingsNotVisibleToParent() {
     Injector parent = Guice.createInjector();
     parent.createChildInjector(bindsB);

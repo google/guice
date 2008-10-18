@@ -321,6 +321,9 @@ class InjectorBuilder {
     public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
       return this.delegateInjector.findBindingsByType(type);
     }
+    public Injector getParent() {
+      return delegateInjector.getParent();
+    }
     public Injector createChildInjector(Iterable<? extends Module> modules) {
       return delegateInjector.createChildInjector(modules);
     }
