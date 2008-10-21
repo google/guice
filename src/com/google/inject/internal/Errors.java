@@ -381,8 +381,9 @@ public final class Errors implements Serializable {
             } else {
               throw new AssertionError();
             }
+          } else {
+            fmt.format("  while locating %s%n", convert(dependency.getKey()));
           }
-          continue;
         }
 
         fmt.format("  at %s%n", sourceToString(source));
