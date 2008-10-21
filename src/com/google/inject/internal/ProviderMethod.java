@@ -62,9 +62,9 @@ public class ProviderMethod<T> implements Provider<T> {
 
   public void configure(Binder binder) {
     if (scopeAnnotation != null) {
-      binder.bind(key).toProvider(this).in(scopeAnnotation);
+      binder.withSource(method).bind(key).toProvider(this).in(scopeAnnotation);
     } else {
-      binder.bind(key).toProvider(this);
+      binder.withSource(method).bind(key).toProvider(this);
     }
   }
 
