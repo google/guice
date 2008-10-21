@@ -50,8 +50,9 @@ import java.util.List;
 public final class Errors implements Serializable {
 
   // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad
-      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  }
 
   private List<Message> errors;
   private final List<Object> sources;
@@ -381,8 +382,9 @@ public final class Errors implements Serializable {
             } else {
               throw new AssertionError();
             }
+          } else {
+            fmt.format("  while locating %s%n", convert(dependency.getKey()));
           }
-          continue;
         }
 
         fmt.format("  at %s%n", sourceToString(source));
@@ -402,7 +404,7 @@ public final class Errors implements Serializable {
       throws ErrorsException {
     if (value != null
         || dependency.isNullable()
-        || allowNullsBadBadBad) {
+        || allowNullsBadBadBad()) {
       return value;
     }
 
