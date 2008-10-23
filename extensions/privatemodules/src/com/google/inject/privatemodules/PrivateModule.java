@@ -81,9 +81,24 @@ import org.aopalliance.intercept.MethodInterceptor;
  * }
  * </pre>
  *
- * <p>Private modules are implemented with {@link Injector#createChildInjector(Module[]) parent
- * injectors}. Types that inject an {@link Injector} will be provided with the child injector. This
- * injector includes private bindings that are not available from the parent injector.
+ * <p>Private modules inherit type converters, scopes, and interceptors from their containing
+ * modules. They can be nested within standard modules and within other private modules using
+ * {@link Binder#install install()}.
+ *
+ * <p>Private modules are implemented on top of {@link Injector#createChildInjector(Module[]) parent
+ * injectors}. Just-in-time bindings may be created in the parent injector, sharing them with all
+ * other modules. When bindings are shared:
+ * <ul>
+ *   <li>Scoped instances are shared across modules. For example, if {@code FooImpl} is a shared
+ *       singleton, the other modules get the same instance.</li>
+ *   <li>Bindings that inject the {@code Injector} get the parent injector. It will not be able
+ *       to {@link Injector#getInstance(Key) get injections} bound in the private module.</li>
+ * </ul>
+ * Just-in-time bindings will not be shared if they have dependencies in the private module. To
+ * prevent it from being shared, write an explicit binding:
+ * <pre>
+ *   bind(FooImpl.class);
+ * </pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
