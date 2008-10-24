@@ -51,15 +51,19 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * A module whose configuration information is hidden from other modules. Only bindings that are
- * explicitly {@link #expose(Class) exposed} will be available to other modules and to the injector.
- * Exposed keys must be explicitly bound, either directly or via another module that's installed
- * by the private module.
+ * A module whose configuration information is hidden from its environment by default. Only bindings
+ * that are explicitly exposed will be available to other modules and to the users of the injector.
+ * This module may expose the bindings it creates and the bindings of the modules it installs.
  *
- * <p>In addition to the bindings configured via {@link #configurePrivateBindings()}, bindings will
- * be created for all methods with the {@literal @}{@link com.google.inject.Provides Provides}
- * annotation. These bindings will be hidden from other modules unless the methods also have the
- * {@literal @}{@link Exposed} annotation:
+ * <p>A private module can be nested within a regular module or within another private module using
+ * {@link Binder#install install()}.  Its bindings live in a new environment that inherits bindings,
+ * type converters, scopes, and interceptors from the surrounding ("parent") environment.  When you
+ * nest multiple private modules, the result is a tree of environments where the injector's
+ * environment is the root.
+ *
+ * <p>Guice EDSL bindings can be exposed with {@link #expose(Class) expose()}. {@literal @}{@link
+ * com.google.inject.Provides Provides} bindings can be exposed with the {@literal @}{@link
+ * Exposed} annotation:
  *
  * <pre>
  * public class FooBarBazModule extends PrivateModule {
@@ -81,21 +85,18 @@ import org.aopalliance.intercept.MethodInterceptor;
  * }
  * </pre>
  *
- * <p>Private modules inherit type converters, scopes, and interceptors from their containing
- * modules. They can be nested within standard modules and within other private modules using
- * {@link Binder#install install()}.
+ * <p>Private modules are implemented using {@link Injector#createChildInjector(Module[]) parent
+ * injectors}. When it can satisfy their dependencies, just-in-time bindings will be created in the
+ * root environment. Such bindings are shared among all environments in the tree.
  *
- * <p>Private modules are implemented on top of {@link Injector#createChildInjector(Module[]) parent
- * injectors}. Just-in-time bindings may be created in the parent injector, sharing them with all
- * other modules. When bindings are shared:
- * <ul>
- *   <li>Scoped instances are shared across modules. For example, if {@code FooImpl} is a shared
- *       singleton, the other modules get the same instance.</li>
- *   <li>Bindings that inject the {@code Injector} get the parent injector. It will not be able
- *       to {@link Injector#getInstance(Key) get injections} bound in the private module.</li>
- * </ul>
- * Just-in-time bindings will not be shared if they have dependencies in the private module. To
- * prevent it from being shared, write an explicit binding:
+ * <p>The scope of a shared binding is also shared among all environments in the tree. For example,
+ * if {@code FooImpl} is a shared singleton, all other modules will get the same instance.
+ *
+ * <p>A shared binding that injects the {@code Injector} gets the root injector, which only has
+ * access to bindings in the root environment. An explicit binding that injects the {@code Injector}
+ * gets access to all bindings in the child environment.
+ *
+ * <p>To promote a just-in-time binding to an explicit binding, bind it:
  * <pre>
  *   bind(FooImpl.class);
  * </pre>
