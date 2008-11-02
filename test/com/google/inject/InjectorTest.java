@@ -324,7 +324,8 @@ public class InjectorTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           Tree.class.getName() + " doesn't provide instances of " + Money.class.getName(),
-          "at ", Money.class.getName() + ".class(InjectorTest.java:");
+          "while locating ", Tree.class.getName(),
+          "while locating ", Money.class.getName());
     }
   }
 
@@ -335,7 +336,7 @@ public class InjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           Tree.class.getName() + " doesn't extend " + PineTree.class.getName(),
-          "at ", PineTree.class.getName() + ".class(InjectorTest.java:");
+          "while locating ", PineTree.class.getName());
     }
   }
 
@@ -346,7 +347,7 @@ public class InjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "@ImplementedBy points to the same class it annotates.",
-          "at ", SeaHorse.class.getName() + ".class(InjectorTest.java:");
+          "while locating ", SeaHorse.class.getName());
     }
   }
 
@@ -357,7 +358,7 @@ public class InjectorTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "@ProvidedBy points to the same class it annotates",
-          "at ", Chicken.class.getName() + ".class(InjectorTest.java:");
+          "while locating ", Chicken.class.getName());
     }
   }
 

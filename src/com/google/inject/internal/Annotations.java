@@ -85,8 +85,9 @@ public class Annotations {
   /** Gets a key for the given type, member and annotations. */
   public static Key<?> getKey(Type type, Member member, Annotation[] annotations, Errors errors)
       throws ErrorsException {
+    int numErrorsBefore = errors.size();
     Annotation found = findBindingAnnotation(errors, member, annotations);
-    errors.throwIfNecessary();
+    errors.throwIfNewErrors(numErrorsBefore);
     return found == null ? Key.get(type) : Key.get(type, found);
   }
 

@@ -16,8 +16,6 @@
 
 package com.google.inject.multibindings;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -26,6 +24,8 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
+import static com.google.inject.multibindings.Multibinder.checkConfiguration;
+import static com.google.inject.multibindings.Multibinder.checkNotNull;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -223,7 +223,7 @@ public abstract class MapBinder<K, V> {
      */
     @Override public LinkedBindingBuilder<V> addBinding(K key) {
       checkNotNull(key, "key");
-      checkState(!isInitialized(), "MapBinder was already initialized");
+      checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
       @SuppressWarnings("unchecked")
       Key<V> valueKey = (Key<V>) Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
@@ -233,7 +233,7 @@ public abstract class MapBinder<K, V> {
     }
 
     public void configure(Binder binder) {
-      checkState(!isInitialized(), "MapBinder was already initialized");
+      checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
       // binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>
       final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
@@ -247,7 +247,7 @@ public abstract class MapBinder<K, V> {
 
           Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
           for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-            checkState(providerMapMutable.put(entry.getKey(), entry.getValue()) == null,
+            checkConfiguration(providerMapMutable.put(entry.getKey(), entry.getValue()) == null,
                 "Map injection failed due to duplicated key \"%s\"", entry.getKey());
           }
 
@@ -266,7 +266,7 @@ public abstract class MapBinder<K, V> {
           for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
             V value = entry.getValue().get();
             K key = entry.getKey();
-            checkState(value != null,
+            checkConfiguration(value != null,
                 "Map injection failed due to null value for key \"%s\"", key);
             map.put(key, value);
           }

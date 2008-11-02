@@ -16,15 +16,18 @@
 
 package com.google.inject.assistedinject;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.spi.Message;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -105,8 +108,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
   
   @Inject
   @SuppressWarnings({"unchecked", "unused"})
-  private void setInjectorAndCheckUnboundParametersAreInjectable(
-      Injector injector) {
+  void setInjectorAndCheckUnboundParametersAreInjectable(Injector injector) {
     this.injector = injector;
     for (AssistedConstructor<?> c : factoryMethodToConstructor.values()) {
       for (Parameter p : c.getAllParameters()) {
@@ -114,22 +116,20 @@ public class FactoryProvider<F, R> implements Provider<F> {
           // this is lame - we're not using the proper mechanism to add an
           // error to the injector. Throughout this class we throw exceptions
           // to add errors, which isn't really the best way in Guice
-          throw new IllegalStateException(String.format(
-              "Parameter of type '%s' is not injectable or annotated "
-                + "with @Assisted for Constructor '%s'", p, c));
+          throw newConfigurationException("Parameter of type '%s' is not injectable or annotated "
+                + "with @Assisted for Constructor '%s'", p, c);
         }
       }
     }
   }
-  
+
   private void checkDeclaredExceptionsMatch() {
     for (Map.Entry<Method, AssistedConstructor<?>> entry : factoryMethodToConstructor.entrySet()) {
       for (Class<?> constructorException : entry.getValue().getDeclaredExceptions()) {
         if (!isConstructorExceptionCompatibleWithFactoryExeception(
             constructorException, entry.getKey().getExceptionTypes())) {
-          throw new IllegalStateException(String.format(
-              "Constructor %s declares an exception, but no compatible exception is thrown " 
-                  + "by the factory method %s", entry.getValue(), entry.getKey()));
+          throw newConfigurationException("Constructor %s declares an exception, but no compatible "
+              + "exception is thrown by the factory method %s", entry.getValue(), entry.getKey());
         }
       }
     }
@@ -152,37 +152,30 @@ public class FactoryProvider<F, R> implements Provider<F> {
 
   @SuppressWarnings({"unchecked"})
   private Map<Method, AssistedConstructor<?>> createMethodMapping() {
-    
-    List<AssistedConstructor<?>> constructors = new ArrayList<AssistedConstructor<?>>();
-    
+    List<AssistedConstructor<?>> constructors = Lists.newArrayList();
+
     for (Constructor c : implementationType.getDeclaredConstructors()) {
       if (c.getAnnotation(AssistedInject.class) != null) {
         constructors.add(new AssistedConstructor(c));
       }
     }
-    
+
     if (constructors.size() != factoryType.getMethods().length) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Constructor mismatch: %s has %s @AssistedInject " +
-              "constructors, factory %s has %s creation methods",
-              implementationType.getSimpleName(),
-              constructors.size(),
-              factoryType.getSimpleName(),
-              factoryType.getMethods().length));
+      throw newConfigurationException("Constructor mismatch: %s has %s @AssistedInject "
+          + "constructors, factory %s has %s creation methods", implementationType.getSimpleName(),
+          constructors.size(), factoryType.getSimpleName(), factoryType.getMethods().length);
     }
-    
-    Map<ParameterListKey, AssistedConstructor> paramsToConstructor
-        = new HashMap<ParameterListKey, AssistedConstructor>();
-    
+
+    Map<ParameterListKey, AssistedConstructor> paramsToConstructor = Maps.newHashMap();
+
     for (AssistedConstructor c : constructors) {
       if (paramsToConstructor.containsKey(c.getAssistedParameters())) {
         throw new RuntimeException("Duplicate constructor, " + c);
       }
       paramsToConstructor.put(c.getAssistedParameters(), c);
     }
-    
-    Map<Method, AssistedConstructor<?>> result = new HashMap<Method, AssistedConstructor<?>>();
+
+    Map<Method, AssistedConstructor<?>> result = Maps.newHashMap();
     for (Method method : factoryType.getMethods()) {
       if (!method.getReturnType().isAssignableFrom(implementationType)) {
         throw new RuntimeException(String.format("Return type of method \"%s\""
@@ -190,15 +183,14 @@ public class FactoryProvider<F, R> implements Provider<F> {
             implementationType.getName()));
       }
       ParameterListKey methodParams = new ParameterListKey(method.getGenericParameterTypes());
-      
+
       if (!paramsToConstructor.containsKey(methodParams)) {
-        throw new IllegalArgumentException(String.format("%s has no " +
-            "@AssistInject constructor that takes the @Assisted parameters %s " +
-            "in that order. @AssistInject constructors are %s",
-            implementationType, methodParams, paramsToConstructor.values()));
+        throw newConfigurationException("%s has no @AssistInject constructor that takes the "
+            + "@Assisted parameters %s in that order. @AssistInject constructors are %s",
+            implementationType, methodParams, paramsToConstructor.values());
       }
       AssistedConstructor matchingConstructor = paramsToConstructor.remove(methodParams);
-      
+
       result.put(method, matchingConstructor);
     }
     return result;
@@ -207,7 +199,6 @@ public class FactoryProvider<F, R> implements Provider<F> {
   @SuppressWarnings({"unchecked"})
   public F get() {
     InvocationHandler invocationHandler = new InvocationHandler() {
-
       public Object invoke(Object proxy, Method method, Object[] creationArgs) throws Throwable {
         // pass methods from Object.class to the proxy
         if (method.getDeclaringClass().equals(Object.class)) {
@@ -244,5 +235,9 @@ public class FactoryProvider<F, R> implements Provider<F> {
 
     return (F) Proxy.newProxyInstance(factoryType.getClassLoader(),
         new Class[] {factoryType}, invocationHandler);
+  }
+
+  private ConfigurationException newConfigurationException(String format, Object... args) {
+    return new ConfigurationException(ImmutableSet.of(new Message(String.format(format, args))));
   }
 }

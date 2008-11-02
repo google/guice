@@ -51,6 +51,7 @@ class SingleParameterInjector<T> {
       return null;
     }
 
+    int numErrorsBefore = errors.size();
     Object[] parameters = new Object[parameterInjectors.size()];
 
     int i = 0;
@@ -62,7 +63,7 @@ class SingleParameterInjector<T> {
       }
     }
 
-    errors.throwIfNecessary();
+    errors.throwIfNewErrors(numErrorsBefore);
     return parameters;
   }
 }

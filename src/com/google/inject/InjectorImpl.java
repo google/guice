@@ -329,8 +329,7 @@ class InjectorImpl implements Injector {
         // TODO: does this put the binding in JIT bindings?
         binding.initialize(this, errors);
         successful = true;
-      }
-      finally {
+      } finally {
         if (!successful) {
           jitBindings.remove(key);
         }
@@ -580,6 +579,7 @@ class InjectorImpl implements Injector {
       = new FailableCache<Class<?>, ImmutableList<SingleMemberInjector>>() {
     protected ImmutableList<SingleMemberInjector> create(Class<?> type, Errors errors)
         throws ErrorsException {
+      int numErrorsBefore = errors.size();
       List<InjectionPoint> injectionPoints = Lists.newArrayList();
       try {
         InjectionPoint.addForInstanceMethodsAndFields(type, injectionPoints);
@@ -587,7 +587,7 @@ class InjectorImpl implements Injector {
         errors.merge(e.getErrorMessages());
       }
       ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
-      errors.throwIfNecessary();
+      errors.throwIfNewErrors(numErrorsBefore);
       return injectors;
     }
   };
@@ -644,6 +644,7 @@ class InjectorImpl implements Injector {
       return null;
     }
 
+    int numErrorsBefore = errors.size();
     SingleParameterInjector<?>[] result = new SingleParameterInjector<?>[parameters.size()];
     int i = 0;
     for (Dependency<?> parameter : parameters) {
@@ -654,7 +655,7 @@ class InjectorImpl implements Injector {
       }
     }
 
-    errors.throwIfNecessary();
+    errors.throwIfNewErrors(numErrorsBefore);
     return ImmutableList.of(result);
   }
 
@@ -746,7 +747,7 @@ class InjectorImpl implements Injector {
               }
             }
           });
-          errors.throwIfNecessary();
+          errors.throwIfNewErrors(0);
           return t;
         } catch (ErrorsException e) {
           throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
@@ -763,7 +764,7 @@ class InjectorImpl implements Injector {
     Errors errors = new Errors(key);
     try {
       Provider<T> result = getProviderOrThrow(key, errors);
-      errors.throwIfNecessary();
+      errors.throwIfNewErrors(0);
       return result;
     } catch (ErrorsException e) {
       throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());

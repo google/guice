@@ -16,10 +16,11 @@
 
 package com.google.inject.multibindings;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -27,6 +28,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.spi.Message;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -183,14 +185,14 @@ public abstract class Multibinder<T> {
 
     @SuppressWarnings("unchecked")
     public void configure(Binder binder) {
-      checkState(!isInitialized(), "Multibinder was already initialized");
+      checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
       binder.bind(setKey).toProvider(this);
     }
 
     @SuppressWarnings("unchecked")
     @Override public LinkedBindingBuilder<T> addBinding() {
-      checkState(!isInitialized(), "Multibinder was already initialized");
+      checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
       return binder.bind((Key<T>) Key.get(elementType, new RealElement(setName)));
     }
@@ -224,13 +226,13 @@ public abstract class Multibinder<T> {
     }
 
     public Set<T> get() {
-      checkState(isInitialized(), "Multibinder is not initialized");
+      checkConfiguration(isInitialized(), "Multibinder is not initialized");
 
       Set<T> result = new LinkedHashSet<T>();
       for (Provider<T> provider : providers) {
         final T newValue = provider.get();
-        checkState(newValue != null, "Set injection failed due to null element");
-        checkState(result.add(newValue),
+        checkConfiguration(newValue != null, "Set injection failed due to null element");
+        checkConfiguration(result.add(newValue),
             "Set injection failed due to duplicated element \"%s\"", newValue);
       }
       return Collections.unmodifiableSet(result);
@@ -266,5 +268,23 @@ public abstract class Multibinder<T> {
     public Type getElementType() {
       return elementType;
     }
+  }
+
+  static void checkConfiguration(boolean condition, String format, Object... args) {
+    if (condition) {
+      return;
+    }
+
+    throw new ConfigurationException(ImmutableSet.of(new Message(String.format(format, args))));
+  }
+
+  static <T> T checkNotNull(T reference, String name) {
+    if (reference != null) {
+      return reference;
+    }
+
+    NullPointerException npe = new NullPointerException(name);
+    throw new ConfigurationException(ImmutableSet.of(
+        new Message(ImmutableList.of(), npe.toString(), npe)));
   }
 }

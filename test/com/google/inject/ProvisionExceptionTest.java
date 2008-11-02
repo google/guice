@@ -119,8 +119,8 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertContains(e.getMessage(), "1) User Exception",
-          "at binding for ", FProvider.class.getName(), ".class(ProvisionExceptionTest.java",
-          "at binding for ", F.class.getName(), ".class(ProvisionExceptionTest.java:");
+          "while locating ", FProvider.class.getName(),
+          "while locating ", F.class.getName());
     }
   }
 
@@ -170,7 +170,7 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (Exception expected) {
       assertContains(expected.getMessage(),
           "Injecting into inner classes is not supported.",
-          "at binding for " + InnerClass.class.getName() + ".class(ProvisionExceptionTest.java:");
+          "while locating " + InnerClass.class.getName());
     }
   }
 
@@ -184,19 +184,20 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (Exception expected) {
       assertContains(expected.getMessage(),
           "Injecting into inner classes is not supported.",
-          "at binding for " + LocalClass.class.getName() + ".class(ProvisionExceptionTest.java:");
+          "while locating " + LocalClass.class.getName());
     }
   }
 
   public void testBindingAnnotationsOnMethodsAndConstructors() {
     try {
-      Guice.createInjector().getInstance(MethodWithBindingAnnotation.class);
+      Injector injector = Guice.createInjector();
+      injector.getInstance(MethodWithBindingAnnotation.class);
       fail();
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), MethodWithBindingAnnotation.class.getName()
           + ".injectMe() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.",
-          "at binding for " + MethodWithBindingAnnotation.class.getName() + ".class");
+          "while locating " + MethodWithBindingAnnotation.class.getName());
     }
 
     try {
@@ -207,7 +208,7 @@ public class ProvisionExceptionTest extends TestCase {
           + ".<init>() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.",
           "at " + ConstructorWithBindingAnnotation.class.getName() + ".class",
-          "at binding for " + ConstructorWithBindingAnnotation.class.getName() + ".class");
+          "while locating " + ConstructorWithBindingAnnotation.class.getName());
     }
   }
 
@@ -224,8 +225,8 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
           "at " + RealD.class.getName() + ".<init>(ProvisionExceptionTest.java:",
-          "at binding for " + RealD.class.getName() + ".class(ProvisionExceptionTest.java:",
-          "at binding for " + D.class.getName() + ".class(ProvisionExceptionTest.java:");
+          "while locating " + RealD.class.getName(),
+          "while locating " + D.class.getName());
     }
   }
 
@@ -241,8 +242,8 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "at binding for " + DProvider.class.getName() + ".class(ProvisionExceptionTest.java:",
-          "at binding for " + D.class.getName() + ".class(ProvisionExceptionTest.java:");
+          "while locating " + DProvider.class.getName(),
+          "while locating " + D.class.getName());
     }
   }
 

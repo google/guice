@@ -219,8 +219,8 @@ public class MultibinderTest extends TestCase {
       injector.getInstance(Key.get(setOfString));
       fail();
     } catch(ProvisionException expected) {
-      assertEquals("Set injection failed due to duplicated element \"A\"",
-          expected.getCause().getMessage());
+      assertContains(expected.getMessage(),
+          "1) Set injection failed due to duplicated element \"A\"");
     }
   }
 
@@ -236,8 +236,8 @@ public class MultibinderTest extends TestCase {
       injector.getInstance(Key.get(setOfString));
       fail();
     } catch(ProvisionException expected) {
-      assertEquals("Set injection failed due to null element",
-          expected.getCause().getMessage());
+      assertContains(expected.getMessage(), 
+          "1) Set injection failed due to null element");
     }
   }
 

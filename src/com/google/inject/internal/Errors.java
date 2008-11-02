@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -35,7 +36,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -261,16 +261,23 @@ public final class Errors implements Serializable {
     return errorInUserCode("Error in custom provider, %s", runtimeException);
   }
 
+  public static Collection<Message> getMessagesFromThrowable(Throwable throwable) {
+    if (throwable instanceof ProvisionException) {
+      return ((ProvisionException) throwable).getErrorMessages();
+    } else if (throwable instanceof ConfigurationException) {
+      return ((ConfigurationException) throwable).getErrorMessages();
+    } else if (throwable instanceof CreationException) {
+      return ((CreationException) throwable).getErrorMessages();
+    } else {
+      return ImmutableSet.of();
+    }
+  }
+
   public Errors errorInUserCode(String message, Throwable cause) {
-    if (cause instanceof ProvisionException) {
-      return merge(((ProvisionException) cause).getErrorMessages());
+    Collection<Message> messages = getMessagesFromThrowable(cause);
 
-    } else if (cause instanceof ConfigurationException) {
-      return merge(((ConfigurationException) cause).getErrorMessages());
-
-    } else if (cause instanceof CreationException) {
-      return merge(((CreationException) cause).getErrorMessages());
-
+    if (!messages.isEmpty()) {
+      return merge(messages);
     } else {
       return addMessage(cause, message, cause);
     }
@@ -336,13 +343,15 @@ public final class Errors implements Serializable {
   public List<Object> getSources() {
     List<Object> sources = Lists.newArrayList();
     for (Errors e = this; e != null; e = e.parent) {
-      sources.add(0, e.source);
+      if (e.source != SourceProvider.UNKNOWN_SOURCE) {
+        sources.add(0, e.source);
+      }
     }
     return sources;
   }
 
-  public void throwIfNecessary() throws ErrorsException {
-    if (!hasErrors()) {
+  public void throwIfNewErrors(int expectedSize) throws ErrorsException {
+    if (size() == expectedSize) {
       return;
     }
 
@@ -469,6 +478,10 @@ public final class Errors implements Serializable {
     return onlyCause;
   }
 
+  public int size() {
+    return errors.size();
+  }
+
   private static abstract class Converter<T> {
 
     final Class<T> type;
@@ -540,18 +553,8 @@ public final class Errors implements Serializable {
 
     } else if (source instanceof Key) {
       Key<?> key = (Key<?>) source;
-      Type type = key.getTypeLiteral().getType();
-      if (key.getAnnotationType() != null) {
-        formatter.format("  at binding for %s annotated with %s%n", MoreTypes.toString(type),
-            (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType()));
+      formatter.format("  while locating %s%n", convert(key));
 
-      } else if (type instanceof Class) {
-        formatter.format("  at binding for %s%n", StackTraceElements.forType((Class<?>) type));
-
-      } else {
-          formatter.format("  at binding for %s%n", type);
-
-      }
     } else {
       formatter.format("  at %s%n", source);
     }
@@ -563,10 +566,13 @@ public final class Errors implements Serializable {
     Class<? extends Member> memberType = MoreTypes.memberType(member);
 
     if (memberType == Field.class) {
-      formatter.format("  for field at %s%n", StackTraceElements.forMember(member));
+      dependency = injectionPoint.getDependencies().get(0);
+      formatter.format("  while locating %s%n", convert(dependency.getKey()));
+      formatter.format("    for field at %s%n", StackTraceElements.forMember(member));
 
     } else if (dependency != null) {
-      formatter.format("  for parameter %s at %s%n",
+      formatter.format("  while locating %s%n", convert(dependency.getKey()));
+      formatter.format("    for parameter %s at %s%n",
           dependency.getParameterIndex(), StackTraceElements.forMember(member));
 
     } else {

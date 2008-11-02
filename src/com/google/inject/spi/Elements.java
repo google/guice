@@ -31,6 +31,7 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ModuleBinding;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Collection;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -156,7 +158,12 @@ public final class Elements {
         try {
           module.configure(this);
         } catch (RuntimeException e) {
-          addError(e);
+          Collection<Message> messages = Errors.getMessagesFromThrowable(e);
+          if (!messages.isEmpty()) {
+            elements.addAll(messages);
+          } else {
+            addError(e);
+          }
         }
         install(ProviderMethodsModule.forModule(module));
       }

@@ -250,8 +250,8 @@ public class MapBinderTest extends TestCase {
       injector.getInstance(Key.get(mapOfString));
       fail();
     } catch(ProvisionException expected) {
-      assertEquals("Map injection failed due to null value for key \"null\"",
-          expected.getCause().getMessage());
+      assertContains(expected.getMessage(),
+          "1) Map injection failed due to null value for key \"null\"");
     }
   }
 

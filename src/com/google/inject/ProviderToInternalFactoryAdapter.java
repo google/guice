@@ -43,7 +43,7 @@ class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
           return internalFactory.get(errors, context, dependency);
         }
       });
-      errors.throwIfNecessary();
+      errors.throwIfNewErrors(0);
       return t;
     } catch (ErrorsException e) {
       throw new ProvisionException(errors.merge(e.getErrors()).getMessages());

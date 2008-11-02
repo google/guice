@@ -90,7 +90,7 @@ public class ImplicitBindingTest extends TestCase {
       Asserts.assertContains(expected.getMessage(),
           "1) No implementation for " + I.class.getName(),
           "annotated with @" + Named.class.getName() + "(value=i) was bound.",
-          "at binding for " + I.class.getName(),
+          "while locating " + I.class.getName(),
           " annotated with @" + Named.class.getName() + "(value=i)");
     }
   }

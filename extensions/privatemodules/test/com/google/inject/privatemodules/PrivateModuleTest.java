@@ -150,6 +150,37 @@ public class PrivateModuleTest extends TestCase {
     }
   }
 
+  /**
+   * Ensure that when we've got errors in different private modules, Guice presents all errors
+   * in a unified message.
+   */
+  public void testMessagesFromPrivateModulesAreNicelyIntegrated() {
+    try {
+      Guice.createInjector(
+          new PrivateModule() {
+            public void configurePrivateBindings() {
+              bind(C.class);
+            }
+          },
+          new PrivateModule() {
+            public void configurePrivateBindings() {
+              bind(AB.class);
+            }
+          }
+      );
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) No implementation for " + C.class.getName() + " was bound.",
+          "at " + getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:",
+          "2) No implementation for " + String.class.getName(), "Named(value=a) was bound.",
+          "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
+          "3) No implementation for " + String.class.getName(), "Named(value=b) was bound.",
+          "for field at " + AB.class.getName() + ".b(PrivateModuleTest.java:",
+          "3 errors");
+    }
+  }
+
   public void testNestedPrivateInjectors() {
     Injector injector = Guice.createInjector(new PrivateModule() {
       public void configurePrivateBindings() {

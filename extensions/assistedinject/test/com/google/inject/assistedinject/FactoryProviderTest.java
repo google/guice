@@ -515,7 +515,7 @@ public class FactoryProviderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "Parameter of type 'double' is not injectable or annotated with @Assisted");
+          "1) Parameter of type 'double' is not injectable or annotated with @Assisted");
     }
   }
   
