@@ -41,7 +41,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *   protected void configure() {
  *     bind(Foo.class).to(FooImpl.class).in(Scopes.SINGLETON);
  *     bind(BarImpl.class);
- *     link(Bar.class).to(BarImpl.class);
+ *     bind(Bar.class).to(BarImpl.class);
  *     bindConstant(named("port")).to(8080);
  *   }
  * }
