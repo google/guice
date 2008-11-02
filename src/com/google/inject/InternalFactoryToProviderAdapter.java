@@ -21,6 +21,8 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Message;
+import java.util.Collection;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -45,9 +47,7 @@ class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     try {
       return errors.checkForNull(initializable.get(errors).get(), source, dependency);
     } catch (RuntimeException userException) {
-      Errors userErrors = ProvisionException.getErrors(userException);
-      throw errors.withSource(source)
-          .errorInProvider(userException, userErrors).toException();
+      throw errors.withSource(source).errorInProvider(userException).toException();
     }
   }
 

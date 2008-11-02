@@ -53,7 +53,7 @@ public class ParentInjectorTest extends TestCase {
     try {
       parent.getInstance(A.class);
       fail("Created a just-in-time binding on the parent that's the same as a child's binding");
-    } catch (ProvisionException e) {
+    } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "A binding to ", A.class.getName(),
           " already exists on a child injector.");
     }
@@ -92,7 +92,7 @@ public class ParentInjectorTest extends TestCase {
     try {
       parent.getBinding(B.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
     }
   }
 
@@ -141,7 +141,7 @@ public class ParentInjectorTest extends TestCase {
     try {
       child.getInstance(Key.get(List.class, Names.named("B")));
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       Asserts.assertContains(expected.getMessage(), "Multiple converters can convert");
     }
   }
@@ -178,13 +178,13 @@ public class ParentInjectorTest extends TestCase {
     try {
       top.getInstance(D.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
     }
 
     try {
       left.getInstance(D.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
     }
   }
 

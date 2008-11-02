@@ -18,10 +18,10 @@ package com.google.inject.spi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.MoreTypes;
@@ -94,7 +94,7 @@ public final class InjectionPoint implements Serializable {
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
-    ConfigurationException.throwNewIfNonEmpty(errors);
+    errors.throwConfigurationExceptionIfNecessary();
 
     this.dependencies = ImmutableList.<Dependency<?>>of(
         newDependency(key, Nullability.allowsNull(annotations), -1));
@@ -118,7 +118,7 @@ public final class InjectionPoint implements Serializable {
       }
     }
 
-    ConfigurationException.throwNewIfNonEmpty(errors);
+    errors.throwConfigurationExceptionIfNecessary();
     return ImmutableList.copyOf(dependencies);
   }
 
@@ -201,7 +201,7 @@ public final class InjectionPoint implements Serializable {
       }
     }
 
-    ConfigurationException.throwNewIfNonEmpty(errors);
+    errors.throwConfigurationExceptionIfNecessary();
 
     if (found != null) {
       return new InjectionPoint(found);
@@ -216,13 +216,13 @@ public final class InjectionPoint implements Serializable {
       if (Modifier.isPrivate(noArgCtor.getModifiers())
           && !Modifier.isPrivate(type.getModifiers())) {
         errors.missingConstructor(type);
-        throw new ConfigurationException(errors);
+        throw new ConfigurationException(errors.getMessages());
       }
 
       return new InjectionPoint(noArgCtor);
     } catch (NoSuchMethodException e) {
       errors.missingConstructor(type);
-      throw new ConfigurationException(errors);
+      throw new ConfigurationException(errors.getMessages());
     }
   }
 
@@ -239,7 +239,7 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors();
     addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
     addInjectionPoints(type, Factory.METHODS, true, sink, errors);
-    ConfigurationException.throwNewIfNonEmpty(errors);
+    errors.throwConfigurationExceptionIfNecessary();;
   }
 
   /**
@@ -257,7 +257,7 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors();
     addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
     addInjectionPoints(type, Factory.METHODS, false, sink, errors);
-    ConfigurationException.throwNewIfNonEmpty(errors);
+    errors.throwConfigurationExceptionIfNecessary();
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectionPoints(Class<?> type,
@@ -289,9 +289,9 @@ public final class InjectionPoint implements Serializable {
 
       try {
         injectionPoints.add(factory.create(member));
-      } catch (ConfigurationException e) {
+      } catch (ConfigurationException ignorable) {
         if (!inject.optional()) {
-          errors.merge(e.getErrorMessages());
+          errors.merge(ignorable.getErrorMessages());
         }
       }
     }

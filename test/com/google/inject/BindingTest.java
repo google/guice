@@ -183,7 +183,7 @@ public class BindingTest extends TestCase {
     try {
       Guice.createInjector().getInstance(clazz);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "Could not find a suitable constructor in " + PrivateNoArg.class.getName(),
           "at " + PrivateNoArg.class.getName() + ".class(BindingTest.java:");
@@ -194,7 +194,7 @@ public class BindingTest extends TestCase {
     try {
       Guice.createInjector().getInstance(TooManyConstructors.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           TooManyConstructors.class.getName() + " has more than one constructor annotated with " 
               + "@Inject. Classes must have either one (and only one) constructor",

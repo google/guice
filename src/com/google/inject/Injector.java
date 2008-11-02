@@ -20,16 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Fulfills requests for the object instances that make up your application,
- * always ensuring that these instances are properly injected before they are
- * returned. The {@code Injector} is the heart of the Guice framework,
- * although you don't typically interact with it directly very often. This
- * "behind-the-scenes" operation is what distinguishes the dependency
- * injection pattern from its cousin, service locator.
- *
- * <p>The {@code Injector} API has a few additional features: it allows
- * pre-constructed instances to have their fields and methods injected and
- * offers programmatic introspection to support tool development.
+ * Builds the graphs of objects that make up your application. The injector tracks the dependencies
+ * for each type and uses bindings to inject them. This is the core of Guice, although you rarely
+ * interact with it directly. This "behind-the-scenes" operation is what distinguishes dependency
+ * injection from its cousin, the service locator pattern.
  *
  * <p>Contains several default bindings:
  *
@@ -42,122 +36,137 @@ import java.util.Map;
  *
  * Injectors are created using the facade class {@link Guice}.
  *
+ * <p>An injector can also {@link #injectMembers(Object) inject the dependencies} of
+ * already-constructed instances. This can be used to interoperate with objects created by other
+ * frameworks or services.
+ *
+ * <p>Injectors can be {@link #createChildInjector(Iterable) hierarchical}. Child injectors inherit
+ * the configuration of their parent injectors, but the converse does not hold.
+ *
+ * <p>The injector's {@link #getBindings() internal bindings} are available for introspection. This
+ * enables tools and extensions to operate on an injector reflectively.
+ *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface Injector {
 
   /**
-   * Injects dependencies into the fields and methods of an existing object.
-   * Ignores the presence or absence of an injectable constructor.
+   * Injects dependencies into the fields and methods of {@code instance}. Ignores the presence or
+   * absence of an injectable constructor.
    *
-   * <p>Whenever Guice creates an instance, it performs this injection
-   * automatically (after first performing constructor injection), so if you're
-   * able to let Guice create all your objects for you, you'll never need to
-   * use this method.
+   * <p>Whenever Guice creates an instance, it performs this injection automatically (after first
+   * performing constructor injection), so if you're able to let Guice create all your objects for
+   * you, you'll never need to use this method.
    */
-  void injectMembers(Object o);
+  void injectMembers(Object instance);
 
   /**
-   * Gets all explicit bindings.
+   * Returns all explicit bindings.
    *
-   * <p>This method is part of the Injector
-   * Introspection API and is primarily intended for use by tools.
+   * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
+   * injector}, should one exist.
+   *
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    */
   Map<Key<?>, Binding<?>> getBindings();
 
   /**
-   * Gets a binding for the given key, or null if no binding for this key is
-   * found. Returns explicit bindings as well as those synthesized by the
-   * container such as bindings for converted constants, etc.
+   * Returns the binding for the given injection key. This will be an explicit bindings if the key
+   * was bound explicitly by a module, or an implicit binding otherwise. The implicit binding will
+   * be created if necessary.
    *
-   * <p>This method is part of the Injector Introspection API and is
-   * primarily intended for use by tools.
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the binding.
    */
   <T> Binding<T> getBinding(Key<T> key);
 
   /**
-   * Gets a binding for the given type, or null if no binding for this type is
-   * found. Returns explicit bindings as well as those synthesized by the
-   * container such as bindings for converted constants, etc.
+   * Returns the binding for the given type. This will be an explicit bindings if the injection key
+   * was bound explicitly by a module, or an implicit binding otherwise. The implicit binding will
+   * be created if necessary.
    *
-   * <p>This method is part of the Injector Introspection API and is
-   * primarily intended for use by tools.
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the binding.
    */
   <T> Binding<T> getBinding(Class<T> type);
 
   /**
-   * Returns all explicit bindings for the given type. This method is part of the Injector
-   * Introspection API and is primarily intended for use by tools.
+   * Returns all explicit bindings for {@code type}.
+   *
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    */
   <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type);
 
   /**
-   * Returns the provider used to obtain instances for the given injection key.
-   * When feasible, it's generally preferable to avoid using this method, in
-   * favor of having Guice inject your dependencies ahead of time.
+   * Returns the provider used to obtain instances for the given injection key. When feasible, avoid
+   * using this method, in favor of having Guice inject your dependencies ahead of time.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the provider.
    */
   <T> Provider<T> getProvider(Key<T> key);
 
   /**
-   * Returns the provider used to obtain instances for the given injection key.
-   * When feasible, it's generally preferable to avoid using this method, in
-   * favor of having Guice inject your dependencies ahead of time.
+   * Returns the provider used to obtain instances for the given type. When feasible, avoid
+   * using this method, in favor of having Guice inject your dependencies ahead of time.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the provider.
    */
   <T> Provider<T> getProvider(Class<T> type);
 
   /**
-   * Returns the appropriate instance for the given injection key; equivalent to
-   * {@code getProvider(key).get()}. When feasible, it's generally preferable to
-   * avoid using this method, in favor of having Guice inject your dependencies
-   * ahead of time.
+   * Returns the appropriate instance for the given injection key; equivalent to {@code
+   * getProvider(key).get()}. When feasible, avoid using this method, in favor of having Guice
+   * inject your dependencies ahead of time.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the provider.
+   * @throws ProvisionException if there was a runtime failure while providing an instance.
    */
   <T> T getInstance(Key<T> key);
 
   /**
-   * Returns the appropriate instance for the given type; equivalent to
-   * {@code getProvider(type).get()}. When feasible, it's generally preferable
-   * to avoid using this method, in favor of having Guice inject your
-   * dependencies ahead of time.
+   * Returns the appropriate instance for the given injection type; equivalent to {@code
+   * getProvider(type).get()}. When feasible, avoid using this method, in favor of having Guice
+   * inject your dependencies ahead of time.
+   *
+   * @throws ConfigurationException if this injector cannot find or create the provider.
+   * @throws ProvisionException if there was a runtime failure while providing an instance.
    */
   <T> T getInstance(Class<T> type);
 
   /**
-   * Returns this injector's parent injector, or {@code null} if this is a top-
-   * level injector.
+   * Returns this injector's parent, or {@code null} if this is a top-level injector.
    */
   Injector getParent();
 
   /**
-   * Returns a new injector that inherits all state from this injector. All
-   * bindings, scopes, interceptors and type converters are inherited -- they
-   * are visible to the child injector. Elements of the child injector are not
-   * visible to its parent.
+   * Returns a new injector that inherits all state from this injector. All bindings, scopes,
+   * interceptors and type converters are inherited -- they are visible to the child injector.
+   * Elements of the child injector are not visible to its parent.
    *
-   * <p>Just-in-time bindings created for child injectors will be created in an
-   * ancestor injector whenever possible. This allows for scoped instances to be
-   * shared between injectors. Use explicit bindings to prevent bindings from
-   * being shared with the parent injector.
+   * <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
+   * whenever possible. This allows for scoped instances to be shared between injectors. Use
+   * explicit bindings to prevent bindings from being shared with the parent injector.
    *
-   * <p>No key may be bound by both an injector and one of its ancestors. This
-   * includes just-in-time bindings. The lone exception is the key for {@code
-   * Injector.class}, which is bound by each injector to itself.
+   * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
+   * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
+   * injector to itself.
    */
   Injector createChildInjector(Iterable<? extends Module> modules);
 
   /**
-   * Returns a new injector that inherits all state from this injector. All
-   * bindings, scopes, interceptors and type converters are inherited -- they
-   * are visible to the child injector. Elements of the child injector are not
-   * visible to its parent.
+   * Returns a new injector that inherits all state from this injector. All bindings, scopes,
+   * interceptors and type converters are inherited -- they are visible to the child injector.
+   * Elements of the child injector are not visible to its parent.
    *
-   * <p>Just-in-time bindings created for child injectors will be created in an
-   * ancestor injector whenever possible. This allows for scoped instances to be
-   * shared between injectors. Use explicit bindings to prevent bindings from
-   * being shared with the parent injector.
+   * <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
+   * whenever possible. This allows for scoped instances to be shared between injectors. Use
+   * explicit bindings to prevent bindings from being shared with the parent injector.
    *
-   * <p>No key may be bound by both an injector and one of its ancestors. This
-   * includes just-in-time bindings. The lone exception is the key for {@code
-   * Injector.class}, which is bound by each injector to itself.
+   * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
+   * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
+   * injector to itself.
    */
   Injector createChildInjector(Module... modules);
 }

@@ -86,7 +86,7 @@ public class ImplicitBindingTest extends TestCase {
     try {
       Guice.createInjector().getInstance(Key.get(I.class, Names.named("i")));
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       Asserts.assertContains(expected.getMessage(),
           "1) No implementation for " + I.class.getName(),
           "annotated with @" + Named.class.getName() + "(value=i) was bound.",

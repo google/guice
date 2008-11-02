@@ -125,8 +125,7 @@ public class ProvisionExceptionTest extends TestCase {
       Guice.createInjector().getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
-          "1) Error injecting constructor, com.google.inject.ProvisionException: User Exception",
+      assertContains(e.getMessage(), "1) User Exception",
           "at " + F.class.getName() + ".<init>(ProvisionExceptionTest.java:");
     }
   }
@@ -140,8 +139,7 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
-          "1) Error in custom provider, com.google.inject.ProvisionException: User Exception",
+      assertContains(e.getMessage(), "1) User Exception",
           "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
@@ -155,8 +153,7 @@ public class ProvisionExceptionTest extends TestCase {
       }).getInstance(F.class);
       fail();
     } catch (ProvisionException e) {
-      assertContains(e.getMessage(),
-          "1) Error in custom provider, com.google.inject.ProvisionException: User Exception",
+      assertContains(e.getMessage(), "1) User Exception",
           "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
     }
   }
@@ -167,6 +164,21 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertSimilarWhenReserialized(expected);
+    }
+  }
+
+  public void testMultipleCauses() {
+    try {
+      Guice.createInjector().getInstance(G.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "1) Error injecting method, java.lang.IllegalArgumentException",
+          "Caused by: java.lang.IllegalArgumentException: java.lang.UnsupportedOperationException",
+          "Caused by: java.lang.UnsupportedOperationException: Unsupported",
+          "2) Error injecting method, java.lang.NullPointerException: can't inject second either",
+          "Caused by: java.lang.NullPointerException: can't inject second either",
+          "2 errors");
     }
   }
 
@@ -206,6 +218,15 @@ public class ProvisionExceptionTest extends TestCase {
   static class FProvider implements Provider<F> {
     public F get() {
       return new F();
+    }
+  }
+
+  static class G {
+    @Inject void injectFirst() {
+      throw new IllegalArgumentException(new UnsupportedOperationException("Unsupported"));
+    }
+    @Inject void injectSecond() {
+      throw new NullPointerException("can't inject second either");
     }
   }
 }

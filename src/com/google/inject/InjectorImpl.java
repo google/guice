@@ -27,7 +27,6 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
-import com.google.inject.internal.ConfigurationException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
@@ -101,11 +100,10 @@ class InjectorImpl implements Injector {
     Errors errors = new Errors(key.getRawType());
     try {
       BindingImpl<T> result = getBindingOrThrow(key, errors);
-      ProvisionException.throwNewIfNonEmpty(errors);
+      errors.throwConfigurationExceptionIfNecessary();
       return result;
-    }
-    catch (ErrorsException e) {
-      throw new ProvisionException(errors.merge(e.getErrors()));
+    } catch (ErrorsException e) {
+      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
     }
   }
 
@@ -467,7 +465,7 @@ class InjectorImpl implements Injector {
           T t = (T) o;
           return t;
         } catch (RuntimeException e) {
-          throw errors.withSource(type).errorInProvider(e, null).toException();
+          throw errors.withSource(type).errorInProvider(e).toException();
         }
       }
     };
@@ -850,13 +848,10 @@ class InjectorImpl implements Injector {
     return parameters;
   }
 
-  void injectMembers(Errors errors, Object o, InternalContext context)
+  void injectMembers(Errors errors, Object o, InternalContext context,
+      List<SingleMemberInjector> injectors)
       throws ErrorsException {
-    if (o == null) {
-      return;
-    }
-
-    for (SingleMemberInjector injector : injectors.get(o.getClass(), errors)) {
+    for (SingleMemberInjector injector : injectors) {
       injector.inject(errors, context, o);
     }
   }
@@ -864,20 +859,35 @@ class InjectorImpl implements Injector {
   // Not test-covered
   public void injectMembers(final Object o) {
     Errors errors = new Errors();
+
+    // configuration/validation stuff throws ConfigurationException
+    List<SingleMemberInjector> injectors;
     try {
-      injectMembersOrThrow(errors, o);
+      injectors = this.injectors.get(o.getClass(), errors);
+    } catch (ErrorsException e) {
+      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+    }
+
+    // injection can throw ProvisionException
+    try {
+      injectMembersOrThrow(errors, o, injectors);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
 
-    ProvisionException.throwNewIfNonEmpty(errors);
+    errors.throwProvisionExceptionIfErrorsExist();
   }
 
-  public void injectMembersOrThrow(final Errors errors, final Object o)
+  public void injectMembersOrThrow(final Errors errors, final Object o,
+      final List<SingleMemberInjector> injectors)
       throws ErrorsException {
+    if (o == null) {
+      return;
+    }
+
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) throws ErrorsException {
-        injectMembers(errors, o, context);
+        injectMembers(errors, o, context, injectors);
         return null;
       }
     });
@@ -901,8 +911,7 @@ class InjectorImpl implements Injector {
               errors.pushSource(dependency);
               try {
                 return factory.get(errors, context, dependency);
-              }
-              finally {
+              } finally {
                 context.setDependency(null);
                 errors.popSource(dependency);
               }
@@ -911,7 +920,7 @@ class InjectorImpl implements Injector {
           errors.throwIfNecessary();
           return t;
         } catch (ErrorsException e) {
-          throw new ProvisionException(errors.merge(e.getErrors()));
+          throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
         }
       }
 
@@ -927,9 +936,8 @@ class InjectorImpl implements Injector {
       Provider<T> result = getProviderOrThrow(key, errors);
       errors.throwIfNecessary();
       return result;
-    }
-    catch (ErrorsException e) {
-      throw new ProvisionException(errors.merge(e.getErrors()));
+    } catch (ErrorsException e) {
+      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
     }
   }
 

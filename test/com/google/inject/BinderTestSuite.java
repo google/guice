@@ -96,7 +96,7 @@ public class BinderTestSuite {
         .name("no binding, AWithProvidedBy named apple")
         .key(Key.get(AWithProvidedBy.class, named("apple")),
             InjectsAWithProvidedByNamedApple.class)
-        .provisionException("No implementation for %s annotated with %s was bound",
+        .configurationException("No implementation for %s annotated with %s was bound",
             AWithProvidedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
@@ -104,14 +104,14 @@ public class BinderTestSuite {
         .name("no binding, AWithImplementedBy named apple")
         .key(Key.get(AWithImplementedBy.class, named("apple")),
             InjectsAWithImplementedByNamedApple.class)
-        .provisionException("No implementation for %s annotated with %s was bound",
+        .configurationException("No implementation for %s annotated with %s was bound",
             AWithImplementedBy.class.getName(), named("apple"))
         .addToSuite(suite);
 
     new Builder()
         .name("no binding, ScopedA named apple")
         .key(Key.get(ScopedA.class, named("apple")), InjectsScopedANamedApple.class)
-        .provisionException("No implementation for %s annotated with %s was bound",
+        .configurationException("No implementation for %s annotated with %s was bound",
             ScopedA.class.getName(), named("apple"))
         .addToSuite(suite);
 
@@ -311,7 +311,7 @@ public class BinderTestSuite {
         new PlainA(201), new PlainA(202), new PlainA(203));
     private CreationTime creationTime = CreationTime.LAZY;
     private String creationException;
-    private String provisionException;
+    private String configurationException;
 
     public Builder module(Module module) {
       this.modules.add(module);
@@ -339,8 +339,8 @@ public class BinderTestSuite {
       return this;
     }
 
-    private Builder provisionException(String message, Object... args) {
-      provisionException = String.format(message, args);
+    private Builder configurationException(String message, Object... args) {
+      configurationException = String.format(message, args);
       return this;
     }
 
@@ -360,8 +360,8 @@ public class BinderTestSuite {
       if (creationException != null) {
         suite.addTest(new CreationExceptionTest(this));
 
-      } else if (provisionException != null) {
-        suite.addTest(new ProvisionExceptionTest(this));
+      } else if (configurationException != null) {
+        suite.addTest(new ConfigurationExceptionTest(this));
 
       } else {
         suite.addTest(new SuccessTest(this));
@@ -469,20 +469,20 @@ public class BinderTestSuite {
     }
   }
 
-  public static class ProvisionExceptionTest extends TestCase {
+  public static class ConfigurationExceptionTest extends TestCase {
     final String name;
     final Key<?> key;
     final Class<? extends Injectable> injectsKey;
     final ImmutableList<Module> modules;
-    final String provisionException;
+    final String configurationException;
 
-    public ProvisionExceptionTest(Builder builder) {
+    public ConfigurationExceptionTest(Builder builder) {
       super("test");
       name = builder.name;
       key = builder.key;
       injectsKey = builder.injectsKey;
       modules = ImmutableList.copyOf(builder.modules);
-      provisionException = builder.provisionException;
+      configurationException = builder.configurationException;
     }
 
     public String getName() {
@@ -497,43 +497,43 @@ public class BinderTestSuite {
       try {
         newInjector().getProvider(key);
         fail();
-      } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), provisionException);
+      } catch (ConfigurationException expected) {
+        assertContains(expected.getMessage(), configurationException);
       }
 
       try {
         newInjector().getBinding(key).getProvider();
         fail();
-      } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), provisionException);
+      } catch (ConfigurationException expected) {
+        assertContains(expected.getMessage(), configurationException);
       }
 
       try {
         newInjector().getInstance(key);
         fail();
-      } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), provisionException);
+      } catch (ConfigurationException expected) {
+        assertContains(expected.getMessage(), configurationException);
       }
 
       try {
         newInjector().getInstance(injectsKey);
         fail();
-      } catch (ProvisionException expected) {
+      } catch (ConfigurationException expected) {
         assertContains(expected.getMessage(),
-            provisionException, injectsKey.getName() + ".inject",
-            provisionException, injectsKey.getName() + ".inject",
-            "2 error[s]");
+            configurationException, injectsKey.getName() + ".inject",
+            configurationException, injectsKey.getName() + ".inject",
+            "2 errors");
       }
 
       try {
         Injectable injectable = injectsKey.newInstance();
         newInjector().injectMembers(injectable);
         fail();
-      } catch (ProvisionException expected) {
+      } catch (ConfigurationException expected) {
         assertContains(expected.getMessage(),
-            provisionException, injectsKey.getName() + ".inject",
-            provisionException, injectsKey.getName() + ".inject",
-            "2 error[s]");
+            configurationException, injectsKey.getName() + ".inject",
+            configurationException, injectsKey.getName() + ".inject",
+            "2 errors");
       }
     }
   }

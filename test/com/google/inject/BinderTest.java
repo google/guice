@@ -229,7 +229,7 @@ public class BinderTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) A binding to java.lang.String[] was already configured at " + getClass().getName(),
           "at " + getClass().getName(), ".configure(BinderTest.java:");
-      assertContains(expected.getMessage(), "1 error[s]");
+      assertContains(expected.getMessage(), "1 error");
     }
   }
 
@@ -289,7 +289,7 @@ public class BinderTest extends TestCase {
     try {
       injector.getInstance(MissingParameter.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) Could not find a suitable constructor in " + NoInjectConstructor.class.getName(),
           "at " + MissingParameter.class.getName() + ".<init>(BinderTest.java:");
@@ -413,7 +413,7 @@ public class BinderTest extends TestCase {
     try {
       Guice.createInjector().getInstance(Provider.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       Asserts.assertContains(expected.getMessage(),
           "1) Cannot inject a Provider that has no type parameter",
           "at " + Provider.class.getName());

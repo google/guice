@@ -16,47 +16,36 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import static com.google.common.base.Preconditions.checkArgument;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import java.util.Collection;
-import java.util.List;
 
 /**
- * Thrown when errors occur while creating a {@link Injector}. Includes a list
- * of encountered errors. Typically, a client should catch this exception, log
- * it, and stop execution.
+ * Thrown when errors occur while creating a {@link Injector}. Includes a list of encountered
+ * errors. Clients should catch this exception, log it, and stop execution.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public class CreationException extends RuntimeException {
 
-  private final List<Message> errorMessages;
+  private final ImmutableSet<Message> messages;
 
-  /**
-   * Constructs a new exception for the given errors.
-   */
-  public CreationException(Collection<? extends Message> errorMessages) {
-    this.errorMessages = ImmutableList.copyOf(errorMessages);
-
-    // find a cause
-    for (Message message : errorMessages) {
-      if (message.getCause() != null) {
-        initCause(message.getCause());
-        break;
-      }
-    }
+  /** Creates a CreationException containing {@code messages}. */
+  public CreationException(Iterable<Message> messages) {
+    this.messages = ImmutableSet.copyOf(messages);
+    checkArgument(!this.messages.isEmpty());
+    initCause(Errors.getOnlyCause(this.messages));
   }
 
-  /**
-   * Gets the error messages which resulted in this exception.
-   */
+  /** Returns messages for the errors that caused this exception. */
   public Collection<Message> getErrorMessages() {
-    return errorMessages;
+    return messages;
   }
 
   @Override public String getMessage() {
-    return Errors.format("Guice configuration errors", errorMessages);
+    return Errors.format("Guice creation errors", messages);
   }
 
   private static final long serialVersionUID = 0;

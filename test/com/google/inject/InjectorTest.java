@@ -332,7 +332,7 @@ public class InjectorTest extends TestCase {
     try {
       Guice.createInjector().getInstance(PineTree.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           Tree.class.getName() + " doesn't extend " + PineTree.class.getName(),
           "at ", PineTree.class.getName() + ".class(InjectorTest.java:");
@@ -343,7 +343,7 @@ public class InjectorTest extends TestCase {
     try {
       Guice.createInjector().getInstance(SeaHorse.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "@ImplementedBy points to the same class it annotates.",
           "at ", SeaHorse.class.getName() + ".class(InjectorTest.java:");
@@ -354,7 +354,7 @@ public class InjectorTest extends TestCase {
     try {
       Guice.createInjector().getInstance(Chicken.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "@ProvidedBy points to the same class it annotates",
           "at ", Chicken.class.getName() + ".class(InjectorTest.java:");

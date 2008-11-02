@@ -20,15 +20,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -246,18 +250,29 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorInjectingMethod(Throwable cause) {
-    return addMessage(cause, "Error injecting method, %s", cause);
+    return errorInUserCode("Error injecting method, %s", cause);
   }
 
   public Errors errorInjectingConstructor(Throwable cause) {
-    return addMessage(cause, "Error injecting constructor, %s", cause);
+    return errorInUserCode("Error injecting constructor, %s", cause);
   }
 
-  public Errors errorInProvider(RuntimeException runtimeException, Errors errorsFromException) {
-    if (errorsFromException != null) {
-      return merge(errorsFromException);
+  public Errors errorInProvider(RuntimeException runtimeException) {
+    return errorInUserCode("Error in custom provider, %s", runtimeException);
+  }
+
+  public Errors errorInUserCode(String message, Throwable cause) {
+    if (cause instanceof ProvisionException) {
+      return merge(((ProvisionException) cause).getErrorMessages());
+
+    } else if (cause instanceof ConfigurationException) {
+      return merge(((ConfigurationException) cause).getErrorMessages());
+
+    } else if (cause instanceof CreationException) {
+      return merge(((CreationException) cause).getErrorMessages());
+
     } else {
-      return addMessage(runtimeException, "Error in custom provider, %s", runtimeException);
+      return addMessage(cause, message, cause);
     }
   }
 
@@ -274,6 +289,22 @@ public final class Errors implements Serializable {
   public Errors makeImmutable() {
     errors = ImmutableList.copyOf(errors);
     return this;
+  }
+
+  public void throwConfigurationExceptionIfNecessary() {
+    if (!hasErrors()) {
+      return;
+    }
+
+    throw new ConfigurationException(getMessages());
+  }
+
+  public void throwProvisionExceptionIfErrorsExist() {
+    if (!hasErrors()) {
+      return;
+    }
+
+    throw new ProvisionException(getMessages());
   }
 
   public void throwCreationExceptionIfErrorsExist() {
@@ -356,9 +387,12 @@ public final class Errors implements Serializable {
     return result;
   }
 
-  public static String format(String heading, Collection<? extends Message> errorMessages) {
+  /** Returns the formatted message for an exception with the specified messages. */
+  public static String format(String heading, Collection<Message> errorMessages) {
     Formatter fmt = new Formatter().format(heading).format(":%n%n");
     int index = 1;
+    boolean displayCauses = getOnlyCause(errorMessages) == null;
+
     for (Message errorMessage : errorMessages) {
       fmt.format("%s) %s%n", index++, errorMessage.getMessage());
 
@@ -389,10 +423,23 @@ public final class Errors implements Serializable {
         fmt.format("  at %s%n", sourceToString(source));
       }
 
+      Throwable cause = errorMessage.getCause();
+      if (displayCauses && cause != null) {
+        StringWriter writer = new StringWriter();
+        cause.printStackTrace(new PrintWriter(writer));
+        fmt.format("Caused by: %s", writer.getBuffer());
+      }
+
       fmt.format("%n");
     }
 
-    return fmt.format("%s error[s]", errorMessages.size()).toString();
+    if (errorMessages.size() == 1) {
+      fmt.format("1 error");
+    } else {
+      fmt.format("%s errors", errorMessages.size());
+    }
+
+    return fmt.toString();
   }
 
   /**
@@ -415,6 +462,28 @@ public final class Errors implements Serializable {
         source, parameterName, dependency.getInjectionPoint().getMember());
 
     throw toException();
+  }
+
+  /**
+   * Returns the cause throwable if there is exactly one cause in {@code messages}. If there are
+   * zero or multiple messages with causes, null is returned.
+   */
+  public static Throwable getOnlyCause(Collection<Message> messages) {
+    Throwable onlyCause = null;
+    for (Message message : messages) {
+      Throwable messageCause = message.getCause();
+      if (messageCause == null) {
+        continue;
+      }
+
+      if (onlyCause != null) {
+        return null;
+      }
+
+      onlyCause = messageCause;
+    }
+
+    return onlyCause;
   }
 
   private static abstract class Converter<T> {

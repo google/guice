@@ -143,7 +143,7 @@ public class ScopesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(D.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           D.class.getName() + " is annotated with " + Singleton.class.getName(),
           "but scope annotations are not supported for abstract types.",
@@ -159,7 +159,7 @@ public class ScopesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(E.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           E.class.getName() + " is annotated with " + Singleton.class.getName(),
           "but scope annotations are not supported for abstract types.",
@@ -303,7 +303,7 @@ public class ScopesTest extends TestCase {
     try {
       injector.getInstance(SingletonAndCustomScoped.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) More than one scope annotation was found: ",
           "at " + SingletonAndCustomScoped.class.getName(), ".class(ScopesTest.java:");

@@ -16,11 +16,12 @@
 
 package com.google.inject.assistedinject;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -97,7 +98,7 @@ class Parameter {
     try {
       return injector.getBinding(key) != null
           || injector.getProvider(key) != null;
-    } catch (ProvisionException e) {
+    } catch (ConfigurationException e) {
       return false;
     }
   }
@@ -146,10 +147,8 @@ class Parameter {
     Annotation bindingAnnotation = null;
     for (Annotation a : annotations) {
       if (a.annotationType().getAnnotation(BindingAnnotation.class) != null) {
-        if (bindingAnnotation != null) {
-          throw new IllegalArgumentException(String.format("Parameter has " +
-              "multiple binding annotations: %s and %s", bindingAnnotation, a));
-        }
+        checkArgument(bindingAnnotation == null,
+            "Parameter has multiple binding annotations: %s and %s", bindingAnnotation, a);
         bindingAnnotation = a;
       }
     }

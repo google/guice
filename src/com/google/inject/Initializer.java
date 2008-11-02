@@ -22,8 +22,10 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.InjectorImpl.SingleMemberInjector;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -109,6 +111,7 @@ class Initializer {
   private class InjectableReference<T> implements Initializable<T> {
     private final T instance;
     private final Object source;
+    private List<SingleMemberInjector> injectors;
 
     public InjectableReference(T instance, Object source) {
       this.instance = checkNotNull(instance, "instance");
@@ -116,7 +119,7 @@ class Initializer {
     }
 
     public void validate(Errors errors) throws ErrorsException {
-      injector.injectors.get(instance.getClass(), errors.withSource(source));
+      injectors = injector.injectors.get(instance.getClass(), errors.withSource(source));
     }
 
     /**
@@ -141,7 +144,7 @@ class Initializer {
 
       // toInject needs injection, do it right away. we only do this once, even if it fails
       if (pendingInjection.remove(instance) != null) {
-        injector.injectMembersOrThrow(errors.withSource(source), instance);
+        injector.injectMembersOrThrow(errors.withSource(source), instance, injectors);
       }
 
       return instance;

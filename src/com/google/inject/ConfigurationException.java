@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,25 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import java.util.Collection;
 
 /**
- * Indicates that there was a runtime failure while providing an instance.
+ * Thrown when a programming error such as a misplaced annotation, illegal binding, or unsupported
+ * scope is found. Clients should catch this exception, log it, and stop execution.
  *
- * @author kevinb@google.com (Kevin Bourrillion)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class ProvisionException extends RuntimeException {
+public final class ConfigurationException extends RuntimeException {
 
   private final ImmutableSet<Message> messages;
 
   /** Creates a ConfigurationException containing {@code messages}. */
-  public ProvisionException(Iterable<Message> messages) {
+  public ConfigurationException(Iterable<Message> messages) {
     this.messages = ImmutableSet.copyOf(messages);
-    checkArgument(!this.messages.isEmpty());
     initCause(Errors.getOnlyCause(this.messages));
-  }
-
-  public ProvisionException(String message, Throwable cause) {
-    super(cause);
-    this.messages = ImmutableSet.of(new Message(ImmutableList.of(), message, cause));
-  }
-
-  public ProvisionException(String message) {
-    this.messages = ImmutableSet.of(new Message(message));
   }
 
   /** Returns messages for the errors that caused this exception. */
@@ -55,7 +43,7 @@ public final class ProvisionException extends RuntimeException {
   }
 
   @Override public String getMessage() {
-    return Errors.format("Guice provision errors", messages);
+    return Errors.format("Guice configuration errors", messages);
   }
 
   private static final long serialVersionUID = 0;

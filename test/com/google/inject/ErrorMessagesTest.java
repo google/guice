@@ -51,7 +51,7 @@ public class ErrorMessagesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(B.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           B.class.getName() + ".injectMe() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.",
@@ -61,7 +61,7 @@ public class ErrorMessagesTest extends TestCase {
     try {
       Guice.createInjector().getInstance(C.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           C.class.getName() + ".<init>() is annotated with @", Green.class.getName() + "(), ",
           "but binding annotations should be applied to its parameters instead.",

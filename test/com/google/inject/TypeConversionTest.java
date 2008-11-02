@@ -128,7 +128,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidInteger.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to java.lang.Integer");
@@ -149,7 +149,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidCharacter.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to java.lang.Character");
@@ -170,7 +170,7 @@ public class TypeConversionTest extends TestCase {
     try {
       injector.getInstance(InvalidEnum.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "Error converting 'invalid'");
       assertContains(expected.getMessage(), "bound at " + getClass().getName());
       assertContains(expected.getMessage(), "to " + Bar.class.getName());
