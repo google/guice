@@ -149,6 +149,23 @@ public class BinderTest extends TestCase {
     }
   }
 
+  public void testBindingNullConstant() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override public void configure() {
+          String none = null;
+          bindConstant().annotatedWith(Names.named("nullOne")).to(none);
+          bind(String.class).annotatedWith(Names.named("nullTwo")).toInstance(none);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Binding to null instances is not allowed. Use toProvider(Providers.of(null))",
+          "2) Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+    }
+  }
+
   public void testToStringOnBinderApi() {
     try {
       Guice.createInjector(new AbstractModule() {

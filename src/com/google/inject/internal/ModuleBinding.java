@@ -197,8 +197,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
 
       if (instance == null) {
-        binder.addError("Binding to null instances is not allowed. "
-            + "Use toProvider(Providers.of(null)) if this is your intended behaviour.");
+        binder.addError(BINDING_TO_NULL);
         // we finish the binding to prevent additional errors
         toProvider(Providers.<T>of(null));
         return;
@@ -421,14 +420,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       to(value.getDeclaringClass(), value);
     }
 
-    static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
-        + " than once.";
-    static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
-        + " is specified for this binding.";
-
     private void to(Class<?> type, Object instance) {
-      checkNotNull(instance, "instance");
-
       // this type will define T, so these assignments are safe
       @SuppressWarnings("unchecked")
       Class<T> typeAsClassT = (Class<T>) type;
@@ -450,6 +442,10 @@ public final class ModuleBinding<T> implements Binding<T> {
 
       ModuleBinding.this.target = new InstanceTarget<T>(instanceAsT,
           ImmutableSet.<InjectionPoint>of());
+
+      if (instanceAsT == null) {
+        binder.addError(BINDING_TO_NULL);
+      }
     }
 
     @Override public String toString() {
@@ -482,4 +478,11 @@ public final class ModuleBinding<T> implements Binding<T> {
       return visitor.visitInstance(instance, injectionPoints);
     }
   }
+
+  static final String BINDING_TO_NULL = "Binding to null instances is not allowed. "
+      + "Use toProvider(Providers.of(null)) if this is your intended behaviour.";
+  static final String CONSTANT_VALUE_ALREADY_SET = "Constant value is set more"
+      + " than once.";
+  static final String ANNOTATION_ALREADY_SPECIFIED = "More than one annotation"
+      + " is specified for this binding.";
 }
