@@ -120,6 +120,36 @@ public class RequestInjectionTest extends TestCase {
     }
   }
 
+  public void testUserExceptionWhileInjectingInstance() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          requestInjection(new BlowsUpOnInject());
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error injecting method, java.lang.UnsupportedOperationException: Pop\n",
+          "at " + BlowsUpOnInject.class.getName() + ".injectInstance(RequestInjectionTest.java:");
+    }
+  }
+
+  public void testUserExceptionWhileInjectingStatically() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          requestStaticInjection(BlowsUpOnInject.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error injecting method, java.lang.UnsupportedOperationException: Snap",
+          "at " + BlowsUpOnInject.class.getName() + ".injectStatically(RequestInjectionTest.java:");
+    }
+  }
+
   static class NeedsRunnable {
     @Inject Runnable runnable;
   }
@@ -138,6 +168,16 @@ public class RequestInjectionTest extends TestCase {
 
     @Inject void setInstanceS(@ForMethod String instanceS) {
       this.instanceMethod = instanceS;
+    }
+  }
+
+  static class BlowsUpOnInject {
+    @Inject void injectInstance() {
+      throw new UnsupportedOperationException("Pop");
+    }
+
+    @Inject static void injectStatically() {
+      throw new UnsupportedOperationException("Snap");
     }
   }
 }
