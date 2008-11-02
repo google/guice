@@ -306,7 +306,7 @@ public class ScopesTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) More than one scope annotation was found: ",
-          "at " + SingletonAndCustomScoped.class.getName(), ".class(ScopesTest.java:");
+          "at binding for " + SingletonAndCustomScoped.class.getName(), ".class(ScopesTest.java:");
     }
   }
 

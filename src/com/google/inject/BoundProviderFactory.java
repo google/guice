@@ -20,8 +20,6 @@ import com.google.inject.BindingProcessor.CreationListener;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.Message;
-import java.util.Collection;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
@@ -49,11 +47,12 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency)
       throws ErrorsException {
+    errors = errors.withSource(providerKey);
     Provider<? extends T> provider = providerFactory.get(errors, context, dependency);
     try {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch(RuntimeException userException) {
-      throw errors.withSource(source).errorInProvider(userException).toException();
+      throw errors.errorInProvider(userException).toException();
     }
   }
 

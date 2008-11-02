@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
-import com.google.inject.internal.Errors;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +34,7 @@ import net.sf.cglib.reflect.FastConstructor;
  */
 class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
-  public <T> ConstructionProxy<T> get(Errors errors, final InjectionPoint injectionPoint) {
+  public <T> ConstructionProxy<T> get(final InjectionPoint injectionPoint) {
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
@@ -43,14 +42,13 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
     if (!Modifier.isPublic(constructor.getModifiers())) {
       constructor.setAccessible(true);
       return new ConstructionProxy<T>() {
-        public T newInstance(Object... arguments) throws
-            InvocationTargetException {
+        public T newInstance(Object... arguments) throws InvocationTargetException {
           try {
             return constructor.newInstance(arguments);
           } catch (InstantiationException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError(e); // shouldn't happen, we know this is a concrete type
           } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw new AssertionError(e); // a security manager is blocking us, we're hosed
           }
         }
         public InjectionPoint getInjectionPoint() {

@@ -17,22 +17,34 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
+import java.lang.reflect.Constructor;
 
 /**
- * Abstraction for Java's reflection APIs. This interface exists to provide a
- * single place where runtime reflection can be substituted for another
- * mechanism such as CGLib or compile-time code generation.
+ * Abstraction for Java's reflection APIs. This interface exists to provide a single place where
+ * runtime reflection can be substituted for another mechanism such as CGLib or compile-time code
+ * generation.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-interface Reflection {
+class Reflection {
 
-  public <T> ConstructionProxy<T> getConstructionProxy(Errors errors, Class<T> implementation)
-      throws ErrorsException;
+  /**
+   * A placeholder. This enables us to continue processing and gather more
+   * errors but blows up if you actually try to use it.
+   */
+  static class InvalidConstructor {
+    InvalidConstructor() {
+      throw new AssertionError();
+    }
+  }
 
-  interface Factory {
-    Reflection create(ConstructionProxyFactory constructionProxyFactory);
+  @SuppressWarnings("unchecked")
+  static <T> Constructor<T> invalidConstructor() {
+    try {
+      return (Constructor<T>) InvalidConstructor.class.getDeclaredConstructor();
+    }
+    catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
   }
 }

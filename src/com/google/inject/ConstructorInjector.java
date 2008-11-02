@@ -16,48 +16,48 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.InjectorImpl.SingleMemberInjector;
-import com.google.inject.InjectorImpl.SingleParameterInjector;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 /**
- * Injects constructors.
+ * Creates instances using an injectable constructor. After construction, all injectable fields and
+ * methods are injected.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 class ConstructorInjector<T> {
 
   final Class<T> implementation;
-  final SingleMemberInjector[] memberInjectors;
-  final SingleParameterInjector<?>[] parameterInjectors;
+  final InjectionPoint injectionPoint;
+  final ImmutableList<SingleMemberInjector> memberInjectors;
+  final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
   ConstructorInjector(Errors errors, InjectorImpl injector, Class<T> implementation)
       throws ErrorsException {
     this.implementation = implementation;
-    constructionProxy = injector.reflection.getConstructionProxy(errors, implementation);
-    parameterInjectors = createParameterInjector(errors, injector, constructionProxy);
-    List<SingleMemberInjector> memberInjectorsList = injector.injectors.get(implementation, errors);
-    memberInjectors = memberInjectorsList.toArray(
-        new SingleMemberInjector[memberInjectorsList.size()]);
-  }
 
-  SingleParameterInjector<?>[] createParameterInjector(Errors errors,
-      InjectorImpl injector, ConstructionProxy<T> constructionProxy)
-      throws ErrorsException {
-    return injector.getParametersInjectors(constructionProxy.getInjectionPoint(), errors);
+    try {
+      this.injectionPoint = InjectionPoint.forConstructorOf(implementation);
+    } catch (ConfigurationException e) {
+      throw errors.merge(e.getErrorMessages()).toException();
+    }
+
+    constructionProxy = injector.constructionProxyFactory.get(injectionPoint);
+    parameterInjectors = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
+    memberInjectors = injector.injectors.get(implementation, errors);
   }
 
   ImmutableSet<InjectionPoint> getInjectionPoints() {
-    InjectionPoint[] injectionPoints = new InjectionPoint[memberInjectors.length + 1];
+    InjectionPoint[] injectionPoints = new InjectionPoint[memberInjectors.size() + 1];
     injectionPoints[0] = constructionProxy.getInjectionPoint();
-    for (int i = 0; i < memberInjectors.length; i++) {
-      injectionPoints[i+1] = memberInjectors[i].getInjectionPoint();
+    int i = 1;
+    for (SingleMemberInjector memberInjector : memberInjectors) {
+      injectionPoints[i++] = memberInjector.getInjectionPoint();
     }
     return ImmutableSet.of(injectionPoints);
   }
@@ -87,11 +87,10 @@ class ConstructorInjector<T> {
       // First time through...
       constructionContext.startConstruction();
       try {
-        Object[] parameters = InjectorImpl.getParameters(errors, context, parameterInjectors);
+        Object[] parameters = SingleParameterInjector.getAll(errors, context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
         constructionContext.setProxyDelegates(t);
-      }
-      finally {
+      } finally {
         constructionContext.finishConstruction();
       }
 
@@ -100,7 +99,7 @@ class ConstructorInjector<T> {
       constructionContext.setCurrentReference(t);
 
       // Inject fields and methods.
-      for (InjectorImpl.SingleMemberInjector injector : memberInjectors) {
+      for (SingleMemberInjector injector : memberInjectors) {
         injector.inject(errors, context, t);
       }
 

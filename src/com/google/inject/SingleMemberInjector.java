@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2008 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
 import com.google.inject.spi.InjectionPoint;
 
 /**
- * Creates {@link ConstructionProxy} instances.
- *
- * @author crazybob@google.com (Bob Lee)
+ * Injects a field or method of a given object.
  */
-interface ConstructionProxyFactory {
-
-  /**
-   * Gets a construction proxy for the given constructor.
-   *
-   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
-   */
-  <T> ConstructionProxy<T> get(InjectionPoint injectionPoint);
+public interface SingleMemberInjector {
+  void inject(Errors errors, InternalContext context, Object o);
+  InjectionPoint getInjectionPoint();
 }

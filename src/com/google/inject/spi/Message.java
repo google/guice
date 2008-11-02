@@ -59,7 +59,7 @@ public final class Message implements Serializable, Element {
   public String getSource() {
     return sources.isEmpty()
         ? SourceProvider.UNKNOWN_SOURCE.toString()
-        : Errors.sourceToString(sources.get(sources.size() - 1));
+        : Errors.convert(sources.get(sources.size() - 1)).toString();
   }
 
   public List<Object> getSources() {

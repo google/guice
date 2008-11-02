@@ -53,7 +53,6 @@ public class AllTests {
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(TypeConversionTest.class);
     // suite.addTestSuite(ErrorHandlingTest.class); not a testcase
-    suite.addTestSuite(ErrorMessagesTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(InjectionPointTest.class);

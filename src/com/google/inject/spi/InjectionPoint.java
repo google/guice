@@ -94,7 +94,7 @@ public final class InjectionPoint implements Serializable {
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
-    errors.throwConfigurationExceptionIfNecessary();
+    errors.throwConfigurationExceptionIfErrorsExist();
 
     this.dependencies = ImmutableList.<Dependency<?>>of(
         newDependency(key, Nullability.allowsNull(annotations), -1));
@@ -118,7 +118,7 @@ public final class InjectionPoint implements Serializable {
       }
     }
 
-    errors.throwConfigurationExceptionIfNecessary();
+    errors.throwConfigurationExceptionIfErrorsExist();
     return ImmutableList.copyOf(dependencies);
   }
 
@@ -185,7 +185,7 @@ public final class InjectionPoint implements Serializable {
   public static InjectionPoint forConstructorOf(Class<?> type) {
     Errors errors = new Errors(type);
 
-    Constructor<?> found = null;
+    Constructor<?> injectableConstructor = null;
     for (Constructor<?> constructor : type.getDeclaredConstructors()) {
       Inject inject = constructor.getAnnotation(Inject.class);
       if (inject != null) {
@@ -193,33 +193,34 @@ public final class InjectionPoint implements Serializable {
           errors.optionalConstructor(constructor);
         }
 
-        if (found != null) {
+        if (injectableConstructor != null) {
           errors.tooManyConstructors(type);
         }
 
-        found = constructor;
+        injectableConstructor = constructor;
+        checkForMisplacedBindingAnnotations(injectableConstructor, errors);
       }
     }
 
-    errors.throwConfigurationExceptionIfNecessary();
+    errors.throwConfigurationExceptionIfErrorsExist();
 
-    if (found != null) {
-      return new InjectionPoint(found);
+    if (injectableConstructor != null) {
+      return new InjectionPoint(injectableConstructor);
     }
 
-    // If no annotated constructor is found, look for a no-arg constructor
-    // instead.
+    // If no annotated constructor is found, look for a no-arg constructor instead.
     try {
-      Constructor<?> noArgCtor = type.getDeclaredConstructor();
+      Constructor<?> noArgConstructor = type.getDeclaredConstructor();
 
       // Disallow private constructors on non-private classes (unless they have @Inject)
-      if (Modifier.isPrivate(noArgCtor.getModifiers())
+      if (Modifier.isPrivate(noArgConstructor.getModifiers())
           && !Modifier.isPrivate(type.getModifiers())) {
         errors.missingConstructor(type);
         throw new ConfigurationException(errors.getMessages());
       }
 
-      return new InjectionPoint(noArgCtor);
+      checkForMisplacedBindingAnnotations(noArgConstructor, errors);
+      return new InjectionPoint(noArgConstructor);
     } catch (NoSuchMethodException e) {
       errors.missingConstructor(type);
       throw new ConfigurationException(errors.getMessages());
@@ -239,7 +240,7 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors();
     addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
     addInjectionPoints(type, Factory.METHODS, true, sink, errors);
-    errors.throwConfigurationExceptionIfNecessary();;
+    errors.throwConfigurationExceptionIfErrorsExist();
   }
 
   /**
@@ -257,7 +258,15 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors();
     addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
     addInjectionPoints(type, Factory.METHODS, false, sink, errors);
-    errors.throwConfigurationExceptionIfNecessary();
+    errors.throwConfigurationExceptionIfErrorsExist();
+  }
+
+  private static void checkForMisplacedBindingAnnotations(Member member, Errors errors) {
+    Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
+        errors, member, ((AnnotatedElement) member).getAnnotations());
+    if (misplacedBindingAnnotation != null) {
+      errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+    }
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectionPoints(Class<?> type,
@@ -288,7 +297,7 @@ public final class InjectionPoint implements Serializable {
       }
 
       try {
-        injectionPoints.add(factory.create(member));
+        injectionPoints.add(factory.create(member, errors));
       } catch (ConfigurationException ignorable) {
         if (!inject.optional()) {
           errors.merge(ignorable.getErrorMessages());
@@ -306,7 +315,7 @@ public final class InjectionPoint implements Serializable {
       public Field[] getMembers(Class<?> type) {
         return type.getDeclaredFields();
       }
-      public InjectionPoint create(Field member) {
+      public InjectionPoint create(Field member, Errors errors) {
         return new InjectionPoint(member);
       }
     };
@@ -315,13 +324,14 @@ public final class InjectionPoint implements Serializable {
       public Method[] getMembers(Class<?> type) {
         return type.getDeclaredMethods();
       }
-      public InjectionPoint create(Method member) {
+      public InjectionPoint create(Method member, Errors errors) {
+        checkForMisplacedBindingAnnotations(member, errors);
         return new InjectionPoint(member);
       }
     };
 
     M[] getMembers(Class<?> type);
-    InjectionPoint create(M member);
+    InjectionPoint create(M member, Errors errors);
   }
 
   private static final long serialVersionUID = 0;

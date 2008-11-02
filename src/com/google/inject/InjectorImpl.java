@@ -24,8 +24,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.inject.internal.Annotations;
-import com.google.inject.internal.BytecodeGen.Visibility;
-import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -42,15 +40,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastMethod;
 
 /**
  * Default {@link Injector} implementation.
@@ -63,7 +58,7 @@ class InjectorImpl implements Injector {
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Initializer initializer = new Initializer(this);
-  Reflection reflection;
+  ConstructionProxyFactory constructionProxyFactory;
 
   InjectorImpl(@Nullable InjectorImpl parent) {
     this.parent = parent;
@@ -97,10 +92,10 @@ class InjectorImpl implements Injector {
 
   /** Returns the binding for {@code key} */
   public <T> BindingImpl<T> getBinding(Key<T> key) {
-    Errors errors = new Errors(key.getRawType());
+    Errors errors = new Errors(key);
     try {
       BindingImpl<T> result = getBindingOrThrow(key, errors);
-      errors.throwConfigurationExceptionIfNecessary();
+      errors.throwConfigurationExceptionIfErrorsExist();
       return result;
     } catch (ErrorsException e) {
       throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
@@ -209,7 +204,6 @@ class InjectorImpl implements Injector {
   }
 
   static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>> {
-
     final BindingImpl<T> providedBinding;
 
     ProviderBindingImpl(
@@ -284,11 +278,9 @@ class InjectorImpl implements Injector {
       }
 
       return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
-    }
-    catch (ErrorsException e) {
+    } catch (ErrorsException e) {
       throw e;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw errors.conversionError(stringValue, source, type, matchingConverter, e)
           .toException();
     }
@@ -359,7 +351,7 @@ class InjectorImpl implements Injector {
       LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
     // Don't try to inject arrays, or enums.
     if (type.isArray() || type.isEnum()) {
-      throw errors.missingImplementation(type).toException();
+      throw errors.missingImplementation(key).toException();
     }
 
     // Handle @ImplementedBy
@@ -444,28 +436,28 @@ class InjectorImpl implements Injector {
       throw errors.recursiveProviderType().toException();
     }
 
-    // TODO: Make sure the provided type extends type. We at least check the type at runtime below.
-
     // Assume the provider provides an appropriate type. We double check at runtime.
     @SuppressWarnings("unchecked")
-    Key<? extends Provider<T>> providerKey = (Key<? extends Provider<T>>) Key.get(providerType);
+    final Key<? extends Provider<T>> providerKey
+        = (Key<? extends Provider<T>>) Key.get(providerType);
     final BindingImpl<? extends Provider<?>> providerBinding
         = getBindingOrThrow(providerKey, errors);
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, Dependency dependency)
           throws ErrorsException {
+        errors = errors.withSource(providerKey);
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, dependency);
         try {
           Object o = provider.get();
           if (o != null && !type.isInstance(o)) {
-            throw errors.withSource(type).subtypeNotProvided(providerType, type).toException();
+            throw errors.subtypeNotProvided(providerType, type).toException();
           }
           @SuppressWarnings("unchecked") // protected by isInstance() check above
           T t = (T) o;
           return t;
         } catch (RuntimeException e) {
-          throw errors.withSource(type).errorInProvider(e).toException();
+          throw errors.errorInProvider(e).toException();
         }
       }
     };
@@ -497,17 +489,17 @@ class InjectorImpl implements Injector {
       throw errors.notASubtype(implementationType, type).toException();
     }
 
-    // After the preceding check, this cast is safe.
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // After the preceding check, this cast is safe.
     Class<? extends T> subclass = (Class<? extends T>) implementationType;
 
     // Look up the target binding.
-    final BindingImpl<? extends T> targetBinding = getBindingOrThrow(Key.get(subclass), errors);
+    final Key<? extends T> targetKey = Key.get(subclass);
+    final BindingImpl<? extends T> targetBinding = getBindingOrThrow(targetKey, errors);
 
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, Dependency<?> dependency)
           throws ErrorsException {
-        return targetBinding.internalFactory.get(errors, context, dependency);
+        return targetBinding.internalFactory.get(errors.withSource(targetKey), context, dependency);
       }
     };
 
@@ -517,8 +509,7 @@ class InjectorImpl implements Injector {
         key,
         type,
         Scopes.<T>scope(key, this, internalFactory, scope),
-        scope,
-        Key.get(subclass),
+        scope, targetKey,
         loadStrategy);
   }
 
@@ -585,9 +576,9 @@ class InjectorImpl implements Injector {
   }
 
   /** Cached field and method injectors for a type. */
-  final FailableCache<Class<?>, List<SingleMemberInjector>> injectors
-      = new FailableCache<Class<?>, List<SingleMemberInjector>>() {
-    protected List<SingleMemberInjector> create(Class<?> type, Errors errors)
+  final FailableCache<Class<?>, ImmutableList<SingleMemberInjector>> injectors
+      = new FailableCache<Class<?>, ImmutableList<SingleMemberInjector>>() {
+    protected ImmutableList<SingleMemberInjector> create(Class<?> type, Errors errors)
         throws ErrorsException {
       List<InjectionPoint> injectionPoints = Lists.newArrayList();
       try {
@@ -609,10 +600,10 @@ class InjectorImpl implements Injector {
       try {
         Errors errorsForMember = injectionPoint.isOptional()
             ? new Errors(injectionPoint)
-            : errors;
+            : errors.withSource(injectionPoint);
         SingleMemberInjector injector = injectionPoint.getMember() instanceof Field
-            ? new SingleFieldInjector(errorsForMember, this, injectionPoint)
-            : new SingleMethodInjector(errorsForMember, this, injectionPoint);
+            ? new SingleFieldInjector(this, injectionPoint, errorsForMember)
+            : new SingleMethodInjector(this, injectionPoint, errorsForMember);
         injectors.add(injector);
       } catch (ErrorsException ignoredForNow) {
       }
@@ -644,150 +635,33 @@ class InjectorImpl implements Injector {
     }
   }
 
-  class SingleFieldInjector implements SingleMemberInjector {
-    final Field field;
-    final InternalFactory<?> factory;
-    final InjectionPoint injectionPoint;
-    final Dependency<?> dependency;
-
-    public SingleFieldInjector(Errors errors, InjectorImpl injector, InjectionPoint injectionPoint)
-        throws ErrorsException {
-      this.injectionPoint = injectionPoint;
-      this.field = (Field) injectionPoint.getMember();
-      this.dependency = injectionPoint.getDependencies().get(0);
-
-      // Ewwwww...
-      field.setAccessible(true);
-      factory = injector.getInternalFactory(dependency.getKey(), errors.withSource(dependency));
-    }
-
-    public InjectionPoint getInjectionPoint() {
-      return injectionPoint;
-    }
-
-    public void inject(Errors errors, InternalContext context, Object o) {
-      context.setDependency(dependency);
-      errors.pushSource(dependency);
-      try {
-        Object value = factory.get(errors, context, dependency);
-        field.set(o, value);
-      }
-      catch (IllegalAccessException e) {
-        throw new AssertionError(e);
-      }
-      catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
-      finally {
-        context.setDependency(null);
-        errors.popSource(dependency);
-      }
-    }
-  }
-
   /**
    * Returns parameter injectors, or {@code null} if there are no parameters.
    */
-  SingleParameterInjector<?>[] getParametersInjectors(InjectionPoint injectionPoint, Errors errors)
-      throws ErrorsException {
-    errors.pushSource(injectionPoint);
-    try {
-      Member member = injectionPoint.getMember();
-      Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
-          errors, member, ((AnnotatedElement) member).getAnnotations());
-      if (misplacedBindingAnnotation != null) {
-        errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
-      }
-    } finally {
-      errors.popSource(injectionPoint);
-    }
-
-    List<Dependency<?>> parameters = injectionPoint.getDependencies();
+  ImmutableList<SingleParameterInjector<?>> getParametersInjectors(
+      List<Dependency<?>> parameters, Errors errors) throws ErrorsException {
     if (parameters.isEmpty()) {
       return null;
     }
 
-    SingleParameterInjector<?>[] parameterInjectors
-        = new SingleParameterInjector<?>[parameters.size()];
-    int index = 0;
+    SingleParameterInjector<?>[] result = new SingleParameterInjector<?>[parameters.size()];
+    int i = 0;
     for (Dependency<?> parameter : parameters) {
-      errors.pushSource(parameter);
       try {
-        parameterInjectors[index] = createParameterInjector(parameter, errors);
+        result[i++] = createParameterInjector(parameter, errors.withSource(parameter));
       } catch (ErrorsException rethrownBelow) {
         // rethrown below
-      } finally {
-        errors.popSource(parameter);
       }
-      index++;
     }
 
     errors.throwIfNecessary();
-    return parameterInjectors;
+    return ImmutableList.of(result);
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(final Dependency<T> dependency,
       final Errors errors) throws ErrorsException {
-    InternalFactory<? extends T> factory
-        = getInternalFactory(dependency.getKey(), errors.withSource(dependency));
+    InternalFactory<? extends T> factory = getInternalFactory(dependency.getKey(), errors);
     return new SingleParameterInjector<T>(dependency, factory);
-  }
-
-  static class SingleMethodInjector implements SingleMemberInjector {
-    final MethodInvoker methodInvoker;
-    final SingleParameterInjector<?>[] parameterInjectors;
-    final InjectionPoint injectionPoint;
-
-    public SingleMethodInjector(Errors errors, InjectorImpl injector, InjectionPoint injectionPoint)
-        throws ErrorsException {
-      this.injectionPoint = injectionPoint;
-      final Method method = (Method) injectionPoint.getMember();
-
-      // We can't use FastMethod if the method is private.
-      if (Modifier.isPrivate(method.getModifiers())
-          || Modifier.isProtected(method.getModifiers())) {
-        method.setAccessible(true);
-        methodInvoker = new MethodInvoker() {
-          public Object invoke(Object target, Object... parameters)
-              throws IllegalAccessException, InvocationTargetException {
-            return method.invoke(target, parameters);
-          }
-        };
-      } else {
-        FastClass fastClass = newFastClass(method.getDeclaringClass(),
-            Visibility.forMember(method));
-        final FastMethod fastMethod = fastClass.getMethod(method);
-
-        methodInvoker = new MethodInvoker() {
-          public Object invoke(Object target, Object... parameters)
-              throws IllegalAccessException, InvocationTargetException {
-            return fastMethod.invoke(target, parameters);
-          }
-        };
-      }
-
-      parameterInjectors = injector.getParametersInjectors(injectionPoint, errors);
-    }
-
-    public void inject(Errors errors, InternalContext context, Object o) {
-      try {
-        Object[] parameters = getParameters(errors, context, parameterInjectors);
-        methodInvoker.invoke(o, parameters);
-      } catch (IllegalAccessException e) {
-        throw new AssertionError(e);
-      } catch (InvocationTargetException userException) {
-        Throwable cause = userException.getCause() != null
-            ? userException.getCause()
-            : userException;
-        errors.withSource(injectionPoint).errorInjectingMethod(cause);
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
-    }
-
-    public InjectionPoint getInjectionPoint() {
-      return injectionPoint;
-    }
   }
 
   /** Invokes a method. */
@@ -800,53 +674,10 @@ class InjectorImpl implements Injector {
   final FailableCache<Class<?>, ConstructorInjector<?>> constructors
       = new FailableCache<Class<?>, ConstructorInjector<?>>() {
     @SuppressWarnings("unchecked")
-    protected ConstructorInjector<?> create(Class<?> key, Errors errors) throws ErrorsException {
-      return new ConstructorInjector(errors, InjectorImpl.this, key);
+    protected ConstructorInjector<?> create(Class<?> type, Errors errors) throws ErrorsException {
+      return new ConstructorInjector(errors, InjectorImpl.this, type);
     }
   };
-
-  static class SingleParameterInjector<T> {
-    final Dependency<T> dependency;
-    final InternalFactory<? extends T> factory;
-
-    public SingleParameterInjector(Dependency<T> dependency,
-        InternalFactory<? extends T> factory) {
-      this.dependency = dependency;
-      this.factory = factory;
-    }
-
-    T inject(Errors errors, InternalContext context) throws ErrorsException {
-      context.setDependency(dependency);
-      errors.pushSource(dependency);
-      try {
-        return factory.get(errors, context, dependency);
-      }
-      finally {
-        errors.popSource(dependency);
-        context.setDependency(null);
-      }
-    }
-  }
-
-  /** Iterates over parameter injectors and creates an array of parameter values. */
-  static Object[] getParameters(Errors errors, InternalContext context,
-      SingleParameterInjector[] parameterInjectors) throws ErrorsException {
-    if (parameterInjectors == null) {
-      return null;
-    }
-
-    Object[] parameters = new Object[parameterInjectors.length];
-    for (int i = 0; i < parameters.length; i++) {
-      try {
-        parameters[i] = parameterInjectors[i].inject(errors, context);
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
-    }
-
-    errors.throwIfNecessary();
-    return parameters;
-  }
 
   void injectMembers(Errors errors, Object o, InternalContext context,
       List<SingleMemberInjector> injectors)
@@ -858,7 +689,7 @@ class InjectorImpl implements Injector {
 
   // Not test-covered
   public void injectMembers(final Object o) {
-    Errors errors = new Errors();
+    Errors errors = new Errors(o.getClass());
 
     // configuration/validation stuff throws ConfigurationException
     List<SingleMemberInjector> injectors;
@@ -899,21 +730,19 @@ class InjectorImpl implements Injector {
 
   <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors) throws ErrorsException {
     final InternalFactory<? extends T> factory = getInternalFactory(key, errors);
+    final Dependency<T> dependency = Dependency.get(key);
 
     return new Provider<T>() {
       public T get() {
-        final Errors errors = new Errors();
+        final Errors errors = new Errors(dependency);
         try {
           T t = callInContext(new ContextualCallable<T>() {
             public T call(InternalContext context) throws ErrorsException {
-              Dependency<T> dependency = Dependency.get(key);
               context.setDependency(dependency);
-              errors.pushSource(dependency);
               try {
                 return factory.get(errors, context, dependency);
               } finally {
                 context.setDependency(null);
-                errors.popSource(dependency);
               }
             }
           });
@@ -931,7 +760,7 @@ class InjectorImpl implements Injector {
   }
 
   public <T> Provider<T> getProvider(final Key<T> key) {
-    Errors errors = new Errors(key.getRawType());
+    Errors errors = new Errors(key);
     try {
       Provider<T> result = getProviderOrThrow(key, errors);
       errors.throwIfNecessary();
@@ -967,12 +796,6 @@ class InjectorImpl implements Injector {
       // Someone else will clean up this context.
       return callable.call(reference[0]);
     }
-  }
-
-  /** Injects a field or method in a given object. */
-  public interface SingleMemberInjector {
-    void inject(Errors errors, InternalContext context, Object o);
-    InjectionPoint getInjectionPoint();
   }
 
   public String toString() {

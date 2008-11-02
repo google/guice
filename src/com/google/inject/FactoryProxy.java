@@ -50,7 +50,7 @@ class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationLi
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency)
       throws ErrorsException {
-    return targetFactory.get(errors, context, dependency);
+    return targetFactory.get(errors.withSource(targetKey), context, dependency);
   }
 
   @Override public String toString() {

@@ -33,7 +33,7 @@ public abstract class FailableCache<K, V> {
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
-      return errors.hasErrors() ? errors.makeImmutable() : result;
+      return errors.hasErrors() ? errors : result;
     }
   };
 

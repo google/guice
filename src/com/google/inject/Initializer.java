@@ -22,7 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.InjectorImpl.SingleMemberInjector;
+import com.google.inject.SingleMemberInjector;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;

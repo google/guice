@@ -416,7 +416,7 @@ public class BinderTest extends TestCase {
     } catch (ConfigurationException expected) {
       Asserts.assertContains(expected.getMessage(),
           "1) Cannot inject a Provider that has no type parameter",
-          "at " + Provider.class.getName());
+          "at binding for " + Provider.class.getName());
     }
   }
 }

@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.inject.Reflection.Factory;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -48,7 +47,6 @@ class InjectorBuilder {
 
   private InjectorImpl parent = null;
   private Stage stage;
-  private Factory reflectionFactory = new RuntimeReflectionFactory();
   private final List<Module> modules = Lists.newLinkedList();
 
   private InjectorImpl injector;
@@ -65,11 +63,6 @@ class InjectorBuilder {
    */
   InjectorBuilder stage(Stage stage) {
     this.stage = stage;
-    return this;
-  }
-
-  InjectorBuilder usingReflectionFactory(Factory reflectionFactory) {
-    this.reflectionFactory = reflectionFactory;
     return this;
   }
 
@@ -128,8 +121,7 @@ class InjectorBuilder {
     InterceptorBindingProcessor interceptorCommandProcessor
         = new InterceptorBindingProcessor(errors, injector.state);
     interceptorCommandProcessor.processCommands(elements);
-    ConstructionProxyFactory proxyFactory = interceptorCommandProcessor.createProxyFactory();
-    injector.reflection = reflectionFactory.create(proxyFactory);
+    injector.constructionProxyFactory = interceptorCommandProcessor.createProxyFactory();
     stopwatch.resetAndLog("Interceptors creation");
 
     new ScopeBindingProcessor(errors, injector.state).processCommands(elements);
@@ -197,17 +189,16 @@ class InjectorBuilder {
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         try {
           injector.callInContext(new ContextualCallable<Void>() {
+            Dependency<?> dependency = Dependency.get(binding.key);
             public Void call(InternalContext context) {
-              Dependency<?> dependency = Dependency.get(binding.key);
               context.setDependency(dependency);
-              errors.pushSource(dependency);
+              Errors errorsForBinding = errors.withSource(dependency);
               try {
-                binding.internalFactory.get(errors, context, dependency);
+                binding.internalFactory.get(errorsForBinding, context, dependency);
               } catch (ErrorsException e) {
-                errors.merge(e.getErrors());
+                errorsForBinding.merge(e.getErrors());
               } finally {
                 context.setDependency(null);
-                errors.popSource(dependency);
               }
 
               return null;

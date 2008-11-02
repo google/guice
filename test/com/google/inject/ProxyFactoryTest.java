@@ -18,7 +18,6 @@
 package com.google.inject;
 
 import com.google.common.collect.Lists;
-import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
@@ -47,8 +46,8 @@ public class ProxyFactoryTest extends TestCase {
     aspects.add(new MethodAspect(any(), any(), interceptor));
     ProxyFactory factory = new ProxyFactory(aspects);
 
-    ConstructionProxy<Simple> constructionProxy = factory
-        .createConstructionProxy(new Errors(), InjectionPoint.forConstructorOf(Simple.class));
+    ConstructionProxy<Simple> constructionProxy
+        = factory.createConstructionProxy(InjectionPoint.forConstructorOf(Simple.class));
 
     Simple simple = constructionProxy.newInstance();
     simple.invoke();
@@ -81,9 +80,9 @@ public class ProxyFactoryTest extends TestCase {
     ProxyFactory factory = new ProxyFactory(aspects);
 
     ConstructionProxy<Foo> fooFactory =
-        factory.get(new Errors(), InjectionPoint.forConstructorOf(Foo.class));
+        factory.get(InjectionPoint.forConstructorOf(Foo.class));
     ConstructionProxy<Bar> barFactory =
-        factory.get(new Errors(), InjectionPoint.forConstructorOf(Bar.class));
+        factory.get(InjectionPoint.forConstructorOf(Bar.class));
 
     Foo foo = fooFactory.newInstance();
     Bar bar = barFactory.newInstance();
@@ -135,7 +134,7 @@ public class ProxyFactoryTest extends TestCase {
     ProxyFactory factory = new ProxyFactory(aspects);
 
     ConstructionProxy<A> constructor =
-        factory.get(new Errors(), InjectionPoint.forConstructorOf(A.class));
+        factory.get(InjectionPoint.forConstructorOf(A.class));
 
     A a = constructor.newInstance(5);
     a.a();
@@ -150,7 +149,7 @@ public class ProxyFactoryTest extends TestCase {
     ProxyFactory factory = new ProxyFactory(aspects);
 
     ConstructionProxy<A> constructor =
-        factory.get(new Errors(), InjectionPoint.forConstructorOf(A.class));
+        factory.get(InjectionPoint.forConstructorOf(A.class));
 
     A a = constructor.newInstance(5);
     assertEquals(A.class, a.getClass());
@@ -173,7 +172,7 @@ public class ProxyFactoryTest extends TestCase {
     ProxyFactory factory = new ProxyFactory(aspects);
 
     ConstructionProxy<Counter> constructor =
-        factory.get(new Errors(), InjectionPoint.forConstructorOf(Counter.class));
+        factory.get(InjectionPoint.forConstructorOf(Counter.class));
 
     Counter counter = constructor.newInstance();
     counter.inc();

@@ -162,10 +162,9 @@ class BindingProcessor extends AbstractProcessor {
 
         FactoryProxy<T> factory = new FactoryProxy<T>(key, targetKey, source);
         creationListeners.add(factory);
-        InternalFactory<? extends T> scopedFactory
-            = Scopes.scope(key, injector, factory, scope);
+        InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new LinkedBindingImpl<T>(
-                injector, key, source, scopedFactory, scope, targetKey, loadStrategy));
+            injector, key, source, scopedFactory, scope, targetKey, loadStrategy));
         return null;
       }
 

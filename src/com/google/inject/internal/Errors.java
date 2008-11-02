@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
@@ -37,17 +35,25 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
  * considered to have executed succesfully only if new errors were not added to this collection.
+ *
+ * <p>Errors can be chained to provide additional context. To add context, call {@link #withSource}
+ * to create a new Errors instance that contains additional context. All messages added to the
+ * returned instance will contain full context.
+ *
+ * <p>To avoid messages with redundant context, {@link #withSource} should be added sparingly. A
+ * good rule of thumb is to assume a ethod's caller has already specified enough context to
+ * identify that method. When calling a method that's defined in a different context, call that
+ * method with an errors object that includes its context.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -57,23 +63,26 @@ public final class Errors implements Serializable {
   private static final boolean allowNullsBadBadBad
       = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
 
-  private List<Message> errors;
-  private final List<Object> sources;
+  private final List<Message> errors;
+  private final Errors parent;
+  private final Object source;
 
   public Errors() {
-    sources = Lists.newArrayList();
-    errors = Lists.newArrayList();
+    this.errors = Lists.newArrayList();
+    this.parent = null;
+    this.source = SourceProvider.UNKNOWN_SOURCE;
   }
 
   public Errors(Object source) {
-    sources = Lists.newArrayList(source);
-    errors = Lists.newArrayList();
+    this.errors = Lists.newArrayList();
+    this.parent = null;
+    this.source = source;
   }
 
   private Errors(Errors parent, Object source) {
-    errors = parent.errors;
-    sources = Lists.newArrayList(parent.sources);
-    sources.add(source);
+    this.errors = parent.errors;
+    this.parent = parent;
+    this.source = source;
   }
 
   /**
@@ -83,15 +92,6 @@ public final class Errors implements Serializable {
     return source == SourceProvider.UNKNOWN_SOURCE
         ? this
         : new Errors(this, source);
-  }
-
-  public void pushSource(Object source) {
-    sources.add(source);
-  }
-
-  public void popSource(Object source) {
-    Object popped = sources.remove(sources.size() - 1);
-    checkArgument(source == popped);
   }
 
   /**
@@ -107,15 +107,15 @@ public final class Errors implements Serializable {
    * Otherwise we need to know who's calling when resolving a just-in-time
    * binding, which makes things unnecessarily complex.
    */
-  public Errors missingImplementation(Object keyOrType) {
-    return addMessage("No implementation for %s was bound.", keyOrType);
+  public Errors missingImplementation(Key key) {
+    return addMessage("No implementation for %s was bound.", key);
   }
 
   public Errors converterReturnedNull(String stringValue, Object source,
       TypeLiteral<?> type, MatcherAndConverter matchingConverter) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
         + " using %s.",
-        stringValue, sourceToString(source), type, matchingConverter);
+        stringValue, convert(source), type, matchingConverter);
   }
 
   public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
@@ -123,7 +123,7 @@ public final class Errors implements Serializable {
     return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Converter returned %s.",
-        stringValue, sourceToString(source), type, matchingConverter, converted);
+        stringValue, convert(source), type, matchingConverter, converted);
   }
 
   public Errors conversionError(String stringValue, Object source,
@@ -131,7 +131,7 @@ public final class Errors implements Serializable {
     return addMessage(cause, "Error converting '%s' (bound at %s) to %s%n" 
         + " using %s.%n"
         + " Reason: %s",
-        stringValue, sourceToString(source), type, matchingConverter, cause);
+        stringValue, convert(source), type, matchingConverter, cause);
   }
 
   public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
@@ -140,7 +140,7 @@ public final class Errors implements Serializable {
         + " %s and%n"
         + " %s.%n"
         + " Please adjust your type converter configuration to avoid overlapping matches.",
-        stringValue, sourceToString(source), type, a, b);
+        stringValue, convert(source), type, a, b);
   }
 
   public Errors bindingToProvider() {
@@ -166,7 +166,7 @@ public final class Errors implements Serializable {
 
   public Errors missingRuntimeRetention(Object source) {
     return addMessage("Please annotate with @Retention(RUNTIME).%n"
-        + " Bound at %s.", sourceToString(source));
+        + " Bound at %s.", convert(source));
   }
 
   public Errors missingScopeAnnotation() {
@@ -189,7 +189,7 @@ public final class Errors implements Serializable {
   public Errors scopeAnnotationOnAbstractType(
       Class<? extends Annotation> scopeAnnotation, Class<?> type, Object source) {
     return addMessage("%s is annotated with %s, but scope annotations are not supported "
-        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, sourceToString(source));
+        + "for abstract types.%n Bound at %s.", type, scopeAnnotation, convert(source));
   }
 
   public Errors misplacedBindingAnnotation(Member member, Annotation bindingAnnotation) {
@@ -242,7 +242,7 @@ public final class Errors implements Serializable {
   }
 
   public Errors bindingAlreadySet(Key<?> key, Object source) {
-    return addMessage("A binding to %s was already configured at %s.", key, sourceToString(source));
+    return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
 
   public Errors childBindingAlreadySet(Key<?> key) {
@@ -286,12 +286,15 @@ public final class Errors implements Serializable {
         expectedType);
   }
 
-  public Errors makeImmutable() {
-    errors = ImmutableList.copyOf(errors);
-    return this;
+  public void throwCreationExceptionIfErrorsExist() {
+    if (!hasErrors()) {
+      return;
+    }
+
+    throw new CreationException(getMessages());
   }
 
-  public void throwConfigurationExceptionIfNecessary() {
+  public void throwConfigurationExceptionIfErrorsExist() {
     if (!hasErrors()) {
       return;
     }
@@ -307,34 +310,35 @@ public final class Errors implements Serializable {
     throw new ProvisionException(getMessages());
   }
 
-  public void throwCreationExceptionIfErrorsExist() {
-    if (!hasErrors()) {
-      return;
-    }
-
-    makeImmutable();
-    throw new CreationException(getMessages());
-  }
-
   private Message merge(Message message) {
     List<Object> sources = Lists.newArrayList();
-    sources.addAll(this.sources);
+    sources.addAll(getSources());
     sources.addAll(message.getSources());
-    return new Message(stripDuplicates(sources), message.getMessage(), message.getCause());
+    return new Message(sources, message.getMessage(), message.getCause());
   }
 
   public Errors merge(Collection<Message> messages) {
-    if (messages != this.errors) {
-      for (Message message : messages) {
-        errors.add(merge(message));
-      }
+    for (Message message : messages) {
+      errors.add(merge(message));
     }
     return this;
   }
 
   public Errors merge(Errors moreErrors) {
+    if (moreErrors.errors == errors) {
+      return this;
+    }
+
     merge(moreErrors.errors);
     return this;
+  }
+
+  public List<Object> getSources() {
+    List<Object> sources = Lists.newArrayList();
+    for (Errors e = this; e != null; e = e.parent) {
+      sources.add(0, e.source);
+    }
+    return sources;
   }
 
   public void throwIfNecessary() throws ErrorsException {
@@ -359,7 +363,7 @@ public final class Errors implements Serializable {
 
   private Errors addMessage(Throwable cause, String messageFormat, Object... arguments) {
     String message = format(messageFormat, arguments);
-    addMessage(new Message(stripDuplicates(sources), message, cause));
+    addMessage(new Message(getSources(), message, cause));
     return this;
   }
 
@@ -399,28 +403,7 @@ public final class Errors implements Serializable {
       List<Object> dependencies = errorMessage.getSources();
       for (int i = dependencies.size() - 1; i >= 0; i--) {
         Object source = dependencies.get(i);
-
-        if (source instanceof Dependency) {
-          Dependency<?> dependency = (Dependency<?>) source;
-
-          InjectionPoint injectionPoint = dependency.getInjectionPoint();
-          if (injectionPoint != null) {
-            Member member = injectionPoint.getMember();
-            Class<? extends Member> memberType = MoreTypes.memberType(member);
-            if (memberType == Field.class) {
-              fmt.format("  for field at %s%n", StackTraceElements.forMember(member));
-            } else if (memberType == Method.class || memberType == Constructor.class) {
-              fmt.format("  for parameter %s at %s%n",
-                  dependency.getParameterIndex(), StackTraceElements.forMember(member));
-            } else {
-              throw new AssertionError();
-            }
-          } else {
-            fmt.format("  while locating %s%n", convert(dependency.getKey()));
-          }
-        }
-
-        fmt.format("  at %s%n", sourceToString(source));
+        formatSource(fmt, source);
       }
 
       Throwable cause = errorMessage.getCause();
@@ -506,11 +489,6 @@ public final class Errors implements Serializable {
   }
 
   private static final Collection<Converter<?>> converters = ImmutableList.of(
-      new Converter<MatcherAndConverter>(MatcherAndConverter.class) {
-        public String toString(MatcherAndConverter m) {
-          return m.toString();
-        }
-      },
       new Converter<Class>(Class.class) {
         public String toString(Class c) {
           return c.getName();
@@ -522,14 +500,13 @@ public final class Errors implements Serializable {
         }
       },
       new Converter<Key>(Key.class) {
-        public String toString(Key k) {
-          StringBuilder result = new StringBuilder();
-          result.append(k.getTypeLiteral());
-          if (k.getAnnotationType() != null) {
-            result.append(" annotated with ");
-            result.append(k.getAnnotation() != null ? k.getAnnotation() : k.getAnnotationType());
+        public String toString(Key key) {
+          if (key.getAnnotationType() != null) {
+            return key.getTypeLiteral() + " annotated with "
+                + (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType());
+          } else {
+            return key.getTypeLiteral().toString();
           }
-          return result.toString();
         }
       });
 
@@ -542,40 +519,58 @@ public final class Errors implements Serializable {
     return o;
   }
 
-  /**
-   * This method returns a String that indicates an element source. We do a
-   * best effort to include a line number in this String.
-   */
-  public static String sourceToString(Object source) {
-    checkNotNull(source, "source");
+  public static void formatSource(Formatter formatter, Object source) {
+    if (source instanceof Dependency) {
+      Dependency<?> dependency = (Dependency<?>) source;
+      InjectionPoint injectionPoint = dependency.getInjectionPoint();
+      if (injectionPoint != null) {
+        formatInjectionPoint(formatter, dependency, injectionPoint);
+      } else {
+        formatSource(formatter, dependency.getKey());
+      }
 
-    if (source instanceof InjectionPoint) {
-      return sourceToString(((InjectionPoint) source).getMember());
-    } else if (source instanceof Member) {
-      return StackTraceElements.forMember((Member) source).toString();
+    } else if (source instanceof InjectionPoint) {
+      formatInjectionPoint(formatter, null, (InjectionPoint) source);
+
     } else if (source instanceof Class) {
-      return StackTraceElements.forType(((Class<?>) source)).toString();
+      formatter.format("  at %s%n", StackTraceElements.forType((Class<?>) source));
+
+    } else if (source instanceof Member) {
+      formatter.format("  at %s%n", StackTraceElements.forMember((Member) source));
+
+    } else if (source instanceof Key) {
+      Key<?> key = (Key<?>) source;
+      Type type = key.getTypeLiteral().getType();
+      if (key.getAnnotationType() != null) {
+        formatter.format("  at binding for %s annotated with %s%n", MoreTypes.toString(type),
+            (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType()));
+
+      } else if (type instanceof Class) {
+        formatter.format("  at binding for %s%n", StackTraceElements.forType((Class<?>) type));
+
+      } else {
+          formatter.format("  at binding for %s%n", type);
+
+      }
     } else {
-      return convert(source).toString();
+      formatter.format("  at %s%n", source);
     }
   }
-  
-  /**
-   * Removes consecutive duplicates, so that [A B B C D A] becomes [A B C D A].
-   */
-  private <T> List<T> stripDuplicates(List<T> list) {
-    list = Lists.newArrayList(list);
 
-    Iterator i = list.iterator();
-    if (i.hasNext()) {
-      for (Object last = i.next(), current; i.hasNext(); last = current) {
-        current = i.next();
-        if (last.equals(current)) {
-          i.remove();
-        }
-      }
+  public static void formatInjectionPoint(Formatter formatter, Dependency<?> dependency,
+      InjectionPoint injectionPoint) {
+    Member member = injectionPoint.getMember();
+    Class<? extends Member> memberType = MoreTypes.memberType(member);
+
+    if (memberType == Field.class) {
+      formatter.format("  for field at %s%n", StackTraceElements.forMember(member));
+
+    } else if (dependency != null) {
+      formatter.format("  for parameter %s at %s%n",
+          dependency.getParameterIndex(), StackTraceElements.forMember(member));
+
+    } else {
+      formatSource(formatter, injectionPoint.getMember());
     }
-
-    return ImmutableList.copyOf(list);
   }
 }

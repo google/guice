@@ -21,9 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.FailableCache;
+import com.google.inject.internal.ReferenceCache;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -55,21 +53,19 @@ class ProxyFactory implements ConstructionProxyFactory {
   }
 
   @SuppressWarnings("unchecked") // the constructed T is the same as the injection point's T
-  public <T> ConstructionProxy<T> get(Errors errors, InjectionPoint injectionPoint)
-      throws ErrorsException {
-    return (ConstructionProxy<T>) constructionProxies.get(injectionPoint, errors);
+  public <T> ConstructionProxy<T> get(InjectionPoint injectionPoint) {
+    return (ConstructionProxy<T>) constructionProxies.get(injectionPoint);
   }
 
   /** Cached construction proxies for each injection point */
-  FailableCache<InjectionPoint, ConstructionProxy> constructionProxies
-      = new FailableCache<InjectionPoint, ConstructionProxy>() {
-    protected ConstructionProxy create(InjectionPoint key, Errors errors) throws ErrorsException {
-      return createConstructionProxy(errors, key);
+  ReferenceCache<InjectionPoint, ConstructionProxy> constructionProxies
+      = new ReferenceCache<InjectionPoint, ConstructionProxy>() {
+    protected ConstructionProxy create(InjectionPoint key) {
+      return createConstructionProxy(key);
     }
   };
 
-  <T> ConstructionProxy<T> createConstructionProxy(Errors errors, InjectionPoint injectionPoint)
-      throws ErrorsException {
+  <T> ConstructionProxy<T> createConstructionProxy(InjectionPoint injectionPoint) {
     @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
     Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
     Class<T> declaringClass = constructor.getDeclaringClass();
@@ -82,7 +78,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       }
     }
     if (applicableAspects.isEmpty()) {
-      return defaultFactory.get(errors, injectionPoint);
+      return defaultFactory.get(injectionPoint);
     }
 
     // Get list of methods from cglib.
@@ -115,21 +111,20 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
     if (!anyMatched) {
       // not test-covered
-      return defaultFactory.get(errors, injectionPoint);
+      return defaultFactory.get(injectionPoint);
     }
 
     // Create callbacks.
     Callback[] callbacks = new Callback[methods.size()];
 
-    @SuppressWarnings("unchecked") Class<? extends Callback>[] callbackTypes = new Class[methods
-        .size()];
+    @SuppressWarnings("unchecked")
+    Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
     for (int i = 0; i < methods.size(); i++) {
       MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
       if (!pair.hasInterceptors()) {
         callbacks[i] = NoOp.INSTANCE;
         callbackTypes[i] = NoOp.class;
-      }
-      else {
+      } else {
         callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
         callbackTypes[i] = net.sf.cglib.proxy.MethodInterceptor.class;
       }
@@ -156,7 +151,7 @@ class ProxyFactory implements ConstructionProxyFactory {
    * Creates a construction proxy given a class and parameter types.
    */
   private <T> ConstructionProxy<T> createConstructionProxy(final Class<?> clazz,
-      final InjectionPoint injectionPoint) throws ErrorsException {
+      final InjectionPoint injectionPoint) {
     @SuppressWarnings("unchecked") // injection point's member must be a Constructor<T>
     final Constructor<T> standardConstructor = (Constructor<T>) injectionPoint.getMember();
     FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);

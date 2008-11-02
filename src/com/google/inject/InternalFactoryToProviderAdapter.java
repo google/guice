@@ -21,8 +21,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.Message;
-import java.util.Collection;
 
 /**
  * @author crazybob@google.com (Bob Lee)
