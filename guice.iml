@@ -79,6 +79,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" exported="" name="collect" level="project" />
+    <orderEntry type="module" module-name="multibindings" />
     <orderEntryProperties />
   </component>
 </module>
