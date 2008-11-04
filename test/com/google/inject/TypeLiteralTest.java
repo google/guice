@@ -87,6 +87,12 @@ public class TypeLiteralTest extends TestCase {
     assertEquals(arrayAsClass, arrayAsType);
   }
 
+  public void testEqualityOfMultidimensionalGenericArrayAndClassArray() {
+    TypeLiteral<String[][][]> arrayAsClass = TypeLiteral.get(String[][][].class);
+    TypeLiteral<String[][][]> arrayAsType = new TypeLiteral<String[][][]>() {};
+    assertEquals(arrayAsClass, arrayAsType);
+  }
+
   public void testTypeLiteralsMustHaveRawTypes() {
     try {
       TypeLiteral.get(Types.subtypeOf(Runnable.class));

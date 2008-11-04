@@ -175,19 +175,16 @@ class BindingProcessor extends AbstractProcessor {
         // Example: bind(Date.class).annotatedWith(Red.class);
         // We can't assume abstract types aren't injectable. They may have an
         // @ImplementedBy annotation or something.
-        if (key.hasAnnotationType() || !(type instanceof Class<?>)) {
+        if (key.hasAnnotationType()) {
           errors.missingImplementation(key);
           putBinding(invalidBinding(injector, key, source));
           return null;
         }
 
         // This cast is safe after the preceeding check.
-        @SuppressWarnings("unchecked")
-        Class<T> clazz = (Class<T>) type;
         final BindingImpl<T> binding;
         try {
-          binding = injector.createUnitializedBinding(
-              key, clazz, scope, source, loadStrategy, errors);
+          binding = injector.createUnitializedBinding(key, scope, source, loadStrategy, errors);
           putBinding(binding);
         } catch (ErrorsException e) {
           errors.merge(e.getErrors());

@@ -43,7 +43,7 @@ class ClassBindingImpl<T> extends BindingImpl<T> {
   }
 
   @Override void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-    lateBoundConstructor.bind(injector, getBoundClass(), errors);
+    lateBoundConstructor.bind(injector, getKey().getTypeLiteral(), errors);
     injectionPoints = lateBoundConstructor.constructorInjector.getInjectionPoints();
   }
 
@@ -52,15 +52,9 @@ class ClassBindingImpl<T> extends BindingImpl<T> {
     return visitor.visitConstructor(lateBoundConstructor.getConstructor(), injectionPoints);
   }
 
-  @SuppressWarnings("unchecked")
-  public Class<T> getBoundClass() {
-    // T should always be the class itself.
-    return (Class<T>) key.getRawType();
-  }
-
   @Override public String toString() {
     return new ToStringBuilder(Binding.class)
-        .add("class", getBoundClass())
+        .add("type", getKey().getTypeLiteral())
         .add("scope", scope)
         .add("source", source)
         .toString();

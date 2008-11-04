@@ -22,10 +22,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.SingleMemberInjector;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -119,7 +118,8 @@ class Initializer {
     }
 
     public void validate(Errors errors) throws ErrorsException {
-      injectors = injector.injectors.get(instance.getClass(), errors.withSource(source));
+      injectors = injector.injectors.get(
+          TypeLiteral.get(instance.getClass()), errors.withSource(source));
     }
 
     /**

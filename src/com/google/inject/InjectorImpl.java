@@ -29,6 +29,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.MatcherAndConverter;
+import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -340,72 +341,68 @@ class InjectorImpl implements Injector {
   /**
    * Creates a binding for an injectable type with the given scope. Looks for a scope on the type if
    * none is specified.
-   *
-   * TODO(jessewilson): Fix raw types! this method makes a binding for {@code Foo} from a request
-   *     for {@code Foo<String>}
-   *
-   * @param type the raw type for {@code key}
    */
-  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Class<T> type, Scope scope, Object source,
+  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope, Object source,
       LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+    Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
+
     // Don't try to inject arrays, or enums.
-    if (type.isArray() || type.isEnum()) {
+    if (rawType.isArray() || rawType.isEnum()) {
       throw errors.missingImplementation(key).toException();
     }
 
     // Handle @ImplementedBy
-    ImplementedBy implementedBy = type.getAnnotation(ImplementedBy.class);
+    ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
-      Annotations.checkForMisplacedScopeAnnotations(type, source, errors);
-      return createImplementedByBinding(type, scope, implementedBy, loadStrategy, errors);
+      Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
+      return createImplementedByBinding(key, scope, implementedBy, loadStrategy, errors);
     }
 
     // Handle @ProvidedBy.
-    ProvidedBy providedBy = type.getAnnotation(ProvidedBy.class);
+    ProvidedBy providedBy = rawType.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
-      Annotations.checkForMisplacedScopeAnnotations(type, source, errors);
-      return createProvidedByBinding(type, scope, providedBy, loadStrategy, errors);
+      Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
+      return createProvidedByBinding(key, scope, providedBy, loadStrategy, errors);
     }
 
     // We can't inject abstract classes.
     // TODO: Method interceptors could actually enable us to implement
     // abstract types. Should we remove this restriction?
-    if (Modifier.isAbstract(type.getModifiers())) {
+    if (Modifier.isAbstract(rawType.getModifiers())) {
       throw errors.missingImplementation(key).toException();
     }
 
     // Error: Inner class.
-    if (Classes.isInnerClass(type)) {
-      throw errors.cannotInjectInnerClass(type).toException();
+    if (Classes.isInnerClass(rawType)) {
+      throw errors.cannotInjectInnerClass(rawType).toException();
     }
 
     if (scope == null) {
-      Class<? extends Annotation> scopeAnnotation = Annotations.findScopeAnnotation(errors, type);
+      Class<? extends Annotation> scopeAnnotation
+          = Annotations.findScopeAnnotation(errors, rawType);
       if (scopeAnnotation != null) {
         scope = state.getScope(scopeAnnotation);
         if (scope == null) {
-          errors.withSource(type).scopeNotFound(scopeAnnotation);
+          errors.withSource(rawType).scopeNotFound(scopeAnnotation);
         }
       }
     }
 
-    Key<T> keyForRawType = Key.get(type);
-
     LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
     InternalFactory<? extends T> scopedFactory
-        = Scopes.scope(keyForRawType, this, lateBoundConstructor, scope);
+        = Scopes.scope(key, this, lateBoundConstructor, scope);
     return new ClassBindingImpl<T>(
-        this, keyForRawType, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
+        this, key, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {
     ConstructorInjector<T> constructorInjector;
 
     @SuppressWarnings("unchecked") // the constructor T is the same as the implementation T
-    void bind(InjectorImpl injector, Class<T> implementation, Errors errors)
+    void bind(InjectorImpl injector, TypeLiteral<T> implementation, Errors errors)
         throws ErrorsException {
-      constructorInjector = (ConstructorInjector<T>) injector.constructors.get(
-          implementation, errors);
+      constructorInjector
+          = (ConstructorInjector<T>) injector.constructors.get(implementation, errors);
     }
 
     public Constructor<T> getConstructor() {
@@ -426,12 +423,13 @@ class InjectorImpl implements Injector {
   }
 
   /** Creates a binding for a type annotated with @ProvidedBy. */
-  <T> BindingImpl<T> createProvidedByBinding(final Class<T> type, Scope scope,
+  <T> BindingImpl<T> createProvidedByBinding(Key<T> key, Scope scope,
       ProvidedBy providedBy, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+    final Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
-    if (providerType == type) {
+    if (providerType == rawType) {
       throw errors.recursiveProviderType().toException();
     }
 
@@ -449,8 +447,8 @@ class InjectorImpl implements Injector {
         Provider<?> provider = providerBinding.internalFactory.get(errors, context, dependency);
         try {
           Object o = provider.get();
-          if (o != null && !type.isInstance(o)) {
-            throw errors.subtypeNotProvided(providerType, type).toException();
+          if (o != null && !rawType.isInstance(o)) {
+            throw errors.subtypeNotProvided(providerType, rawType).toException();
           }
           @SuppressWarnings("unchecked") // protected by isInstance() check above
           T t = (T) o;
@@ -461,11 +459,10 @@ class InjectorImpl implements Injector {
       }
     };
 
-    Key<T> key = Key.get(type);
     return new LinkedProviderBindingImpl<T>(
         this,
         key,
-        type,
+        rawType /* source */,
         Scopes.<T>scope(key, this, internalFactory, scope),
         scope,
         providerKey,
@@ -473,19 +470,20 @@ class InjectorImpl implements Injector {
   }
 
   /** Creates a binding for a type annotated with @ImplementedBy. */
-  <T> BindingImpl<T> createImplementedByBinding(Class<T> type, Scope scope,
+  <T> BindingImpl<T> createImplementedByBinding(Key<T> key, Scope scope,
       ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
       throws ErrorsException {
+    Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
     Class<?> implementationType = implementedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper cycles?
-    if (implementationType == type) {
+    if (implementationType == rawType) {
       throw errors.recursiveImplementationType().toException();
     }
 
     // Make sure implementationType extends type.
-    if (!type.isAssignableFrom(implementationType)) {
-      throw errors.notASubtype(implementationType, type).toException();
+    if (!rawType.isAssignableFrom(implementationType)) {
+      throw errors.notASubtype(implementationType, rawType).toException();
     }
 
     @SuppressWarnings("unchecked") // After the preceding check, this cast is safe.
@@ -502,13 +500,13 @@ class InjectorImpl implements Injector {
       }
     };
 
-    Key<T> key = Key.get(type);
     return new LinkedBindingImpl<T>(
         this,
         key,
-        type,
+        rawType /* source */,
         Scopes.<T>scope(key, this, internalFactory, scope),
-        scope, targetKey,
+        scope,
+        targetKey,
         loadStrategy);
   }
 
@@ -560,10 +558,8 @@ class InjectorImpl implements Injector {
       throw errors.missingImplementation(key).toException();
     }
 
-    // Create a binding based on the raw type.
-    @SuppressWarnings("unchecked")
-    Class<T> rawType = (Class<T>) key.getRawType();
-    BindingImpl<T> binding = createUnitializedBinding(key, rawType, null /* scope */, rawType,
+    Object source = MoreTypes.getRawType(key.getTypeLiteral().getType());
+    BindingImpl<T> binding = createUnitializedBinding(key, null /* scope */, source,
         LoadStrategy.LAZY, errors);
     initializeBinding(binding, errors);
     return binding;
@@ -575,14 +571,14 @@ class InjectorImpl implements Injector {
   }
 
   /** Cached field and method injectors for a type. */
-  final FailableCache<Class<?>, ImmutableList<SingleMemberInjector>> injectors
-      = new FailableCache<Class<?>, ImmutableList<SingleMemberInjector>>() {
-    protected ImmutableList<SingleMemberInjector> create(Class<?> type, Errors errors)
+  final FailableCache<TypeLiteral<?>, ImmutableList<SingleMemberInjector>> injectors
+      = new FailableCache<TypeLiteral<?>, ImmutableList<SingleMemberInjector>>() {
+    protected ImmutableList<SingleMemberInjector> create(TypeLiteral<?> type, Errors errors)
         throws ErrorsException {
       int numErrorsBefore = errors.size();
       List<InjectionPoint> injectionPoints = Lists.newArrayList();
       try {
-        InjectionPoint.addForInstanceMethodsAndFields(type, injectionPoints);
+        InjectionPoint.addForInstanceMethodsAndFields(type.getType(), injectionPoints);
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
       }
@@ -672,10 +668,11 @@ class InjectorImpl implements Injector {
   }
 
   /** Cached constructor injectors for each type */
-  final FailableCache<Class<?>, ConstructorInjector<?>> constructors
-      = new FailableCache<Class<?>, ConstructorInjector<?>>() {
+  final FailableCache<TypeLiteral<?>, ConstructorInjector<?>> constructors
+      = new FailableCache<TypeLiteral<?>, ConstructorInjector<?>>() {
     @SuppressWarnings("unchecked")
-    protected ConstructorInjector<?> create(Class<?> type, Errors errors) throws ErrorsException {
+    protected ConstructorInjector<?> create(TypeLiteral<?> type, Errors errors)
+        throws ErrorsException {
       return new ConstructorInjector(errors, InjectorImpl.this, type);
     }
   };
@@ -695,7 +692,7 @@ class InjectorImpl implements Injector {
     // configuration/validation stuff throws ConfigurationException
     List<SingleMemberInjector> injectors;
     try {
-      injectors = this.injectors.get(o.getClass(), errors);
+      injectors = this.injectors.get(TypeLiteral.get(o.getClass()), errors);
     } catch (ErrorsException e) {
       throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
     }

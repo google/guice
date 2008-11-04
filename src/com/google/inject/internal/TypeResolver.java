@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -51,7 +52,7 @@ public final class TypeResolver {
   public final Type type;
 
   /** maps from type variables to the types they resolve to */
-  private final Map<FqTypeVar, Type> index = Maps.newHashMap();
+  private final Map<TypeVariable, Type> index = Maps.newHashMap();
 
   /** types to resolved types */
   private final Map<Type, Type> cache = Maps.newHashMap();
@@ -102,9 +103,8 @@ public final class TypeResolver {
       Type[] arguments = parameterizedType.getActualTypeArguments();
       Type[] resolvedArguments = new Type[typeVariables.length];
       for (int v = 0; v < typeVariables.length; v++) {
-        FqTypeVar typeVar = new FqTypeVar(rawType, typeVariables[v].getName());
         resolvedArguments[v] = resolve(arguments[v]);
-        index.put(typeVar, resolvedArguments[v]);
+        index.put(typeVariables[v], resolvedArguments[v]);
       }
 
       Type resolvedRawType = resolve(rawType);
@@ -120,8 +120,7 @@ public final class TypeResolver {
       GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
       Type result = typeVariable;
       if (genericDeclaration instanceof Class) {
-        FqTypeVar fqTypeVar = new FqTypeVar((Class<?>) genericDeclaration, typeVariable.getName());
-        Type resolved = index.get(fqTypeVar);
+        Type resolved = index.get(typeVariable);
         result = resolved != null ? resolved : result;
       }
       cache.put(type, result);
@@ -163,6 +162,13 @@ public final class TypeResolver {
   }
 
   /**
+   * Returns the raw form of the type being resolved, such as {@code List}.
+   */
+  public Class<?> getRawType() {
+    return MoreTypes.getRawType(type);
+  }
+
+  /**
    * Returns the generic equivalent of {@code supertype}. For example, if this
    * is a resolver of {@code ArrayList<String>}, this method returns {@code
    * Iterable<String>} given the input {@code Iterable.class}.
@@ -190,19 +196,6 @@ public final class TypeResolver {
   }
 
   /**
-   * Returns a list of the resolved generic parameter types of {@code
-   * constructor}.
-   *
-   * @param constructor a constructor defined by this resolver's type or any of
-   *      its superclasses.
-   */
-  public List<Type> getParameterTypes(Constructor constructor) {
-    checkArgument(implementedTypes.containsKey(constructor.getDeclaringClass()),
-        "%s does not construct a supertype of %s", constructor, type);
-    return resolveAll(constructor.getGenericParameterTypes());
-  }
-
-  /**
    * Returns a list of the resolved generic exception types of {@code
    * constructor}.
    *
@@ -216,15 +209,31 @@ public final class TypeResolver {
   }
 
   /**
-   * Returns a list of the resolved generic parameter types of {@code method}.
+   * Returns a list of the resolved generic parameter types of {@code methodOrConstructor}.
    *
-   * @param method a method defined by this resolver's type, its superclasses
-   *      or implemented interfaces.
+   * @param methodOrConstructor a method or constructor defined by this resolver's type, its
+   *      superclasses or implemented interfaces.
    */
-  public List<Type> getParameterTypes(Method method) {
-    checkArgument(implementedTypes.containsKey(method.getDeclaringClass()),
-        "%s is not defined by a supertype of %s", method, type);
-    return resolveAll(method.getGenericParameterTypes());
+  public List<Type> getParameterTypes(Member methodOrConstructor) {
+    Type[] genericParameterTypes;
+
+    if (methodOrConstructor instanceof Method) {
+      Method method = (Method) methodOrConstructor;
+      checkArgument(implementedTypes.containsKey(method.getDeclaringClass()),
+          "%s is not defined by a supertype of %s", method, type);
+      genericParameterTypes = method.getGenericParameterTypes();
+
+    } else if (methodOrConstructor instanceof Constructor) {
+      Constructor constructor = (Constructor) methodOrConstructor;
+      checkArgument(implementedTypes.containsKey(constructor.getDeclaringClass()),
+          "%s does not construct a supertype of %s", constructor, type);
+      genericParameterTypes = constructor.getGenericParameterTypes();
+
+    } else {
+      throw new IllegalArgumentException("Not a method or a constructor: " + methodOrConstructor);
+    }
+
+    return resolveAll(genericParameterTypes);
   }
 
   /**
@@ -262,32 +271,5 @@ public final class TypeResolver {
 
   @Override public String toString() {
     return "Resolver:" + type;
-  }
-
-  /**
-   * A fully-qualified type variable, such as the "E" in java.util.List.
-   */
-  private static class FqTypeVar {
-    private final Class<?> rawType;
-    private final String name;
-
-    private FqTypeVar(Class<?> rawType, String name) {
-      this.rawType = rawType;
-      this.name = name;
-    }
-
-    @Override public boolean equals(Object o) {
-      return o instanceof FqTypeVar
-          && ((FqTypeVar) o).rawType == rawType
-          && ((FqTypeVar) o).name.equals(name);
-    }
-
-    @Override public int hashCode() {
-      return rawType.hashCode() ^ name.hashCode();
-    }
-
-    @Override public String toString() {
-      return rawType + ":" + name;
-    }
   }
 }

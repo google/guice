@@ -31,18 +31,18 @@ import java.lang.reflect.InvocationTargetException;
  */
 class ConstructorInjector<T> {
 
-  final Class<T> implementation;
+  final TypeLiteral<T> implementation;
   final InjectionPoint injectionPoint;
   final ImmutableList<SingleMemberInjector> memberInjectors;
   final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
   final ConstructionProxy<T> constructionProxy;
 
-  ConstructorInjector(Errors errors, InjectorImpl injector, Class<T> implementation)
+  ConstructorInjector(Errors errors, InjectorImpl injector, TypeLiteral<T> implementation)
       throws ErrorsException {
     this.implementation = implementation;
 
     try {
-      this.injectionPoint = InjectionPoint.forConstructorOf(implementation);
+      this.injectionPoint = InjectionPoint.forConstructorOf(implementation.getType());
     } catch (ConfigurationException e) {
       throw errors.merge(e.getErrorMessages()).toException();
     }
