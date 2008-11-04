@@ -88,9 +88,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  * <p>Private modules are implemented using {@link Injector#createChildInjector(Module[]) parent
  * injectors}. When it can satisfy their dependencies, just-in-time bindings will be created in the
  * root environment. Such bindings are shared among all environments in the tree.
- *
- * <p>The scope of a shared binding is also shared among all environments in the tree. For example,
- * if {@code FooImpl} is a shared singleton, all other modules will get the same instance.
+ * 
+ * <p>The scope of a binding is constrained to its environment. A singleton bound in a private
+ * module will be unique to its environment. But a binding for the same type in a different private
+ * module will yield a different instance.
  *
  * <p>A shared binding that injects the {@code Injector} gets the root injector, which only has
  * access to bindings in the root environment. An explicit binding that injects the {@code Injector}
