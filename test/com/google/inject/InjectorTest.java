@@ -21,6 +21,12 @@ import static com.google.inject.Asserts.assertNotSerializable;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
 /**
@@ -387,4 +393,29 @@ public class InjectorTest extends TestCase {
       return this;
     }
   }
+
+  public void testJitBindingFromAnotherThreadDuringInjection() {
+    final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    final AtomicReference<JustInTime> got = new AtomicReference<JustInTime>();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        requestInjection(new Object() {
+          @Inject void initialize(final Injector injector)
+              throws ExecutionException, InterruptedException {
+            Future<JustInTime> future = executorService.submit(new Callable<JustInTime>() {
+              public JustInTime call() throws Exception {
+                return injector.getInstance(JustInTime.class);
+              }
+            });
+            got.set(future.get());
+          }
+        });
+      }
+    });
+
+    assertNotNull(got.get());
+  }
+
+  static class JustInTime {}
 }

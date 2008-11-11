@@ -31,8 +31,6 @@ import java.util.Collections;
  */
 class InheritingState implements State {
 
-  // TODO(jessewilson): think about what we need to do w.r.t. concurrency
-
   private final State parent;
   private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newHashMap();
   private final Map<Key<?>, Binding<?>> explicitBindings
@@ -41,9 +39,11 @@ class InheritingState implements State {
   private final List<MatcherAndConverter> converters = Lists.newArrayList();
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   private final WeakKeySet blacklistedKeys = new WeakKeySet();
+  private final Object lock;
 
   InheritingState(State parent) {
     this.parent = checkNotNull(parent, "parent");
+    this.lock = (parent == State.NONE) ? this : parent.lock();
   }
 
   public State parent() {
@@ -115,5 +115,9 @@ class InheritingState implements State {
 
   public boolean isBlacklisted(Key<?> key) {
     return blacklistedKeys.contains(key);
+  }
+
+  public Object lock() {
+    return lock;
   }
 }

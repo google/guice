@@ -27,7 +27,6 @@ import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
@@ -169,8 +168,6 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Void visitUntargetted() {
-        final Type type = key.getTypeLiteral().getType();
-
         // Error: Missing implementation.
         // Example: bind(Date.class).annotatedWith(Red.class);
         // We can't assume abstract types aren't injectable. They may have an
@@ -258,8 +255,6 @@ class BindingProcessor extends AbstractProcessor {
       errors.bindingAlreadySet(key, original.getSource());
       return;
     }
-
-    // TODO: make getExplicitBinding() and blacklist() atomic
 
     // prevent the parent from creating a JIT binding for this key
     state.parent().blacklist(key);

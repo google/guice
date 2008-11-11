@@ -84,6 +84,10 @@ interface State {
     public boolean isBlacklisted(Key<?> key) {
       return true;
     }
+
+    public Object lock() {
+      throw new UnsupportedOperationException();
+    }
   };
 
   State parent();
@@ -126,4 +130,10 @@ interface State {
    * one of this injector's descendent's has bound the key.
    */
   boolean isBlacklisted(Key<?> key);
+
+  /**
+   * Returns the shared lock for all injector data. This is a low-granularity, high-contention lock
+   * to be used when reading mutable data (ie. just-in-time bindings, and binding blacklists).
+   */
+  Object lock();
 }

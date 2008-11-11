@@ -36,7 +36,16 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Builds a dependency injection {@link Injector}.
+ * Builds a dependency injection {@link Injector}. Injector construction happens in two phases.
+ * <ol>
+ *   <li>Static building. In this phase, we interpret commands, create bindings, and inspect 
+ *     dependencies. During this phase, we hold a lock to ensure consistency with parent injectors.
+ *     No user code is executed in this phase.</li>
+ *   <li>Dynamic injection. In this phase, we call user code. We inject members that requested
+ *     injection. This may require user's objects be created and their providers be called. And we
+ *     create eager singletons. In this phase, user code may have started other threads. This phase
+ *     is not executed for injectors created using {@link Stage#TOOL the tool stage}</li>
+ * </ol>
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
@@ -85,69 +94,71 @@ class InjectorBuilder {
 
     injector = new InjectorImpl(parent);
 
-    // bind Stage and Singleton if this is a top-level injector
-    if (parent == null) {
-      modules.add(0, new RootModule(stage));
-    }
+    buildStatically();
 
-    elements.addAll(Elements.getElements(stage, modules));
-
-    buildCoreInjector();
-
-    validate();
-
-    errors.throwCreationExceptionIfErrorsExist();
-
-    // If we're in the tool stage, stop here. Don't eagerly inject or load
-    // anything.
+    // If we're in the tool stage, stop here. Don't eagerly inject or load anything.
     if (stage == Stage.TOOL) {
       return new ToolStageInjector(injector);
     }
 
-    fulfillInjectionRequests();
-
-    if (!elements.isEmpty()) {
-      throw new AssertionError("Failed to execute " + elements);
-    }
+    injectDynamically();
 
     return injector;
   }
 
-  /** Builds the injector. */
-  private void buildCoreInjector() {
-    new MessageProcessor(errors)
-        .processCommands(elements);
+  /**
+   * Synchronize while we're building up the bindings and other injector state. This ensures that
+   * the JIT bindings in the parent injector don't change while we're being built
+   */
+  void buildStatically() {
+    synchronized (injector.state.lock()) {
+      // bind Stage and Singleton if this is a top-level injector
+      if (parent == null) {
+        modules.add(0, new RootModule(stage));
+      }
 
-    InterceptorBindingProcessor interceptorCommandProcessor
-        = new InterceptorBindingProcessor(errors, injector.state);
-    interceptorCommandProcessor.processCommands(elements);
-    injector.constructionProxyFactory = interceptorCommandProcessor.createProxyFactory();
-    stopwatch.resetAndLog("Interceptors creation");
+      elements.addAll(Elements.getElements(stage, modules));
+      stopwatch.resetAndLog("Module execution");
 
-    new ScopeBindingProcessor(errors, injector.state).processCommands(elements);
-    stopwatch.resetAndLog("Scopes creation");
+      new MessageProcessor(errors).processCommands(elements);
 
-    new TypeConverterBindingProcessor(errors, injector.state).processCommands(elements);
-    stopwatch.resetAndLog("Converters creation");
+      InterceptorBindingProcessor interceptorCommandProcessor
+          = new InterceptorBindingProcessor(errors, injector.state);
+      interceptorCommandProcessor.processCommands(elements);
+      injector.constructionProxyFactory = interceptorCommandProcessor.createProxyFactory();
+      stopwatch.resetAndLog("Interceptors creation");
 
-    bindInjector();
-    bindLogger();
-    bindCommandProcesor = new BindingProcessor(errors,
-        injector, injector.state, injector.initializer);
-    bindCommandProcesor.processCommands(elements);
-    bindCommandProcesor.createUntargettedBindings();
-    stopwatch.resetAndLog("Binding creation");
+      new ScopeBindingProcessor(errors, injector.state).processCommands(elements);
+      stopwatch.resetAndLog("Scopes creation");
 
-    injector.index();
-    stopwatch.resetAndLog("Binding indexing");
+      new TypeConverterBindingProcessor(errors, injector.state).processCommands(elements);
+      stopwatch.resetAndLog("Converters creation");
 
-    injectionCommandProcessor = new InjectionRequestProcessor(errors, injector.initializer);
-    injectionCommandProcessor.processCommands(elements);
-    stopwatch.resetAndLog("Static injection");
+      bindInjector();
+      bindLogger();
+      bindCommandProcesor = new BindingProcessor(errors,
+          injector, injector.state, injector.initializer);
+      bindCommandProcesor.processCommands(elements);
+      bindCommandProcesor.createUntargettedBindings();
+      stopwatch.resetAndLog("Binding creation");
+
+      injector.index();
+      stopwatch.resetAndLog("Binding indexing");
+
+      injectionCommandProcessor = new InjectionRequestProcessor(errors, injector.initializer);
+      injectionCommandProcessor.processCommands(elements);
+      stopwatch.resetAndLog("Static injection");
+
+      validateStatically();
+
+      if (!elements.isEmpty()) {
+        throw new AssertionError("Failed to execute " + elements);
+      }
+    }
   }
 
   /** Validate everything that we can validate now that the injector is ready for use. */
-  private void validate() {
+  private void validateStatically() {
     bindCommandProcesor.runCreationListeners(injector);
     stopwatch.resetAndLog("Validation");
 
@@ -163,8 +174,12 @@ class InjectorBuilder {
     errors.throwCreationExceptionIfErrorsExist();
   }
 
-  /** Inject everything that can be injected. */
-  private void fulfillInjectionRequests() {
+  /**
+   * Inject everything that can be injected. This method is intentionally not synchronized. If we
+   * locked while injecting members (ie. running user code), things would deadlock should the user
+   * code build a just-in-time binding from another thread.
+   */
+  private void injectDynamically() {
     injectionCommandProcessor.injectMembers(injector);
     stopwatch.resetAndLog("Static member injection");
 

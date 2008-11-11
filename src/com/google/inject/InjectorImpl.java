@@ -152,7 +152,7 @@ class InjectorImpl implements Injector {
 
     // TODO: synch should span parent and child
 
-    synchronized (jitBindings) {
+    synchronized (state.lock()) {
       // try to get the JIT binding from the parent injector
       if (parent != null) {
         try {
@@ -321,7 +321,7 @@ class InjectorImpl implements Injector {
   <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
-    // Note: We don't need to synchronize on jitBindings during injector creation.
+    // Note: We don't need to synchronize on state.lock() during injector creation.
     if (binding instanceof ClassBindingImpl<?>) {
       Key<T> key = binding.getKey();
       jitBindings.put(key, binding);
