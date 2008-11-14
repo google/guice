@@ -295,6 +295,23 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
         type.getSupertype(AbstractCollection.class));
   }
 
+  public void testWildcards() throws NoSuchFieldException {
+    TypeLiteral<Parameterized<String>> ofString = new TypeLiteral<Parameterized<String>>() {};
+
+    assertEquals(new TypeLiteral<List<String>>() {}.getType(),
+        ofString.getFieldType(Parameterized.class.getField("t")));
+    assertEquals(new TypeLiteral<List<? extends String>>() {}.getType(),
+        ofString.getFieldType(Parameterized.class.getField("extendsT")));
+    assertEquals(new TypeLiteral<List<? super String>>() {}.getType(),
+        ofString.getFieldType(Parameterized.class.getField("superT")));
+  }
+
+  static class Parameterized<T> {
+    public List<T> t;
+    public List<? extends T> extendsT;
+    public List<? super T> superT;
+  }
+
   // TODO(jessewilson): tests for tricky bounded types like <T extends Collection, Serializable>
   // TODO(jessewilson): tests for wildcard types
 

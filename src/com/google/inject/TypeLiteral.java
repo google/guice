@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 
 /**
@@ -202,6 +203,24 @@ public class TypeLiteral<T> {
         return changed
             ? Types.newParameterizedTypeWithOwner(newOwnerType, original.getRawType(), args)
             : original;
+
+      } else if (toResolve instanceof WildcardType) {
+        WildcardType original = (WildcardType) toResolve;
+        Type[] originalLowerBound = original.getLowerBounds();
+        Type[] originalUpperBound = original.getUpperBounds();
+
+        if (originalLowerBound.length == 1) {
+          Type lowerBound = resolve(originalLowerBound[0]);
+          if (lowerBound != originalLowerBound[0]) {
+            return Types.supertypeOf(lowerBound);
+          }
+        } else if (originalUpperBound.length == 1) {
+          Type upperBound = resolve(originalUpperBound[0]);
+          if (upperBound != originalUpperBound[0]) {
+            return Types.subtypeOf(upperBound);
+          }
+        }
+        return original;
 
       } else {
         return toResolve;
