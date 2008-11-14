@@ -21,12 +21,12 @@ import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.Nullability;
-import com.google.inject.internal.TypeResolver;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -62,22 +62,22 @@ public final class InjectionPoint implements Serializable {
     this.optional = optional;
   }
 
-  InjectionPoint(TypeResolver typeResolver, Method method) {
+  InjectionPoint(TypeLiteral<?> type, Method method) {
     this.member = method;
 
     Inject inject = method.getAnnotation(Inject.class);
     this.optional = inject.optional();
 
-    this.dependencies = forMember(method, typeResolver, method.getParameterAnnotations());
+    this.dependencies = forMember(method, type, method.getParameterAnnotations());
   }
 
-  InjectionPoint(TypeResolver typeResolver, Constructor<?> constructor) {
+  InjectionPoint(TypeLiteral<?> type, Constructor<?> constructor) {
     this.member = constructor;
     this.optional = false;
-    this.dependencies = forMember(constructor, typeResolver, constructor.getParameterAnnotations());
+    this.dependencies = forMember(constructor, type, constructor.getParameterAnnotations());
   }
 
-  InjectionPoint(TypeResolver typeResolver, Field field) {
+  InjectionPoint(TypeLiteral<?> type, Field field) {
     this.member = field;
 
     Inject inject = field.getAnnotation(Inject.class);
@@ -88,7 +88,7 @@ public final class InjectionPoint implements Serializable {
     Errors errors = new Errors(field);
     Key<?> key = null;
     try {
-      key = Annotations.getKey(typeResolver.getFieldType(field), field, annotations, errors);
+      key = Annotations.getKey(type.getFieldType(field), field, annotations, errors);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -98,7 +98,7 @@ public final class InjectionPoint implements Serializable {
         newDependency(key, Nullability.allowsNull(annotations), -1));
   }
 
-  private ImmutableList<Dependency<?>> forMember(Member member, TypeResolver typeResolver,
+  private ImmutableList<Dependency<?>> forMember(Member member, TypeLiteral<?> type,
       Annotation[][] paramterAnnotations) {
     Errors errors = new Errors(member);
     Iterator<Annotation[]> annotationsIterator = Arrays.asList(paramterAnnotations).iterator();
@@ -106,7 +106,7 @@ public final class InjectionPoint implements Serializable {
     List<Dependency<?>> dependencies = Lists.newArrayList();
     int index = 0;
 
-    for (Type parameterType : typeResolver.getParameterTypes(member)) {
+    for (Type parameterType : type.getParameterTypes(member)) {
       try {
         Annotation[] parameterAnnotations = annotationsIterator.next();
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
@@ -183,8 +183,8 @@ public final class InjectionPoint implements Serializable {
    */
   public static InjectionPoint forConstructorOf(Type type) {
     Errors errors = new Errors(type);
-    TypeResolver typeResolver = new TypeResolver(type);
-    Class<?> rawType = typeResolver.getRawType();
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
+    Class<?> rawType = MoreTypes.getRawType(type);
 
     Constructor<?> injectableConstructor = null;
     for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
@@ -206,7 +206,7 @@ public final class InjectionPoint implements Serializable {
     errors.throwConfigurationExceptionIfErrorsExist();
 
     if (injectableConstructor != null) {
-      return new InjectionPoint(typeResolver, injectableConstructor);
+      return new InjectionPoint(typeLiteral, injectableConstructor);
     }
 
     // If no annotated constructor is found, look for a no-arg constructor instead.
@@ -221,7 +221,7 @@ public final class InjectionPoint implements Serializable {
       }
 
       checkForMisplacedBindingAnnotations(noArgConstructor, errors);
-      return new InjectionPoint(typeResolver, noArgConstructor);
+      return new InjectionPoint(typeLiteral, noArgConstructor);
     } catch (NoSuchMethodException e) {
       errors.missingConstructor(rawType);
       throw new ConfigurationException(errors.getMessages());
@@ -239,8 +239,9 @@ public final class InjectionPoint implements Serializable {
    */
   public static void addForStaticMethodsAndFields(Type type, Collection<InjectionPoint> sink) {
     Errors errors = new Errors();
-    addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
-    addInjectionPoints(type, Factory.METHODS, true, sink, errors);
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
+    addInjectionPoints(typeLiteral, Factory.FIELDS, true, sink, errors);
+    addInjectionPoints(typeLiteral, Factory.METHODS, true, sink, errors);
     errors.throwConfigurationExceptionIfErrorsExist();
   }
 
@@ -256,8 +257,9 @@ public final class InjectionPoint implements Serializable {
   public static void addForInstanceMethodsAndFields(Type type, Collection<InjectionPoint> sink) {
     // TODO (crazybob): Filter out overridden members.
     Errors errors = new Errors();
-    addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
-    addInjectionPoints(type, Factory.METHODS, false, sink, errors);
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
+    addInjectionPoints(typeLiteral, Factory.FIELDS, false, sink, errors);
+    addInjectionPoints(typeLiteral, Factory.METHODS, false, sink, errors);
     errors.throwConfigurationExceptionIfErrorsExist();
   }
 
@@ -269,27 +271,25 @@ public final class InjectionPoint implements Serializable {
     }
   }
 
-  private static <M extends Member & AnnotatedElement> void addInjectionPoints(Type type,
+  private static <M extends Member & AnnotatedElement> void addInjectionPoints(TypeLiteral<?> type,
       Factory<M> factory, boolean statics, Collection<InjectionPoint> injectionPoints,
       Errors errors) {
-    if (type == Object.class) {
+    if (type.getType() == Object.class) {
       return;
     }
 
-    TypeResolver typeResolver = new TypeResolver(type);
-
     // Add injectors for superclass first.
-    Type superType = typeResolver.getSupertype(MoreTypes.getRawType(type).getSuperclass());
-    addInjectionPoints(superType, factory, statics, injectionPoints, errors);
+    Type superType = type.getSupertype(MoreTypes.getRawType(type.getType()).getSuperclass());
+    addInjectionPoints(TypeLiteral.get(superType), factory, statics, injectionPoints, errors);
 
     // Add injectors for all members next
-    addInjectorsForMembers(typeResolver, factory, statics, injectionPoints, errors);
+    addInjectorsForMembers(type, factory, statics, injectionPoints, errors);
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectorsForMembers(
-      TypeResolver typeResolver, Factory<M> factory, boolean statics,
+      TypeLiteral<?> typeResolver, Factory<M> factory, boolean statics,
       Collection<InjectionPoint> injectionPoints, Errors errors) {
-    for (M member : factory.getMembers(typeResolver.getRawType())) {
+    for (M member : factory.getMembers(MoreTypes.getRawType(typeResolver.getType()))) {
       if (isStatic(member) != statics) {
         continue;
       }
@@ -318,7 +318,7 @@ public final class InjectionPoint implements Serializable {
       public Field[] getMembers(Class<?> type) {
         return type.getDeclaredFields();
       }
-      public InjectionPoint create(TypeResolver typeResolver, Field member, Errors errors) {
+      public InjectionPoint create(TypeLiteral<?> typeResolver, Field member, Errors errors) {
         return new InjectionPoint(typeResolver, member);
       }
     };
@@ -327,14 +327,14 @@ public final class InjectionPoint implements Serializable {
       public Method[] getMembers(Class<?> type) {
         return type.getDeclaredMethods();
       }
-      public InjectionPoint create(TypeResolver typeResolver, Method member, Errors errors) {
+      public InjectionPoint create(TypeLiteral<?> typeResolver, Method member, Errors errors) {
         checkForMisplacedBindingAnnotations(member, errors);
         return new InjectionPoint(typeResolver, member);
       }
     };
 
     M[] getMembers(Class<?> type);
-    InjectionPoint create(TypeResolver typeResolver, M member, Errors errors);
+    InjectionPoint create(TypeLiteral<?> typeResolver, M member, Errors errors);
   }
 
   private static final long serialVersionUID = 0;

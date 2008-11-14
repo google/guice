@@ -77,6 +77,7 @@ public class AllTests {
     suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
+    suite.addTestSuite(TypeLiteralTypeResolutionTest.class);
 
     // commands
     suite.addTestSuite(ElementsTest.class);

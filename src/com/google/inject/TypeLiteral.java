@@ -16,12 +16,21 @@
 
 package com.google.inject;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.canonicalize;
 import com.google.inject.util.Types;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.List;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
@@ -140,5 +149,152 @@ public class TypeLiteral<T> {
    */
   public static <T> TypeLiteral<T> get(Class<T> type) {
     return new TypeLiteral<T>(type);
+  }
+
+
+  /** Returns an immutable list of the resolved types. */
+  private List<Type> resolveAll(Type[] types) {
+    Type[] result = new Type[types.length];
+    for (int t = 0; t < types.length; t++) {
+      result[t] = resolve(types[t]);
+    }
+    return ImmutableList.of(result);
+  }
+
+  /**
+   * Resolves known type parameters in {@code toResolve} and returns the result.
+   */
+  Type resolve(Type toResolve) {
+    while (true) {
+      if (toResolve instanceof TypeVariable) {
+        TypeVariable original = (TypeVariable) toResolve;
+        toResolve = MoreTypes.resolveTypeVariable(type, rawType, original);
+        if (toResolve == original) {
+          return toResolve;
+        }
+
+      } else if (toResolve instanceof GenericArrayType) {
+        GenericArrayType original = (GenericArrayType) toResolve;
+        Type componentType = original.getGenericComponentType();
+        Type newComponentType = resolve(componentType);
+        return componentType == newComponentType
+            ? original
+            : Types.arrayOf(newComponentType);
+
+      } else if (toResolve instanceof ParameterizedType) {
+        ParameterizedType original = (ParameterizedType) toResolve;
+        Type ownerType = original.getOwnerType();
+        Type newOwnerType = resolve(ownerType);
+        boolean changed = newOwnerType != ownerType;
+
+        Type[] args = original.getActualTypeArguments();
+        for (int t = 0, length = args.length; t < length; t++) {
+          Type resolvedTypeArgument = resolve(args[t]);
+          if (resolvedTypeArgument != args[t]) {
+            if (!changed) {
+              args = args.clone();
+              changed = true;
+            }
+            args[t] = resolvedTypeArgument;
+          }
+        }
+
+        return changed
+            ? Types.newParameterizedTypeWithOwner(newOwnerType, original.getRawType(), args)
+            : original;
+
+      } else {
+        return toResolve;
+      }
+    }
+  }
+
+  /**
+   * Returns the generic form of {@code supertype}. For example, if this is {@code
+   * ArrayList<String>}, this returns {@code Iterable<String>} given the input {@code
+   * Iterable.class}.
+   *
+   * @param supertype a superclass of, or interface implemented by, this.
+   */
+  public Type getSupertype(Class<?> supertype) {
+    checkArgument(supertype.isAssignableFrom(rawType),
+        "%s is not a supertype of %s", supertype, this.type);
+    return resolve(MoreTypes.getGenericSupertype(type, rawType, supertype));
+  }
+
+  /**
+   * Returns the resolved generic type of {@code field}.
+   *
+   * @param field a field defined by this or any superclass.
+   */
+  public Type getFieldType(Field field) {
+    checkArgument(field.getDeclaringClass().isAssignableFrom(rawType),
+        "%s is not defined by a supertype of %s", field, type);
+    return resolve(field.getGenericType());
+  }
+
+  /**
+   * Returns the resolved generic parameter types of {@code methodOrConstructor}.
+   *
+   * @param methodOrConstructor a method or constructor defined by this or any supertype.
+   */
+  public List<Type> getParameterTypes(Member methodOrConstructor) {
+    Type[] genericParameterTypes;
+
+    if (methodOrConstructor instanceof Method) {
+      Method method = (Method) methodOrConstructor;
+      checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
+          "%s is not defined by a supertype of %s", method, type);
+      genericParameterTypes = method.getGenericParameterTypes();
+
+    } else if (methodOrConstructor instanceof Constructor) {
+      Constructor constructor = (Constructor) methodOrConstructor;
+      checkArgument(constructor.getDeclaringClass().isAssignableFrom(rawType),
+          "%s does not construct a supertype of %s", constructor, type);
+      genericParameterTypes = constructor.getGenericParameterTypes();
+
+    } else {
+      throw new IllegalArgumentException("Not a method or a constructor: " + methodOrConstructor);
+    }
+
+    return resolveAll(genericParameterTypes);
+  }
+
+  /**
+   * Returns the resolved generic exception types thrown by {@code constructor}.
+   *
+   * @param methodOrConstructor a method or constructor defined by this or any supertype.
+   */
+  public List<Type> getExceptionTypes(Member methodOrConstructor) {
+    Type[] genericExceptionTypes;
+
+    if (methodOrConstructor instanceof Method) {
+      Method method = (Method) methodOrConstructor;
+      checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
+          "%s is not defined by a supertype of %s", method, type);
+      genericExceptionTypes = method.getGenericExceptionTypes();
+
+    } else if (methodOrConstructor instanceof Constructor) {
+      Constructor<?> constructor = (Constructor<?>) methodOrConstructor;
+      checkArgument(constructor.getDeclaringClass().isAssignableFrom(rawType),
+          "%s does not construct a supertype of %s", constructor, type);
+      genericExceptionTypes = constructor.getGenericExceptionTypes();
+
+    } else {
+      throw new IllegalArgumentException("Not a method or a constructor: " + methodOrConstructor);
+    }
+
+    return resolveAll(genericExceptionTypes);
+  }
+
+  /**
+   * Returns the resolved generic return type of {@code method}.
+   *
+   * @param method a method defined by this or any supertype.
+   */
+  public Type getReturnType(Method method) {
+    checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
+        "%s is not defined by a supertype of %s", method, type);
+    return resolve(method.getGenericReturnType());
   }
 }

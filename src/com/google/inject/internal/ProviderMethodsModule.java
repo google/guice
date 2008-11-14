@@ -16,9 +16,8 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Preconditions;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -43,11 +42,11 @@ import java.util.List;
  */
 public final class ProviderMethodsModule implements Module {
   private final Module delegate;
-  private final TypeResolver typeResolver;
+  private final TypeLiteral<?> typeLiteral;
 
   private ProviderMethodsModule(Module delegate) {
     this.delegate = checkNotNull(delegate, "delegate");
-    this.typeResolver = new TypeResolver(this.delegate.getClass());
+    this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
   }
 
   /**
@@ -108,7 +107,7 @@ public final class ProviderMethodsModule implements Module {
 
     // prepare the parameter providers
     List<Provider<?>> parameterProviders = Lists.newArrayList();
-    List<Type> parameterTypes = typeResolver.getParameterTypes(method);
+    List<Type> parameterTypes = typeLiteral.getParameterTypes(method);
     Annotation[][] parameterAnnotations = method.getParameterAnnotations();
     for (int i = 0; i < parameterTypes.size(); i++) {
       Key<?> key = getKey(errors, TypeLiteral.get(parameterTypes.get(i)),
@@ -118,7 +117,7 @@ public final class ProviderMethodsModule implements Module {
 
     // Define T as the method's return type.
     @SuppressWarnings("unchecked") TypeLiteral<T> returnType
-        = (TypeLiteral<T>) TypeLiteral.get(typeResolver.getReturnType(method));
+        = (TypeLiteral<T>) TypeLiteral.get(typeLiteral.getReturnType(method));
 
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
     Class<? extends Annotation> scopeAnnotation

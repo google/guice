@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.TypeResolver;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import java.io.IOException;
@@ -51,14 +50,14 @@ public class InjectionPointTest extends TestCase {
   }
 
   public void testFieldInjectionPoint() throws NoSuchFieldException, IOException, ErrorsException {
-    TypeResolver typeResolver = new TypeResolver(getClass());
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(getClass());
     Field fooField = getClass().getField("foo");
 
-    InjectionPoint injectionPoint = new InjectionPoint(typeResolver, fooField);
+    InjectionPoint injectionPoint = new InjectionPoint(typeLiteral, fooField);
     assertSame(fooField, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
     assertEquals(getClass().getName() + ".foo", injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeResolver, fooField));
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, fooField));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
@@ -70,18 +69,18 @@ public class InjectionPointTest extends TestCase {
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
     assertEqualsBothWays(dependency,
-        getOnlyElement(new InjectionPoint(typeResolver, fooField).getDependencies()));
+        getOnlyElement(new InjectionPoint(typeLiteral, fooField).getDependencies()));
   }
 
   public void testMethodInjectionPoint() throws Exception {
-    TypeResolver typeResolver = new TypeResolver(getClass());
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(getClass());
 
     Method barMethod = getClass().getMethod("bar", String.class);
-    InjectionPoint injectionPoint = new InjectionPoint(typeResolver, barMethod);
+    InjectionPoint injectionPoint = new InjectionPoint(typeLiteral, barMethod);
     assertSame(barMethod, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
     assertEquals(getClass().getName() + ".bar()", injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeResolver, barMethod));
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, barMethod));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
@@ -93,19 +92,19 @@ public class InjectionPointTest extends TestCase {
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
     assertEqualsBothWays(dependency,
-        getOnlyElement(new InjectionPoint(typeResolver, barMethod).getDependencies()));
+        getOnlyElement(new InjectionPoint(typeLiteral, barMethod).getDependencies()));
   }
 
   public void testConstructorInjectionPoint() throws NoSuchMethodException, IOException,
       ErrorsException {
-    TypeResolver typeResolver = new TypeResolver(Constructable.class);
+    TypeLiteral<?> typeLiteral = TypeLiteral.get(Constructable.class);
 
     Constructor<?> constructor = Constructable.class.getConstructor(String.class);
-    InjectionPoint injectionPoint = new InjectionPoint(typeResolver, constructor);
+    InjectionPoint injectionPoint = new InjectionPoint(typeLiteral, constructor);
     assertSame(constructor, injectionPoint.getMember());
     assertFalse(injectionPoint.isOptional());
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
-    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeResolver, constructor));
+    assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, constructor));
     assertSimilarWhenReserialized(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
@@ -117,7 +116,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(false, dependency.isNullable());
     assertSimilarWhenReserialized(dependency);
     assertEqualsBothWays(dependency,
-        getOnlyElement(new InjectionPoint(typeResolver, constructor).getDependencies()));
+        getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
   }
   
   public void testUnattachedDependency() throws IOException {
@@ -144,8 +143,8 @@ public class InjectionPointTest extends TestCase {
     Set<InjectionPoint> sink = Sets.newHashSet();
     InjectionPoint.addForInstanceMethodsAndFields(HasInjections.class, sink);
     assertEquals(ImmutableSet.of(
-        new InjectionPoint(new TypeResolver(HasInjections.class), instanceMethod),
-        new InjectionPoint(new TypeResolver(HasInjections.class), instanceField)),
+        new InjectionPoint(TypeLiteral.get(HasInjections.class), instanceMethod),
+        new InjectionPoint(TypeLiteral.get(HasInjections.class), instanceField)),
         sink);
   }
 
@@ -156,8 +155,8 @@ public class InjectionPointTest extends TestCase {
     Set<InjectionPoint> sink = Sets.newHashSet();
     InjectionPoint.addForStaticMethodsAndFields(HasInjections.class, sink);
     assertEquals(ImmutableSet.of(
-        new InjectionPoint(new TypeResolver(HasInjections.class), staticMethod),
-        new InjectionPoint(new TypeResolver(HasInjections.class), staticField)),
+        new InjectionPoint(TypeLiteral.get(HasInjections.class), staticMethod),
+        new InjectionPoint(TypeLiteral.get(HasInjections.class), staticField)),
         sink);
   }
 
