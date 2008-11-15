@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -285,6 +286,14 @@ public final class Errors implements Serializable {
 
   public Errors cannotInjectRawProvider() {
     return addMessage("Cannot inject a Provider that has no type parameter");
+  }
+
+  public Errors cannotInjectTypeLiteralOf(Type unsupportedType) {
+    return addMessage("Cannot inject a TypeLiteral of %s", unsupportedType);
+  }
+
+  public Errors cannotInjectRawTypeLiteral() {
+    return addMessage("Cannot inject a TypeLiteral that has no type parameter");
   }
 
   public Errors cannotSatisfyCircularDependency(Class<?> expectedType) {

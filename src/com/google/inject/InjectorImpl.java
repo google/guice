@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.common.base.Nullable;
 import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -30,6 +31,7 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.MoreTypes;
+import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -39,6 +41,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
@@ -351,6 +354,14 @@ class InjectorImpl implements Injector {
       throw errors.missingImplementation(key).toException();
     }
 
+    // Handle TypeLiteral<T> by binding the inner type
+    if (rawType == TypeLiteral.class) {
+      @SuppressWarnings("unchecked") // we have to fudge the inner type as Object
+      BindingImpl<T> binding = (BindingImpl<T>) createTypeLiteralBinding(
+          (Key<TypeLiteral<Object>>) key, errors);
+      return binding;
+    }
+
     // Handle @ImplementedBy
     ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
@@ -393,6 +404,36 @@ class InjectorImpl implements Injector {
         = Scopes.scope(key, this, lateBoundConstructor, scope);
     return new ClassBindingImpl<T>(
         this, key, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
+  }
+
+  /**
+   * Converts a binding for a {@code Key<TypeLiteral<T>>} to the value {@code TypeLiteral<T>}. It's
+   * a bit awkward because we have to pull out the inner type in the type literal.
+   */
+  private <T> BindingImpl<TypeLiteral<T>> createTypeLiteralBinding(
+      Key<TypeLiteral<T>> key, Errors errors) throws ErrorsException {
+    Type typeLiteralType = key.getTypeLiteral().getType();
+    if (!(typeLiteralType instanceof ParameterizedType)) {
+      throw errors.cannotInjectRawTypeLiteral().toException();
+    }
+
+    ParameterizedType parameterizedType = (ParameterizedType) typeLiteralType;
+    Type innerType = parameterizedType.getActualTypeArguments()[0];
+
+    // this is unforunate. We don't support building TypeLiterals for type variable like 'T'. If
+    // this proves problematic, we can probably fix TypeLiteral to support type variables
+    if (!(innerType instanceof Class)
+        && !(innerType instanceof GenericArrayType)
+        && !(innerType instanceof ParameterizedType)) {
+      throw errors.cannotInjectTypeLiteralOf(innerType).toException();
+    }
+
+    @SuppressWarnings("unchecked") // by definition, innerType == T, so this is safe
+    TypeLiteral<T> value = (TypeLiteral<T>) TypeLiteral.get(innerType);
+    InternalFactory<TypeLiteral<T>> factory = new ConstantFactory<TypeLiteral<T>>(
+        Initializables.of(value));
+    return new InstanceBindingImpl<TypeLiteral<T>>(this, key, SourceProvider.UNKNOWN_SOURCE,
+        factory, ImmutableSet.<InjectionPoint>of(), value);
   }
 
   static class LateBoundConstructor<T> implements InternalFactory<T> {
