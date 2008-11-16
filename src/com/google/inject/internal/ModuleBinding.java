@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -39,7 +38,6 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -204,16 +202,15 @@ public final class ModuleBinding<T> implements Binding<T> {
       }
 
       // lookup the injection points, adding any errors to the binder's errors list
-      List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+      Set<InjectionPoint> injectionPoints;
       try {
-        InjectionPoint.addForInstanceMethodsAndFields(instance.getClass(), injectionPointsList);
+        injectionPoints = InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
       } catch (ConfigurationException e) {
         for (Message message : e.getErrorMessages()) {
           binder.addError(message);
         }
+        injectionPoints = e.getPartialValue();
       }
-      ImmutableSet<InjectionPoint> injectionPoints = ImmutableSet.copyOf(injectionPointsList);
-
       target = new InstanceTarget<T>(instance, injectionPoints);
     }
 
@@ -222,19 +219,20 @@ public final class ModuleBinding<T> implements Binding<T> {
       checkNotTargetted();
 
       // lookup the injection points, adding any errors to the binder's errors list
-      List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+      Set<InjectionPoint> injectionPoints;
       try {
-        InjectionPoint.addForInstanceMethodsAndFields(provider.getClass(), injectionPointsList);
+        injectionPoints = InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
       } catch (ConfigurationException e) {
         for (Message message : e.getErrorMessages()) {
           binder.addError(message);
         }
+        injectionPoints = e.getPartialValue();
       }
-      final ImmutableSet<InjectionPoint> injectionPoints = ImmutableSet.copyOf(injectionPointsList);
 
+      final Set<InjectionPoint> injectionPointsFinal = injectionPoints;
       target = new Target<T>() {
         public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-          return visitor.visitProvider(provider, injectionPoints);
+          return visitor.visitProvider(provider, injectionPointsFinal);
         }
       };
       return this;
@@ -469,9 +467,9 @@ public final class ModuleBinding<T> implements Binding<T> {
     private final T instance;
     private final ImmutableSet<InjectionPoint> injectionPoints;
 
-    public InstanceTarget(T instance, ImmutableSet<InjectionPoint> injectionPoints) {
+    public InstanceTarget(T instance, Set<InjectionPoint> injectionPoints) {
       this.instance = instance;
-      this.injectionPoints = injectionPoints;
+      this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     }
 
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {

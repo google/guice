@@ -18,7 +18,6 @@ package com.google.inject.spi;
 
 import com.google.common.collect.ImmutableSet;
 import static com.google.common.collect.Iterables.getOnlyElement;
-import com.google.common.collect.Sets;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 import com.google.inject.Inject;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.Assert;
@@ -140,24 +138,23 @@ public class InjectionPointTest extends TestCase {
     Method instanceMethod = HasInjections.class.getMethod("instanceMethod", String.class);
     Field instanceField = HasInjections.class.getField("instanceField");
 
-    Set<InjectionPoint> sink = Sets.newHashSet();
-    InjectionPoint.addForInstanceMethodsAndFields(HasInjections.class, sink);
+    TypeLiteral<HasInjections> type = TypeLiteral.get(HasInjections.class);
     assertEquals(ImmutableSet.of(
-        new InjectionPoint(TypeLiteral.get(HasInjections.class), instanceMethod),
-        new InjectionPoint(TypeLiteral.get(HasInjections.class), instanceField)),
-        sink);
+        new InjectionPoint(type, instanceMethod),
+        new InjectionPoint(type, instanceField)),
+        InjectionPoint.forInstanceMethodsAndFields(HasInjections.class));
   }
 
   public void testAddForStaticMethodsAndFields() throws Exception {
     Method staticMethod = HasInjections.class.getMethod("staticMethod", String.class);
     Field staticField = HasInjections.class.getField("staticField");
 
-    Set<InjectionPoint> sink = Sets.newHashSet();
-    InjectionPoint.addForStaticMethodsAndFields(HasInjections.class, sink);
+    Set<InjectionPoint> injectionPoints = InjectionPoint.forStaticMethodsAndFields(
+        HasInjections.class);
     assertEquals(ImmutableSet.of(
         new InjectionPoint(TypeLiteral.get(HasInjections.class), staticMethod),
         new InjectionPoint(TypeLiteral.get(HasInjections.class), staticField)),
-        sink);
+        injectionPoints);
   }
 
   static class HasInjections {
@@ -168,15 +165,13 @@ public class InjectionPointTest extends TestCase {
   }
 
   public void testAddForParameterizedInjections() {
-    Set<InjectionPoint> sink = Sets.newHashSet();
-    Type type = new TypeLiteral<ParameterizedInjections<String>>() {}.getType();
+    TypeLiteral<?> type = new TypeLiteral<ParameterizedInjections<String>>() {};
 
     InjectionPoint constructor = InjectionPoint.forConstructorOf(type);
     assertEquals(new Key<Map<String, String>>() {},
         getOnlyElement(constructor.getDependencies()).getKey());
 
-    InjectionPoint.addForInstanceMethodsAndFields(type, sink);
-    InjectionPoint field = getOnlyElement(sink);
+    InjectionPoint field = getOnlyElement(InjectionPoint.forInstanceMethodsAndFields(type));
     assertEquals(new Key<Set<String>>() {}, getOnlyElement(field.getDependencies()).getKey());
   }
 

@@ -50,6 +50,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Default {@link Injector} implementation.
@@ -617,11 +618,12 @@ class InjectorImpl implements Injector {
     protected ImmutableList<SingleMemberInjector> create(TypeLiteral<?> type, Errors errors)
         throws ErrorsException {
       int numErrorsBefore = errors.size();
-      List<InjectionPoint> injectionPoints = Lists.newArrayList();
+      Set<InjectionPoint> injectionPoints;
       try {
-        InjectionPoint.addForInstanceMethodsAndFields(type.getType(), injectionPoints);
+        injectionPoints = InjectionPoint.forInstanceMethodsAndFields(type);
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
+        injectionPoints = e.getPartialValue();
       }
       ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
       errors.throwIfNewErrors(numErrorsBefore);
@@ -631,7 +633,7 @@ class InjectorImpl implements Injector {
 
   /** Returns the injectors for the specified injection points. */
   ImmutableList<SingleMemberInjector> getInjectors(
-      List<InjectionPoint> injectionPoints, Errors errors) {
+      Set<InjectionPoint> injectionPoints, Errors errors) {
     List<SingleMemberInjector> injectors = Lists.newArrayList();
     for (InjectionPoint injectionPoint : injectionPoints) {
       try {

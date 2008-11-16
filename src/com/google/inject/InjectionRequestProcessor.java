@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -25,6 +24,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Handles {@link Binder#requestInjection} and {@link Binder#requestStaticInjection} commands.
@@ -50,16 +50,16 @@ class InjectionRequestProcessor extends AbstractProcessor {
   }
 
   @Override public Boolean visitInjectionRequest(InjectionRequest command) {
-    List<InjectionPoint> injectionPointsList = Lists.newArrayList();
+    Set<InjectionPoint> injectionPoints;
     try {
-      InjectionPoint.addForInstanceMethodsAndFields(
-          command.getInstance().getClass(), injectionPointsList);
+      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(
+          command.getInstance().getClass());
     } catch (ConfigurationException e) {
       errors.merge(e.getErrorMessages());
+      injectionPoints = e.getPartialValue();
     }
 
-    memberInjector.requestInjection(command.getInstance(), command.getSource(),
-        ImmutableSet.copyOf(injectionPointsList));
+    memberInjector.requestInjection(command.getInstance(), command.getSource(), injectionPoints);
     return true;
   }
 
@@ -88,11 +88,12 @@ class InjectionRequestProcessor extends AbstractProcessor {
 
     void validate(final InjectorImpl injector) {
       Errors errorsForMember = errors.withSource(source);
-      List<InjectionPoint> injectionPoints = Lists.newArrayList();
+      Set<InjectionPoint> injectionPoints;
       try {
-        InjectionPoint.addForStaticMethodsAndFields(type, injectionPoints);
+        injectionPoints = InjectionPoint.forStaticMethodsAndFields(type);
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
+        injectionPoints = e.getPartialValue();
       }
       memberInjectors = injector.getInjectors(injectionPoints, errorsForMember);
     }

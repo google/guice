@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A constructor, field or method that can receive injections. Typically this is a member with the
@@ -181,10 +183,9 @@ public final class InjectionPoint implements Serializable {
    *     constructor, or if parameters of the injectable constructor are malformed, such as a
    *     parameter with multiple binding annotations.
    */
-  public static InjectionPoint forConstructorOf(Type type) {
-    Errors errors = new Errors(type);
-    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
-    Class<?> rawType = MoreTypes.getRawType(type);
+  public static InjectionPoint forConstructorOf(TypeLiteral<?> type) {
+    Class<?> rawType = MoreTypes.getRawType(type.getType());
+    Errors errors = new Errors(rawType);
 
     Constructor<?> injectableConstructor = null;
     for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
@@ -206,7 +207,7 @@ public final class InjectionPoint implements Serializable {
     errors.throwConfigurationExceptionIfErrorsExist();
 
     if (injectableConstructor != null) {
-      return new InjectionPoint(typeLiteral, injectableConstructor);
+      return new InjectionPoint(type, injectableConstructor);
     }
 
     // If no annotated constructor is found, look for a no-arg constructor instead.
@@ -221,7 +222,7 @@ public final class InjectionPoint implements Serializable {
       }
 
       checkForMisplacedBindingAnnotations(noArgConstructor, errors);
-      return new InjectionPoint(typeLiteral, noArgConstructor);
+      return new InjectionPoint(type, noArgConstructor);
     } catch (NoSuchMethodException e) {
       errors.missingConstructor(rawType);
       throw new ConfigurationException(errors.getMessages());
@@ -229,38 +230,92 @@ public final class InjectionPoint implements Serializable {
   }
 
   /**
-   * Adds all static method and field injection points on {@code type} to {@code injectionPoints}.
-   * All fields are added first, and then all methods. Within the fields, supertype fields are added
-   * before subtype fields. Similarly, supertype methods are added before subtype methods.
+   * Returns a new injection point for the injectable constructor of {@code type}.
    *
-   * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. When such an exception is thrown, the valid
-   *      injection points are still added to the collection.
+   * @param type a concrete type with exactly one constructor annotated {@literal @}{@link Inject},
+   *     or a no-arguments constructor that is not private.
+   * @throws ConfigurationException if there is no injectable constructor, more than one injectable
+   *     constructor, or if parameters of the injectable constructor are malformed, such as a
+   *     parameter with multiple binding annotations.
    */
-  public static void addForStaticMethodsAndFields(Type type, Collection<InjectionPoint> sink) {
-    Errors errors = new Errors();
-    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
-    addInjectionPoints(typeLiteral, Factory.FIELDS, true, sink, errors);
-    addInjectionPoints(typeLiteral, Factory.METHODS, true, sink, errors);
-    errors.throwConfigurationExceptionIfErrorsExist();
+  public static InjectionPoint forConstructorOf(Class<?> type) {
+    return forConstructorOf(TypeLiteral.get(type));
   }
 
   /**
-   * Adds all instance method and field injection points on {@code type} to {@code injectionPoints}.
-   * All fields are added first, and then all methods. Within the fields, supertype fields are added
-   * before subtype fields. Similarly, supertype methods are added before subtype methods.
+   * Returns all static method and field injection points on {@code type}. All fields are added
+   * first, and then all methods. Within the fields, supertype fields are added before subtype
+   * fields. Similarly, supertype methods are added before subtype methods.
    *
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
-   *      a field with multiple binding annotations. When such an exception is thrown, the valid
-   *      injection points are still added to the collection.
+   *      a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
    */
-  public static void addForInstanceMethodsAndFields(Type type, Collection<InjectionPoint> sink) {
-    // TODO (crazybob): Filter out overridden members.
+  public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral type) {
+    List<InjectionPoint> sink = Lists.newArrayList();
     Errors errors = new Errors();
-    TypeLiteral<?> typeLiteral = TypeLiteral.get(type);
-    addInjectionPoints(typeLiteral, Factory.FIELDS, false, sink, errors);
-    addInjectionPoints(typeLiteral, Factory.METHODS, false, sink, errors);
-    errors.throwConfigurationExceptionIfErrorsExist();
+
+    addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
+    addInjectionPoints(type, Factory.METHODS, true, sink, errors);
+
+    ImmutableSet<InjectionPoint> result = ImmutableSet.copyOf(sink);
+    if (errors.hasErrors()) {
+      throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
+    }
+    return result;
+  }
+  /**
+   * Returns all static method and field injection points on {@code type}. All fields are added
+   * first, and then all methods. Within the fields, supertype fields are added before subtype
+   * fields. Similarly, supertype methods are added before subtype methods.
+   *
+   * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+   *      a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
+   */
+  public static Set<InjectionPoint> forStaticMethodsAndFields(Class<?> type) {
+    return forStaticMethodsAndFields(TypeLiteral.get(type));
+  }
+
+  /**
+   * Returns all instance method and field injection points on {@code type}. All fields are added
+   * first, and then all methods. Within the fields, supertype fields are added before subtype
+   * fields. Similarly, supertype methods are added before subtype methods.
+   *
+   * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+   *      a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
+   */
+  public static Set<InjectionPoint> forInstanceMethodsAndFields(TypeLiteral<?> type) {
+    List<InjectionPoint> sink = Lists.newArrayList();
+    Errors errors = new Errors();
+
+    // TODO (crazybob): Filter out overridden members.
+    addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
+    addInjectionPoints(type, Factory.METHODS, false, sink, errors);
+
+    ImmutableSet<InjectionPoint> result = ImmutableSet.copyOf(sink);
+    if (errors.hasErrors()) {
+      throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
+    }
+    return result;
+  }
+
+  /**
+   * Returns all instance method and field injection points on {@code type}. All fields are added
+   * first, and then all methods. Within the fields, supertype fields are added before subtype
+   * fields. Similarly, supertype methods are added before subtype methods.
+   *
+   * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+   *      a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
+   */
+  public static Set<InjectionPoint> forInstanceMethodsAndFields(Class<?> type) {
+    return forInstanceMethodsAndFields(TypeLiteral.get(type));
   }
 
   private static void checkForMisplacedBindingAnnotations(Member member, Errors errors) {

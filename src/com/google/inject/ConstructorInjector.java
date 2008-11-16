@@ -42,7 +42,7 @@ class ConstructorInjector<T> {
     this.implementation = implementation;
 
     try {
-      this.injectionPoint = InjectionPoint.forConstructorOf(implementation.getType());
+      this.injectionPoint = InjectionPoint.forConstructorOf(implementation);
     } catch (ConfigurationException e) {
       throw errors.merge(e.getErrorMessages()).toException();
     }
