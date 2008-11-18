@@ -34,8 +34,9 @@ import java.util.Set;
  * Static methods for working with types.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @since 2.0
  */
-public class Types {
+public final class Types {
   private Types() {}
 
   /**

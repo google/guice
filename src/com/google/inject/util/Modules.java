@@ -41,8 +41,9 @@ import java.util.Set;
  * Static utility methods for creating and working with instances of {@link Module}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
-public class Modules {
+public final class Modules {
   private Modules() {}
 
   public static final Module EMPTY_MODULE = new Module() {

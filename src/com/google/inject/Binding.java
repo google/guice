@@ -78,6 +78,7 @@ public interface Binding<T> extends Element {
    * Accepts a target visitor. Invokes the visitor method specific to this binding's target.
    *
    * @param visitor to call back on
+   * @since 2.0
    */
   <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor);
 
@@ -85,6 +86,7 @@ public interface Binding<T> extends Element {
    * Accepts a scoping visitor. Invokes the visitor method specific to this binding's scoping.
    *
    * @param visitor to call back on
+   * @since 2.0
    */
   <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor);
 

@@ -34,6 +34,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *         new MyTransactionInterceptor());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class InterceptorBinding implements Element {
   private final Object source;

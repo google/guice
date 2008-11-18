@@ -29,6 +29,7 @@ import java.util.Set;
  *     {@code return null} if no return type is needed.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTargetVisitor<T, V> {
 

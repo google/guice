@@ -29,6 +29,7 @@ import java.lang.annotation.Annotation;
  *     bindScope(RecordScoped.class, new RecordScope());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class ScopeBinding implements Element {
   private final Object source;

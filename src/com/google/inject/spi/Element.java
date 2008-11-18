@@ -28,6 +28,7 @@ package com.google.inject.spi;
  * com.google.inject.Injector#getBindings Injector.getBindings()} to reflect on Guice injectors.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public interface Element {
 

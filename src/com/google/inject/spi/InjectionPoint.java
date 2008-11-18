@@ -50,6 +50,7 @@ import java.util.Set;
  * omit the annotation. 
  *
  * @author crazybob@google.com (Bob Lee)
+ * @since 2.0
  */
 public final class InjectionPoint implements Serializable {
 

@@ -73,6 +73,8 @@ public class Scopes {
    * <p>This exists only in case a class has been annotated with a scope
    * annotation such as {@link Singleton @Singleton}, and you need to override
    * this to "no scope" in your binding.
+   *
+   * @since 2.0
    */
   public static final Scope NO_SCOPE = new Scope() {
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {

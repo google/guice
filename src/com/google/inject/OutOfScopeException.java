@@ -21,8 +21,9 @@ package com.google.inject;
  * object while the scope in question is not currently active.
  *
  * @author kevinb@google.com (Kevin Bourrillion)
+ * @since 2.0
  */
-public class OutOfScopeException extends RuntimeException {
+public final class OutOfScopeException extends RuntimeException {
 
   public OutOfScopeException(String message) {
     super(message);

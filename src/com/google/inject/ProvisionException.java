@@ -28,6 +28,7 @@ import java.util.Collection;
  *
  * @author kevinb@google.com (Kevin Bourrillion)
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class ProvisionException extends RuntimeException {
 

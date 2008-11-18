@@ -22,6 +22,7 @@ import com.google.inject.TypeLiteral;
  * Converts constant string values to a different type.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @since 2.0
  */
 public interface TypeConverter {
 

@@ -27,6 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *     requestStaticInjection(MyLegacyService.class);</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class StaticInjectionRequest implements Element {
   private final Object source;

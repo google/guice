@@ -28,6 +28,7 @@ import com.google.inject.matcher.Matcher;
  *     convertToTypes(Matchers.only(DateTime.class), new DateTimeConverter());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class TypeConverterBinding implements Element {
   private final Object source;

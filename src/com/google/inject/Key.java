@@ -528,10 +528,12 @@ public class Key<T> implements Serializable {
     private static final long serialVersionUID = 0;
   }
 
-  protected void readObject(ObjectInputStream stream) throws InvalidObjectException {
+  /** @since 2.0 */
+  protected final void readObject(ObjectInputStream stream) throws InvalidObjectException {
     throw new InvalidObjectException("Use SerializedForm");
   }
 
+  /** @since 2.0 */
   protected final Object writeReplace() {
     return new SerializedForm(this);
   }

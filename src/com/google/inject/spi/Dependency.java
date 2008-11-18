@@ -28,6 +28,7 @@ import java.io.Serializable;
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class Dependency<T> implements Serializable {
   private final InjectionPoint injectionPoint;

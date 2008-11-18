@@ -22,7 +22,7 @@ import com.google.inject.spi.InjectionPoint;
 /**
  * Injects a field or method of a given object.
  */
-public interface SingleMemberInjector {
+interface SingleMemberInjector {
   void inject(Errors errors, InternalContext context, Object o);
   InjectionPoint getInjectionPoint();
 }

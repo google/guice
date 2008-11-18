@@ -229,6 +229,7 @@ public interface Binder {
    * and methods of the given objects.
    *
    * @param instances for which members will be injected
+   * @since 2.0
    */
   void requestInjection(Object... instances);
 
@@ -269,6 +270,8 @@ public interface Binder {
 
   /**
    * Records an error message to be presented to the user at a later time.
+   *
+   * @since 2.0
    */
   void addError(Message message);
 
@@ -277,6 +280,8 @@ public interface Binder {
    * The returned will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.
+   *
+   * @since 2.0
    */
   <T> Provider<T> getProvider(Key<T> key);
 
@@ -285,6 +290,8 @@ public interface Binder {
    * The returned will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.
+   *
+   * @since 2.0
    */
   <T> Provider<T> getProvider(Class<T> type);
 
@@ -294,6 +301,7 @@ public interface Binder {
    *
    * @param typeMatcher matches types the converter can handle
    * @param converter converts values
+   * @since 2.0
    */
   void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter);
@@ -307,6 +315,7 @@ public interface Binder {
    * @param source any object representing the source location and has a
    *     concise {@link Object#toString() toString()} value
    * @return a binder that shares its configuration with this binder
+   * @since 2.0
    */
   Binder withSource(Object source);
 
@@ -318,6 +327,7 @@ public interface Binder {
    * @param classesToSkip library classes that create bindings on behalf of
    *      their clients.
    * @return a binder that shares its configuration with this binder.
+   * @since 2.0
    */
   Binder skipSources(Class... classesToSkip);
 }

@@ -42,6 +42,9 @@ public final class Message implements Serializable, Element {
   private final Throwable cause;
   private final List<Object> sources;
 
+  /**
+   * @since 2.0
+   */
   public Message(List<Object> sources, String message, Throwable cause) {
     this.sources = ImmutableList.copyOf(sources);
     this.message = checkNotNull(message, "message");
@@ -62,6 +65,9 @@ public final class Message implements Serializable, Element {
         : Errors.convert(sources.get(sources.size() - 1)).toString();
   }
 
+  /**
+   * @since 2.0
+   */
   public List<Object> getSources() {
     return sources;
   }
@@ -73,6 +79,7 @@ public final class Message implements Serializable, Element {
     return message;
   }
 
+  /** @since 2.0 */
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
     return visitor.visitMessage(this);
   }
@@ -80,6 +87,8 @@ public final class Message implements Serializable, Element {
   /**
    * Returns the throwable that caused this message, or {@code null} if this
    * message was not caused by a throwable.
+   *
+   * @since 2.0
    */
   public Throwable getCause() {
     return cause;

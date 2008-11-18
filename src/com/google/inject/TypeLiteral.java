@@ -234,6 +234,7 @@ public class TypeLiteral<T> {
    * Iterable.class}.
    *
    * @param supertype a superclass of, or interface implemented by, this.
+   * @since 2.0
    */
   public Type getSupertype(Class<?> supertype) {
     checkArgument(supertype.isAssignableFrom(rawType),
@@ -245,6 +246,7 @@ public class TypeLiteral<T> {
    * Returns the resolved generic type of {@code field}.
    *
    * @param field a field defined by this or any superclass.
+   * @since 2.0
    */
   public Type getFieldType(Field field) {
     checkArgument(field.getDeclaringClass().isAssignableFrom(rawType),
@@ -256,6 +258,7 @@ public class TypeLiteral<T> {
    * Returns the resolved generic parameter types of {@code methodOrConstructor}.
    *
    * @param methodOrConstructor a method or constructor defined by this or any supertype.
+   * @since 2.0
    */
   public List<Type> getParameterTypes(Member methodOrConstructor) {
     Type[] genericParameterTypes;
@@ -283,6 +286,7 @@ public class TypeLiteral<T> {
    * Returns the resolved generic exception types thrown by {@code constructor}.
    *
    * @param methodOrConstructor a method or constructor defined by this or any supertype.
+   * @since 2.0
    */
   public List<Type> getExceptionTypes(Member methodOrConstructor) {
     Type[] genericExceptionTypes;
@@ -310,6 +314,7 @@ public class TypeLiteral<T> {
    * Returns the resolved generic return type of {@code method}.
    *
    * @param method a method defined by this or any supertype.
+   * @since 2.0
    */
   public Type getReturnType(Method method) {
     checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),

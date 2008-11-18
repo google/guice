@@ -24,7 +24,7 @@ import java.util.Set;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class WeakKeySet {
+final class WeakKeySet {
 
   /**
    * We store strings rather than keys so we don't hold strong references.

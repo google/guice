@@ -27,6 +27,7 @@ import java.util.Collection;
  * scope is found. Clients should catch this exception, log it, and stop execution.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class ConfigurationException extends RuntimeException {
 

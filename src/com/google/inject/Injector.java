@@ -89,6 +89,7 @@ public interface Injector {
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    *
    * @throws ConfigurationException if this injector cannot find or create the binding.
+   * @since 2.0
    */
   <T> Binding<T> getBinding(Class<T> type);
 
@@ -137,6 +138,8 @@ public interface Injector {
 
   /**
    * Returns this injector's parent, or {@code null} if this is a top-level injector.
+   *
+   * @since 2.0
    */
   Injector getParent();
 
@@ -152,6 +155,8 @@ public interface Injector {
    * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
    * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
    * injector to itself.
+   *
+   * @since 2.0
    */
   Injector createChildInjector(Iterable<? extends Module> modules);
 
@@ -167,6 +172,8 @@ public interface Injector {
    * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
    * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
    * injector to itself.
+   *
+   * @since 2.0
    */
   Injector createChildInjector(Module... modules);
 }

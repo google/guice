@@ -35,6 +35,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * Creates a Module from a collection of component elements.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public class ModuleWriter {
 

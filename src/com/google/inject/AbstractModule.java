@@ -136,6 +136,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#addError(Message)
+   * @since 2.0
    */
   protected void addError(Message message) {
     binder.addError(message);
@@ -143,6 +144,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#requestInjection(Object[])
+   * @since 2.0
    */
   protected void requestInjection(Object... objects) {
     binder.requestInjection(objects);
@@ -171,6 +173,8 @@ public abstract class AbstractModule implements Module {
    * created, Guice will report an error if {@code key} cannot be injected.
    * Note that this requirement may be satisfied by implicit binding, such as
    * a public no-arguments constructor.
+   *
+   * @since 2.0
    */
   protected void requireBinding(Key<?> key) {
     binder.getProvider(key);
@@ -181,6 +185,8 @@ public abstract class AbstractModule implements Module {
    * created, Guice will report an error if {@code type} cannot be injected.
    * Note that this requirement may be satisfied by implicit binding, such as
    * a public no-arguments constructor.
+   *
+   * @since 2.0
    */
   protected void requireBinding(Class<?> type) {
     binder.getProvider(type);
@@ -188,6 +194,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#getProvider(Key)
+   * @since 2.0
    */
   protected <T> Provider<T> getProvider(Key<T> key) {
     return binder.getProvider(key);
@@ -195,6 +202,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#getProvider(Class)
+   * @since 2.0
    */
   protected <T> Provider<T> getProvider(Class<T> type) {
     return binder.getProvider(type);
@@ -202,6 +210,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#convertToTypes
+   * @since 2.0
    */
   protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
@@ -210,6 +219,7 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#currentStage() 
+   * @since 2.0
    */
   protected Stage currentStage() {
     return binder.currentStage();

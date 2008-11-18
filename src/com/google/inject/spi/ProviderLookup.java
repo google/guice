@@ -29,6 +29,7 @@ import com.google.inject.Provider;
  *         = getProvider(PaymentService.class);</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class ProviderLookup<T> implements Element {
   private final Object source;

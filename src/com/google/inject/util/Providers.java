@@ -23,6 +23,7 @@ import com.google.inject.Provider;
  * {@link Provider}.
  *
  * @author Kevin Bourrillion (kevinb9n@gmail.com)
+ * @since 2.0
  */
 public final class Providers {
 

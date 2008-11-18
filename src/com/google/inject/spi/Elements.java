@@ -50,6 +50,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * rewritten}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class Elements {
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR

@@ -17,9 +17,9 @@
 package com.google.inject;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
@@ -27,8 +27,7 @@ import java.lang.annotation.Target;
  * type is bound to it's returned value. Guice will pass dependencies to the method as parameters.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @since 2.0
  */
-@Target({ ElementType.METHOD })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
+@Documented @Target(METHOD) @Retention(RUNTIME)
 public @interface Provides {}

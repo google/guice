@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
  *
  * @param <V> any type to be returned by the visit method. Use {@link Void} with
  *     {@code return null} if no return type is needed.
+ * @since 2.0
  */
 public interface BindingScopingVisitor<V> {
 

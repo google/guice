@@ -27,6 +27,7 @@ import java.lang.annotation.Annotation;
  *     {@code return null} if no return type is needed.
  * 
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public class DefaultBindingScopingVisitor<V> implements BindingScopingVisitor<V> {
 

@@ -326,6 +326,8 @@ public class Matchers {
   /**
    * Returns a matcher which matches classes in the given package and its subpackages. Unlike
    * {@link #inPackage(Package) inPackage()}, this matches classes from any classloader.
+   * 
+   * @since 2.0
    */
   public static Matcher<Class> inSubpackage(final String targetPackageName) {
     return new InSubpackage(targetPackageName);

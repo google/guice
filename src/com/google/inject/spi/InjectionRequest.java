@@ -26,6 +26,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *     requestInjection(serviceInstance);</pre>
  *
  * @author mikeward@google.com (Mike Ward)
+ * @since 2.0
  */
 public final class InjectionRequest implements Element {
   private Object source;
