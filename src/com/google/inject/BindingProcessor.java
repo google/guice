@@ -249,11 +249,16 @@ class BindingProcessor extends AbstractProcessor {
     }
 
     Binding<?> original = state.getExplicitBinding(key);
-    if (original != null && !"com.google.inject.privatemodules.PrivateModule$Expose"
-        .equals(original.acceptTargetVisitor(GET_BOUND_PROVIDER_CLASS_NAME))) {
+
+    if (original != null) {
       // the hard-coded class name is certainly lame, but it avoids an even lamer dependency...
-      errors.bindingAlreadySet(key, original.getSource());
-      return;
+      boolean isOkayDuplicate = original instanceof ProviderInstanceBindingImpl
+          && "com.google.inject.privatemodules.PrivateModule$Expose"
+              .equals(original.acceptTargetVisitor(GET_BOUND_PROVIDER_CLASS_NAME));
+      if (!isOkayDuplicate) {
+        errors.bindingAlreadySet(key, original.getSource());
+        return;
+      }
     }
 
     // prevent the parent from creating a JIT binding for this key

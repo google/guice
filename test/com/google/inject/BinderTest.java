@@ -99,6 +99,22 @@ public class BinderTest extends TestCase {
     }
   }
 
+  public void testDuplicateBindings() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(JustAClass.class);
+          bind(JustAClass.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "A binding to " + JustAClass.class.getName(),
+          " was already configured at " + BinderTest.class.getName(), ".configure(",
+          "at " + BinderTest.class.getName(), ".configure(BinderTest.java:");
+    }
+  }
+
   public void testMissingDependency() {
     try {
       Guice.createInjector(new AbstractModule() {
