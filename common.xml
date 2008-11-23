@@ -13,7 +13,8 @@
     <mkdir dir="${build.dir}/classes"/>
     <javac srcdir="${src.dir}"
          debug="on"
-         destdir="${build.dir}/classes">
+         destdir="${build.dir}/classes"
+         source="1.5" target="1.5">
       <classpath refid="compile.classpath"/>
     </javac>
     <copy toDir="${build.dir}/classes">
@@ -60,7 +61,8 @@
     <mkdir dir="${build.dir}/test"/>
     <javac srcdir="${test.dir}"
          debug="on"
-         destdir="${build.dir}/test">
+         destdir="${build.dir}/test"
+         source="1.5" target="1.5">
       <classpath path="${build.dir}/classes"/>
       <classpath refid="compile.classpath"/>
     </javac>
