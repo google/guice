@@ -24,10 +24,6 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -38,23 +34,6 @@ import junit.framework.TestCase;
  * @author crazybob@google.com (Bob Lee)
  */
 public class BinderTest extends TestCase {
-
-  private ParameterizedType parameterizedWithVariable;
-  private ParameterizedType parameterizedWithWildcard;
-  private TypeVariable typeVariable;
-  private WildcardType wildcardType;
-
-  <T> void parameterizedWithVariable(List<T> typeWithVariables) {}
-  <T> void parameterizedWithWildcard(List<? extends Comparable> typeWithWildcard) {}
-
-  @Override protected void setUp() throws Exception {
-    parameterizedWithVariable = (ParameterizedType) getClass()
-        .getDeclaredMethod("parameterizedWithVariable", List.class).getGenericParameterTypes()[0];
-    parameterizedWithWildcard = (ParameterizedType) getClass()
-        .getDeclaredMethod("parameterizedWithWildcard", List.class).getGenericParameterTypes()[0];
-    typeVariable = (TypeVariable) parameterizedWithVariable.getActualTypeArguments()[0];
-    wildcardType = (WildcardType) parameterizedWithWildcard.getActualTypeArguments()[0];
-  }
 
   Provider<Foo> fooProvider;
 
@@ -263,32 +242,6 @@ public class BinderTest extends TestCase {
           "1) A binding to java.lang.String[] was already configured at " + getClass().getName(),
           "at " + getClass().getName(), ".configure(BinderTest.java:");
       assertContains(expected.getMessage(), "1 error");
-    }
-  }
-
-  /** Test for issue 186 */
-  public void testBindDisallowedTypes() throws NoSuchMethodException {
-    Type[] types = new Type[] {
-        parameterizedWithVariable,
-        parameterizedWithWildcard,
-        typeVariable,
-        wildcardType,
-    };
-
-    for (Type type : types) {
-      @SuppressWarnings("unchecked") final
-      Key<Object> key = (Key<Object>) Key.get(type);
-
-      try {
-        Guice.createInjector(new AbstractModule() {
-          protected void configure() {
-            bind(key).toProvider(Providers.of(null));
-          }
-        });
-        fail("Guice should not allow bindings to " + type);
-      } catch (CreationException e) {
-        assertContains(e.getMessage(), "Cannot bind types that have type variables");
-      }
     }
   }
 

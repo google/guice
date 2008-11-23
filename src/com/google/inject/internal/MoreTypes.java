@@ -21,7 +21,10 @@ import com.google.common.base.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.Message;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -63,16 +66,41 @@ public class MoreTypes {
           .build();
 
   /**
-   * Returns an equivalent (but not necessarily equal) type literal that is
-   * free of primitive types. Type literals of primitives will return the
-   * corresponding wrapper types.
+   * Returns an equivalent type that's safe for use in a key. The returned type will be free of
+   * primitive types. Type literals of primitives will return the corresponding wrapper types.
+   *
+   * @throws ConfigurationException if {@code type} contains a type variable
    */
-  public static <T> TypeLiteral<T> wrapPrimitives(TypeLiteral<T> typeLiteral) {
+  public static <T> TypeLiteral<T> makeKeySafe(TypeLiteral<T> type) {
+    if (!isFullySpecified(type.getType())) {
+      String message = type + " cannot be used as a key; It is not fully specified.";
+      throw new ConfigurationException(ImmutableSet.of(
+          new Message(SourceProvider.UNKNOWN_SOURCE, message)));
+    }
+
     @SuppressWarnings("unchecked")
-    TypeLiteral<T> wrappedPrimitives = (TypeLiteral<T>) PRIMITIVE_TO_WRAPPER.get(typeLiteral);
+    TypeLiteral<T> wrappedPrimitives = (TypeLiteral<T>) PRIMITIVE_TO_WRAPPER.get(type);
     return wrappedPrimitives != null
         ? wrappedPrimitives
-        : typeLiteral;
+        : type;
+  }
+
+  /**
+   * Returns true if {@code type} is free from type variables.
+   */
+  private static boolean isFullySpecified(Type type) {
+    if (type instanceof Class) {
+      return true;
+
+    } else if (type instanceof CompositeType) {
+      return ((CompositeType) type).isFullySpecified();
+
+    } else if (type instanceof TypeVariable){
+      return false;
+
+    } else {
+      return ((CompositeType) canonicalize(type)).isFullySpecified();
+    }
   }
 
   /**
@@ -140,6 +168,11 @@ public class MoreTypes {
       // TODO: Is this sufficient?
       return Object[].class;
 
+    } else if (type instanceof TypeVariable) {
+      // we could use the variable's bounds, but that'll won't work if there are multiple.
+      // having a raw type that's more general than necessary is okay  
+      return Object.class;
+
     } else {
       throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
           + "GenericArrayType, but <" + type + "> is of type " + type.getClass().getName());
@@ -163,7 +196,7 @@ public class MoreTypes {
         return false;
       }
 
-      // TODO(jessewilson): save a .clone() call
+      // TODO: save a .clone() call
       ParameterizedType pa = (ParameterizedType) a;
       ParameterizedType pb = (ParameterizedType) b;
       return Objects.equal(pa.getOwnerType(), pb.getOwnerType())
@@ -189,9 +222,17 @@ public class MoreTypes {
       return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
           && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
 
+    } else if (a instanceof TypeVariable) {
+      if (!(b instanceof TypeVariable)) {
+        return false;
+      }
+      TypeVariable<?> va = (TypeVariable) a;
+      TypeVariable<?> vb = (TypeVariable) b;
+      return va.getGenericDeclaration() == vb.getGenericDeclaration()
+          && va.getName().equals(vb.getName());
+
     } else {
-      // This isn't a type we support. Could be a generic array type, wildcard
-      // type, etc.
+      // This isn't a type we support. Could be a generic array type, wildcard type, etc.
       return false;
     }
   }
@@ -218,7 +259,7 @@ public class MoreTypes {
       return Arrays.hashCode(w.getLowerBounds()) ^ Arrays.hashCode(w.getUpperBounds());
 
     } else {
-      // This isn't a type we support. Could be a generic array type, wildcard type, etc.
+      // This isn't a type we support. Probably a type variable
       return hashCodeOrZero(type);
     }
   }
@@ -418,7 +459,8 @@ public class MoreTypes {
         : null;
   }
 
-  public static class ParameterizedTypeImpl implements ParameterizedType, Serializable {
+  public static class ParameterizedTypeImpl
+      implements ParameterizedType, Serializable, CompositeType {
     private final Type ownerType;
     private final Type rawType;
     private final Type[] typeArguments;
@@ -455,6 +497,24 @@ public class MoreTypes {
       return ownerType;
     }
 
+    public boolean isFullySpecified() {
+      if (ownerType != null && !MoreTypes.isFullySpecified(ownerType)) {
+        return false;
+      }
+
+      if (!MoreTypes.isFullySpecified(rawType)) {
+        return false;
+      }
+
+      for (Type type : typeArguments) {
+        if (!MoreTypes.isFullySpecified(type)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     @Override public boolean equals(Object other) {
       return other instanceof ParameterizedType
           && MoreTypes.equals(this, (ParameterizedType) other);
@@ -471,7 +531,8 @@ public class MoreTypes {
     private static final long serialVersionUID = 0;
   }
 
-  public static class GenericArrayTypeImpl implements GenericArrayType, Serializable {
+  public static class GenericArrayTypeImpl
+      implements GenericArrayType, Serializable, CompositeType {
     private final Type componentType;
 
     public GenericArrayTypeImpl(Type componentType) {
@@ -480,6 +541,10 @@ public class MoreTypes {
 
     public Type getGenericComponentType() {
       return componentType;
+    }
+
+    public boolean isFullySpecified() {
+      return MoreTypes.isFullySpecified(componentType);
     }
 
     @Override public boolean equals(Object o) {
@@ -503,7 +568,7 @@ public class MoreTypes {
    * lower bounds. We only support what the Java 6 language needs - at most one
    * bound. If a lower bound is set, the upper bound must be Object.class.
    */
-  public static class WildcardTypeImpl implements WildcardType, Serializable {
+  public static class WildcardTypeImpl implements WildcardType, Serializable, CompositeType {
     private final Type upperBound;
     private final Type lowerBound;
 
@@ -532,6 +597,11 @@ public class MoreTypes {
 
     public Type[] getLowerBounds() {
       return lowerBound != null ? new Type[] { lowerBound } : EMPTY_TYPE_ARRAY;
+    }
+
+    public boolean isFullySpecified() {
+      return MoreTypes.isFullySpecified(upperBound)
+          && (lowerBound == null || MoreTypes.isFullySpecified(lowerBound));
     }
 
     @Override public boolean equals(Object other) {
@@ -596,5 +666,11 @@ public class MoreTypes {
     @Override public String toString() {
       return MoreTypes.toString(this);
     }
+  }
+
+  /** A type formed from other types, such as arrays, parameterized types or wildcard types */
+  private interface CompositeType {
+    /** Returns true if there are no type variables in this type. */
+    boolean isFullySpecified();
   }
 }

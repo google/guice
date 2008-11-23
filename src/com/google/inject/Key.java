@@ -72,8 +72,7 @@ public class Key<T> implements Serializable {
   @SuppressWarnings("unchecked")
   protected Key(Class<? extends Annotation> annotationType) {
     this.annotationStrategy = strategyFor(annotationType);
-    this.typeLiteral
-        = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
   }
 
@@ -93,8 +92,7 @@ public class Key<T> implements Serializable {
   protected Key(Annotation annotation) {
     // no usages, not test-covered
     this.annotationStrategy = strategyFor(annotation);
-    this.typeLiteral
-        = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
   }
 
@@ -112,8 +110,7 @@ public class Key<T> implements Serializable {
   @SuppressWarnings("unchecked")
   protected Key() {
     this.annotationStrategy = NullAnnotationStrategy.INSTANCE;
-    this.typeLiteral
-        = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
     this.hashCode = computeHashCode();
   }
 
@@ -123,15 +120,14 @@ public class Key<T> implements Serializable {
   @SuppressWarnings("unchecked")
   private Key(Type type, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = MoreTypes.wrapPrimitives((TypeLiteral<T>) TypeLiteral.get(type));
+    this.typeLiteral = MoreTypes.makeKeySafe((TypeLiteral<T>) TypeLiteral.get(type));
     this.hashCode = computeHashCode();
   }
 
   /** Constructs a key from a manually specified type. */
-  private Key(TypeLiteral<T> typeLiteral,
-      AnnotationStrategy annotationStrategy) {
+  private Key(TypeLiteral<T> typeLiteral, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = MoreTypes.wrapPrimitives(typeLiteral);
+    this.typeLiteral = MoreTypes.makeKeySafe(typeLiteral);
     this.hashCode = computeHashCode();
   }
 

@@ -30,7 +30,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.MatcherAndConverter;
-import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -348,7 +347,7 @@ class InjectorImpl implements Injector {
    */
   <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope, Object source,
       LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
-    Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
+    Class<?> rawType = key.getTypeLiteral().getRawType();
 
     // Don't try to inject arrays, or enums.
     if (rawType.isArray() || rawType.isEnum()) {
@@ -467,7 +466,7 @@ class InjectorImpl implements Injector {
   /** Creates a binding for a type annotated with @ProvidedBy. */
   <T> BindingImpl<T> createProvidedByBinding(Key<T> key, Scope scope,
       ProvidedBy providedBy, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
-    final Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
+    final Class<?> rawType = key.getTypeLiteral().getRawType();
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
@@ -515,7 +514,7 @@ class InjectorImpl implements Injector {
   <T> BindingImpl<T> createImplementedByBinding(Key<T> key, Scope scope,
       ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
       throws ErrorsException {
-    Class<?> rawType = MoreTypes.getRawType(key.getTypeLiteral().getType());
+    Class<?> rawType = key.getTypeLiteral().getRawType();
     Class<?> implementationType = implementedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper cycles?
@@ -600,7 +599,7 @@ class InjectorImpl implements Injector {
       throw errors.missingImplementation(key).toException();
     }
 
-    Object source = MoreTypes.getRawType(key.getTypeLiteral().getType());
+    Object source = key.getTypeLiteral().getRawType();
     BindingImpl<T> binding = createUnitializedBinding(key, null /* scope */, source,
         LoadStrategy.LAZY, errors);
     initializeBinding(binding, errors);

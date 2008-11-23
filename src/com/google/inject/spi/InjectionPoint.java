@@ -27,6 +27,7 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.MoreTypes;
+import static com.google.inject.internal.MoreTypes.getRawType;
 import com.google.inject.internal.Nullability;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -37,7 +38,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -109,7 +109,7 @@ public final class InjectionPoint implements Serializable {
     List<Dependency<?>> dependencies = Lists.newArrayList();
     int index = 0;
 
-    for (Type parameterType : type.getParameterTypes(member)) {
+    for (TypeLiteral<?> parameterType : type.getParameterTypes(member)) {
       try {
         Annotation[] parameterAnnotations = annotationsIterator.next();
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
@@ -185,7 +185,7 @@ public final class InjectionPoint implements Serializable {
    *     parameter with multiple binding annotations.
    */
   public static InjectionPoint forConstructorOf(TypeLiteral<?> type) {
-    Class<?> rawType = MoreTypes.getRawType(type.getType());
+    Class<?> rawType = getRawType(type.getType());
     Errors errors = new Errors(rawType);
 
     Constructor<?> injectableConstructor = null;
@@ -335,8 +335,8 @@ public final class InjectionPoint implements Serializable {
     }
 
     // Add injectors for superclass first.
-    Type superType = type.getSupertype(MoreTypes.getRawType(type.getType()).getSuperclass());
-    addInjectionPoints(TypeLiteral.get(superType), factory, statics, injectionPoints, errors);
+    TypeLiteral<?> superType = type.getSupertype(type.getRawType().getSuperclass());
+    addInjectionPoints(superType, factory, statics, injectionPoints, errors);
 
     // Add injectors for all members next
     addInjectorsForMembers(type, factory, statics, injectionPoints, errors);
@@ -345,7 +345,7 @@ public final class InjectionPoint implements Serializable {
   private static <M extends Member & AnnotatedElement> void addInjectorsForMembers(
       TypeLiteral<?> typeResolver, Factory<M> factory, boolean statics,
       Collection<InjectionPoint> injectionPoints, Errors errors) {
-    for (M member : factory.getMembers(MoreTypes.getRawType(typeResolver.getType()))) {
+    for (M member : factory.getMembers(getRawType(typeResolver.getType()))) {
       if (isStatic(member) != statics) {
         continue;
       }

@@ -19,11 +19,11 @@ package com.google.inject.internal;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.TypeLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Member;
-import java.lang.reflect.Type;
 
 /**
  * Annotation utilities.
@@ -83,8 +83,8 @@ public class Annotations {
   }
 
   /** Gets a key for the given type, member and annotations. */
-  public static Key<?> getKey(Type type, Member member, Annotation[] annotations, Errors errors)
-      throws ErrorsException {
+  public static Key<?> getKey(TypeLiteral<?> type, Member member, Annotation[] annotations,
+      Errors errors) throws ErrorsException {
     int numErrorsBefore = errors.size();
     Annotation found = findBindingAnnotation(errors, member, annotations);
     errors.throwIfNewErrors(numErrorsBefore);

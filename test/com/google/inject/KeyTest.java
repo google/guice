@@ -28,7 +28,9 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -160,6 +162,33 @@ public class KeyTest extends TestCase {
     }
   }
 
+  <T> void parameterizedWithVariable(List<T> typeWithVariables) {}
+
+  /** Test for issue 186 */
+  public void testCannotCreateKeysWithTypeVariables() throws NoSuchMethodException {
+    ParameterizedType listOfTType = (ParameterizedType) getClass().getDeclaredMethod(
+        "parameterizedWithVariable", List.class).getGenericParameterTypes()[0];
+
+    TypeLiteral<?> listOfT = TypeLiteral.get(listOfTType);
+    try {
+      Key.get(listOfT);
+      fail("Guice should not allow keys for java.util.List<T>");
+    } catch (ConfigurationException e) {
+      assertContains(e.getMessage(),
+          "java.util.List<T> cannot be used as a key; It is not fully specified.");
+    }
+
+    TypeVariable tType = (TypeVariable) listOfTType.getActualTypeArguments()[0];
+    TypeLiteral<?> t = TypeLiteral.get(tType);
+    try {
+      Key.get(t);
+      fail("Guice should not allow keys for T");
+    } catch (ConfigurationException e) {
+      assertContains(e.getMessage(),
+          "T cannot be used as a key; It is not fully specified.");
+    }
+  }
+
   interface B {}
 
   @Retention(RUNTIME)
@@ -168,4 +197,8 @@ public class KeyTest extends TestCase {
 
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @BindingAnnotation @interface Bar {}
+
+  class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
+    A a; B b; C c;
+  }
 }

@@ -16,10 +16,13 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.util.Types;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import junit.framework.TestCase;
 
@@ -134,5 +137,55 @@ public class TypeLiteralTest extends TestCase {
 
   public void testSerialization() throws IOException {
     assertNotSerializable(new TypeLiteral<List<String>>() {});
+  }
+
+  public void testTypeVariableWithNoBound() {
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables
+        = HasTypeParameters.class.getTypeParameters();
+
+    TypeLiteral<?> aTl = TypeLiteral.get(typeVariables[0]);
+    assertEquals(Object.class, aTl.getRawType());
+    assertEquals("A", aTl.toString());
+    TypeVariable<?> aTv = (TypeVariable) aTl.getType();
+    assertEquals(HasTypeParameters.class, aTv.getGenericDeclaration());
+    assertEquals("A", aTv.getName());
+    assertEquals(ImmutableList.<Type>of(Object.class), ImmutableList.of(aTv.getBounds()));
+    assertEquals("A", aTv.toString());
+    assertEqualsBothWays(aTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
+  }
+
+  public void testTypeVariablesWithSingleBound() {
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables
+        = HasTypeParameters.class.getTypeParameters();
+
+    TypeLiteral<?> cTl = TypeLiteral.get(typeVariables[2]);
+    assertEquals(Object.class, cTl.getRawType());
+    assertEquals("C", cTl.toString());
+    TypeVariable<?> cTv = (TypeVariable) cTl.getType();
+    assertEquals(HasTypeParameters.class, cTv.getGenericDeclaration());
+    assertEquals("C", cTv.getName());
+    assertEquals(ImmutableList.<Type>of(Runnable.class), ImmutableList.of(cTv.getBounds()));
+    assertEquals("C", cTv.toString());
+    assertEqualsBothWays(cTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[2]));
+  }
+
+  public void testTypeVariableWithMultipleBounds() {
+    TypeVariable<Class<HasTypeParameters>>[] typeVariables
+        = HasTypeParameters.class.getTypeParameters();
+
+    TypeLiteral<?> bTl = TypeLiteral.get(typeVariables[1]);
+    assertEquals(Object.class, bTl.getRawType());
+    assertEquals("B", bTl.toString());
+    TypeVariable<?> bTv = (TypeVariable) bTl.getType();
+    assertEquals(HasTypeParameters.class, bTv.getGenericDeclaration());
+    assertEquals("B", bTv.getName());
+    assertEquals(ImmutableList.<Type>of(Types.listOf(typeVariables[0]), Runnable.class),
+        ImmutableList.of(bTv.getBounds()));
+    assertEquals("B", bTv.toString());
+    assertEqualsBothWays(bTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[1]));
+  }
+
+  class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
+    A a; B b; C c;
   }
 }

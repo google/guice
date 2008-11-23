@@ -82,8 +82,8 @@ public class TypeLiteral<T> {
   }
 
   /**
-   * Returns the type from super class's type parameter in {@link
-   * com.google.inject.internal.MoreTypes#canonicalize(Type) canonical form}.
+   * Returns the type from super class's type parameter in {@link MoreTypes#canonicalize(Type)
+   * canonical form}.
    */
   static Type getSuperclassTypeParameter(Class<?> subclass) {
     Type superclass = subclass.getGenericSuperclass();
@@ -102,9 +102,9 @@ public class TypeLiteral<T> {
   }
 
   /**
-   * Gets the raw type.
+   * Returns the raw (non-generic) type for this type.
    */
-  final Class<? super T> getRawType() {
+  public final Class<? super T> getRawType() {
     return rawType;
   }
 
@@ -154,8 +154,8 @@ public class TypeLiteral<T> {
 
 
   /** Returns an immutable list of the resolved types. */
-  private List<Type> resolveAll(Type[] types) {
-    Type[] result = new Type[types.length];
+  private List<TypeLiteral<?>> resolveAll(Type[] types) {
+    TypeLiteral<?>[] result = new TypeLiteral<?>[types.length];
     for (int t = 0; t < types.length; t++) {
       result[t] = resolve(types[t]);
     }
@@ -165,7 +165,12 @@ public class TypeLiteral<T> {
   /**
    * Resolves known type parameters in {@code toResolve} and returns the result.
    */
-  Type resolve(Type toResolve) {
+  TypeLiteral<?> resolve(Type toResolve) {
+    return TypeLiteral.get(resolveType(toResolve));
+  }
+
+  Type resolveType(Type toResolve) {
+    // this implementation is made a little more complicated in an attempt to avoid object-creation
     while (true) {
       if (toResolve instanceof TypeVariable) {
         TypeVariable original = (TypeVariable) toResolve;
@@ -177,7 +182,7 @@ public class TypeLiteral<T> {
       } else if (toResolve instanceof GenericArrayType) {
         GenericArrayType original = (GenericArrayType) toResolve;
         Type componentType = original.getGenericComponentType();
-        Type newComponentType = resolve(componentType);
+        Type newComponentType = resolveType(componentType);
         return componentType == newComponentType
             ? original
             : Types.arrayOf(newComponentType);
@@ -185,12 +190,12 @@ public class TypeLiteral<T> {
       } else if (toResolve instanceof ParameterizedType) {
         ParameterizedType original = (ParameterizedType) toResolve;
         Type ownerType = original.getOwnerType();
-        Type newOwnerType = resolve(ownerType);
+        Type newOwnerType = resolveType(ownerType);
         boolean changed = newOwnerType != ownerType;
 
         Type[] args = original.getActualTypeArguments();
         for (int t = 0, length = args.length; t < length; t++) {
-          Type resolvedTypeArgument = resolve(args[t]);
+          Type resolvedTypeArgument = resolveType(args[t]);
           if (resolvedTypeArgument != args[t]) {
             if (!changed) {
               args = args.clone();
@@ -210,12 +215,12 @@ public class TypeLiteral<T> {
         Type[] originalUpperBound = original.getUpperBounds();
 
         if (originalLowerBound.length == 1) {
-          Type lowerBound = resolve(originalLowerBound[0]);
+          Type lowerBound = resolveType(originalLowerBound[0]);
           if (lowerBound != originalLowerBound[0]) {
             return Types.supertypeOf(lowerBound);
           }
         } else if (originalUpperBound.length == 1) {
-          Type upperBound = resolve(originalUpperBound[0]);
+          Type upperBound = resolveType(originalUpperBound[0]);
           if (upperBound != originalUpperBound[0]) {
             return Types.subtypeOf(upperBound);
           }
@@ -236,7 +241,7 @@ public class TypeLiteral<T> {
    * @param supertype a superclass of, or interface implemented by, this.
    * @since 2.0
    */
-  public Type getSupertype(Class<?> supertype) {
+  public TypeLiteral<?> getSupertype(Class<?> supertype) {
     checkArgument(supertype.isAssignableFrom(rawType),
         "%s is not a supertype of %s", supertype, this.type);
     return resolve(MoreTypes.getGenericSupertype(type, rawType, supertype));
@@ -248,7 +253,7 @@ public class TypeLiteral<T> {
    * @param field a field defined by this or any superclass.
    * @since 2.0
    */
-  public Type getFieldType(Field field) {
+  public TypeLiteral<?> getFieldType(Field field) {
     checkArgument(field.getDeclaringClass().isAssignableFrom(rawType),
         "%s is not defined by a supertype of %s", field, type);
     return resolve(field.getGenericType());
@@ -260,7 +265,7 @@ public class TypeLiteral<T> {
    * @param methodOrConstructor a method or constructor defined by this or any supertype.
    * @since 2.0
    */
-  public List<Type> getParameterTypes(Member methodOrConstructor) {
+  public List<TypeLiteral<?>> getParameterTypes(Member methodOrConstructor) {
     Type[] genericParameterTypes;
 
     if (methodOrConstructor instanceof Method) {
@@ -288,7 +293,7 @@ public class TypeLiteral<T> {
    * @param methodOrConstructor a method or constructor defined by this or any supertype.
    * @since 2.0
    */
-  public List<Type> getExceptionTypes(Member methodOrConstructor) {
+  public List<TypeLiteral<?>> getExceptionTypes(Member methodOrConstructor) {
     Type[] genericExceptionTypes;
 
     if (methodOrConstructor instanceof Method) {
@@ -316,7 +321,7 @@ public class TypeLiteral<T> {
    * @param method a method defined by this or any supertype.
    * @since 2.0
    */
-  public Type getReturnType(Method method) {
+  public TypeLiteral<?> getReturnType(Method method) {
     checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
         "%s is not defined by a supertype of %s", method, type);
     return resolve(method.getGenericReturnType());

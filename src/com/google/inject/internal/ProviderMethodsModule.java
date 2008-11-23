@@ -30,7 +30,6 @@ import com.google.inject.util.Modules;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -107,17 +106,15 @@ public final class ProviderMethodsModule implements Module {
 
     // prepare the parameter providers
     List<Provider<?>> parameterProviders = Lists.newArrayList();
-    List<Type> parameterTypes = typeLiteral.getParameterTypes(method);
+    List<TypeLiteral<?>> parameterTypes = typeLiteral.getParameterTypes(method);
     Annotation[][] parameterAnnotations = method.getParameterAnnotations();
     for (int i = 0; i < parameterTypes.size(); i++) {
-      Key<?> key = getKey(errors, TypeLiteral.get(parameterTypes.get(i)),
-          method, parameterAnnotations[i]);
+      Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
       parameterProviders.add(binder.getProvider(key));
     }
 
-    // Define T as the method's return type.
-    @SuppressWarnings("unchecked") TypeLiteral<T> returnType
-        = (TypeLiteral<T>) TypeLiteral.get(typeLiteral.getReturnType(method));
+    @SuppressWarnings("unchecked") // Define T as the method's return type.
+    TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
 
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
     Class<? extends Annotation> scopeAnnotation

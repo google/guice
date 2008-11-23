@@ -168,4 +168,18 @@ public class GenericInjectionTest extends TestCase {
       this.values = values;
     }
   }
+
+  public void testImmediateTypeVariablesAreInjected() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toInstance("tee");
+      }
+    });
+    InjectsT<String> injectsT = injector.getInstance(new Key<InjectsT<String>>() {});
+    assertEquals("tee", injectsT.t);
+  }
+
+  static class InjectsT<T> {
+    @Inject T t;
+  }
 }
