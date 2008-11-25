@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
@@ -330,4 +331,15 @@ public interface Binder {
    * @since 2.0
    */
   Binder skipSources(Class... classesToSkip);
+
+  /**
+   * Creates a new private child environment for bindings and other configuration. The returned
+   * binder can be used to add and configuration information in this environment. See {@link
+   * com.google.inject.privatemodules.PrivateModule} for details.
+   *
+   * @return a binder that inherits configuration from this binder. Only exposed configuration on
+   *      the returned binder will be visible to this binder.
+   * @since 2.0
+   */
+  PrivateBinder newPrivateBinder();
 }

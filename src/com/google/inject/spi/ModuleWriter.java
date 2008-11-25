@@ -24,6 +24,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -99,6 +100,16 @@ public class ModuleWriter {
         writeGetProvider(binder, element);
         return null;
       }
+
+      public Void visitPrivateElements(PrivateEnvironment privateEnvironment) {
+        writePrivateElements(binder, privateEnvironment);
+        return null;
+      }
+
+      public Void visitExposure(Exposure expose) {
+        writeExpose(binder, expose);
+        return null;
+      }
     };
 
     for (Element element : elements) {
@@ -106,43 +117,50 @@ public class ModuleWriter {
     }
   }
 
-  protected void writeMessage(final Binder binder, final Message element) {
+  protected void writeMessage(Binder binder, Message element) {
     binder.addError(element);
   }
 
-  protected void writeBindInterceptor(final Binder binder, final InterceptorBinding element) {
+  protected void writeBindInterceptor(Binder binder, InterceptorBinding element) {
     List<MethodInterceptor> interceptors = element.getInterceptors();
     binder.withSource(element.getSource()).bindInterceptor(
         element.getClassMatcher(), element.getMethodMatcher(),
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
 
-  protected void writeBindScope(final Binder binder, final ScopeBinding element) {
+  protected void writeBindScope(Binder binder, ScopeBinding element) {
     binder.withSource(element.getSource()).bindScope(
         element.getAnnotationType(), element.getScope());
   }
 
-  protected void writeRequestInjection(final Binder binder,
-      final InjectionRequest command) {
+  protected void writeRequestInjection(Binder binder, InjectionRequest command) {
     binder.withSource(command.getSource()).requestInjection(command.getInstance());
   }
 
-  protected void writeRequestStaticInjection(final Binder binder,
-      final StaticInjectionRequest element) {
+  protected void writeRequestStaticInjection(Binder binder, StaticInjectionRequest element) {
     Class<?> type = element.getType();
     binder.withSource(element.getSource()).requestStaticInjection(type);
   }
 
-  protected void writeConvertToTypes(final Binder binder, final TypeConverterBinding element) {
+  protected void writeConvertToTypes(Binder binder, TypeConverterBinding element) {
     binder.withSource(element.getSource())
         .convertToTypes(element.getTypeMatcher(), element.getTypeConverter());
   }
 
-  protected <T> void writeBind(final Binder binder, final Binding<T> element) {
+  protected <T> void writeBind(Binder binder, Binding<T> element) {
     LinkedBindingBuilder<T> lbb = binder.withSource(element.getSource()).bind(element.getKey());
-
     ScopedBindingBuilder sbb = applyTarget(element, lbb);
     applyScoping(element, sbb);
+  }
+
+  protected void writePrivateElements(Binder binder, PrivateEnvironment element) {
+    PrivateBinder privateBinder = binder.withSource(element.getSource()).newPrivateBinder();
+    apply(privateBinder, element.getElements());
+  }
+
+  protected void writeExpose(Binder binder, Exposure exposure) {
+    PrivateBinder privateBinder = (PrivateBinder) binder;
+    privateBinder.withSource(exposure.getSource()).expose(exposure.getKey());
   }
 
   /**
@@ -212,7 +230,7 @@ public class ModuleWriter {
     });
   }
 
-  protected <T> void writeGetProvider(final Binder binder, final ProviderLookup<T> element) {
+  protected <T> void writeGetProvider(Binder binder, ProviderLookup<T> element) {
     Provider<T> provider = binder.withSource(element.getSource()).getProvider(element.getKey());
     element.initDelegate(provider);
   }

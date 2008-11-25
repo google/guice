@@ -41,31 +41,39 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitElement(message);
   }
 
-  public <T> V visitBinding(Binding<T> command) {
-    return visitElement(command);
+  public <T> V visitBinding(Binding<T> binding) {
+    return visitElement(binding);
   }
 
-  public V visitInterceptorBinding(InterceptorBinding command) {
-    return visitElement(command);
+  public V visitInterceptorBinding(InterceptorBinding interceptorBinding) {
+    return visitElement(interceptorBinding);
   }
 
-  public V visitScopeBinding(ScopeBinding command) {
-    return visitElement(command);
+  public V visitScopeBinding(ScopeBinding scopeBinding) {
+    return visitElement(scopeBinding);
   }
 
-  public V visitTypeConverterBinding(TypeConverterBinding command) {
-    return visitElement(command);
+  public V visitTypeConverterBinding(TypeConverterBinding typeConverterBinding) {
+    return visitElement(typeConverterBinding);
   }
 
-  public <T> V visitProviderLookup(ProviderLookup<T> command) {
-    return visitElement(command);
+  public <T> V visitProviderLookup(ProviderLookup<T> providerLookup) {
+    return visitElement(providerLookup);
   }
 
-  public V visitInjectionRequest(InjectionRequest command) {
-    return visitElement(command);
+  public V visitInjectionRequest(InjectionRequest injectionRequest) {
+    return visitElement(injectionRequest);
   }
 
-  public V visitStaticInjectionRequest(StaticInjectionRequest command) {
-    return visitElement(command);
+  public V visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
+    return visitElement(staticInjectionRequest);
+  }
+
+  public V visitPrivateElements(PrivateEnvironment privateEnvironment) {
+    return visitElement(privateEnvironment);
+  }
+
+  public V visitExposure(Exposure exposure) {
+    return visitElement(exposure);
   }
 }

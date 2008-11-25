@@ -31,6 +31,8 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.AnnotatedElementBuilder;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ModuleBinding;
 import com.google.inject.internal.ProviderMethodsModule;
@@ -39,10 +41,10 @@ import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.Collection;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -101,12 +103,13 @@ public final class Elements {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
-  private static class RecordingBinder implements Binder {
+  private static class RecordingBinder implements Binder, PrivateBinder {
     private final Stage stage;
     private final Set<Module> modules;
     private final List<Element> elements;
     private final Object source;
     private final SourceProvider sourceProvider;
+    private final PrivateEnvironment privateEnvironment;
 
     private RecordingBinder(Stage stage) {
       this.stage = stage;
@@ -115,12 +118,10 @@ public final class Elements {
       this.source = null;
       this.sourceProvider = new SourceProvider()
           .plusSkippedClasses(Elements.class, RecordingBinder.class, AbstractModule.class);
+      this.privateEnvironment = null;
     }
 
-    /**
-     * Creates a recording binder that's backed by the same configuration as
-     * {@code backingBinder}.
-     */
+    /** Creates a recording binder that's backed by {@code backingBinder}. */
     private RecordingBinder(RecordingBinder parent, Object source, SourceProvider sourceProvider) {
       checkArgument(source == null ^ sourceProvider == null);
 
@@ -129,6 +130,17 @@ public final class Elements {
       this.elements = parent.elements;
       this.source = source;
       this.sourceProvider = sourceProvider;
+      this.privateEnvironment = parent.privateEnvironment;
+    }
+
+    /** Creates a private recording binder. */
+    private RecordingBinder(RecordingBinder parent, PrivateEnvironment privateEnvironment) {
+      this.stage = parent.stage;
+      this.modules = Sets.newHashSet();
+      this.elements = privateEnvironment.elementsMutable;
+      this.source = parent.source;
+      this.sourceProvider = parent.sourceProvider;
+      this.privateEnvironment = privateEnvironment;
     }
 
     public void bindInterceptor(
@@ -233,11 +245,11 @@ public final class Elements {
       elements.add(new TypeConverterBinding(getSource(), typeMatcher, converter));
     }
 
-    public Binder withSource(final Object source) {
+    public RecordingBinder withSource(final Object source) {
       return new RecordingBinder(this, source, null);
     }
 
-    public Binder skipSources(Class... classesToSkip) {
+    public RecordingBinder skipSources(Class... classesToSkip) {
       // if a source is specified explicitly, we don't need to skip sources
       if (source != null) {
         return this;
@@ -245,6 +257,35 @@ public final class Elements {
 
       SourceProvider newSourceProvider = sourceProvider.plusSkippedClasses(classesToSkip);
       return new RecordingBinder(this, null, newSourceProvider);
+    }
+
+    public PrivateBinder newPrivateBinder() {
+      PrivateEnvironment privateEnvironment = new PrivateEnvironment(getSource());
+      elements.add(privateEnvironment);
+      return new RecordingBinder(this, privateEnvironment);
+    }
+
+    public void expose(Key<?> type) {
+      exposeInternal(type);
+    }
+
+    public AnnotatedElementBuilder expose(Class<?> type) {
+      return exposeInternal(Key.get(type));
+    }
+
+    public AnnotatedElementBuilder expose(TypeLiteral<?> type) {
+      return exposeInternal(Key.get(type));
+    }
+
+    private AnnotatedElementBuilder exposeInternal(Key<?> key) {
+      if (privateEnvironment == null) {
+        throw new UnsupportedOperationException("expose() only supported on PrivateBinder. "
+            + "Avoid using 'instanceof PrivateBinder', it's unsafe.");
+      }
+
+      Exposure exposure = new Exposure(getSource(), privateEnvironment, key);
+      elements.add(exposure);
+      return exposure.annotatedElementBuilder(this);
     }
 
     protected Object getSource() {

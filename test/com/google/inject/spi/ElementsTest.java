@@ -16,6 +16,7 @@
 
 package com.google.inject.spi;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
@@ -30,6 +31,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
@@ -669,6 +671,86 @@ public class ElementsTest extends TestCase {
     );
   }
 
+  public void testNewPrivateBinder() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            PrivateBinder one = binder().newPrivateBinder();
+            one.expose(ArrayList.class);
+            one.expose(Collection.class).annotatedWith(SampleAnnotation.class);
+            one.bind(List.class).to(ArrayList.class);
+
+            PrivateBinder two = binder().withSource("1 ElementsTest.java")
+                .newPrivateBinder().withSource("2 ElementsTest.java");
+            two.expose(String.class).annotatedWith(Names.named("a"));
+            two.expose(Key.get(String.class, Names.named("b")));
+            two.bind(List.class).to(ArrayList.class);
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visitPrivateElements(PrivateEnvironment one) {
+            assertEquals(ImmutableSet.<Key<?>>of(Key.get(ArrayList.class),
+                Key.get(Collection.class, SampleAnnotation.class)), one.getExposedKeys());
+            checkElements(one.getElements(),
+                new FailingElementVisitor() {
+                  @Override public Void visitExposure(Exposure exposure) {
+                    assertEquals(Key.get(ArrayList.class), exposure.getKey());
+                    return null;
+                  }
+                },
+                new FailingElementVisitor() {
+                  @Override public Void visitExposure(Exposure exposure) {
+                    assertEquals(Key.get(Collection.class, SampleAnnotation.class),
+                        exposure.getKey());
+                    return null;
+                  }
+                },
+                new FailingElementVisitor() {
+                  @Override public <T> Void visitBinding(Binding<T> binding) {
+                    assertEquals(Key.get(List.class), binding.getKey());
+                    return null;
+                  }
+                }
+            );
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visitPrivateElements(PrivateEnvironment two) {
+            assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class, Names.named("a")),
+                Key.get(String.class, Names.named("b"))), two.getExposedKeys());
+            assertEquals("1 ElementsTest.java", two.getSource());
+            checkElements(two.getElements(),
+                new FailingElementVisitor() {
+                  @Override public Void visitExposure(Exposure exposure) {
+                    assertEquals("2 ElementsTest.java", exposure.getSource());
+                    assertEquals(Key.get(String.class, Names.named("a")), exposure.getKey());
+                    return null;
+                  }
+                },
+                new FailingElementVisitor() {
+                  @Override public Void visitExposure(Exposure exposure) {
+                    assertEquals("2 ElementsTest.java", exposure.getSource());
+                    assertEquals(Key.get(String.class, Names.named("b")), exposure.getKey());
+                    return null;
+                  }
+                },
+                new FailingElementVisitor() {
+                  @Override public <T> Void visitBinding(Binding<T> binding) {
+                    assertEquals("2 ElementsTest.java", binding.getSource());
+                    assertEquals(Key.get(List.class), binding.getKey());
+                    return null;
+                  }
+                }
+            );
+            return null;
+          }
+        }
+    );
+  }
+
   public void testBindWithMultipleAnnotationsAddsError() {
     checkModule(
         new AbstractModule() {
@@ -837,9 +919,11 @@ public class ElementsTest extends TestCase {
    */
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     List<Element> elements = Elements.getElements(module);
-
     assertEquals(elements.size(), visitors.length);
+    checkElements(elements, visitors);
+  }
 
+  protected void checkElements(List<Element> elements, ElementVisitor<?>... visitors) {
     for (int i = 0; i < visitors.length; i++) {
       ElementVisitor<?> visitor = visitors[i];
       Element element = elements.get(i);

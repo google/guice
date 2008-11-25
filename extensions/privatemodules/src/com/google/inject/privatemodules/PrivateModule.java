@@ -256,7 +256,7 @@ public abstract class PrivateModule implements Module {
   private static class Expose<T> implements ExposedKeyBuilder, Provider<T> {
     private final Object source;
     private final Provider<Ready> readyProvider;
-    private Key<T> key; // mutable, a binding annotation may be assigned after Expose creation
+    private Key<T> key; // mutable, a binding annotation may be assigned after exposure creation
     private Provider<T> privateProvider;
 
     private Expose(Object source, Provider<Ready> readyProvider, Key<T> key) {

@@ -19,9 +19,11 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
+import com.google.inject.spi.Exposure;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.PrivateEnvironment;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -91,6 +93,14 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
   }
 
   public <T> Boolean visitProviderLookup(ProviderLookup<T> providerLookup) {
+    return false;
+  }
+
+  public Boolean visitPrivateElements(PrivateEnvironment privateEnvironment) {
+    return false;
+  }
+
+  public Boolean visitExposure(Exposure exposure) {
     return false;
   }
 }
