@@ -74,6 +74,8 @@ public class ProviderMethod<T> implements Provider<T> {
     }
 
     if (exposed) {
+      // the cast is safe 'cause the only binder we have implements PrivateBinder. If there's a
+      // misplaced @Exposed, calling this will add an error to the binder's error queue
       ((PrivateBinder) binder).expose(key);
     }
   }

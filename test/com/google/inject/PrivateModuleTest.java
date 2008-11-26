@@ -145,6 +145,19 @@ public class PrivateModuleTest extends TestCase {
     });
 
     assertEquals("i", injector.getInstance(Key.get(String.class, named("a"))));
+
+    try {
+      injector.getInstance(Key.get(String.class, named("c")));
+      fail();
+    } catch(ConfigurationException expected) {
+    }
+
+    try {
+      injector.getInstance(Key.get(String.class, named("d")));
+      fail();
+    } catch(ConfigurationException expected) {
+    }
+
     assertEquals("ii", injector.getInstance(Key.get(String.class, named("d"))));
   }
 

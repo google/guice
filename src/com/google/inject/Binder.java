@@ -334,7 +334,7 @@ public interface Binder {
   /**
    * Creates a new private child environment for bindings and other configuration. The returned
    * binder can be used to add and configuration information in this environment. See {@link
-   * com.google.inject.privatemodules.PrivateModule} for details.
+   * PrivateModule} for details.
    *
    * @return a binder that inherits configuration from this binder. Only exposed configuration on
    *      the returned binder will be visible to this binder.

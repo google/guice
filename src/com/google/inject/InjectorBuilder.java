@@ -188,7 +188,7 @@ class InjectorBuilder {
         (Collection) injector.state.getExplicitBindingsThisLevel().values(),
         injector.jitBindings.values()));
     for (final BindingImpl<?> binding : candidateBindings) {
-      if ((stage == Stage.PRODUCTION && binding.getScope() == com.google.inject.Scopes.SINGLETON)
+      if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
           || binding.getLoadStrategy() == LoadStrategy.EAGER) {
         try {
           injector.callInContext(new ContextualCallable<Void>() {
