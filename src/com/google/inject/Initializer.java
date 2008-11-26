@@ -43,11 +43,6 @@ class Initializer {
 
   /** Maps instances that need injection to a source that registered them */
   private final Map<Object, InjectableReference<?>> pendingInjection = Maps.newIdentityHashMap();
-  private final InjectorImpl injector;
-
-  Initializer(InjectorImpl injector) {
-    this.injector = injector;
-  }
 
   /**
    * Registers an instance for member injection when that step is performed.
@@ -56,7 +51,7 @@ class Initializer {
    *      @Inject).
    * @param source the source location that this injection was requested
    */
-  public <T> Initializable<T> requestInjection(T instance, Object source,
+  public <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Object source,
       Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
 
@@ -65,7 +60,7 @@ class Initializer {
       return Initializables.of(instance);
     }
 
-    InjectableReference<T> initializable = new InjectableReference<T>(instance, source);
+    InjectableReference<T> initializable = new InjectableReference<T>(injector, instance, source);
     pendingInjection.put(instance, initializable);
     return initializable;
   }
@@ -108,11 +103,13 @@ class Initializer {
   }
 
   private class InjectableReference<T> implements Initializable<T> {
+    private final InjectorImpl injector;
     private final T instance;
     private final Object source;
     private List<SingleMemberInjector> injectors;
 
-    public InjectableReference(T instance, Object source) {
+    public InjectableReference(InjectorImpl injector, T instance, Object source) {
+      this.injector = injector;
       this.instance = checkNotNull(instance, "instance");
       this.source = checkNotNull(source, "source");
     }

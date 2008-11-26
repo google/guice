@@ -262,6 +262,10 @@ public final class Errors implements Serializable {
     return errorInUserCode("Error in custom provider, %s", runtimeException);
   }
 
+  public void exposedButNotBound(Key<?> key) {
+    addMessage("Could not expose() %s, it must be explicitly bound.", key);
+  }
+
   public static Collection<Message> getMessagesFromThrowable(Throwable throwable) {
     if (throwable instanceof ProvisionException) {
       return ((ProvisionException) throwable).getErrorMessages();

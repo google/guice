@@ -28,11 +28,8 @@ import com.google.inject.spi.ProviderLookup;
  */
 class ProviderLookupProcessor extends AbstractProcessor {
 
-  private final InjectorImpl injector;
-
-  ProviderLookupProcessor(Errors errors, InjectorImpl injector) {
+  ProviderLookupProcessor(Errors errors) {
     super(errors);
-    this.injector = injector;
   }
 
   @Override public <T> Boolean visitProviderLookup(ProviderLookup<T> command) {

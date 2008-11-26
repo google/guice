@@ -21,26 +21,29 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.PrivateEnvironment;
+import java.util.Map;
 
 /**
- * A placeholder which enables us to swap in the real factory once the
- * container is created.
+ * A placeholder which enables us to swap in the real factory once the injector is created.
  */
 class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationListener {
 
+  private final InjectorImpl injector;
   private final Key<T> key;
   private final Key<? extends T> targetKey;
   private final Object source;
 
   private InternalFactory<? extends T> targetFactory;
 
-  FactoryProxy(Key<T> key, Key<? extends T> targetKey, Object source) {
+  FactoryProxy(InjectorImpl injector, Key<T> key, Key<? extends T> targetKey, Object source) {
+    this.injector = injector;
     this.key = key;
     this.targetKey = targetKey;
     this.source = source;
   }
 
-  public void notify(final InjectorImpl injector, final Errors errors) {
+  public void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, final Errors errors) {
     try {
       targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source));
     } catch (ErrorsException e) {

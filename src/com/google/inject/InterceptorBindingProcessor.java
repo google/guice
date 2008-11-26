@@ -27,20 +27,17 @@ import com.google.inject.spi.InterceptorBinding;
  */
 class InterceptorBindingProcessor extends AbstractProcessor {
 
-  private final State state;
-
-  InterceptorBindingProcessor(Errors errors, State state) {
+  InterceptorBindingProcessor(Errors errors) {
     super(errors);
-    this.state = state;
   }
 
   @Override public Boolean visitInterceptorBinding(InterceptorBinding command) {
-    state.addMethodAspect(new MethodAspect(
+    injector.state.addMethodAspect(new MethodAspect(
         command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors()));
     return true;
   }
 
-  ProxyFactory createProxyFactory() {
-    return new ProxyFactory(state.getMethodAspects());
+  void setupProxyFactory(InjectorImpl injector) {
+    injector.constructionProxyFactory = new ProxyFactory(injector.state.getMethodAspects());
   }
 }

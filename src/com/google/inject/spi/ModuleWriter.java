@@ -16,19 +16,21 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Maps;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -40,9 +42,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public class ModuleWriter {
 
+  private final Map<PrivateEnvironment, PrivateBinder> environmentToBinder = Maps.newHashMap();
+
   /**
-   * Returns a module that executes the specified elements
-   * using this executing visitor.
+   * Returns a module that executes the specified elements using this executing visitor.
    */
   public final Module create(final Iterable<? extends Element> elements) {
     return new Module() {
@@ -101,13 +104,8 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visitPrivateElements(PrivateEnvironment privateEnvironment) {
+      public Void visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
         writePrivateElements(binder, privateEnvironment);
-        return null;
-      }
-
-      public Void visitExposure(Exposure expose) {
-        writeExpose(binder, expose);
         return null;
       }
     };
@@ -148,47 +146,55 @@ public class ModuleWriter {
   }
 
   protected <T> void writeBind(Binder binder, Binding<T> element) {
-    LinkedBindingBuilder<T> lbb = binder.withSource(element.getSource()).bind(element.getKey());
-    ScopedBindingBuilder sbb = applyTarget(element, lbb);
+    ScopedBindingBuilder sbb
+        = bindKeyToTarget(element, binder.withSource(element.getSource()), element.getKey());
     applyScoping(element, sbb);
   }
 
+  /**
+   * Writes all the elements bound in the private environment to new private binder that's enclosed
+   * by the current binder. The private binder will be associated with its environment, so exposed
+   * bindings from the main elements list can be exposed from the corresponding private binder.
+   */
   protected void writePrivateElements(Binder binder, PrivateEnvironment element) {
     PrivateBinder privateBinder = binder.withSource(element.getSource()).newPrivateBinder();
+    setPrivateBinder(element, privateBinder);
     apply(privateBinder, element.getElements());
-  }
-
-  protected void writeExpose(Binder binder, Exposure exposure) {
-    PrivateBinder privateBinder = (PrivateBinder) binder;
-    privateBinder.withSource(exposure.getSource()).expose(exposure.getKey());
   }
 
   /**
    * Execute this target against the linked binding builder.
    */
-  protected <T> ScopedBindingBuilder applyTarget(Binding<T> binding,
-      final LinkedBindingBuilder<T> linkedBindingBuilder) {
+  protected <T> ScopedBindingBuilder bindKeyToTarget(
+      final Binding<T> binding, final Binder binder, final Key<T> key) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
       public ScopedBindingBuilder visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
-        linkedBindingBuilder.toInstance(instance);
+        binder.bind(key).toInstance(instance);
         return null;
       }
 
       public ScopedBindingBuilder visitProvider(Provider<? extends T> provider,
           Set<InjectionPoint> injectionPoints) {
-        return linkedBindingBuilder.toProvider(provider);
+        return binder.bind(key).toProvider(provider);
       }
 
-      public ScopedBindingBuilder visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-        return linkedBindingBuilder.toProvider(providerKey);
+      public ScopedBindingBuilder visitProviderKey(
+          Key<? extends Provider<? extends T>> providerKey) {
+        return binder.bind(key).toProvider(providerKey);
       }
 
-      public ScopedBindingBuilder visitKey(Key<? extends T> key) {
-        return linkedBindingBuilder.to(key);
+      public ScopedBindingBuilder visitKey(Key<? extends T> targetKey) {
+        return binder.bind(key).to(targetKey);
       }
 
       public ScopedBindingBuilder visitUntargetted() {
-        return linkedBindingBuilder;
+        return binder.bind(key);
+      }
+
+      public ScopedBindingBuilder visitExposed(PrivateEnvironment privateEnvironment) {
+        PrivateBinder privateBinder = getPrivateBinder(privateEnvironment);
+        privateBinder.withSource(binding.getSource()).expose(key);
+        return null;
       }
 
       public ScopedBindingBuilder visitConvertedConstant(T value) {
@@ -204,6 +210,26 @@ public class ModuleWriter {
         throw new IllegalArgumentException("Non-module element");
       }
     });
+  }
+
+  /**
+   * Associates {@code binder} with {@code privateEnvironment}. This can later be used to lookup the
+   * binder for its environment.
+   */
+  protected void setPrivateBinder(PrivateEnvironment privateEnvironment, PrivateBinder binder) {
+    checkArgument(!environmentToBinder.containsKey(privateEnvironment),
+        "A private binder already exists for %s", privateEnvironment);
+    environmentToBinder.put(privateEnvironment, binder);
+  }
+
+  /**
+   * Returns the {@code binder} accociated with {@code privateEnvironment}. This can be used to
+   * expose bindings from {@code privateEnvironment} from the corresponding private binder.
+   */
+  protected PrivateBinder getPrivateBinder(PrivateEnvironment privateEnvironment) {
+    PrivateBinder privateBinder = environmentToBinder.get(privateEnvironment);
+    checkArgument(privateBinder != null, "No private binder for %s", privateEnvironment);
+    return privateBinder;
   }
 
   protected void applyScoping(Binding<?> binding, final ScopedBindingBuilder scopedBindingBuilder) {

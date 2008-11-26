@@ -38,76 +38,79 @@ import java.lang.reflect.Type;
  */
 class TypeConverterBindingProcessor extends AbstractProcessor {
 
-  private final State state;
-
-  TypeConverterBindingProcessor(Errors errors, State state) {
+  TypeConverterBindingProcessor(Errors errors) {
     super(errors);
-    this.state = state;
-
-    // Configure type converters.
-    convertToPrimitiveType(int.class, Integer.class);
-    convertToPrimitiveType(long.class, Long.class);
-    convertToPrimitiveType(boolean.class, Boolean.class);
-    convertToPrimitiveType(byte.class, Byte.class);
-    convertToPrimitiveType(short.class, Short.class);
-    convertToPrimitiveType(float.class, Float.class);
-    convertToPrimitiveType(double.class, Double.class);
-
-    convertToClass(Character.class, new TypeConverter() {
-      public Object convert(String value, TypeLiteral<?> toType) {
-        value = value.trim();
-        if (value.length() != 1) {
-          throw new RuntimeException("Length != 1.");
-        }
-        return value.charAt(0);
-      }
-
-      @Override public String toString() {
-        return "TypeConverter<Character>";
-      }
-    });
-
-    convertToClasses(Matchers.subclassesOf(Enum.class), new TypeConverter() {
-      @SuppressWarnings("unchecked")
-      public Object convert(String value, TypeLiteral<?> toType) {
-        return Enum.valueOf((Class) toType.getRawType(), value);
-      }
-
-      @Override public String toString() {
-        return "TypeConverter<E extends Enum<E>>";
-      }
-    });
-
-    internalConvertToTypes(
-      new AbstractMatcher<TypeLiteral<?>>() {
-        public boolean matches(TypeLiteral<?> typeLiteral) {
-          return typeLiteral.getRawType() == Class.class;
-        }
-
-        @Override public String toString() {
-          return "Class<?>";
-        }
-      },
-      new TypeConverter() {
-        @SuppressWarnings("unchecked")
-        public Object convert(String value, TypeLiteral<?> toType) {
-          try {
-            return Class.forName(value);
-          }
-          catch (ClassNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
-          }
-        }
-
-        @Override public String toString() {
-          return "TypeConverter<Class<?>>";
-        }
-      }
-    );
   }
 
-  private <T> void convertToPrimitiveType(Class<T> primitiveType,
-      final Class<T> wrapperType) {
+  /** Installs default converters for primitives, enums, and class literals. */
+  public void prepareBuiltInConverters(InjectorImpl injector) {
+    this.injector = injector;
+    try {
+      // Configure type converters.
+      convertToPrimitiveType(int.class, Integer.class);
+      convertToPrimitiveType(long.class, Long.class);
+      convertToPrimitiveType(boolean.class, Boolean.class);
+      convertToPrimitiveType(byte.class, Byte.class);
+      convertToPrimitiveType(short.class, Short.class);
+      convertToPrimitiveType(float.class, Float.class);
+      convertToPrimitiveType(double.class, Double.class);
+
+      convertToClass(Character.class, new TypeConverter() {
+        public Object convert(String value, TypeLiteral<?> toType) {
+          value = value.trim();
+          if (value.length() != 1) {
+            throw new RuntimeException("Length != 1.");
+          }
+          return value.charAt(0);
+        }
+
+        @Override public String toString() {
+          return "TypeConverter<Character>";
+        }
+      });
+
+      convertToClasses(Matchers.subclassesOf(Enum.class), new TypeConverter() {
+        @SuppressWarnings("unchecked")
+        public Object convert(String value, TypeLiteral<?> toType) {
+          return Enum.valueOf((Class) toType.getRawType(), value);
+        }
+
+        @Override public String toString() {
+          return "TypeConverter<E extends Enum<E>>";
+        }
+      });
+
+      internalConvertToTypes(
+        new AbstractMatcher<TypeLiteral<?>>() {
+          public boolean matches(TypeLiteral<?> typeLiteral) {
+            return typeLiteral.getRawType() == Class.class;
+          }
+
+          @Override public String toString() {
+            return "Class<?>";
+          }
+        },
+        new TypeConverter() {
+          @SuppressWarnings("unchecked")
+          public Object convert(String value, TypeLiteral<?> toType) {
+            try {
+              return Class.forName(value);
+            } catch (ClassNotFoundException e) {
+              throw new RuntimeException(e.getMessage());
+            }
+          }
+
+          @Override public String toString() {
+            return "TypeConverter<Class<?>>";
+          }
+        }
+      );
+    } finally {
+      this.injector = null;
+    }
+  }
+
+  private <T> void convertToPrimitiveType(Class<T> primitiveType, final Class<T> wrapperType) {
     try {
       final Method parser = wrapperType.getMethod(
           "parse" + Strings.capitalize(primitiveType.getName()), String.class);
@@ -117,11 +120,9 @@ class TypeConverterBindingProcessor extends AbstractProcessor {
         public Object convert(String value, TypeLiteral<?> toType) {
           try {
             return parser.invoke(null, value);
-          }
-          catch (IllegalAccessException e) {
+          } catch (IllegalAccessException e) {
             throw new AssertionError(e);
-          }
-          catch (InvocationTargetException e) {
+          } catch (InvocationTargetException e) {
             throw new RuntimeException(e.getTargetException().getMessage());
           }
         }
@@ -161,12 +162,12 @@ class TypeConverterBindingProcessor extends AbstractProcessor {
 
   private void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    state.addConverter(
+    injector.state.addConverter(
         new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
   }
 
   @Override public Boolean visitTypeConverterBinding(TypeConverterBinding command) {
-    state.addConverter(new MatcherAndConverter(
+    injector.state.addConverter(new MatcherAndConverter(
         command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;
   }

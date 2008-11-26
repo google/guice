@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.inject.privatemodules;
+package com.google.inject;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
-import java.lang.annotation.Documented;
 
 /**
  * Acccompanies a {@literal @}{@link com.google.inject.Provides Provides} method annotation in a

@@ -304,8 +304,7 @@ public interface Binder {
    * @param converter converts values
    * @since 2.0
    */
-  void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeConverter converter);
+  void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

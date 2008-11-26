@@ -45,7 +45,9 @@ public abstract class FailableCache<K, V> {
       errors.merge((Errors) resultOrError);
       throw errors.toException();
     } else {
-      return (V) resultOrError;
+      @SuppressWarnings("unchecked") // create returned a non-error result, so this is safe
+      V result = (V) resultOrError;
+      return result;
     }
   }
 }

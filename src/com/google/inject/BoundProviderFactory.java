@@ -20,24 +20,29 @@ import com.google.inject.BindingProcessor.CreationListener;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.PrivateEnvironment;
+import java.util.Map;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
  */
 class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
 
+  private final InjectorImpl injector;
   final Key<? extends Provider<? extends T>> providerKey;
   final Object source;
   private InternalFactory<? extends Provider<? extends T>> providerFactory;
 
   BoundProviderFactory(
+      InjectorImpl injector,
       Key<? extends Provider<? extends T>> providerKey,
       Object source) {
+    this.injector = injector;
     this.providerKey = providerKey;
     this.source = source;
   }
 
-  public void notify(final InjectorImpl injector, final Errors errors) {
+  public void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, Errors errors) {
     try {
       providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source));
     } catch (ErrorsException e) {

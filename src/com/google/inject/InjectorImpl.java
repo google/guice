@@ -61,12 +61,13 @@ class InjectorImpl implements Injector {
   final State state;
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Initializer initializer = new Initializer(this);
+  final Initializer initializer;
   ConstructionProxyFactory constructionProxyFactory;
 
-  InjectorImpl(@Nullable InjectorImpl parent) {
+  InjectorImpl(@Nullable InjectorImpl parent, State state, Initializer initializer) {
     this.parent = parent;
-    this.state = new InheritingState(parent != null ? parent.state : State.NONE);
+    this.state = state;
+    this.initializer = initializer;
 
     if (parent != null) {
       localContext = parent.localContext;
@@ -135,7 +136,6 @@ class InjectorImpl implements Injector {
   public Injector createChildInjector(Iterable<? extends Module> modules) {
     return new InjectorBuilder()
         .parentInjector(this)
-        .stage(getInstance(Stage.class))
         .addModules(modules)
         .build();
   }

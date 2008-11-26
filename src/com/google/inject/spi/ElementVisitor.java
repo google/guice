@@ -72,10 +72,5 @@ public interface ElementVisitor<V> {
   /**
    * Visit a collection of configuration elements for a private environment.
    */
-  V visitPrivateElements(PrivateEnvironment privateEnvironment);
-
-  /**
-   * Visit the exposure of a binding to its enclosing environment.
-   */
-  V visitExposure(Exposure exposure);
+  V visitPrivateEnvironment(PrivateEnvironment privateEnvironment);
 }

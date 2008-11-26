@@ -66,6 +66,7 @@ public class AllTests {
     suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(OverrideModuleTest.class);
     suite.addTestSuite(ParentInjectorTest.class);
+    suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);

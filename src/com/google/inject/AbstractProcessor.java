@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
-import com.google.inject.spi.Exposure;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
@@ -43,13 +42,21 @@ import java.util.List;
 abstract class AbstractProcessor implements ElementVisitor<Boolean> {
 
   protected Errors errors;
+  protected InjectorImpl injector;
 
   protected AbstractProcessor(Errors errors) {
     this.errors = errors;
   }
 
-  public void processCommands(List<Element> elements) {
+  public void process(Iterable<InjectorShell> isolatedInjectorBuilders) {
+    for (InjectorShell injectorShell : isolatedInjectorBuilders) {
+      process(injectorShell.getInjector(), injectorShell.getElements());
+    }
+  }
+
+  public void process(InjectorImpl injector, List<Element> elements) {
     Errors errorsAnyElement = this.errors;
+    this.injector = injector;
     try {
       for (Iterator<Element> i = elements.iterator(); i.hasNext(); ) {
         Element element = i.next();
@@ -61,6 +68,7 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
       }
     } finally {
       this.errors = errorsAnyElement;
+      this.injector = null;
     }
   }
 
@@ -96,11 +104,7 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
     return false;
   }
 
-  public Boolean visitPrivateElements(PrivateEnvironment privateEnvironment) {
-    return false;
-  }
-
-  public Boolean visitExposure(Exposure exposure) {
+  public Boolean visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
     return false;
   }
 }

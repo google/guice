@@ -16,12 +16,14 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Provider;
-import com.google.inject.Key;
 import com.google.inject.Binder;
+import com.google.inject.Exposed;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.binder.PrivateBinder;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -37,6 +39,7 @@ public class ProviderMethod<T> implements Provider<T> {
   private final Object instance;
   private final Method method;
   private final List<Provider<?>> parameterProviders;
+  private final boolean exposed;
 
   /**
    * @param method the method to invoke. It's return type must be the same type as {@code key}.
@@ -48,6 +51,7 @@ public class ProviderMethod<T> implements Provider<T> {
     this.instance = instance;
     this.method = method;
     this.parameterProviders = parameterProviders;
+    this.exposed = method.isAnnotationPresent(Exposed.class);
 
     method.setAccessible(true);
   }
@@ -61,10 +65,16 @@ public class ProviderMethod<T> implements Provider<T> {
   }
 
   public void configure(Binder binder) {
+    binder = binder.withSource(method);
+
     if (scopeAnnotation != null) {
-      binder.withSource(method).bind(key).toProvider(this).in(scopeAnnotation);
+      binder.bind(key).toProvider(this).in(scopeAnnotation);
     } else {
-      binder.withSource(method).bind(key).toProvider(this);
+      binder.bind(key).toProvider(this);
+    }
+
+    if (exposed) {
+      ((PrivateBinder) binder).expose(key);
     }
   }
 

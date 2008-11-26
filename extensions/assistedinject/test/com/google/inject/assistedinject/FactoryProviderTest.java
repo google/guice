@@ -18,6 +18,7 @@ package com.google.inject.assistedinject;
 
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -170,8 +171,8 @@ public class FactoryProviderTest extends TestCase {
     try {
       FactoryProvider.newFactory(SummerCarFactory.class, Beetle.class);
       fail();
-    } catch(IllegalArgumentException e) {
-      assertTrue(e.getMessage().startsWith("Constructor mismatch"));
+    } catch(ConfigurationException e) {
+      assertContains(e.getMessage(), "Constructor mismatch");
     }
   }
 
@@ -379,7 +380,7 @@ public class FactoryProviderTest extends TestCase {
     try {
       FactoryProvider.newFactory(DefectiveCarFactoryWithNoExceptions.class, DefectiveCar.class);
       fail();
-    } catch (IllegalStateException expected) {
+    } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(), "no compatible exception is thrown");
     }
   }

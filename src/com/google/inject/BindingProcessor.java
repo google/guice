@@ -18,16 +18,18 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.inject.ExposedBindingImpl.Factory;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
-import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.PrivateEnvironment;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,14 +39,6 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 class BindingProcessor extends AbstractProcessor {
-
-  /** Returns the class name of the bound provider, or null */
-  private BindingTargetVisitor<Object, String> GET_BOUND_PROVIDER_CLASS_NAME
-      = new DefaultBindingTargetVisitor<Object, String>() {
-    public String visitProvider(Provider<?> provider, Set<InjectionPoint> injectionPoints) {
-      return provider.getClass().getName();
-    }
-  };
 
   private static final BindingScopingVisitor<LoadStrategy> LOAD_STRATEGY_VISITOR
       = new BindingScopingVisitor<LoadStrategy>() {
@@ -65,18 +59,16 @@ class BindingProcessor extends AbstractProcessor {
     }
   };
 
-  private final InjectorImpl injector;
-  private final State state;
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Initializer initializer;
-  private final List<Runnable> untargettedBindings = Lists.newArrayList();
+  private final List<Runnable> uninitializedBindings = Lists.newArrayList();
+  private final Map<PrivateEnvironment, InjectorImpl> environmentToInjector;
 
-  BindingProcessor(Errors errors, InjectorImpl injector, State state,
-      Initializer initializer) {
+  BindingProcessor(Errors errors, Initializer initializer,
+      Map<PrivateEnvironment, InjectorImpl> environmentToInjector) {
     super(errors);
-    this.injector = injector;
-    this.state = state;
     this.initializer = initializer;
+    this.environmentToInjector = environmentToInjector;
   }
 
   @Override public <T> Boolean visitBinding(Binding<T> command) {
@@ -108,7 +100,7 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Scope visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-        Scope scope = state.getScope(scopeAnnotation);
+        Scope scope = injector.state.getScope(scopeAnnotation);
         if (scope != null) {
           return scope;
         } else {
@@ -124,7 +116,8 @@ class BindingProcessor extends AbstractProcessor {
 
     command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
       public Void visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
-        Initializable<T> ref = initializer.requestInjection(instance, source, injectionPoints);
+        Initializable<T> ref = initializer.requestInjection(
+            injector, instance, source, injectionPoints);
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, injectionPoints,
@@ -135,7 +128,7 @@ class BindingProcessor extends AbstractProcessor {
       public Void visitProvider(Provider<? extends T> provider,
           Set<InjectionPoint> injectionPoints) {
         Initializable<Provider<? extends T>> initializable = initializer
-            .<Provider<? extends T>>requestInjection(provider, source, injectionPoints);
+            .<Provider<? extends T>>requestInjection(injector, provider, source, injectionPoints);
         InternalFactory<T> factory = new InternalFactoryToProviderAdapter<T>(initializable, source);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scope,
@@ -144,8 +137,8 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-        final BoundProviderFactory<T> boundProviderFactory =
-            new BoundProviderFactory<T>(providerKey, source);
+        BoundProviderFactory<T> boundProviderFactory
+            = new BoundProviderFactory<T>(injector, providerKey, source);
         creationListeners.add(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, scope);
@@ -159,7 +152,7 @@ class BindingProcessor extends AbstractProcessor {
           errors.recursiveBinding();
         }
 
-        FactoryProxy<T> factory = new FactoryProxy<T>(key, targetKey, source);
+        FactoryProxy<T> factory = new FactoryProxy<T>(injector, key, targetKey, source);
         creationListeners.add(factory);
         InternalFactory<? extends T> scopedFactory = Scopes.scope(key, injector, factory, scope);
         putBinding(new LinkedBindingImpl<T>(
@@ -189,16 +182,23 @@ class BindingProcessor extends AbstractProcessor {
           return null;
         }
 
-        untargettedBindings.add(new Runnable() {
+        uninitializedBindings.add(new Runnable() {
           public void run() {
             try {
-              injector.initializeBinding(binding, errors.withSource(source));
+              binding.injector.initializeBinding(binding, errors.withSource(source));
             } catch (ErrorsException e) {
               errors.merge(e.getErrors());
             }
           }
         });
 
+        return null;
+      }
+
+      public Void visitExposed(PrivateEnvironment privateEnvironment) {
+        Factory<T> factory = new Factory<T>(key, privateEnvironment);
+        creationListeners.add(factory);
+        putBinding(new ExposedBindingImpl<T>(injector, source, factory));
         return null;
       }
 
@@ -227,15 +227,15 @@ class BindingProcessor extends AbstractProcessor {
     return new InvalidBindingImpl<T>(injector, key, source);
   }
 
-  public void createUntargettedBindings() {
-    for (Runnable untargettedBinding : untargettedBindings) {
-      untargettedBinding.run();
+  public void initializeBindings() {
+    for (Runnable initializer : uninitializedBindings) {
+      initializer.run();
     }
   }
 
-  public void runCreationListeners(InjectorImpl injector) {
+  public void runCreationListeners(Map<PrivateEnvironment, InjectorImpl> privateInjectors) {
     for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(injector, errors);
+      creationListener.notify(privateInjectors, errors);
     }
   }
 
@@ -248,22 +248,30 @@ class BindingProcessor extends AbstractProcessor {
       return;
     }
 
-    Binding<?> original = state.getExplicitBinding(key);
-
-    if (original != null) {
-      // the hard-coded class name is certainly lame, but it avoids an even lamer dependency...
-      boolean isOkayDuplicate = original instanceof ProviderInstanceBindingImpl
-          && "com.google.inject.privatemodules.PrivateModule$Expose"
-              .equals(original.acceptTargetVisitor(GET_BOUND_PROVIDER_CLASS_NAME));
-      if (!isOkayDuplicate) {
-        errors.bindingAlreadySet(key, original.getSource());
-        return;
-      }
+    Binding<?> original = injector.state.getExplicitBinding(key);
+    if (original != null && !isOkayDuplicate(original, binding)) {
+      errors.bindingAlreadySet(key, original.getSource());
+      return;
     }
 
     // prevent the parent from creating a JIT binding for this key
-    state.parent().blacklist(key);
-    state.putBinding(key, binding);
+    injector.state.parent().blacklist(key);
+    injector.state.putBinding(key, binding);
+  }
+
+  /**
+   * We tolerate duplicate bindings only if one exposes the other.
+   *
+   * @param original the binding in the parent injector (candidate for an exposing binding)
+   * @param binding the binding to check (candidate for the exposed binding)
+   */
+  private boolean isOkayDuplicate(Binding<?> original, BindingImpl<?> binding) {
+    if (original instanceof ExposedBindingImpl) {
+      ExposedBindingImpl exposed = (ExposedBindingImpl) original;
+      InjectorImpl exposedFrom = environmentToInjector.get(exposed.getPrivateEnvironment());
+      return (exposedFrom == binding.injector);
+    }
+    return false;
   }
 
   // It's unfortunate that we have to maintain a blacklist of specific
@@ -282,6 +290,6 @@ class BindingProcessor extends AbstractProcessor {
   // TODO(jessewilson): fix BuiltInModule, then add Stage
 
   interface CreationListener {
-    void notify(InjectorImpl injector, Errors errors);
+    void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, Errors errors);
   }
 }

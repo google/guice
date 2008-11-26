@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
@@ -57,29 +56,7 @@ public final class ProviderMethodsModule implements Module {
       return Modules.EMPTY_MODULE;
     }
 
-    // don't install provider methods for private modules, they take care of that manually
-    if (isPrivateModule(module)) {
-      return Modules.EMPTY_MODULE;
-    }
-
     return new ProviderMethodsModule(module);
-  }
-
-  private static boolean isPrivateModule(Module module) {
-    // use the ugly class name to avoid an even uglier dependency. If private modules ever get
-    // incorporated into core, we could use a single instanceof instead of this loop
-    for (Class<?> c = module.getClass(); c != Object.class; c = c.getSuperclass()) {
-      if (c.getName().equals("com.google.inject.privatemodules.PrivateModule")) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /** See {@link com.google.inject.privatemodules.PrivateModule}. */
-  public static ProviderMethodsModule forPrivateModule(Module privateModule) {
-    checkArgument(isPrivateModule(privateModule));
-    return new ProviderMethodsModule(privateModule);
   }
 
   public synchronized void configure(Binder binder) {

@@ -16,6 +16,7 @@
 
 package com.google.inject.privatemodules;
 
+import com.google.inject.PrivateModuleTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

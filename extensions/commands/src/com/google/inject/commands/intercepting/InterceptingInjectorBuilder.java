@@ -31,7 +31,6 @@ import com.google.inject.Module;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.name.Names;
@@ -175,8 +174,7 @@ public final class InterceptingInjectorBuilder {
       Key<T> anonymousKey = Key.get(key.getTypeLiteral(), UniqueAnnotations.create());
       binder.bind(key).toProvider(new InterceptingProvider<T>(key, anonymousKey));
 
-      LinkedBindingBuilder<T> linkedBindingBuilder = binder.bind(anonymousKey);
-      ScopedBindingBuilder scopedBindingBuilder = applyTarget(binding, linkedBindingBuilder);
+      ScopedBindingBuilder scopedBindingBuilder = bindKeyToTarget(binding, binder, anonymousKey);
 
       // we scope the user's provider, not the interceptor. This is dangerous,
       // but convenient. It means that although the user's provider will live

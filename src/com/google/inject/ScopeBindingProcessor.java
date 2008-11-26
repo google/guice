@@ -30,12 +30,8 @@ import java.lang.annotation.Annotation;
  */
 class ScopeBindingProcessor extends AbstractProcessor {
 
-  private final State state;
-
-  ScopeBindingProcessor(Errors errors,
-      State state) {
+  ScopeBindingProcessor(Errors errors) {
     super(errors);
-    this.state = state;
   }
 
   @Override public Boolean visitScopeBinding(ScopeBinding command) {
@@ -53,11 +49,11 @@ class ScopeBindingProcessor extends AbstractProcessor {
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    Scope existing = state.getScope(checkNotNull(annotationType, "annotation type"));
+    Scope existing = injector.state.getScope(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
       errors.duplicateScopes(existing, annotationType, scope);
     } else {
-      state.putAnnotation(annotationType, checkNotNull(scope, "scope"));
+      injector.state.putAnnotation(annotationType, checkNotNull(scope, "scope"));
     }
 
     return true;

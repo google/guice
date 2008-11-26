@@ -672,6 +672,14 @@ public class ElementsTest extends TestCase {
   }
 
   public void testNewPrivateBinder() {
+    final Key<Collection> collection = Key.get(Collection.class, SampleAnnotation.class);
+    final Key<ArrayList> arrayList = Key.get(ArrayList.class);
+    final ImmutableSet<Key<?>> collections = ImmutableSet.<Key<?>>of(arrayList, collection);
+
+    final Key<?> a = Key.get(String.class, Names.named("a"));
+    final Key<?> b = Key.get(String.class, Names.named("b"));
+    final ImmutableSet<Key<?>> ab = ImmutableSet.of(a, b);
+
     checkModule(
         new AbstractModule() {
           protected void configure() {
@@ -683,29 +691,15 @@ public class ElementsTest extends TestCase {
             PrivateBinder two = binder().withSource("1 ElementsTest.java")
                 .newPrivateBinder().withSource("2 ElementsTest.java");
             two.expose(String.class).annotatedWith(Names.named("a"));
-            two.expose(Key.get(String.class, Names.named("b")));
+            two.expose(b);
             two.bind(List.class).to(ArrayList.class);
           }
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitPrivateElements(PrivateEnvironment one) {
-            assertEquals(ImmutableSet.<Key<?>>of(Key.get(ArrayList.class),
-                Key.get(Collection.class, SampleAnnotation.class)), one.getExposedKeys());
+          @Override public Void visitPrivateEnvironment(PrivateEnvironment one) {
+            assertEquals(collections, one.getExposedKeys());
             checkElements(one.getElements(),
-                new FailingElementVisitor() {
-                  @Override public Void visitExposure(Exposure exposure) {
-                    assertEquals(Key.get(ArrayList.class), exposure.getKey());
-                    return null;
-                  }
-                },
-                new FailingElementVisitor() {
-                  @Override public Void visitExposure(Exposure exposure) {
-                    assertEquals(Key.get(Collection.class, SampleAnnotation.class),
-                        exposure.getKey());
-                    return null;
-                  }
-                },
                 new FailingElementVisitor() {
                   @Override public <T> Void visitBinding(Binding<T> binding) {
                     assertEquals(Key.get(List.class), binding.getKey());
@@ -718,25 +712,36 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visitPrivateElements(PrivateEnvironment two) {
-            assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class, Names.named("a")),
-                Key.get(String.class, Names.named("b"))), two.getExposedKeys());
+          @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertEquals(arrayList, binding.getKey());
+            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
+                assertEquals(collections, privateEnvironment.getExposedKeys());
+                return null;
+              }
+            });
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertEquals(collection, binding.getKey());
+            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
+                assertEquals(collections, privateEnvironment.getExposedKeys());
+                return null;
+              }
+            });
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visitPrivateEnvironment(PrivateEnvironment two) {
+            assertEquals(ab, two.getExposedKeys());
             assertEquals("1 ElementsTest.java", two.getSource());
             checkElements(two.getElements(),
-                new FailingElementVisitor() {
-                  @Override public Void visitExposure(Exposure exposure) {
-                    assertEquals("2 ElementsTest.java", exposure.getSource());
-                    assertEquals(Key.get(String.class, Names.named("a")), exposure.getKey());
-                    return null;
-                  }
-                },
-                new FailingElementVisitor() {
-                  @Override public Void visitExposure(Exposure exposure) {
-                    assertEquals("2 ElementsTest.java", exposure.getSource());
-                    assertEquals(Key.get(String.class, Names.named("b")), exposure.getKey());
-                    return null;
-                  }
-                },
                 new FailingElementVisitor() {
                   @Override public <T> Void visitBinding(Binding<T> binding) {
                     assertEquals("2 ElementsTest.java", binding.getSource());
@@ -745,6 +750,34 @@ public class ElementsTest extends TestCase {
                   }
                 }
             );
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertEquals(a, binding.getKey());
+            assertEquals("2 ElementsTest.java", binding.getSource());
+            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
+                assertEquals(ab, privateEnvironment.getExposedKeys());
+                return null;
+              }
+            });
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertEquals(b, binding.getKey());
+            assertEquals("2 ElementsTest.java", binding.getSource());
+            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
+                assertEquals(ab, privateEnvironment.getExposedKeys());
+                return null;
+              }
+            });
             return null;
           }
         }

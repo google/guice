@@ -25,6 +25,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
@@ -35,6 +36,7 @@ import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.PrivateBinder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ModuleBinding;
+import com.google.inject.internal.ModuleBinding.ExposureBuilder;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
@@ -109,6 +111,9 @@ public final class Elements {
     private final List<Element> elements;
     private final Object source;
     private final SourceProvider sourceProvider;
+
+    /** The binder where exposed bindings will be created */
+    private final RecordingBinder parent;
     private final PrivateEnvironment privateEnvironment;
 
     private RecordingBinder(Stage stage) {
@@ -118,28 +123,32 @@ public final class Elements {
       this.source = null;
       this.sourceProvider = new SourceProvider()
           .plusSkippedClasses(Elements.class, RecordingBinder.class, AbstractModule.class);
+      this.parent = null;
       this.privateEnvironment = null;
     }
 
-    /** Creates a recording binder that's backed by {@code backingBinder}. */
-    private RecordingBinder(RecordingBinder parent, Object source, SourceProvider sourceProvider) {
+    /** Creates a recording binder that's backed by {@code prototype}. */
+    private RecordingBinder(
+        RecordingBinder prototype, Object source, SourceProvider sourceProvider) {
       checkArgument(source == null ^ sourceProvider == null);
 
-      this.stage = parent.stage;
-      this.modules = parent.modules;
-      this.elements = parent.elements;
+      this.stage = prototype.stage;
+      this.modules = prototype.modules;
+      this.elements = prototype.elements;
       this.source = source;
       this.sourceProvider = sourceProvider;
-      this.privateEnvironment = parent.privateEnvironment;
+      this.parent = prototype.parent;
+      this.privateEnvironment = prototype.privateEnvironment;
     }
 
     /** Creates a private recording binder. */
     private RecordingBinder(RecordingBinder parent, PrivateEnvironment privateEnvironment) {
       this.stage = parent.stage;
       this.modules = Sets.newHashSet();
-      this.elements = privateEnvironment.elementsMutable;
+      this.elements = privateEnvironment.getElementsMutable();
       this.source = parent.source;
       this.sourceProvider = parent.sourceProvider;
+      this.parent = parent;
       this.privateEnvironment = privateEnvironment;
     }
 
@@ -168,8 +177,13 @@ public final class Elements {
 
     public void install(Module module) {
       if (modules.add(module)) {
+        Binder binder = this;
+        if (module instanceof PrivateModule) {
+          binder = binder.newPrivateBinder();
+        }
+
         try {
-          module.configure(this);
+          module.configure(binder);
         } catch (RuntimeException e) {
           Collection<Message> messages = Errors.getMessagesFromThrowable(e);
           if (!messages.isEmpty()) {
@@ -178,7 +192,7 @@ public final class Elements {
             addError(e);
           }
         }
-        install(ProviderMethodsModule.forModule(module));
+        binder.install(ProviderMethodsModule.forModule(module));
       }
     }
 
@@ -277,15 +291,18 @@ public final class Elements {
       return exposeInternal(Key.get(type));
     }
 
-    private AnnotatedElementBuilder exposeInternal(Key<?> key) {
+    private <T> AnnotatedElementBuilder exposeInternal(Key<T> key) {
       if (privateEnvironment == null) {
         throw new UnsupportedOperationException("expose() only supported on PrivateBinder. "
             + "Avoid using 'instanceof PrivateBinder', it's unsafe.");
       }
 
-      Exposure exposure = new Exposure(getSource(), privateEnvironment, key);
-      elements.add(exposure);
-      return exposure.annotatedElementBuilder(this);
+      ModuleBinding<T> exposeBinding = new ModuleBinding<T>(getSource(), key);
+      parent.elements.add(exposeBinding);
+
+      ExposureBuilder<T> builder = exposeBinding.exposedKeyBuilder(this, privateEnvironment);
+      privateEnvironment.addExposureBuilder(builder);
+      return builder;
     }
 
     protected Object getSource() {

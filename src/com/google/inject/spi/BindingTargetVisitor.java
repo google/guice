@@ -105,4 +105,9 @@ public interface BindingTargetVisitor<T, V> {
    *      com.google.inject.Injector#getBinding(Key) Injector.getBinding(provided)}
    */
   V visitProviderBinding(Key<?> provided);
+
+  /**
+   * Visit a binding to a key exposed by a private environment.
+   */
+  V visitExposed(PrivateEnvironment privateEnvironment);
 }

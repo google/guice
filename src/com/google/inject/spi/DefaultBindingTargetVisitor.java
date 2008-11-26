@@ -69,4 +69,8 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
   public V visitProviderBinding(Key<?> provided) {
     return visitOther();
   }
+
+  public V visitExposed(PrivateEnvironment privateEnvironment) {
+    return visitOther();
+  }
 }

@@ -36,16 +36,15 @@ import java.util.Set;
 class InjectionRequestProcessor extends AbstractProcessor {
 
   private final List<StaticInjection> staticInjections = Lists.newArrayList();
-  private final Initializer memberInjector;
+  private final Initializer initializer;
 
-  InjectionRequestProcessor(Errors errors,
-      Initializer memberInjector) {
+  InjectionRequestProcessor(Errors errors, Initializer initializer) {
     super(errors);
-    this.memberInjector = memberInjector;
+    this.initializer = initializer;
   }
 
   @Override public Boolean visitStaticInjectionRequest(StaticInjectionRequest command) {
-    staticInjections.add(new StaticInjection(command.getSource(), command.getType()));
+    staticInjections.add(new StaticInjection(injector, command.getSource(), command.getType()));
     return true;
   }
 
@@ -59,34 +58,36 @@ class InjectionRequestProcessor extends AbstractProcessor {
       injectionPoints = e.getPartialValue();
     }
 
-    memberInjector.requestInjection(command.getInstance(), command.getSource(), injectionPoints);
+    initializer.requestInjection(injector, command.getInstance(), command.getSource(), injectionPoints);
     return true;
   }
 
-  public void validate(InjectorImpl injector) {
+  public void validate() {
     for (StaticInjection staticInjection : staticInjections) {
-      staticInjection.validate(injector);
+      staticInjection.validate();
     }
   }
 
-  public void injectMembers(InjectorImpl injector) {
+  public void injectMembers() {
     for (StaticInjection staticInjection : staticInjections) {
-      staticInjection.injectMembers(injector);
+      staticInjection.injectMembers();
     }
   }
 
   /** A requested static injection. */
   private class StaticInjection {
+    final InjectorImpl injector;
     final Object source;
     final Class<?> type;
     ImmutableList<SingleMemberInjector> memberInjectors;
 
-    public StaticInjection(Object source, Class type) {
+    public StaticInjection(InjectorImpl injector, Object source, Class type) {
+      this.injector = injector;
       this.source = source;
       this.type = type;
     }
 
-    void validate(final InjectorImpl injector) {
+    void validate() {
       Errors errorsForMember = errors.withSource(source);
       Set<InjectionPoint> injectionPoints;
       try {
@@ -98,7 +99,7 @@ class InjectionRequestProcessor extends AbstractProcessor {
       memberInjectors = injector.getInjectors(injectionPoints, errorsForMember);
     }
 
-    void injectMembers(InjectorImpl injector) {
+    void injectMembers() {
       try {
         injector.callInContext(new ContextualCallable<Void>() {
           public Void call(InternalContext context) {

@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Key;
+import com.google.inject.internal.ModuleBinding.ExposureBuilder;
 import java.util.List;
 import java.util.Set;
 
@@ -33,8 +34,16 @@ import java.util.Set;
  */
 public final class PrivateEnvironment implements Element {
 
+  /*
+   * This class acts as both a value object and as a builder. When getElements() is called, an
+   * immutable collection of elements is constructed and the original mutable list is nulled out.
+   * Similarly, the exposed keys are made immutable on access.
+   */
+
   private final Object source;
-  List<Element> elementsMutable = Lists.newArrayList();
+
+  private List<Element> elementsMutable = Lists.newArrayList();
+  private List<ExposureBuilder<?>> exposureBuilders = Lists.newArrayList();
 
   /** lazily instantiated */
   private ImmutableList<Element> elements;
@@ -51,8 +60,7 @@ public final class PrivateEnvironment implements Element {
   }
 
   /**
-   * Returns the configuration information in this private environment, including the {@link
-   * Exposure} elements that make configuration available to the enclosing environment.
+   * Returns the configuration information in this private environment.
    */
   public List<Element> getElements() {
     if (elements == null) {
@@ -69,18 +77,25 @@ public final class PrivateEnvironment implements Element {
   public Set<Key<?>> getExposedKeys() {
     if (exposedKeys == null) {
       Set<Key<?>> exposedKeysMutable = Sets.newLinkedHashSet();
-      for (Element element : getElements()) {
-        if (element instanceof Exposure) {
-          exposedKeysMutable.add(((Exposure) element).getKey());
-        }
+      for (ExposureBuilder<?> exposureBuilder : exposureBuilders) {
+        exposedKeysMutable.add(exposureBuilder.getKey());
       }
       exposedKeys = ImmutableSet.copyOf(exposedKeysMutable);
+      exposureBuilders = null;
     }
 
     return exposedKeys;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitPrivateElements(this);
+    return visitor.visitPrivateEnvironment(this);
+  }
+
+  List<Element> getElementsMutable() {
+    return elementsMutable;
+  }
+
+  void addExposureBuilder(ExposureBuilder<?> exposureBuilder) {
+    exposureBuilders.add(exposureBuilder);
   }
 }

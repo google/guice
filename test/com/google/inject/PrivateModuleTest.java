@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.privatemodules;
+package com.google.inject;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.ProvisionException;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import junit.framework.TestCase;
@@ -68,6 +60,25 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("public", ab2.a);
     assertEquals("ii", ab2.b);
   }
+  
+  public void testWithoutPrivateModules() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        PrivateBinder bindA = binder().newPrivateBinder();
+        bindA.bind(String.class).annotatedWith(named("a")).toInstance("i");
+        bindA.expose(String.class).annotatedWith(named("a"));
+        bindA.bind(String.class).annotatedWith(named("c")).toInstance("private to A");
+
+        PrivateBinder bindB = binder().newPrivateBinder();
+        bindB.bind(String.class).annotatedWith(named("b")).toInstance("ii");
+        bindB.expose(String.class).annotatedWith(named("b"));
+        bindB.bind(String.class).annotatedWith(named("c")).toInstance("private to B");
+      }
+    });
+
+    assertEquals("i", injector.getInstance(Key.get(String.class, named("a"))));
+    assertEquals("ii", injector.getInstance(Key.get(String.class, named("b"))));
+  }
 
   public void testPrivateModulesAndProvidesMethods() {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -89,11 +100,11 @@ public class PrivateModuleTest extends TestCase {
         install(new PrivateModule() {
           public void configurePrivateBindings() {}
 
-          @Provides @Named("a") String providePrivateA() {
+          @Provides @Named("c") String providePrivateC() {
             return "private";
           }
 
-          @Provides @Exposed @Named("b") String providePublicB() {
+          @Provides @Exposed @Named("d") String providePublicD() {
             return "ii";
           }
         });
@@ -101,7 +112,7 @@ public class PrivateModuleTest extends TestCase {
     });
 
     assertEquals("i", injector.getInstance(Key.get(String.class, named("a"))));
-    assertEquals("ii", injector.getInstance(Key.get(String.class, named("b"))));
+    assertEquals("ii", injector.getInstance(Key.get(String.class, named("d"))));
   }
 
   public void testCannotBindAKeyExportedByASibling() {
@@ -122,9 +133,12 @@ public class PrivateModuleTest extends TestCase {
           });
         }
       });
-      fail("KNOWN ISSUE: Binding to 'private' should conflict with binding to 'public'");
+      fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Cannot bind String");
+      assertContains(expected.getMessage(),
+          "A binding to java.lang.String was already configured at ",
+          getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:",
+          " at " + getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:");
     }
   }
 
@@ -144,9 +158,9 @@ public class PrivateModuleTest extends TestCase {
       });
       fail("AB was exposed but not bound");
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "Could not expose() at ",
-          PrivateModuleTest.class.getName(), ".configurePrivateBindings(PrivateModuleTest.java:",
-          Key.get(AB.class).toString(), " must be explicitly bound.");
+      assertContains(expected.getMessage(),
+          "Could not expose() " + AB.class.getName() + ", it must be explicitly bound",
+          ".configurePrivateBindings(PrivateModuleTest.java:");
     }
   }
 
@@ -232,21 +246,21 @@ public class PrivateModuleTest extends TestCase {
       }
     });
 
-    assertEquals("boeo", injector.getInstance(
-        Key.get(String.class, named("bound outer, exposed outer"))));
-    assertEquals("bieb", injector.getInstance(
-        Key.get(String.class, named("bound inner, exposed both"))));
+    assertEquals("boeo",
+        injector.getInstance(Key.get(String.class, named("bound outer, exposed outer"))));
+    assertEquals("bieb",
+        injector.getInstance(Key.get(String.class, named("bound inner, exposed both"))));
 
     try {
       injector.getInstance(Key.get(String.class, named("bound outer, exposed none")));
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
     }
 
     try {
       injector.getInstance(Key.get(String.class, named("bound inner, exposed none")));
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
     }
   }
 

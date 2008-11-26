@@ -27,6 +27,7 @@ import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
@@ -36,6 +37,7 @@ import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.PrivateEnvironment;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -153,6 +155,23 @@ public final class ModuleBinding<T> implements Binding<T> {
     return new RegularBuilder(binder);
   }
 
+
+  /** @param binder the binder where errors will be reported. */
+  public ExposureBuilder<T> exposedKeyBuilder(Binder binder,
+      final PrivateEnvironment privateEnvironment) {
+    if (target != EMPTY_TARGET) {
+      throw new AssertionError();
+    }
+
+    target = new Target<T>() {
+      public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
+        return visitor.visitExposed(privateEnvironment);
+      }
+    };
+
+    return new ExposureBuilder<T>(this, binder);
+  }
+
   /**
    * Write access to the internal state of this element. Not for use by the public API.
    */
@@ -163,8 +182,7 @@ public final class ModuleBinding<T> implements Binding<T> {
       this.binder = binder.skipSources(RegularBuilder.class);
     }
 
-    public LinkedBindingBuilder<T> annotatedWith(
-        Class<? extends Annotation> annotationType) {
+    public LinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> annotationType) {
       checkNotNull(annotationType, "annotationType");
       checkNotAnnotated();
       key = Key.get(key.getTypeLiteral(), annotationType);
@@ -352,8 +370,7 @@ public final class ModuleBinding<T> implements Binding<T> {
   /**
    * Package-private write access to the internal state of this element.
    */
-  class ConstantBuilder
-      implements AnnotatedConstantBindingBuilder, ConstantBindingBuilder {
+  class ConstantBuilder implements AnnotatedConstantBindingBuilder, ConstantBindingBuilder {
     private final Binder binder;
 
     ConstantBuilder(Binder binder) {
@@ -452,6 +469,45 @@ public final class ModuleBinding<T> implements Binding<T> {
       return key.getAnnotationType() == null
           ? "AnnotatedConstantBindingBuilder"
           : "ConstantBindingBuilder";
+    }
+  }
+
+  /**
+   * For private binder's expose() method.
+   */
+  public static class ExposureBuilder<T> implements AnnotatedElementBuilder {
+    private ModuleBinding<T> binding;
+    private final Binder binder;
+
+    public ExposureBuilder(ModuleBinding<T> binding, Binder binder) {
+      this.binding = binding;
+      this.binder = binder;
+    }
+
+    public void annotatedWith(Class<? extends Annotation> annotationType) {
+      checkNotNull(annotationType, "annotationType");
+      checkNotAnnotated();
+      binding.key = Key.get(binding.key.getTypeLiteral(), annotationType);
+    }
+
+    public void annotatedWith(Annotation annotation) {
+      checkNotNull(annotation, "annotation");
+      checkNotAnnotated();
+      binding.key = Key.get(binding.key.getTypeLiteral(), annotation);
+    }
+
+    public Key<?> getKey() {
+      return binding.key;
+    }
+
+    private void checkNotAnnotated() {
+      if (binding.key.getAnnotationType() != null) {
+        binder.addError(ANNOTATION_ALREADY_SPECIFIED);
+      }
+    }
+
+    @Override public String toString() {
+      return "AnnotatedElementBuilder";
     }
   }
 
