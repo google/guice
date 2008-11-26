@@ -35,7 +35,6 @@
     <ant antfile="extensions/assistedinject/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
-    <ant antfile="extensions/privatemodules/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/commands/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
@@ -55,9 +54,6 @@
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/multibindings/build" includes="*.jar"/>
-    </copy>
-    <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/privatemodules/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/commands/build" includes="*.jar"/>
@@ -119,7 +115,6 @@
         <pathelement location="${assistedinject.src.dir}"/>
         <pathelement location="${throwingproviders.src.dir}"/>
         <pathelement location="${multibindings.src.dir}"/>
-        <pathelement location="${privatemodules.src.dir}"/>
         <pathelement location="${commands.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
@@ -141,7 +136,6 @@
     <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
-    <ant dir="extensions/privatemodules" antfile="build.xml" target="clean"/>
     <ant dir="extensions/commands" antfile="build.xml" target="clean"/>
   </target>
   

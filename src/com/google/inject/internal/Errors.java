@@ -235,7 +235,7 @@ public final class Errors implements Serializable {
 
   public Errors duplicateScopeAnnotations(
       Class<? extends Annotation> a, Class<? extends Annotation> b) {
-    return addMessage("More than one scope annotation was found: %s and %s", a, b);
+    return addMessage("More than one scope annotation was found: %s and %s.", a, b);
   }
 
   public Errors recursiveBinding() {
@@ -394,7 +394,7 @@ public final class Errors implements Serializable {
     return this;
   }
 
-  private String format(String messageFormat, Object... arguments) {
+  public static String format(String messageFormat, Object... arguments) {
     for (int i = 0; i < arguments.length; i++) {
       arguments[i] = Errors.convert(arguments[i]);
     }

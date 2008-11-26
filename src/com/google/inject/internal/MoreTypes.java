@@ -74,8 +74,7 @@ public class MoreTypes {
   public static <T> TypeLiteral<T> makeKeySafe(TypeLiteral<T> type) {
     if (!isFullySpecified(type.getType())) {
       String message = type + " cannot be used as a key; It is not fully specified.";
-      throw new ConfigurationException(ImmutableSet.of(
-          new Message(SourceProvider.UNKNOWN_SOURCE, message)));
+      throw new ConfigurationException(ImmutableSet.of(new Message(message)));
     }
 
     @SuppressWarnings("unchecked")

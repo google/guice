@@ -21,8 +21,8 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
 /**
- * Returns a binder whose configuration information is hidden from its environment. See {@link
- * com.google.inject.privatemodules.PrivateModule} for details.
+ * Returns a binder whose configuration information is hidden from its environment by default. See
+ * {@link com.google.inject.PrivateModule PrivateModule} for details.
  * 
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

@@ -201,7 +201,7 @@ public final class Elements {
     }
 
     public void addError(String message, Object... arguments) {
-      elements.add(new Message(getSource(), String.format(message, arguments)));
+      elements.add(new Message(getSource(), Errors.format(message, arguments)));
     }
 
     public void addError(Throwable t) {
@@ -293,8 +293,12 @@ public final class Elements {
 
     private <T> AnnotatedElementBuilder exposeInternal(Key<T> key) {
       if (privateEnvironment == null) {
-        throw new UnsupportedOperationException("expose() only supported on PrivateBinder. "
-            + "Avoid using 'instanceof PrivateBinder', it's unsafe.");
+        addError("Cannot expose %s on a standard binder. "
+            + "Exposed bindings are only applicable to private binders.", key);
+        return new AnnotatedElementBuilder() {
+          public void annotatedWith(Class<? extends Annotation> annotationType) {}
+          public void annotatedWith(Annotation annotation) {}
+        };
       }
 
       ModuleBinding<T> exposeBinding = new ModuleBinding<T>(getSource(), key);

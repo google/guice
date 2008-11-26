@@ -71,6 +71,14 @@ public interface BindingTargetVisitor<T, V> {
   V visitKey(Key<? extends T> key);
 
   /**
+   * Visit a binding to a key exposed from an enclosed private environment. This target is found in
+   * both module and injector bindings.
+   *
+   * @param privateEnvironment an enclosed environment that holds the original binding.
+   */
+  V visitExposed(PrivateEnvironment privateEnvironment);
+
+  /**
    * Visit an untargetted binding. This target is found only on module bindings. It indicates
    * that the injector should use its implicit binding strategies to resolve injections.
    */
@@ -105,9 +113,4 @@ public interface BindingTargetVisitor<T, V> {
    *      com.google.inject.Injector#getBinding(Key) Injector.getBinding(provided)}
    */
   V visitProviderBinding(Key<?> provided);
-
-  /**
-   * Visit a binding to a key exposed by a private environment.
-   */
-  V visitExposed(PrivateEnvironment privateEnvironment);
 }

@@ -80,6 +80,39 @@ public class PrivateModuleTest extends TestCase {
     assertEquals("ii", injector.getInstance(Key.get(String.class, named("b"))));
   }
 
+  public void testMisplacedExposedAnnotation() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {}
+
+        @Provides @Exposed
+        String provideString() {
+          return "i";
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Cannot expose java.lang.String on a standard binder. ",
+          "Exposed bindings are only applicable to private binders.",
+          " at " + PrivateModuleTest.class.getName(), "provideString(PrivateModuleTest.java:");
+    }
+  }
+
+  public void testMisplacedExposeStatement() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          ((PrivateBinder) binder()).expose(String.class).annotatedWith(named("a"));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Cannot expose java.lang.String on a standard binder. ",
+          "Exposed bindings are only applicable to private binders.",
+          " at " + PrivateModuleTest.class.getName(), "configure(PrivateModuleTest.java:");
+    }
+  }
+
   public void testPrivateModulesAndProvidesMethods() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {

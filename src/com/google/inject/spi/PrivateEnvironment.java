@@ -27,7 +27,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A private environment for configuration information.
+ * A private environment whose configuration information is hidden from the enclosing environment
+ * by default. See {@link com.google.inject.PrivateModule PrivateModule} for details.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

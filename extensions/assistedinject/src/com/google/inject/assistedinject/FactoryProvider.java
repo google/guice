@@ -23,6 +23,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -238,6 +239,6 @@ public class FactoryProvider<F, R> implements Provider<F> {
   }
 
   private ConfigurationException newConfigurationException(String format, Object... args) {
-    return new ConfigurationException(ImmutableSet.of(new Message(String.format(format, args))));
+    return new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
   }
 }

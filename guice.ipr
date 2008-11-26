@@ -53,7 +53,6 @@
         <option name="BLANK_LINES_BEFORE_PACKAGE" value="1" />
         <option name="SPACE_WITHIN_ARRAY_INITIALIZER_BRACES" value="true" />
         <option name="SPACE_BEFORE_ARRAY_INITIALIZER_LBRACE" value="true" />
-        <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
         <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
         <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
         <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">

@@ -152,9 +152,8 @@ public class ModuleWriter {
   }
 
   /**
-   * Writes all the elements bound in the private environment to new private binder that's enclosed
-   * by the current binder. The private binder will be associated with its environment, so exposed
-   * bindings from the main elements list can be exposed from the corresponding private binder.
+   * Writes the elements of the private environment to a new private binder and {@link
+   * #setPrivateBinder associates} the two.
    */
   protected void writePrivateElements(Binder binder, PrivateEnvironment element) {
     PrivateBinder privateBinder = binder.withSource(element.getSource()).newPrivateBinder();
@@ -212,10 +211,7 @@ public class ModuleWriter {
     });
   }
 
-  /**
-   * Associates {@code binder} with {@code privateEnvironment}. This can later be used to lookup the
-   * binder for its environment.
-   */
+  /** Associates {@code binder} with {@code privateEnvironment}. */
   protected void setPrivateBinder(PrivateEnvironment privateEnvironment, PrivateBinder binder) {
     checkArgument(!environmentToBinder.containsKey(privateEnvironment),
         "A private binder already exists for %s", privateEnvironment);
@@ -224,7 +220,7 @@ public class ModuleWriter {
 
   /**
    * Returns the {@code binder} accociated with {@code privateEnvironment}. This can be used to
-   * expose bindings from {@code privateEnvironment} from the corresponding private binder.
+   * expose bindings to the enclosing environment.
    */
   protected PrivateBinder getPrivateBinder(PrivateEnvironment privateEnvironment) {
     PrivateBinder privateBinder = environmentToBinder.get(privateEnvironment);

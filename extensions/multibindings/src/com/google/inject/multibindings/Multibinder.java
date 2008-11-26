@@ -28,6 +28,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
@@ -275,7 +276,7 @@ public abstract class Multibinder<T> {
       return;
     }
 
-    throw new ConfigurationException(ImmutableSet.of(new Message(String.format(format, args))));
+    throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
   }
 
   static <T> T checkNotNull(T reference, String name) {
