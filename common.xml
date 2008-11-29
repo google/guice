@@ -104,4 +104,22 @@
       depends="source.jar, jar"
       description="Build jar files"/>
 
+  <target name="jar.withdeps" depends="compile"
+      description="Build jar with dependencies embedded.">
+    <mkdir dir="${build.dir}/dist"/>
+    <dirname property="common.basedir" file="${ant.file.common}"/>
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+        classpath="${common.basedir}/lib/build/jarjar-1.0rc8.jar"/>
+    <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
+      <fileset dir="${build.dir}/classes"/>
+      <zipfileset src="${common.basedir}/lib/build/cglib-2.2.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/asm-3.1.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/google-collect-snapshot-20080530.jar"/>
+      <rule pattern="com.google.common.**" result="com.google.inject.internal.@1"/>
+      <rule pattern="net.sf.cglib.**" result="com.google.inject.internal.cglib.@1"/>
+      <rule pattern="org.objectweb.asm.**" result="com.google.inject.internal.asm.@1"/>
+      <keep pattern="com.google.inject.**"/>
+    </jarjar>
+  </target>
+
 </project>

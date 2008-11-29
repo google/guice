@@ -9,22 +9,12 @@
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
   </path>
 
-  <target name="jar" depends="compile, manifest"
-       description="Build jar.">
-    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" 
-      classpath="lib/build/jarjar-1.0rc8.jar"/>
-    <mkdir dir="${build.dir}/dist"/>
-    <jarjar jarfile="${build.dir}/dist/guice-${version}.jar"
+
+  <target name="jar" depends="jar.withdeps, manifest" description="Build jar.">
+    <jar jarfile="${build.dir}/dist/guice-${version}.jar"
         manifest="${build.dir}/META-INF/MANIFEST.MF">
-      <fileset dir="${build.dir}/classes"/>
-      <zipfileset src="lib/build/cglib-2.2.jar"/>
-      <zipfileset src="lib/build/asm-3.1.jar"/>
-      <zipfileset src="lib/build/google-collect-snapshot-20080530.jar"/>
-      <rule pattern="com.google.common.**" result="com.google.inject.internal.@1"/>
-      <rule pattern="net.sf.cglib.**" result="com.google.inject.internal.cglib.@1"/>
-      <rule pattern="org.objectweb.asm.**" result="com.google.inject.internal.asm.@1"/>
-      <keep pattern="com.google.inject.**"/>
-    </jarjar>
+      <zipfileset src="${build.dir}/${ant.project.name}-with-deps.jar"/>
+    </jar>
   </target>
 
   <target name="dist" depends="distjars, javadoc"
@@ -38,25 +28,25 @@
     <ant antfile="extensions/commands/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="servlet/build" includes="*.jar"/>
+      <fileset dir="servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="spring/build" includes="*.jar"/>
+      <fileset dir="spring/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="struts2/plugin/build" includes="*.jar"/>
+      <fileset dir="struts2/plugin/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/assistedinject/build" includes="*.jar"/>
+      <fileset dir="extensions/assistedinject/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/throwingproviders/build" includes="*.jar"/>
+      <fileset dir="extensions/throwingproviders/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/multibindings/build" includes="*.jar"/>
+      <fileset dir="extensions/multibindings/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/commands/build" includes="*.jar"/>
+      <fileset dir="extensions/commands/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
@@ -69,7 +59,7 @@
     </copy>
 
     <zip destfile="${build.dir}/guice-${version}.zip">
-      <zipfileset dir="${build.dir}/dist" prefix="guice-${version}"/>
+      <zipfileset dir="${build.dir}/dist" prefix="guice-${version}" excludes="*-src.jar"/>
     </zip>
     <zip destfile="${build.dir}/guice-${version}-src.zip">
       <zipfileset dir="." prefix="guice-${version}-src"
