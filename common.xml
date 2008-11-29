@@ -114,7 +114,7 @@
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-2.2.jar"/>
       <zipfileset src="${common.basedir}/lib/build/asm-3.1.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/google-collect-snapshot-20080530.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/google-collect-snapshot-20081129.jar"/>
       <rule pattern="com.google.common.**" result="com.google.inject.internal.@1"/>
       <rule pattern="net.sf.cglib.**" result="com.google.inject.internal.cglib.@1"/>
       <rule pattern="org.objectweb.asm.**" result="com.google.inject.internal.asm.@1"/>
