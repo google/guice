@@ -322,9 +322,22 @@ public final class InjectionPoint implements Serializable {
   private static void checkForMisplacedBindingAnnotations(Member member, Errors errors) {
     Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
         errors, member, ((AnnotatedElement) member).getAnnotations());
-    if (misplacedBindingAnnotation != null) {
-      errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+    if (misplacedBindingAnnotation == null) {
+      return;
     }
+
+    // don't warn about misplaced binding annotations on methods when there's a field with the same
+    // name. In Scala, fields always get accessor methods (that we need to ignore). See bug 242.
+    if (member instanceof Method) {
+      try {
+        if (member.getDeclaringClass().getDeclaredField(member.getName()) != null) {
+          return;
+        }
+      } catch (NoSuchFieldException ignore) {
+      }
+    }
+
+    errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectionPoints(TypeLiteral<?> type,

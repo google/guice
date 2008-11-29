@@ -19,13 +19,13 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 import junit.framework.TestCase;
 
 /**
@@ -212,6 +212,15 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  public void testBindingAnnotationWarningForScala() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).annotatedWith(Green.class).toInstance("lime!");
+      }
+    });
+    injector.getInstance(LikeScala.class);
+  }
+
   public void testLinkedBindings() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -272,6 +281,15 @@ public class ProvisionExceptionTest extends TestCase {
 
   static class ConstructorWithBindingAnnotation {
     @Inject @Green ConstructorWithBindingAnnotation(String greenString) {}
+  }
+
+  /**
+   * In Scala, fields automatically get accessor methods with the same name. So we don't do
+   * misplaced-binding annotation detection if the offending method has a matching field.
+   */
+  static class LikeScala {
+    @Inject @Green String green;
+    @Inject @Green String green() { return green; }
   }
 
   @Retention(RUNTIME)
