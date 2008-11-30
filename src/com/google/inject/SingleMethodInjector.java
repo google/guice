@@ -18,8 +18,8 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.InjectorImpl.MethodInvoker;
-import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
+import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.InjectionPoint;
@@ -53,8 +53,7 @@ class SingleMethodInjector implements SingleMemberInjector {
         }
       };
     } else {
-      FastClass fastClass = BytecodeGen.newFastClass(
-          method.getDeclaringClass(), Visibility.forMember(method));
+      FastClass fastClass = newFastClass(method.getDeclaringClass(), Visibility.forMember(method));
       final FastMethod fastMethod = fastClass.getMethod(method);
 
       methodInvoker = new MethodInvoker() {

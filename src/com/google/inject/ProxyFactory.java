@@ -94,7 +94,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       indices.put(method, i);
     }
 
-    // true if all the methods we're intercepting are public. This impacts which classloader we
+    // PUBLIC if all the methods we're intercepting are public. This impacts which classloader we
     // should use for loading the enhanced class
     Visibility visibility = Visibility.PUBLIC;
 
@@ -154,7 +154,7 @@ class ProxyFactory implements ConstructionProxyFactory {
       final InjectionPoint injectionPoint) {
     @SuppressWarnings("unchecked") // injection point's member must be a Constructor<T>
     final Constructor<T> standardConstructor = (Constructor<T>) injectionPoint.getMember();
-    FastClass fastClass = newFastClass(clazz, Visibility.PUBLIC);
+    FastClass fastClass = newFastClass(clazz, Visibility.forMember(standardConstructor));
     final FastConstructor fastConstructor
         = fastClass.getConstructor(standardConstructor.getParameterTypes());
 

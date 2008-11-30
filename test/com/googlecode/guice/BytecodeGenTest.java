@@ -22,7 +22,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import static com.google.inject.matcher.Matchers.any;
-import com.googlecode.guice.PackageVisilibityTestModule.PublicUserOfPackagePrivate;
+import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -54,7 +54,12 @@ public class BytecodeGenTest extends TestCase {
   };
 
   public void testPackageVisibility() {
-    Injector injector = Guice.createInjector(new PackageVisilibityTestModule());
+    Injector injector = Guice.createInjector(new PackageVisibilityTestModule());
+    injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
+  }
+
+  public void testInterceptedPackageVisibility() {
+    Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
   }
 
@@ -176,20 +181,29 @@ public class BytecodeGenTest extends TestCase {
     assertEquals("HELLO WORLD", m.invoke(testObject));
   }
 
-  public void testProxyClassUnloading() {
+  public void testSystemClassLoaderIsUsedIfProxiedClassUsesIt() {
     ProxyTest testProxy = Guice.createInjector(interceptorModule, new Module() {
       public void configure(Binder binder) {
         binder.bind(ProxyTest.class).to(ProxyTestImpl.class);
       }
     }).getInstance(ProxyTest.class);
 
+    assertSame(testProxy.getClass().getClassLoader(), ClassLoader.getSystemClassLoader());
+  }
+  
+  public void testProxyClassUnloading() {
+    Object testObject = Guice.createInjector(interceptorModule, testModule)
+        .getInstance(proxyTestClass);
+    assertNotNull(testObject.getClass().getClassLoader());
+    assertNotSame(testObject.getClass().getClassLoader(), ClassLoader.getSystemClassLoader());
+
     // take a weak reference to the generated proxy class
-    Reference<Class<?>> clazzRef = new WeakReference<Class<?>>(testProxy.getClass());
+    Reference<Class<?>> clazzRef = new WeakReference<Class<?>>(testObject.getClass());
 
     assertNotNull(clazzRef.get());
 
     // null the proxy
-    testProxy = null;
+    testObject = null;
 
     /*
      * this should be enough to queue the weak reference
@@ -203,7 +217,7 @@ public class BytecodeGenTest extends TestCase {
     // If it fails, run the test again to make sure it's failing reliably.
     assertNull(clazzRef.get());
   }
-  
+
   public void testProxyingPackagePrivateMethods() {
     Injector injector = Guice.createInjector(interceptorModule);
     assertEquals("HI WORLD", injector.getInstance(PackageClassPackageMethod.class).sayHi());

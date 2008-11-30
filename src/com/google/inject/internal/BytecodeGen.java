@@ -17,7 +17,9 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.ReferenceType.WEAK;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -78,7 +80,7 @@ public final class BytecodeGen {
 
   /** Use "-Dguice.custom.loader=false" to disable custom classloading. */
   static final boolean HOOK_ENABLED
-      = "true".equals(System.getProperty("guice.custom.loader", "false"));
+      = "true".equals(System.getProperty("guice.custom.loader", "true"));
 
   /**
    * Weak cache of bridge class loaders that make the Guice implementation
@@ -87,11 +89,6 @@ public final class BytecodeGen {
   private static final ReferenceCache<ClassLoader, ClassLoader> CLASS_LOADER_CACHE
       = new ReferenceCache<ClassLoader, ClassLoader>(WEAK, WEAK) {
         @Override protected ClassLoader create(final ClassLoader typeClassLoader) {
-          // Don't bother bridging existing bridge classloaders
-          if (typeClassLoader instanceof BridgeClassLoader) {
-            return typeClassLoader;
-          }
-
           logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
           return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
             public ClassLoader run() {
@@ -120,6 +117,16 @@ public final class BytecodeGen {
 
   private static ClassLoader getClassLoader(Class<?> type, ClassLoader delegate) {
     delegate = canonicalize(delegate);
+
+    // if the application is running in the System classloader, assume we can run there too
+    if (delegate == ClassLoader.getSystemClassLoader()) {
+      return delegate;
+    }
+
+    // Don't bother bridging existing bridge classloaders
+    if (delegate instanceof BridgeClassLoader) {
+      return delegate;
+    }
 
     if (HOOK_ENABLED && Visibility.forType(type) == Visibility.PUBLIC) {
       return CLASS_LOADER_CACHE.get(delegate);
@@ -184,9 +191,20 @@ public final class BytecodeGen {
     };
 
     public static Visibility forMember(Member member) {
-      return (member.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) != 0
-          ? PUBLIC
-          : SAME_PACKAGE;
+      if ((member.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC)) == 0) {
+        return SAME_PACKAGE;
+      }
+
+      Class[] parameterTypes = member instanceof Constructor
+          ? ((Constructor) member).getParameterTypes()
+          : ((Method) member).getParameterTypes();
+      for (Class<?> type : parameterTypes) {
+        if (forType(type) == SAME_PACKAGE) {
+          return SAME_PACKAGE;
+        }
+      }
+
+      return PUBLIC;
     }
 
     public static Visibility forType(Class<?> type) {

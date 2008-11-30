@@ -62,7 +62,7 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
 
     return new ConstructionProxy<T>() {
       Class<T> classToConstruct = constructor.getDeclaringClass();
-      FastClass fastClass = newFastClass(classToConstruct, Visibility.PUBLIC);
+      FastClass fastClass = newFastClass(classToConstruct, Visibility.forMember(constructor));
       final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
 
       @SuppressWarnings("unchecked")
