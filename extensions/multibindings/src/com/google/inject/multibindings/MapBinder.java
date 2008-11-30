@@ -27,8 +27,9 @@ import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
 import com.google.inject.util.Types;
+import static com.google.inject.util.Types.newParameterizedType;
+import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -94,69 +95,98 @@ public abstract class MapBinder<K, V> {
   private MapBinder() {}
 
   /**
-   * Returns a new mapbinder that collects entries of {@code keyType}/{@code 
-   * valueType} in a {@link Map} that is itself bound with no binding 
-   * annotation.
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with no binding annotation.
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
-      Type keyType, Type valueType) {
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
-        Key.get(MapBinder.<K, V>mapOf(keyType, valueType)),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType)), 
-        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
-            binder, entryOfProviderOf(keyType, valueType)));
+        Key.get(mapOf(keyType, valueType)),
+        Key.get(mapOfProviderOf(keyType, valueType)),
+        Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType)));
   }
 
   /**
-   * Returns a new mapbinder that collects entries of {@code keyType}/{@code 
-   * valueType} in a {@link Map} that is itself bound with {@code annotation}.
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with no binding annotation.
    */
-  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
-      Type keyType, Type valueType, Annotation annotation) {
-    binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
-    return newMapBinder(binder, valueType,
-        Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotation),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotation), 
-        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
-            binder, entryOfProviderOf(keyType, valueType), annotation));
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
+      Class<K> keyType, Class<V> valueType) {
+    return newMapBinder(binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType));
   }
 
   /**
-   * Returns a new mapbinder that collects entries of {@code keyType}/{@code 
-   * valueType} in a {@link Map} that is itself bound with {@code annotationType}.
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with {@code annotation}.
    */
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
-      Type keyType, Type valueType, Class<? extends Annotation> annotationType) {
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType, Annotation annotation) {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
-        Key.get(MapBinder.<K, V>mapOf(keyType, valueType), annotationType),
-        Key.get(MapBinder.<K, V>mapOfProviderOf(keyType, valueType), annotationType), 
-        Multibinder.<Entry<K, Provider<V>>>newSetBinder(
-            binder, entryOfProviderOf(keyType, valueType), annotationType));
+        Key.get(mapOf(keyType, valueType), annotation),
+        Key.get(mapOfProviderOf(keyType, valueType), annotation),
+        Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotation));
   }
 
-  @SuppressWarnings("unchecked")
-  private static <K, V> TypeLiteral<Map<K, V>> mapOf(Type keyType, Type valueType) {
-    Type type = Types.mapOf(keyType, valueType);
-    return (TypeLiteral<Map<K, V>>) TypeLiteral.get(type);
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with {@code annotation}.
+   */
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
+      Class<K> keyType, Class<V> valueType, Annotation annotation) {
+    return newMapBinder(binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotation);
   }
 
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with {@code annotationType}.
+   */
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, TypeLiteral<K> keyType,
+      TypeLiteral<V> valueType, Class<? extends Annotation> annotationType) {
+    binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
+    return newMapBinder(binder, valueType,
+        Key.get(mapOf(keyType, valueType), annotationType),
+        Key.get(mapOfProviderOf(keyType, valueType), annotationType),
+        Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotationType));
+  }
+
+  /**
+   * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
+   * {@link Map} that is itself bound with {@code annotationType}.
+   */
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, Class<K> keyType,
+      Class<V> valueType, Class<? extends Annotation> annotationType) {
+    return newMapBinder(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotationType);
+  }
+
+  @SuppressWarnings("unchecked") // a map of <K, V> is safely a Map<K, V>
+  private static <K, V> TypeLiteral<Map<K, V>> mapOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, V>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(), valueType.getType()));
+  }
+
+  @SuppressWarnings("unchecked") // a provider map <K, V> is safely a Map<K, Provider<V>>
   private static <K, V> TypeLiteral<Map<K, Provider<V>>> mapOfProviderOf(
-      Type keyType, Type valueType) {
-    return mapOf(keyType, Types.newParameterizedType(Provider.class, valueType));
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, Provider<V>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(), newParameterizedType(Provider.class, valueType.getType())));
   }
   
-  private static Type entryOfProviderOf(Type keyType, final Type valueType) {
-    return Types.newParameterizedTypeWithOwner(Map.class, Map.Entry.class, keyType,
-        Types.providerOf(valueType));
+  @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
+  private static <K, V> TypeLiteral<Map.Entry<K, Provider<V>>> entryOfProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Entry<K, Provider<V>>>) TypeLiteral.get(newParameterizedTypeWithOwner(
+        Map.class, Entry.class, keyType.getType(), Types.providerOf(valueType.getType())));
   }
 
-  private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
-      Type valueType, Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
+  private static <K, V> MapBinder<K, V> newMapBinder(Binder binder, TypeLiteral<V> valueType,
+      Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
       Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
-    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(binder,
-        valueType, mapKey, providerMapKey, entrySetBinder);
+    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(
+        binder, valueType, mapKey, providerMapKey, entrySetBinder);
     binder.install(mapBinder);
     return mapBinder;
   }
@@ -199,7 +229,7 @@ public abstract class MapBinder<K, V> {
    * <p>We use a subclass to hide 'implements Module' from the public API.
    */
   private static final class RealMapBinder<K, V> extends MapBinder<K, V> implements Module {
-    private final Type valueType;
+    private final TypeLiteral<V> valueType;
     private final Key<Map<K, V>> mapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
@@ -207,7 +237,7 @@ public abstract class MapBinder<K, V> {
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
 
-    private RealMapBinder(Binder binder, Type valueType, 
+    private RealMapBinder(Binder binder, TypeLiteral<V> valueType,
         Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
         Multibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
       this.valueType = valueType;
@@ -225,8 +255,7 @@ public abstract class MapBinder<K, V> {
       checkNotNull(key, "key");
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
-      @SuppressWarnings("unchecked")
-      Key<V> valueKey = (Key<V>) Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
+      Key<V> valueKey = Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
       entrySetBinder.addBinding().toInstance(new MapEntry<K, Provider<V>>(key,
           binder.getProvider(valueKey)));
       return binder.bind(valueKey);

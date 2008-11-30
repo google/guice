@@ -88,10 +88,10 @@ public abstract class Multibinder<T> {
   private Multibinder() {}
 
   /**
-   * Returns a new multibinder that collects instances of {@code type} in a
-   * {@link Set} that is itself bound with no binding annotation.
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with no binding annotation.
    */
-  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
+  public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "",
         Key.get(Multibinder.<T>setOf(type)));
@@ -100,10 +100,19 @@ public abstract class Multibinder<T> {
   }
 
   /**
-   * Returns a new multibinder that collects instances of {@code type} in a
-   * {@link Set} that is itself bound with {@code annotation}.
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with no binding annotation.
    */
-  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Class<T> type) {
+    return newSetBinder(binder, TypeLiteral.get(type));
+  }
+
+  /**
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with {@code annotation}.
+   */
+  public static <T> Multibinder<T> newSetBinder(
+      Binder binder, TypeLiteral<T> type, Annotation annotation) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation.toString(),
         Key.get(Multibinder.<T>setOf(type), annotation));
@@ -112,10 +121,19 @@ public abstract class Multibinder<T> {
   }
 
   /**
-   * Returns a new multibinder that collects instances of {@code type} in a
-   * {@link Set} that is itself bound with {@code annotationType}.
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with {@code annotation}.
    */
-  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
+  public static <T> Multibinder<T> newSetBinder(
+      Binder binder, Class<T> type, Annotation annotation) {
+    return newSetBinder(binder, TypeLiteral.get(type), annotation);
+  }
+
+  /**
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with {@code annotationType}.
+   */
+  public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type,
       Class<? extends Annotation> annotationType) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "@" + annotationType.getName(),
@@ -124,9 +142,18 @@ public abstract class Multibinder<T> {
     return result;
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T> TypeLiteral<Set<T>> setOf(Type elementType) {
-    Type type = Types.setOf(elementType);
+  /**
+   * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
+   * itself bound with {@code annotationType}.
+   */
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Class<T> type,
+      Class<? extends Annotation> annotationType) {
+    return newSetBinder(binder, TypeLiteral.get(type), annotationType);
+  }
+
+  @SuppressWarnings("unchecked") // wrapping a T in a Set safely returns a Set<T>
+  private static <T> TypeLiteral<Set<T>> setOf(TypeLiteral<T> elementType) {
+    Type type = Types.setOf(elementType.getType());
     return (TypeLiteral<Set<T>>) TypeLiteral.get(type);
   }
 
@@ -163,10 +190,9 @@ public abstract class Multibinder<T> {
    * <p>We use a subclass to hide 'implements Module, Provider' from the public
    * API.
    */
-  static final class RealMultibinder<T>
-      extends Multibinder<T> implements Module, Provider<Set<T>> {
+  static final class RealMultibinder<T> extends Multibinder<T> implements Module, Provider<Set<T>> {
 
-    private final Type elementType;
+    private final TypeLiteral<T> elementType;
     private final String setName;
     private final Key<Set<T>> setKey;
 
@@ -176,7 +202,7 @@ public abstract class Multibinder<T> {
     /* a provider for each element in the set. null until initialization, non-null afterwards */
     private List<Provider<T>> providers;
 
-    private RealMultibinder(Binder binder, Type elementType,
+    private RealMultibinder(Binder binder, TypeLiteral<T> elementType,
         String setName, Key<Set<T>> setKey) {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
@@ -191,11 +217,10 @@ public abstract class Multibinder<T> {
       binder.bind(setKey).toProvider(this);
     }
 
-    @SuppressWarnings("unchecked")
     @Override public LinkedBindingBuilder<T> addBinding() {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
-      return binder.bind((Key<T>) Key.get(elementType, new RealElement(setName)));
+      return binder.bind(Key.get(elementType, new RealElement(setName)));
     }
 
     /**
@@ -217,7 +242,7 @@ public abstract class Multibinder<T> {
     }
 
     private boolean keyMatches(Key<?> key) {
-      return key.getTypeLiteral().getType().equals(elementType)
+      return key.getTypeLiteral().equals(elementType)
           && key.getAnnotation() instanceof Element
           && ((Element) key.getAnnotation()).setName().equals(setName);
     }
@@ -264,10 +289,6 @@ public abstract class Multibinder<T> {
           .append(elementType)
           .append(">")
           .toString();
-    }
-
-    public Type getElementType() {
-      return elementType;
     }
   }
 
