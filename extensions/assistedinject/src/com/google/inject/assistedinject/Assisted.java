@@ -16,20 +16,21 @@
 
 package com.google.inject.assistedinject;
 
+import com.google.inject.BindingAnnotation;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * The {@code @Assisted} annotation should be used on paramters within
- * a constructor annotated with {@code @AssistedInject}.  The annotation
- * indicates that the parameter will be supplied through a factory 
- * method (the parameter will not be injected by Guice).
- * 
+ * Annotates an injected parameter or field whose value comes from an argument to a factory method.
+ *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-@Target({PARAMETER})
-@Retention(RUNTIME)
-public @interface Assisted {}
+@BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+public @interface Assisted {
+  String value() default "";
+}

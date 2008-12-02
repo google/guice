@@ -379,7 +379,7 @@ public final class Errors implements Serializable {
     return !errors.isEmpty();
   }
 
-  private Errors addMessage(String messageFormat, Object... arguments) {
+  public Errors addMessage(String messageFormat, Object... arguments) {
     return addMessage(null, messageFormat, arguments);
   }
 

@@ -71,7 +71,8 @@ public class Annotations {
    * Adds an error if there is a misplaced annotations on {@code type}. Scoping
    * annotations are not allowed on abstract classes or interfaces.
    */
-  public static void checkForMisplacedScopeAnnotations(Class<?> type, Object source, Errors errors) {
+  public static void checkForMisplacedScopeAnnotations(
+      Class<?> type, Object source, Errors errors) {
     if (Classes.isConcrete(type)) {
       return;
     }
