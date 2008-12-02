@@ -21,7 +21,11 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.name.Names;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -33,6 +37,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.isNull;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
@@ -41,133 +46,102 @@ import static org.easymock.EasyMock.verify;
  */
 public class ServletTest extends TestCase {
 
-  public void testNewRequestObject()
-      throws CreationException, IOException, ServletException {
-    final Injector injector = createInjector();
+  final Key<InSession> sessionKey = Key.get(InSession.class);
+  final Key<InRequest> requestKey = Key.get(InRequest.class);
+  final Key<String> nullSessionKey = Key.get(String.class, Names.named("null session"));
+  final Key<String> nullRequestKey = Key.get(String.class, Names.named("null request"));
+  final Injector injector = createInjector();
+  final GuiceFilter filter = new GuiceFilter();
+  final HttpServletRequest request = createMock(HttpServletRequest.class);
+  final HttpSession session = createMock(HttpSession.class);
 
-    GuiceFilter filter = new GuiceFilter();
+  FilterChain filterChain;
+  boolean invoked;
 
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+  public void testNewRequestObject() throws Exception {
+    expect(request.getAttribute(requestKey.toString())).andReturn(null);
+    request.setAttribute(eq(requestKey.toString()), isA(InRequest.class));
 
-    String name = Key.get(InRequest.class).toString();
-    expect(request.getAttribute(name)).andReturn(null);
-    request.setAttribute(eq(name), isA(InRequest.class));
-
-    final boolean[] invoked = new boolean[1];
-    FilterChain filterChain = new FilterChain() {
-      public void doFilter(ServletRequest servletRequest,
-          ServletResponse servletResponse) {
-        invoked[0] = true;
+    filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        invoked = true;
         assertSame(request, servletRequest);
         assertNotNull(injector.getInstance(InRequest.class));
       }
     };
 
-    replay(request);
-
-    filter.doFilter(request, null, filterChain);
-
-    verify(request);
-    assertTrue(invoked[0]);
+    replayFilterAndVerify();
   }
 
-  public void testExistingRequestObject()
-      throws CreationException, IOException, ServletException {
-    final Injector injector = createInjector();
+  public void testNullRequestObject() throws Exception {
+    expect(request.getAttribute(nullRequestKey.toString())).andReturn(null).times(2);
+    request.setAttribute(eq(nullRequestKey.toString()), isNull());
 
-    GuiceFilter filter = new GuiceFilter();
+    expect(request.getSession()).andReturn(session);
+    expect(session.getAttribute(nullSessionKey.toString())).andReturn(null);
+    session.setAttribute(eq(nullSessionKey.toString()), isNull());
 
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        invoked = true;
+        assertSame(request, servletRequest);
+        assertNull(injector.getInstance(nullRequestKey));
+        assertNull(injector.getInstance(nullRequestKey));
+        assertNull(injector.getInstance(nullSessionKey));
+        assertNull(injector.getInstance(nullSessionKey));
+      }
+    };
 
+    replayFilterAndVerify();
+  }
+
+  public void testExistingRequestObject() throws Exception {
     final InRequest inRequest = new InRequest();
-    String name = Key.get(InRequest.class).toString();
-    expect(request.getAttribute(name)).andReturn(inRequest).times(2);
+    expect(request.getAttribute(requestKey.toString())).andReturn(inRequest).times(2);
 
-    final boolean[] invoked = new boolean[1];
-    FilterChain filterChain = new FilterChain() {
-      public void doFilter(ServletRequest servletRequest,
-          ServletResponse servletResponse) {
-        invoked[0] = true;
+    filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        invoked = true;
         assertSame(request, servletRequest);
         assertSame(inRequest, injector.getInstance(InRequest.class));
         assertSame(inRequest, injector.getInstance(InRequest.class));
       }
     };
 
-    replay(request);
-
-    filter.doFilter(request, null, filterChain);
-
-    verify(request);
-    assertTrue(invoked[0]);
+    replayFilterAndVerify();
   }
 
-  public void testNewSessionObject()
-      throws CreationException, IOException, ServletException {
-    final Injector injector = createInjector();
-
-    GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpSession session = createMock(HttpSession.class);
-
-    String name = Key.get(InSession.class).toString();
-
+  public void testNewSessionObject() throws Exception {
     expect(request.getSession()).andReturn(session);
-    expect(session.getAttribute(name)).andReturn(null);
-    session.setAttribute(eq(name), isA(InSession.class));
+    expect(session.getAttribute(sessionKey.toString())).andReturn(null);
+    session.setAttribute(eq(sessionKey.toString()), isA(InSession.class));
 
-    final boolean[] invoked = new boolean[1];
-    FilterChain filterChain = new FilterChain() {
-      public void doFilter(ServletRequest servletRequest,
-          ServletResponse servletResponse) {
-        invoked[0] = true;
+    filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        invoked = true;
         assertSame(request, servletRequest);
         assertNotNull(injector.getInstance(InSession.class));
       }
     };
 
-    replay(request, session);
-
-    filter.doFilter(request, null, filterChain);
-
-    verify(request, session);
-    assertTrue(invoked[0]);
+    replayFilterAndVerify();
   }
 
-  public void testExistingSessionObject()
-      throws CreationException, IOException, ServletException {
-    final Injector injector = createInjector();
-
-    GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpSession session = createMock(HttpSession.class);
-
-    String name = Key.get(InSession.class).toString();
-
+  public void testExistingSessionObject() throws Exception {
     final InSession inSession = new InSession();
     expect(request.getSession()).andReturn(session).times(2);
-    expect(session.getAttribute(name)).andReturn(inSession).times(2);
+    expect(session.getAttribute(sessionKey.toString())).andReturn(inSession).times(2);
 
-    final boolean[] invoked = new boolean[1];
-    FilterChain filterChain = new FilterChain() {
-      public void doFilter(ServletRequest servletRequest,
-          ServletResponse servletResponse) {
-        invoked[0] = true;
+    filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        invoked = true;
         assertSame(request, servletRequest);
-
         assertSame(inSession, injector.getInstance(InSession.class));
         assertSame(inSession, injector.getInstance(InSession.class));
       }
     };
 
-    replay(request, session);
-
-    filter.doFilter(request, null, filterChain);
-
-    verify(request, session);
-    assertTrue(invoked[0]);
+    replayFilterAndVerify();
   }
 
   private Injector createInjector() throws CreationException {
@@ -176,8 +150,21 @@ public class ServletTest extends TestCase {
         install(new ServletModule());
         bind(InSession.class);
         bind(InRequest.class);
+        bind(nullRequestKey).toProvider(new NullThenNonNullProvider()).in(RequestScoped.class);
+        bind(nullSessionKey).toProvider(new NullThenNonNullProvider()).in(SessionScoped.class);
       }
     });
+  }
+
+  private void replayFilterAndVerify() throws IOException, ServletException {
+    replay(request);
+    replay(session);
+
+    filter.doFilter(request, null, filterChain);
+
+    verify(request);
+    verify(session);
+    assertTrue(invoked);
   }
 
   @SessionScoped
@@ -185,4 +172,11 @@ public class ServletTest extends TestCase {
 
   @RequestScoped
   static class InRequest {}
+
+  static class NullThenNonNullProvider implements Provider<String> {
+    final Iterator<String> iterator = Arrays.asList(null, "A").iterator();
+    public String get() {
+      return iterator.next();
+    }
+  }
 }

@@ -339,6 +339,7 @@
         <inspection_tool class="ThrowableInstanceNeverThrown" level="WARNING" enabled="false" />
         <inspection_tool class="InjectOfNonPublicMember" level="WARNING" enabled="false" />
         <inspection_tool class="ThrowableResultOfMethodCallIgnored" level="WARNING" enabled="false" />
+        <inspection_tool class="BindingAnnotationWithoutInject" level="WARNING" enabled="false" />
       </profile>
     </profiles>
     <list size="4">
@@ -517,7 +518,6 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/commands/commands.iml" filepath="$PROJECT_DIR$/extensions/commands/commands.iml" />
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
-      <module fileurl="file://$PROJECT_DIR$/extensions/privatemodules/privatemodules.iml" filepath="$PROJECT_DIR$/extensions/privatemodules/privatemodules.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
       <module fileurl="file://$PROJECT_DIR$/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/struts2/example/struts2-example.iml" />
@@ -577,7 +577,7 @@
   <component name="libraryTable">
     <library name="collect">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/build/google-collect-snapshot-20080530.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/build/google-collect-snapshot-20081129.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

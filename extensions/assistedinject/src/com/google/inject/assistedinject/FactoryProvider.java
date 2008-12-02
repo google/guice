@@ -68,8 +68,8 @@ import java.util.Map;
  *     FactoryProvider.newFactory(PaymentFactory.class, RealPayment.class));</code></pre>
  *
  * <p>Now you can {@literal @}{@code Inject} your factory interface into your
- * Guice-injected classes. When you invoke the create method on that factory, the
- * {@link FactoryProvider} will instantiate the implementation class using
+ * Guice-injected classes. When you invoke the create method on that factory,
+ * the {@link FactoryProvider} will instantiate the implementation class using
  * parameters from the injector and the factory method.
  *
  * <pre><code>public class PaymentAction {
@@ -80,10 +80,10 @@ import java.util.Map;
  *       payment.apply();
  *    }
  * }</code></pre>
- * 
+ *
  * @param <F> The factory interface
  * @param <R> The concrete class to be created.
- * 
+ *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -99,16 +99,15 @@ public class FactoryProvider<F, R> implements Provider<F> {
       Class<X> factoryType, Class<Y> implementationType){
     return new FactoryProvider<X, Y>(factoryType,implementationType);
   }
-  
+
   private FactoryProvider(Class<F> factoryType, Class<R> implementationType) {
     this.factoryType = factoryType;
     this.implementationType = implementationType;
     this.factoryMethodToConstructor = createMethodMapping();
     checkDeclaredExceptionsMatch();
   }
-  
+
   @Inject
-  @SuppressWarnings({"unchecked", "unused"})
   void setInjectorAndCheckUnboundParametersAreInjectable(Injector injector) {
     this.injector = injector;
     for (AssistedConstructor<?> c : factoryMethodToConstructor.values()) {
@@ -135,7 +134,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
       }
     }
   }
-  
+
   private boolean isConstructorExceptionCompatibleWithFactoryExeception(
       Class<?> constructorException, Class<?>[] factoryExceptions) {
     for (Class<?> factoryException : factoryExceptions) {
@@ -145,8 +144,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
     }
     return false;
   }
-  
-  @SuppressWarnings("unchecked")
+
   private boolean paramCanBeInjected(Parameter parameter, Injector injector) {
     return parameter.isBound(injector);
   }
@@ -155,7 +153,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
   private Map<Method, AssistedConstructor<?>> createMethodMapping() {
     List<AssistedConstructor<?>> constructors = Lists.newArrayList();
 
-    for (Constructor c : implementationType.getDeclaredConstructors()) {
+    for (Constructor<?> c : implementationType.getDeclaredConstructors()) {
       if (c.getAnnotation(AssistedInject.class) != null) {
         constructors.add(new AssistedConstructor(c));
       }
@@ -197,7 +195,6 @@ public class FactoryProvider<F, R> implements Provider<F> {
     return result;
   }
 
-  @SuppressWarnings({"unchecked"})
   public F get() {
     InvocationHandler invocationHandler = new InvocationHandler() {
       public Object invoke(Object proxy, Method method, Object[] creationArgs) throws Throwable {
@@ -205,7 +202,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
         if (method.getDeclaringClass().equals(Object.class)) {
           return method.invoke(this, creationArgs);
         }
-        
+
         AssistedConstructor<?> constructor = factoryMethodToConstructor.get(method);
         Object[] constructorArgs = gatherArgsForConstructor(
             constructor, creationArgs);
@@ -220,7 +217,7 @@ public class FactoryProvider<F, R> implements Provider<F> {
         int numParams = constructor.getAllParameters().size();
         int argPosition = 0;
         Object[] result = new Object[numParams];
-        
+
         for (int i = 0; i < numParams; i++) {
           Parameter parameter = constructor.getAllParameters().get(i);
           if (parameter.isProvidedByFactory()) {
@@ -234,8 +231,8 @@ public class FactoryProvider<F, R> implements Provider<F> {
       }
     };
 
-    return (F) Proxy.newProxyInstance(factoryType.getClassLoader(),
-        new Class[] {factoryType}, invocationHandler);
+    return factoryType.cast(Proxy.newProxyInstance(factoryType.getClassLoader(),
+        new Class[] {factoryType}, invocationHandler));
   }
 
   private ConfigurationException newConfigurationException(String format, Object... args) {

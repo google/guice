@@ -24,6 +24,8 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -308,6 +310,20 @@ public class ScopesTest extends TestCase {
           "1) More than one scope annotation was found: ",
           "while locating " + SingletonAndCustomScoped.class.getName());
     }
+  }
+
+  public void testNullScopedAsASingleton() {
+    Provider<String> unscoped = new Provider<String>() {
+      final Iterator<String> values = Arrays.asList(null, "A").iterator();
+      public String get() {
+        return values.next();
+      }
+    };
+
+    Provider<String> scoped = Scopes.SINGLETON.scope(Key.get(String.class), unscoped);
+    assertNull(scoped.get());
+    assertNull(scoped.get());
+    assertNull(scoped.get());
   }
 
   class RememberProviderScope implements Scope {
