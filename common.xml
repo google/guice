@@ -119,6 +119,7 @@
       <rule pattern="net.sf.cglib.**" result="com.google.inject.internal.cglib.@1"/>
       <rule pattern="org.objectweb.asm.**" result="com.google.inject.internal.asm.@1"/>
       <keep pattern="com.google.inject.**"/>
+      <keep pattern="com.google.common.collect.ImmutableMultimap"/>
     </jarjar>
   </target>
 
