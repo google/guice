@@ -18,21 +18,22 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
-import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.ReferenceCache;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.NoOp;
+import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -84,14 +85,11 @@ class ProxyFactory implements ConstructionProxyFactory {
     // Get list of methods from cglib.
     List<Method> methods = Lists.newArrayList();
     Enhancer.getMethods(declaringClass, null, methods);
-    final Map<Method, Integer> indices = Maps.newHashMap();
 
     // Create method/interceptor holders and record indices.
     List<MethodInterceptorsPair> methodInterceptorsPairs = Lists.newArrayList();
-    for (int i = 0; i < methods.size(); i++) {
-      Method method = methods.get(i);
+    for (Method method : methods) {
       methodInterceptorsPairs.add(new MethodInterceptorsPair(method));
-      indices.put(method, i);
     }
 
     // PUBLIC if all the methods we're intercepting are public. This impacts which classloader we
@@ -114,66 +112,80 @@ class ProxyFactory implements ConstructionProxyFactory {
       return defaultFactory.get(injectionPoint);
     }
 
-    // Create callbacks.
-    Callback[] callbacks = new Callback[methods.size()];
-
     @SuppressWarnings("unchecked")
     Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
-    for (int i = 0; i < methods.size(); i++) {
-      MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
-      if (!pair.hasInterceptors()) {
-        callbacks[i] = NoOp.INSTANCE;
-        callbackTypes[i] = NoOp.class;
-      } else {
-        callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
-        callbackTypes[i] = net.sf.cglib.proxy.MethodInterceptor.class;
+    Callback[] callbacks = new Callback[methods.size()];
+    Arrays.fill(callbackTypes, net.sf.cglib.proxy.MethodInterceptor.class);
+    Arrays.fill(callbacks, NO_OP_METHOD_INTERCEPTOR);
+
+    // Create the proxied class. We're careful to ensure that all enhancer state is not-specific to
+    // this injector. Otherwise, the proxies for each injector will waste Permgen memory
+    Enhancer enhancer = newEnhancer(declaringClass, visibility);
+    enhancer.setCallbackFilter(new IndicesCallbackFilter(declaringClass, methods));
+    enhancer.setCallbackTypes(callbackTypes);
+
+    return new ProxyConstructor<T>(methods, methodInterceptorsPairs, enhancer, injectionPoint);
+  }
+
+  private static final net.sf.cglib.proxy.MethodInterceptor NO_OP_METHOD_INTERCEPTOR
+      = new net.sf.cglib.proxy.MethodInterceptor() {
+    public Object intercept(
+        Object proxy, Method method, Object[] arguments, MethodProxy methodProxy)
+        throws Throwable {
+      return methodProxy.invokeSuper(proxy, arguments);
+    }
+  };
+
+  /**
+   * Constructs instances that participate in AOP.
+   */
+  private static class ProxyConstructor<T> implements ConstructionProxy<T> {
+    private final Class<?> enhanced;
+    private final InjectionPoint injectionPoint;
+    private final Constructor<T> constructor;
+
+    private final Callback[] callbacks;
+    private final FastConstructor fastConstructor;
+
+    @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
+    ProxyConstructor(List<Method> methods, List<MethodInterceptorsPair> methodInterceptorsPairs,
+        Enhancer enhancer, InjectionPoint injectionPoint) {
+      this.enhanced = enhancer.createClass(); // this returns a cached class if possible
+      this.injectionPoint = injectionPoint;
+      this.constructor = (Constructor<T>) injectionPoint.getMember();
+
+      this.callbacks = new Callback[methods.size()];
+      for (int i = 0; i < methods.size(); i++) {
+        MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
+        callbacks[i] = pair.hasInterceptors()
+            ? new InterceptorStackCallback(pair.method, pair.interceptors)
+            : NO_OP_METHOD_INTERCEPTOR;
+      }
+
+      FastClass fastClass = BytecodeGen.newFastClass(enhanced, Visibility.forMember(constructor));
+      this.fastConstructor = fastClass.getConstructor(constructor.getParameterTypes());
+    }
+
+    @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
+    public T newInstance(Object[] arguments) throws InvocationTargetException {
+      Enhancer.registerCallbacks(enhanced, callbacks);
+      try {
+        return (T) fastConstructor.newInstance(arguments);
+      } finally {
+        Enhancer.registerCallbacks(enhanced, null);
       }
     }
 
-    // Create the proxied class.
-    Enhancer enhancer = newEnhancer(declaringClass, visibility);
-    enhancer.setCallbackFilter(new CallbackFilter() {
-      public int accept(Method method) {
-        return indices.get(method);
-      }
-    });
-    enhancer.setCallbackTypes(callbackTypes);
+    public InjectionPoint getInjectionPoint() {
+      return injectionPoint;
+    }
 
-    Class<?> proxied = enhancer.createClass();
-
-    // Store callbacks.
-    Enhancer.registerStaticCallbacks(proxied, callbacks);
-
-    return createConstructionProxy(proxied, injectionPoint);
+    public Constructor<T> getConstructor() {
+      return constructor;
+    }
   }
 
-  /**
-   * Creates a construction proxy given a class and parameter types.
-   */
-  private <T> ConstructionProxy<T> createConstructionProxy(final Class<?> clazz,
-      final InjectionPoint injectionPoint) {
-    @SuppressWarnings("unchecked") // injection point's member must be a Constructor<T>
-    final Constructor<T> standardConstructor = (Constructor<T>) injectionPoint.getMember();
-    FastClass fastClass = newFastClass(clazz, Visibility.forMember(standardConstructor));
-    final FastConstructor fastConstructor
-        = fastClass.getConstructor(standardConstructor.getParameterTypes());
-
-    return new ConstructionProxy<T>() {
-      @SuppressWarnings("unchecked")
-      public T newInstance(Object... arguments) throws InvocationTargetException {
-        return (T) fastConstructor.newInstance(arguments);
-      }
-      public InjectionPoint getInjectionPoint() {
-        return injectionPoint;
-      }
-      public Constructor<T> getConstructor() {
-        return standardConstructor;
-      }
-    };
-  }
-
-  static class MethodInterceptorsPair {
-
+  private static class MethodInterceptorsPair {
     final Method method;
     List<MethodInterceptor> interceptors;
 
@@ -190,6 +202,39 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     boolean hasInterceptors() {
       return interceptors != null;
+    }
+  }
+
+  /**
+   * A callback filter that maps methods to unique IDs. We define equals and hashCode using the
+   * declaring class so that enhanced classes can be shared between injectors.
+   */
+  private static class IndicesCallbackFilter implements CallbackFilter {
+    private final Class<?> declaringClass;
+    private final Map<Method, Integer> indices;
+
+    public IndicesCallbackFilter(Class<?> declaringClass, List<Method> methods) {
+      this.declaringClass = declaringClass;
+      final Map<Method, Integer> indices = Maps.newHashMap();
+      for (int i = 0; i < methods.size(); i++) {
+        Method method = methods.get(i);
+        indices.put(method, i);
+      }
+
+      this.indices = indices;
+    }
+
+    public int accept(Method method) {
+      return indices.get(method);
+    }
+
+    @Override public boolean equals(Object o) {
+      return o instanceof IndicesCallbackFilter &&
+          ((IndicesCallbackFilter) o).declaringClass == declaringClass;
+    }
+
+    @Override public int hashCode() {
+      return declaringClass.hashCode();
     }
   }
 }

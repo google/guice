@@ -49,6 +49,7 @@ import java.util.List;
  * {@link Object#hashCode()} as value (as opposed to identity) comparison.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public class TypeLiteral<T> {
 

@@ -16,15 +16,17 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.Dependency;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.Dependency;
 import java.util.List;
 
 /**
  * Resolves a single parameter, to be used in a constructor or method invocation.
  */
 class SingleParameterInjector<T> {
+  private static final Object[] NO_ARGUMENTS = {}; 
+
   private final Dependency<T> dependency;
   private final InternalFactory<? extends T> factory;
 
@@ -48,7 +50,7 @@ class SingleParameterInjector<T> {
   static Object[] getAll(Errors errors, InternalContext context,
       List<SingleParameterInjector<?>> parameterInjectors) throws ErrorsException {
     if (parameterInjectors == null) {
-      return null;
+      return NO_ARGUMENTS;
     }
 
     int numErrorsBefore = errors.size();

@@ -149,7 +149,6 @@ public final class BytecodeGen {
   public static Enhancer newEnhancer(Class<?> type, Visibility visibility) {
     Enhancer enhancer = new Enhancer();
     enhancer.setSuperclass(type);
-    enhancer.setUseCache(false); // We do enough caching.
     enhancer.setUseFactory(false);
     if (visibility == Visibility.PUBLIC) {
       enhancer.setClassLoader(getClassLoader(type));
