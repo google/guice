@@ -60,6 +60,7 @@ public class AllTests {
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
+    suite.addTestSuite(MethodInterceptionTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
