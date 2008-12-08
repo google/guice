@@ -114,9 +114,7 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     @SuppressWarnings("unchecked")
     Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
-    Callback[] callbacks = new Callback[methods.size()];
     Arrays.fill(callbackTypes, net.sf.cglib.proxy.MethodInterceptor.class);
-    Arrays.fill(callbacks, NO_OP_METHOD_INTERCEPTOR);
 
     // Create the proxied class. We're careful to ensure that all enhancer state is not-specific to
     // this injector. Otherwise, the proxies for each injector will waste Permgen memory
@@ -210,8 +208,8 @@ class ProxyFactory implements ConstructionProxyFactory {
    * declaring class so that enhanced classes can be shared between injectors.
    */
   private static class IndicesCallbackFilter implements CallbackFilter {
-    private final Class<?> declaringClass;
-    private final Map<Method, Integer> indices;
+    final Class<?> declaringClass;
+    final Map<Method, Integer> indices;
 
     public IndicesCallbackFilter(Class<?> declaringClass, List<Method> methods) {
       this.declaringClass = declaringClass;
