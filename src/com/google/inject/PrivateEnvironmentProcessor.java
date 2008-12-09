@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class PrivateEnvironmentProcessor extends AbstractProcessor {
+class PrivateEnvironmentProcessor extends AbstractProcessor {
 
   private final Stage stage;
   private final List<InjectorShell.Builder> injectorShellBuilders = Lists.newArrayList();

@@ -24,7 +24,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.PrivateEnvironment;
 import java.util.Map;
 
-public class ExposedBindingImpl<T> extends BindingImpl<T> {
+class ExposedBindingImpl<T> extends BindingImpl<T> {
 
   private Factory factory;
 
