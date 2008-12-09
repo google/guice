@@ -130,7 +130,7 @@ public class RequestInjectionTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Error injecting method, java.lang.UnsupportedOperationException: Pop\n",
+          "1) Error injecting method, java.lang.UnsupportedOperationException: Pop",
           "at " + BlowsUpOnInject.class.getName() + ".injectInstance(RequestInjectionTest.java:");
     }
   }

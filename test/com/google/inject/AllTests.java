@@ -23,6 +23,7 @@ import com.google.inject.internal.ReferenceMapTest;
 import com.google.inject.internal.ReferenceMapTestSuite;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
+import com.google.inject.name.NamesTest;
 import com.google.inject.spi.ElementsTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.ModuleRewriterTest;
@@ -53,6 +54,7 @@ public class AllTests {
     suite.addTestSuite(CircularDependencyTest.class);
     suite.addTestSuite(TypeConversionTest.class);
     // suite.addTestSuite(ErrorHandlingTest.class); not a testcase
+    suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(InjectionPointTest.class);
@@ -78,6 +80,7 @@ public class AllTests {
     suite.addTestSuite(SerializationTest.class);
     suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
+    suite.addTestSuite(TypeLiteralInjectionTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
     suite.addTestSuite(TypeLiteralTypeResolutionTest.class);
 
@@ -99,6 +102,9 @@ public class AllTests {
     // matcher
     suite.addTestSuite(MatcherTest.class);
 
+    // names
+    suite.addTestSuite(NamesTest.class);
+    
     // tools
     // suite.addTestSuite(JmxTest.class); not a testcase
 

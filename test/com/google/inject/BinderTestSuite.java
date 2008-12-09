@@ -419,7 +419,8 @@ public class BinderTestSuite {
       injector = newInjector();
       nextId.set(201);
       for (Object value : expectedValues) {
-        assertEquals(value, injector.getInstance(injectsKey).value);
+        Injectable instance = injector.getInstance(injectsKey);
+        assertEquals(value, instance.value);
       }
 
       injector = newInjector();

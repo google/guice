@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.util.Types;
 import static com.google.inject.util.Types.listOf;
-import java.lang.reflect.Type;
 import java.util.List;
 import junit.framework.TestCase;
 
@@ -60,19 +59,16 @@ public class TypeLiteralInjectionTest extends TestCase {
   }
 
   public void testInjectTypeLiteralWithRawTypes() {
-    Type t = A.class.getTypeParameters()[0];
-
-    A a = Guice.createInjector().getInstance(A.class);
-    assertEquals(TypeLiteral.get(String.class), a.string);
-    assertEquals(TypeLiteral.get(listOf(t)), a.listOfT);
-    assertEquals(TypeLiteral.get(listOf(Types.subtypeOf(t))), a.listOfWildcardT);
+    C c = Guice.createInjector().getInstance(C.class);
+    assertEquals(TypeLiteral.get(String.class), c.string);
+    assertEquals(TypeLiteral.get(A.class), c.a);
 
     try {
       Guice.createInjector().getInstance(B.class);
       fail();
     } catch (ConfigurationException expected) {
-      assertContains(expected.getMessage(), "Cannot inject a TypeLiteral of T",
-          "while locating com.google.inject.TypeLiteral<T>");
+      assertContains(expected.getMessage(), TypeLiteral.class.getName() + "<java.util.List<T>> "
+          + "cannot be used as a key; It is not fully specified.");
     }
   }
 
@@ -102,5 +98,11 @@ public class TypeLiteralInjectionTest extends TestCase {
 
   static class B<T> extends A<T> {
     @Inject TypeLiteral<T> t;
+  }
+
+  static class C<T> {
+    @Inject TypeLiteral<String> string;
+    @Inject TypeLiteral<A> a;
+    T t;
   }
 }

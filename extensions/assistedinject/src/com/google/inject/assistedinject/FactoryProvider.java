@@ -68,7 +68,7 @@ import java.util.Map;
  * <h3>Configuring factories</h3>
  * In your {@link com.google.inject.Module module}, bind the factory interface to the returned
  * factory:
- * <pre>bind(PaymentFactory.class).toInstance(
+ * <pre>bind(PaymentFactory.class).toProvider(
  *     FactoryProvider.newFactory(PaymentFactory.class, RealPayment.class));</pre>
  * As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
  * factory cannot be used until the injector has been initialized.
