@@ -536,5 +536,24 @@ public class FactoryProviderTest extends TestCase {
     carFactory.toString();
   }
 
-  // TODO(jessewilson): test for duplicate constructors
+  public void testAssistedInjectConstructorAndAssistedFactoryParameterMustNotMix() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(Double.class).toInstance(5.0d);
+          bind(AssistedParamsFactory.class)
+              .toProvider(FactoryProvider.newFactory(AssistedParamsFactory.class, Mustang.class));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "Factory method "
+          + AssistedParamsFactory.class.getName() + ".create() has an @Assisted parameter, which "
+          + "is incompatible with the deprecated @AssistedInject annotation.");
+    }
+  }
+
+  interface AssistedParamsFactory {
+    Car create(@Assisted Color color);
+  }
 }

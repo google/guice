@@ -32,5 +32,10 @@ import java.lang.annotation.Target;
  */
 @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
 public @interface Assisted {
+
+  /**
+   * The unique name for this parameter. This is matched to the {@literal @Assisted} constructor 
+   * parameter with the same value.
+   */
   String value() default "";
 }

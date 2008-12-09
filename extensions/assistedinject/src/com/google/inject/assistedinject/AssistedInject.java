@@ -22,16 +22,22 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * Constructors annotated with <code>@AssistedInject</code> indicate that will
- * can be instantiated by the {@link FactoryProvider}.  Each constructor must
- * exactly one corresponding factory method within the Factory Interface.
+ * <p>Constructors annotated with {@code @AssistedInject} indicate that will can be instantiated by
+ * the {@link FactoryProvider}. Each constructor must exactly one corresponding factory method
+ * within the factory interface.
  * 
- * <p>Constructor parameters must be either supplied by the Factory Interface and
- * marked with <code>@Assisted</code>, or they must be injectable.
+ * <p>Constructor parameters must be either supplied by the factory interface and marked with
+ * <code>@Assisted</code>, or they must be injectable.
  * 
+ * @deprecated {@link FactoryProvider} now works better with the standard {@literal @Inject}
+ *     annotation. When using that annotation, parameters are matched by name and type rather than
+ *     by position. In addition, values that use the standard {@literal @Inject} constructor
+ *     annotation are eligible for method interception.
+ *
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
 @Target({CONSTRUCTOR})
 @Retention(RUNTIME)
+@Deprecated
 public @interface AssistedInject {}

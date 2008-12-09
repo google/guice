@@ -356,9 +356,9 @@ public final class InjectionPoint implements Serializable {
   }
 
   private static <M extends Member & AnnotatedElement> void addInjectorsForMembers(
-      TypeLiteral<?> typeResolver, Factory<M> factory, boolean statics,
+      TypeLiteral<?> typeLiteral, Factory<M> factory, boolean statics,
       Collection<InjectionPoint> injectionPoints, Errors errors) {
-    for (M member : factory.getMembers(getRawType(typeResolver.getType()))) {
+    for (M member : factory.getMembers(getRawType(typeLiteral.getType()))) {
       if (isStatic(member) != statics) {
         continue;
       }
@@ -369,7 +369,7 @@ public final class InjectionPoint implements Serializable {
       }
 
       try {
-        injectionPoints.add(factory.create(typeResolver, member, errors));
+        injectionPoints.add(factory.create(typeLiteral, member, errors));
       } catch (ConfigurationException ignorable) {
         if (!inject.optional()) {
           errors.merge(ignorable.getErrorMessages());
@@ -387,8 +387,8 @@ public final class InjectionPoint implements Serializable {
       public Field[] getMembers(Class<?> type) {
         return type.getDeclaredFields();
       }
-      public InjectionPoint create(TypeLiteral<?> typeResolver, Field member, Errors errors) {
-        return new InjectionPoint(typeResolver, member);
+      public InjectionPoint create(TypeLiteral<?> typeLiteral, Field member, Errors errors) {
+        return new InjectionPoint(typeLiteral, member);
       }
     };
 
@@ -396,14 +396,14 @@ public final class InjectionPoint implements Serializable {
       public Method[] getMembers(Class<?> type) {
         return type.getDeclaredMethods();
       }
-      public InjectionPoint create(TypeLiteral<?> typeResolver, Method member, Errors errors) {
+      public InjectionPoint create(TypeLiteral<?> typeLiteral, Method member, Errors errors) {
         checkForMisplacedBindingAnnotations(member, errors);
-        return new InjectionPoint(typeResolver, member);
+        return new InjectionPoint(typeLiteral, member);
       }
     };
 
     M[] getMembers(Class<?> type);
-    InjectionPoint create(TypeLiteral<?> typeResolver, M member, Errors errors);
+    InjectionPoint create(TypeLiteral<?> typeLiteral, M member, Errors errors);
   }
 
   private static final long serialVersionUID = 0;
