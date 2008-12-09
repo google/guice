@@ -64,6 +64,9 @@ class InjectorImpl implements Injector {
   final Initializer initializer;
   ConstructionProxyFactory constructionProxyFactory;
 
+  /** Just-in-time binding cache. Guarded by state.lock() */
+  final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
+
   InjectorImpl(@Nullable InjectorImpl parent, State state, Initializer initializer) {
     this.parent = parent;
     this.state = state;
@@ -147,41 +150,24 @@ class InjectorImpl implements Injector {
   /**
    * Returns a just-in-time binding for {@code key}, creating it if necessary.
    *
-   * @throws com.google.inject.internal.ErrorsException if the binding could not be created.
+   * @throws ErrorsException if the binding could not be created.
    */
-  @SuppressWarnings("unchecked")
   private <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors)
       throws ErrorsException {
-
-    // TODO: synch should span parent and child
-
     synchronized (state.lock()) {
-      // try to get the JIT binding from the parent injector
-      if (parent != null) {
-        try {
-          return parent.getJustInTimeBinding(key, new Errors());
-        } catch (ErrorsException ignored) {
+      // first try to find a JIT binding that we've already created
+      for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
+        @SuppressWarnings("unchecked") // we only store bindings that match their key
+        BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindings.get(key);
+
+        if (binding != null) {
+          return binding;
         }
       }
 
-      // Support null values.
-      if (jitBindings.containsKey(key)) {
-        return (BindingImpl<T>) jitBindings.get(key);
-      }
-
-      if (state.isBlacklisted(key)) {
-        throw errors.childBindingAlreadySet(key).toException();
-      }
-
-      BindingImpl<T> binding = createJustInTimeBinding(key, errors);
-      state.parent().blacklist(key);
-      jitBindings.put(key, binding);
-      return binding;
+      return createJustInTimeBindingRecursive(key, errors);
     }
   }
-
-  /** Just-in-time binding cache. */
-  final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
 
   /* Returns true if the key type is Provider<?> (but not a subclass of Provider<?>). */
   static boolean isProvider(Key<?> key) {
@@ -549,6 +535,30 @@ class InjectorImpl implements Injector {
         scope,
         targetKey,
         loadStrategy);
+  }
+
+  /**
+   * Attempts to create a just-in-time binding for {@code key} in the root injector, falling back to
+   * other ancestor injectors until this injector is tried.
+   */
+  private <T> BindingImpl<T> createJustInTimeBindingRecursive(Key<T> key, Errors errors)
+      throws ErrorsException {
+    // ask the parent to create the JIT binding
+    if (parent != null) {
+      try {
+        return parent.createJustInTimeBindingRecursive(key, new Errors());
+      } catch (ErrorsException ignored) {
+      }
+    }
+
+    if (state.isBlacklisted(key)) {
+      throw errors.childBindingAlreadySet(key).toException();
+    }
+
+    BindingImpl<T> binding = createJustInTimeBinding(key, errors);
+    state.parent().blacklist(key);
+    jitBindings.put(key, binding);
+    return binding;
   }
 
   /**
