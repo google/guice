@@ -1,0 +1,13 @@
+com.google.inject
+com.google.inject.assistedinject
+com.google.inject.binder
+com.google.inject.jndi
+com.google.inject.matcher
+com.google.inject.multibindings
+com.google.inject.name
+com.google.inject.servlet
+com.google.inject.spi
+com.google.inject.spring
+com.google.inject.throwingproviders
+com.google.inject.tools.jmx
+com.google.inject.util
