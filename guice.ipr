@@ -340,6 +340,7 @@
         <inspection_tool class="InjectOfNonPublicMember" level="WARNING" enabled="false" />
         <inspection_tool class="ThrowableResultOfMethodCallIgnored" level="WARNING" enabled="false" />
         <inspection_tool class="BindingAnnotationWithoutInject" level="WARNING" enabled="false" />
+        <inspection_tool class="PointlessBinding" level="WARNING" enabled="false" />
       </profile>
     </profiles>
     <list size="4">
