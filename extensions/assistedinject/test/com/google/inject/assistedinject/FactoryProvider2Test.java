@@ -19,6 +19,7 @@ package com.google.inject.assistedinject;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -319,7 +320,8 @@ public class FactoryProvider2Test extends TestCase {
             FactoryProvider.newFactory(ColoredCarFactory.class, Prius.class));
       }
     });
-    Car car = injector.getInstance(ColoredCarFactory.class).create(Color.ORANGE);
+    Prius prius = (Prius) injector.getInstance(ColoredCarFactory.class).create(Color.ORANGE);
+    assertEquals(prius.color, Color.ORANGE);
   }
 
   public static class ExplodingCar implements Car {
@@ -634,8 +636,54 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(1, invocationCount.get());
   }
 
+  /**
+   * Our factories aren't reusable across injectors. Although this behaviour isn't something we
+   * like, I have a test case to make sure the error message is pretty.
+   */
+  public void testFactoryReuseErrorMessageIsPretty() {
+    final Provider<ColoredCarFactory> factoryProvider
+        = FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class);
+
+    Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bind(Double.class).toInstance(5.0d);
+        bind(ColoredCarFactory.class).toProvider(factoryProvider);
+      }
+    });
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(Double.class).toInstance(5.0d);
+          bind(ColoredCarFactory.class).toProvider(factoryProvider);
+        }
+      });
+      fail();
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Factories.create() factories may only be used in one Injector!");
+    }
+  }
+
+  public void testNonAssistedFactoryMethodParameter() {
+    try {
+      FactoryProvider.newFactory(NamedParameterFactory.class, Mustang.class);
+      fail();
+    } catch(ConfigurationException expected) {
+      assertContains(expected.getMessage(),
+          "Only @Assisted is allowed for factory parameters, but found @" + Named.class.getName());
+    }
+  }
+
+  interface NamedParameterFactory {
+    Car create(@Named("seats") int seats, double engineSize);
+  }
+
+
   public void testDefaultAssistedAnnotation() throws NoSuchFieldException {
-    assertEqualsBothWays(FactoryProvider2.DEFAULT_ANNOTATION,
-        Subaru.class.getDeclaredField("colorProvider").getAnnotation(Assisted.class));
+    Assisted plainAssisted
+        = Subaru.class.getDeclaredField("colorProvider").getAnnotation(Assisted.class);
+    assertEqualsBothWays(FactoryProvider2.DEFAULT_ANNOTATION, plainAssisted);
+    assertEquals(FactoryProvider2.DEFAULT_ANNOTATION.toString(), plainAssisted.toString());
   }
 }
