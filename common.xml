@@ -25,7 +25,7 @@
   <target name="manifest" description="Generate OSGi manifest." depends="compile">
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef resource="aQute/bnd/ant/taskdef.properties"
-      classpath="${common.basedir}/lib/build/bnd-0.0.255.jar"/>
+      classpath="${common.basedir}/lib/build/bnd-0.0.305.jar"/>
 
     <fail unless="module" message="Missing 'module' property (use the primary package name in this jar)"/>
 
@@ -40,10 +40,11 @@
     <property name="Bundle-Vendor" value="Google Inc."/>
 
     <property name="exclude.imports" value=""/>
-    <property name="guice.imports" value="com.google.inject.*;version=${api.version}"/>
+    <property name="api.range" value="&quot;[${api.version},${version;+;${api.version}})&quot;"/>
+    <property name="guice.imports" value="com.google.inject.*;version=${api.range}"/>
     <property name="Import-Package" value="${exclude.imports},${guice.imports},*;resolution:=optional"/>
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
-    <property name="-nouses" value="true"/>
+
     <property name="-removeheaders" value="Bnd-LastModified,Ignore-Package,Include-Resource,Private-Package,Tool"/>
 
     <bndwrap jars="${build.dir}/classes" output="${build.dir}"/>

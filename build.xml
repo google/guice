@@ -2,6 +2,9 @@
 
 <project name="guice" default="compile">
 
+  <property name="DynamicImport-Package" value="org.aopalliance.intercept"/>
+  <property name="exclude.imports" value="!com.google.common.*,!net.sf.*,!org.objectweb.*"/>
+
   <import file="common.xml"/>
 
   <path id="compile.classpath">
