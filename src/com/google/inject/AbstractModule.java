@@ -35,14 +35,12 @@ import org.aopalliance.intercept.MethodInterceptor;
  * {@link Binder}. For example:
  *
  * <pre>
- * import static com.google.inject.Names.named;
- *
  * public class MyModule extends AbstractModule {
  *   protected void configure() {
- *     bind(Foo.class).to(FooImpl.class).in(Scopes.SINGLETON);
- *     bind(BarImpl.class);
- *     bind(Bar.class).to(BarImpl.class);
- *     bindConstant(named("port")).to(8080);
+ *     bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
+ *     bind(CreditCardPaymentService.class);
+ *     bind(PaymentService.class).to(CreditCardPaymentService.class);
+ *     bindConstant().annotatedWith(Names.named("port")).to(8080);
  *   }
  * }
  * </pre>

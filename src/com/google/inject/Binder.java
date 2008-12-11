@@ -149,7 +149,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * <pre>
  *   {@literal @}Color("red") Color red; // A member variable (field)
  *    . . .
- *     red = MyModule.class.getField("red").getAnnotation(Color.class);
+ *     red = MyModule.class.getDeclaredField("red").getAnnotation(Color.class);
  *     bind(Service.class).annotatedWith(red).to(RedService.class);</pre>
  *
  * If your binding annotation has parameters you can apply different bindings to

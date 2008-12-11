@@ -39,7 +39,7 @@ import java.util.Arrays;
  *         );
  *
  *         // Now just bootstrap the application and you're done
- *         MyStartClass starter = injector.getInstance(MyStartClass.class);
+ *         FooStarter starter = injector.getInstance(FooStarter.class);
  *         starter.runApplication();
  *       }
  *     }
