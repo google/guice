@@ -18,6 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
+
 import com.google.inject.Injector;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -29,11 +30,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletException;
 import junit.framework.TestCase;
+
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+/**
+ * NOTE(dhanji): InjectedHttpServlet is deprecated
+ */
 public class InjectedHttpServletTest extends TestCase {
 
   private static class MyDependency {}

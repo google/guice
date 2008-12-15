@@ -31,7 +31,10 @@ import javax.servlet.http.HttpServlet;
  * servlet context listener.
  *
  * @author Kevin Bourrillion (kevinb@google.com)
+ * @deprecated Servlets can be injected like any other POJO by using the
+ *  {@link Servlets#configure()} system instead.
  */
+@Deprecated
 public abstract class InjectedHttpServlet extends HttpServlet {
 
   @Override public void init(ServletConfig config) throws ServletException {

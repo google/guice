@@ -24,6 +24,13 @@ import javax.servlet.ServletContextListener;
 /**
  * Register your own subclass of this as a servlet context listener if you wish
  * to have injectable servlets that extend {@link InjectedHttpServlet}.
+ *
+ * <p>
+ * As of Guice 2.0, {@code InjectedHttpServlet} is deprecated, however you can still
+ * use (your subclasses of) {@code GuiceServletContextListener} class as a logical
+ * place to create and configure your injector. Though it is not required that you
+ * do so, any more. Creating an injector anywhere, with {@link Servlets#configure}
+ * will work.
  * 
  * @author Kevin Bourrillion (kevinb@google.com)
  */
