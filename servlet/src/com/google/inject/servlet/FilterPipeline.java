@@ -29,13 +29,12 @@ import java.io.IOException;
  * words, we dispatch directly to the web.xml pipeline after setting up scopes.
  *
  * <p>
- * If on the other hand, {@link Servlets#configure} is used to register managed
+ * If on the other hand, {@link ServletModule} is used to register managed
  * servlets and/or filters, then a different pipeline is bound instead. Which,
  * after dispatching to Guice-injected filters and servlets continues to the web.xml
  * pipeline (if necessary).
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
- * @see com.google.inject.servlet.ManagedFilterPipeline Guice Servlet 2.0 Pipeline.
  */
 @ImplementedBy(DefaultFilterPipeline.class)
 interface FilterPipeline {
@@ -43,5 +42,5 @@ interface FilterPipeline {
   void destroyPipeline();
 
   void dispatch(ServletRequest request, ServletResponse response,
-      FilterChain proceedingFilterChain) throws IOException, ServletException;
+      FilterChain defaultFilterChain) throws IOException, ServletException;
 }

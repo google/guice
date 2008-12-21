@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006-2008 Google Inc.
+ * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.google.inject.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.OutOfScopeException;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import javax.servlet.Filter;
@@ -48,13 +47,9 @@ import javax.servlet.http.HttpServletResponse;
  *  &lt;/filter-mapping&gt;
  *  </pre>
  *
- * This filter should appear above every filter that makes use of Guice injection or servlet
- * scopes functionality. Ideally, you want to register ONLY this filter in web.xml and register
- * any other filters using {@link Servlets#configure()}. But this is not strictly necessary.
- *
- * <p>
- * You will generally want to place sitemesh and similar (purely decorative) filters above
- * {@code GuiceFilter} in web.xml.
+ * This filter must appear before every filter that makes use of Guice injection or servlet
+ * scopes functionality. Typically, you will only register this filter in web.xml and register
+ * any other filters (and servlets) using a {@link ServletModule}.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -62,8 +57,9 @@ import javax.servlet.http.HttpServletResponse;
 public class GuiceFilter implements Filter {
   static final ThreadLocal<Context> localContext = new ThreadLocal<Context>();
   static volatile WeakReference<FilterPipeline> pipeline =
-      new WeakReference<FilterPipeline>(null);
+      new WeakReference<FilterPipeline>(new DefaultFilterPipeline());
 
+  /** Used to inject the servlets configured via {@link ServletModule} */
   static volatile WeakReference<ServletContext> servletContext =
       new WeakReference<ServletContext>(null);
 
@@ -71,25 +67,21 @@ public class GuiceFilter implements Filter {
   @Inject
   static void setPipeline(FilterPipeline pipeline) {
 
-    //multiple injectors with ServletModules!
-    if (null != GuiceFilter.pipeline.get()) {
-      throw new RuntimeException(
-                  "Multiple injectors detected. Please install only one"
-                      + " ServletModule in your web application. While you may "
-                      + "have more than one injector, you should only configure"
-                      + " guice-servlet in one of them. (Hint: look for legacy "
-                      + "ServetModules or multiple calls to Servlets.configure())."
-
-          );
+    // Multiple injectors with ServletModules?
+    if (GuiceFilter.pipeline.get() instanceof ManagedFilterPipeline) {
+      throw new RuntimeException("Multiple injectors detected. Please install only one"
+          + " ServletModule in your web application. While you may "
+          + "have more than one injector, you should only configure"
+          + " guice-servlet in one of them. (Hint: look for legacy "
+          + "ServetModules or multiple calls to Servlets.configure()).");
     }
 
-    //we obtain the pipeline using a special key, so we can identify if the
-    //servlet module was installed properly.
+    // We will only overwrite the default pipeline
     GuiceFilter.pipeline = new WeakReference<FilterPipeline>(pipeline);
   }
 
-  //VisibleForTesting (only)
-  public static void clearPipeline() {
+  //VisibleForTesting
+  static void clearPipeline() {
     pipeline = new WeakReference<FilterPipeline>(null);
   }
 
@@ -100,18 +92,11 @@ public class GuiceFilter implements Filter {
     Context previous = localContext.get();
     FilterPipeline filterPipeline = pipeline.get();
 
-    //not even a default pipeline was available--bad!
-    if (null == filterPipeline)
-      throw new ServletException("No Guice Injector was present. You should also "
-                               + "setup the servlet module by using Servlets.configure()."
-                               + " An injector must be present for GuiceFilter to work"
-                               + " and for servlet support in your web application.");
-
     try {
       localContext.set(new Context((HttpServletRequest) servletRequest,
           (HttpServletResponse) servletResponse));
 
-      //dispatch across the servlet pipeline, ensuring web.xml's filterchain is also honored
+      //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
       filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
 
     } finally {
@@ -127,7 +112,7 @@ public class GuiceFilter implements Filter {
     return getContext().getResponse();
   }
 
-  public static ServletContext getServletContext() {
+  static ServletContext getServletContext() {
     return servletContext.get();
   }
 
@@ -164,21 +149,19 @@ public class GuiceFilter implements Filter {
   public void init(FilterConfig filterConfig) throws ServletException {
     final ServletContext servletContext = filterConfig.getServletContext();
 
-    //store servlet context in a weakreference, for injection
+    // Store servlet context in a weakreference, for injection
     GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
-    
-    FilterPipeline filterPipeline = GuiceFilter.pipeline.get();
 
-    //we must allow for the possibility that the injector is created *after*
-    // GuiceFilter is initialized, to preserve backwards compatibility with Guice 1.0.
-    if (null != filterPipeline)
-      filterPipeline.initPipeline(servletContext);
+    // In the default pipeline, this is a noop. However, if replaced
+    // by a managed pipeline, a lazy init will be triggered the first time
+    // dispatch occurs.
+    GuiceFilter.pipeline.get().initPipeline(servletContext);
   }
 
   public void destroy() {
 
     try {
-      //destroy all registered filters & servlets in that order
+      // Destroy all registered filters & servlets in that order
       pipeline.get().destroyPipeline();
 
     } finally {

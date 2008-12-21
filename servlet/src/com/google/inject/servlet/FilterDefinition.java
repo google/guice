@@ -114,4 +114,9 @@ class FilterDefinition {
       filterChainInvocation.doFilter(servletRequest, servletResponse);
     }
   }
+
+  //VisibleForTesting
+  Filter getFilter() {
+    return filter.get();
+  }
 }

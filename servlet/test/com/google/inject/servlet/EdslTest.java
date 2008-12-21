@@ -32,37 +32,43 @@ public class EdslTest extends TestCase {
   public final void testConfigureServlets() {
 
     //the various possible config calls--
-    Module webModule = Servlets.configure()
-      .filters()
-        .filter("/*").through(DummyFilterImpl.class)
+    Module webModule = new ServletModule() {
 
-        .filter("*.html").through(DummyFilterImpl.class)
+      @Override
+      protected void configureServlets() {
+        filter("/*").through(DummyFilterImpl.class);
+        filter("*.html").through(DummyFilterImpl.class);
+        filter("/*").through(Key.get(DummyFilterImpl.class));
 
-        .filter("*.html").through(DummyFilterImpl.class, new HashMap<String, String>())
+        filter("*.html").through(DummyFilterImpl.class,
+            new HashMap<String, String>());
 
-        .filterRegex("/person/[0-9]*").through(DummyFilterImpl.class)
+        filterRegex("/person/[0-9]*").through(DummyFilterImpl.class);
+        filterRegex("/person/[0-9]*").through(DummyFilterImpl.class,
+            new HashMap<String, String>());
 
-        .filterRegex("/person/[0-9]*").through(Key.get(DummyFilterImpl.class))
+        filterRegex("/person/[0-9]*").through(Key.get(DummyFilterImpl.class));
+        filterRegex("/person/[0-9]*").through(Key.get(DummyFilterImpl.class),
+            new HashMap<String, String>());
 
-        .filterRegex("/person/[0-9]*").through(Key.get(DummyFilterImpl.class), new HashMap<String, String>())
 
-        .filter("/*").through(Key.get(DummyFilterImpl.class))
+        serve("/*").with(DummyServlet.class);
+        serve("/*").with(Key.get(DummyServlet.class));
+        serve("/*").with(DummyServlet.class, new HashMap<String, String>());
 
-      .servlets()
+        serve("*.html").with(Key.get(DummyServlet.class));
+        serve("*.html").with(Key.get(DummyServlet.class),
+            new HashMap<String, String>());
 
-        .serve("/*").with(DummyServlet.class)
-        .serve("/*").with(DummyServlet.class, new HashMap<String, String>())
+        serveRegex("/person/[0-9]*").with(DummyServlet.class);
+        serveRegex("/person/[0-9]*").with(DummyServlet.class,
+            new HashMap<String, String>());
 
-        .serve("*.html").with(Key.get(DummyServlet.class))
-        .serve("*.html").with(Key.get(DummyServlet.class), new HashMap<String, String>())
-
-        .serveRegex("/person/[0-9]*").with(DummyServlet.class)
-        .serveRegex("/person/[0-9]*").with(DummyServlet.class, new HashMap<String, String>())
-
-        .serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class))
-        .serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class), new HashMap<String, String>())
-
-      .buildModule();
+        serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class));
+        serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class),
+            new HashMap<String, String>());
+      }
+    };
 
     //verify that it doesn't blow up!
     Guice.createInjector(Stage.TOOL, webModule);

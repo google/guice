@@ -18,53 +18,39 @@ package com.google.inject.servlet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.servlet.Servlets.FilterBindingBuilder;
-import com.google.inject.servlet.Servlets.ServletBindingBuilder;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.Filter;
 
 /**
- * Builds the guice module that binds configured filters, with their wrapper FilterDefinitions. Is
- * part of the binding EDSL.
+ * Builds the guice module that binds configured filters, with their
+ * wrapper FilterDefinitions. Is part of the binding EDSL. All Filters
+ * and Servlets are always bound as singletons.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
- * @see com.google.inject.servlet.Servlets#configure
  */
-class FiltersModuleBuilder extends AbstractModule implements FilterBindingBuilder {
-  private List<FilterDefinition> filterDefinitions = Lists.newArrayList();
+class FiltersModuleBuilder extends AbstractModule {
+  private final List<FilterDefinition> filterDefinitions = Lists.newArrayList();
 
   //invoked on injector config
   @Override
   protected void configure() {
-    //bind these filter definitions to a singleton dispatcher pipeline (overrides the
+    // Bind these filter definitions to a singleton dispatcher pipeline (overrides the
     // DefaultFilterPipeline)
     bind(FilterPipeline.class).toInstance(new ManagedFilterPipeline(filterDefinitions));
   }
 
-  //the first level of the EDSL--
-  public FilterKeyBindingBuilder filter(String urlPattern) {
+  public ServletModule.FilterKeyBindingBuilder filter(String urlPattern) {
     return new FilterKeyBindingBuilderImpl(urlPattern, UriPatternType.SERVLET);
   }
 
-  public FilterKeyBindingBuilder filterRegex(String regex) {
+  public ServletModule.FilterKeyBindingBuilder filterRegex(String regex) {
     return new FilterKeyBindingBuilderImpl(regex, UriPatternType.REGEX);
   }
 
-  public ServletBindingBuilder servlets() {
-    return new ServletsModuleBuilder(this);
-  }
-
-  //shortcut method if there are no servlets to configure
-  public Module buildModule() {
-    return new ServletsModuleBuilder(this);
-  }
-
   //non-static inner class so it can access state of enclosing module class
-  private class FilterKeyBindingBuilderImpl implements FilterKeyBindingBuilder {
+  class FilterKeyBindingBuilderImpl implements ServletModule.FilterKeyBindingBuilder {
     private final String uriPattern;
     private final UriPatternType uriPatternType;
 
@@ -73,27 +59,26 @@ class FiltersModuleBuilder extends AbstractModule implements FilterBindingBuilde
       this.uriPatternType = uriPatternType;
     }
 
-    public FilterBindingBuilder through(Class<? extends Filter> filterKey) {
-      return through(Key.get(filterKey));
+    public void through(Class<? extends Filter> filterKey) {
+      through(Key.get(filterKey));
     }
 
-    public FilterBindingBuilder through(Key<? extends Filter> filterKey) {
-      return through(filterKey, new HashMap<String, String>());
+    public void through(Key<? extends Filter> filterKey) {
+      through(filterKey, new HashMap<String, String>());
     }
 
-    public FilterBindingBuilder through(Class<? extends Filter> filterKey,
+    public void through(Class<? extends Filter> filterKey,
         Map<String, String> contextParams) {
-      //careful you don't accidentally make this method recursive!! thank you IntelliJ IDEA!
-      return through(Key.get(filterKey), contextParams);
+      // Careful you don't accidentally make this method recursive, thank you IntelliJ IDEA!
+      through(Key.get(filterKey), contextParams);
     }
 
-    public FilterBindingBuilder through(Key<? extends Filter> filterKey,
+    public void through(Key<? extends Filter> filterKey,
         Map<String, String> contextParams) {
+
       filterDefinitions.add(
           new FilterDefinition(uriPattern, filterKey, UriPatternType.get(uriPatternType),
               contextParams));
-
-      return FiltersModuleBuilder.this;
     }
   }
 }

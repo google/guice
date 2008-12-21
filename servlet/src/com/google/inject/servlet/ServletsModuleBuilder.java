@@ -18,54 +18,39 @@ package com.google.inject.servlet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.servlet.Servlets.ServletBindingBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServlet;
 
 /**
- * Builds the guice module that binds configured servlets, with their wrapper ServletDefinitions. Is
- * part of the binding EDSL. Very similar to {@link com.google.inject.servlet.FiltersModuleBuilder}.
+ * Builds the guice module that binds configured servlets, with their
+ * wrapper ServletDefinitions. Is part of the binding EDSL. Very similar to
+ * {@link com.google.inject.servlet.FiltersModuleBuilder}.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
- * @see com.google.inject.servlet.Servlets
  */
-class ServletsModuleBuilder extends AbstractModule implements ServletBindingBuilder {
-  private List<ServletDefinition> servletDefinitions = Lists.newArrayList();
-  private final Module filtersModule;
-
-  public ServletsModuleBuilder(Module filtersModule) {
-    this.filtersModule = filtersModule;
-  }
+class ServletsModuleBuilder extends AbstractModule {
+  private final List<ServletDefinition> servletDefinitions = Lists.newArrayList();
 
   //invoked on injector config
+  @Override
   protected void configure() {
-    //install preceeding module(s)
-    install(new ServletModule(true)); //using the hidden local constructor
-    install(filtersModule);
-
-    //bind these servlet definitions to a singleton pipeline
+    // Bind these servlet definitions to a singleton pipeline
     bind(ManagedServletPipeline.class).toInstance(new ManagedServletPipeline(servletDefinitions));
   }
 
   //the first level of the EDSL--
-
-  public ServletKeyBindingBuilder serve(String urlPattern) {
+  public ServletModule.ServletKeyBindingBuilder serve(String urlPattern) {
     return new ServletKeyBindingBuilderImpl(urlPattern, UriPatternType.SERVLET);
   }
 
-  public ServletKeyBindingBuilder serveRegex(String regex) {
+  public ServletModule.ServletKeyBindingBuilder serveRegex(String regex) {
     return new ServletKeyBindingBuilderImpl(regex, UriPatternType.REGEX);
   }
 
-  public Module buildModule() {
-    return this;
-  }
-
   //non-static inner class so it can access state of enclosing module class
-  private class ServletKeyBindingBuilderImpl implements ServletKeyBindingBuilder {
+  class ServletKeyBindingBuilderImpl implements ServletModule.ServletKeyBindingBuilder {
     private final String uriPattern;
     private final UriPatternType uriPatternType;
 
@@ -74,26 +59,24 @@ class ServletsModuleBuilder extends AbstractModule implements ServletBindingBuil
       this.uriPatternType = uriPatternType;
     }
 
-    public ServletBindingBuilder with(Class<? extends HttpServlet> servletKey) {
-      return with(Key.get(servletKey));
+    public void with(Class<? extends HttpServlet> servletKey) {
+      with(Key.get(servletKey));
     }
 
-    public ServletBindingBuilder with(Key<? extends HttpServlet> servletKey) {
-      return with(servletKey, new HashMap<String, String>());
+    public void with(Key<? extends HttpServlet> servletKey) {
+      with(servletKey, new HashMap<String, String>());
     }
 
-    public ServletBindingBuilder with(Class<? extends HttpServlet> servletKey,
+    public void with(Class<? extends HttpServlet> servletKey,
         Map<String, String> contextParams) {
-      return with(Key.get(servletKey), contextParams);
+      with(Key.get(servletKey), contextParams);
     }
 
-    public ServletBindingBuilder with(Key<? extends HttpServlet> servletKey,
+    public void with(Key<? extends HttpServlet> servletKey,
         Map<String, String> contextParams) {
       servletDefinitions.add(
           new ServletDefinition(uriPattern, servletKey, UriPatternType.get(uriPatternType),
               contextParams));
-
-      return ServletsModuleBuilder.this;
     }
   }
 }

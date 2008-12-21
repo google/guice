@@ -186,7 +186,7 @@ public class ServletTest extends TestCase {
 
       @Override
       protected void configure() {
-        install(Servlets.configure().filters().buildModule());
+        install(new ServletModule());
         bind(InSession.class);
         bind(InRequest.class);
       }
