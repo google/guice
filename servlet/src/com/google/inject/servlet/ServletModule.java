@@ -51,6 +51,7 @@ public class ServletModule extends AbstractModule {
   @Override
   protected final void configure() {
     // Install the filter and servlet bindings.
+    configureServlets();
     install(filtersModuleBuilder);
     install(servletsModuleBuilder);
 
