@@ -77,17 +77,17 @@ import java.util.List;
                   + "flush buffers)");
             }
 
-            //clear buffer before forwarding
+            // clear buffer before forwarding
             servletResponse.resetBuffer();
 
-            //now dispatch to the servlet
+            // now dispatch to the servlet
             servletDefinition.doService(servletRequest, servletResponse);
           }
 
           public void include(ServletRequest servletRequest, ServletResponse servletResponse)
               throws ServletException, IOException {
 
-            //route to the target servlet
+            // route to the target servlet
             servletDefinition.doService(servletRequest, servletResponse);
           }
         };

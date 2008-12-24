@@ -16,14 +16,13 @@
 
 package com.google.inject.servlet;
 
-import static com.google.inject.servlet.ServletScopes.REQUEST;
-import static com.google.inject.servlet.ServletScopes.SESSION;
-
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-
+import static com.google.inject.servlet.ServletScopes.REQUEST;
+import static com.google.inject.servlet.ServletScopes.SESSION;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
@@ -154,7 +153,13 @@ public class ServletModule extends AbstractModule {
    *       <b>serve("/my/*").with(MyServlet.class)</b>
    * </pre>
    *
-   * You are free to register as many servlets and filters as you like this way:
+   * Every servlet is required to be a singleton and will implicitly be bound as one if it isn't
+   * already. Mapping a servlet that is bound under any other scope is an error.
+   *
+   * <p>
+   * <h4>Dispatch Order</h4>
+   * You are free to register as many servlets and filters as you like this way. They will
+   * be compared and dispatched in the order in which the filter methods are called:
    *
    * <pre>
    *
@@ -162,17 +167,41 @@ public class ServletModule extends AbstractModule {
    *
    *     {@literal @}Override
    *     protected void configureServlets() {
-   *       filter("/*").through(MyFilter.class)
-   *       filter("*.css").through(MyCssFilter.class)
+   *       filter("/*").through(MyFilter.class);
+   *       filter("*.css").through(MyCssFilter.class);
    *       // etc..
    *
-   *       serve("*.html").with(MyServlet.class)
-   *       serve("/my/*").with(MyServlet.class)
+   *       serve("*.html").with(MyServlet.class);
+   *       serve("/my/*").with(MyServlet.class);
    *       // etc..
    *      }
    *    }
    * </pre>
+   * This will traverse down the list of rules in lexical order. For example, a url
+   *  "{@code /my/file.js}" (after it runs through the matching filters) will first
+   *  be compared against the servlet mapping:
+   * 
+   * <pre>
+   *       serve("*.html").with(MyServlet.class);
+   * </pre>
+   * And failing that, it will descend to the next servlet mapping:
    *
+   * <pre>
+   *       serve("/my/*").with(MyServlet.class);
+   * </pre>
+   *
+   * Since this rule matches, Guice Servlet will dispatch to {@code MyServlet}. These
+   * two mapping rules can also be written in more compact form using varargs syntax:
+   *
+   * <pre>
+   *       serve(<b>"*.html", "/my/*"</b>).with(MyServlet.class);
+   * </pre>
+   * 
+   * This way you can map several URI patterns to the same servlet. A similar syntax is
+   * also available for filter mappings.
+   *
+   * <p>
+   * <h4>Regular Expressions</h4>
    * You can also map servlets (or filters) to URIs using regular expressions:
    * <pre>
    *    <b>serveRegex("(.)*ajax(.)*").with(MyAjaxServlet.class)</b>
@@ -203,15 +232,14 @@ public class ServletModule extends AbstractModule {
    *      serve("/*").with(MyServlet.class, <b>params</b>)
    * </pre>
    *
-   *
+   * <p>
    * <h3>Binding Keys</h3>
    *
-   * <p> You can also bind keys rather than classes. This lets you hide
+   * You can also bind keys rather than classes. This lets you hide
    * implementations with package-local visbility and expose them using
    * only a Guice module and an annotation:
    *
    * <pre>
-   *
    *  ...
    *      filter("/*").through(<b>Key.get(Filter.class, Fave.class)</b>);
    * </pre>
@@ -224,7 +252,7 @@ public class ServletModule extends AbstractModule {
    *   bind(Filter.class)<b>.annotatedWith(Fave.class)</b>.to(MyFilterImpl.class);
    * </pre>
    *
-   * See Guice documentation for more information on binding annotations.
+   * See {@link com.google.inject.Binder} for more information on binding syntax.
    */
   protected void configureServlets() {
   }
@@ -236,29 +264,29 @@ public class ServletModule extends AbstractModule {
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.
    */
-  protected final FilterKeyBindingBuilder filter(String urlPattern) {
-    return filtersModuleBuilder.filter(urlPattern);
+  protected final FilterKeyBindingBuilder filter(String urlPattern, String... morePatterns) {
+    return filtersModuleBuilder.filter(Lists.asList(urlPattern, morePatterns));
   }
 
   /**
    * @param regex Any Java-style regular expression.
    */
-  protected final FilterKeyBindingBuilder filterRegex(String regex) {
-    return filtersModuleBuilder.filterRegex(regex);
+  protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
+    return filtersModuleBuilder.filterRegex(Lists.asList(regex, regexes));
   }
 
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.
    */
-  protected final ServletKeyBindingBuilder serve(String urlPattern) {
-    return servletsModuleBuilder.serve(urlPattern);
+  protected final ServletKeyBindingBuilder serve(String urlPattern, String... morePatterns) {
+    return servletsModuleBuilder.serve(Lists.asList(urlPattern, morePatterns));
   }
 
   /**
    * @param regex Any Java-style regular expression.
    */
-  protected final ServletKeyBindingBuilder serveRegex(String regex) {
-    return servletsModuleBuilder.serveRegex(regex);
+  protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
+    return servletsModuleBuilder.serveRegex(Lists.asList(regex, regexes));
   }
 
   public static interface FilterKeyBindingBuilder {

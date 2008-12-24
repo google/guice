@@ -153,8 +153,8 @@ class ServletDefinition {
           pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/")
               .substring(servletPathLength);
 
-          //corner case: when servlet path and request path match exactly (without trailing '/'),
-          //pathinfo is null
+          // Corner case: when servlet path and request path match exactly (without trailing '/'),
+          // then pathinfo is null
           if ("".equals(pathInfo) && servletPathLength != 0) {
             pathInfo = null;
           }
@@ -177,7 +177,7 @@ class ServletDefinition {
         return (null == info) ? null : getRealPath(info);
       }
 
-      //memoizer pattern
+      // Memoizer pattern.
       private String computePath() {
         if (!pathComputed) {
           path = patternMatcher.extractPath(pattern);

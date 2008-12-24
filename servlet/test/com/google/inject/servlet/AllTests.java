@@ -27,12 +27,22 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    // Servlet tests.
+    // Filter tests.
     suite.addTestSuite(EdslTest.class);
     suite.addTestSuite(FilterDefinitionTest.class);
     suite.addTestSuite(FilterDispatchIntegrationTest.class);
     suite.addTestSuite(FilterPipelineTest.class);
+
+    // Servlet + integration tests.
     suite.addTestSuite(ServletTest.class);
+    suite.addTestSuite(ServletDefinitionTest.class);
+    suite.addTestSuite(ServletDefinitionPathsTest.class);
+    suite.addTestSuite(ServletPipelineRequestDispatcherTest.class);
+    suite.addTestSuite(ServletDispatchIntegrationTest.class);
+
+    // Varargs URL mapping tests.
+    suite.addTestSuite(VarargsFilterDispatchIntegrationTest.class);
+    suite.addTestSuite(VarargsServletDispatchIntegrationTest.class);
 
     return suite;
   }

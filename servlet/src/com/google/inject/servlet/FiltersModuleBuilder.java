@@ -41,21 +41,21 @@ class FiltersModuleBuilder extends AbstractModule {
     bind(FilterPipeline.class).toInstance(new ManagedFilterPipeline(filterDefinitions));
   }
 
-  public ServletModule.FilterKeyBindingBuilder filter(String urlPattern) {
-    return new FilterKeyBindingBuilderImpl(urlPattern, UriPatternType.SERVLET);
+  public ServletModule.FilterKeyBindingBuilder filter(List<String> patterns) {
+    return new FilterKeyBindingBuilderImpl(patterns, UriPatternType.SERVLET);
   }
 
-  public ServletModule.FilterKeyBindingBuilder filterRegex(String regex) {
-    return new FilterKeyBindingBuilderImpl(regex, UriPatternType.REGEX);
+  public ServletModule.FilterKeyBindingBuilder filterRegex(List<String> regexes) {
+    return new FilterKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
   }
 
   //non-static inner class so it can access state of enclosing module class
   class FilterKeyBindingBuilderImpl implements ServletModule.FilterKeyBindingBuilder {
-    private final String uriPattern;
+    private final List<String> uriPatterns;
     private final UriPatternType uriPatternType;
 
-    private FilterKeyBindingBuilderImpl(String uriPattern, UriPatternType uriPatternType) {
-      this.uriPattern = uriPattern;
+    private FilterKeyBindingBuilderImpl(List<String> uriPatterns, UriPatternType uriPatternType) {
+      this.uriPatterns = uriPatterns;
       this.uriPatternType = uriPatternType;
     }
 
@@ -76,9 +76,11 @@ class FiltersModuleBuilder extends AbstractModule {
     public void through(Key<? extends Filter> filterKey,
         Map<String, String> contextParams) {
 
-      filterDefinitions.add(
-          new FilterDefinition(uriPattern, filterKey, UriPatternType.get(uriPatternType),
-              contextParams));
+      for (String pattern : uriPatterns) {
+        filterDefinitions.add(
+            new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType),
+                contextParams));
+      }
     }
   }
 }

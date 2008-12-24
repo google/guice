@@ -56,8 +56,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class GuiceFilter implements Filter {
   static final ThreadLocal<Context> localContext = new ThreadLocal<Context>();
-  static volatile WeakReference<FilterPipeline> pipeline =
-      new WeakReference<FilterPipeline>(new DefaultFilterPipeline());
+  static volatile FilterPipeline pipeline = new DefaultFilterPipeline();
 
   /** Used to inject the servlets configured via {@link ServletModule} */
   static volatile WeakReference<ServletContext> servletContext =
@@ -68,7 +67,7 @@ public class GuiceFilter implements Filter {
   static void setPipeline(FilterPipeline pipeline) {
 
     // Multiple injectors with ServletModules?
-    if (GuiceFilter.pipeline.get() instanceof ManagedFilterPipeline) {
+    if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
       throw new RuntimeException("Multiple injectors detected. Please install only one"
           + " ServletModule in your web application. While you may "
           + "have more than one injector, you should only configure"
@@ -77,12 +76,12 @@ public class GuiceFilter implements Filter {
     }
 
     // We will only overwrite the default pipeline
-    GuiceFilter.pipeline = new WeakReference<FilterPipeline>(pipeline);
+    GuiceFilter.pipeline = pipeline;
   }
 
   //VisibleForTesting
   static void clearPipeline() {
-    pipeline = new WeakReference<FilterPipeline>(null);
+    pipeline = null;
   }
 
   public void doFilter(ServletRequest servletRequest,
@@ -90,7 +89,7 @@ public class GuiceFilter implements Filter {
       throws IOException, ServletException {
 
     Context previous = localContext.get();
-    FilterPipeline filterPipeline = pipeline.get();
+    FilterPipeline filterPipeline = pipeline;
 
     try {
       localContext.set(new Context((HttpServletRequest) servletRequest,
@@ -155,17 +154,17 @@ public class GuiceFilter implements Filter {
     // In the default pipeline, this is a noop. However, if replaced
     // by a managed pipeline, a lazy init will be triggered the first time
     // dispatch occurs.
-    GuiceFilter.pipeline.get().initPipeline(servletContext);
+    GuiceFilter.pipeline.initPipeline(servletContext);
   }
 
   public void destroy() {
 
     try {
       // Destroy all registered filters & servlets in that order
-      pipeline.get().destroyPipeline();
+      pipeline.destroyPipeline();
 
     } finally {
-      pipeline.clear();
+      clearPipeline();
       servletContext.clear();
     }
   }

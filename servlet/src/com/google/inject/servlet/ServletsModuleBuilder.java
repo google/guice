@@ -41,21 +41,21 @@ class ServletsModuleBuilder extends AbstractModule {
   }
 
   //the first level of the EDSL--
-  public ServletModule.ServletKeyBindingBuilder serve(String urlPattern) {
-    return new ServletKeyBindingBuilderImpl(urlPattern, UriPatternType.SERVLET);
+  public ServletModule.ServletKeyBindingBuilder serve(List<String> urlPatterns) {
+    return new ServletKeyBindingBuilderImpl(urlPatterns, UriPatternType.SERVLET);
   }
 
-  public ServletModule.ServletKeyBindingBuilder serveRegex(String regex) {
-    return new ServletKeyBindingBuilderImpl(regex, UriPatternType.REGEX);
+  public ServletModule.ServletKeyBindingBuilder serveRegex(List<String> regexes) {
+    return new ServletKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
   }
 
   //non-static inner class so it can access state of enclosing module class
   class ServletKeyBindingBuilderImpl implements ServletModule.ServletKeyBindingBuilder {
-    private final String uriPattern;
+    private final List<String> uriPatterns;
     private final UriPatternType uriPatternType;
 
-    private ServletKeyBindingBuilderImpl(String uriPattern, UriPatternType uriPatternType) {
-      this.uriPattern = uriPattern;
+    private ServletKeyBindingBuilderImpl(List<String> uriPatterns, UriPatternType uriPatternType) {
+      this.uriPatterns = uriPatterns;
       this.uriPatternType = uriPatternType;
     }
 
@@ -74,9 +74,12 @@ class ServletsModuleBuilder extends AbstractModule {
 
     public void with(Key<? extends HttpServlet> servletKey,
         Map<String, String> contextParams) {
-      servletDefinitions.add(
-          new ServletDefinition(uriPattern, servletKey, UriPatternType.get(uriPatternType),
-              contextParams));
+
+      for (String pattern : uriPatterns) {
+        servletDefinitions.add(
+            new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType),
+                contextParams));
+      }
     }
   }
 }
