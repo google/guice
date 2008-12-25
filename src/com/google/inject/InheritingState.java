@@ -19,12 +19,13 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.MatcherAndConverter;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

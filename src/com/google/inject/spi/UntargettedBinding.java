@@ -17,10 +17,12 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
-}
+/**
+ * An untargetted binding. This binding indicates that the injector should use its implicit binding
+ * strategies to resolve injections.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface UntargettedBinding<T> extends Binding<T> {}

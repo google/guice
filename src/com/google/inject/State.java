@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.MatcherAndConverter;
 import java.lang.annotation.Annotation;

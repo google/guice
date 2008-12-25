@@ -19,6 +19,8 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalContext;
+import com.google.inject.internal.InternalFactory;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.PrivateEnvironment;

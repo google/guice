@@ -28,10 +28,8 @@ import com.google.inject.Scope;
 import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -167,45 +165,42 @@ public class ModuleWriter {
   protected <T> ScopedBindingBuilder bindKeyToTarget(
       final Binding<T> binding, final Binder binder, final Key<T> key) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
-      public ScopedBindingBuilder visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
-        binder.bind(key).toInstance(instance);
+      public ScopedBindingBuilder visitInstance(InstanceBinding<T> binding) {
+        binder.bind(key).toInstance(binding.getInstance());
         return null;
       }
 
-      public ScopedBindingBuilder visitProvider(Provider<? extends T> provider,
-          Set<InjectionPoint> injectionPoints) {
-        return binder.bind(key).toProvider(provider);
+      public ScopedBindingBuilder visitProviderInstance(ProviderInstanceBinding<T> binding) {
+        return binder.bind(key).toProvider(binding.getProviderInstance());
       }
 
-      public ScopedBindingBuilder visitProviderKey(
-          Key<? extends Provider<? extends T>> providerKey) {
-        return binder.bind(key).toProvider(providerKey);
+      public ScopedBindingBuilder visitProviderKey(ProviderKeyBinding<T> binding) {
+        return binder.bind(key).toProvider(binding.getProviderKey());
       }
 
-      public ScopedBindingBuilder visitKey(Key<? extends T> targetKey) {
-        return binder.bind(key).to(targetKey);
+      public ScopedBindingBuilder visitLinkedKey(LinkedKeyBinding<T> binding) {
+        return binder.bind(key).to(binding.getLinkedKey());
       }
 
-      public ScopedBindingBuilder visitUntargetted() {
+      public ScopedBindingBuilder visitUntargetted(UntargettedBinding<T> binding) {
         return binder.bind(key);
       }
 
-      public ScopedBindingBuilder visitExposed(PrivateEnvironment privateEnvironment) {
-        PrivateBinder privateBinder = getPrivateBinder(privateEnvironment);
+      public ScopedBindingBuilder visitExposed(ExposedBinding<T> binding) {
+        PrivateBinder privateBinder = getPrivateBinder(binding.getPrivateEnvironment());
         privateBinder.withSource(binding.getSource()).expose(key);
         return null;
       }
 
-      public ScopedBindingBuilder visitConvertedConstant(T value) {
+      public ScopedBindingBuilder visitConvertedConstant(ConvertedConstantBinding<T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitConstructor(Constructor<? extends T> constructor,
-          Set<InjectionPoint> injectionPoints) {
+      public ScopedBindingBuilder visitConstructor(ConstructorBinding<T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitProviderBinding(Key<?> provided) {
+      public ScopedBindingBuilder visitProviderBinding(ProviderBinding<?> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
     });

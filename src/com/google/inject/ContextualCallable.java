@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalContext;
 
 /**
  * @author crazybob@google.com (Bob Lee)

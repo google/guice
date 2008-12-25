@@ -14,12 +14,32 @@
  * limitations under the License.
  */
 
+package com.google.inject.spi;
 
-package com.google.inject;
+import com.google.inject.Binding;
+import com.google.inject.Provider;
+import java.util.Set;
 
 /**
+ * A binding to a provider instance. The provider's {@code get} method is invoked to resolve
+ * injections.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
-enum LoadStrategy {
-  EAGER, LAZY
+public interface ProviderInstanceBinding<T> extends Binding<T>, HasDependencies {
+
+  /**
+   * Returns the user-supplied, unscoped provider.
+   */
+  Provider<? extends T> getProviderInstance();
+
+  /**
+   * Returns the field and method injection points of the provider, injected at injector-creation
+   * time only.
+   *
+   * @return a possibly empty set
+   */
+  Set<InjectionPoint> getInjectionPoints();
+
 }

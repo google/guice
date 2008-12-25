@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
 
-import com.google.inject.internal.BytecodeGen;
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,39 +28,39 @@ import java.util.List;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class ConstructionContext<T> {
+public class ConstructionContext<T> {
 
   T currentReference;
   boolean constructing;
 
   List<DelegatingInvocationHandler<T>> invocationHandlers;
 
-  T getCurrentReference() {
+  public T getCurrentReference() {
     return currentReference;
   }
 
-  void removeCurrentReference() {
+  public void removeCurrentReference() {
     this.currentReference = null;
   }
 
-  void setCurrentReference(T currentReference) {
+  public void setCurrentReference(T currentReference) {
     this.currentReference = currentReference;
   }
 
-  boolean isConstructing() {
+  public boolean isConstructing() {
     return constructing;
   }
 
-  void startConstruction() {
+  public void startConstruction() {
     this.constructing = true;
   }
 
-  void finishConstruction() {
+  public void finishConstruction() {
     this.constructing = false;
     invocationHandlers = null;
   }
 
-  Object createProxy(Errors errors, Class<?> expectedType) throws ErrorsException {
+  public Object createProxy(Errors errors, Class<?> expectedType) throws ErrorsException {
     // TODO: if I create a proxy which implements all the interfaces of
     // the implementation type, I'll be able to get away with one proxy
     // instance (as opposed to one per caller).
@@ -85,7 +82,7 @@ class ConstructionContext<T> {
         new Class[] { expectedType }, invocationHandler));
   }
 
-  void setProxyDelegates(T delegate) {
+  public void setProxyDelegates(T delegate) {
     if (invocationHandlers != null) {
       for (DelegatingInvocationHandler<T> handler : invocationHandlers) {
         handler.setDelegate(delegate);

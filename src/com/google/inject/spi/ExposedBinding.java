@@ -17,10 +17,18 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * A binding to a key exposed from an enclosed private environment.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
+
+  /**
+   * Returns the enclosed environment that holds the original binding.
+   */
+  PrivateEnvironment getPrivateEnvironment();
+
 }

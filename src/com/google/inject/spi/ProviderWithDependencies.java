@@ -16,11 +16,12 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import com.google.inject.Provider;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
-}
+/**
+ * A provider with dependencies on other injected types. If a {@link Provider} has dependencies that
+ * aren't specified in injections, this interface should be used to expose all dependencies.
+ *
+ * @since 2.0
+ */
+public interface ProviderWithDependencies<T> extends Provider<T>, HasDependencies {}

@@ -16,28 +16,31 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Exposed;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.binder.PrivateBinder;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ProviderWithDependencies;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A provider that invokes a method and returns its result.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class ProviderMethod<T> implements Provider<T> {
-  // TODO: this should be a top-level implementation of Binding
-
+public class ProviderMethod<T> implements ProviderWithDependencies<T> {
   private final Key<T> key;
   private final Class<? extends Annotation> scopeAnnotation;
   private final Object instance;
   private final Method method;
+  private final ImmutableSet<Dependency<?>> dependencies;
   private final List<Provider<?>> parameterProviders;
   private final boolean exposed;
 
@@ -45,10 +48,12 @@ public class ProviderMethod<T> implements Provider<T> {
    * @param method the method to invoke. It's return type must be the same type as {@code key}.
    */
   ProviderMethod(Key<T> key, Method method, Object instance,
-      List<Provider<?>> parameterProviders, Class<? extends Annotation> scopeAnnotation) {
+      ImmutableSet<Dependency<?>> dependencies, List<Provider<?>> parameterProviders,
+      Class<? extends Annotation> scopeAnnotation) {
     this.key = key;
     this.scopeAnnotation = scopeAnnotation;
     this.instance = instance;
+    this.dependencies = dependencies;
     this.method = method;
     this.parameterProviders = parameterProviders;
     this.exposed = method.isAnnotationPresent(Exposed.class);
@@ -96,5 +101,9 @@ public class ProviderMethod<T> implements Provider<T> {
     } catch (InvocationTargetException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public Set<Dependency<?>> getDependencies() {
+    return dependencies;
   }
 }

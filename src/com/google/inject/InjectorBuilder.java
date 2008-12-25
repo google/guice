@@ -19,8 +19,10 @@ package com.google.inject;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.PrivateEnvironment;
@@ -188,16 +190,15 @@ class InjectorBuilder {
         (Collection) injector.state.getExplicitBindingsThisLevel().values(),
         injector.jitBindings.values()));
     for (final BindingImpl<?> binding : candidateBindings) {
-      if ((stage == Stage.PRODUCTION && binding.getScope() == Scopes.SINGLETON)
-          || binding.getLoadStrategy() == LoadStrategy.EAGER) {
+      if (binding.getScoping().isEagerSingleton(stage)) {
         try {
           injector.callInContext(new ContextualCallable<Void>() {
-            Dependency<?> dependency = Dependency.get(binding.key);
+            Dependency<?> dependency = Dependency.get(binding.getKey());
             public Void call(InternalContext context) {
               context.setDependency(dependency);
               Errors errorsForBinding = errors.withSource(dependency);
               try {
-                binding.internalFactory.get(errorsForBinding, context, dependency);
+                binding.getInternalFactory().get(errorsForBinding, context, dependency);
               } catch (ErrorsException e) {
                 errorsForBinding.merge(e.getErrors());
               } finally {

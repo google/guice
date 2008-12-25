@@ -170,13 +170,15 @@ public class BinderTest extends TestCase {
           assertEquals("Provider<java.util.List<java.lang.String>>",
               getProvider(Key.get(new TypeLiteral<List<String>>() {})).toString());
 
-          assertEquals("AnnotatedBindingBuilder<java.lang.Integer>",
+          assertEquals("BindingBuilder<java.lang.Integer>",
               bind(Integer.class).toString());
-          assertEquals("LinkedBindingBuilder<java.lang.Integer>",
+          assertEquals("BindingBuilder<java.lang.Integer>",
               bind(Integer.class).annotatedWith(Names.named("a")).toString());
-          assertEquals("AnnotatedConstantBindingBuilder", bindConstant().toString());
+          assertEquals("ConstantBindingBuilder", bindConstant().toString());
           assertEquals("ConstantBindingBuilder",
               bindConstant().annotatedWith(Names.named("b")).toString());
+          assertEquals("AnnotatedElementBuilder",
+              binder().newPrivateBinder().expose(Integer.class).toString());
         }
       });
       fail();

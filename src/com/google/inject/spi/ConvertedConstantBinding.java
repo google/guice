@@ -17,10 +17,24 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import java.util.Set;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * A binding created from converting a bound instance to a new type. The source binding has the same
+ * binding annotation but a different type.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies {
+
+  /**
+   * Returns the converted value.
+   */
+  T getValue();
+
+  /**
+   * Returns a singleton set containing only the converted key.
+   */
+  Set<Dependency<?>> getDependencies();
 }

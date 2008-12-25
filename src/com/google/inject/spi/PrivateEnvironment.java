@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Key;
-import com.google.inject.internal.ModuleBinding.ExposureBuilder;
+import com.google.inject.internal.BindingBuilder.ExposureBuilder;
 import java.util.List;
 import java.util.Set;
 

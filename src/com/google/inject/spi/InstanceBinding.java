@@ -17,10 +17,27 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import java.util.Set;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * A binding to a single instance. The same instance is returned for every injection.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface InstanceBinding<T> extends Binding<T>, HasDependencies {
+
+  /**
+   * Returns the user-supplied instance.
+   */
+  T getInstance();
+
+  /**
+   * Returns the field and method injection points of the instance, injected at injector-creation
+   * time only.
+   *
+   * @return a possibly empty set
+   */
+  Set<InjectionPoint> getInjectionPoints();
+
 }

@@ -23,6 +23,10 @@ import com.google.common.collect.Lists;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.InternalContext;
+import com.google.inject.internal.InternalFactory;
+import com.google.inject.internal.ProviderInstanceBindingImpl;
+import com.google.inject.internal.Scoping;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
@@ -181,7 +185,7 @@ class InjectorShell {
     InjectorFactory injectorFactory = new InjectorFactory(injector);
     injector.state.putBinding(key,
         new ProviderInstanceBindingImpl<Injector>(injector, key, SourceProvider.UNKNOWN_SOURCE,
-            injectorFactory, Scopes.NO_SCOPE, injectorFactory, LoadStrategy.LAZY,
+            injectorFactory, Scoping.UNSCOPED, injectorFactory,
             ImmutableSet.<InjectionPoint>of()));
   }
 
@@ -215,8 +219,8 @@ class InjectorShell {
     LoggerFactory loggerFactory = new LoggerFactory();
     injector.state.putBinding(key,
         new ProviderInstanceBindingImpl<Logger>(injector, key,
-            SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scopes.NO_SCOPE,
-            loggerFactory, LoadStrategy.LAZY, ImmutableSet.<InjectionPoint>of()));
+            SourceProvider.UNKNOWN_SOURCE, loggerFactory, Scoping.UNSCOPED,
+            loggerFactory, ImmutableSet.<InjectionPoint>of()));
   }
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {

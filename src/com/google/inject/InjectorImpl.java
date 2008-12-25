@@ -25,16 +25,26 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.inject.internal.Annotations;
+import static com.google.inject.internal.Annotations.findScopeAnnotation;
+import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
+import com.google.inject.internal.InstanceBindingImpl;
+import com.google.inject.internal.InternalContext;
+import com.google.inject.internal.InternalFactory;
+import com.google.inject.internal.LinkedBindingImpl;
+import com.google.inject.internal.LinkedProviderBindingImpl;
 import com.google.inject.internal.MatcherAndConverter;
+import com.google.inject.internal.Scoping;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.ProviderBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -95,7 +105,7 @@ class InjectorImpl implements Injector {
   }
 
   public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
-    return Collections.<Binding<T>>unmodifiableList(bindingsMultimap.getAll(type));
+    return bindingsMultimap.getAll(type);
   }
 
   /** Returns the binding for {@code key} */
@@ -175,8 +185,8 @@ class InjectorImpl implements Injector {
   }
 
   /** Creates a synthetic binding to Provider<T>, i.e. a binding to the provider from Binding<T>. */
-  private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key,
-      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+  private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key, Errors errors)
+      throws ErrorsException {
     Type providerType = key.getTypeLiteral().getType();
 
     // If the Provider has no type parameter (raw Provider)...
@@ -190,24 +200,16 @@ class InjectorImpl implements Injector {
     Key<T> providedKey = (Key<T>) key.ofType(entryType);
 
     BindingImpl<T> delegate = getBindingOrThrow(providedKey, errors);
-    return new ProviderBindingImpl<T>(this, key, delegate, loadStrategy);
+    return new ProviderBindingImpl<T>(this, key, delegate);
   }
 
-  static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>> {
+  static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
+      implements ProviderBinding<T> {
     final BindingImpl<T> providedBinding;
 
-    ProviderBindingImpl(
-        InjectorImpl injector,
-        Key<Provider<T>> key,
-        Binding<T> providedBinding,
-        LoadStrategy loadStrategy) {
-      super(
-          injector,
-          key,
-          providedBinding.getSource(),
-          createInternalFactory(providedBinding),
-          Scopes.NO_SCOPE,
-          loadStrategy);
+    ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key, Binding<T> providedBinding) {
+      super(injector, key, providedBinding.getSource(), createInternalFactory(providedBinding),
+          Scoping.UNSCOPED);
       this.providedBinding = (BindingImpl<T>) providedBinding;
     }
 
@@ -220,8 +222,12 @@ class InjectorImpl implements Injector {
       };
     }
 
-    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
-      return visitor.visitProviderBinding(providedBinding.getKey());
+    public Key<? extends T> getProvidedKey() {
+      return providedBinding.getKey();
+    }
+
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<Provider<T>, V> visitor) {
+      return visitor.visitProviderBinding(this);
     }
   }
 
@@ -276,15 +282,16 @@ class InjectorImpl implements Injector {
     }
   }
 
-  private static class ConvertedConstantBindingImpl<T> extends BindingImpl<T> {
+  private static class ConvertedConstantBindingImpl<T>
+      extends BindingImpl<T> implements ConvertedConstantBinding<T> {
     final T value;
     final Provider<T> provider;
     final Binding<String> originalBinding;
 
     ConvertedConstantBindingImpl(
-        InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding) {
+        Injector injector, Key<T> key, T value, Binding<String> originalBinding) {
       super(injector, key, originalBinding.getSource(),
-          new ConstantFactory<T>(Initializables.of(value)), Scopes.NO_SCOPE, LoadStrategy.LAZY);
+          new ConstantFactory<T>(Initializables.of(value)), Scoping.UNSCOPED);
       this.value = value;
       provider = Providers.of(value);
       this.originalBinding = originalBinding;
@@ -294,13 +301,21 @@ class InjectorImpl implements Injector {
       return provider;
     }
 
-    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-      return visitor.visitConvertedConstant(value);
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+      return visitor.visitConvertedConstant(this);
+    }
+
+    public T getValue() {
+      return value;
+    }
+
+    public Set<Dependency<?>> getDependencies() {
+      return ImmutableSet.<Dependency<?>>of(Dependency.get(originalBinding.getKey()));
     }
 
     @Override public String toString() {
-      return new ToStringBuilder(Binding.class)
-          .add("key", key)
+      return new ToStringBuilder(ConvertedConstantBinding.class)
+          .add("key", getKey())
           .add("value", value)
           .add("original", originalBinding)
           .toString();
@@ -331,8 +346,8 @@ class InjectorImpl implements Injector {
    * Creates a binding for an injectable type with the given scope. Looks for a scope on the type if
    * none is specified.
    */
-  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scope scope, Object source,
-      LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scoping scoping, Object source,
+      Errors errors) throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
 
     // Don't try to inject arrays, or enums.
@@ -352,14 +367,14 @@ class InjectorImpl implements Injector {
     ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
       Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
-      return createImplementedByBinding(key, scope, implementedBy, loadStrategy, errors);
+      return createImplementedByBinding(key, scoping, implementedBy, errors);
     }
 
     // Handle @ProvidedBy.
     ProvidedBy providedBy = rawType.getAnnotation(ProvidedBy.class);
     if (providedBy != null) {
       Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
-      return createProvidedByBinding(key, scope, providedBy, loadStrategy, errors);
+      return createProvidedByBinding(key, scoping, providedBy, errors);
     }
 
     // We can't inject abstract classes.
@@ -374,22 +389,20 @@ class InjectorImpl implements Injector {
       throw errors.cannotInjectInnerClass(rawType).toException();
     }
 
-    if (scope == null) {
-      Class<? extends Annotation> scopeAnnotation
-          = Annotations.findScopeAnnotation(errors, rawType);
+    LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
+
+    if (!scoping.isExplicitlyScoped()) {
+      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
       if (scopeAnnotation != null) {
-        scope = state.getScope(scopeAnnotation);
-        if (scope == null) {
-          errors.withSource(rawType).scopeNotFound(scopeAnnotation);
-        }
+        scoping = Scopes.makeInjectable(Scoping.forAnnotation(scopeAnnotation),
+            this, errors.withSource(rawType));
       }
     }
 
-    LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
     InternalFactory<? extends T> scopedFactory
-        = Scopes.scope(key, this, lateBoundConstructor, scope);
+        = Scopes.scope(key, this, lateBoundConstructor, scoping);
     return new ClassBindingImpl<T>(
-        this, key, source, scopedFactory, scope, lateBoundConstructor, loadStrategy);
+        this, key, source, scopedFactory, scoping, lateBoundConstructor);
   }
 
   /**
@@ -426,10 +439,11 @@ class InjectorImpl implements Injector {
     ConstructorInjector<T> constructorInjector;
 
     @SuppressWarnings("unchecked") // the constructor T is the same as the implementation T
-    void bind(InjectorImpl injector, TypeLiteral<T> implementation, Errors errors)
+    void bind(Injector injector, TypeLiteral<T> implementation, Errors errors)
         throws ErrorsException {
+      InjectorImpl injectorImpl = (InjectorImpl) injector;
       constructorInjector
-          = (ConstructorInjector<T>) injector.constructors.get(implementation, errors);
+          = (ConstructorInjector<T>) injectorImpl.constructors.get(implementation, errors);
     }
 
     public Constructor<T> getConstructor() {
@@ -450,8 +464,8 @@ class InjectorImpl implements Injector {
   }
 
   /** Creates a binding for a type annotated with @ProvidedBy. */
-  <T> BindingImpl<T> createProvidedByBinding(Key<T> key, Scope scope,
-      ProvidedBy providedBy, LoadStrategy loadStrategy, Errors errors) throws ErrorsException {
+  <T> BindingImpl<T> createProvidedByBinding(Key<T> key, Scoping scoping,
+      ProvidedBy providedBy, Errors errors) throws ErrorsException {
     final Class<?> rawType = key.getTypeLiteral().getRawType();
     final Class<? extends Provider<?>> providerType = providedBy.value();
 
@@ -471,7 +485,8 @@ class InjectorImpl implements Injector {
       public T get(Errors errors, InternalContext context, Dependency dependency)
           throws ErrorsException {
         errors = errors.withSource(providerKey);
-        Provider<?> provider = providerBinding.internalFactory.get(errors, context, dependency);
+        Provider<?> provider = providerBinding.getInternalFactory().get(
+            errors, context, dependency);
         try {
           Object o = provider.get();
           if (o != null && !rawType.isInstance(o)) {
@@ -490,15 +505,14 @@ class InjectorImpl implements Injector {
         this,
         key,
         rawType /* source */,
-        Scopes.<T>scope(key, this, internalFactory, scope),
-        scope,
-        providerKey,
-        loadStrategy);
+        Scopes.<T>scope(key, this, internalFactory, scoping),
+        scoping,
+        providerKey);
   }
 
   /** Creates a binding for a type annotated with @ImplementedBy. */
-  <T> BindingImpl<T> createImplementedByBinding(Key<T> key, Scope scope,
-      ImplementedBy implementedBy, LoadStrategy loadStrategy, Errors errors)
+  <T> BindingImpl<T> createImplementedByBinding(Key<T> key, Scoping scoping,
+      ImplementedBy implementedBy, Errors errors)
       throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
     Class<?> implementationType = implementedBy.value();
@@ -523,7 +537,8 @@ class InjectorImpl implements Injector {
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, Dependency<?> dependency)
           throws ErrorsException {
-        return targetBinding.internalFactory.get(errors.withSource(targetKey), context, dependency);
+        return targetBinding.getInternalFactory().get(
+            errors.withSource(targetKey), context, dependency);
       }
     };
 
@@ -531,10 +546,9 @@ class InjectorImpl implements Injector {
         this,
         key,
         rawType /* source */,
-        Scopes.<T>scope(key, this, internalFactory, scope),
-        scope,
-        targetKey,
-        loadStrategy);
+        Scopes.<T>scope(key, this, internalFactory, scoping),
+        scoping,
+        targetKey);
   }
 
   /**
@@ -585,7 +599,7 @@ class InjectorImpl implements Injector {
       // createProviderBinding() will return BindingImpl<Provider<X>>.
       @SuppressWarnings("unchecked")
       BindingImpl<T> binding
-          = (BindingImpl<T>) createProviderBinding((Key) key, LoadStrategy.LAZY, errors);
+          = (BindingImpl<T>) createProviderBinding((Key) key, errors);
       return binding;
     }
 
@@ -610,15 +624,14 @@ class InjectorImpl implements Injector {
     }
 
     Object source = key.getTypeLiteral().getRawType();
-    BindingImpl<T> binding = createUnitializedBinding(key, null /* scope */, source,
-        LoadStrategy.LAZY, errors);
+    BindingImpl<T> binding = createUnitializedBinding(key, Scoping.UNSCOPED, source, errors);
     initializeBinding(binding, errors);
     return binding;
   }
 
   <T> InternalFactory<? extends T> getInternalFactory(Key<T> key, Errors errors)
       throws ErrorsException {
-    return getBindingOrThrow(key, errors).internalFactory;
+    return getBindingOrThrow(key, errors).getInternalFactory();
   }
 
   /** Cached field and method injectors for a type. */
@@ -654,6 +667,7 @@ class InjectorImpl implements Injector {
             : new SingleMethodInjector(this, injectionPoint, errorsForMember);
         injectors.add(injector);
       } catch (ErrorsException ignoredForNow) {
+        // ignored for now
       }
     }
     return ImmutableList.copyOf(injectors);
@@ -676,10 +690,10 @@ class InjectorImpl implements Injector {
       multimap.put(type, binding);
     }
 
-    // safe because we only put matching entries into the map
-    @SuppressWarnings("unchecked")
+
+    @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
     <T> List<Binding<T>> getAll(TypeLiteral<T> type) {
-      return (List<Binding<T>>) (List) multimap.get(type);
+      return Collections.<Binding<T>>unmodifiableList((List) multimap.get(type));
     }
   }
 

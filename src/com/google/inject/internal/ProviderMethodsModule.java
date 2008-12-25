@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -24,6 +25,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Modules;
 import java.lang.annotation.Annotation;
@@ -82,11 +84,13 @@ public final class ProviderMethodsModule implements Module {
     Errors errors = new Errors(method);
 
     // prepare the parameter providers
+    List<Dependency<?>> dependencies = Lists.newArrayList();
     List<Provider<?>> parameterProviders = Lists.newArrayList();
     List<TypeLiteral<?>> parameterTypes = typeLiteral.getParameterTypes(method);
     Annotation[][] parameterAnnotations = method.getParameterAnnotations();
     for (int i = 0; i < parameterTypes.size(); i++) {
       Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
+      dependencies.add(Dependency.get(key));
       parameterProviders.add(binder.getProvider(key));
     }
 
@@ -101,7 +105,8 @@ public final class ProviderMethodsModule implements Module {
       binder.addError(message);
     }
 
-    return new ProviderMethod<T>(key, method, delegate, parameterProviders, scopeAnnotation);
+    return new ProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
+        parameterProviders, scopeAnnotation);
   }
 
   <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {

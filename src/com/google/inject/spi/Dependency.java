@@ -17,8 +17,12 @@
 package com.google.inject.spi;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A variable that can be resolved by an injector.
@@ -50,6 +54,17 @@ public final class Dependency<T> implements Serializable {
    */
   public static <T> Dependency<T> get(Key<T> key) {
     return new Dependency<T>(null, key, true, -1);
+  }
+
+  /**
+   * Returns the dependencies from the given injection points.
+   */
+  public static Set<Dependency<?>> forInjectionPoints(Set<InjectionPoint> injectionPoints) {
+    List<Dependency<?>> dependencies = Lists.newArrayList();
+    for (InjectionPoint injectionPoint : injectionPoints) {
+      dependencies.addAll(injectionPoint.getDependencies());
+    }
+    return ImmutableSet.copyOf(dependencies);
   }
 
   /**

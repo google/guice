@@ -16,8 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.InternalFactory;
+import com.google.inject.internal.Scoping;
+import java.lang.annotation.Annotation;
+
 /**
- * Built in scope implementations.
+ * Built-in scope implementations.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -86,16 +91,38 @@ public class Scopes {
   };
 
   /** Scopes an internal factory. */
-  static <T> InternalFactory<? extends T> scope(Key<T> key,
-      InjectorImpl injector, InternalFactory<? extends T> creator,
-      Scope scope) {
-    // No scope does nothing.
-    if (scope == null || scope == Scopes.NO_SCOPE) {
+  static <T> InternalFactory<? extends T> scope(Key<T> key, InjectorImpl injector,
+      InternalFactory<? extends T> creator, Scoping scoping) {
+
+    if (scoping.isNoScope()) {
       return creator;
     }
-    Provider<T> scoped = scope.scope(key,
-        new ProviderToInternalFactoryAdapter<T>(injector, creator));
+
+    Scope scope = scoping.getScopeInstance();
+
+    Provider<T> scoped
+        = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(
         Initializables.<Provider<? extends T>>of(scoped));
+  }
+
+  /**
+   * Replaces annotation scopes with instance scopes using the Injector's annotation-to-instance
+   * map. If the scope annotation has no corresponding instance, an error will be added and unscoped
+   * will be retuned.
+   */
+  static Scoping makeInjectable(Scoping scoping, InjectorImpl injector, Errors errors) {
+    Class<? extends Annotation> scopeAnnotation = scoping.getScopeAnnotation();
+    if (scopeAnnotation == null) {
+      return scoping;
+    }
+
+    Scope scope = injector.state.getScope(scopeAnnotation);
+    if (scope != null) {
+      return Scoping.forInstance(scope);
+    }
+
+    errors.scopeNotFound(scopeAnnotation);
+    return Scoping.UNSCOPED;
   }
 }

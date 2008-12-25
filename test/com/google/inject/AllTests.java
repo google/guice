@@ -25,6 +25,7 @@ import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.ElementsTest;
+import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ModuleWriterTest;
@@ -71,7 +72,6 @@ public class AllTests {
     suite.addTestSuite(ParentInjectorTest.class);
     suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
-    suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTest(ReferenceMapTestSuite.suite());
@@ -84,8 +84,10 @@ public class AllTests {
     suite.addTestSuite(TypeLiteralTest.class);
     suite.addTestSuite(TypeLiteralTypeResolutionTest.class);
 
-    // commands
+    // spi
     suite.addTestSuite(ElementsTest.class);
+    suite.addTestSuite(HasDependenciesTest.class);
+    suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(ModuleWriterTest.class);
     suite.addTestSuite(ModuleRewriterTest.class);
     suite.addTestSuite(SpiBindingsTest.class);

@@ -150,6 +150,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
@@ -158,6 +159,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, Names.named("Bee")), command.getKey());
             assertEquals("B", getInstance(command));
             return null;
@@ -185,6 +187,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class, Names.named("String")), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
@@ -193,6 +196,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Integer.class, Names.named("int")), command.getKey());
             assertEquals(2, getInstance(command));
             return null;
@@ -201,6 +205,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Long.class, Names.named("long")), command.getKey());
             assertEquals(3L, getInstance(command));
             return null;
@@ -209,6 +214,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Boolean.class, Names.named("boolean")), command.getKey());
             assertEquals(false, getInstance(command));
             return null;
@@ -217,6 +223,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Double.class, Names.named("double")), command.getKey());
             assertEquals(5.0d, getInstance(command));
             return null;
@@ -225,6 +232,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Float.class, Names.named("float")), command.getKey());
             assertEquals(6.0f, getInstance(command));
             return null;
@@ -233,6 +241,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Short.class, Names.named("short")), command.getKey());
             assertEquals((short) 7, getInstance(command));
             return null;
@@ -241,6 +250,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', getInstance(command));
             return null;
@@ -249,6 +259,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Class.class, Names.named("Class")), command.getKey());
             assertEquals(Iterator.class, getInstance(command));
             return null;
@@ -257,6 +268,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(CoinSide.class, Names.named("Enum")), command.getKey());
             assertEquals(CoinSide.TAILS, getInstance(command));
             return null;
@@ -346,11 +358,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof ProviderInstanceBinding);
             assertEquals(Key.get(String.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitProvider(Provider<? extends T> provider,
-                  Set<InjectionPoint> injectionPoints) {
-                assertSame(aProvider, provider);
+              @Override public Void visitProviderInstance(ProviderInstanceBinding<T> binding) {
+                assertSame(aProvider, binding.getProviderInstance());
                 return null;
               }
             });
@@ -360,10 +372,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof ProviderKeyBinding);
             assertEquals(Key.get(List.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-                assertEquals(Key.get(ListProvider.class), providerKey);
+              @Override public Void visitProviderKey(ProviderKeyBinding<T> binding) {
+                assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
                 return null;
               }
             });
@@ -373,10 +386,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof ProviderKeyBinding);
             assertEquals(Key.get(Collection.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-                assertEquals(Key.get(ListProvider.class), providerKey);
+              @Override public Void visitProviderKey(ProviderKeyBinding<T> binding) {
+                assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
                 return null;
               }
             });
@@ -398,10 +412,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(List.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitKey(Key<? extends T> key) {
-                assertEquals(Key.get(ArrayList.class), key);
+              @Override public Void visitLinkedKey(LinkedKeyBinding<T> binding) {
+                assertEquals(Key.get(ArrayList.class), binding.getLinkedKey());
                 return null;
               }
             });
@@ -411,10 +426,12 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(Map.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitKey(Key<? extends T> key) {
-                assertEquals(Key.get(new TypeLiteral<HashMap<Integer, String>>() {}), key);
+              @Override public Void visitLinkedKey(LinkedKeyBinding<T> binding) {
+                assertEquals(Key.get(new TypeLiteral<HashMap<Integer, String>>() {}),
+                    binding.getLinkedKey());
                 return null;
               }
             });
@@ -424,10 +441,12 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof LinkedKeyBinding);
             assertEquals(Key.get(Set.class), command.getKey());
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              public Void visitKey(Key<? extends T> key) {
-                assertEquals(Key.get(TreeSet.class, SampleAnnotation.class), key);
+              @Override public Void visitLinkedKey(LinkedKeyBinding<T> binding) {
+                assertEquals(Key.get(TreeSet.class, SampleAnnotation.class),
+                    binding.getLinkedKey());
                 return null;
               }
             });
@@ -447,6 +466,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(String.class), command.getKey());
             assertEquals("A", getInstance(command));
             return null;
@@ -713,10 +733,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertTrue(binding instanceof ExposedBinding);
             assertEquals(arrayList, binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
-                assertEquals(collections, privateEnvironment.getExposedKeys());
+              @Override public Void visitExposed(ExposedBinding<T> binding) {
+                assertEquals(collections, binding.getPrivateEnvironment().getExposedKeys());
                 return null;
               }
             });
@@ -726,10 +747,11 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertTrue(binding instanceof ExposedBinding);
             assertEquals(collection, binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
-                assertEquals(collections, privateEnvironment.getExposedKeys());
+              @Override public Void visitExposed(ExposedBinding<T> binding) {
+                assertEquals(collections, binding.getPrivateEnvironment().getExposedKeys());
                 return null;
               }
             });
@@ -756,11 +778,12 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertTrue(binding instanceof ExposedBinding);
             assertEquals(a, binding.getKey());
             assertEquals("2 ElementsTest.java", binding.getSource());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
-                assertEquals(ab, privateEnvironment.getExposedKeys());
+              @Override public Void visitExposed(ExposedBinding<T> binding) {
+                assertEquals(ab, binding.getPrivateEnvironment().getExposedKeys());
                 return null;
               }
             });
@@ -770,11 +793,12 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visitBinding(Binding<T> binding) {
+            assertTrue(binding instanceof ExposedBinding);
             assertEquals(b, binding.getKey());
             assertEquals("2 ElementsTest.java", binding.getSource());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitExposed(PrivateEnvironment privateEnvironment) {
-                assertEquals(ab, privateEnvironment.getExposedKeys());
+              @Override public Void visitExposed(ExposedBinding<T> binding) {
+                assertEquals(ab, binding.getPrivateEnvironment().getExposedKeys());
                 return null;
               }
             });

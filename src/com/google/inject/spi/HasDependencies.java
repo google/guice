@@ -16,11 +16,23 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import java.util.Set;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * Implemented by {@link com.google.inject.Binding bindings}, {@link com.google.inject.Provider
+ * providers} and instances that expose their dependencies explicitly.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface HasDependencies {
+
+  /**
+   * Returns the known dependencies for this type. If this has dependencies whose values are not
+   * known statically, a dependency for the {@link com.google.inject.Injector Injector} will be
+   * included in the returned set.
+   * 
+   * @return a possibly empty set
+   */
+  Set<Dependency<?>> getDependencies();
 }

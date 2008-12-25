@@ -524,8 +524,7 @@ public class Key<T> implements Serializable {
     private static final long serialVersionUID = 0;
   }
 
-  /** @since 2.0 */
-  protected final void readObject(ObjectInputStream stream) throws InvalidObjectException {
+  private void readObject(ObjectInputStream stream) throws InvalidObjectException {
     throw new InvalidObjectException("Use SerializedForm");
   }
 

@@ -17,10 +17,20 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import com.google.inject.Key;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * A binding to a linked key. The other key's binding is used to resolve injections.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface LinkedKeyBinding<T> extends Binding<T> {
+
+  /**
+   * Returns the linked key used to resolve injections. That binding can be retrieved from an
+   * injector using {@link com.google.inject.Injector#getBinding(Key) Injector.getBinding(key)}.
+   */
+  Key<? extends T> getLinkedKey();
+
 }

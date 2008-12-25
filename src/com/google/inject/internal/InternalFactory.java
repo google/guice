@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
 
-import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Dependency;
 
 /**
@@ -25,7 +23,7 @@ import com.google.inject.spi.Dependency;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface InternalFactory<T> {
+public interface InternalFactory<T> {
 
   /**
    * Creates an object to be injected.

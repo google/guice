@@ -16,14 +16,11 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import java.lang.reflect.Constructor;
-import java.util.Set;
+import com.google.inject.Binding;
 
 /**
- * No-op visitor for subclassing. All interface methods simply delegate to
- * {@link #visitOther()}, returning its result.
+ * No-op visitor for subclassing. All interface methods simply delegate to {@link
+ * #visitOther(Binding)}, returning its result.
  *
  * @param <V> any type to be returned by the visit method. Use {@link Void} with
  *     {@code return null} if no return type is needed.
@@ -33,44 +30,44 @@ import java.util.Set;
  */
 public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTargetVisitor<T, V> {
 
-  protected V visitOther() {
+  protected V visitOther(Binding<T> binding) {
     return null;
   }
 
-  public V visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
-    return visitOther();
+  public V visitInstance(InstanceBinding<T> instanceBinding) {
+    return visitOther(instanceBinding);
   }
 
-  public V visitProvider(Provider<? extends T> provider, Set<InjectionPoint> injectionPoints) {
-    return visitOther();
+  public V visitProviderInstance(ProviderInstanceBinding<T> providerInstanceBinding) {
+    return visitOther(providerInstanceBinding);
   }
 
-  public V visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
-    return visitOther();
+  public V visitProviderKey(ProviderKeyBinding<T> providerKeyBinding) {
+    return visitOther(providerKeyBinding);
   }
 
-  public V visitKey(Key<? extends T> key) {
-    return visitOther();
+  public V visitLinkedKey(LinkedKeyBinding<T> linkedKeyBinding) {
+    return visitOther(linkedKeyBinding);
   }
 
-  public V visitUntargetted() {
-    return visitOther();
+  public V visitExposed(ExposedBinding<T> exposedBinding) {
+    return visitOther(exposedBinding);
   }
 
-  public V visitConstructor(Constructor<? extends T> constructor,
-      Set<InjectionPoint> injectionPoints) {
-    return visitOther();
+  public V visitUntargetted(UntargettedBinding<T> untargettedBinding) {
+    return visitOther(untargettedBinding);
   }
 
-  public V visitConvertedConstant(T value) {
-    return visitOther();
+  public V visitConstructor(ConstructorBinding<T> constructorBinding) {
+    return visitOther(constructorBinding);
   }
 
-  public V visitProviderBinding(Key<?> provided) {
-    return visitOther();
+  public V visitConvertedConstant(ConvertedConstantBinding<T> convertedConstantBinding) {
+    return visitOther(convertedConstantBinding);
   }
 
-  public V visitExposed(PrivateEnvironment privateEnvironment) {
-    return visitOther();
+  @SuppressWarnings("unchecked") // if we visit a ProviderBinding, we know T == Provider<?>
+  public V visitProviderBinding(ProviderBinding<?> providerBinding) {
+    return visitOther((Binding<T>) providerBinding);
   }
 }

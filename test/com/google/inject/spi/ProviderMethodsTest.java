@@ -300,4 +300,22 @@ public class ProviderMethodsTest extends TestCase implements Module {
     @Inject List<? super Integer> numbers;
     @Inject Class<?> type;
   }
+
+  public void testProviderMethodDependenciesAreExposed() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Integer.class).toInstance(50);
+        bindConstant().annotatedWith(Names.named("units")).to("Kg");
+      }
+      @Provides @Named("weight") String provideWeight(Integer count, @Named("units") String units) {
+        return count + units;
+      }
+    });
+
+    ProviderInstanceBinding<?> binding = (ProviderInstanceBinding<?>) injector.getBinding(
+        Key.get(String.class, Names.named("weight")));
+    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)),
+        Dependency.get(Key.get(String.class, Names.named("units")))),
+        binding.getDependencies());
+  }
 }

@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
@@ -34,9 +35,10 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.PrivateBinder;
+import com.google.inject.internal.AbstractBindingBuilder;
+import com.google.inject.internal.BindingBuilder;
+import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ModuleBinding;
-import com.google.inject.internal.ModuleBinding.ExposureBuilder;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
@@ -59,11 +61,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 public final class Elements {
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
-    @Override public Object visitInstance(Object instance, Set<InjectionPoint> injectionPoints) {
-      return instance;
+    @Override public Object visitInstance(InstanceBinding<Object> binding) {
+      return binding.getInstance();
     }
 
-    @Override protected Object visitOther() {
+    @Override protected Object visitOther(Binding<Object> binding) {
       throw new IllegalArgumentException();
     }
   };
@@ -121,8 +123,9 @@ public final class Elements {
       this.modules = Sets.newHashSet();
       this.elements = Lists.newArrayList();
       this.source = null;
-      this.sourceProvider = new SourceProvider()
-          .plusSkippedClasses(Elements.class, RecordingBinder.class, AbstractModule.class);
+      this.sourceProvider = new SourceProvider().plusSkippedClasses(
+          Elements.class, RecordingBinder.class, AbstractModule.class,
+          ConstantBindingBuilderImpl.class, AbstractBindingBuilder.class, BindingBuilder.class);
       this.parent = null;
       this.privateEnvironment = null;
     }
@@ -214,9 +217,7 @@ public final class Elements {
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-      ModuleBinding<T> moduleBindingCommand = new ModuleBinding<T>(getSource(), key);
-      elements.add(moduleBindingCommand);
-      return moduleBindingCommand.regularBuilder(RecordingBinder.this);
+      return new BindingBuilder<T>(this, elements, getSource(), key);
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
@@ -228,9 +229,7 @@ public final class Elements {
     }
 
     public AnnotatedConstantBindingBuilder bindConstant() {
-      ModuleBinding<Object> moduleBindingCommand = new ModuleBinding<Object>(getSource());
-      elements.add(moduleBindingCommand);
-      return moduleBindingCommand.constantBuilder(RecordingBinder.this);
+      return new ConstantBindingBuilderImpl<Void>(this, elements, getSource());
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
@@ -301,10 +300,10 @@ public final class Elements {
         };
       }
 
-      ModuleBinding<T> exposeBinding = new ModuleBinding<T>(getSource(), key);
-      parent.elements.add(exposeBinding);
+      BindingBuilder<T> exposeBinding = new BindingBuilder<T>(
+          this, parent.elements, getSource(), key);
 
-      ExposureBuilder<T> builder = exposeBinding.exposedKeyBuilder(this, privateEnvironment);
+      BindingBuilder.ExposureBuilder<T> builder = exposeBinding.usingKeyFrom(privateEnvironment);
       privateEnvironment.addExposureBuilder(builder);
       return builder;
     }

@@ -17,10 +17,23 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import com.google.inject.Key;
+import com.google.inject.Provider;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<T> binding) {
-    throw new AssertionFailedError();
-  }
+/**
+ * A binding to a provider key. To resolve injections, the provider key is first resolved, then that
+ * provider's {@code get} method is invoked.
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
+ */
+public interface ProviderKeyBinding<T> extends Binding<T> {
+
+  /**
+   * Returns the key used to resolve the provider's binding. That binding can be retrieved from an
+   * injector using {@link com.google.inject.Injector#getBinding(Key)
+   * Injector.getBinding(providerKey)}
+   */
+  Key<? extends Provider<? extends T>> getProviderKey();
+
 }

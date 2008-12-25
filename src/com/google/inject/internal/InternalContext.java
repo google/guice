@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.internal;
 
 import com.google.inject.spi.Dependency;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class InternalContext {
+public final class InternalContext {
 
   private Map<Object, ConstructionContext<?>> constructionContexts;
   private Dependency dependency;

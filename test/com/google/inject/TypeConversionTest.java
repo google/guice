@@ -23,6 +23,7 @@ import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Date;
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 /**
@@ -278,6 +279,30 @@ public class TypeConversionTest extends TestCase {
           "Converter returned -1.",
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
+  }
+  
+  public void testStringIsConvertedOnlyOnce() {
+    final TypeConverter converter = new TypeConverter() {
+      boolean converted = false;
+      public Object convert(String value, TypeLiteral<?> toType) {
+        if (converted) {
+          throw new AssertionFailedError("converted multiple times!");
+        }
+        converted = true;
+        return new Date();
+      }
+    };
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), converter);
+        bindConstant().annotatedWith(NumericValue.class).to("unused");
+      }
+    });
+
+    Date first = injector.getInstance(Key.get(Date.class, NumericValue.class));
+    Date second = injector.getInstance(Key.get(Date.class, NumericValue.class));
+    assertSame(first, second);
   }
 
   public void testAmbiguousTypeConversion() {
