@@ -35,7 +35,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
 /**
- * <p>Builds a binding for an {@link ThrowingProvider} using a fluent API:
+ * <p>Builds a binding for a {@link ThrowingProvider} using a fluent API:
  * <pre><code>ThrowingProviderBinder.create(binder())
  *    .bind(RemoteProvider.class, Customer.class)
  *    .to(RemoteCustomerProvider.class)

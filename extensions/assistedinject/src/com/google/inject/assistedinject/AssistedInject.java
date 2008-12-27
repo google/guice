@@ -22,8 +22,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * <p>Constructors annotated with {@code @AssistedInject} indicate that will can be instantiated by
- * the {@link FactoryProvider}. Each constructor must exactly one corresponding factory method
+ * <p>Constructors annotated with {@code @AssistedInject} indicate that they can be instantiated by
+ * the {@link FactoryProvider}. Each constructor must exactly match one corresponding factory method
  * within the factory interface.
  * 
  * <p>Constructor parameters must be either supplied by the factory interface and marked with

@@ -38,7 +38,7 @@ package com.google.inject;
  * for a given key, via the {@link Injector#getProvider} methods.
  * </ul>
  *
- * @param <T> the type of object this provider provides
+ * @param <T> the type of object this provides
  *
  * @author crazybob@google.com (Bob Lee)
  */

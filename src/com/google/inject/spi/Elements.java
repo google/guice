@@ -278,8 +278,8 @@ public final class Elements {
       return new RecordingBinder(this, privateEnvironment);
     }
 
-    public void expose(Key<?> type) {
-      exposeInternal(type);
+    public void expose(Key<?> key) {
+      exposeInternal(key);
     }
 
     public AnnotatedElementBuilder expose(Class<?> type) {

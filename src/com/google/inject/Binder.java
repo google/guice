@@ -38,10 +38,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  * Guice uses an <i>embedded domain-specific language</i>, or EDSL, to help you
  * create bindings simply and readably.  This approach is great for overall
  * usability, but it does come with a small cost: <b>it is difficult to
- * learn how to use the Binding EDSL in the usual way -- by reading
- * method-level javadocs</b>.  Instead, you should consult this series of
+ * learn how to use the Binding EDSL by reading
+ * method-level javadocs</b>.  Instead, you should consult the series of
  * examples below.  To save space, these examples omit the opening
- * {@code binder.}, just as you will if your module extends
+ * {@code binder}, just as you will if your module extends
  * {@link AbstractModule}.
  *
  * <pre>
@@ -132,7 +132,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  * In this example, your module itself, <i>not Guice</i>, takes responsibility
  * for obtaining a {@code ServiceImpl} instance, then asks Guice to always use
  * this single instance to fulfill all {@code Service} injection requests.  When
- * the {@link Injector} is first created, it will automatically perform field
+ * the {@link Injector} is created, it will automatically perform field
  * and method injection for this instance, but any injectable constructor on
  * {@code ServiceImpl} is simply ignored.  Note that using this approach results
  * in "eager loading" behavior that you can't control.

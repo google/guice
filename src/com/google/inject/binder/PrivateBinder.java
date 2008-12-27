@@ -30,7 +30,7 @@ import com.google.inject.TypeLiteral;
 public interface PrivateBinder extends Binder {
 
   /** Makes the binding for {@code key} available to the enclosing environment */
-  void expose(Key<?> type);
+  void expose(Key<?> key);
 
   /**
    * Makes a binding for {@code type} available to the enclosing environment. Use {@link

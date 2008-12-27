@@ -30,6 +30,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
@@ -59,8 +60,8 @@ import java.util.Set;
  * <pre class="code">bind(MyServiceClass.class);</pre>
  *
  * <p>All intercepted bindings must be bound explicitly. Interception cannot
- * be applied to implicit bindings, or bindings that depend on
- * {@literal @}{@link ProvidedBy}, {@literal @}{@link ImplementedBy}
+ * be applied to implicit bindings, or bproindings that depend on
+ * {@literal @}{@link ProvidedBy}, {@literal @}{@link ImplementedBy}, {@literal @}{@link Provides}
  * annotations.
  *
  * <p><strong>Implementation note:</strong> To intercept provision, an

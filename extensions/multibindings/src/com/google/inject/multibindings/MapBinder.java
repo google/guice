@@ -74,9 +74,9 @@ import java.util.Set;
  *
  * <p>Values are resolved at map injection time. If a value is bound to a
  * provider, that provider's get method will be called each time the map is
- * injected (unless the binding is also scoped).
+ * injected (unless the binding is also scoped, or a map of providers is injected).
  *
- * <p>Annotations are be used to create different maps of the same key/value
+ * <p>Annotations are used to create different maps of the same key/value
  * type. Each distinct annotation gets its own independent map.
  *
  * <p><strong>Keys must be distinct.</strong> If the same key is bound more than
