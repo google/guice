@@ -309,15 +309,19 @@ class InjectorImpl implements Injector {
       return value;
     }
 
+    public Key<String> getSourceKey() {
+      return originalBinding.getKey();
+    }
+
     public Set<Dependency<?>> getDependencies() {
-      return ImmutableSet.<Dependency<?>>of(Dependency.get(originalBinding.getKey()));
+      return ImmutableSet.<Dependency<?>>of(Dependency.get(getSourceKey()));
     }
 
     @Override public String toString() {
       return new ToStringBuilder(ConvertedConstantBinding.class)
           .add("key", getKey())
           .add("value", value)
-          .add("original", originalBinding)
+          .add("sourceKey", getSourceKey())
           .toString();
     }
   }

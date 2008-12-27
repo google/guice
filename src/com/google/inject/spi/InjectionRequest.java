@@ -17,6 +17,8 @@
 package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.ConfigurationException;
+import java.util.Set;
 
 /**
  * A request to inject the instance fields and methods of an instance. Requests are created
@@ -43,6 +45,22 @@ public final class InjectionRequest implements Element {
 
   public Object getInstance() {
     return instance;
+  }
+
+  /**
+   * Returns the instance methods and fields of {@code instance} that will be injected to fulfill
+   * this request.
+   *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   * @throws ConfigurationException if there is a malformed injection point on the class of {@code
+   *      instance}, such as a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
+    return InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {

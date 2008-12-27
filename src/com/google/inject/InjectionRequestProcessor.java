@@ -44,22 +44,22 @@ class InjectionRequestProcessor extends AbstractProcessor {
     this.initializer = initializer;
   }
 
-  @Override public Boolean visitStaticInjectionRequest(StaticInjectionRequest command) {
-    staticInjections.add(new StaticInjection(injector, command.getSource(), command.getType()));
+  @Override public Boolean visitStaticInjectionRequest(StaticInjectionRequest request) {
+    staticInjections.add(new StaticInjection(injector, request));
     return true;
   }
 
-  @Override public Boolean visitInjectionRequest(InjectionRequest command) {
+  @Override public Boolean visitInjectionRequest(InjectionRequest request) {
     Set<InjectionPoint> injectionPoints;
     try {
-      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(
-          command.getInstance().getClass());
+      injectionPoints = request.getInjectionPoints();
     } catch (ConfigurationException e) {
       errors.merge(e.getErrorMessages());
       injectionPoints = e.getPartialValue();
     }
 
-    initializer.requestInjection(injector, command.getInstance(), command.getSource(), injectionPoints);
+    initializer.requestInjection(
+        injector, request.getInstance(), request.getSource(), injectionPoints);
     return true;
   }
 
@@ -79,20 +79,20 @@ class InjectionRequestProcessor extends AbstractProcessor {
   private class StaticInjection {
     final InjectorImpl injector;
     final Object source;
-    final Class<?> type;
+    final StaticInjectionRequest request;
     ImmutableList<SingleMemberInjector> memberInjectors;
 
-    public StaticInjection(InjectorImpl injector, Object source, Class type) {
+    public StaticInjection(InjectorImpl injector, StaticInjectionRequest request) {
       this.injector = injector;
-      this.source = source;
-      this.type = type;
+      this.source = request.getSource();
+      this.request = request;
     }
 
     void validate() {
       Errors errorsForMember = errors.withSource(source);
       Set<InjectionPoint> injectionPoints;
       try {
-        injectionPoints = InjectionPoint.forStaticMethodsAndFields(type);
+        injectionPoints = request.getInjectionPoints();
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
         injectionPoints = e.getPartialValue();

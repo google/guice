@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
+import com.google.inject.Key;
 import java.util.Set;
 
 /**
@@ -32,6 +33,12 @@ public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies
    * Returns the converted value.
    */
   T getValue();
+
+  /**
+   * Returns the key for the source binding. That binding can e retrieved from an injector using
+   * {@link com.google.inject.Injector#getBinding(Key) Injector.getBinding(key)}.
+   */
+  Key<String> getSourceKey();
 
   /**
    * Returns a singleton set containing only the converted key.

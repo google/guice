@@ -242,6 +242,7 @@ public class SpiBindingsTest extends TestCase {
     binding.acceptTargetVisitor(new FailingTargetVisitor<Integer>() {
       @Override public Void visitConvertedConstant(ConvertedConstantBinding<Integer> binding) {
         assertEquals((Integer) 1, binding.getValue());
+        assertEquals(Key.get(String.class, Names.named("one")), binding.getSourceKey());
         return null;
       }
     });

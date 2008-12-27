@@ -244,10 +244,11 @@ public final class InjectionPoint implements Serializable {
   }
 
   /**
-   * Returns all static method and field injection points on {@code type}. All fields are added
-   * first, and then all methods. Within the fields, supertype fields are added before subtype
-   * fields. Similarly, supertype methods are added before subtype methods.
+   * Returns all static method and field injection points on {@code type}.
    *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
    *      a field with multiple binding annotations. The exception's {@link
    *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
@@ -266,11 +267,13 @@ public final class InjectionPoint implements Serializable {
     }
     return result;
   }
+
   /**
-   * Returns all static method and field injection points on {@code type}. All fields are added
-   * first, and then all methods. Within the fields, supertype fields are added before subtype
-   * fields. Similarly, supertype methods are added before subtype methods.
+   * Returns all static method and field injection points on {@code type}.
    *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
    *      a field with multiple binding annotations. The exception's {@link
    *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
@@ -281,10 +284,11 @@ public final class InjectionPoint implements Serializable {
   }
 
   /**
-   * Returns all instance method and field injection points on {@code type}. All fields are added
-   * first, and then all methods. Within the fields, supertype fields are added before subtype
-   * fields. Similarly, supertype methods are added before subtype methods.
+   * Returns all instance method and field injection points on {@code type}.
    *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
    *      a field with multiple binding annotations. The exception's {@link
    *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
@@ -306,10 +310,11 @@ public final class InjectionPoint implements Serializable {
   }
 
   /**
-   * Returns all instance method and field injection points on {@code type}. All fields are added
-   * first, and then all methods. Within the fields, supertype fields are added before subtype
-   * fields. Similarly, supertype methods are added before subtype methods.
+   * Returns all instance method and field injection points on {@code type}.
    *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
    * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
    *      a field with multiple binding annotations. The exception's {@link
    *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}

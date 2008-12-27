@@ -16,11 +16,12 @@
 
 package com.google.inject.spi;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.ConfigurationException;
+import java.util.Set;
 
 /**
- * A request to inject the static fields and methods of type. Requests are created
+ * A request to inject the static fields and methods of a type. Requests are created
  * explicitly in a module using {@link com.google.inject.Binder#requestStaticInjection(Class[])
  * requestStaticInjection()} statements:
  * <pre>
@@ -44,6 +45,22 @@ public final class StaticInjectionRequest implements Element {
 
   public Class<?> getType() {
     return type;
+  }
+
+  /**
+   * Returns the static methods and fields of {@code type} that will be injected to fulfill this
+   * request.
+   *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   * @throws ConfigurationException if there is a malformed injection point on {@code type}, such as
+   *      a field with multiple binding annotations. The exception's {@link
+   *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
+   *      of the valid injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints() throws ConfigurationException {
+    return InjectionPoint.forStaticMethodsAndFields(type);
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
