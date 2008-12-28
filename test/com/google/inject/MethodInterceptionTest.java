@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.matcher.Matchers;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -64,6 +65,25 @@ public class MethodInterceptionTest extends TestCase {
     
     assertSame("Child injectors should share proxy classes, otherwise memory leaks!",
         nullFoos.getClass(), bothNull.getClass());
+  }
+  
+  public void testGetThis() {
+    final AtomicReference<Object> lastTarget = new AtomicReference<Object>();
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.any(), new MethodInterceptor() {
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            lastTarget.set(methodInvocation.getThis());
+            return methodInvocation.proceed();
+          }
+        });
+      }
+    });
+
+    Interceptable interceptable = injector.getInstance(Interceptable.class);
+    interceptable.foo();
+    assertSame(interceptable, lastTarget.get());
   }
 
   static class Foo {}
