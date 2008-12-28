@@ -37,7 +37,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
     this.targetKey = targetKey;
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitLinkedKey(this);
   }
 

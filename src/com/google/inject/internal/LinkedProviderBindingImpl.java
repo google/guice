@@ -40,7 +40,7 @@ public final class LinkedProviderBindingImpl<T>
     this.providerKey = providerKey;
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitProviderKey(this);
   }
 

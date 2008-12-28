@@ -167,7 +167,8 @@ public final class InterceptingInjectorBuilder {
       }
 
       binding.acceptTargetVisitor(new DefaultBindingTargetVisitor<T, Void>() {
-        @Override public Void visitUntargetted(UntargettedBinding<T> tUntargettedBinding) {
+        @Override public Void visitUntargetted(
+            UntargettedBinding<? extends T> tUntargettedBinding) {
           throw new UnsupportedOperationException(
               String.format("Cannot intercept bare binding of %s.", key));
         }

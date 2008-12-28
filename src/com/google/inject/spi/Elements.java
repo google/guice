@@ -61,11 +61,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 public final class Elements {
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
-    @Override public Object visitInstance(InstanceBinding<Object> binding) {
+    @Override public Object visitInstance(InstanceBinding<?> binding) {
       return binding.getInstance();
     }
 
-    @Override protected Object visitOther(Binding<Object> binding) {
+    @Override protected Object visitOther(Binding<?> binding) {
       throw new IllegalArgumentException();
     }
   };

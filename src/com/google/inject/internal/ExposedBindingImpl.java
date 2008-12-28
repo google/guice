@@ -41,7 +41,7 @@ public class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBind
     this.privateEnvironment = privateEnvironment;
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitExposed(this);
   }
 

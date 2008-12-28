@@ -165,42 +165,44 @@ public class ModuleWriter {
   protected <T> ScopedBindingBuilder bindKeyToTarget(
       final Binding<T> binding, final Binder binder, final Key<T> key) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
-      public ScopedBindingBuilder visitInstance(InstanceBinding<T> binding) {
+      public ScopedBindingBuilder visitInstance(InstanceBinding<? extends T> binding) {
         binder.bind(key).toInstance(binding.getInstance());
         return null;
       }
 
-      public ScopedBindingBuilder visitProviderInstance(ProviderInstanceBinding<T> binding) {
+      public ScopedBindingBuilder visitProviderInstance(
+          ProviderInstanceBinding<? extends T> binding) {
         return binder.bind(key).toProvider(binding.getProviderInstance());
       }
 
-      public ScopedBindingBuilder visitProviderKey(ProviderKeyBinding<T> binding) {
+      public ScopedBindingBuilder visitProviderKey(ProviderKeyBinding<? extends T> binding) {
         return binder.bind(key).toProvider(binding.getProviderKey());
       }
 
-      public ScopedBindingBuilder visitLinkedKey(LinkedKeyBinding<T> binding) {
+      public ScopedBindingBuilder visitLinkedKey(LinkedKeyBinding<? extends T> binding) {
         return binder.bind(key).to(binding.getLinkedKey());
       }
 
-      public ScopedBindingBuilder visitUntargetted(UntargettedBinding<T> binding) {
+      public ScopedBindingBuilder visitUntargetted(UntargettedBinding<? extends T> binding) {
         return binder.bind(key);
       }
 
-      public ScopedBindingBuilder visitExposed(ExposedBinding<T> binding) {
+      public ScopedBindingBuilder visitExposed(ExposedBinding<? extends T> binding) {
         PrivateBinder privateBinder = getPrivateBinder(binding.getPrivateEnvironment());
         privateBinder.withSource(binding.getSource()).expose(key);
         return null;
       }
 
-      public ScopedBindingBuilder visitConvertedConstant(ConvertedConstantBinding<T> binding) {
+      public ScopedBindingBuilder visitConvertedConstant(
+          ConvertedConstantBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitConstructor(ConstructorBinding<T> binding) {
+      public ScopedBindingBuilder visitConstructor(ConstructorBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitProviderBinding(ProviderBinding<?> binding) {
+      public ScopedBindingBuilder visitProviderBinding(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
     });

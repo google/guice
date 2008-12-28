@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import junit.framework.AssertionFailedError;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import junit.framework.TestCase;
 
-public class FailingTargetVisitor<T> extends DefaultBindingTargetVisitor<T, Void> {
-  @Override protected Void visitOther(Binding<? extends T> binding) {
-    throw new AssertionFailedError();
+/**
+ * Simple little test that should compile. Ensures that wildcards on the
+ * generics are correct.
+ *
+ * @author phopkins@gmail.com
+ */
+public class BindingTargetVisitorTest extends TestCase {
+  public void testBindingTargetVisitorTypeTest() throws Exception {
+    Injector injector = Guice.createInjector();
+    for (Binding<?> binding : injector.getBindings().values()) {
+      binding.acceptTargetVisitor(new DefaultBindingTargetVisitor<Object, Object>() {});
+    }
   }
 }

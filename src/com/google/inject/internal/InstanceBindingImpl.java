@@ -55,7 +55,7 @@ public class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBi
     return this.provider;
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitInstance(this);
   }
 

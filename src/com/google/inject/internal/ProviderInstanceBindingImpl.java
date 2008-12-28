@@ -49,7 +49,7 @@ public final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
     this.providerInstance = providerInstance;
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitProviderInstance(this);
   }
 

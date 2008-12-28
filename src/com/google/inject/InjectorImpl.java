@@ -204,7 +204,7 @@ class InjectorImpl implements Injector {
   }
 
   static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
-      implements ProviderBinding<T> {
+      implements ProviderBinding<Provider<T>> {
     final BindingImpl<T> providedBinding;
 
     ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key, Binding<T> providedBinding) {
@@ -226,7 +226,7 @@ class InjectorImpl implements Injector {
       return providedBinding.getKey();
     }
 
-    public <V> V acceptTargetVisitor(BindingTargetVisitor<Provider<T>, V> visitor) {
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
       return visitor.visitProviderBinding(this);
     }
   }
@@ -301,7 +301,7 @@ class InjectorImpl implements Injector {
       return provider;
     }
 
-    public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+    public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
       return visitor.visitConvertedConstant(this);
     }
 
@@ -602,8 +602,7 @@ class InjectorImpl implements Injector {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
       // createProviderBinding() will return BindingImpl<Provider<X>>.
       @SuppressWarnings("unchecked")
-      BindingImpl<T> binding
-          = (BindingImpl<T>) createProviderBinding((Key) key, errors);
+      BindingImpl binding = createProviderBinding((Key) key, errors);
       return binding;
     }
 

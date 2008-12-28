@@ -30,44 +30,45 @@ import com.google.inject.Binding;
  */
 public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTargetVisitor<T, V> {
 
-  protected V visitOther(Binding<T> binding) {
+  protected V visitOther(Binding<? extends T> binding) {
     return null;
   }
 
-  public V visitInstance(InstanceBinding<T> instanceBinding) {
+  public V visitInstance(InstanceBinding<? extends T> instanceBinding) {
     return visitOther(instanceBinding);
   }
 
-  public V visitProviderInstance(ProviderInstanceBinding<T> providerInstanceBinding) {
+  public V visitProviderInstance(ProviderInstanceBinding<? extends T> providerInstanceBinding) {
     return visitOther(providerInstanceBinding);
   }
 
-  public V visitProviderKey(ProviderKeyBinding<T> providerKeyBinding) {
+  public V visitProviderKey(ProviderKeyBinding<? extends T> providerKeyBinding) {
     return visitOther(providerKeyBinding);
   }
 
-  public V visitLinkedKey(LinkedKeyBinding<T> linkedKeyBinding) {
+  public V visitLinkedKey(LinkedKeyBinding<? extends T> linkedKeyBinding) {
     return visitOther(linkedKeyBinding);
   }
 
-  public V visitExposed(ExposedBinding<T> exposedBinding) {
+  public V visitExposed(ExposedBinding<? extends T> exposedBinding) {
     return visitOther(exposedBinding);
   }
 
-  public V visitUntargetted(UntargettedBinding<T> untargettedBinding) {
+  public V visitUntargetted(UntargettedBinding<? extends T> untargettedBinding) {
     return visitOther(untargettedBinding);
   }
 
-  public V visitConstructor(ConstructorBinding<T> constructorBinding) {
+  public V visitConstructor(ConstructorBinding<? extends T> constructorBinding) {
     return visitOther(constructorBinding);
   }
 
-  public V visitConvertedConstant(ConvertedConstantBinding<T> convertedConstantBinding) {
+  public V visitConvertedConstant(ConvertedConstantBinding<? extends T> convertedConstantBinding) {
     return visitOther(convertedConstantBinding);
   }
 
-  @SuppressWarnings("unchecked") // if we visit a ProviderBinding, we know T == Provider<?>
-  public V visitProviderBinding(ProviderBinding<?> providerBinding) {
-    return visitOther((Binding<T>) providerBinding);
+   // javac says it's an error to cast ProviderBinding<? extends T> to Binding<? extends T>
+  @SuppressWarnings("unchecked")
+  public V visitProviderBinding(ProviderBinding<? extends T> providerBinding) {
+    return visitOther((Binding) providerBinding);
   }
 }

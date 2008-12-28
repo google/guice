@@ -89,7 +89,7 @@ class BindingProcessor extends AbstractProcessor {
 
     command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
 
-      public Void visitInstance(InstanceBinding<T> binding) {
+      public Void visitInstance(InstanceBinding<? extends T> binding) {
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         T instance = binding.getInstance();
         Initializable<T> ref = initializer.requestInjection(
@@ -101,7 +101,7 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitProviderInstance(ProviderInstanceBinding<T> binding) {
+      public Void visitProviderInstance(ProviderInstanceBinding<? extends T> binding) {
         Provider<? extends T> provider = binding.getProviderInstance();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<Provider<? extends T>> initializable = initializer
@@ -113,7 +113,7 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitProviderKey(ProviderKeyBinding<T> binding) {
+      public Void visitProviderKey(ProviderKeyBinding<? extends T> binding) {
         Key<? extends Provider<? extends T>> providerKey = binding.getProviderKey();
         BoundProviderFactory<T> boundProviderFactory
             = new BoundProviderFactory<T>(injector, providerKey, source);
@@ -125,7 +125,7 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitLinkedKey(LinkedKeyBinding<T> binding) {
+      public Void visitLinkedKey(LinkedKeyBinding<? extends T> binding) {
         Key<? extends T> linkedKey = binding.getLinkedKey();
         if (key.equals(linkedKey)) {
           errors.recursiveBinding();
@@ -139,7 +139,7 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitUntargetted(UntargettedBinding<T> untargetted) {
+      public Void visitUntargetted(UntargettedBinding<? extends T> untargetted) {
         // Error: Missing implementation.
         // Example: bind(Date.class).annotatedWith(Red.class);
         // We can't assume abstract types aren't injectable. They may have an
@@ -175,7 +175,7 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitExposed(ExposedBinding<T> binding) {
+      public Void visitExposed(ExposedBinding<? extends T> binding) {
         PrivateEnvironment privateEnvironment = binding.getPrivateEnvironment();
         ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateEnvironment);
         creationListeners.add(exposedKeyFactory);
@@ -184,15 +184,15 @@ class BindingProcessor extends AbstractProcessor {
         return null;
       }
 
-      public Void visitConvertedConstant(ConvertedConstantBinding<T> binding) {
+      public Void visitConvertedConstant(ConvertedConstantBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visitConstructor(ConstructorBinding<T> binding) {
+      public Void visitConstructor(ConstructorBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visitProviderBinding(ProviderBinding<?> binding) {
+      public Void visitProviderBinding(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
     });

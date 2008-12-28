@@ -49,7 +49,7 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T
     injectionPoints = lateBoundConstructor.constructorInjector.getInjectionPoints();
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     checkState(injectionPoints != null, "not initialized");
     return visitor.visitConstructor(this);
   }

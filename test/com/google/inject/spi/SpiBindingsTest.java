@@ -78,7 +78,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitInstance(InstanceBinding<T> binding) {
+              @Override public Void visitInstance(InstanceBinding<? extends T> binding) {
                 assertEquals("A", binding.getInstance());
                 return null;
               }
@@ -105,7 +105,8 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitProviderInstance(ProviderInstanceBinding<T> binding) {
+              @Override public Void visitProviderInstance(
+                  ProviderInstanceBinding<? extends T> binding) {
                 assertSame(stringProvider, binding.getProviderInstance());
                 return null;
               }
@@ -130,7 +131,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitProviderKey(ProviderKeyBinding<T> binding) {
+              @Override public Void visitProviderKey(ProviderKeyBinding<? extends T> binding) {
                 assertEquals(Key.get(StringProvider.class), binding.getProviderKey());
                 return null;
               }
@@ -159,7 +160,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(aKey, binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitLinkedKey(LinkedKeyBinding<T> binding) {
+              @Override public Void visitLinkedKey(LinkedKeyBinding<? extends T> binding) {
                 assertEquals(bKey, binding.getLinkedKey());
                 return null;
               }
@@ -191,7 +192,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(D.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitConstructor(ConstructorBinding<T> binding) {
+              @Override public Void visitConstructor(ConstructorBinding<? extends T> binding) {
                 Constructor<?> expected = D.class.getDeclaredConstructors()[0];
                 assertEquals(expected, binding.getConstructor());
                 return null;
@@ -217,7 +218,7 @@ public class SpiBindingsTest extends TestCase {
             assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
             assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visitInstance(InstanceBinding<T> binding) {
+              @Override public Void visitInstance(InstanceBinding<? extends T> binding) {
                 assertEquals(1, binding.getInstance());
                 return null;
               }
@@ -240,7 +241,8 @@ public class SpiBindingsTest extends TestCase {
     assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
     assertTrue(binding instanceof ConvertedConstantBinding);
     binding.acceptTargetVisitor(new FailingTargetVisitor<Integer>() {
-      @Override public Void visitConvertedConstant(ConvertedConstantBinding<Integer> binding) {
+      @Override public Void visitConvertedConstant(
+          ConvertedConstantBinding<? extends Integer> binding) {
         assertEquals((Integer) 1, binding.getValue());
         assertEquals(Key.get(String.class, Names.named("one")), binding.getSourceKey());
         return null;
@@ -261,7 +263,8 @@ public class SpiBindingsTest extends TestCase {
     assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
     assertTrue(binding instanceof ProviderBinding);
     binding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
-      @Override public Void visitProviderBinding(ProviderBinding<?> binding) {
+      @Override public Void visitProviderBinding(
+          ProviderBinding<? extends Provider<String>> binding) {
         assertEquals(Key.get(String.class), binding.getProvidedKey());
         return null;
       }

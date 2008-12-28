@@ -36,7 +36,7 @@ public class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarge
     super(source, key, scoping);
   }
 
-  public <V> V acceptTargetVisitor(BindingTargetVisitor<T, V> visitor) {
+  public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visitUntargetted(this);
   }
 

@@ -29,55 +29,55 @@ public interface BindingTargetVisitor<T, V> {
    * Visit a instance binding. The same instance is returned for every injection. This target is
    * found in both module and injector bindings.
    */
-  V visitInstance(InstanceBinding<T> binding);
+  V visitInstance(InstanceBinding<? extends T> binding);
 
   /**
    * Visit a provider instance binding. The provider's {@code get} method is invoked to resolve
    * injections. This target is found in both module and injector bindings.
    */
-  V visitProviderInstance(ProviderInstanceBinding<T> binding);
+  V visitProviderInstance(ProviderInstanceBinding<? extends T> binding);
 
   /**
    * Visit a provider key binding. To resolve injections, the provider key is first resolved, then
    * that provider's {@code get} method is invoked. This target is found in both module and injector
    * bindings.
    */
-  V visitProviderKey(ProviderKeyBinding<T> binding);
+  V visitProviderKey(ProviderKeyBinding<? extends T> binding);
 
   /**
    * Visit a linked key binding. The other key's binding is used to resolve injections. This
    * target is found in both module and injector bindings.
    */
-  V visitLinkedKey(LinkedKeyBinding<T> binding);
+  V visitLinkedKey(LinkedKeyBinding<? extends T> binding);
 
   /**
    * Visit a binding to a key exposed from an enclosed private environment. This target is found in
    * both module and injector bindings.
    */
-  V visitExposed(ExposedBinding<T> binding);
+  V visitExposed(ExposedBinding<? extends T> binding);
 
   /**
    * Visit an untargetted binding. This target is found only on module bindings. It indicates
    * that the injector should use its implicit binding strategies to resolve injections.
    */
-  V visitUntargetted(UntargettedBinding<T> binding);
+  V visitUntargetted(UntargettedBinding<? extends T> binding);
 
   /**
    * Visit a constructor binding. To resolve injections, an instance is instantiated by invoking
    * {@code constructor}. This target is found only on injector bindings.
    */
-  V visitConstructor(ConstructorBinding<T> binding);
+  V visitConstructor(ConstructorBinding<? extends T> binding);
 
   /**
    * Visit a binding created from converting a bound instance to a new type. The source binding
    * has the same binding annotation but a different type. This target is found only on injector
    * bindings.
    */
-  V visitConvertedConstant(ConvertedConstantBinding<T> binding);
+  V visitConvertedConstant(ConvertedConstantBinding<? extends T> binding);
 
   /**
    * Visit a binding to a {@link com.google.inject.Provider} that delegates to the binding for the
    * provided type. This target is found only on injector bindings.
    */
-  V visitProviderBinding(ProviderBinding<?> binding);
+  V visitProviderBinding(ProviderBinding<? extends T> binding);
 }
