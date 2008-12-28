@@ -140,11 +140,12 @@ import org.aopalliance.intercept.MethodInterceptor;
  * <pre>
  *     bindConstant().annotatedWith(ServerHost.class).to(args[0]);</pre>
  *
- * Sets up a constant binding.  Constant bindings are typeless in Guice; you
- * can provide the values in a variety of types and the values can be injected
- * in a variety of types; Guice performs the standard type conversions for you
- * behind the scenes.  Because of this "typelessness", constant injections must
- * always be annotated.
+ * Sets up a constant binding. Constant injections must always be annotated.
+ * When a constant binding's value is a string, it is eligile for conversion to
+ * all primitive types, to {@link Enum#valueOf(Class, String) all enums}, and to
+ * {@link Class#forName class literals}. Conversions for other types can be
+ * configured using {@link #convertToTypes(Matcher, TypeConverter)
+ * convertToTypes()}.
  *
  * <pre>
  *   {@literal @}Color("red") Color red; // A member variable (field)
