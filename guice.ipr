@@ -516,7 +516,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" filepath="$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" />
-      <module fileurl="file://$PROJECT_DIR$/extensions/commands/commands.iml" filepath="$PROJECT_DIR$/extensions/commands/commands.iml" />
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
