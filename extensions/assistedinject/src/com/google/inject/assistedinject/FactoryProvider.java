@@ -26,6 +26,8 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.Errors;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -34,6 +36,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides a factory that combines caller-provided parameters with injector-provided values when
@@ -132,7 +135,7 @@ import java.util.Map;
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
  */
-public class FactoryProvider<F> implements Provider<F> {
+public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   /*
    * This class implements the old @AssistedInject implementation that manually matches constructors
@@ -267,6 +270,18 @@ public class FactoryProvider<F> implements Provider<F> {
       result.put(method, matchingConstructor);
     }
     return result;
+  }
+
+  public Set<Dependency<?>> getDependencies() {
+    List<Dependency<?>> dependencies = Lists.newArrayList();
+    for (AssistedConstructor<?> constructor : factoryMethodToConstructor.values()) {
+      for (Parameter parameter : constructor.getAllParameters()) {
+        if (!parameter.isProvidedByFactory()) {
+          dependencies.add(Dependency.get(parameter.getPrimaryBindingKey()));
+        }
+      }
+    }
+    return ImmutableSet.copyOf(dependencies);
   }
 
   public F get() {

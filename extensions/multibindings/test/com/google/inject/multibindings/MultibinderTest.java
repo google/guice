@@ -16,9 +16,11 @@
 
 package com.google.inject.multibindings;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -30,6 +32,8 @@ import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -253,6 +257,30 @@ public class MultibinderTest extends TestCase {
       assertContains(expected.getMessage(), "No implementation for java.lang.Integer", 
           "at " + getClass().getName());
     }
+  }
+
+  /**
+   * We just want to make sure that multibinder's binding depends on each of its values. We don't
+   * really care about the underlying structure of those bindings, which are implementation details.
+   */
+  public void testMultibinderDependencies() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
+
+        bindConstant().annotatedWith(Names.named("b")).to("B");
+      }
+    });
+
+    Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
+    HasDependencies withDependencies = (HasDependencies) binding;
+    Set<String> elements = Sets.newHashSet();
+    for (Dependency<?> dependency : withDependencies.getDependencies()) {
+      elements.add((String) injector.getInstance(dependency.getKey()));
+    }
+    assertEquals(ImmutableSet.of("A", "B"), elements);
   }
 
   @Retention(RUNTIME) @BindingAnnotation

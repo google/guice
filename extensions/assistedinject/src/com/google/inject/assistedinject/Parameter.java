@@ -116,7 +116,7 @@ class Parameter {
         : Key.get(key.getTypeLiteral(), key.getAnnotation().annotationType());
   }
 
-  private Key<?> getPrimaryBindingKey() {
+  Key<?> getPrimaryBindingKey() {
     return isProvider
         ? getBindingForType(getProvidedType(type))
         : getBindingForType(type);

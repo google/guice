@@ -74,7 +74,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     }
 
     @Override public String toString() {
-      return Assisted.class.getName() + "(value=)";
+      return "@" + Assisted.class.getName() + "(value=)";
     }
   };
 

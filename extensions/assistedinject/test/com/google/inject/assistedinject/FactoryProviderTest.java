@@ -16,17 +16,22 @@
 
 package com.google.inject.assistedinject;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +62,22 @@ public class FactoryProviderTest extends TestCase {
     Mustang redMustang = (Mustang) carFactory.create(Color.RED);
     assertEquals(Color.RED, redMustang.color);
     assertEquals(5.0d, redMustang.engineSize);
+  }
+
+  public void testFactoryBindingDependencies() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Double.class).toInstance(5.0d);
+        bind(ColoredCarFactory.class)
+            .toProvider(FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+      }
+    });
+
+    Binding<?> binding = injector.getBinding(ColoredCarFactory.class);
+    HasDependencies hasDependencies = (HasDependencies) binding;
+    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(double.class))),
+        hasDependencies.getDependencies());
   }
 
   public void testAssistedFactoryWithAnnotations() {

@@ -18,6 +18,7 @@ package com.google.inject.multibindings;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -29,11 +30,12 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Errors;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -190,7 +192,8 @@ public abstract class Multibinder<T> {
    * <p>We use a subclass to hide 'implements Module, Provider' from the public
    * API.
    */
-  static final class RealMultibinder<T> extends Multibinder<T> implements Module, Provider<Set<T>> {
+  static final class RealMultibinder<T> extends Multibinder<T>
+      implements Module, Provider<Set<T>>, HasDependencies {
 
     private final TypeLiteral<T> elementType;
     private final String setName;
@@ -201,6 +204,7 @@ public abstract class Multibinder<T> {
 
     /* a provider for each element in the set. null until initialization, non-null afterwards */
     private List<Provider<T>> providers;
+    private Set<Dependency<?>> dependencies;
 
     private RealMultibinder(Binder binder, TypeLiteral<T> elementType,
         String setName, Key<Set<T>> setKey) {
@@ -229,15 +233,18 @@ public abstract class Multibinder<T> {
      * contents are only evaluated when get() is invoked.
      */
     @Inject void initialize(Injector injector) {
-      providers = new ArrayList<Provider<T>>();
+      providers = Lists.newArrayList();
+      List<Dependency<?>> dependencies = Lists.newArrayList();
       for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
         if (keyMatches(entry.getKey())) {
-          @SuppressWarnings("unchecked")
+          @SuppressWarnings("unchecked") // protected by keyMatches()
           Binding<T> binding = (Binding<T>) entry.getValue();
           providers.add(binding.getProvider());
+          dependencies.add(Dependency.get(binding.getKey()));
         }
       }
 
+      this.dependencies = ImmutableSet.copyOf(dependencies);
       this.binder = null;
     }
 
@@ -270,6 +277,10 @@ public abstract class Multibinder<T> {
     
     Key<Set<T>> getSetKey() {
       return setKey;
+    }
+
+    public Set<Dependency<?>> getDependencies() {
+      return dependencies;
     }
 
     @Override public boolean equals(Object o) {

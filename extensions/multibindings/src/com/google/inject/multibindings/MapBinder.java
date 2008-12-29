@@ -16,6 +16,7 @@
 
 package com.google.inject.multibindings;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -26,6 +27,8 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
@@ -264,10 +267,13 @@ public abstract class MapBinder<K, V> {
     public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
+      final ImmutableSet<Dependency<?>> dependencies
+          = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetBinder.getSetKey()));
+
       // binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>
       final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
           .getProvider(entrySetBinder.getSetKey());
-      binder.bind(providerMapKey).toProvider(new Provider<Map<K, Provider<V>>>() {
+      binder.bind(providerMapKey).toProvider(new ProviderWithDependencies<Map<K, Provider<V>>>() {
         private Map<K, Provider<V>> providerMap;
 
         @SuppressWarnings("unused")
@@ -286,10 +292,14 @@ public abstract class MapBinder<K, V> {
         public Map<K, Provider<V>> get() {
           return providerMap;
         }
+
+        public Set<Dependency<?>> getDependencies() {
+          return dependencies;
+        }
       });
 
       final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
-      binder.bind(mapKey).toProvider(new Provider<Map<K, V>>() {
+      binder.bind(mapKey).toProvider(new ProviderWithDependencies<Map<K, V>>() {
         public Map<K, V> get() {
           Map<K, V> map = new LinkedHashMap<K, V>();
           for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
@@ -300,6 +310,10 @@ public abstract class MapBinder<K, V> {
             map.put(key, value);
           }
           return Collections.unmodifiableMap(map);
+        }
+
+        public Set<Dependency<?>> getDependencies() {
+          return dependencies;
         }
       });
     }
