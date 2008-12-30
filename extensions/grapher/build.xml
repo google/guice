@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<project name="guice-grapher" basedir="." default="jar">
+
+  <import file="../../common.xml"/>
+  
+  <path id="compile.classpath">
+    <fileset dir="${lib.dir}" includes="*.jar"/>
+    <fileset dir="${lib.dir}/build" includes="*.jar"/>
+    <fileset dir="../../build/dist" includes="*.jar"/>
+  </path>
+
+  <target name="jar" depends="jar.withdeps, manifest" description="Build jar.">
+    <jar destfile="${build.dir}/${ant.project.name}-${version}.jar"
+        manifest="${build.dir}/META-INF/MANIFEST.MF">
+      <zipfileset src="${build.dir}/${ant.project.name}-with-deps.jar"
+          excludes="com/google/inject/internal/**"/>
+    </jar>
+  </target>
+
+</project>

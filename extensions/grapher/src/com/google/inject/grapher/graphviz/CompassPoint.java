@@ -1,0 +1,50 @@
+/**
+ * Copyright (C) 2008 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.inject.grapher.graphviz;
+
+/**
+ * Enum for the "compass point" values used to control where edge
+ * end points appear on the graph.
+ * <p>
+ * See: http://www.graphviz.org/doc/info/attrs.html#k:portPos
+ *
+ * @author phopkins@gmail.com (Pete Hopkins)
+ */
+public enum CompassPoint {
+  NORTH("n"),
+  NORTH_EAST("ne"),
+  EAST("e"),
+  SOUTH_EAST("se"),
+  SOUTH("s"),
+  SOUTH_WEST("sw"),
+  WEST("w"),
+  NORTH_WEST("nw"),
+  CENTER("c"),
+  EXTERIOR_SIDE("_");
+
+  /** Graphviz "compass_pt" value. */
+  private final String compassPt;
+
+  CompassPoint(String compassPt) {
+    this.compassPt = compassPt;
+  }
+
+  @Override
+  public String toString() {
+    return compassPt;
+  }
+}

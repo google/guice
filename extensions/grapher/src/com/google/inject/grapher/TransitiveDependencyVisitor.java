@@ -1,0 +1,105 @@
+/**
+ * Copyright (C) 2008 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.inject.grapher;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.inject.Key;
+import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.ConvertedConstantBinding;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ExposedBinding;
+import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.LinkedKeyBinding;
+import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderKeyBinding;
+import com.google.inject.spi.UntargettedBinding;
+
+import java.util.Collection;
+import java.util.Set;
+
+/**
+ * {@link BindingTargetVisitor} that returns a {@link Collection} of the
+ * {@link Key}s of each {@link Binding}'s dependencies. Used by
+ * {@link InjectorGropher} to walk the dependency graph from a starting set of
+ * {@link Binding}s.
+ *
+ * @author phopkins@gmail.com (Pete Hopkins)
+ */
+public class TransitiveDependencyVisitor
+implements BindingTargetVisitor<Object, Collection<Key<?>>> {
+
+  // TODO(phopkins): Remove InjectionPoints when issue 298 is fixed.
+  private Collection<Key<?>> visitHasDependencies(HasDependencies hasDependencies,
+      Collection<InjectionPoint> injectionPoints) {
+    Set<Key<?>> dependencies = Sets.newHashSet();
+    
+    for (Dependency<?> dependency : hasDependencies.getDependencies()) {
+      dependencies.add(dependency.getKey());
+    }
+
+    for (InjectionPoint injectionPoint : injectionPoints) {
+      for (Dependency<?> dependency : injectionPoint.getDependencies()) {
+        dependencies.add(dependency.getKey());
+      }
+    }
+
+    return dependencies;
+  }
+  
+  public Collection<Key<?>> visitConstructor(ConstructorBinding<?> binding) {
+    return visitHasDependencies(binding, binding.getInjectionPoints());
+  }
+
+  public Collection<Key<?>> visitConvertedConstant(ConvertedConstantBinding<?> binding) {
+    return visitHasDependencies(binding, ImmutableSet.<InjectionPoint>of());
+  }
+
+  public Collection<Key<?>> visitExposed(ExposedBinding<?> binding) {
+    // TODO(phopkins): Figure out if this is needed for graphing.
+    return ImmutableSet.of();
+  }
+
+  public Collection<Key<?>> visitInstance(InstanceBinding<?> binding) {
+    return visitHasDependencies(binding, binding.getInjectionPoints());
+  }
+
+  public Collection<Key<?>> visitLinkedKey(LinkedKeyBinding<?> binding) {
+    return ImmutableSet.<Key<?>>of(binding.getLinkedKey());
+  }
+
+  public Collection<Key<?>> visitProviderBinding(ProviderBinding<?> binding) {
+    return ImmutableSet.<Key<?>>of(binding.getProvidedKey());
+  }
+
+  public Collection<Key<?>> visitProviderInstance(ProviderInstanceBinding<?> binding) {
+    return visitHasDependencies(binding, binding.getInjectionPoints());
+  }
+
+  public Collection<Key<?>> visitProviderKey(ProviderKeyBinding<?> binding) {
+    return ImmutableSet.<Key<?>>of(binding.getProviderKey());
+  }
+
+  public Collection<Key<?>> visitUntargetted(UntargettedBinding<?> binding) {
+    // TODO(phopkins): Figure out if this is needed for graphing.
+    return null;
+  }
+}
