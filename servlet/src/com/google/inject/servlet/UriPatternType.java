@@ -15,18 +15,20 @@
  */
 package com.google.inject.servlet;
 
+import java.util.regex.Pattern;
+
 /**
  * An enumeration of the available URI-pattern matching styles
  */
 enum UriPatternType {
   SERVLET, REGEX;
 
-  public static UriPatternMatcher get(UriPatternType type) {
+  public static UriPatternMatcher get(UriPatternType type, String pattern) {
     switch (type) {
       case SERVLET:
-        return new ServletStyleUriPatternMatcher();
+        return new ServletStyleUriPatternMatcher(pattern);
       case REGEX:
-        return new RegexUriPatternMatcher();
+        return new RegexUriPatternMatcher(pattern);
       default:
         return null;
     }
@@ -38,16 +40,33 @@ enum UriPatternType {
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */
   private static class ServletStyleUriPatternMatcher implements UriPatternMatcher {
-    public boolean matches(String uri, String pattern) {
+    private final String pattern;
+    private final Kind patternKind;
+
+    private static enum Kind { PREFIX, SUFFIX, LITERAL, }
+
+    public ServletStyleUriPatternMatcher(String pattern) {
+      if (pattern.startsWith("*")) {
+        this.pattern = pattern.substring(1);
+        this.patternKind = Kind.PREFIX;
+      } else if (pattern.endsWith("*")) {
+        this.pattern = pattern.substring(0, pattern.length() - 1);
+        this.patternKind = Kind.SUFFIX;
+      } else {
+        this.pattern = pattern;
+        this.patternKind = Kind.LITERAL;
+      }
+    }
+
+    public boolean matches(String uri) {
       if (null == uri) {
         return false;
       }
 
-      if (pattern.startsWith("*")) {
-        return uri.endsWith(pattern.substring(1));
-      }
-      else if (pattern.endsWith("*")) {
-        return uri.startsWith(pattern.substring(0, pattern.length() - 1));
+      if (patternKind == Kind.PREFIX) {
+        return uri.endsWith(pattern);
+      } else if (patternKind == Kind.SUFFIX) {
+        return uri.startsWith(pattern);
       }
 
       //else treat as a literal
@@ -75,13 +94,19 @@ enum UriPatternType {
 
   /**
    * Matchers URIs using a regular expression.
-   * NOTE(dhanji) No path info is available when using regex mapping.
+   * NOTE(dhanji): No path info is available when using regex mapping.
    *
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */
   private static class RegexUriPatternMatcher implements UriPatternMatcher {
-    public boolean matches(String uri, String pattern) {
-      return null != uri && uri.matches(pattern);
+    private final Pattern pattern;
+
+    public RegexUriPatternMatcher(String pattern) {
+      this.pattern = Pattern.compile(pattern);
+    }
+
+    public boolean matches(String uri) {
+      return null != uri && this.pattern.matcher(uri).matches();
     }
 
     public String extractPath(String pattern) {

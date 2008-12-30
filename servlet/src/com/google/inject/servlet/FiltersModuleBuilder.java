@@ -78,7 +78,7 @@ class FiltersModuleBuilder extends AbstractModule {
 
       for (String pattern : uriPatterns) {
         filterDefinitions.add(
-            new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType),
+            new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
                 contextParams));
       }
     }

@@ -84,7 +84,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     replay(injector, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.SERVLET), new HashMap<String, String>());
+        UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
     servletDefinition.init(null, injector);
     servletDefinition.doService(request, response);
@@ -167,7 +167,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     replay(injector, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.SERVLET), new HashMap<String, String>());
+        UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
     servletDefinition.init(null, injector);
     servletDefinition.doService(request, response);
@@ -250,7 +250,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     replay(injector, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.REGEX), new HashMap<String, String>());
+        UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>());
 
     servletDefinition.init(null, injector);
     servletDefinition.doService(request, response);

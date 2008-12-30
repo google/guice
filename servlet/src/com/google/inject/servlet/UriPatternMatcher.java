@@ -17,30 +17,25 @@
 package com.google.inject.servlet;
 
 /**
- * <p>
- * A general interface for matching a URI against a URI pattern. Guice-servlet provides
- * regex and servlet-style pattern matching out of the box.
- * </p>
+ * A general interface for matching a URI against a URI pattern. Guice-servlet provides regex and
+ * servlet-style pattern matching out of the box.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
- * @see com.google.inject.servlet.Servlets#configure() Binding Servlets.
  */
 interface UriPatternMatcher {
-    /**
-     * @param uri A "contextual" (i.e. relative) Request URI, *not* a complete one.
-     * @param pattern A String containing some pattern that this service can match against.
-     * @return Returns true if the uri matches the pattern.
-     */
-    boolean matches(String uri, String pattern);
+  /**
+   * @param uri A "contextual" (i.e. relative) Request URI, *not* a complete one.
+   * @return Returns true if the uri matches the pattern.
+   */
+  boolean matches(String uri);
 
-    /**
-     * @param pattern A String containing some pattern that this service can match against.
-     * @return Returns a canonical servlet path from this pattern. For instance, if the
-     * pattern is {@code /home/*} then the path extracted will be {@code /home}. Each pattern
-     * matcher implementation must decide and publish what a canonical path represents.
-     *
-     * NOTE(dhanji) This method returns null for the regex pattern matcher.
-     *
-     */
-    String extractPath(String pattern);
+  /**
+   * @param pattern A String containing some pattern that this service can match against.
+   * @return Returns a canonical servlet path from this pattern. For instance, if the pattern is
+   *         {@code /home/*} then the path extracted will be {@code /home}. Each pattern matcher
+   *         implementation must decide and publish what a canonical path represents.
+   *
+   *         NOTE(dhanji): This method returns null for the regex pattern matcher.
+   */
+  String extractPath(String pattern);
 }

@@ -38,8 +38,7 @@ import javax.servlet.http.HttpSession;
  * objects so you can inject the request, response, session, etc.
  *
  * <p>
- * <strong>
- * As of Guice 2.0, you can subclass this module to register servlets and
+ * You should subclass this module to register servlets and
  * filters in the {@link #configureServlets()} method.
  *
  * @author crazybob@google.com (Bob Lee)

@@ -15,13 +15,13 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.collect.Iterators;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
@@ -54,7 +54,7 @@ class FilterDefinition {
   }
 
   private boolean shouldFilter(String uri) {
-    return patternMatcher.matches(uri, pattern);
+    return patternMatcher.matches(uri);
   }
 
   public void init(final ServletContext servletContext, Injector injector) throws ServletException {
@@ -63,7 +63,6 @@ class FilterDefinition {
     this.filter.set(filter);
 
     //initialize our filter with the configured context params and servlet context
-    //noinspection OverlyComplexAnonymousInnerClass,AnonymousInnerClassWithTooManyMethods
     filter.init(new FilterConfig() {
       public String getFilterName() {
         return filterKey.toString();
@@ -78,18 +77,7 @@ class FilterDefinition {
       }
 
       public Enumeration getInitParameterNames() {
-        //noinspection InnerClassTooDeeplyNested,AnonymousInnerClassWithTooManyMethods
-        return new Enumeration() {
-          private final Iterator<String> paramNames = initParams.keySet().iterator();
-
-          public boolean hasMoreElements() {
-            return paramNames.hasNext();
-          }
-
-          public Object nextElement() {
-            return paramNames.next();
-          }
-        };
+        return Iterators.asEnumeration(initParams.keySet().iterator());
       }
     });
   }

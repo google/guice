@@ -77,7 +77,7 @@ class ServletsModuleBuilder extends AbstractModule {
 
       for (String pattern : uriPatterns) {
         servletDefinitions.add(
-            new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType),
+            new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType, pattern),
                 contextParams));
       }
     }

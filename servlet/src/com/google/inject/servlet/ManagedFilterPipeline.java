@@ -41,7 +41,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 class ManagedFilterPipeline implements FilterPipeline{
   private final List<FilterDefinition> filterDefinitions;
 
-  //TODO make these setter for testing?
   @Inject
   private final ManagedServletPipeline servletPipeline = null;
 
@@ -86,7 +85,7 @@ class ManagedFilterPipeline implements FilterPipeline{
       initPipeline(servletContext.get());
     }
 
-    //obtain the servlet pipeline to dispatch against (we use getInstance() to avoid holding refs)
+    //obtain the servlet pipeline to dispatch against
     new FilterChainInvocation(filterDefinitions, servletPipeline, proceedingFilterChain)
         .doFilter(withDispatcher(request, servletPipeline), response);
 

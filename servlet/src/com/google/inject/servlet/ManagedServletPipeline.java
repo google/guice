@@ -30,7 +30,8 @@ import java.util.List;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  * @see ManagedFilterPipeline
  */
-@Singleton class ManagedServletPipeline {
+@Singleton
+class ManagedServletPipeline {
   private final List<ServletDefinition> servletDefinitions;
 
   public ManagedServletPipeline(List<ServletDefinition> servletDefinitions) {
@@ -63,7 +64,11 @@ import java.util.List;
     }
   }
 
-  public RequestDispatcher getRequestDispatcher(String path) {
+  /**
+   * @return Returns a request dispatcher wrapped with a servlet mapped to
+   * the given path or null if no mapping was found.
+   */
+  RequestDispatcher getRequestDispatcher(String path) {
     for (final ServletDefinition servletDefinition : servletDefinitions) {
       if (servletDefinition.shouldServe(path)) {
         return new RequestDispatcher() {

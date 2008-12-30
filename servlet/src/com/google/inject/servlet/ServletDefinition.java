@@ -15,13 +15,13 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.collect.Iterators;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
@@ -57,16 +57,15 @@ class ServletDefinition {
   }
 
   boolean shouldServe(String uri) {
-    return patternMatcher.matches(uri, pattern);
+    return patternMatcher.matches(uri);
   }
 
   public void init(final ServletContext servletContext, Injector injector) throws ServletException {
-    //TODO this absolutely must be a singleton, and so is only initialized once
+    //TODO(dhanji): this absolutely must be a singleton, and so is only initialized once
     HttpServlet httpServlet = injector.getInstance(servletKey);
     this.httpServlet.set(httpServlet);
 
     //initialize our servlet with the configured context params and servlet context
-    //noinspection OverlyComplexAnonymousInnerClass,AnonymousInnerClassWithTooManyMethods
     httpServlet.init(new ServletConfig() {
       public String getServletName() {
         return servletKey.toString();
@@ -81,18 +80,7 @@ class ServletDefinition {
       }
 
       public Enumeration getInitParameterNames() {
-        //noinspection InnerClassTooDeeplyNested,AnonymousInnerClassWithTooManyMethods
-        return new Enumeration() {
-          private final Iterator<String> paramNames = initParams.keySet().iterator();
-
-          public boolean hasMoreElements() {
-            return paramNames.hasNext();
-          }
-
-          public Object nextElement() {
-            return paramNames.next();
-          }
-        };
+        return Iterators.asEnumeration(initParams.keySet().iterator());
       }
     });
   }
@@ -132,8 +120,8 @@ class ServletDefinition {
    * We need to suppress deprecation coz we use HttpServletRequestWrapper, which implements
    * deprecated API for backwards compatibility.
    */
-  @SuppressWarnings({ "JavaDoc", "deprecation" }) void doService(
-      final ServletRequest servletRequest, ServletResponse servletResponse)
+  @SuppressWarnings({ "JavaDoc", "deprecation" })
+  void doService(final ServletRequest servletRequest, ServletResponse servletResponse)
       throws ServletException, IOException {
 
     //noinspection OverlyComplexAnonymousInnerClass

@@ -48,8 +48,9 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       + new Date() + UUID.randomUUID();
 
   public final void testIncludeManagedServlet() throws IOException, ServletException {
-    final ServletDefinition servletDefinition = new ServletDefinition("blah.html",
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET),
+    String pattern = "blah.html";
+    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
+        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
@@ -79,7 +80,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
         Arrays.asList(servletDefinition))
-        .getRequestDispatcher("blah.html");
+        .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
     dispatcher.include(mockRequest, createMock(HttpServletResponse.class));
@@ -90,8 +91,9 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testForwardToManagedServlet() throws IOException, ServletException {
-    final ServletDefinition servletDefinition = new ServletDefinition("blah.html",
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET),
+    String pattern = "blah.html";
+    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
+        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
@@ -128,7 +130,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
         Arrays.asList(servletDefinition))
-        .getRequestDispatcher("blah.html");
+        .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
     dispatcher.forward(mockRequest, mockResponse);
@@ -153,8 +155,9 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
   public final void forwardToManagedServletFailureOnCommittedBuffer()
       throws IOException, ServletException {
-    final ServletDefinition servletDefinition = new ServletDefinition("blah.html",
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET),
+    String pattern = "blah.html";
+    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
+        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
@@ -183,7 +186,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
         Arrays.asList(servletDefinition))
-        .getRequestDispatcher("blah.html");
+        .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
 

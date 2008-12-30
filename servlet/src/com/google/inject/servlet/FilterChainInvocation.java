@@ -57,8 +57,7 @@ class FilterChainInvocation implements FilterChain {
     //dispatch down the chain while there are more filters
     if (index < filterDefinitions.size()) {
       filterDefinitions.get(index).doFilter(servletRequest, servletResponse, this);
-    }
-    else {
+    } else {
 
       //we've reached the end of the filterchain, let's try to dispatch to a servlet
       final boolean serviced = servletPipeline.service(servletRequest, servletResponse);
