@@ -29,6 +29,6 @@ public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
   /**
    * Returns the enclosed environment that holds the original binding.
    */
-  PrivateEnvironment getPrivateEnvironment();
+  PrivateElements getPrivateElements();
 
 }

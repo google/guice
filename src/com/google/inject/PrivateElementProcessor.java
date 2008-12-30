@@ -18,7 +18,7 @@ package com.google.inject;
 
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import java.util.List;
 
 /**
@@ -26,21 +26,21 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class PrivateEnvironmentProcessor extends AbstractProcessor {
+class PrivateElementProcessor extends AbstractProcessor {
 
   private final Stage stage;
   private final List<InjectorShell.Builder> injectorShellBuilders = Lists.newArrayList();
 
-  PrivateEnvironmentProcessor(Errors errors, Stage stage) {
+  PrivateElementProcessor(Errors errors, Stage stage) {
     super(errors);
     this.stage = stage;
   }
 
-  @Override public Boolean visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
+  @Override public Boolean visitPrivateElements(PrivateElements privateElements) {
     InjectorShell.Builder builder = new InjectorShell.Builder()
         .parent(injector)
         .stage(stage)
-        .privateEnvironment(privateEnvironment);
+        .privateElements(privateElements);
     injectorShellBuilders.add(builder);
     return true;
   }

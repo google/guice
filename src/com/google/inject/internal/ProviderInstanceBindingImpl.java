@@ -81,9 +81,9 @@ public final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   public String toString() {
     return new ToStringBuilder(ProviderInstanceBinding.class)
         .add("key", getKey())
-        .add("provider", providerInstance)
-        .add("scope", getScoping())
         .add("source", getSource())
+        .add("scope", getScoping())
+        .add("provider", providerInstance)
         .toString();
   }
 }

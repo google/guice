@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.internal.BindingBuilder.ExposureBuilder;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.ElementVisitor;
+import com.google.inject.spi.PrivateElements;
 import java.util.List;
 import java.util.Set;
 
 /**
- * A private environment whose configuration information is hidden from the enclosing environment
- * by default. See {@link com.google.inject.PrivateModule PrivateModule} for details.
- *
  * @author jessewilson@google.com (Jesse Wilson)
- * @since 2.0
  */
-public final class PrivateEnvironment implements Element {
+public final class PrivateElementsImpl implements PrivateElements {
 
   /*
    * This class acts as both a value object and as a builder. When getElements() is called, an
@@ -51,8 +52,9 @@ public final class PrivateEnvironment implements Element {
 
   /** lazily instantiated */
   private ImmutableSet<Key<?>> exposedKeys;
+  private Injector injector;
 
-  PrivateEnvironment(Object source) {
+  public PrivateElementsImpl(Object source) {
     this.source = checkNotNull(source, "source");
   }
 
@@ -60,9 +62,6 @@ public final class PrivateEnvironment implements Element {
     return source;
   }
 
-  /**
-   * Returns the configuration information in this private environment.
-   */
   public List<Element> getElements() {
     if (elements == null) {
       elements = ImmutableList.copyOf(elementsMutable);
@@ -72,9 +71,15 @@ public final class PrivateEnvironment implements Element {
     return elements;
   }
 
-  /**
-   * Returns the unique exposed keys for these private elements.
-   */
+  public Injector getInjector() {
+    return injector;
+  }
+
+  public void initInjector(Injector injector) {
+    checkState(this.injector == null, "injector already initialized");
+    this.injector = checkNotNull(injector, "injector");
+  }
+
   public Set<Key<?>> getExposedKeys() {
     if (exposedKeys == null) {
       Set<Key<?>> exposedKeysMutable = Sets.newLinkedHashSet();
@@ -89,14 +94,14 @@ public final class PrivateEnvironment implements Element {
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitPrivateEnvironment(this);
+    return visitor.visitPrivateElements(this);
   }
 
-  List<Element> getElementsMutable() {
+  public List<Element> getElementsMutable() {
     return elementsMutable;
   }
 
-  void addExposureBuilder(ExposureBuilder<?> exposureBuilder) {
+  public void addExposureBuilder(ExposureBuilder<?> exposureBuilder) {
     exposureBuilders.add(exposureBuilder);
   }
 }

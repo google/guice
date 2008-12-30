@@ -59,9 +59,9 @@ public final class LinkedProviderBindingImpl<T>
   @Override public String toString() {
     return new ToStringBuilder(ProviderKeyBinding.class)
         .add("key", getKey())
-        .add("provider", providerKey)
-        .add("scope", getScoping())
         .add("source", getSource())
+        .add("scope", getScoping())
+        .add("provider", providerKey)
         .toString();
   }
 }

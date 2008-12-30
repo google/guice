@@ -22,8 +22,6 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.PrivateEnvironment;
-import java.util.Map;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.
@@ -44,7 +42,7 @@ class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
     this.source = source;
   }
 
-  public void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, Errors errors) {
+  public void notify(Errors errors) {
     try {
       providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source));
     } catch (ErrorsException e) {

@@ -69,7 +69,7 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitElement(staticInjectionRequest);
   }
 
-  public V visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
-    return visitElement(privateEnvironment);
+  public V visitPrivateElements(PrivateElements privateElements) {
+    return visitElement(privateElements);
   }
 }

@@ -22,7 +22,7 @@ import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -104,7 +104,7 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
     return false;
   }
 
-  public Boolean visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
+  public Boolean visitPrivateElements(PrivateElements privateElements) {
     return false;
   }
 }

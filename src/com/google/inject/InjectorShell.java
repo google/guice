@@ -25,6 +25,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
+import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderInstanceBindingImpl;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.SourceProvider;
@@ -33,9 +34,8 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -48,16 +48,16 @@ class InjectorShell {
 
   private final List<Element> elements;
   private final InjectorImpl injector;
-  private final PrivateEnvironment privateEnvironment;
+  private final PrivateElements privateElements;
 
   private InjectorShell(Builder builder, List<Element> elements, InjectorImpl injector) {
-    this.privateEnvironment = builder.privateEnvironment;
+    this.privateElements = builder.privateElements;
     this.elements = elements;
     this.injector = injector;
   }
 
-  PrivateEnvironment getPrivateEnvironment() {
-    return privateEnvironment;
+  PrivateElements getPrivateElements() {
+    return privateElements;
   }
 
   InjectorImpl getInjector() {
@@ -79,7 +79,7 @@ class InjectorShell {
     private Stage stage;
 
     /** null unless this exists in a {@link Binder#newPrivateBinder private environment} */
-    private PrivateEnvironment privateEnvironment;
+    private PrivateElementsImpl privateElements;
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
@@ -92,9 +92,9 @@ class InjectorShell {
       return this;
     }
 
-    Builder privateEnvironment(PrivateEnvironment privateEnvironment) {
-      this.privateEnvironment = privateEnvironment;
-      this.elements.addAll(privateEnvironment.getElements());
+    Builder privateElements(PrivateElements privateElements) {
+      this.privateElements = (PrivateElementsImpl) privateElements;
+      this.elements.addAll(privateElements.getElements());
       return this;
     }
 
@@ -115,15 +115,14 @@ class InjectorShell {
      * primary injector will be first in the returned list.
      */
     List<InjectorShell> build(Initializer initializer, BindingProcessor bindingProcessor,
-        Map<PrivateEnvironment, InjectorImpl> environmentToInjector,
         Stopwatch stopwatch, Errors errors) {
       checkState(stage != null, "Stage not initialized");
-      checkState(privateEnvironment == null || parent != null, "PrivateEnvironment with no parent");
+      checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
 
       InjectorImpl injector = new InjectorImpl(parent, state, initializer);
-      if (privateEnvironment != null) {
-        environmentToInjector.put(privateEnvironment, injector);
+      if (privateElements != null) {
+        privateElements.initInjector(injector);
       }
 
       // bind Stage and Singleton if this is a top-level injector
@@ -157,11 +156,10 @@ class InjectorShell {
       injectorShells.add(new InjectorShell(this, elements, injector));
 
       // recursively build child shells
-      PrivateEnvironmentProcessor processor = new PrivateEnvironmentProcessor(errors, stage);
+      PrivateElementProcessor processor = new PrivateElementProcessor(errors, stage);
       processor.process(injector, elements);
       for (Builder builder : processor.getInjectorShellBuilders()) {
-        injectorShells.addAll(
-            builder.build(initializer, bindingProcessor, environmentToInjector, stopwatch, errors));
+        injectorShells.addAll(builder.build(initializer, bindingProcessor, stopwatch, errors));
       }
       stopwatch.resetAndLog("Private environment creation");
 

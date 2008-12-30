@@ -40,7 +40,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public class ModuleWriter {
 
-  private final Map<PrivateEnvironment, PrivateBinder> environmentToBinder = Maps.newHashMap();
+  private final Map<PrivateElements, PrivateBinder> environmentToBinder = Maps.newHashMap();
 
   /**
    * Returns a module that executes the specified elements using this executing visitor.
@@ -102,8 +102,8 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visitPrivateEnvironment(PrivateEnvironment privateEnvironment) {
-        writePrivateElements(binder, privateEnvironment);
+      public Void visitPrivateElements(PrivateElements privateElements) {
+        writePrivateElements(binder, privateElements);
         return null;
       }
     };
@@ -153,7 +153,7 @@ public class ModuleWriter {
    * Writes the elements of the private environment to a new private binder and {@link
    * #setPrivateBinder associates} the two.
    */
-  protected void writePrivateElements(Binder binder, PrivateEnvironment element) {
+  protected void writePrivateElements(Binder binder, PrivateElements element) {
     PrivateBinder privateBinder = binder.withSource(element.getSource()).newPrivateBinder();
     setPrivateBinder(element, privateBinder);
     apply(privateBinder, element.getElements());
@@ -188,7 +188,7 @@ public class ModuleWriter {
       }
 
       public ScopedBindingBuilder visitExposed(ExposedBinding<? extends T> binding) {
-        PrivateBinder privateBinder = getPrivateBinder(binding.getPrivateEnvironment());
+        PrivateBinder privateBinder = getPrivateBinder(binding.getPrivateElements());
         privateBinder.withSource(binding.getSource()).expose(key);
         return null;
       }
@@ -208,20 +208,20 @@ public class ModuleWriter {
     });
   }
 
-  /** Associates {@code binder} with {@code privateEnvironment}. */
-  protected void setPrivateBinder(PrivateEnvironment privateEnvironment, PrivateBinder binder) {
-    checkArgument(!environmentToBinder.containsKey(privateEnvironment),
-        "A private binder already exists for %s", privateEnvironment);
-    environmentToBinder.put(privateEnvironment, binder);
+  /** Associates {@code binder} with {@code privateElements}. */
+  protected void setPrivateBinder(PrivateElements privateElements, PrivateBinder binder) {
+    checkArgument(!environmentToBinder.containsKey(privateElements),
+        "A private binder already exists for %s", privateElements);
+    environmentToBinder.put(privateElements, binder);
   }
 
   /**
-   * Returns the {@code binder} accociated with {@code privateEnvironment}. This can be used to
+   * Returns the {@code binder} accociated with {@code privateElements}. This can be used to
    * expose bindings to the enclosing environment.
    */
-  protected PrivateBinder getPrivateBinder(PrivateEnvironment privateEnvironment) {
-    PrivateBinder privateBinder = environmentToBinder.get(privateEnvironment);
-    checkArgument(privateBinder != null, "No private binder for %s", privateEnvironment);
+  protected PrivateBinder getPrivateBinder(PrivateElements privateElements) {
+    PrivateBinder privateBinder = environmentToBinder.get(privateElements);
+    checkArgument(privateBinder != null, "No private binder for %s", privateElements);
     return privateBinder;
   }
 

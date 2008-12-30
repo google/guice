@@ -37,13 +37,12 @@ import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,13 +56,10 @@ class BindingProcessor extends AbstractProcessor {
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Initializer initializer;
   private final List<Runnable> uninitializedBindings = Lists.newArrayList();
-  private final Map<PrivateEnvironment, InjectorImpl> environmentToInjector;
 
-  BindingProcessor(Errors errors, Initializer initializer,
-      Map<PrivateEnvironment, InjectorImpl> environmentToInjector) {
+  BindingProcessor(Errors errors, Initializer initializer) {
     super(errors);
     this.initializer = initializer;
-    this.environmentToInjector = environmentToInjector;
   }
 
   @Override public <T> Boolean visitBinding(Binding<T> command) {
@@ -176,11 +172,11 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Void visitExposed(ExposedBinding<? extends T> binding) {
-        PrivateEnvironment privateEnvironment = binding.getPrivateEnvironment();
-        ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateEnvironment);
+        PrivateElements privateElements = binding.getPrivateElements();
+        ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateElements);
         creationListeners.add(exposedKeyFactory);
         putBinding(new ExposedBindingImpl<T>(
-            injector, source, key, exposedKeyFactory, privateEnvironment));
+            injector, source, key, exposedKeyFactory, privateElements));
         return null;
       }
 
@@ -214,9 +210,9 @@ class BindingProcessor extends AbstractProcessor {
     }
   }
 
-  public void runCreationListeners(Map<PrivateEnvironment, InjectorImpl> privateInjectors) {
+  public void runCreationListeners() {
     for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(privateInjectors, errors);
+      creationListener.notify(errors);
     }
   }
 
@@ -249,7 +245,7 @@ class BindingProcessor extends AbstractProcessor {
   private boolean isOkayDuplicate(Binding<?> original, BindingImpl<?> binding) {
     if (original instanceof ExposedBindingImpl) {
       ExposedBindingImpl exposed = (ExposedBindingImpl) original;
-      InjectorImpl exposedFrom = environmentToInjector.get(exposed.getPrivateEnvironment());
+      InjectorImpl exposedFrom = (InjectorImpl) exposed.getPrivateElements().getInjector();
       return (exposedFrom == binding.getInjector());
     }
     return false;
@@ -271,6 +267,6 @@ class BindingProcessor extends AbstractProcessor {
   // TODO(jessewilson): fix BuiltInModule, then add Stage
 
   interface CreationListener {
-    void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, Errors errors);
+    void notify(Errors errors);
   }
 }

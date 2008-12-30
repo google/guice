@@ -28,7 +28,7 @@ import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
@@ -131,13 +131,13 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
-  public ExposureBuilder<T> usingKeyFrom(PrivateEnvironment privateEnvironment) {
+  public ExposureBuilder<T> usingKeyFrom(PrivateElements privateElements) {
     checkNotTargetted();
     checkNotScoped();
 
     BindingImpl<T> base = getBinding();
     ExposedBindingImpl<T> exposedBinding = new ExposedBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), privateEnvironment);
+        base.getSource(), base.getKey(), base.getScoping(), privateElements);
     setBinding(exposedBinding);
 
     return new ExposureBuilder<T>(this, exposedBinding);

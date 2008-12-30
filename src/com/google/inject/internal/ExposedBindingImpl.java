@@ -22,23 +22,23 @@ import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
-import com.google.inject.spi.PrivateEnvironment;
+import com.google.inject.spi.PrivateElements;
 import java.util.Set;
 
 public class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBinding<T> {
 
-  private final PrivateEnvironment privateEnvironment;
+  private final PrivateElements privateElements;
 
   public ExposedBindingImpl(Injector injector, Object source, Key<T> key,
-      InternalFactory<T> factory, PrivateEnvironment privateEnvironment) {
+      InternalFactory<T> factory, PrivateElements privateElements) {
     super(injector, key, source, factory, Scoping.UNSCOPED);
-    this.privateEnvironment = privateEnvironment;
+    this.privateElements = privateElements;
   }
 
   public ExposedBindingImpl(Object source, Key<T> key, Scoping scoping,
-      PrivateEnvironment privateEnvironment) {
+      PrivateElements privateElements) {
     super(source, key, scoping);
-    this.privateEnvironment = privateEnvironment;
+    this.privateElements = privateElements;
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -49,23 +49,23 @@ public class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBind
     return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
   }
 
-  public PrivateEnvironment getPrivateEnvironment() {
-    return privateEnvironment;
+  public PrivateElements getPrivateElements() {
+    return privateElements;
   }
 
   public BindingImpl<T> withScoping(Scoping scoping) {
-    return new ExposedBindingImpl<T>(getSource(), getKey(), scoping, privateEnvironment);
+    return new ExposedBindingImpl<T>(getSource(), getKey(), scoping, privateElements);
   }
 
   public ExposedBindingImpl<T> withKey(Key<T> key) {
-    return new ExposedBindingImpl<T>(getSource(), key, getScoping(), privateEnvironment);
+    return new ExposedBindingImpl<T>(getSource(), key, getScoping(), privateElements);
   }
 
   @Override public String toString() {
     return new ToStringBuilder(ExposedBinding.class)
         .add("key", getKey())
-        .add("privateEnvironment", privateEnvironment)
         .add("source", getSource())
+        .add("privateElements", privateElements)
         .toString();
   }
 }

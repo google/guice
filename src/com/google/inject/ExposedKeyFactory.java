@@ -22,23 +22,29 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.PrivateEnvironment;
-import java.util.Map;
+import com.google.inject.spi.PrivateElements;
 
+/**
+ * This factory exists in a parent injector. When invoked, it retrieves its value from a child
+ * injector.
+ */
 class ExposedKeyFactory<T> implements InternalFactory<T>, BindingProcessor.CreationListener {
   private final Key<T> key;
-  private final PrivateEnvironment privateEnvironment;
+  private final PrivateElements privateElements;
   private BindingImpl<T> delegate;
 
-  public ExposedKeyFactory(Key<T> key, PrivateEnvironment privateEnvironment) {
+  public ExposedKeyFactory(Key<T> key, PrivateElements privateElements) {
     this.key = key;
-    this.privateEnvironment = privateEnvironment;
+    this.privateElements = privateElements;
   }
 
-  public void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, Errors errors) {
-    InjectorImpl privateInjector = privateInjectors.get(privateEnvironment);
+  public void notify(Errors errors) {
+    InjectorImpl privateInjector = (InjectorImpl) privateElements.getInjector();
     BindingImpl<T> explicitBinding = privateInjector.state.getExplicitBinding(key);
 
+    // validate that the child injector has its own factory. If the getInternalFactory() returns
+    // this, then that child injector doesn't have a factory (and getExplicitBinding has returned
+    // its parent's binding instead
     if (explicitBinding.getInternalFactory() == this) {
       errors.withSource(explicitBinding.getSource()).exposedButNotBound(key);
       return;

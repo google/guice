@@ -56,9 +56,9 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
   @Override public String toString() {
     return new ToStringBuilder(LinkedKeyBinding.class)
         .add("key", getKey())
-        .add("target", targetKey)
-        .add("scope", getScoping())
         .add("source", getSource())
+        .add("scope", getScoping())
+        .add("target", targetKey)
         .toString();
   }
 }

@@ -45,6 +45,7 @@ import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -229,6 +230,13 @@ class InjectorImpl implements Injector {
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
       return visitor.visitProviderBinding(this);
     }
+
+    @Override public String toString() {
+      return new ToStringBuilder(ProviderKeyBinding.class)
+          .add("key", getKey())
+          .add("providedKey", getProvidedKey())
+          .toString();
+    }
   }
 
   /**
@@ -320,8 +328,8 @@ class InjectorImpl implements Injector {
     @Override public String toString() {
       return new ToStringBuilder(ConvertedConstantBinding.class)
           .add("key", getKey())
-          .add("value", value)
           .add("sourceKey", getSourceKey())
+          .add("value", value)
           .toString();
     }
   }
@@ -867,7 +875,7 @@ class InjectorImpl implements Injector {
 
   public String toString() {
     return new ToStringBuilder(Injector.class)
-        .add("bindings", state.getExplicitBindingsThisLevel())
+        .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
   }
 }

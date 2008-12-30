@@ -18,14 +18,12 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.PrivateEnvironment;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -60,14 +58,13 @@ class InjectorBuilder {
   private final Initializer initializer = new Initializer();
   private final BindingProcessor bindingProcesor;
   private final InjectionRequestProcessor injectionRequestProcessor;
-  private final Map<PrivateEnvironment, InjectorImpl> environmentToInjector = Maps.newHashMap();
 
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
   private List<InjectorShell> shells;
 
   InjectorBuilder() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
-    bindingProcesor = new BindingProcessor(errors, initializer, environmentToInjector);
+    bindingProcesor = new BindingProcessor(errors, initializer);
   }
 
   /**
@@ -102,8 +99,7 @@ class InjectorBuilder {
     // Synchronize while we're building up the bindings and other injector state. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
-      shells = shellBuilder.build(
-          initializer, bindingProcesor, environmentToInjector, stopwatch, errors);
+      shells = shellBuilder.build(initializer, bindingProcesor, stopwatch, errors);
       stopwatch.resetAndLog("Injector construction");
 
       initializeStatically();
@@ -132,7 +128,7 @@ class InjectorBuilder {
     injectionRequestProcessor.process(shells);
     stopwatch.resetAndLog("Collecting injection requests");
 
-    bindingProcesor.runCreationListeners(environmentToInjector);
+    bindingProcesor.runCreationListeners();
     stopwatch.resetAndLog("Binding validation");
 
     injectionRequestProcessor.validate();

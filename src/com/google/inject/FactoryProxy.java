@@ -23,8 +23,6 @@ import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.PrivateEnvironment;
-import java.util.Map;
 
 /**
  * A placeholder which enables us to swap in the real factory once the injector is created.
@@ -45,7 +43,7 @@ class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationLi
     this.source = source;
   }
 
-  public void notify(Map<PrivateEnvironment, InjectorImpl> privateInjectors, final Errors errors) {
+  public void notify(final Errors errors) {
     try {
       targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source));
     } catch (ErrorsException e) {

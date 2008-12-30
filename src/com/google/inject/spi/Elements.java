@@ -39,6 +39,7 @@ import com.google.inject.internal.AbstractBindingBuilder;
 import com.google.inject.internal.BindingBuilder;
 import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
@@ -116,7 +117,7 @@ public final class Elements {
 
     /** The binder where exposed bindings will be created */
     private final RecordingBinder parent;
-    private final PrivateEnvironment privateEnvironment;
+    private final PrivateElementsImpl privateElements;
 
     private RecordingBinder(Stage stage) {
       this.stage = stage;
@@ -127,7 +128,7 @@ public final class Elements {
           Elements.class, RecordingBinder.class, AbstractModule.class,
           ConstantBindingBuilderImpl.class, AbstractBindingBuilder.class, BindingBuilder.class);
       this.parent = null;
-      this.privateEnvironment = null;
+      this.privateElements = null;
     }
 
     /** Creates a recording binder that's backed by {@code prototype}. */
@@ -141,18 +142,18 @@ public final class Elements {
       this.source = source;
       this.sourceProvider = sourceProvider;
       this.parent = prototype.parent;
-      this.privateEnvironment = prototype.privateEnvironment;
+      this.privateElements = prototype.privateElements;
     }
 
     /** Creates a private recording binder. */
-    private RecordingBinder(RecordingBinder parent, PrivateEnvironment privateEnvironment) {
+    private RecordingBinder(RecordingBinder parent, PrivateElementsImpl privateElements) {
       this.stage = parent.stage;
       this.modules = Sets.newHashSet();
-      this.elements = privateEnvironment.getElementsMutable();
+      this.elements = privateElements.getElementsMutable();
       this.source = parent.source;
       this.sourceProvider = parent.sourceProvider;
       this.parent = parent;
-      this.privateEnvironment = privateEnvironment;
+      this.privateElements = privateElements;
     }
 
     public void bindInterceptor(
@@ -273,9 +274,9 @@ public final class Elements {
     }
 
     public PrivateBinder newPrivateBinder() {
-      PrivateEnvironment privateEnvironment = new PrivateEnvironment(getSource());
-      elements.add(privateEnvironment);
-      return new RecordingBinder(this, privateEnvironment);
+      PrivateElementsImpl privateElements = new PrivateElementsImpl(getSource());
+      elements.add(privateElements);
+      return new RecordingBinder(this, privateElements);
     }
 
     public void expose(Key<?> key) {
@@ -291,7 +292,7 @@ public final class Elements {
     }
 
     private <T> AnnotatedElementBuilder exposeInternal(Key<T> key) {
-      if (privateEnvironment == null) {
+      if (privateElements == null) {
         addError("Cannot expose %s on a standard binder. "
             + "Exposed bindings are only applicable to private binders.", key);
         return new AnnotatedElementBuilder() {
@@ -303,8 +304,8 @@ public final class Elements {
       BindingBuilder<T> exposeBinding = new BindingBuilder<T>(
           this, parent.elements, getSource(), key);
 
-      BindingBuilder.ExposureBuilder<T> builder = exposeBinding.usingKeyFrom(privateEnvironment);
-      privateEnvironment.addExposureBuilder(builder);
+      BindingBuilder.ExposureBuilder<T> builder = exposeBinding.usingKeyFrom(privateElements);
+      privateElements.addExposureBuilder(builder);
       return builder;
     }
 

@@ -69,8 +69,8 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T
   @Override public String toString() {
     return new ToStringBuilder(ConstructorBinding.class)
         .add("key", getKey())
-        .add("scope", getScoping())
         .add("source", getSource())
+        .add("scope", getScoping())
         .toString();
   }
 }

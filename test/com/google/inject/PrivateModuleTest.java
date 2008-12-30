@@ -16,10 +16,15 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableSet;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.binder.PrivateBinder;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ExposedBinding;
+import com.google.inject.spi.PrivateElements;
 import junit.framework.TestCase;
 
 /**
@@ -420,4 +425,24 @@ public class PrivateModuleTest extends TestCase {
   }
 
   interface C {}
+
+  public void testSpiAccess() {
+    Injector injector = Guice.createInjector(new PrivateModule() {
+          public void configurePrivateBindings() {
+            bind(String.class).annotatedWith(named("a")).toInstance("private");
+            bind(String.class).annotatedWith(named("b")).toInstance("exposed");
+            expose(String.class).annotatedWith(named("b"));
+          }
+        });
+
+    ExposedBinding<?> binding
+        = (ExposedBinding<?>) injector.getBinding(Key.get(String.class, Names.named("b")));
+    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class))),
+        binding.getDependencies());
+    PrivateElements privateElements = binding.getPrivateElements();
+    assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class, named("b"))),
+        privateElements.getExposedKeys());
+    Injector privateInjector = privateElements.getInjector();
+    assertEquals("private", privateInjector.getInstance(Key.get(String.class, Names.named("a"))));
+  }
 }

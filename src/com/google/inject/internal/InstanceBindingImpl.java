@@ -84,8 +84,8 @@ public class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBi
   @Override public String toString() {
     return new ToStringBuilder(InstanceBinding.class)
         .add("key", getKey())
-        .add("instance", instance)
         .add("source", getSource())
+        .add("instance", instance)
         .toString();
   }
 }

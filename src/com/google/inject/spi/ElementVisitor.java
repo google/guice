@@ -72,5 +72,5 @@ public interface ElementVisitor<V> {
   /**
    * Visit a collection of configuration elements for a private environment.
    */
-  V visitPrivateEnvironment(PrivateEnvironment privateEnvironment);
+  V visitPrivateElements(PrivateElements privateElements);
 }
