@@ -19,6 +19,10 @@ package com.google.inject;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Proxies calls to a {@link java.lang.reflect.Constructor} for a class
@@ -43,4 +47,9 @@ interface ConstructionProxy<T> {
    * code for method interception), the natural constructor is returned.
    */
   Constructor<T> getConstructor();
+
+  /**
+   * Returns the interceptors applied to each method, in order of invocation.
+   */
+  Map<Method, List<MethodInterceptor>> getMethodInterceptors();
 }

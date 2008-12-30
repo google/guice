@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen;
@@ -26,7 +28,6 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +145,7 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     private final Callback[] callbacks;
     private final FastConstructor fastConstructor;
+    private final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
 
     @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
     ProxyConstructor(List<Method> methods, List<MethodInterceptorsPair> methodInterceptorsPairs,
@@ -152,16 +154,29 @@ class ProxyFactory implements ConstructionProxyFactory {
       this.injectionPoint = injectionPoint;
       this.constructor = (Constructor<T>) injectionPoint.getMember();
 
+      ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder = null; // lazy
+
       this.callbacks = new Callback[methods.size()];
       for (int i = 0; i < methods.size(); i++) {
         MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
-        callbacks[i] = pair.hasInterceptors()
-            ? new InterceptorStackCallback(pair.method, pair.interceptors)
-            : NO_OP_METHOD_INTERCEPTOR;
+
+        if (!pair.hasInterceptors()) {
+          callbacks[i] = NO_OP_METHOD_INTERCEPTOR;
+          continue;
+        }
+
+        if (interceptorsMapBuilder == null) {
+          interceptorsMapBuilder = ImmutableMap.builder();
+        }
+        interceptorsMapBuilder.put(pair.method, ImmutableList.copyOf(pair.interceptors));
+        callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
       }
 
       FastClass fastClass = BytecodeGen.newFastClass(enhanced, Visibility.forMember(constructor));
       this.fastConstructor = fastClass.getConstructor(constructor.getParameterTypes());
+      this.methodInterceptors = interceptorsMapBuilder != null
+          ? interceptorsMapBuilder.build()
+          : ImmutableMap.<Method, List<MethodInterceptor>>of();
     }
 
     @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
@@ -181,6 +196,10 @@ class ProxyFactory implements ConstructionProxyFactory {
     public Constructor<T> getConstructor() {
       return constructor;
     }
+
+    public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+      return methodInterceptors;
+    }
   }
 
   private static class MethodInterceptorsPair {
@@ -193,7 +212,7 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     void addAll(List<MethodInterceptor> interceptors) {
       if (this.interceptors == null) {
-        this.interceptors = new ArrayList<MethodInterceptor>();
+        this.interceptors = Lists.newArrayList();
       }
       this.interceptors.addAll(interceptors);
     }

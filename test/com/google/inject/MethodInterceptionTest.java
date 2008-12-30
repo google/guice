@@ -16,7 +16,14 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.matcher.Matchers;
+import static com.google.inject.matcher.Matchers.only;
+import com.google.inject.spi.ConstructorBinding;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -27,6 +34,15 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class MethodInterceptionTest extends TestCase {
 
+  private AtomicInteger count = new AtomicInteger();
+
+  private final MethodInterceptor countingInterceptor = new MethodInterceptor() {
+    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+      count.incrementAndGet();
+      return methodInvocation.proceed();
+    }
+  };
+
   private final MethodInterceptor returnNullInterceptor = new MethodInterceptor() {
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       return null;
@@ -36,7 +52,7 @@ public class MethodInterceptionTest extends TestCase {
   public void testSharedProxyClasses() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bindInterceptor(Matchers.any(), Matchers.returns(Matchers.only(Foo.class)),
+        bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class)),
             returnNullInterceptor);
       }
     });
@@ -54,7 +70,7 @@ public class MethodInterceptionTest extends TestCase {
     Injector nullFoosAndBarsInjector = injector.createChildInjector(new AbstractModule() {
       protected void configure() {
         bind(Interceptable.class);
-        bindInterceptor(Matchers.any(), Matchers.returns(Matchers.only(Bar.class)),
+        bindInterceptor(Matchers.any(), Matchers.returns(only(Bar.class)),
             returnNullInterceptor);
       }
     });
@@ -84,6 +100,34 @@ public class MethodInterceptionTest extends TestCase {
     Interceptable interceptable = injector.getInstance(Interceptable.class);
     interceptable.foo();
     assertSame(interceptable, lastTarget.get());
+  }
+
+  public void testSpiAccessToInterceptors() throws NoSuchMethodException {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class)),
+            countingInterceptor);
+        bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class).or(only(Bar.class))),
+            returnNullInterceptor);
+      }
+    });
+
+    ConstructorBinding<?> interceptedBinding
+        = (ConstructorBinding<?>) injector.getBinding(Interceptable.class);
+    Method barMethod = Interceptable.class.getMethod("bar");
+    Method fooMethod = Interceptable.class.getMethod("foo");
+    assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(
+        fooMethod, ImmutableList.of(countingInterceptor, returnNullInterceptor),
+        barMethod, ImmutableList.of(returnNullInterceptor)),
+        interceptedBinding.getMethodInterceptors());
+
+    ConstructorBinding<?> nonInterceptedBinding
+        = (ConstructorBinding<?>) injector.getBinding(Foo.class);
+    assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(),
+        nonInterceptedBinding.getMethodInterceptors());
+
+    injector.getInstance(Interceptable.class).foo();
+    assertEquals("expected counting interceptor to be invoked first", 1, count.get());
   }
 
   static class Foo {}

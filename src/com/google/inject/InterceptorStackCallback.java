@@ -36,14 +36,12 @@ class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
   public InterceptorStackCallback(Method method,
       List<MethodInterceptor> interceptors) {
     this.method = method;
-    this.interceptors
-        = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
+    this.interceptors = interceptors.toArray(new MethodInterceptor[interceptors.size()]);
   }
 
   public Object intercept(Object proxy, Method method, Object[] arguments,
       MethodProxy methodProxy) throws Throwable {
-    return new InterceptedMethodInvocation(proxy, methodProxy, arguments)
-        .proceed();
+    return new InterceptedMethodInvocation(proxy, methodProxy, arguments).proceed();
   }
 
   class InterceptedMethodInvocation implements MethodInvocation {

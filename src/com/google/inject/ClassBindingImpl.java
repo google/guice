@@ -30,7 +30,11 @@ import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T> {
 
@@ -64,6 +68,10 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T
 
   public Set<Dependency<?>> getDependencies() {
     return Dependency.forInjectionPoints(injectionPoints);
+  }
+
+  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+    return lateBoundConstructor.constructorInjector.constructionProxy.getMethodInterceptors();
   }
 
   @Override public String toString() {

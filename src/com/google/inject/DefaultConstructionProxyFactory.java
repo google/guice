@@ -16,14 +16,19 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Map;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
@@ -57,6 +62,9 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         public Constructor<T> getConstructor() {
           return constructor;
         }
+        public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+          return ImmutableMap.of();
+        }
       };
     }
 
@@ -74,6 +82,9 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       }
       public Constructor<T> getConstructor() {
         return constructor;
+      }
+      public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+        return ImmutableMap.of();
       }
     };
   }

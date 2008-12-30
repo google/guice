@@ -18,7 +18,11 @@ package com.google.inject.spi;
 
 import com.google.inject.Binding;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A binding to the constructor of a concrete clss. To resolve injections, an instance is
@@ -40,5 +44,12 @@ public interface ConstructorBinding<T> extends Binding<T>, HasDependencies {
    * instance. The set contains exactly one constructor injection point.
    */
   Set<InjectionPoint> getInjectionPoints();
+
+  /**
+   * Returns the interceptors applied to each method, in the order that they will be applied.
+   *
+   * @return a possibly empty map
+   */
+  Map<Method, List<MethodInterceptor>> getMethodInterceptors();
 
 }
