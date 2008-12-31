@@ -96,7 +96,7 @@
          destdir="${build.dir}/javadoc"
          author="false"
          protected="true"
-         windowtitle="Guice 1.0 API">
+         windowtitle="Guice 2.0 API">
       <sourcepath>
         <pathelement location="${src.dir}"/>
         <pathelement location="${servlet.src.dir}"/>
