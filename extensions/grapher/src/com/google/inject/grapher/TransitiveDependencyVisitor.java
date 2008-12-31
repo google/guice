@@ -25,7 +25,6 @@ import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.HasDependencies;
-import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderBinding;
@@ -47,30 +46,22 @@ import java.util.Set;
 public class TransitiveDependencyVisitor
 implements BindingTargetVisitor<Object, Collection<Key<?>>> {
 
-  // TODO(phopkins): Remove InjectionPoints when issue 298 is fixed.
-  private Collection<Key<?>> visitHasDependencies(HasDependencies hasDependencies,
-      Collection<InjectionPoint> injectionPoints) {
+  private Collection<Key<?>> visitHasDependencies(HasDependencies hasDependencies) {
     Set<Key<?>> dependencies = Sets.newHashSet();
     
     for (Dependency<?> dependency : hasDependencies.getDependencies()) {
       dependencies.add(dependency.getKey());
     }
 
-    for (InjectionPoint injectionPoint : injectionPoints) {
-      for (Dependency<?> dependency : injectionPoint.getDependencies()) {
-        dependencies.add(dependency.getKey());
-      }
-    }
-
     return dependencies;
   }
   
   public Collection<Key<?>> visitConstructor(ConstructorBinding<?> binding) {
-    return visitHasDependencies(binding, binding.getInjectionPoints());
+    return visitHasDependencies(binding);
   }
 
   public Collection<Key<?>> visitConvertedConstant(ConvertedConstantBinding<?> binding) {
-    return visitHasDependencies(binding, ImmutableSet.<InjectionPoint>of());
+    return visitHasDependencies(binding);
   }
 
   public Collection<Key<?>> visitExposed(ExposedBinding<?> binding) {
@@ -79,7 +70,7 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
   }
 
   public Collection<Key<?>> visitInstance(InstanceBinding<?> binding) {
-    return visitHasDependencies(binding, binding.getInjectionPoints());
+    return visitHasDependencies(binding);
   }
 
   public Collection<Key<?>> visitLinkedKey(LinkedKeyBinding<?> binding) {
@@ -91,7 +82,7 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
   }
 
   public Collection<Key<?>> visitProviderInstance(ProviderInstanceBinding<?> binding) {
-    return visitHasDependencies(binding, binding.getInjectionPoints());
+    return visitHasDependencies(binding);
   }
 
   public Collection<Key<?>> visitProviderKey(ProviderKeyBinding<?> binding) {

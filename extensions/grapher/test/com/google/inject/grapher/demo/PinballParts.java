@@ -16,4 +16,11 @@
 
 package com.google.inject.grapher.demo;
 
-class PinballParts {}
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
+class PinballParts {
+  // Shows up as an injection point on an instance. We use a Provider so that
+  // it doesn't have to be satisfied when the Injector is created.
+  @Inject Provider<DocBrown> salvager;
+}

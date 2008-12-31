@@ -18,14 +18,16 @@ package com.google.inject.grapher;
 
 import com.google.common.base.Nullable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
@@ -34,9 +36,9 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
 
+import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * {@link BindingTargetVisitor} that adds nodes and edges to the graph based on
@@ -137,15 +139,10 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link Binding}, where the {@link Binding} is for an instance, rather than
    * a class.
    */
-  protected M newInstanceImplementationNode(Binding<?> binding, Object instance,
-      Collection<InjectionPoint> injectionPoints) {
+  protected M newInstanceImplementationNode(Binding<?> binding, Object instance) {
     M node = implementationNodeFactory.newImplementationNode(getInstanceNodeId(binding));
     node.setSource(binding.getSource());
     node.setInstance(instance);
-
-    for (InjectionPoint injectionPoint : injectionPoints) {
-      node.addMember(injectionPoint.getMember());
-    }
 
     return node;
   }
@@ -167,43 +164,36 @@ implements BindingTargetVisitor<Object, Void> {
   }
 
   /**
-   * Adds {@link DependencyEdge}s to the graph from the given
-   * {@link ImplementationNode} to the {@link Key}s specified in the
-   * {@link InjectionPoint}s.
+   * Adds {@link DependencyEdge}s to the graph for each of the provided
+   * {@link Dependency}s. These will be from the given node ID to the
+   * {@link Dependency}'s {@link Key}.
    * <p>
-   * Also adds edges for any {@link Dependency}s passed in that are not covered
-   * in the set of {@link InjectionPoint}s.
+   * If a {@link Dependency} has an associated {@link InjectionPoint}, its
+   * member will be added to the given {@link ImplementationNode} and the edge
+   * will start at the {@link Member}.
    *
    * @see #newDependencyEdge(Object, InjectionPoint, Dependency)
    * 
    * @param nodeId ID of the node that should be the tail of the
    *     {@link DependencyEdge}s.
-   * @param injectionPoints {@link Collection} of {@link InjectionPoint}s on
-   *     the class or instance represented by the {@link ImplementationNode}.
+   * @param node An {@link ImplementationNode} to add {@link Member}s to.
    * @param dependencies {@link Collection} of {@link Dependency}s from the
-   *     {@link Binding}. Some {@link Binding}s may have {@link Dependency}s
-   *     even if they do not have {@link InjectionPoint}s.
+   *     {@link Binding}.
    * @return A {@link Collection} of the {@link DependencyEdge}s that were
    *     added to the graph.
    */
-  protected Collection<D> newDependencyEdges(K nodeId, Collection<InjectionPoint> injectionPoints,
+  protected Collection<D> newDependencyEdges(K nodeId, M node,
       Collection<Dependency<?>> dependencies) {
     List<D> edges = Lists.newArrayList();
 
-    // Set to keep track of which of the given Dependencies is not duplicated
-    // by the InjectionPoints.
-    Set<Dependency<?>> remainingDependencies = Sets.newHashSet(dependencies);
-    
-    for (InjectionPoint injectionPoint : injectionPoints) {
-      for (Dependency<?> dependency : injectionPoint.getDependencies()) {
-        D edge = newDependencyEdge(nodeId, injectionPoint, dependency);
-        edges.add(edge);
-        remainingDependencies.remove(dependency);
-      }
-    }
+    for (Dependency<?> dependency : dependencies) {
+      InjectionPoint injectionPoint = dependency.getInjectionPoint();
 
-    for (Dependency<?> dependency : remainingDependencies) {
-      D edge = newDependencyEdge(nodeId, null, dependency);    
+      if (injectionPoint != null) {
+        node.addMember(injectionPoint.getMember());
+      }
+
+      D edge = newDependencyEdge(nodeId, injectionPoint, dependency);
       edges.add(edge);
     }
 
@@ -241,9 +231,8 @@ implements BindingTargetVisitor<Object, Void> {
    * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
    */
   public Void visitConstructor(ConstructorBinding<?> binding) {
-    newClassImplementationNode(binding, binding.getInjectionPoints());
-    newDependencyEdges(getClassNodeId(binding), binding.getInjectionPoints(),
-        binding.getDependencies());
+    M node = newClassImplementationNode(binding, binding.getInjectionPoints());
+    newDependencyEdges(getClassNodeId(binding), node, binding.getDependencies());
 
     return null;
   }
@@ -299,9 +288,8 @@ implements BindingTargetVisitor<Object, Void> {
     newBindingEdge(getClassNodeId(binding), getInstanceNodeId(binding),
         BindingEdge.Type.NORMAL);
 
-    newInstanceImplementationNode(binding, binding.getInstance(), binding.getInjectionPoints());
-    newDependencyEdges(getInstanceNodeId(binding), binding.getInjectionPoints(),
-        binding.getDependencies());
+    M node = newInstanceImplementationNode(binding, binding.getInstance());
+    newDependencyEdges(getInstanceNodeId(binding), node, binding.getDependencies());
 
     return null;
   }
@@ -353,10 +341,8 @@ implements BindingTargetVisitor<Object, Void> {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), getInstanceNodeId(binding), BindingEdge.Type.PROVIDER);
 
-    newInstanceImplementationNode(binding, binding.getProviderInstance(),
-        binding.getInjectionPoints());
-    newDependencyEdges(getInstanceNodeId(binding), binding.getInjectionPoints(),
-        binding.getDependencies());
+    M node = newInstanceImplementationNode(binding, binding.getProviderInstance());
+    newDependencyEdges(getInstanceNodeId(binding), node, binding.getDependencies());
 
     return null;
   }

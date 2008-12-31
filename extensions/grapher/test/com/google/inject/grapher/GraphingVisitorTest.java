@@ -17,22 +17,26 @@
 package com.google.inject.grapher;
 
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provides;
+import com.google.inject.Key;
 import com.google.inject.spi.ConstructorBinding;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.InstanceBinding;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -80,34 +84,50 @@ public class GraphingVisitorTest extends TestCase {
   }
 
   public void testNewDependencies_withInjectionPoints() throws Exception {
+    @SuppressWarnings("unchecked")
+    ImplementationNode<String> node = recordMock(createMock(ImplementationNode.class));
+    
+    node.addMember(Obj.class.getDeclaredField("string"));
+    expectLastCall();
+    node.addMember(Obj.class.getDeclaredField("integer"));
+    expectLastCall();
+    node.addMember(Obj.class.getDeclaredField("bool"));
+    expectLastCall();
+    node.addMember(Obj.class.getDeclaredMethod("setInteger", Integer.class));
+    expectLastCall();
+
     replayAll();
 
-    ConstructorBinding<?> binding = (ConstructorBinding<?>) createInjector().getBinding(Obj.class);
+    Injector injector = Guice.createInjector(new ClassModule());
+    ConstructorBinding<?> binding = (ConstructorBinding<?>) injector.getBinding(Obj.class);
 
-    Collection<DependencyEdge<String>> edges = graphingVisitor.newDependencyEdges("",
-        binding.getInjectionPoints(), binding.getDependencies());
+    Collection<DependencyEdge<String>> edges = graphingVisitor.newDependencyEdges("", node,
+        binding.getDependencies());
 
-    assertEquals("There should be three edges, from the InjectionPoints", 3, edges.size());
+    assertEquals("There should be four edges, from the three fields plus the method",
+        4, edges.size());
     
     verifyAll();
   }
 
   public void testNewDependencies_withDependencies() throws Exception {
+    @SuppressWarnings("unchecked")
+    ImplementationNode<String> node = recordMock(createMock(ImplementationNode.class));
+    // No members should be added to the node, since the stated dependencies
+    // have no associated {@link InjectionPoint}s.
+
     replayAll();
 
-    ProviderInstanceBinding<?> binding =
-        (ProviderInstanceBinding<?>) createInjector().getBinding(Intf.class);
+    Injector injector = Guice.createInjector(new ClassModule(), new InstanceModule());
+    InstanceBinding<?> binding = (InstanceBinding<?>) injector.getBinding(Obj.class);
 
-    Collection<DependencyEdge<String>> edges = graphingVisitor.newDependencyEdges("",
-        ImmutableList.<InjectionPoint>of(), binding.getDependencies());
+    Collection<DependencyEdge<String>> edges = graphingVisitor.newDependencyEdges("", node,
+        binding.getDependencies());
 
-    assertEquals("There should be three edges, from the parameter Dependencies", 3, edges.size());
+    assertEquals("One edge should be created, for the one stated Integer dependency",
+        1, edges.size());
     
     verifyAll();
-  }
-
-  private Injector createInjector() {
-    return Guice.createInjector(new TestModule());
   }
 
   private void replayAll() {
@@ -132,25 +152,31 @@ public class GraphingVisitorTest extends TestCase {
     }
   }
 
-  private static class TestModule extends AbstractModule {
+  private static class ClassModule extends AbstractModule {
     @Override
     protected void configure() {
       bind(String.class).toInstance("String");
       bind(Integer.class).toInstance(Integer.valueOf(8));
       bind(Boolean.class).toInstance(Boolean.TRUE);
     }
+  }
 
-    @Provides
-    public Intf provideIntf(String string, Integer integer, Boolean bool) {
-      return null;
+  private static class InstanceModule extends AbstractModule {
+    @Override
+    protected void configure() {
+      bind(Obj.class).toInstance(new Obj());
     }
   }
 
-  private static interface Intf {}
-
-  private static class Obj {
+  private static class Obj implements HasDependencies {
     @Inject String string;
     @Inject Integer integer;
     @Inject Boolean bool;
+
+    @Inject void setInteger(Integer integer) {}
+    
+    public Set<Dependency<?>> getDependencies() {
+      return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)));
+    }
   }
 }
