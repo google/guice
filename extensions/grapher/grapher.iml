@@ -9,6 +9,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="guice" exported="" />
+    <orderEntry type="module" module-name="assistedinject" />
+    <orderEntry type="module" module-name="multibindings" />
   </component>
 </module>
 

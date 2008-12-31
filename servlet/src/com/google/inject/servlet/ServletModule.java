@@ -252,6 +252,8 @@ public class ServletModule extends AbstractModule {
    * </pre>
    *
    * See {@link com.google.inject.Binder} for more information on binding syntax.
+   * 
+   * @since 2.0
    */
   protected void configureServlets() {
   }
@@ -262,6 +264,7 @@ public class ServletModule extends AbstractModule {
 
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.
+   * @since 2.0
    */
   protected final FilterKeyBindingBuilder filter(String urlPattern, String... morePatterns) {
     return filtersModuleBuilder.filter(Lists.asList(urlPattern, morePatterns));
@@ -269,6 +272,7 @@ public class ServletModule extends AbstractModule {
 
   /**
    * @param regex Any Java-style regular expression.
+   * @since 2.0
    */
   protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
     return filtersModuleBuilder.filterRegex(Lists.asList(regex, regexes));
@@ -276,6 +280,7 @@ public class ServletModule extends AbstractModule {
 
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.
+   * @since 2.0
    */
   protected final ServletKeyBindingBuilder serve(String urlPattern, String... morePatterns) {
     return servletsModuleBuilder.serve(Lists.asList(urlPattern, morePatterns));
@@ -283,11 +288,17 @@ public class ServletModule extends AbstractModule {
 
   /**
    * @param regex Any Java-style regular expression.
+   * @since 2.0
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
     return servletsModuleBuilder.serveRegex(Lists.asList(regex, regexes));
   }
 
+  /**
+   * See the EDSL examples at {@link ServletModule#configureServlets()}
+   *
+   * @since 2.0
+   */
   public static interface FilterKeyBindingBuilder {
     void through(Class<? extends Filter> filterKey);
     void through(Key<? extends Filter> filterKey);
@@ -295,6 +306,11 @@ public class ServletModule extends AbstractModule {
     void through(Key<? extends Filter> dummyFilterClass, Map<String, String> contextParams);
   }
 
+  /**
+   * See the EDSL examples at {@link ServletModule#configureServlets()}
+   *
+   * @since 2.0
+   */
   public static interface ServletKeyBindingBuilder {
     void with(Class<? extends HttpServlet> servletKey);
     void with(Key<? extends HttpServlet> servletKey);

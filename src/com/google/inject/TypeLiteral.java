@@ -104,6 +104,8 @@ public class TypeLiteral<T> {
 
   /**
    * Returns the raw (non-generic) type for this type.
+   * 
+   * @since 2.0
    */
   public final Class<? super T> getRawType() {
     return rawType;
