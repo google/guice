@@ -49,7 +49,7 @@ public class Scopes {
              * Maybe one of these days we will identify independent graphs of
              * objects and offer to load them in parallel.
              */
-            synchronized (Injector.class) {
+            synchronized (InjectorImpl.class) {
               if (instance == null) {
                 instance = creator.get();
               }
