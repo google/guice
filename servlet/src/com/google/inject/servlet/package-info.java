@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006-2008 Google Inc.
+ * Copyright (C) 2006 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 
 /**
- * Servlet API scopes and bindings. Apply {@link GuiceFilter} to any servlets which will use the
- * servlet scopes. Install {@link ServletModule} into your {@link com.google.inject.Injector} to
- * install everything at once.
+ * Servlet API scopes and bindings. Apply {@link com.google.inject.servlet.GuiceFilter} to any
+ * servlets which will use the servlet scopes. Install {@link
+ * com.google.inject.servlet.ServletModule} into your {@link com.google.inject.Injector} to install
+ * everything at once.
  */
 package com.google.inject.servlet;
