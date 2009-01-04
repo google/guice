@@ -44,6 +44,9 @@ public class AllTests {
     suite.addTestSuite(VarargsFilterDispatchIntegrationTest.class);
     suite.addTestSuite(VarargsServletDispatchIntegrationTest.class);
 
+    // Multiple modules tests.
+    suite.addTestSuite(MultiModuleDispatchIntegrationTest.class);
+
     return suite;
   }
 }

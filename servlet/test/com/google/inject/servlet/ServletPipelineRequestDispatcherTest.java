@@ -16,12 +16,15 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -73,13 +76,24 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
+    final Key<List<ServletDefinition>> servetDefsKey = Key
+        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    expect(injector.getBindings())
+        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
+
+          put(servetDefsKey, createMock(Binding.class));
+        }});
+
+    expect(injector.getInstance(servetDefsKey))
+        .andReturn(ImmutableList.of(servletDefinition));
+
     replay(injector, mockRequest);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
-        Arrays.asList(servletDefinition))
+        injector)
         .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
@@ -123,13 +137,23 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
+    final Key<List<ServletDefinition>> servetDefsKey = Key
+        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    expect(injector.getBindings())
+        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
+
+          put(servetDefsKey, createMock(Binding.class));
+        }});
+
+    expect(injector.getInstance(servetDefsKey))
+        .andReturn(ImmutableList.of(servletDefinition));
+
     replay(injector, mockRequest, mockResponse);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
 
-    final RequestDispatcher dispatcher = new ManagedServletPipeline(
-        Arrays.asList(servletDefinition))
+    final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
@@ -179,13 +203,24 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(mockServlet);
 
+
+    final Key<List<ServletDefinition>> servetDefsKey = Key
+        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    expect(injector.getBindings())
+        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
+
+          put(servetDefsKey, createMock(Binding.class));
+        }});
+
+    expect(injector.getInstance(servetDefsKey))
+        .andReturn(ImmutableList.of(servletDefinition));
+
     replay(injector, mockRequest, mockResponse);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
 
-    final RequestDispatcher dispatcher = new ManagedServletPipeline(
-        Arrays.asList(servletDefinition))
+    final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);

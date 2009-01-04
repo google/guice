@@ -19,19 +19,9 @@ package com.google.inject.servlet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
-import static com.google.inject.servlet.ServletScopes.REQUEST;
-import static com.google.inject.servlet.ServletScopes.SESSION;
 import java.util.Map;
 import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * Configures the servlet scopes and creates bindings for the servlet API
@@ -48,82 +38,13 @@ public class ServletModule extends AbstractModule {
 
   @Override
   protected final void configure() {
-    // Install the filter and servlet bindings.
+    // Install common bindings (skipped if already installed).
+    install(new InternalServletModule());
+
+    // Install local filter and servlet bindings.
     configureServlets();
     install(filtersModuleBuilder);
     install(servletsModuleBuilder);
-
-    // Scopes.
-    bindScope(RequestScoped.class, REQUEST);
-    bindScope(SessionScoped.class, SESSION);
-
-    // Bind request.
-    Provider<HttpServletRequest> requestProvider =
-        new Provider<HttpServletRequest>() {
-          public HttpServletRequest get() {
-            return GuiceFilter.getRequest();
-          }
-
-          public String toString() {
-            return "RequestProvider";
-          }
-        };
-    bind(HttpServletRequest.class).toProvider(requestProvider);
-    bind(ServletRequest.class).toProvider(requestProvider);
-
-    // Bind response.
-    Provider<HttpServletResponse> responseProvider =
-        new Provider<HttpServletResponse>() {
-          public HttpServletResponse get() {
-            return GuiceFilter.getResponse();
-          }
-
-          public String toString() {
-            return "ResponseProvider";
-          }
-        };
-    bind(HttpServletResponse.class).toProvider(responseProvider);
-    bind(ServletResponse.class).toProvider(responseProvider);
-
-    // Bind session.
-    bind(HttpSession.class).toProvider(new Provider<HttpSession>() {
-      public HttpSession get() {
-        return GuiceFilter.getRequest().getSession();
-      }
-
-      public String toString() {
-        return "SessionProvider";
-      }
-    });
-
-    // Bind servlet context.
-    bind(ServletContext.class).toProvider(new Provider<ServletContext>() {
-      public ServletContext get() {
-        return GuiceFilter.getServletContext();
-      }
-
-      public String toString() {
-        return "ServletContextProvider";
-      }
-    });
-
-    // Bind request parameters.
-    bind(new TypeLiteral<Map<String, String[]>>() {})
-        .annotatedWith(RequestParameters.class)
-        .toProvider(new Provider<Map<String, String[]>>() {
-              @SuppressWarnings({"unchecked"})
-              public Map<String, String[]> get() {
-                return GuiceFilter.getRequest().getParameterMap();
-              }
-
-              public String toString() {
-                return "RequestParametersProvider";
-              }
-            });
-
-    // inject the pipeline into GuiceFilter so it can route requests correctly
-    // Unfortunate staticness... =(
-    requestStaticInjection(GuiceFilter.class);
   }
 
   /**
@@ -252,6 +173,41 @@ public class ServletModule extends AbstractModule {
    * </pre>
    *
    * See {@link com.google.inject.Binder} for more information on binding syntax.
+   *
+   * <p>
+   * <h3>Multiple Modules</h3>
+   *
+   * It is sometimes useful to capture servlet and filter mappings from multiple different
+   * modules. This is essential if you want to package and offer drop-in Guice plugins that
+   * provide servlet functionality.
+   *
+   * <p>
+   * Guice Servlet allows you to register several instances of {@code ServletModule} to your
+   * injector. The order in which these modules are installed determines the dispatch order
+   * of filters and the precedence order of servlets. For example, if you had two servlet modules,
+   * {@code RpcModule} and {@code WebServiceModule} and they each contained a filter that mapped
+   * to the same URI pattern, {@code "/*"}:
+   *
+   * <p>
+   * In {@code RpcModule}:
+   * <pre>
+   *     filter("/*").through(RpcFilter.class);
+   * </pre>
+   *
+   * In {@code WebServiceModule}:
+   * <pre>
+   *     filter("/*").through(WebServiceFilter.class);
+   * </pre>
+   *
+   * Then the order in which these filters are dispatched is determined by the order in which
+   * the modules are installed:
+   *
+   * <pre>
+   *   <b>install(new WebServiceModule());</b>
+   *   install(new RpcModule());
+   * </pre>
+   *
+   * In the case shown above {@code WebServiceFilter} will run first.
    * 
    * @since 2.0
    */

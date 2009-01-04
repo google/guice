@@ -64,9 +64,12 @@ public interface Injector {
    * Returns all explicit bindings.
    *
    * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
-   * injector}, should one exist.
+   * injector}, should one exist. The returned map is guaranteed to iterate (for example, with
+   * its {@link java.util.Map#entrySet()} iterator) in the order of insertion. In other words,
+   * the order in which bindings appear in user Modules.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+   *
    */
   Map<Key<?>, Binding<?>> getBindings();
 

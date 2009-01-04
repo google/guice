@@ -15,13 +15,18 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -40,22 +45,46 @@ import javax.servlet.http.HttpServletRequestWrapper;
 @Singleton
 class ManagedFilterPipeline implements FilterPipeline{
   private final List<FilterDefinition> filterDefinitions;
-
-  @Inject
-  private final ManagedServletPipeline servletPipeline = null;
-
-  @Inject
-  private final Provider<ServletContext> servletContext = null;
+  private final ManagedServletPipeline servletPipeline;
+  private final Provider<ServletContext> servletContext;
 
   //Unfortunately, we need the injector itself in order to create filters + servlets
-  @Inject
-  private final Injector injector = null;
+  private final Injector injector;
 
   //Guards a DCL, so needs to be volatile
   private volatile boolean initialized = false;
+  private static final TypeLiteral<List<FilterDefinition>> FILTER_DEFS =
+      new TypeLiteral<List<FilterDefinition>>() { };
 
-  public ManagedFilterPipeline(List<FilterDefinition> filterDefinitions) {
-    this.filterDefinitions = Collections.unmodifiableList(filterDefinitions);
+  @Inject
+  public ManagedFilterPipeline(Injector injector, ManagedServletPipeline servletPipeline,
+      Provider<ServletContext> servletContext) {
+    this.injector = injector;
+    this.servletPipeline = servletPipeline;
+    this.servletContext = servletContext;
+
+    this.filterDefinitions = Collections.unmodifiableList(collectFilterDefinitions(injector));
+  }
+
+  /**
+   * Introspects the injector and collects all instances of bound {@code List<FilterDefinition>}
+   * into a master list.
+   * 
+   * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
+   * that preserves insertion order in entry-set iterators.
+   */
+  private List<FilterDefinition> collectFilterDefinitions(Injector injector) {
+    List<FilterDefinition> filterDefinitions = Lists.newArrayList();
+    for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
+      if (FILTER_DEFS.equals(entry.getKey().getTypeLiteral())) {
+
+        @SuppressWarnings("unchecked")
+        Key<List<FilterDefinition>> defsKey = (Key<List<FilterDefinition>>) entry.getKey();
+        filterDefinitions.addAll(injector.getInstance(defsKey));
+      }
+    }
+
+    return filterDefinitions;
   }
 
   public synchronized void initPipeline(ServletContext servletContext)

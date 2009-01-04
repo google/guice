@@ -35,7 +35,7 @@ enum UriPatternType {
   }
 
   /**
-   * Matchers URIs using the pattern grammar of the Servlet API and web.xml.
+   * Matches URIs using the pattern grammar of the Servlet API and web.xml.
    *
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */

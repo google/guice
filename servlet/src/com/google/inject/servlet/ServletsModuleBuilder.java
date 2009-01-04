@@ -18,9 +18,12 @@ package com.google.inject.servlet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import static com.google.inject.name.Names.named;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -36,8 +39,10 @@ class ServletsModuleBuilder extends AbstractModule {
   //invoked on injector config
   @Override
   protected void configure() {
-    // Bind these servlet definitions to a singleton pipeline
-    bind(ManagedServletPipeline.class).toInstance(new ManagedServletPipeline(servletDefinitions));
+    // Bind these servlet definitions to a unique random key. Doesn't matter what it is,
+    // coz it's never used.
+    bind(Key.get(new TypeLiteral<List<ServletDefinition>>() {},
+        named(UUID.randomUUID().toString()))).toInstance(servletDefinitions);
   }
 
   //the first level of the EDSL--

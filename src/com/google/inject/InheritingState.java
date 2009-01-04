@@ -33,7 +33,9 @@ import java.util.Map;
 class InheritingState implements State {
 
   private final State parent;
-  private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newHashMap();
+
+  // Must be a linked hashmap in order to preserve order of bindings in Modules.
+  private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newLinkedHashMap();
   private final Map<Key<?>, Binding<?>> explicitBindings
       = Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();

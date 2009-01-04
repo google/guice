@@ -15,27 +15,59 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Binding;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
-
-import javax.servlet.*;
+import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * A wrapping dispatcher for servlets, in much the same way as {@link ManagedFilterPipeline} is for
  * filters.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
- * @see ManagedFilterPipeline
  */
 @Singleton
 class ManagedServletPipeline {
   private final List<ServletDefinition> servletDefinitions;
+  private static final TypeLiteral<List<ServletDefinition>> SERVLET_DEFS =
+      new TypeLiteral<List<ServletDefinition>>() {};
 
-  public ManagedServletPipeline(List<ServletDefinition> servletDefinitions) {
-    this.servletDefinitions = Collections.unmodifiableList(servletDefinitions);
+  @Inject
+  public ManagedServletPipeline(Injector injector) {
+    this.servletDefinitions = Collections.unmodifiableList(collectServletDefinitions(injector));
+  }
+
+  /**
+   * Introspects the injector and collects all instances of bound {@code List<ServletDefinition>}
+   * into a master list.
+   *
+   * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
+   * that preserves insertion order in entry-set iterators.
+   */
+  private List<ServletDefinition> collectServletDefinitions(Injector injector) {
+    List<ServletDefinition> servletDefinitions = Lists.newArrayList();
+    for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
+      if (SERVLET_DEFS.equals(entry.getKey().getTypeLiteral())) {
+
+        @SuppressWarnings("unchecked")
+        Key<List<ServletDefinition>> defsKey = (Key<List<ServletDefinition>>) entry.getKey();
+        servletDefinitions.addAll(injector.getInstance(defsKey));
+      }
+    }
+
+    return servletDefinitions;
   }
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {

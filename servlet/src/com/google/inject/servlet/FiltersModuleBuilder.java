@@ -18,9 +18,12 @@ package com.google.inject.servlet;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import static com.google.inject.name.Names.named;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.Filter;
 
 /**
@@ -36,9 +39,10 @@ class FiltersModuleBuilder extends AbstractModule {
   //invoked on injector config
   @Override
   protected void configure() {
-    // Bind these filter definitions to a singleton dispatcher pipeline (overrides the
-    // DefaultFilterPipeline)
-    bind(FilterPipeline.class).toInstance(new ManagedFilterPipeline(filterDefinitions));
+    // Bind these filter definitions to a unique random key. Doesn't matter what it is,
+    // coz it's never used.
+    bind(Key.get(new TypeLiteral<List<FilterDefinition>>() {}, named(UUID.randomUUID().toString())))
+        .toInstance(filterDefinitions);
   }
 
   public ServletModule.FilterKeyBindingBuilder filter(List<String> patterns) {

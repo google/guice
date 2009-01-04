@@ -18,8 +18,10 @@ package com.google.inject.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.OutOfScopeException;
+import com.google.inject.Stage;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -62,20 +64,29 @@ public class GuiceFilter implements Filter {
   static volatile WeakReference<ServletContext> servletContext =
       new WeakReference<ServletContext>(null);
 
-  //VisibleForTesting
-  @Inject
-  static void setPipeline(FilterPipeline pipeline) {
-
-    // Multiple injectors with ServletModules?
-    if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
-      throw new RuntimeException("Multiple injectors detected. Please install only one"
+  private static final String MULTIPLE_INJECTORS_ERROR =
+      "Multiple injectors detected. Please install only one"
           + " ServletModule in your web application. While you may "
           + "have more than one injector, you should only configure"
           + " guice-servlet in one of them. (Hint: look for legacy "
-          + "ServetModules or multiple calls to Servlets.configure()).");
+          + "ServetModules or multiple calls to Servlets.configure()).";
+
+  //VisibleForTesting
+  @Inject
+  static void setPipeline(FilterPipeline pipeline, Stage stage) {
+
+    // Multiple injectors with Servlet pipelines?!
+    // We don't throw an exception in DEVELOPMENT stage, to allow for legacy
+    // tests that don't have a tearDown that calls GuiceFilter#clearPipeline().
+    if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
+      if (Stage.PRODUCTION.equals(stage)) {
+        throw new RuntimeException(MULTIPLE_INJECTORS_ERROR);
+      } else {
+        Logger.getLogger(GuiceFilter.class.getName()).warning(MULTIPLE_INJECTORS_ERROR);
+      }
     }
 
-    // We will only overwrite the default pipeline
+    // We overwrite the default pipeline
     GuiceFilter.pipeline = pipeline;
   }
 
