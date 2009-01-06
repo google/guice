@@ -77,7 +77,7 @@ public class GuiceFilter implements Filter {
 
     // Multiple injectors with Servlet pipelines?!
     // We don't throw an exception in DEVELOPMENT stage, to allow for legacy
-    // tests that don't have a tearDown that calls GuiceFilter#clearPipeline().
+    // tests that don't have a tearDown that calls GuiceFilter#reset().
     if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
       if (Stage.PRODUCTION.equals(stage)) {
         throw new RuntimeException(MULTIPLE_INJECTORS_ERROR);
@@ -91,8 +91,8 @@ public class GuiceFilter implements Filter {
   }
 
   //VisibleForTesting
-  static void clearPipeline() {
-    pipeline = null;
+  static void reset() {
+    pipeline = new DefaultFilterPipeline();
   }
 
   public void doFilter(ServletRequest servletRequest,
@@ -175,7 +175,7 @@ public class GuiceFilter implements Filter {
       pipeline.destroyPipeline();
 
     } finally {
-      clearPipeline();
+      reset();
       servletContext.clear();
     }
   }

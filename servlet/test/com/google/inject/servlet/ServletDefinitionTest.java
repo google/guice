@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.replay;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Binding;
 import junit.framework.TestCase;
 
 import java.util.Enumeration;
@@ -42,6 +43,8 @@ public class ServletDefinitionTest extends TestCase {
   public final void testServletInitAndConfig() throws ServletException {
     Injector injector = createMock(Injector.class);
 
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
     final HttpServlet mockServlet = new HttpServlet() {
     };
     expect(injector.getInstance(Key.get(HttpServlet.class)))

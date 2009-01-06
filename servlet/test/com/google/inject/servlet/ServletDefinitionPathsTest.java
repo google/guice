@@ -16,21 +16,19 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 /**
  * Ensures servlet spec compliance for CGI-style variables and general
@@ -61,8 +59,10 @@ public class ServletDefinitionPathsTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    final boolean[] run = new boolean[1];
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
 
+    final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(new HttpServlet() {
@@ -125,8 +125,10 @@ public class ServletDefinitionPathsTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    final boolean[] run = new boolean[1];
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
 
+    final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(new HttpServlet() {
@@ -208,8 +210,10 @@ public class ServletDefinitionPathsTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
-    final boolean[] run = new boolean[1];
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
 
+    final boolean[] run = new boolean[1];
     //get an instance of this servlet
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(new HttpServlet() {

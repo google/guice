@@ -73,6 +73,7 @@ class FiltersModuleBuilder extends AbstractModule {
 
     public void through(Class<? extends Filter> filterKey,
         Map<String, String> contextParams) {
+      
       // Careful you don't accidentally make this method recursive, thank you IntelliJ IDEA!
       through(Key.get(filterKey), contextParams);
     }

@@ -38,7 +38,7 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     doFilters = 0;
     destroys = 0;
 
-    GuiceFilter.clearPipeline();
+    GuiceFilter.reset();
   }
 
 

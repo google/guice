@@ -1,16 +1,25 @@
 package com.google.inject.servlet;
 
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import static org.easymock.EasyMock.*;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
@@ -24,7 +33,13 @@ public class FilterDefinitionTest extends TestCase {
     Injector injector = createMock(Injector.class);
 
     final MockFilter mockFilter = new MockFilter();
-    expect(injector.getInstance(Key.get(Filter.class))).andReturn(mockFilter).anyTimes();
+
+    expect(injector.getBinding(Key.get(Filter.class)))
+        .andReturn(createMock(Binding.class));
+
+    expect(injector.getInstance(Key.get(Filter.class)))
+        .andReturn(mockFilter)
+        .anyTimes();
 
     replay(injector);
 
@@ -70,7 +85,13 @@ public class FilterDefinitionTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     final MockFilter mockFilter = new MockFilter();
-    expect(injector.getInstance(Key.get(Filter.class))).andReturn(mockFilter).anyTimes();
+
+    expect(injector.getBinding(Key.get(Filter.class)))
+        .andReturn(createMock(Binding.class));
+
+    expect(injector.getInstance(Key.get(Filter.class)))
+        .andReturn(mockFilter)
+        .anyTimes();
 
     expect(request.getServletPath()).andReturn("/index.html");
 
@@ -118,7 +139,13 @@ public class FilterDefinitionTest extends TestCase {
         //suppress rest of chain...
       }
     };
-    expect(injector.getInstance(Key.get(Filter.class))).andReturn(mockFilter).anyTimes();
+
+    expect(injector.getBinding(Key.get(Filter.class)))
+        .andReturn(createMock(Binding.class));
+    
+    expect(injector.getInstance(Key.get(Filter.class)))
+        .andReturn(mockFilter)
+        .anyTimes();
 
     expect(request.getServletPath()).andReturn("/index.html");
 

@@ -33,7 +33,7 @@ public class FilterPipelineTest extends TestCase {
 
   @Override
   public final void setUp() {
-    GuiceFilter.clearPipeline();
+    GuiceFilter.reset();
     
     Guice.createInjector(new ServletModule() {
 
@@ -53,7 +53,7 @@ public class FilterPipelineTest extends TestCase {
 
   @Override
   public final void tearDown() {
-    GuiceFilter.clearPipeline();    
+    GuiceFilter.reset();
   }
 
   public final void testDispatchThruGuiceFilter() throws ServletException, IOException {

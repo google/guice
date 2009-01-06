@@ -52,7 +52,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
     destroys = 0;
     doFilters = 0;
 
-    GuiceFilter.clearPipeline();
+    GuiceFilter.reset();
   }
 
   public final void testDispatchRequestToManagedPipelineServlets()

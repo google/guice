@@ -48,7 +48,7 @@ public class ServletTest extends TestCase {
   @Override
   public void setUp() {
     //we need to clear the reference to the pipeline every test =(
-    GuiceFilter.clearPipeline();
+    GuiceFilter.reset();
   }
 
   public void testNewRequestObject()

@@ -73,6 +73,8 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       }
     };
 
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
@@ -133,6 +135,9 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
       }
     };
+
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
 
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
@@ -199,6 +204,9 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
       }
     };
+
+    expect(injector.getBinding(Key.get(HttpServlet.class)))
+        .andReturn(createMock(Binding.class));
 
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(mockServlet);
