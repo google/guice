@@ -65,7 +65,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
         // These servets should never fire... (ordering test)
         serve("*.html").with(NeverServlet.class);
-        serve("/*").with(Key.get(NeverServlet.class));
+        serve("/test/*").with(Key.get(NeverServlet.class));
         serve("/index/*").with(Key.get(NeverServlet.class));
         serve("*.jsp").with(Key.get(NeverServlet.class));
       }
@@ -108,7 +108,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
         // These servets should never fire...
         serve("*.html").with(NeverServlet.class);
-        serve("/*").with(Key.get(NeverServlet.class));
+        serve("/test/*").with(Key.get(NeverServlet.class));
         serve("/index/*").with(Key.get(NeverServlet.class));
         serve("*.jsp").with(Key.get(NeverServlet.class));
 

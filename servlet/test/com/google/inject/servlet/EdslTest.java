@@ -52,20 +52,20 @@ public class EdslTest extends TestCase {
             new HashMap<String, String>());
 
 
-        serve("/*").with(DummyServlet.class);
-        serve("/*").with(Key.get(DummyServlet.class));
-        serve("/*").with(DummyServlet.class, new HashMap<String, String>());
+        serve("/1/*").with(DummyServlet.class);
+        serve("/2/*").with(Key.get(DummyServlet.class));
+        serve("/3/*").with(DummyServlet.class, new HashMap<String, String>());
 
-        serve("*.html").with(Key.get(DummyServlet.class));
+        serve("*.htm").with(Key.get(DummyServlet.class));
         serve("*.html").with(Key.get(DummyServlet.class),
             new HashMap<String, String>());
 
-        serveRegex("/person/[0-9]*").with(DummyServlet.class);
+        serveRegex("/person/[0-8]*").with(DummyServlet.class);
         serveRegex("/person/[0-9]*").with(DummyServlet.class,
             new HashMap<String, String>());
 
-        serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class));
-        serveRegex("/person/[0-9]*").with(Key.get(DummyServlet.class),
+        serveRegex("/person/[0-6]*").with(Key.get(DummyServlet.class));
+        serveRegex("/person/[0-9]/2/*").with(Key.get(DummyServlet.class),
             new HashMap<String, String>());
       }
     };

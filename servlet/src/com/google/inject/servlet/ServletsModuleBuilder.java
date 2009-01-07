@@ -16,6 +16,7 @@
 package com.google.inject.servlet;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -23,6 +24,7 @@ import static com.google.inject.name.Names.named;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import javax.servlet.http.HttpServlet;
 
@@ -39,6 +41,19 @@ class ServletsModuleBuilder extends AbstractModule {
   //invoked on injector config
   @Override
   protected void configure() {
+
+    // Ensure that servlets are not bound twice to the same pattern.
+    Set<String> servletUris = Sets.newHashSet();
+    for (ServletDefinition servletDefinition : servletDefinitions) {
+      if (servletUris.contains(servletDefinition.getPattern())) {
+        addError("More than one servlet was mapped to the same URI pattern: "
+            + servletDefinition.getPattern());
+      }
+      else {
+        servletUris.add(servletDefinition.getPattern());
+      }
+    }
+
     // Bind these servlet definitions to a unique random key. Doesn't matter what it is,
     // coz it's never used.
     bind(Key.get(new TypeLiteral<List<ServletDefinition>>() {},

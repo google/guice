@@ -189,4 +189,11 @@ class ServletDefinition {
     httpServlet.get().service(request, servletResponse);
   }
 
+  String getKey() {
+    return servletKey.toString();
+  }
+
+  String getPattern() {
+    return pattern;
+  }
 }

@@ -64,7 +64,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
         serve("/*", "/index.html").with(TestServlet.class);
 
         // These servets should never fire... (ordering test)
-        serve("*.html", "/*", "/index/*", "*.jsp").with(Key.get(NeverServlet.class));
+        serve("*.html", "/o/*", "/index/*", "*.jsp").with(Key.get(NeverServlet.class));
       }
     });
 
@@ -140,7 +140,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
         serve("/*").with(TestServlet.class);
 
         // These servets should never fire...
-        serve("*.html", "/*", "/index/*", "*.jsp").with(Key.get(NeverServlet.class));
+        serve("*.html", "/y/*", "/index/*", "*.jsp").with(Key.get(NeverServlet.class));
 
       }
     });
