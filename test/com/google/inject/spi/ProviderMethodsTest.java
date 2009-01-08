@@ -28,8 +28,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.internal.ProviderMethod;
+import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Types;
@@ -317,5 +320,37 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Integer.class)),
         Dependency.get(Key.get(String.class, Names.named("units")))),
         binding.getDependencies());
+  }
+
+  public void testNonModuleProviderMethods() {
+    final Object methodsObject = new Object() {
+      @Provides @Named("foo") String provideFoo() {
+        return "foo-value";
+      }
+    };
+
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        install(ProviderMethodsModule.forObject(methodsObject));
+      }
+    };
+
+    Injector injector = Guice.createInjector(module);
+
+    Key<String> key = Key.get(String.class, Names.named("foo"));
+    assertEquals("foo-value", injector.getInstance(key));
+
+    // Test the provider method object itself. This makes sure getInstance works, since GIN uses it
+    List<Element> elements = Elements.getElements(module);
+    assertEquals(1, elements.size());
+
+    Element element = elements.get(0);
+    assertTrue(element + " instanceof ProviderInstanceBinding",
+        element instanceof ProviderInstanceBinding);
+
+    ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
+    Provider provider = binding.getProviderInstance();    
+    assertEquals(ProviderMethod.class, provider.getClass());
+    assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
   }
 }

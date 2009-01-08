@@ -69,6 +69,11 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
     return method;
   }
 
+  // exposed for GIN
+  public Object getInstance() {
+    return instance;
+  }
+
   public void configure(Binder binder) {
     binder = binder.withSource(method);
 

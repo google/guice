@@ -41,10 +41,10 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
-  private final Module delegate;
+  private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
 
-  private ProviderMethodsModule(Module delegate) {
+  private ProviderMethodsModule(Object delegate) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
   }
@@ -53,14 +53,21 @@ public final class ProviderMethodsModule implements Module {
    * Returns a module which creates bindings for provider methods from the given module.
    */
   public static Module forModule(Module module) {
+    return forObject(module);
+  }
+
+  /**
+   * Returns a module which creates bindings for provider methods from the given object.
+   * This is useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
+   */
+  public static Module forObject(Object object) {
     // avoid infinite recursion, since installing a module always installs itself
-    if (module instanceof ProviderMethodsModule) {
+    if (object instanceof ProviderMethodsModule) {
       return Modules.EMPTY_MODULE;
     }
 
-    return new ProviderMethodsModule(module);
+    return new ProviderMethodsModule(object);
   }
-
   public synchronized void configure(Binder binder) {
     for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
       providerMethod.configure(binder);
