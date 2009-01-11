@@ -113,7 +113,7 @@
         classpath="${common.basedir}/lib/build/jarjar-1.0rc8.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <fileset dir="${build.dir}/classes"/>
-      <zipfileset src="${common.basedir}/lib/build/cglib-2.2.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/cglib-2.2.1-snapshot.jar"/>
       <zipfileset src="${common.basedir}/lib/build/asm-3.1.jar"/>
       <zipfileset src="${common.basedir}/lib/build/google-collect-snapshot-20081129.jar"/>
       <rule pattern="com.google.common.**" result="com.google.inject.internal.@1"/>
