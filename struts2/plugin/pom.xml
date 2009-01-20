@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.google.guice.integration</groupId>
+    <artifactId>integration</artifactId>
+    <version>1.0</version>
+  </parent>
+  <artifactId>guice-struts2-plugin</artifactId>
+  <packaging>jar</packaging>
+  <name>Google Guice - Integration: Struts2 Plugin</name>
+  <description>Guice integration with Struts2 as a plugin</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guice</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guice.integration</groupId>
+      <artifactId>guice-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>opensymphony</groupId>
+      <artifactId>xwork</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.google.guice.integration</groupId>
+    <artifactId>integration</artifactId>
+    <version>1.0</version>
+  </parent>
+  <artifactId>guice-spring</artifactId>
+  <packaging>jar</packaging>
+  <name>Google Guice - Integration: Spring</name>
+  <description>Guice integration with the Spring container</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guice</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+  </dependencies>
+</project>
