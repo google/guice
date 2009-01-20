@@ -50,6 +50,9 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <scm>
+    <url>http://code.google.com/p/google-guice/source/browse/</url>
+  </scm>
   <build>
     <plugins>
       <plugin>
