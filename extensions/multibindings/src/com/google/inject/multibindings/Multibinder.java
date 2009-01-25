@@ -39,7 +39,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -235,10 +234,11 @@ public abstract class Multibinder<T> {
     @Inject void initialize(Injector injector) {
       providers = Lists.newArrayList();
       List<Dependency<?>> dependencies = Lists.newArrayList();
-      for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
+      for (Binding<?> entry : injector.findBindingsByType(elementType)) {
+
         if (keyMatches(entry.getKey())) {
-          @SuppressWarnings("unchecked") // protected by keyMatches()
-          Binding<T> binding = (Binding<T>) entry.getValue();
+          @SuppressWarnings("unchecked") // protected by findBindingsByType()
+          Binding<T> binding = (Binding<T>) entry;
           providers.add(binding.getProvider());
           dependencies.add(Dependency.get(binding.getKey()));
         }
