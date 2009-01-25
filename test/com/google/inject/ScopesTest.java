@@ -334,6 +334,17 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  public void testSingletonAnnotationOnParameterizedType() {
+    Injector injector = Guice.createInjector();
+    assertSame(injector.getInstance(new Key<Injected<String>>() {}),
+        injector.getInstance(new Key<Injected<String>>() {}));
+    assertSame(injector.getInstance(new Key<In<Integer>>() {}),
+        injector.getInstance(new Key<In<Short>>() {}));
+  }
+
+  @ImplementedBy(Injected.class) public interface In<T> {}
+  @Singleton public static class Injected<T>  implements In<T> {}
+
   @Target({ ElementType.TYPE, ElementType.METHOD })
   @Retention(RUNTIME)
   @ScopeAnnotation
