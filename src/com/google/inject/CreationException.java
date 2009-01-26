@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableSet;
 import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 import java.util.Collection;
@@ -33,7 +33,7 @@ public class CreationException extends RuntimeException {
   private final ImmutableSet<Message> messages;
 
   /** Creates a CreationException containing {@code messages}. */
-  public CreationException(Iterable<Message> messages) {
+  public CreationException(Collection<Message> messages) {
     this.messages = ImmutableSet.copyOf(messages);
     checkArgument(!this.messages.isEmpty());
     initCause(Errors.getOnlyCause(this.messages));
