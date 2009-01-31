@@ -92,7 +92,15 @@ class ServletDefinition {
   }
 
   public void destroy() {
-    httpServlet.get().destroy();
+    HttpServlet reference = httpServlet.get();
+
+    // Do nothing if this Servlet was invalid (usually due to not being scoped
+    // properly). According to Servlet Spec: it is "out of service", and does not
+    // need to be destroyed.
+    if (null == reference) {
+      return;
+    }
+    reference.destroy();
   }
 
   /**
