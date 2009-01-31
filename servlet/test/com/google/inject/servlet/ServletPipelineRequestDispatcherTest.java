@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -78,18 +79,19 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
+
     final Key<List<ServletDefinition>> servetDefsKey = Key
         .get(new TypeLiteral<List<ServletDefinition>>() {});
-    expect(injector.getBindings())
-        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
 
-          put(servetDefsKey, createMock(Binding.class));
-        }});
+    Binding mockBinding = createMock(Binding.class);
+    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
+        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
 
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest);
+    replay(injector, mockRequest, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
@@ -103,7 +105,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     assertTrue("Include did not dispatch to our servlet!", run[0]);
 
-    verify(injector, mockRequest);
+    verify(injector, mockRequest, mockBinding);
   }
 
   public final void testForwardToManagedServlet() throws IOException, ServletException {
@@ -144,16 +146,16 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final Key<List<ServletDefinition>> servetDefsKey = Key
         .get(new TypeLiteral<List<ServletDefinition>>() {});
-    expect(injector.getBindings())
-        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
 
-          put(servetDefsKey, createMock(Binding.class));
-        }});
+    Binding mockBinding = createMock(Binding.class);
+    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
+        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
 
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest, mockResponse);
+    replay(injector, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
@@ -166,7 +168,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     assertTrue("Include did not dispatch to our servlet!", run[0]);
 
-    verify(injector, mockRequest, mockResponse);
+    verify(injector, mockRequest, mockResponse, mockBinding);
   }
 
   public final void testForwardToManagedServletFailureOnCommittedBuffer()
@@ -214,16 +216,16 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final Key<List<ServletDefinition>> servetDefsKey = Key
         .get(new TypeLiteral<List<ServletDefinition>>() {});
-    expect(injector.getBindings())
-        .andReturn(new HashMap<Key<?>, Binding<?>>() {{
 
-          put(servetDefsKey, createMock(Binding.class));
-        }});
+    Binding mockBinding = createMock(Binding.class);
+    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
+        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
 
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest, mockResponse);
+    replay(injector, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector);
@@ -237,7 +239,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       dispatcher.forward(mockRequest, mockResponse);
     }
     finally {
-      verify(injector, mockRequest, mockResponse);
+      verify(injector, mockRequest, mockResponse, mockBinding);
     }
 
   }

@@ -26,7 +26,6 @@ import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -75,13 +74,11 @@ class ManagedFilterPipeline implements FilterPipeline{
    */
   private List<FilterDefinition> collectFilterDefinitions(Injector injector) {
     List<FilterDefinition> filterDefinitions = Lists.newArrayList();
-    for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
-      if (FILTER_DEFS.equals(entry.getKey().getTypeLiteral())) {
+    for (Binding<?> entry : injector.findBindingsByType(FILTER_DEFS)) {
 
-        @SuppressWarnings("unchecked")
-        Key<List<FilterDefinition>> defsKey = (Key<List<FilterDefinition>>) entry.getKey();
-        filterDefinitions.addAll(injector.getInstance(defsKey));
-      }
+      @SuppressWarnings("unchecked") //guarded by findBindingsByType()
+      Key<List<FilterDefinition>> defsKey = (Key<List<FilterDefinition>>) entry.getKey();
+      filterDefinitions.addAll(injector.getInstance(defsKey));
     }
 
     return filterDefinitions;

@@ -25,7 +25,6 @@ import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -58,13 +57,11 @@ class ManagedServletPipeline {
    */
   private List<ServletDefinition> collectServletDefinitions(Injector injector) {
     List<ServletDefinition> servletDefinitions = Lists.newArrayList();
-    for (Map.Entry<Key<?>, Binding<?>> entry : injector.getBindings().entrySet()) {
-      if (SERVLET_DEFS.equals(entry.getKey().getTypeLiteral())) {
+    for (Binding<?> entry : injector.findBindingsByType(SERVLET_DEFS)) {
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked") //guarded by findBindingsByType()
         Key<List<ServletDefinition>> defsKey = (Key<List<ServletDefinition>>) entry.getKey();
         servletDefinitions.addAll(injector.getInstance(defsKey));
-      }
     }
 
     return servletDefinitions;
