@@ -77,7 +77,7 @@ implements ImplementationNode.Factory<String, ImplementationNode<String>> {
     public void setInstance(Object instance) {
       node.setHeaderBackgroundColor("#aaaaaa");
       node.setHeaderTextColor("#ffffff");
-      node.setTitle(nameFactory.getClassName(instance));
+      node.setTitle(nameFactory.getInstanceName(instance));
     }
 
     public void setSource(Object source) {

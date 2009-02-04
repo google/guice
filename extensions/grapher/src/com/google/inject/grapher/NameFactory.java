@@ -29,7 +29,7 @@ import java.lang.reflect.Member;
 public interface NameFactory {
   String getMemberName(Member member);
   String getClassName(Key<?> key);
-  String getClassName(Object instance);
+  String getInstanceName(Object instance);
   String getAnnotationName(Key<?> key);
   String getSourceName(Object source);
 }

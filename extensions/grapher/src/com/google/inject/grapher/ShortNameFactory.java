@@ -20,9 +20,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.List;
 
+import com.google.common.base.Join;
+import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ProviderMethod;
+import com.google.inject.internal.StackTraceElements;
 
 /**
  * Reasonable implementation for {@link NameFactory}. Mostly takes various
@@ -65,12 +70,57 @@ public class ShortNameFactory implements NameFactory {
     return stripPackages(typeLiteral.toString());
   }
 
-  public String getClassName(Object instance) {
-    return stripPackages(instance.getClass().getName());
+  public String getInstanceName(Object instance) {
+    if (instance instanceof ProviderMethod) {
+      return getMethodString(((ProviderMethod<?>) instance).getMethod());
+    }
+
+    if (instance instanceof CharSequence) {
+      return "\"" + instance + "\"";
+    }
+
+    try {
+      if (instance.getClass().getMethod("toString").getDeclaringClass().equals(Object.class)) {
+        return stripPackages(instance.getClass().getName());
+      }
+    } catch (SecurityException e) {
+      throw new AssertionError(e);
+    } catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
+
+    return instance.toString();
   }
-  
+
+  /**
+   * Returns a name for a Guice "source" object. This will typically be either
+   * a {@link StackTraceElement} for when the binding is made to the instance,
+   * or a {@link Method} when a provider method is used.
+   */
   public String getSourceName(Object source) {
+    if (source instanceof Method) {
+      source = StackTraceElements.forMember((Method) source);
+    }
+
+    if (source instanceof StackTraceElement) {
+      return getFileString((StackTraceElement) source);
+    }
+
     return stripPackages(source.toString());
+  }
+
+  protected String getFileString(StackTraceElement stackTraceElement) {
+    return stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber();
+  }
+
+  protected String getMethodString(Method method) {
+    List<String> paramStrings = Lists.newArrayList();
+    for (Class<?> paramType : method.getParameterTypes()) {
+      paramStrings.add(paramType.getSimpleName());
+    }
+
+    String paramString = Join.join(", ", paramStrings);
+    return "#" + method.getName() + "(" + paramString + ")";
   }
 
   /**
