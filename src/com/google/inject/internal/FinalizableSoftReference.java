@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2006 Google Inc.
+/*
+ * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,23 @@ package com.google.inject.internal;
 import java.lang.ref.SoftReference;
 
 /**
- * Soft reference with a {@link FinalizableReference#finalizeReferent()} method
- * which a background thread invokes after the garbage collector reclaims the
- * referent. This is a simpler alternative to using a
- * {@link java.lang.ref.ReferenceQueue}.
+ * Soft reference with a {@code finalizeReferent()} method which a background
+ * thread invokes after the garbage collector reclaims the referent. This is a
+ * simpler alternative to using a {@link java.lang.ref.ReferenceQueue}.
  *
- * @author crazybob@google.com (Bob Lee)
+ * @author Bob Lee
  */
 public abstract class FinalizableSoftReference<T> extends SoftReference<T>
     implements FinalizableReference {
 
-  protected FinalizableSoftReference(T referent) {
-    super(referent, FinalizableReferenceQueue.getInstance());
+  /**
+   * Consructs a new finalizable soft reference.
+   *
+   * @param referent to softly reference
+   * @param queue that should finalize the referent
+   */
+  protected FinalizableSoftReference(T referent,
+      FinalizableReferenceQueue queue) {
+    super(referent, queue.queue);
   }
 }

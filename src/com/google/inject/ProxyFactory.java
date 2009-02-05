@@ -23,7 +23,8 @@ import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
-import com.google.inject.internal.ReferenceCache;
+import com.google.inject.internal.Function;
+import com.google.inject.internal.MapMaker;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -54,19 +55,20 @@ class ProxyFactory implements ConstructionProxyFactory {
     defaultFactory = new DefaultConstructionProxyFactory();
   }
 
+  /** Cached construction proxies for each injection point */
+  Map<InjectionPoint, ConstructionProxy> constructionProxies = new MapMaker().makeComputingMap(
+      new Function<InjectionPoint, ConstructionProxy>() {
+    public ConstructionProxy apply(InjectionPoint key) {
+      return createConstructionProxy(key);
+    }
+  });
+
   @SuppressWarnings("unchecked") // the constructed T is the same as the injection point's T
   public <T> ConstructionProxy<T> get(InjectionPoint injectionPoint) {
     return (ConstructionProxy<T>) constructionProxies.get(injectionPoint);
   }
 
-  /** Cached construction proxies for each injection point */
-  ReferenceCache<InjectionPoint, ConstructionProxy> constructionProxies
-      = new ReferenceCache<InjectionPoint, ConstructionProxy>() {
-    protected ConstructionProxy create(InjectionPoint key) {
-      return createConstructionProxy(key);
-    }
-  };
-
+  // TODO: This isn't safe.
   <T> ConstructionProxy<T> createConstructionProxy(InjectionPoint injectionPoint) {
     @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
     Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();

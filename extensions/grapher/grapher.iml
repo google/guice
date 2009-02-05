@@ -11,6 +11,7 @@
     <orderEntry type="module" module-name="guice" exported="" />
     <orderEntry type="module" module-name="assistedinject" />
     <orderEntry type="module" module-name="multibindings" />
+    <orderEntryProperties />
   </component>
 </module>
 

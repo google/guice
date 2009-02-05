@@ -16,13 +16,13 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.ReferenceType.WEAK;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Map;
 import java.util.logging.Logger;
 import net.sf.cglib.core.DefaultNamingPolicy;
 import net.sf.cglib.core.NamingPolicy;
@@ -86,17 +86,18 @@ public final class BytecodeGen {
    * Weak cache of bridge class loaders that make the Guice implementation
    * classes visible to various code-generated proxies of client classes.
    */
-  private static final ReferenceCache<ClassLoader, ClassLoader> CLASS_LOADER_CACHE
-      = new ReferenceCache<ClassLoader, ClassLoader>(WEAK, WEAK) {
-        @Override protected ClassLoader create(final ClassLoader typeClassLoader) {
-          logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
-          return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-            public ClassLoader run() {
-              return new BridgeClassLoader(typeClassLoader);
-            }
-          });
+  private static final Map<ClassLoader, ClassLoader> CLASS_LOADER_CACHE
+      = new MapMaker().weakKeys().weakValues().makeComputingMap(
+          new Function<ClassLoader, ClassLoader>() {
+    public ClassLoader apply(final @Nullable ClassLoader typeClassLoader) {
+      logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
+      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+        public ClassLoader run() {
+          return new BridgeClassLoader(typeClassLoader);
         }
-      };
+      });
+    }
+  });
 
   /**
    * For class loaders, {@code null}, is always an alias to the

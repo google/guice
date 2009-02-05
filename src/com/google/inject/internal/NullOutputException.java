@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 package com.google.inject.internal;
 
 /**
- * Implemented by references that have code to run after garbage collection of
- * their referents.
+ * Thrown when a computer function returns null. This subclass exists so
+ * that our ReferenceCache adapter can differentiate null output from null
+ * keys, but we don't want to make this public otherwise.
  *
- * @see FinalizableReferenceQueue
  * @author Bob Lee
  */
-public interface FinalizableReference {
-
-  /**
-   * Invoked on a background thread after the referent has been garbage
-   * collected.
-   */
-  void finalizeReferent();
+class NullOutputException extends NullPointerException {
+  public NullOutputException(String s) {
+    super(s);
+  }
 }

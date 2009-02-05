@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,11 @@
 
 package com.google.inject.internal;
 
-/**
- * Implemented by references that have code to run after garbage collection of
- * their referents.
- *
- * @see FinalizableReferenceQueue
- * @author Bob Lee
- */
-public interface FinalizableReference {
+import java.util.Timer;
 
-  /**
-   * Invoked on a background thread after the referent has been garbage
-   * collected.
-   */
-  void finalizeReferent();
+/**
+ * Timer used for entry expiration in MapMaker.
+ */
+class ExpirationTimer {
+  static Timer instance = new Timer(true);
 }

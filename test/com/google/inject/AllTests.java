@@ -18,10 +18,9 @@ package com.google.inject;
 
 import com.google.inject.internal.FinalizableReferenceQueueTest;
 import com.google.inject.internal.LineNumbersTest;
-import com.google.inject.internal.ReferenceCacheTest;
-import com.google.inject.internal.ReferenceMapTest;
-import com.google.inject.internal.ReferenceMapTestSuite;
+import com.google.inject.internal.MapMakerTestSuite;
 import com.google.inject.internal.UniqueAnnotationsTest;
+import com.google.inject.internal.Jsr166HashMapTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.ElementsTest;
@@ -74,7 +73,6 @@ public class AllTests {
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
     suite.addTestSuite(ProxyFactoryTest.class);
-    suite.addTest(ReferenceMapTestSuite.suite());
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
@@ -95,8 +93,8 @@ public class AllTests {
     // internal
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
     suite.addTestSuite(LineNumbersTest.class);
-    suite.addTestSuite(ReferenceCacheTest.class);
-    suite.addTestSuite(ReferenceMapTest.class);
+    suite.addTest(MapMakerTestSuite.suite());
+    suite.addTestSuite(Jsr166HashMapTest.class);
     suite.addTestSuite(TypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
     suite.addTestSuite(BytecodeGenTest.class);

@@ -9,6 +9,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="guice" exported="" />
+    <orderEntryProperties />
   </component>
 </module>
 

@@ -135,6 +135,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="servlet" />
+    <orderEntryProperties />
   </component>
 </module>
 

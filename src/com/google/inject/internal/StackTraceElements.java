@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.ReferenceType.SOFT;
-import static com.google.inject.internal.ReferenceType.WEAK;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -30,17 +28,17 @@ import java.util.Map;
  */
 public class StackTraceElements {
 
-  static final Map<Class<?>, LineNumbers> lineNumbersCache
-      = new ReferenceCache<Class<?>, LineNumbers>(WEAK, SOFT) {
-    protected LineNumbers create(Class<?> key) {
-      try {
-        return new LineNumbers(key);
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  };
+  static final Map<Class<?>, LineNumbers> lineNumbersCache = new MapMaker().weakKeys().softValues()
+      .makeComputingMap(new Function<Class<?>, LineNumbers>() {
+        public LineNumbers apply(Class<?> key) {
+          try {
+            return new LineNumbers(key);
+          }
+          catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        }
+      });
 
   public static Object forMember(Member member) {
     if (member == null) {

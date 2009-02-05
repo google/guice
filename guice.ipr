@@ -7,7 +7,6 @@
       <antReference projectDefault="true" />
       <customJdkName value="1.5" />
       <maximumHeapSize value="128" />
-      <maximumStackSize value="32" />
       <properties />
     </buildFile>
   </component>
@@ -205,102 +204,102 @@
         <option name="myLocal" value="false" />
         <inspection_tool class="SSBasedInspection" level="WARNING" enabled="true">
           <replaceConfiguration name="use Lists.newArrayList" text="java.util.List&lt;$T$&gt; $var$ = new java.util.ArrayList&lt;$T$&gt;();" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.List&lt;$T$&gt; $var$ = com.google.common.collect.Lists.newArrayList();">
-            <constraint name="var" within="" contains="" />
-            <constraint name="T" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="T" />
           </replaceConfiguration>
           <replaceConfiguration name="use Lists.newArrayList (iterable)" text="java.util.List&lt;$T$&gt; $var$ = new java.util.ArrayList&lt;$T$&gt;($iterable$);" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.List&lt;$T$&gt; $var$ = com.google.common.collect.Lists.newArrayList($iterable$);">
-            <constraint name="var" within="" contains="" />
-            <constraint name="T" within="" contains="" />
-            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="T" />
+            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" />
           </replaceConfiguration>
           <replaceConfiguration name="use Lists.newLinkedList" text="java.util.List&lt;$T$&gt; $var$ = new java.util.LinkedList&lt;$T$&gt;();" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.List&lt;$T$&gt; $var$ = com.google.common.collect.Lists.newLinkedList();">
-            <constraint name="var" within="" contains="" />
-            <constraint name="T" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="T" />
           </replaceConfiguration>
           <replaceConfiguration name="use Lists.newLinkedList (iterable)" text="java.util.List&lt;$T$&gt; $var$ = new java.util.LinkedList&lt;$T$&gt;($iterable$);" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.List&lt;$T$&gt; $var$ = com.google.common.collect.Lists.newLinkedList($iterable$);">
-            <constraint name="var" within="" contains="" />
-            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" within="" contains="" />
-            <constraint name="T" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" />
+            <constraint name="T" />
           </replaceConfiguration>
           <replaceConfiguration name="use Sets.newHashSet" text="java.util.Set&lt;$T$&gt; $var$ = new java.util.HashSet&lt;$T$&gt;();" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.Set&lt;$T$&gt; $var$ = com.google.common.collect.Sets.newHashSet();">
-            <constraint name="var" within="" contains="" />
-            <constraint name="T" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="T" />
           </replaceConfiguration>
           <replaceConfiguration name="use Sets.newHashSet (iterable)" text="java.util.Set&lt;$T$&gt; $var$ = new HashSet&lt;$T$&gt;($iterable$);" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.Set&lt;$T$&gt; $var$ = com.google.common.collect.Sets.newHashSet($iterable$);">
-            <constraint name="var" within="" contains="" />
-            <constraint name="T" within="" contains="" />
-            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="T" />
+            <constraint name="iterable" nameOfExprType="java.lang.Iterable" exprTypeWithinHierarchy="true" />
           </replaceConfiguration>
           <replaceConfiguration name="use Maps.newHashMap" text="java.util.Map&lt;$K$, $V$&gt; $var$ = new java.util.HashMap&lt;$K$, $V$&gt;();" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.Map&lt;$K$, $V$&gt; $var$ = com.google.common.collect.Maps.newHashMap();">
-            <constraint name="var" within="" contains="" />
-            <constraint name="K" within="" contains="" />
-            <constraint name="V" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="K" />
+            <constraint name="V" />
           </replaceConfiguration>
           <replaceConfiguration name="use Multimap&lt;K, V&gt; instead of Map&lt;K, List&lt;V&gt;&gt;" text="java.util.Map&lt;$K$, java.util.List&lt;$V$&gt;&gt; $var$ = $expr$;" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Multimap&lt;$K$, $V$&gt; $var$ = $expr$;">
-            <constraint name="K" within="" contains="" />
-            <constraint name="V" within="" contains="" />
-            <constraint name="var" within="" contains="" />
-            <constraint name="expr" within="" contains="" />
+            <constraint name="K" />
+            <constraint name="V" />
+            <constraint name="var" />
+            <constraint name="expr" />
           </replaceConfiguration>
           <replaceConfiguration name="use Multimap&lt;K, V&gt; instead of Map&lt;K, Set&lt;V&gt;&gt;" text="java.util.Map&lt;$K$, java.util.Set&lt;$V$&gt;&gt; $var$ = $expr$;" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Multimap&lt;$K$, $V$&gt; $var$ = $expr$;">
-            <constraint name="K" within="" contains="" />
-            <constraint name="V" within="" contains="" />
-            <constraint name="var" within="" contains="" />
-            <constraint name="expr" within="" contains="" />
+            <constraint name="K" />
+            <constraint name="V" />
+            <constraint name="var" />
+            <constraint name="expr" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkState" text="if ($condition$) {&#10;  throw new IllegalStateException($message$);&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkState(!($condition$), $message$);">
-            <constraint name="condition" within="" contains="" />
-            <constraint name="message" nameOfExprType="java.lang.String" within="" contains="" />
+            <constraint name="condition" />
+            <constraint name="message" nameOfExprType="java.lang.String" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkArgument" text="if ($argumentCondition$) {&#10;  throw new IllegalArgumentException($message$);&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkArgument(!($argumentCondition$), $message$);">
-            <constraint name="message" nameOfExprType="java.lang.String" within="" contains="" />
-            <constraint name="argumentCondition" within="" contains="" />
+            <constraint name="message" nameOfExprType="java.lang.String" />
+            <constraint name="argumentCondition" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkNotNull" text="if ($var$ == null) {&#10;  throw new NullPointerException($message$);&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkNotNull($var$, $message$);">
-            <constraint name="var" within="" contains="" />
-            <constraint name="message" nameOfExprType="java.lang.String" within="" contains="" />
+            <constraint name="var" />
+            <constraint name="message" nameOfExprType="java.lang.String" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.max" text="$a$.compareTo($b$) &gt; 0 ? $a$ : $b$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.max($b$, $a$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.max for &gt;=" text="$a$.compareTo($b$) &gt;= 0 ? $a$ : $b$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.max($a$, $b$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.min" text="$a$.compareTo($b$) &lt; 0 ? $a$ : $b$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.min($b$, $a$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.min for &lt;=" text="$a$.compareTo($b$) &lt;= 0 ? $a$ : $b$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.min($a$, $b$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.min (2)" text="$a$.compareTo($b$) &gt; 0 ? $b$ : $a$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.min($a$, $b$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.min (2, &gt;=)" text="$a$.compareTo($b$) &gt;= 0 ? $b$ : $a$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.min($b$, $a$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.max (2)" text="$a$.compareTo($b$) &lt; 0 ? $b$ : $a$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.max($a$, $b$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Comparators.max (2, &lt;=)" text="$a$.compareTo($b$) &lt;= 0 ? $b$ : $a$" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.collect.Comparators.max($b$, $a$)">
-            <constraint name="a" within="" contains="" />
-            <constraint name="b" within="" contains="" />
+            <constraint name="a" />
+            <constraint name="b" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkState()" text="if ($condition$) {&#10;  throw new IllegalStateException();&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkState(!($condition$));">
-            <constraint name="condition" within="" contains="" />
+            <constraint name="condition" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkArgument()" text="if ($condition$) {&#10;  throw new IllegalArgumentException();&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkArgument(!($condition$));">
-            <constraint name="condition" within="" contains="" />
+            <constraint name="condition" />
           </replaceConfiguration>
           <replaceConfiguration name="use Preconditions.checkNotNull()" text="if ($var$ == null) {&#10;  throw new NullPointerException();&#10;}" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="com.google.common.base.Preconditions.checkNotNull($var$);">
-            <constraint name="reference" within="" contains="" />
-            <constraint name="var" within="" contains="" />
+            <constraint name="reference" />
+            <constraint name="var" />
           </replaceConfiguration>
         </inspection_tool>
         <inspection_tool class="UnnecessaryLocalVariable" level="WARNING" enabled="true">
@@ -337,10 +336,6 @@
           <option name="myAdditionalJavadocTags" value="" />
         </inspection_tool>
         <inspection_tool class="ThrowableInstanceNeverThrown" level="WARNING" enabled="false" />
-        <inspection_tool class="InjectOfNonPublicMember" level="WARNING" enabled="false" />
-        <inspection_tool class="ThrowableResultOfMethodCallIgnored" level="WARNING" enabled="false" />
-        <inspection_tool class="BindingAnnotationWithoutInject" level="WARNING" enabled="false" />
-        <inspection_tool class="PointlessBinding" level="WARNING" enabled="false" />
       </profile>
     </profiles>
     <list size="4">
@@ -526,7 +521,7 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" filepath="$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="ResourceManagerContainer">
@@ -562,7 +557,7 @@
         </entry>
       </map>
     </option>
-    <option name="myVersion" value="124" />
+    <option name="myVersion" value="123" />
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />

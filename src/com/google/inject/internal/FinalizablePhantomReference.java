@@ -16,25 +16,29 @@
 
 package com.google.inject.internal;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.PhantomReference;
 
 /**
- * Weak reference with a {@code finalizeReferent()} method which a background
- * thread invokes after the garbage collector reclaims the referent. This is a
- * simpler alternative to using a {@link java.lang.ref.ReferenceQueue}.
+ * Phantom reference with a {@code finalizeReferent()} method which a
+ * background thread invokes after the garbage collector reclaims the
+ * referent. This is a simpler alternative to using a {@link
+ * java.lang.ref.ReferenceQueue}.
+ *
+ * <p>Unlike a normal phantom reference, this reference will be cleared
+ * automatically.
  *
  * @author Bob Lee
  */
-public abstract class FinalizableWeakReference<T> extends WeakReference<T>
-    implements FinalizableReference {
+public abstract class FinalizablePhantomReference<T>
+    extends PhantomReference<T> implements FinalizableReference {
 
   /**
-   * Consructs a new finalizable weak reference.
+   * Constructs a new finalizable phantom reference.
    *
-   * @param referent to weakly reference
+   * @param referent to phantom reference
    * @param queue that should finalize the referent
    */
-  protected FinalizableWeakReference(T referent,
+  protected FinalizablePhantomReference(T referent,
       FinalizableReferenceQueue queue) {
     super(referent, queue.queue);
   }

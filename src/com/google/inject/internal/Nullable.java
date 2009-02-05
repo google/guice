@@ -16,18 +16,22 @@
 
 package com.google.inject.internal;
 
-/**
- * Implemented by references that have code to run after garbage collection of
- * their referents.
- *
- * @see FinalizableReferenceQueue
- * @author Bob Lee
- */
-public interface FinalizableReference {
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  /**
-   * Invoked on a background thread after the referent has been garbage
-   * collected.
-   */
-  void finalizeReferent();
-}
+/**
+ * The presence of this annotation on a method parameter indicates that
+ * {@code null} is an acceptable value for that parameter.  It should not be
+ * used for parameters of primitive types.
+ * 
+ * <p>This annotation may be used with the Google Web Toolkit (GWT).
+ * 
+ * @author Kevin Bourrillion
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+public @interface Nullable { }

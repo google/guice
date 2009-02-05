@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import java.util.Map;
+
 /**
  * Lazily creates (and caches) values for keys. If creating the value fails (with errors), an
  * exception is thrown on retrieval.
@@ -24,18 +26,19 @@ package com.google.inject.internal;
  */
 public abstract class FailableCache<K, V> {
   
-  private final ReferenceCache<K, Object> delegate = new ReferenceCache<K, Object>() {
-    protected final Object create(K key) {
-      Errors errors = new Errors();
-      V result = null;
-      try {
-        result = FailableCache.this.create(key, errors);
-      } catch (ErrorsException e) {
-        errors.merge(e.getErrors());
-      }
-      return errors.hasErrors() ? errors : result;
-    }
-  };
+  private final Map<K, Object> delegate = new MapMaker().makeComputingMap(
+      new Function<K, Object>() {
+        public Object apply(@Nullable K key) {
+          Errors errors = new Errors();
+          V result = null;
+          try {
+            result = FailableCache.this.create(key, errors);
+          } catch (ErrorsException e) {
+            errors.merge(e.getErrors());
+          }
+          return errors.hasErrors() ? errors : result;
+        }
+      });
 
   protected abstract V create(K key, Errors errors) throws ErrorsException;
   
