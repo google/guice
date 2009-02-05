@@ -1,0 +1,5 @@
+<beans>
+  <bean type="example.xml.Phone">
+    <property name="contacts"/>
+  </bean>
+</beans>
