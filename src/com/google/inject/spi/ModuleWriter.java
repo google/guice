@@ -25,7 +25,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.binder.PrivateBinder;
+import com.google.inject.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.util.List;

@@ -22,7 +22,7 @@ OK: com.google.inject.spi.InterceptorBinding Class
 OK: com.google.inject.spi.LinkedKeyBinding Interface
 OK: com.google.inject.spi.ModuleWriter Class
 OK: com.google.inject.OutOfScopeException Class
-OK: com.google.inject.binder.PrivateBinder Interface
+OK: com.google.inject.PrivateBinder Interface
 OK: com.google.inject.spi.PrivateElements Interface
 OK: com.google.inject.PrivateModule Class
 OK: com.google.inject.spi.ProviderBinding Interface

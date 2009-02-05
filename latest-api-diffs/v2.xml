@@ -469,7 +469,7 @@
  @since 2.0]]>
       </doc>
     </method>
-    <method name="newPrivateBinder" return="com.google.inject.binder.PrivateBinder"
+    <method name="newPrivateBinder" return="com.google.inject.PrivateBinder"
       abstract="false" native="false" synchronized="false"
       static="false" final="false" visibility="public"
       deprecated="not deprecated">
@@ -2545,7 +2545,7 @@
     </doc>
   </interface>
   <!-- end interface com.google.inject.binder.LinkedBindingBuilder -->
-  <!-- start interface com.google.inject.binder.PrivateBinder -->
+  <!-- start interface com.google.inject.PrivateBinder -->
   <interface name="PrivateBinder"    abstract="true"
     static="false" final="false" visibility="public"
     deprecated="not deprecated">
@@ -2581,13 +2581,13 @@
  binding annotation.]]>
       </doc>
     </method>
-    <method name="withSource" return="com.google.inject.binder.PrivateBinder"
+    <method name="withSource" return="com.google.inject.PrivateBinder"
       abstract="false" native="false" synchronized="false"
       static="false" final="false" visibility="public"
       deprecated="not deprecated">
       <param name="source" type="java.lang.Object"/>
     </method>
-    <method name="skipSources" return="com.google.inject.binder.PrivateBinder"
+    <method name="skipSources" return="com.google.inject.PrivateBinder"
       abstract="false" native="false" synchronized="false"
       static="false" final="false" visibility="public"
       deprecated="not deprecated">
@@ -2601,7 +2601,7 @@
  @since 2.0]]>
     </doc>
   </interface>
-  <!-- end interface com.google.inject.binder.PrivateBinder -->
+  <!-- end interface com.google.inject.PrivateBinder -->
   <!-- start interface com.google.inject.binder.ScopedBindingBuilder -->
   <interface name="ScopedBindingBuilder"    abstract="true"
     static="false" final="false" visibility="public"
@@ -4953,12 +4953,12 @@
       static="false" final="false" visibility="protected"
       deprecated="not deprecated">
       <param name="privateElements" type="com.google.inject.spi.PrivateElements"/>
-      <param name="binder" type="com.google.inject.binder.PrivateBinder"/>
+      <param name="binder" type="com.google.inject.PrivateBinder"/>
       <doc>
       <![CDATA[Associates {@code binder} with {@code privateElements}.]]>
       </doc>
     </method>
-    <method name="getPrivateBinder" return="com.google.inject.binder.PrivateBinder"
+    <method name="getPrivateBinder" return="com.google.inject.PrivateBinder"
       abstract="false" native="false" synchronized="false"
       static="false" final="false" visibility="protected"
       deprecated="not deprecated">

@@ -628,7 +628,7 @@
   </text>
 </comment>
 <comment>
-  <identifier id="com.google.inject.binder.PrivateBinder"/>
+  <identifier id="com.google.inject.PrivateBinder"/>
   <text>
     InsertCommentsHere
   </text>

@@ -21,7 +21,6 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.binder.PrivateBinder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
@@ -92,9 +91,10 @@ public abstract class PrivateModule implements Module {
   public final synchronized void configure(Binder binder) {
     checkState(this.binder == null, "Re-entry is not allowed.");
 
+    // Guice treats PrivateModules specially and passes in a PrivateBinder automatically.
     this.binder = (PrivateBinder) binder.skipSources(PrivateModule.class);
     try {
-      configurePrivateBindings();
+      configure();
     } finally {
       this.binder = null;
     }
@@ -104,7 +104,7 @@ public abstract class PrivateModule implements Module {
    * Creates bindings and other configurations private to this module. Use {@link #expose(Class)
    * expose()} to make the bindings in this module available externally.
    */
-  protected abstract void configurePrivateBindings();
+  protected abstract void configure();
 
   /** Makes the binding for {@code key} available to other modules and the injector. */
   protected final <T> void expose(Key<T> key) {
@@ -128,9 +128,6 @@ public abstract class PrivateModule implements Module {
   protected final AnnotatedElementBuilder expose(TypeLiteral<?> type) {
     return binder.expose(type);
   }
-
-  // prevent classes migrated from AbstractModule from implementing the wrong method.
-  protected final void configure() {}
 
   // everything below is copied from AbstractModule
 

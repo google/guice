@@ -18,7 +18,6 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.binder.PrivateBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
@@ -38,7 +37,7 @@ public class PrivateModuleTest extends TestCase {
         bind(String.class).annotatedWith(named("a")).toInstance("public");
 
         install(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             bind(String.class).annotatedWith(named("b")).toInstance("i");
 
             bind(AB.class).annotatedWith(named("one")).to(AB.class);
@@ -47,7 +46,7 @@ public class PrivateModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             bind(String.class).annotatedWith(named("b")).toInstance("ii");
 
             bind(AB.class).annotatedWith(named("two")).to(AB.class);
@@ -122,7 +121,7 @@ public class PrivateModuleTest extends TestCase {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         install(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             expose(String.class).annotatedWith(named("a"));
           }
 
@@ -136,7 +135,7 @@ public class PrivateModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          public void configurePrivateBindings() {}
+          public void configure() {}
 
           @Provides @Named("c") String providePrivateC() {
             return "private";
@@ -171,14 +170,14 @@ public class PrivateModuleTest extends TestCase {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
           install(new PrivateModule() {
-            public void configurePrivateBindings() {
+            public void configure() {
               bind(String.class).toInstance("public");
               expose(String.class);
             }
           });
 
           install(new PrivateModule() {
-            public void configurePrivateBindings() {
+            public void configure() {
               bind(String.class).toInstance("private");
             }
           });
@@ -188,8 +187,8 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "A binding to java.lang.String was already configured at ",
-          getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:",
-          " at " + getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:");
+          getClass().getName(), ".configure(PrivateModuleTest.java:",
+          " at " + getClass().getName(), ".configure(PrivateModuleTest.java:");
     }
   }
 
@@ -201,7 +200,7 @@ public class PrivateModuleTest extends TestCase {
           bind(String.class).annotatedWith(named("b")).toInstance("b");
 
           install(new PrivateModule() {
-            public void configurePrivateBindings() {
+            public void configure() {
               expose(AB.class);
             }
           });
@@ -211,7 +210,7 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "Could not expose() " + AB.class.getName() + ", it must be explicitly bound",
-          ".configurePrivateBindings(PrivateModuleTest.java:");
+          ".configure(PrivateModuleTest.java:");
     }
   }
 
@@ -223,12 +222,12 @@ public class PrivateModuleTest extends TestCase {
     try {
       Guice.createInjector(
           new PrivateModule() {
-            public void configurePrivateBindings() {
+            public void configure() {
               bind(C.class);
             }
           },
           new PrivateModule() {
-            public void configurePrivateBindings() {
+            public void configure() {
               bind(AB.class);
             }
           }
@@ -237,7 +236,7 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) No implementation for " + C.class.getName() + " was bound.",
-          "at " + getClass().getName(), ".configurePrivateBindings(PrivateModuleTest.java:",
+          "at " + getClass().getName(), ".configure(PrivateModuleTest.java:",
           "2) No implementation for " + String.class.getName(), "Named(value=a) was bound.",
           "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
           "3) No implementation for " + String.class.getName(), "Named(value=b) was bound.",
@@ -248,11 +247,11 @@ public class PrivateModuleTest extends TestCase {
 
   public void testNestedPrivateInjectors() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configurePrivateBindings() {
+      public void configure() {
         expose(String.class);
 
         install(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             bind(String.class).toInstance("nested");
             expose(String.class);
           }
@@ -265,7 +264,7 @@ public class PrivateModuleTest extends TestCase {
 
   public void testInstallingRegularModulesFromPrivateModules() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configurePrivateBindings() {
+      public void configure() {
         expose(String.class);
 
         install(new AbstractModule() {
@@ -281,14 +280,14 @@ public class PrivateModuleTest extends TestCase {
 
   public void testNestedPrivateModulesWithSomeKeysUnexposed() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configurePrivateBindings() {
+      public void configure() {
         bind(String.class).annotatedWith(named("bound outer, exposed outer")).toInstance("boeo");
         expose(String.class).annotatedWith(named("bound outer, exposed outer"));
         bind(String.class).annotatedWith(named("bound outer, exposed none")).toInstance("boen");
         expose(String.class).annotatedWith(named("bound inner, exposed both"));
 
         install(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             bind(String.class).annotatedWith(named("bound inner, exposed both")).toInstance("bieb");
             expose(String.class).annotatedWith(named("bound inner, exposed both"));
             bind(String.class).annotatedWith(named("bound inner, exposed none")).toInstance("bien");
@@ -318,7 +317,7 @@ public class PrivateModuleTest extends TestCase {
   public void testDependenciesBetweenPrivateAndPublic() {
     Injector injector = Guice.createInjector(
         new PrivateModule() {
-          protected void configurePrivateBindings() {}
+          protected void configure() {}
 
           @Provides @Exposed @Named("a") String provideA() {
             return "A";
@@ -347,7 +346,7 @@ public class PrivateModuleTest extends TestCase {
   public void testDependenciesBetweenPrivateAndPublicWithPublicEagerSingleton() {
     Injector injector = Guice.createInjector(
         new PrivateModule() {
-          protected void configurePrivateBindings() {}
+          protected void configure() {}
 
           @Provides @Exposed @Named("a") String provideA() {
             return "A";
@@ -395,7 +394,7 @@ public class PrivateModuleTest extends TestCase {
           }
         },
         new PrivateModule() {
-          protected void configurePrivateBindings() {
+          protected void configure() {
             bind(String.class).annotatedWith(named("abcde")).toProvider(new Provider<String>() {
               @Inject @Named("abcd") String abcd;
 
@@ -428,7 +427,7 @@ public class PrivateModuleTest extends TestCase {
 
   public void testSpiAccess() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-          public void configurePrivateBindings() {
+          public void configure() {
             bind(String.class).annotatedWith(named("a")).toInstance("private");
             bind(String.class).annotatedWith(named("b")).toInstance("exposed");
             expose(String.class).annotatedWith(named("b"));

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.inject.binder;
+package com.google.inject;
 
-import com.google.inject.Binder;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.google.inject.binder.AnnotatedElementBuilder;
 
 /**
  * Returns a binder whose configuration information is hidden from its environment by default. See
@@ -34,7 +32,7 @@ public interface PrivateBinder extends Binder {
 
   /**
    * Makes a binding for {@code type} available to the enclosing environment. Use {@link
-   * AnnotatedElementBuilder#annotatedWith(Class) annotatedWith()} to expose {@code type} with a
+   * com.google.inject.binder.AnnotatedElementBuilder#annotatedWith(Class) annotatedWith()} to expose {@code type} with a
    * binding annotation.
    */
   AnnotatedElementBuilder expose(Class<?> type);

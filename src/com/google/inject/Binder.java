@@ -19,7 +19,7 @@ package com.google.inject;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.binder.PrivateBinder;
+import com.google.inject.PrivateBinder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
