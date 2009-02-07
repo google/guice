@@ -41,12 +41,26 @@ public class ModulesTest extends TestCase {
     assertEquals(3, injector.getInstance(Short.class).shortValue());
   }
 
+  /**
+   * The module returned by Modules.combine shouldn't show up in binder sources.
+   */
+  public void testCombineSources() {
+    Module skipSourcesModule = new AbstractModule() {
+      @Override protected void configure() {
+        install(Modules.combine(newModule(1), newModule(2L)));
+      }
+    };
+    Injector injector = Guice.createInjector(Modules.combine(skipSourcesModule));
+    StackTraceElement source = (StackTraceElement) injector.getBinding(Integer.class).getSource();
+    assertEquals(skipSourcesModule.getClass().getName(), source.getClassName());
+  }
+
   private <T> Module newModule(final T toBind) {
     return new AbstractModule() {
       protected void configure() {
         @SuppressWarnings("unchecked") // getClass always needs a cast
         Class<T> tClass = (Class<T>) toBind.getClass();
-        bind(tClass).toInstance(toBind);
+        binder().skipSources(getClass()).bind(tClass).toInstance(toBind);
       }
     };
   }

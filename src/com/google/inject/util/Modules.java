@@ -96,11 +96,11 @@ public final class Modules {
    */
   public static Module combine(Iterable<? extends Module> modules) {
     final Set<Module> modulesSet = ImmutableSet.copyOf(modules);
-    return new AbstractModule() {
-      @Override
-      public void configure() {
+    return new Module() {
+      public void configure(Binder binder) {
+        binder = binder.skipSources(getClass());
         for (Module module : modulesSet) {
-          install(module);
+          binder.install(module);
         }
       }
     };

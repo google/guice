@@ -131,7 +131,7 @@ public abstract class PrivateModule implements Module {
 
   // everything below is copied from AbstractModule
 
-  protected final Binder binder() {
+  protected final PrivateBinder binder() {
     return binder;
   }
 
