@@ -30,9 +30,9 @@ import java.util.Collection;
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public final class ProvisionException extends RuntimeException {
+public class ProvisionException extends RuntimeException {
 
-  private final ImmutableSet<Message> messages;
+  protected final ImmutableSet<Message> messages;
 
   /** Creates a ConfigurationException containing {@code messages}. */
   public ProvisionException(Iterable<Message> messages) {

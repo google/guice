@@ -10,6 +10,15 @@
       <properties />
     </buildFile>
   </component>
+  <component name="Build editor project-level loader">
+    <settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.ClearOutputChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.JavacHeapChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectJdkChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectPathChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
+    </settings>
+  </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
@@ -154,6 +163,11 @@
     <option name="DEPLOY_AFTER_MAKE" value="0" />
     <resourceExtensions />
     <wildcardResourcePatterns />
+  </component>
+  <component name="ContinuousBuildConfigurationComponent">
+    <builds>
+      <build intervalToCheckBuild="1" buildKey="" buildLabel="" enabled="false" />
+    </builds>
   </component>
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
@@ -350,7 +364,7 @@
     <option name="GENERATE_NO_WARNINGS" value="false" />
     <option name="DEPRECATION" value="true" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="-Xlint:all -Xlint:-serial" />
-    <option name="MAXIMUM_HEAP_SIZE" value="256" />
+    <option name="MAXIMUM_HEAP_SIZE" value="800" />
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" value="file://$PROJECT_DIR/javadoc" />
@@ -383,6 +397,7 @@
     <option name="FILTER_INFO" value="true" />
     <option name="CUSTOM_FILTER" />
   </component>
+  <component name="Mach LOCAL_PREFIX stripper" stripping="true" />
   <component name="Palette2">
     <group name="Swing">
       <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
@@ -521,7 +536,7 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" filepath="$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="java version &quot;1.5.0_06&quot;" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="ResourceManagerContainer">

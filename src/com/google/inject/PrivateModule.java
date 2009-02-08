@@ -104,7 +104,15 @@ public abstract class PrivateModule implements Module {
    * Creates bindings and other configurations private to this module. Use {@link #expose(Class)
    * expose()} to make the bindings in this module available externally.
    */
-  protected abstract void configure();
+  protected void configure() {
+    configurePrivateBindings();
+  }
+
+  /**
+   * @deprecated override {@link #configure} directly instead.
+   */
+  @Deprecated
+  protected void configurePrivateBindings() {}
 
   /** Makes the binding for {@code key} available to other modules and the injector. */
   protected final <T> void expose(Key<T> key) {

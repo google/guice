@@ -108,6 +108,12 @@ public abstract class Multibinder<T> {
     return newSetBinder(binder, TypeLiteral.get(type));
   }
 
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type) {
+    return newSetBinder(binder, (TypeLiteral<T>) TypeLiteral.get(type));
+  }
+
   /**
    * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
    * itself bound with {@code annotation}.
@@ -130,6 +136,12 @@ public abstract class Multibinder<T> {
     return newSetBinder(binder, TypeLiteral.get(type), annotation);
   }
 
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type, Annotation annotation) {
+    return newSetBinder(binder, (TypeLiteral<T>) TypeLiteral.get(type), annotation);
+  }
+
   /**
    * Returns a new multibinder that collects instances of {@code type} in a {@link Set} that is
    * itself bound with {@code annotationType}.
@@ -150,6 +162,13 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, Class<T> type,
       Class<? extends Annotation> annotationType) {
     return newSetBinder(binder, TypeLiteral.get(type), annotationType);
+  }
+
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <T> Multibinder<T> newSetBinder(Binder binder, Type type,
+      Class<? extends Annotation> annotationType) {
+    return newSetBinder(binder, (TypeLiteral<T>) TypeLiteral.get(type), annotationType);
   }
 
   @SuppressWarnings("unchecked") // wrapping a T in a Set safely returns a Set<T>

@@ -33,6 +33,7 @@ import com.google.inject.util.Types;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -119,6 +120,13 @@ public abstract class MapBinder<K, V> {
     return newMapBinder(binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType));
   }
 
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, Type keyType, Type valueType) {
+    return (MapBinder<K, V>) newMapBinder(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType));
+  }
+
   /**
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
    * {@link Map} that is itself bound with {@code annotation}.
@@ -141,6 +149,14 @@ public abstract class MapBinder<K, V> {
     return newMapBinder(binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotation);
   }
 
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, Type keyType, Type valueType,
+      Annotation annotation) {
+    return (MapBinder<K, V>) newMapBinder(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotation);
+  }
+
   /**
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
    * {@link Map} that is itself bound with {@code annotationType}.
@@ -161,6 +177,14 @@ public abstract class MapBinder<K, V> {
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, Class<K> keyType,
       Class<V> valueType, Class<? extends Annotation> annotationType) {
     return newMapBinder(
+        binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotationType);
+  }
+
+  /** @deprecated prefer the overload that takes a TypeLiteral, that one is type safe. */
+  @Deprecated @SuppressWarnings("unchecked") // totally unsafe, but we deprecated
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, Type keyType, Type valueType,
+      Class<? extends Annotation> annotationType) {
+    return (MapBinder<K, V>) newMapBinder(
         binder, TypeLiteral.get(keyType), TypeLiteral.get(valueType), annotationType);
   }
 

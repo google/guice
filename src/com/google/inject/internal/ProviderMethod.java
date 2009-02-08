@@ -18,10 +18,9 @@ package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
-import com.google.inject.Exposed;
 import com.google.inject.Key;
-import com.google.inject.Provider;
 import com.google.inject.PrivateBinder;
+import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
 import java.lang.annotation.Annotation;
@@ -56,7 +55,8 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
     this.dependencies = dependencies;
     this.method = method;
     this.parameterProviders = parameterProviders;
-    this.exposed = method.isAnnotationPresent(Exposed.class);
+    this.exposed = method.isAnnotationPresent(com.google.inject.Exposed.class)
+        || method.isAnnotationPresent(com.google.inject.privatemodules.Exposed.class);
 
     method.setAccessible(true);
   }

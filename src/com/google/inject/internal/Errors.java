@@ -61,8 +61,9 @@ import java.util.List;
 public final class Errors implements Serializable {
 
   // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad
-      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  private static boolean allowNullsBadBadBad() {
+    return "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  }
 
   private final List<Message> errors;
   private final Errors parent;
@@ -455,7 +456,7 @@ public final class Errors implements Serializable {
       throws ErrorsException {
     if (value != null
         || dependency.isNullable()
-        || allowNullsBadBadBad) {
+        || allowNullsBadBadBad()) {
       return value;
     }
 
