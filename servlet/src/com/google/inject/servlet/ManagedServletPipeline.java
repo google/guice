@@ -48,6 +48,10 @@ class ManagedServletPipeline {
     this.servletDefinitions = Collections.unmodifiableList(collectServletDefinitions(injector));
   }
 
+  boolean hasServletsMapped() {
+    return !servletDefinitions.isEmpty();
+  }
+
   /**
    * Introspects the injector and collects all instances of bound {@code List<ServletDefinition>}
    * into a master list.
