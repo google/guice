@@ -73,8 +73,9 @@ public class ServletModule extends AbstractModule {
    *       <b>serve("/my/*").with(MyServlet.class)</b>
    * </pre>
    *
-   * Every servlet is required to be a singleton and will implicitly be bound as one if it isn't
-   * already. Mapping a servlet that is bound under any other scope is an error.
+   * Every servlet (or filter) is required to be a singleton. If you cannot annotate the class
+   * directly, you should add a separate {@code bind(..).in(Singleton.class)} rule elsewhere in
+   * your module. Mapping a servlet that is bound under any other scope is an error.
    *
    * <p>
    * <h4>Dispatch Order</h4>
