@@ -93,7 +93,7 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
     assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
             + services + "; destroys: " + destroys,
-        inits == 5 && services == 1 && destroys == 5);
+        inits == 2 && services == 1 && destroys == 2);
   }
 
   public final void testDispatchRequestToManagedPipelineWithFilter()
@@ -136,8 +136,8 @@ public class ServletDispatchIntegrationTest extends TestCase {
     verify(requestMock);
 
     assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
-            + services + "; destroys: " + destroys,
-        inits == 6 && services == 1 && destroys == 6 && doFilters == 1);
+            + services + "; destroys: " + destroys + "; doFilters: " + doFilters,
+        inits == 3 && services == 1 && destroys == 3 && doFilters == 1);
   }
 
   @Singleton

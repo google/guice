@@ -16,6 +16,8 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.ReferenceType;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -86,7 +88,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -171,7 +173,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -256,7 +258,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);

@@ -15,7 +15,9 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.base.ReferenceType;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -26,6 +28,8 @@ import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -91,8 +95,11 @@ class ManagedFilterPipeline implements FilterPipeline{
     if (initialized)
       return;
 
+    // Used to prevent duplicate initialization.
+    Set<Filter> initializedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
+
     for (FilterDefinition filterDefinition : filterDefinitions) {
-      filterDefinition.init(servletContext, injector);
+      filterDefinition.init(servletContext, injector, initializedSoFar);
     }
 
     //next, initialize servlets...
@@ -151,9 +158,9 @@ class ManagedFilterPipeline implements FilterPipeline{
     servletPipeline.destroy();
 
     //go down chain and destroy all our filters
-    //TODO check servlet spec if we should continue destroying even if exceptions are thrown
+    Set<Filter> destroyedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
     for (FilterDefinition filterDefinition : filterDefinitions) {
-      filterDefinition.destroy();
+      filterDefinition.destroy(destroyedSoFar);
     }
   }
 }

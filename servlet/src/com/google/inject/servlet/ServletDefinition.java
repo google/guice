@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -61,7 +62,9 @@ class ServletDefinition {
     return patternMatcher.matches(uri);
   }
 
-  public void init(final ServletContext servletContext, Injector injector) throws ServletException {
+  public void init(final ServletContext servletContext, Injector injector,
+      Set<HttpServlet> initializedSoFar) throws ServletException {
+
     // This absolutely must be a singleton, and so is only initialized once.
     if (!isSingletonBinding(injector.getBinding(servletKey))) {
       throw new ServletException("Servlets must be bound as singletons. "
@@ -70,6 +73,11 @@ class ServletDefinition {
 
     HttpServlet httpServlet = injector.getInstance(servletKey);
     this.httpServlet.set(httpServlet);
+
+    // Only fire init() if we have not appeared before in the filter chain.
+    if (initializedSoFar.contains(httpServlet)) {
+      return;
+    }
 
     //initialize our servlet with the configured context params and servlet context
     httpServlet.init(new ServletConfig() {
@@ -89,18 +97,28 @@ class ServletDefinition {
         return Iterators.asEnumeration(initParams.keySet().iterator());
       }
     });
+
+    // Mark as initialized.
+    initializedSoFar.add(httpServlet);
   }
 
-  public void destroy() {
+  public void destroy(Set<HttpServlet> destroyedSoFar) {
     HttpServlet reference = httpServlet.get();
 
     // Do nothing if this Servlet was invalid (usually due to not being scoped
     // properly). According to Servlet Spec: it is "out of service", and does not
     // need to be destroyed.
-    if (null == reference) {
+    // Also prevent duplicate destroys to the same singleton that may appear
+    // more than once on the filter chain.
+    if (null == reference || destroyedSoFar.contains(reference)) {
       return;
     }
-    reference.destroy();
+
+    try {
+      reference.destroy();
+    } finally {
+      destroyedSoFar.add(reference);
+    }
   }
 
   /**

@@ -16,15 +16,11 @@
 
 package com.google.inject.servlet;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
+import com.google.common.base.ReferenceType;
+import com.google.common.collect.Sets;
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Binding;
-import junit.framework.TestCase;
-
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +28,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).
@@ -76,7 +76,7 @@ public class ServletDefinitionTest extends TestCase {
 
     replay(servletContext);
 
-    servletDefinition.init(servletContext, injector);
+    servletDefinition.init(servletContext, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
 
     assertNotNull(mockServlet.getServletContext());
     assertEquals(contextName, mockServlet.getServletContext().getServletContextName());

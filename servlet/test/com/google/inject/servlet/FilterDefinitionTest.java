@@ -1,5 +1,7 @@
 package com.google.inject.servlet;
 
+import com.google.common.base.ReferenceType;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -64,7 +66,7 @@ public class FilterDefinitionTest extends TestCase {
 
     replay(servletContext);
 
-    filterDef.init(servletContext, injector);
+    filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
 
     final FilterConfig filterConfig = mockFilter.getConfig();
     assert null != filterConfig;
@@ -103,7 +105,8 @@ public class FilterDefinitionTest extends TestCase {
     assert filterDef.getFilter() instanceof MockFilter;
 
     //should fire on mockfilter now
-    filterDef.init(createMock(ServletContext.class), injector);
+    filterDef.init(createMock(ServletContext.class), injector,
+        Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
 
     assert mockFilter.isInit() : "Init did not fire";
 
@@ -118,7 +121,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("Filter did not proceed down chain", proceed[0]);
 
-    filterDef.destroy();
+    filterDef.destroy(Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
     assertTrue("Destroy did not fire", mockFilter.isDestroy());
 
     verify(injector, request);
@@ -157,7 +160,8 @@ public class FilterDefinitionTest extends TestCase {
     assert filterDef.getFilter() instanceof MockFilter;
 
     //should fire on mockfilter now
-    filterDef.init(createMock(ServletContext.class), injector);
+    filterDef.init(createMock(ServletContext.class), injector,
+        Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
 
     assert mockFilter.isInit() : "Init did not fire";
 
@@ -171,7 +175,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assert !proceed[0] : "Filter did not suppress chain";
 
-    filterDef.destroy();
+    filterDef.destroy(Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
     assert mockFilter.isDestroy() : "Destroy did not fire";
 
     verify(injector, request);

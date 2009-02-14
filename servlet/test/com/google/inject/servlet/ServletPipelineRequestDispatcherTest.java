@@ -16,7 +16,9 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.ReferenceType;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -94,7 +96,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, mockRequest, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
         injector)
@@ -158,7 +160,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);
@@ -228,7 +230,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector);
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);

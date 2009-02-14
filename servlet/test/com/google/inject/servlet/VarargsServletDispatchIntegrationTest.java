@@ -89,7 +89,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
             + services + "; destroys: " + destroys,
-        inits == 6 && services == 1 && destroys == 6);
+        inits == 2 && services == 1 && destroys == 2);
   }
 
   public final void testVarargsSkipDispatchRequestToManagedPipelineServlets()
@@ -126,7 +126,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
             + services + "; destroys: " + destroys,
-        inits == 7 && services == 1 && destroys == 7);
+        inits == 2 && services == 1 && destroys == 2);
   }
 
   public final void testDispatchRequestToManagedPipelineWithFilter()
@@ -167,7 +167,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     assertTrue("lifecycle states did not fire correct number of times-- inits: " + inits + "; dos: "
             + services + "; destroys: " + destroys,
-        inits == 6 && services == 1 && destroys == 6 && doFilters == 1);
+        inits == 3 && services == 1 && destroys == 3 && doFilters == 1);
   }
 
   @Singleton

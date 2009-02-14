@@ -15,7 +15,10 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.ReferenceType;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,11 +28,13 @@ import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 
 /**
  * A wrapping dispatcher for servlets, in much the same way as {@link ManagedFilterPipeline} is for
@@ -68,8 +73,10 @@ class ManagedServletPipeline {
   }
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {
+    Set<HttpServlet> initializedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
+
     for (ServletDefinition servletDefinition : servletDefinitions) {
-      servletDefinition.init(servletContext, injector);
+      servletDefinition.init(servletContext, injector, initializedSoFar);
     }
   }
 
@@ -88,8 +95,9 @@ class ManagedServletPipeline {
   }
 
   public void destroy() {
+    Set<HttpServlet> destroyedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
     for (ServletDefinition servletDefinition : servletDefinitions) {
-      servletDefinition.destroy();
+      servletDefinition.destroy(destroyedSoFar);
     }
   }
 
@@ -105,11 +113,9 @@ class ManagedServletPipeline {
           public void forward(ServletRequest servletRequest, ServletResponse servletResponse)
               throws ServletException, IOException {
 
-            if (servletResponse.isCommitted()) {
-              throw new IllegalStateException("Response has been committed--you can "
-                  + "only call forward before committing the response (hint: don't "
-                  + "flush buffers)");
-            }
+            Preconditions.checkState(!servletResponse.isCommitted(),
+                "Response has been committed--you can only call forward before"
+                + " committing the response (hint: don't flush buffers)");
 
             // clear buffer before forwarding
             servletResponse.resetBuffer();

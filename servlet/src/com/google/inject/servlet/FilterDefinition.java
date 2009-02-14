@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -58,7 +59,9 @@ class FilterDefinition {
     return patternMatcher.matches(uri);
   }
 
-  public void init(final ServletContext servletContext, Injector injector) throws ServletException {
+  public void init(final ServletContext servletContext, Injector injector,
+      Set<Filter> initializedSoFar) throws ServletException {
+
     // This absolutely must be a singleton, and so is only initialized once.
     if (!isSingletonBinding(injector.getBinding(filterKey))) {
       throw new ServletException("Filters must be bound as singletons. "
@@ -67,6 +70,12 @@ class FilterDefinition {
 
     Filter filter = injector.getInstance(filterKey);
     this.filter.set(filter);
+
+    // Only fire init() if this Singleton filter has not already appeared earlier
+    // in the filter chain.
+    if (initializedSoFar.contains(filter)) {
+      return;
+    }
 
     //initialize our filter with the configured context params and servlet context
     filter.init(new FilterConfig() {
@@ -86,19 +95,28 @@ class FilterDefinition {
         return Iterators.asEnumeration(initParams.keySet().iterator());
       }
     });
+
+    initializedSoFar.add(filter);
   }
 
-  public void destroy() {
+  public void destroy(Set<Filter> destroyedSoFar) {
     // filters are always singletons
     Filter reference = filter.get();
     
     // Do nothing if this Filter was invalid (usually due to not being scoped
-    // properly). According to Servlet Spec: it is "out of service", and does not
-    // need to be destroyed.
-    if (null == reference) {
+    // properly), or was already destroyed. According to Servlet Spec: it is
+    // "out of service", and does not need to be destroyed.
+    // Also prevent duplicate destroys to the same singleton that may appear
+    // more than once on the filter chain.
+    if (null == reference || destroyedSoFar.contains(reference)) {
       return;
     }
-    reference.destroy();
+
+    try {
+      reference.destroy();
+    } finally {
+      destroyedSoFar.add(reference);
+    }
   }
 
   public void doFilter(ServletRequest servletRequest,
