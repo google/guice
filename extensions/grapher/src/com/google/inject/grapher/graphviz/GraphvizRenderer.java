@@ -143,7 +143,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
     
     String subtitle = Join.join("<br align=\"left\"/>", node.getSubtitles());
     if (subtitle.length() != 0) {
-      html.append("<font align=\"left\" color=\"").append(node.getHeaderTextColor());
+      html.append("<font color=\"").append(node.getHeaderTextColor());
       html.append("\" point-size=\"10\">");
       html.append(subtitle).append("<br align=\"left\"/>").append("</font>");
     }
