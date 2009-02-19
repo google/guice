@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
-import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,9 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
@@ -43,13 +40,14 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
-    /*if[AOP]*/
     // Use FastConstructor if the constructor is public.
     if (Modifier.isPublic(constructor.getModifiers())) {
+      /*if[AOP]*/
       return new ConstructionProxy<T>() {
         Class<T> classToConstruct = constructor.getDeclaringClass();
-        FastClass fastClass = newFastClass(classToConstruct, Visibility.forMember(constructor));
-        final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
+        final net.sf.cglib.reflect.FastConstructor fastConstructor
+            = BytecodeGen.newFastClass(classToConstruct, Visibility.forMember(constructor))
+                .getConstructor(constructor);
 
         @SuppressWarnings("unchecked")
         public T newInstance(Object... arguments) throws InvocationTargetException {
@@ -61,14 +59,13 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         public Constructor<T> getConstructor() {
           return constructor;
         }
-        public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+        public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>>
+            getMethodInterceptors() {
           return ImmutableMap.of();
         }
       };
-    }
-    /*end[AOP]*/
-
-    if (!Modifier.isPublic(constructor.getModifiers())) {
+      /*end[AOP]*/
+    } else {
       constructor.setAccessible(true);
     }
 
@@ -89,7 +86,8 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         return constructor;
       }
       /*if[AOP]*/
-      public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+      public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>>
+          getMethodInterceptors() {
         return ImmutableMap.of();
       }
       /*end[AOP]*/

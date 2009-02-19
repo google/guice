@@ -35,8 +35,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 public class FactoryProvider2Test extends TestCase {
 
@@ -613,8 +611,10 @@ public class FactoryProvider2Test extends TestCase {
   /*if[AOP]*/
   public void testMethodInterceptorsOnAssistedTypes() {
     final AtomicInteger invocationCount = new AtomicInteger();
-    final MethodInterceptor interceptor = new MethodInterceptor() {
-      public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+    final org.aopalliance.intercept.MethodInterceptor interceptor
+        = new org.aopalliance.intercept.MethodInterceptor() {
+      public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation)
+          throws Throwable {
         invocationCount.incrementAndGet();
         return methodInvocation.proceed();
       }

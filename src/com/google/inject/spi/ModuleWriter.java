@@ -30,7 +30,6 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Creates a Module from a collection of component elements.
@@ -121,10 +120,10 @@ public class ModuleWriter {
 
   /*if[AOP]*/
   protected void writeBindInterceptor(Binder binder, InterceptorBinding element) {
-    List<MethodInterceptor> interceptors = element.getInterceptors();
+    List<org.aopalliance.intercept.MethodInterceptor> interceptors = element.getInterceptors();
     binder.withSource(element.getSource()).bindInterceptor(
         element.getClassMatcher(), element.getMethodMatcher(),
-        interceptors.toArray(new MethodInterceptor[interceptors.size()]));
+        interceptors.toArray(new org.aopalliance.intercept.MethodInterceptor[interceptors.size()]));
   }
   /*end[AOP]*/
 

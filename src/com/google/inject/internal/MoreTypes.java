@@ -360,6 +360,7 @@ public class MoreTypes {
   public static String memberKey(Member member) {
     checkNotNull(member, "member");
 
+    /*if[AOP]*/
     if (member instanceof MemberImpl) {
       return ((MemberImpl) member).memberKey;
 
@@ -380,6 +381,10 @@ public class MoreTypes {
       throw new IllegalArgumentException(
           "Unsupported implementation class for Member, " + member.getClass());
     }
+    /*end[AOP]*/
+    /*if[NO_AOP]
+    return "<NO_MEMBER_KEY>";
+    end[NO_AOP]*/
   }
 
   /**

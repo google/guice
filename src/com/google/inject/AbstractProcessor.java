@@ -20,7 +20,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InjectionRequest;
-import com.google.inject.spi.InterceptorBinding;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderLookup;
@@ -77,7 +76,8 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
   }
 
   /*if[AOP]*/
-  public Boolean visitInterceptorBinding(InterceptorBinding interceptorBinding) {
+  public Boolean visitInterceptorBinding(
+      com.google.inject.spi.InterceptorBinding interceptorBinding) {
     return false;
   }
   /*end[AOP]*/

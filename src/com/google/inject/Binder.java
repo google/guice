@@ -24,7 +24,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -199,7 +198,8 @@ public interface Binder {
    * @param interceptors to bind
    */
   void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors);
+      Matcher<? super Method> methodMatcher,
+      org.aopalliance.intercept.MethodInterceptor... interceptors);
   /*end[AOP]*/
 
   /**

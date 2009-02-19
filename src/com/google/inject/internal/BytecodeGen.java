@@ -24,15 +24,11 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.logging.Logger;
-import net.sf.cglib.core.DefaultNamingPolicy;
-import net.sf.cglib.core.NamingPolicy;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.reflect.FastClass;
 
 /**
- * Utility methods for runtime code generation and class loading. We use this stuff for faster
- * reflection ({@link FastClass}), method interceptors ({@link Enhancer}) and to proxy circular
- * dependencies.
+ * Utility methods for runtime code generation and class loading. We use this stuff for {@link
+ * net.sf.cglib.reflect.FastClass faster reflection}, {@link net.sf.cglib.proxy.Enhancer method
+ * interceptors} and to proxy circular dependencies.
  *
  * <p>When loading classes, we need to be careful of:
  * <ul>
@@ -68,15 +64,21 @@ public final class BytecodeGen {
   private static final String GUICE_INTERNAL_PACKAGE
       = BytecodeGen.class.getName().replaceFirst("\\.internal\\..*$", ".internal");
 
+  /*if[AOP]*/
   /** either "net.sf.cglib", or "com.google.inject.internal.cglib" */
   private static final String CGLIB_PACKAGE
-      = Enhancer.class.getName().replaceFirst("\\.cglib\\..*$", ".cglib");
+      = net.sf.cglib.proxy.Enhancer.class.getName().replaceFirst("\\.cglib\\..*$", ".cglib");
 
-  static final NamingPolicy NAMING_POLICY = new DefaultNamingPolicy() {
+  static final net.sf.cglib.core.NamingPolicy NAMING_POLICY
+      = new net.sf.cglib.core.DefaultNamingPolicy() {
     @Override protected String getTag() {
       return "ByGuice";
     }
   };
+  /*end[AOP]*/
+  /*if[NO_AOP]
+  private static final String CGLIB_PACKAGE = " "; // any string that's illegal in a package name
+  end[NO_AOP]*/
 
   /** Use "-Dguice.custom.loader=false" to disable custom classloading. */
   static final boolean HOOK_ENABLED
@@ -136,8 +138,11 @@ public final class BytecodeGen {
     return delegate;
   }
 
-  public static FastClass newFastClass(Class<?> type, Visibility visibility) {
-    FastClass.Generator generator = new FastClass.Generator();
+  /*if[AOP]*/
+  // use fully-qualified names so imports don't need preprocessor statements 
+  public static net.sf.cglib.reflect.FastClass newFastClass(Class<?> type, Visibility visibility) {
+    net.sf.cglib.reflect.FastClass.Generator generator
+        = new net.sf.cglib.reflect.FastClass.Generator();
     generator.setType(type);
     if (visibility == Visibility.PUBLIC) {
       generator.setClassLoader(getClassLoader(type));
@@ -147,8 +152,8 @@ public final class BytecodeGen {
     return generator.create();
   }
 
-  public static Enhancer newEnhancer(Class<?> type, Visibility visibility) {
-    Enhancer enhancer = new Enhancer();
+  public static net.sf.cglib.proxy.Enhancer newEnhancer(Class<?> type, Visibility visibility) {
+    net.sf.cglib.proxy.Enhancer enhancer = new net.sf.cglib.proxy.Enhancer();
     enhancer.setSuperclass(type);
     enhancer.setUseFactory(false);
     if (visibility == Visibility.PUBLIC) {
@@ -158,6 +163,7 @@ public final class BytecodeGen {
     logger.fine("Loading " + type + " Enhancer with " + enhancer.getClassLoader());
     return enhancer;
   }
+  /*end[AOP]*/
 
   /**
    * The required visibility of a user's class from a Guice-generated class. Visibility of

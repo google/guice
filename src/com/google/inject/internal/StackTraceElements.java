@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public class StackTraceElements {
 
+  /*if[AOP]*/
   static final Map<Class<?>, LineNumbers> lineNumbersCache = new MapMaker().weakKeys().softValues()
       .makeComputingMap(new Function<Class<?>, LineNumbers>() {
         public LineNumbers apply(Class<?> key) {
@@ -39,6 +40,7 @@ public class StackTraceElements {
           }
         }
       });
+  /*end[AOP]*/
 
   public static Object forMember(Member member) {
     if (member == null) {
@@ -46,22 +48,34 @@ public class StackTraceElements {
     }
 
     Class declaringClass = member.getDeclaringClass();
+
+    /*if[AOP]*/
     LineNumbers lineNumbers = lineNumbersCache.get(declaringClass);
-    Integer lineNumber = lineNumbers.getLineNumber(member);
+    String fileName = lineNumbers.getSource();
+    Integer lineNumberOrNull = lineNumbers.getLineNumber(member);
+    int lineNumber = lineNumberOrNull == null ? lineNumbers.getFirstLine() : lineNumberOrNull;
+    /*end[AOP]*/
+    /*if[NO_AOP]
+    String fileName = null;
+    int lineNumber = -1;
+    end[NO_AOP]*/
+
     Class<? extends Member> memberType = MoreTypes.memberType(member);
-
-
     String memberName = memberType == Constructor.class ? "<init>" : member.getName();
-    return new StackTraceElement(declaringClass.getName(), memberName, lineNumbers.getSource(),
-        lineNumber == null ? lineNumbers.getFirstLine() : lineNumber);
+    return new StackTraceElement(declaringClass.getName(), memberName, fileName, lineNumber);
   }
 
   public static Object forType(Class<?> implementation) {
+    /*if[AOP]*/
     LineNumbers lineNumbers = lineNumbersCache.get(implementation);
-    return new StackTraceElement(
-        implementation.getName(),
-        "class",
-        lineNumbers.getSource(),
-        lineNumbers.getFirstLine());
+    int lineNumber = lineNumbers.getFirstLine();
+    String fileName = lineNumbers.getSource();
+    /*end[AOP]*/
+    /*if[NO_AOP]
+    String fileName = null;
+    int lineNumber = -1;
+    end[NO_AOP]*/
+
+    return new StackTraceElement(implementation.getName(), "class", fileName, lineNumber);
   }
 }

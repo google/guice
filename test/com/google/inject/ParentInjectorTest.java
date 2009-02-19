@@ -27,8 +27,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.List;
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -111,6 +109,13 @@ public class ParentInjectorTest extends TestCase {
   }
 
   /*if[AOP]*/
+  private final org.aopalliance.intercept.MethodInterceptor returnNullInterceptor
+      = new org.aopalliance.intercept.MethodInterceptor() {
+    public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
+      return null;
+    }
+  };
+
   public void testInterceptorsInherited() {
     Injector parent = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -210,12 +215,6 @@ public class ParentInjectorTest extends TestCase {
 
   @Target(TYPE) @Retention(RUNTIME) @ScopeAnnotation
   public @interface MyScope {}
-
-  private final MethodInterceptor returnNullInterceptor = new MethodInterceptor() {
-    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-      return null;
-    }
-  };
 
   private final TypeConverter listConverter = new TypeConverter() {
     public Object convert(String value, TypeLiteral<?> toType) {

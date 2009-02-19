@@ -26,7 +26,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A module whose configuration information is hidden from its environment by default. Only bindings
@@ -181,7 +180,8 @@ public abstract class PrivateModule implements Module {
 
   /*if[AOP]*/
   protected final void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-      Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
+      Matcher<? super Method> methodMatcher,
+      org.aopalliance.intercept.MethodInterceptor... interceptors) {
     binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
   /*end[AOP]*/

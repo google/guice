@@ -24,8 +24,6 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.matcher.Matchers;
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -38,8 +36,8 @@ public class LineNumbersTest extends TestCase {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
           bindInterceptor(Matchers.only(A.class), Matchers.any(),
-              new MethodInterceptor() {
-                public Object invoke(MethodInvocation methodInvocation) {
+              new org.aopalliance.intercept.MethodInterceptor() {
+                public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
                   return null;
                 }
               });

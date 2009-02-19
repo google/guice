@@ -18,8 +18,8 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.InjectorImpl.MethodInvoker;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
-import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
@@ -27,8 +27,6 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastMethod;
 
 /**
  * Invokes an injectable method.
@@ -42,30 +40,39 @@ class SingleMethodInjector implements SingleMemberInjector {
       throws ErrorsException {
     this.injectionPoint = injectionPoint;
     final Method method = (Method) injectionPoint.getMember();
+    methodInvoker = createMethodInvoker(method);
+    parameterInjectors = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
+  }
+
+  private MethodInvoker createMethodInvoker(final Method method) {
 
     // We can't use FastMethod if the method is private.
     int modifiers = method.getModifiers();
-    if (Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)) {
-      method.setAccessible(true);
-      methodInvoker = new MethodInvoker() {
-        public Object invoke(Object target, Object... parameters)
-            throws IllegalAccessException, InvocationTargetException {
-          return method.invoke(target, parameters);
-        }
-      };
-    } else {
-      FastClass fastClass = newFastClass(method.getDeclaringClass(), Visibility.forMember(method));
-      final FastMethod fastMethod = fastClass.getMethod(method);
+    if (!Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers)) {
+      /*if[AOP]*/
+      final net.sf.cglib.reflect.FastMethod fastMethod
+          = BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method))
+              .getMethod(method);
 
-      methodInvoker = new MethodInvoker() {
+      return new MethodInvoker() {
         public Object invoke(Object target, Object... parameters)
             throws IllegalAccessException, InvocationTargetException {
           return fastMethod.invoke(target, parameters);
         }
       };
+      /*end[AOP]*/
     }
 
-    parameterInjectors = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
+    if (!Modifier.isPublic(modifiers)) {
+      method.setAccessible(true);
+    }
+
+    return new MethodInvoker() {
+      public Object invoke(Object target, Object... parameters)
+          throws IllegalAccessException, InvocationTargetException {
+        return method.invoke(target, parameters);
+      }
+    };
   }
 
   public InjectionPoint getInjectionPoint() {

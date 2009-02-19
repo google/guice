@@ -32,7 +32,6 @@ import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.googlecode.guice.BytecodeGenTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -70,7 +69,6 @@ public class AllTests {
     suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
-    suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
@@ -109,9 +107,10 @@ public class AllTests {
     suite.addTestSuite(ProvidersTest.class);
 
     /*if[AOP]*/
+    suite.addTestSuite(ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(MethodInterceptionTest.class);
-    suite.addTestSuite(BytecodeGenTest.class);
+    suite.addTestSuite(com.googlecode.guice.BytecodeGenTest.class);
     /*end[AOP]*/
 
     return suite;

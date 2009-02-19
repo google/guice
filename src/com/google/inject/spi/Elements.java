@@ -50,7 +50,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Exposes elements of a module so they can be inspected, validated or {@link ModuleWriter 
@@ -160,7 +159,7 @@ public final class Elements {
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
-        MethodInterceptor... interceptors) {
+        org.aopalliance.intercept.MethodInterceptor... interceptors) {
       elements.add(new InterceptorBinding(getSource(), classMatcher, methodMatcher, interceptors));
     }
     /*end[AOP]*/

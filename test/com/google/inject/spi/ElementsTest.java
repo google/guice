@@ -52,8 +52,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -543,8 +541,9 @@ public class ElementsTest extends TestCase {
   public void testBindIntercepor() {
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
     final Matcher<Object> methodMatcher = Matchers.any();
-    final MethodInterceptor methodInterceptor = new MethodInterceptor() {
-      public Object invoke(MethodInvocation methodInvocation) {
+    final org.aopalliance.intercept.MethodInterceptor methodInterceptor
+        = new org.aopalliance.intercept.MethodInterceptor() {
+      public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation) {
         return null;
       }
     };

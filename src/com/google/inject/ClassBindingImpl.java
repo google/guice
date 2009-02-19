@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.aopalliance.intercept.MethodInterceptor;
 
 class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T> {
 
@@ -71,7 +70,7 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T
   }
 
   /*if[AOP]*/
-  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+  public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors() {
     return lateBoundConstructor.constructorInjector.constructionProxy.getMethodInterceptors();
   }
   /*end[AOP]*/

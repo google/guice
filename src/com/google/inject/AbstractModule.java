@@ -26,7 +26,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A support class for {@link Module}s which reduces repetition and results in
@@ -163,7 +162,7 @@ public abstract class AbstractModule implements Module {
    */
   protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
-      MethodInterceptor... interceptors) {
+      org.aopalliance.intercept.MethodInterceptor... interceptors) {
     binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
   /*end[AOP]*/

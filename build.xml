@@ -121,9 +121,21 @@
     <mkdir dir="build/no_aop"/>
     <munge todir="build/no_aop">
       <fileset dir=".">
-        <exclude name="build/**/*"/>
+        <!-- exclude generated files -->
+        <exclude name="build/**"/>
+        <exclude name="classes/**"/>
+        <exclude name="latest-api-diffs/**"/>
+        <exclude name="javadoc/**"/>
+        <exclude name="latest-javadoc/**"/>
+        <!-- exclude AOP-specific libraries -->
+        <exclude name="lib/aopalliance.jar"/>
+        <exclude name="lib/build/asm-*.jar"/>
+        <exclude name="lib/build/cglib-*.jar"/>
+        <!-- exclude AOP-specific classes -->
+        <exclude name="**/LineNumbers.java"/>
         <exclude name="**/InterceptorBindingProcessor.java"/>
         <exclude name="**/ProxyFactory.java"/>
+        <exclude name="**/ProxyFactoryTest.java"/>
         <exclude name="**/InterceptorStackCallback.java"/>
         <exclude name="**/InterceptorBinding.java"/>
         <exclude name="**/MethodAspect.java"/>
@@ -134,6 +146,8 @@
       </fileset>
       <arg value="-DNO_AOP" />
     </munge>
+    <replace file="build/no_aop/common.xml" token="&lt;zipfileset src=&quot;${common.basedir}/lib/build/asm-3.1.jar&quot;/&gt;" value=""/>
+    <replace file="build/no_aop/common.xml" token="&lt;zipfileset src=&quot;${common.basedir}/lib/build/cglib-2.2.1-snapshot.jar&quot;/&gt;" value=""/>
   </target>
 
   <target name="clean.all"
