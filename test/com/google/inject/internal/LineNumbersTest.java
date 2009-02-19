@@ -32,6 +32,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class LineNumbersTest extends TestCase {
 
+  /*if[AOP]*/
   public void testCanHandleLineNumbersForGuiceGeneratedClasses() {
     try {
       Guice.createInjector(new AbstractModule() {
@@ -54,6 +55,7 @@ public class LineNumbersTest extends TestCase {
           "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
     }
   }
+  /*end[AOP]*/
 
   static class A {
     @Inject A(B b) {}

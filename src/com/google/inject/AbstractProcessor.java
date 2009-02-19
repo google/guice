@@ -76,9 +76,11 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
     return false;
   }
 
+  /*if[AOP]*/
   public Boolean visitInterceptorBinding(InterceptorBinding interceptorBinding) {
     return false;
   }
+  /*end[AOP]*/
 
   public Boolean visitScopeBinding(ScopeBinding scopeBinding) {
     return false;

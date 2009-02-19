@@ -71,6 +71,7 @@ interface State {
       return ImmutableSet.of();
     }
 
+    /*if[AOP]*/
     public void addMethodAspect(MethodAspect methodAspect) {
       throw new UnsupportedOperationException();
     }
@@ -78,6 +79,7 @@ interface State {
     public List<MethodAspect> getMethodAspects() {
       return ImmutableList.of();
     }
+    /*end[AOP]*/
 
     public void blacklist(Key<?> key) {
     }
@@ -115,9 +117,11 @@ interface State {
   /** Returns all converters at this level only. */
   Iterable<MatcherAndConverter> getConvertersThisLevel();
 
+  /*if[AOP]*/
   void addMethodAspect(MethodAspect methodAspect);
 
   List<MethodAspect> getMethodAspects();
+  /*end[AOP]*/
 
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors

@@ -136,10 +136,15 @@ class InjectorShell {
 
       new MessageProcessor(errors).process(injector, elements);
 
+      /*if[AOP]*/
       InterceptorBindingProcessor interceptors = new InterceptorBindingProcessor(errors);
       interceptors.process(injector, elements);
       interceptors.setupProxyFactory(injector);
       stopwatch.resetAndLog("Interceptors creation");
+      /*end[AOP]*/
+      /*if[NO_AOP]
+      injector.constructionProxyFactory = new DefaultConstructionProxyFactory();
+      end[NO_AOP]*/
 
       new ScopeBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Scopes creation");

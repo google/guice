@@ -110,6 +110,7 @@ public class ParentInjectorTest extends TestCase {
     assertSame(child.getInstance(A.class), child.getInstance(A.class));
   }
 
+  /*if[AOP]*/
   public void testInterceptorsInherited() {
     Injector parent = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -126,6 +127,7 @@ public class ParentInjectorTest extends TestCase {
 
     assertNull(child.getInstance(C.class).interceptedMethod());
   }
+  /*end[AOP]*/
 
   public void testTypeConvertersInherited() {
     Injector parent = Guice.createInjector(bindListConverterModule);

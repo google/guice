@@ -43,18 +43,17 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
-    // We can't use FastConstructor if the constructor is non-public.
-    if (!Modifier.isPublic(constructor.getModifiers())) {
-      constructor.setAccessible(true);
+    /*if[AOP]*/
+    // Use FastConstructor if the constructor is public.
+    if (Modifier.isPublic(constructor.getModifiers())) {
       return new ConstructionProxy<T>() {
+        Class<T> classToConstruct = constructor.getDeclaringClass();
+        FastClass fastClass = newFastClass(classToConstruct, Visibility.forMember(constructor));
+        final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
+
+        @SuppressWarnings("unchecked")
         public T newInstance(Object... arguments) throws InvocationTargetException {
-          try {
-            return constructor.newInstance(arguments);
-          } catch (InstantiationException e) {
-            throw new AssertionError(e); // shouldn't happen, we know this is a concrete type
-          } catch (IllegalAccessException e) {
-            throw new AssertionError(e); // a security manager is blocking us, we're hosed
-          }
+          return (T) fastConstructor.newInstance(arguments);
         }
         public InjectionPoint getInjectionPoint() {
           return injectionPoint;
@@ -67,15 +66,21 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
         }
       };
     }
+    /*end[AOP]*/
+
+    if (!Modifier.isPublic(constructor.getModifiers())) {
+      constructor.setAccessible(true);
+    }
 
     return new ConstructionProxy<T>() {
-      Class<T> classToConstruct = constructor.getDeclaringClass();
-      FastClass fastClass = newFastClass(classToConstruct, Visibility.forMember(constructor));
-      final FastConstructor fastConstructor = fastClass.getConstructor(constructor);
-
-      @SuppressWarnings("unchecked")
       public T newInstance(Object... arguments) throws InvocationTargetException {
-        return (T) fastConstructor.newInstance(arguments);
+        try {
+          return constructor.newInstance(arguments);
+        } catch (InstantiationException e) {
+          throw new AssertionError(e); // shouldn't happen, we know this is a concrete type
+        } catch (IllegalAccessException e) {
+          throw new AssertionError(e); // a security manager is blocking us, we're hosed
+        }
       }
       public InjectionPoint getInjectionPoint() {
         return injectionPoint;
@@ -83,9 +88,11 @@ class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
       public Constructor<T> getConstructor() {
         return constructor;
       }
+      /*if[AOP]*/
       public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
         return ImmutableMap.of();
       }
+      /*end[AOP]*/
     };
   }
 }

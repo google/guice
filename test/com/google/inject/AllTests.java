@@ -17,10 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.internal.FinalizableReferenceQueueTest;
+import com.google.inject.internal.Jsr166HashMapTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.MapMakerTestSuite;
 import com.google.inject.internal.UniqueAnnotationsTest;
-import com.google.inject.internal.Jsr166HashMapTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.ElementsTest;
@@ -59,10 +59,8 @@ public class AllTests {
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(InjectorTest.class);
-    suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
-    suite.addTestSuite(MethodInterceptionTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
@@ -97,7 +95,6 @@ public class AllTests {
     suite.addTestSuite(Jsr166HashMapTest.class);
     suite.addTestSuite(TypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
-    suite.addTestSuite(BytecodeGenTest.class);
 
     // matcher
     suite.addTestSuite(MatcherTest.class);
@@ -110,6 +107,12 @@ public class AllTests {
 
     // util
     suite.addTestSuite(ProvidersTest.class);
+
+    /*if[AOP]*/
+    suite.addTestSuite(IntegrationTest.class);
+    suite.addTestSuite(MethodInterceptionTest.class);
+    suite.addTestSuite(BytecodeGenTest.class);
+    /*end[AOP]*/
 
     return suite;
   }

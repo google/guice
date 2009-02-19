@@ -40,7 +40,9 @@ class InheritingState implements State {
       = Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
   private final List<MatcherAndConverter> converters = Lists.newArrayList();
+  /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
+  /*end[AOP]*/
   private final WeakKeySet blacklistedKeys = new WeakKeySet();
   private final Object lock;
 
@@ -100,6 +102,7 @@ class InheritingState implements State {
     return matchingConverter;
   }
 
+  /*if[AOP]*/
   public void addMethodAspect(MethodAspect methodAspect) {
     methodAspects.add(methodAspect);
   }
@@ -110,6 +113,7 @@ class InheritingState implements State {
     result.addAll(methodAspects);
     return result;
   }
+  /*end[AOP]*/
 
   public void blacklist(Key<?> key) {
     parent.blacklist(key);

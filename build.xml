@@ -120,7 +120,18 @@
     <taskdef name="munge" classname="MungeTask" classpath="lib/build/munge.jar"/>
     <mkdir dir="build/no_aop"/>
     <munge todir="build/no_aop">
-      <fileset dir="." excludes="build/**/*"/>
+      <fileset dir=".">
+        <exclude name="build/**/*"/>
+        <exclude name="**/InterceptorBindingProcessor.java"/>
+        <exclude name="**/ProxyFactory.java"/>
+        <exclude name="**/InterceptorStackCallback.java"/>
+        <exclude name="**/InterceptorBinding.java"/>
+        <exclude name="**/MethodAspect.java"/>
+        <exclude name="**/MethodInterceptionTest.java"/>
+        <exclude name="**/BytecodeGenTest.java"/>
+        <exclude name="**/IntegrationTest.java"/>
+        <exclude name="**/MethodInterceptionTest.java"/>
+      </fileset>
       <arg value="-DNO_AOP" />
     </munge>
   </target>

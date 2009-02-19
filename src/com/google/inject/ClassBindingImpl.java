@@ -70,9 +70,11 @@ class ClassBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T
     return Dependency.forInjectionPoints(injectionPoints);
   }
 
+  /*if[AOP]*/
   public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
     return lateBoundConstructor.constructorInjector.constructionProxy.getMethodInterceptors();
   }
+  /*end[AOP]*/
 
   @Override public String toString() {
     return new ToStringBuilder(ConstructorBinding.class)

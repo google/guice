@@ -179,10 +179,12 @@ public abstract class PrivateModule implements Module {
     binder.requestStaticInjection(types);
   }
 
+  /*if[AOP]*/
   protected final void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors) {
     binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
+  /*end[AOP]*/
 
   protected final void requireBinding(Key<?> key) {
     binder.getProvider(key);

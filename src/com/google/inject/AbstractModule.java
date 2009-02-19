@@ -155,6 +155,7 @@ public abstract class AbstractModule implements Module {
     binder.requestStaticInjection(types);
   }
 
+  /*if[AOP]*/
   /**
    * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
    *  com.google.inject.matcher.Matcher,
@@ -165,6 +166,7 @@ public abstract class AbstractModule implements Module {
       MethodInterceptor... interceptors) {
     binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
+  /*end[AOP]*/
 
   /**
    * Adds a dependency from this module to {@code key}. When the injector is

@@ -23,12 +23,12 @@ import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.inject.PrivateBinder;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
@@ -539,6 +539,7 @@ public class ElementsTest extends TestCase {
     );
   }
 
+  /*if[AOP]*/
   public void testBindIntercepor() {
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);
     final Matcher<Object> methodMatcher = Matchers.any();
@@ -565,6 +566,7 @@ public class ElementsTest extends TestCase {
         }
     );
   }
+  /*end[AOP]*/
 
   public void testBindScope() {
     checkModule(

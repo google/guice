@@ -45,9 +45,11 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitElement(binding);
   }
 
+  /*if[AOP]*/
   public V visitInterceptorBinding(InterceptorBinding interceptorBinding) {
     return visitElement(interceptorBinding);
   }
+  /*end[AOP]*/
 
   public V visitScopeBinding(ScopeBinding scopeBinding) {
     return visitElement(scopeBinding);

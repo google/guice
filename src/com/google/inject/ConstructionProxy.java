@@ -48,8 +48,10 @@ interface ConstructionProxy<T> {
    */
   Constructor<T> getConstructor();
 
+  /*if[AOP]*/
   /**
    * Returns the interceptors applied to each method, in order of invocation.
    */
   Map<Method, List<MethodInterceptor>> getMethodInterceptors();
+  /*end[AOP]*/
 }

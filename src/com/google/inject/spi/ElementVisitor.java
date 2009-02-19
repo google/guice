@@ -34,10 +34,12 @@ public interface ElementVisitor<V> {
    */
   <T> V visitBinding(Binding<T> binding);
 
+  /*if[AOP]*/
   /**
    * Visit a registration of interceptors for matching methods of matching classes.
    */
   V visitInterceptorBinding(InterceptorBinding interceptorBinding);
+  /*end[AOP]*/
 
   /**
    * Visit a registration of a scope annotation with the scope that implements it.

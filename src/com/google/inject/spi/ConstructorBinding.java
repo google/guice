@@ -45,11 +45,13 @@ public interface ConstructorBinding<T> extends Binding<T>, HasDependencies {
    */
   Set<InjectionPoint> getInjectionPoints();
 
+  /*if[AOP]*/
   /**
    * Returns the interceptors applied to each method, in the order that they will be applied.
    *
    * @return a possibly empty map
    */
   Map<Method, List<MethodInterceptor>> getMethodInterceptors();
+  /*end[AOP]*/
 
 }

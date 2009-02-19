@@ -26,12 +26,12 @@ import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.PrivateBinder;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.PrivateBinder;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
@@ -156,12 +156,14 @@ public final class Elements {
       this.privateElements = privateElements;
     }
 
+    /*if[AOP]*/
     public void bindInterceptor(
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         MethodInterceptor... interceptors) {
       elements.add(new InterceptorBinding(getSource(), classMatcher, methodMatcher, interceptors));
     }
+    /*end[AOP]*/
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
       elements.add(new ScopeBinding(getSource(), annotationType, scope));

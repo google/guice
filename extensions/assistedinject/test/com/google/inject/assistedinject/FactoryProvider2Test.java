@@ -610,6 +610,7 @@ public class FactoryProvider2Test extends TestCase {
     }
   }
 
+  /*if[AOP]*/
   public void testMethodInterceptorsOnAssistedTypes() {
     final AtomicInteger invocationCount = new AtomicInteger();
     final MethodInterceptor interceptor = new MethodInterceptor() {
@@ -635,6 +636,7 @@ public class FactoryProvider2Test extends TestCase {
     mustang.drive();
     assertEquals(1, invocationCount.get());
   }
+  /*end[AOP]*/
 
   /**
    * Our factories aren't reusable across injectors. Although this behaviour isn't something we

@@ -23,9 +23,9 @@ import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -67,10 +67,12 @@ public class ModuleWriter {
         return null;
       }
 
+      /*if[AOP]*/
       public Void visitInterceptorBinding(InterceptorBinding element) {
         writeBindInterceptor(binder, element);
         return null;
       }
+      /*end[AOP]*/
 
       public Void visitScopeBinding(ScopeBinding element) {
         writeBindScope(binder, element);
@@ -117,12 +119,14 @@ public class ModuleWriter {
     binder.addError(element);
   }
 
+  /*if[AOP]*/
   protected void writeBindInterceptor(Binder binder, InterceptorBinding element) {
     List<MethodInterceptor> interceptors = element.getInterceptors();
     binder.withSource(element.getSource()).bindInterceptor(
         element.getClassMatcher(), element.getMethodMatcher(),
         interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
+  /*end[AOP]*/
 
   protected void writeBindScope(Binder binder, ScopeBinding element) {
     binder.withSource(element.getSource()).bindScope(
