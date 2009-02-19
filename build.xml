@@ -115,6 +115,16 @@
     </javadoc>
   </target>
 
+  <target name="no_aop"
+          description="Create a copy of the Guice source that doesn't do bytecode generation.">
+    <taskdef name="munge" classname="MungeTask" classpath="lib/build/munge.jar"/>
+    <mkdir dir="build/no_aop"/>
+    <munge todir="build/no_aop">
+      <fileset dir="." excludes="build/**/*"/>
+      <arg value="-DNO_AOP" />
+    </munge>
+  </target>
+
   <target name="clean.all"
       depends="clean"
       description="Remove generated files.">

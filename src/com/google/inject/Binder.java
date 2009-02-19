@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.PrivateBinder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
@@ -188,6 +187,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 public interface Binder {
 
+  /*if[AOP]*/
   /**
    * Binds a method interceptor to methods matched by class and method
    * matchers.
@@ -200,6 +200,7 @@ public interface Binder {
    */
   void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher, MethodInterceptor... interceptors);
+  /*end[AOP]*/
 
   /**
    * Binds a scope to an annotation.
