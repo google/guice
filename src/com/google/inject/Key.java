@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
+import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.internal.ToStringBuilder;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;

@@ -16,7 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
@@ -33,6 +32,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;

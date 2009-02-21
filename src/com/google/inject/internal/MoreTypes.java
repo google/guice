@@ -17,13 +17,10 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
+import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Message;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;

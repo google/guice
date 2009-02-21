@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.base.Nullable;
+import com.google.inject.internal.Nullable;
 import com.google.inject.spi.InjectionPoint;
 
 /**

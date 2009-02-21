@@ -16,29 +16,26 @@
 
 package com.google.inject.grapher;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import junit.framework.TestCase;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * Tests for {@link GraphingVisitor}.

@@ -16,12 +16,12 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;

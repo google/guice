@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.ReferenceType;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +76,8 @@ public class ServletDefinitionTest extends TestCase {
 
     replay(servletContext);
 
-    servletDefinition.init(servletContext, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
+    servletDefinition.init(servletContext, injector,
+        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
 
     assertNotNull(mockServlet.getServletContext());
     assertEquals(contextName, mockServlet.getServletContext().getServletContextName());

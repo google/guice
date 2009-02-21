@@ -16,14 +16,13 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.Sets;
 import com.google.inject.spi.BindingTargetVisitor;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;

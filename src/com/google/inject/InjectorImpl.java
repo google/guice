@@ -16,14 +16,6 @@
 
 package com.google.inject;
 
-import com.google.common.base.Nullable;
-import static com.google.common.base.Preconditions.checkState;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.internal.BindingImpl;
@@ -31,12 +23,18 @@ import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InstanceBindingImpl;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.LinkedProviderBindingImpl;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
+import com.google.inject.internal.Nullable;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.ToStringBuilder;
@@ -695,16 +693,24 @@ class InjectorImpl implements Injector {
   }
 
   private static class BindingsMultimap {
-    final Multimap<TypeLiteral<?>, Binding<?>> multimap = Multimaps.newArrayListMultimap();
+    final Map<TypeLiteral<?>, List<Binding<?>>> multimap = Maps.newHashMap();
 
     <T> void put(TypeLiteral<T> type, Binding<T> binding) {
-      multimap.put(type, binding);
+      List<Binding<?>> bindingsForType = multimap.get(type);
+      if (bindingsForType == null) {
+        bindingsForType = Lists.newArrayList();
+        multimap.put(type, bindingsForType);
+      }
+      bindingsForType.add(binding);
     }
 
 
     @SuppressWarnings("unchecked") // safe because we only put matching entries into the map
     <T> List<Binding<T>> getAll(TypeLiteral<T> type) {
-      return Collections.<Binding<T>>unmodifiableList((List) multimap.get(type));
+      List<Binding<?>> bindings = multimap.get(type);
+      return bindings != null
+          ? Collections.<Binding<T>>unmodifiableList((List) multimap.get(type)) 
+          : ImmutableList.<Binding<T>>of();
     }
   }
 

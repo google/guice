@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.InjectionPoint;
 import java.util.List;
 import java.util.Map;

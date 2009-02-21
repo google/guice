@@ -16,13 +16,13 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkState;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.InjectorImpl.LateBoundConstructor;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalFactory;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;

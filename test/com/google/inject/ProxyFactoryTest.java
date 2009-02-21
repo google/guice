@@ -17,8 +17,8 @@
 
 package com.google.inject;
 
-import com.google.common.collect.Lists;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.Lists;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;

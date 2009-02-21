@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;

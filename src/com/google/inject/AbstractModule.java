@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;

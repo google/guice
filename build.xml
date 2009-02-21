@@ -80,7 +80,6 @@
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
-        <pathelement location="lib/build/google-collect-snapshot-20081129.jar"/>
       </classpath>
       <arg value="com.google.inject.AllTests"/>    
       <syspropertyset>

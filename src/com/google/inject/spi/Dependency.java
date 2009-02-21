@@ -16,10 +16,10 @@
 
 package com.google.inject.spi;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.Key;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Objects;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;

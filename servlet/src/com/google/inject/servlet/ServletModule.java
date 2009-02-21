@@ -16,9 +16,9 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.internal.Lists;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
@@ -224,7 +224,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filter(String urlPattern, String... morePatterns) {
-    return filtersModuleBuilder.filter(Lists.asList(urlPattern, morePatterns));
+    return filtersModuleBuilder.filter(Lists.newArrayList(urlPattern, morePatterns));
   }
 
   /**
@@ -232,7 +232,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
-    return filtersModuleBuilder.filterRegex(Lists.asList(regex, regexes));
+    return filtersModuleBuilder.filterRegex(Lists.newArrayList(regex, regexes));
   }
 
   /**
@@ -240,7 +240,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serve(String urlPattern, String... morePatterns) {
-    return servletsModuleBuilder.serve(Lists.asList(urlPattern, morePatterns));
+    return servletsModuleBuilder.serve(Lists.newArrayList(urlPattern, morePatterns));
   }
 
   /**
@@ -248,7 +248,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
-    return servletsModuleBuilder.serveRegex(Lists.asList(regex, regexes));
+    return servletsModuleBuilder.serveRegex(Lists.newArrayList(regex, regexes));
   }
 
   /**

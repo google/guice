@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.util.Types;
 import static com.google.inject.util.Types.arrayOf;
 import static com.google.inject.util.Types.listOf;

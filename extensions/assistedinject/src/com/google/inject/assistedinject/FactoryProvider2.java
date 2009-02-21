@@ -16,11 +16,6 @@
 
 package com.google.inject.assistedinject;
 
-import static com.google.common.base.Preconditions.checkState;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -35,6 +30,11 @@ import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Annotations.getKey;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableMap;
+import static com.google.inject.internal.Iterables.getOnlyElement;
+import com.google.inject.internal.Lists;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-
+import java.util.List;
 
 /**
  * The newer implementation of factory provider. This implementation uses a child injector to
@@ -81,7 +81,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
   /** the produced type, or null if all methods return concrete types */
   private final Key<?> producedType;
   private final ImmutableMap<Method, Key<?>> returnTypesByMethod;
-  private final ImmutableMultimap<Method, Key<?>> paramTypes;
+  private final ImmutableMap<Method, ImmutableList<Key<?>>> paramTypes;
 
   /** the hosting injector, or null if we haven't been initialized yet */
   private Injector injector;
@@ -100,7 +100,8 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     Errors errors = new Errors();
     try {
       ImmutableMap.Builder<Method, Key<?>> returnTypesBuilder = ImmutableMap.builder();
-      ImmutableMultimap.Builder<Method, Key<?>> paramTypesBuilder = ImmutableMultimap.builder();
+      ImmutableMap.Builder<Method, ImmutableList<Key<?>>> paramTypesBuilder
+          = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
       for (Method method : factoryType.getMethods()) {
         Key<?> returnType = getKey(TypeLiteral.get(method.getGenericReturnType()),
@@ -109,10 +110,12 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         Type[] params = method.getGenericParameterTypes();
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
         int p = 0;
+        List<Key<?>> keys = Lists.newArrayList();
         for (Type param : params) {
           Key<?> paramKey = getKey(TypeLiteral.get(param), method, paramAnnotations[p++], errors);
-          paramTypesBuilder.put(method, assistKey(method, paramKey, errors));
+          keys.add(assistKey(method, paramKey, errors));
         }
+        paramTypesBuilder.put(method, ImmutableList.copyOf(keys));
       }
       returnTypesByMethod = returnTypesBuilder.build();
       paramTypes = paramTypesBuilder.build();

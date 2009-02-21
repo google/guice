@@ -16,9 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -26,6 +23,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.getRawType;
 import com.google.inject.internal.Nullability;

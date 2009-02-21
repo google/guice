@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;

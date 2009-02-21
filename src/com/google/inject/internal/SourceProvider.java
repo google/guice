@@ -16,9 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.collect.ImmutableSet;
-import static com.google.common.collect.Iterables.concat;
-import com.google.common.collect.Lists;
+import static com.google.inject.internal.Iterables.concat;
 import java.util.List;
 
 /**

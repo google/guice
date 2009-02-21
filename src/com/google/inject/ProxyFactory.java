@@ -16,15 +16,15 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import static com.google.inject.internal.BytecodeGen.newEnhancer;
 import com.google.inject.internal.Function;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableMap;
+import com.google.inject.internal.Lists;
 import com.google.inject.internal.MapMaker;
+import com.google.inject.internal.Maps;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

@@ -16,7 +16,6 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
@@ -28,6 +27,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;

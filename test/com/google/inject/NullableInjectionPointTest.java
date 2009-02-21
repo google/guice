@@ -1,6 +1,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.internal.Nullable;
 import junit.framework.TestCase;
 
 /**

@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ConstructionContext;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;

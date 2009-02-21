@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
-import com.google.common.collect.Iterables;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
+import com.google.inject.internal.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;

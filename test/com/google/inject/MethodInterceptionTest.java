@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.only;
 import com.google.inject.spi.ConstructorBinding;

@@ -16,8 +16,6 @@
 
 package com.google.inject.multibindings;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
@@ -30,6 +28,8 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Sets;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;

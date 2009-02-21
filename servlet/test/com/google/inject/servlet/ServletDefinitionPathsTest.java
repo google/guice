@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.ReferenceType;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
@@ -88,7 +88,8 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
+    servletDefinition.init(null, injector,
+        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -173,7 +174,8 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
+    servletDefinition.init(null, injector,
+        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -258,7 +260,8 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>());
 
-    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet(ReferenceType.STRONG));
+    servletDefinition.init(null, injector,
+        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);

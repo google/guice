@@ -16,9 +16,6 @@
 
 package com.google.inject.spi;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.Maps;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
@@ -27,6 +24,9 @@ import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.Maps;
+import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;

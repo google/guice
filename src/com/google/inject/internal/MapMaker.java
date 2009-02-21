@@ -16,13 +16,8 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.FinalizableReferenceQueue;
-import com.google.inject.internal.FinalizableSoftReference;
-import com.google.inject.internal.FinalizableWeakReference;
-import com.google.inject.internal.Function;
 import com.google.inject.internal.CustomConcurrentHashMap.ComputingStrategy;
 import com.google.inject.internal.CustomConcurrentHashMap.Internals;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -263,8 +258,7 @@ public final class MapMaker {
   // we don't expose this implementation detail.
   /**
    * See {@link CustomConcurrentHashMap.Builder#buildComputingMap(
-   * CustomConcurrentHashMap.ComputingStrategy,
-   * com.google.inject.internal.Function)}.
+   * CustomConcurrentHashMap.ComputingStrategy, Function)}.
    *
    * <p>If {@link java.util.Map#put} is called before a computation
    * completes, other threads waiting on the computation will wake up and

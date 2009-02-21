@@ -16,9 +16,9 @@
 
 package com.google.inject.name;
 
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 class NamedImpl implements Named, Serializable {
 

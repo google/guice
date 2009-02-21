@@ -16,12 +16,12 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
+import com.google.inject.internal.Iterables;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
 import java.util.Collection;

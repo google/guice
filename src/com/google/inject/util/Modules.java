@@ -16,16 +16,16 @@
 
 package com.google.inject.util;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Scope;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 import com.google.inject.spi.DefaultBindingScopingVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;

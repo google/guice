@@ -16,12 +16,12 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.InjectorImpl.MethodInvoker;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;

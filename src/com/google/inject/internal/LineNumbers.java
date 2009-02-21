@@ -16,8 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import com.google.common.collect.Maps;
+import static com.google.inject.internal.Preconditions.checkArgument;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Member;

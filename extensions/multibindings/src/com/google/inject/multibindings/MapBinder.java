@@ -16,7 +16,6 @@
 
 package com.google.inject.multibindings;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -24,6 +23,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;

@@ -16,12 +16,12 @@
 
 package com.google.inject.assistedinject;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import static com.google.inject.internal.Preconditions.checkArgument;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

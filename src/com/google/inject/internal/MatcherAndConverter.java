@@ -16,8 +16,8 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.TypeLiteral;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.TypeConverter;
 

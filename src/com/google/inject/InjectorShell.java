@@ -16,15 +16,15 @@
 
 package com.google.inject;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
+import com.google.inject.internal.Lists;
+import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderInstanceBindingImpl;
 import com.google.inject.internal.Scoping;

@@ -16,11 +16,6 @@
 
 package com.google.inject.spi;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -39,8 +34,13 @@ import com.google.inject.internal.AbstractBindingBuilder;
 import com.google.inject.internal.BindingBuilder;
 import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.Lists;
+import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
+import com.google.inject.internal.Sets;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;

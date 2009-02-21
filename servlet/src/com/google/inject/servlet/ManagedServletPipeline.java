@@ -15,16 +15,16 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.ReferenceType;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Preconditions;
+import com.google.inject.internal.Sets;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -73,7 +73,8 @@ class ManagedServletPipeline {
   }
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {
-    Set<HttpServlet> initializedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
+    Set<HttpServlet> initializedSoFar
+        = Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap());
 
     for (ServletDefinition servletDefinition : servletDefinitions) {
       servletDefinition.init(servletContext, injector, initializedSoFar);
@@ -95,7 +96,8 @@ class ManagedServletPipeline {
   }
 
   public void destroy() {
-    Set<HttpServlet> destroyedSoFar = Sets.newIdentityHashSet(ReferenceType.STRONG);
+    Set<HttpServlet> destroyedSoFar
+        = Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap());
     for (ServletDefinition servletDefinition : servletDefinitions) {
       servletDefinition.destroy(destroyedSoFar);
     }

@@ -16,9 +16,6 @@
 
 package com.google.inject.multibindings;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -30,6 +27,9 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;

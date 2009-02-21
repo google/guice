@@ -1,10 +1,10 @@
 package com.google.inject.servlet;
 
-import com.google.common.base.ReferenceType;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -66,7 +66,8 @@ public class FilterDefinitionTest extends TestCase {
 
     replay(servletContext);
 
-    filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
+    filterDef.init(servletContext, injector,
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
     final FilterConfig filterConfig = mockFilter.getConfig();
     assert null != filterConfig;
@@ -106,7 +107,7 @@ public class FilterDefinitionTest extends TestCase {
 
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
-        Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
     assert mockFilter.isInit() : "Init did not fire";
 
@@ -121,7 +122,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("Filter did not proceed down chain", proceed[0]);
 
-    filterDef.destroy(Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
+    filterDef.destroy(Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
     assertTrue("Destroy did not fire", mockFilter.isDestroy());
 
     verify(injector, request);
@@ -161,7 +162,7 @@ public class FilterDefinitionTest extends TestCase {
 
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
-        Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
     assert mockFilter.isInit() : "Init did not fire";
 
@@ -175,7 +176,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assert !proceed[0] : "Filter did not suppress chain";
 
-    filterDef.destroy(Sets.<Filter>newIdentityHashSet(ReferenceType.STRONG));
+    filterDef.destroy(Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
     assert mockFilter.isDestroy() : "Destroy did not fire";
 
     verify(injector, request);

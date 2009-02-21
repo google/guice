@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
@@ -25,6 +23,7 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;

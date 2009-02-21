@@ -16,13 +16,12 @@
 
 package com.google.inject.grapher.graphviz;
 
-import com.google.common.base.Join;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.inject.grapher.ImplementationNode;
 import com.google.inject.grapher.NodeAliasFactory;
 import com.google.inject.grapher.Renderer;
-
+import com.google.inject.internal.Join;
+import com.google.inject.internal.Lists;
+import com.google.inject.internal.Maps;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;

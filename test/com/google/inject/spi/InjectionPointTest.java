@@ -16,14 +16,14 @@
 
 package com.google.inject.spi;
 
-import com.google.common.collect.ImmutableSet;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableSet;
+import static com.google.inject.internal.Iterables.getOnlyElement;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import java.io.IOException;

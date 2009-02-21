@@ -15,9 +15,9 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.collect.Iterators;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.internal.Iterators;
 import static com.google.inject.servlet.ServletScopes.isSingletonBinding;
 import java.io.IOException;
 import java.util.Collections;

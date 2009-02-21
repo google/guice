@@ -16,8 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.Binder;
@@ -31,6 +29,8 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;

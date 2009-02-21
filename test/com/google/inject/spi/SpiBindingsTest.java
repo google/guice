@@ -16,12 +16,6 @@
 
 package com.google.inject.spi;
 
-import com.google.common.base.Nullable;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
@@ -35,8 +29,13 @@ import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Lists;
 import com.google.inject.name.Names;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
@@ -342,9 +341,14 @@ public class SpiBindingsTest extends TestCase {
   public void checkInjector(Module module, ElementVisitor<?>... visitors) {
     Injector injector = Guice.createInjector(module);
 
-    List<Binding<?>> bindings = Lists.newArrayList(
-        Iterables.filter(injector.getBindings().values(), isUserBinding));
-    orderByKey.sort(bindings);
+    List<Binding<?>> bindings = Lists.newArrayList(injector.getBindings().values());
+    for (Iterator<Binding<?>> i = bindings.iterator(); i.hasNext(); ) {
+      if (BUILT_IN_BINDINGS.contains(i.next().getKey())) {
+        i.remove();
+      }
+    }
+
+    Collections.sort(bindings, orderByKey);
 
     assertEquals(bindings.size(), visitors.length);
 
@@ -355,15 +359,10 @@ public class SpiBindingsTest extends TestCase {
     }
   }
 
-  private final Predicate<Binding<?>> isUserBinding = new Predicate<Binding<?>>() {
-    private final ImmutableSet<Key<?>> BUILT_IN_BINDINGS = ImmutableSet.of(
-        Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
-    public boolean apply(@Nullable Binding<?> binding) {
-      return !BUILT_IN_BINDINGS.contains(binding.getKey());
-    }
-  };
+  private final ImmutableSet<Key<?>> BUILT_IN_BINDINGS = ImmutableSet.of(
+      Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
 
-  private final Ordering<Binding<?>> orderByKey = new Ordering<Binding<?>>() {
+  private final Comparator<Binding<?>> orderByKey = new Comparator<Binding<?>>() {
     public int compare(Binding<?> a, Binding<?> b) {
       return a.getKey().toString().compareTo(b.getKey().toString());
     }

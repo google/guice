@@ -16,8 +16,8 @@
 
 package com.google.inject.spi;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.ConfigurationException;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.util.Set;
 
 /**

@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.common.collect.Maps;
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.internal.Maps;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

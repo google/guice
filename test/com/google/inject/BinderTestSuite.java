@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.Lists;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import com.google.inject.util.Providers;

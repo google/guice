@@ -16,7 +16,6 @@
 
 package com.google.inject.grapher;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -25,7 +24,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.grapher.TransitiveDependencyVisitor;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
@@ -36,10 +35,8 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
-
 import java.util.Collection;
 import java.util.Set;
-
 import junit.framework.TestCase;
 
 /**

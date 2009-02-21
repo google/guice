@@ -16,17 +16,17 @@
 
 package com.google.inject;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ExposedBindingImpl;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InstanceBindingImpl;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.LinkedProviderBindingImpl;
+import com.google.inject.internal.Lists;
 import com.google.inject.internal.ProviderInstanceBindingImpl;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.UntargettedBindingImpl;
