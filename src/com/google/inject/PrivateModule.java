@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
  *
  * <pre>
  * public class FooBarBazModule extends PrivateModule {
- *   protected void configurePrivateBindings() {
+ *   protected void configure() {
  *     bind(Foo.class).to(RealFoo.class);
  *     expose(Foo.class);
  *
