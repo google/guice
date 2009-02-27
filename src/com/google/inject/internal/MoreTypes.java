@@ -276,11 +276,14 @@ public class MoreTypes {
       if (ownerType != null) {
         stringBuilder.append(toString(ownerType)).append(".");
       }
-      stringBuilder.append(toString(parameterizedType.getRawType()))
-          .append("<")
-          .append(toString(arguments[0]));
-      for (int i = 1; i < arguments.length; i++) {
-        stringBuilder.append(", ").append(toString(arguments[i]));
+      stringBuilder.append(toString(parameterizedType.getRawType()));
+      if (arguments.length > 0) {
+        stringBuilder
+            .append("<")
+            .append(toString(arguments[0]));
+        for (int i = 1; i < arguments.length; i++) {
+          stringBuilder.append(", ").append(toString(arguments[i]));
+        }
       }
       return stringBuilder.append(">").toString();
 

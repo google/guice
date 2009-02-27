@@ -35,7 +35,7 @@ public @interface Assisted {
 
   /**
    * The unique name for this parameter. This is matched to the {@literal @Assisted} constructor 
-   * parameter with the same value.
+   * parameter with the same value. Names are not necessary when the parameter types are distinct.
    */
   String value() default "";
 }

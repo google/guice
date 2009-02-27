@@ -20,6 +20,7 @@ package com.google.inject.util;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.util.Types.subtypeOf;
 import static com.google.inject.util.Types.supertypeOf;
@@ -45,6 +46,7 @@ public class TypesTest extends TestCase {
   List<String[][]> c;
   List<String> d;
   Set<String> e;
+  Outer<String>.Inner f;
 
   private ParameterizedType mapStringInteger;
   private ParameterizedType innerFloatDouble;
@@ -52,6 +54,7 @@ public class TypesTest extends TestCase {
   private ParameterizedType listString;
   private ParameterizedType setString;
   private GenericArrayType stringArray;
+  private ParameterizedType outerInner;
 
   protected void setUp() throws Exception {
     super.setUp();
@@ -61,6 +64,7 @@ public class TypesTest extends TestCase {
     listString = (ParameterizedType) getClass().getDeclaredField("d").getGenericType();
     setString = (ParameterizedType) getClass().getDeclaredField("e").getGenericType();
     stringArray = (GenericArrayType) listStringArray.getActualTypeArguments()[0];
+    outerInner = (ParameterizedType) getClass().getDeclaredField("f").getGenericType();
   }
 
   public void testListSetMap() {
@@ -184,4 +188,18 @@ public class TypesTest extends TestCase {
 
   @SuppressWarnings("UnusedDeclaration")
   class Inner<T1, T2> {}
+  
+  public void testInnerParameterizedEvenWithZeroArgs() {
+    TypeLiteral<Outer<String>.Inner> type = new TypeLiteral<Outer<String>.Inner>() {};
+    assertEqualsBothWays(outerInner, type.getType());
+
+    ParameterizedType parameterizedType = (ParameterizedType) type.getType();
+    assertEquals(0, parameterizedType.getActualTypeArguments().length);
+    assertEquals(new TypeLiteral<Outer<String>>() {}.getType(), parameterizedType.getOwnerType());
+    assertEquals(Outer.Inner.class, parameterizedType.getRawType());
+  }
+
+  static class Outer<T> {
+    class Inner {}
+  }
 }

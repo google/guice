@@ -41,12 +41,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides a factory that combines caller-provided parameters with injector-provided values when
- * constructing objects.
+ * Provides a factory that combines the caller's arguments with injector-supplied values to
+ * construct objects.
  *
  * <h3>Defining a factory</h3>
- * Create an interface whose methods return the constructed type, or its supertypes. The method's
- * parameters are the arguments required to build the constructed type.
+ * Create an interface whose methods return the constructed type, or any of its supertypes. The
+ * method's parameters are the arguments required to build the constructed type.
  * <pre>public interface PaymentFactory {
  *   Payment create(Date startDate, Money amount);
  * }</pre>
@@ -55,8 +55,8 @@ import java.util.Set;
  *
  * <h3>Creating a type that accepts factory parameters</h3>
  * {@code constructedType} is a concrete class with an {@literal @}{@link Inject}-annotated
- * constructor. In addition to injector-provided parameters, the constructor should have
- * parameters that match each of the factory method's parameters. Each factory-provided parameter
+ * constructor. In addition to injector-supplied parameters, the constructor should have
+ * parameters that match each of the factory method's parameters. Each factory-supplied parameter
  * requires an {@literal @}{@link Assisted} annotation. This serves to document that the parameter
  * is not bound by your application's modules.
  * <pre>public class RealPayment implements Payment {
@@ -80,7 +80,7 @@ import java.util.Set;
  *
  * <h3>Using the factory</h3>
  * Inject your factory into your application classes. When you use the factory, your arguments
- * will be combined with values from the injector to produce a concrete instance.
+ * will be combined with values from the injector to construct an instance.
  * <pre>public class PaymentAction {
  *   {@literal @}Inject private PaymentFactory paymentFactory;
  *
