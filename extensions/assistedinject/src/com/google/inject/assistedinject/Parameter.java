@@ -93,11 +93,10 @@ class Parameter {
   }
 
   private boolean isBound(Injector injector, Key<?> key) {
-    /* This method is particularly lame - we really need an API that can test
-       for any binding, implicit or explicit */
+    // This method is particularly lame - we really need an API that can test
+    // for any binding, implicit or explicit
     try {
-      return injector.getBinding(key) != null
-          || injector.getProvider(key) != null;
+      return injector.getBinding(key) != null;
     } catch (ConfigurationException e) {
       return false;
     }
@@ -123,12 +122,12 @@ class Parameter {
   }
 
   private Type getProvidedType(Type type) {
-    return ((ParameterizedType)type).getActualTypeArguments()[0];
+    return ((ParameterizedType) type).getActualTypeArguments()[0];
   }
 
   private boolean isProvider(Type type) {
     return type instanceof ParameterizedType
-        && ((ParameterizedType)type).getRawType() == Provider.class;
+        && ((ParameterizedType) type).getRawType() == Provider.class;
   }
 
   private Key<?> getBindingForType(Type type) {

@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.ImmutableSet;
@@ -34,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,11 +146,16 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   private Injector injector;
 
-  private final Class<F> factoryType;
+  private final TypeLiteral<F> factoryType;
   private final Map<Method, AssistedConstructor<?>> factoryMethodToConstructor;
 
   public static <F> Provider<F> newFactory(
       Class<F> factoryType, Class<?> implementationType){
+    return newFactory(TypeLiteral.get(factoryType), TypeLiteral.get(implementationType));
+  }
+
+  public static <F> Provider<F> newFactory(
+      TypeLiteral<F> factoryType, TypeLiteral<?> implementationType) {
     Map<Method, AssistedConstructor<?>> factoryMethodToConstructor
         = createMethodMapping(factoryType, implementationType);
 
@@ -159,7 +166,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     }
   }
 
-  private FactoryProvider(Class<F> factoryType,
+  private FactoryProvider(TypeLiteral<F> factoryType,
       Map<Method, AssistedConstructor<?>> factoryMethodToConstructor) {
     this.factoryType = factoryType;
     this.factoryMethodToConstructor = factoryMethodToConstructor;
@@ -208,14 +215,16 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     return parameter.isBound(injector);
   }
 
-  @SuppressWarnings({"unchecked"})
   private static Map<Method, AssistedConstructor<?>> createMethodMapping(
-      Class<?> factoryType, Class<?> implementationType) {
+      TypeLiteral<?> factoryType, TypeLiteral<?> implementationType) {
     List<AssistedConstructor<?>> constructors = Lists.newArrayList();
 
-    for (Constructor<?> c : implementationType.getDeclaredConstructors()) {
-      if (c.getAnnotation(AssistedInject.class) != null) {
-        constructors.add(new AssistedConstructor(c));
+    for (Constructor<?> constructor : implementationType.getRawType().getDeclaredConstructors()) {
+      if (constructor.getAnnotation(AssistedInject.class) != null) {
+        @SuppressWarnings("unchecked") // the constructor type and implementation type agree
+        AssistedConstructor assistedConstructor = new AssistedConstructor(
+            constructor, implementationType.getParameterTypes(constructor));
+        constructors.add(assistedConstructor);
       }
     }
 
@@ -223,10 +232,12 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       return ImmutableMap.of();
     }
 
-    if (constructors.size() != factoryType.getMethods().length) {
+    Method[] factoryMethods = factoryType.getRawType().getMethods();
+
+    if (constructors.size() != factoryMethods.length) {
       throw newConfigurationException("Constructor mismatch: %s has %s @AssistedInject "
-          + "constructors, factory %s has %s creation methods", implementationType.getSimpleName(),
-          constructors.size(), factoryType.getSimpleName(), factoryType.getMethods().length);
+          + "constructors, factory %s has %s creation methods", implementationType,
+          constructors.size(), factoryType, factoryMethods.length);
     }
 
     Map<ParameterListKey, AssistedConstructor> paramsToConstructor = Maps.newHashMap();
@@ -239,13 +250,17 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     }
 
     Map<Method, AssistedConstructor<?>> result = Maps.newHashMap();
-    for (Method method : factoryType.getMethods()) {
-      if (!method.getReturnType().isAssignableFrom(implementationType)) {
-        throw new RuntimeException(String.format("Return type of method \"%s\""
-            + " is not assignable from class \"%s\"", method,
-            implementationType.getName()));
+    for (Method method : factoryMethods) {
+      if (!method.getReturnType().isAssignableFrom(implementationType.getRawType())) {
+        throw newConfigurationException("Return type of method %s is not assignable from %s",
+            method, implementationType);
       }
-      ParameterListKey methodParams = new ParameterListKey(method.getGenericParameterTypes());
+
+      List<Type> parameterTypes = Lists.newArrayList();
+      for (TypeLiteral<?> parameterType : factoryType.getParameterTypes(method)) {
+        parameterTypes.add(parameterType.getType());
+      }
+      ParameterListKey methodParams = new ParameterListKey(parameterTypes);
 
       if (!paramsToConstructor.containsKey(methodParams)) {
         throw newConfigurationException("%s has no @AssistInject constructor that takes the "
@@ -319,8 +334,10 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       }
     };
 
-    return factoryType.cast(Proxy.newProxyInstance(factoryType.getClassLoader(),
-        new Class[] {factoryType}, invocationHandler));
+    @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
+    Class<F> factoryRawType = (Class) factoryType.getRawType();
+    return factoryRawType.cast(Proxy.newProxyInstance(factoryRawType.getClassLoader(),
+        new Class[] { factoryRawType }, invocationHandler));
   }
 
   private static ConfigurationException newConfigurationException(String format, Object... args) {

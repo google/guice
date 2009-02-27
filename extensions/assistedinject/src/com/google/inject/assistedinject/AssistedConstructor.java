@@ -17,6 +17,8 @@
 package com.google.inject.assistedinject;
 
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Lists;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -41,18 +43,17 @@ class AssistedConstructor<T> {
   private final List<Parameter> allParameters;
 
   @SuppressWarnings("unchecked")
-  public AssistedConstructor(Constructor<T> constructor) {
+  public AssistedConstructor(Constructor<T> constructor, List<TypeLiteral<?>> parameterTypes) {
     this.constructor = constructor;
 
-    Type[] parameterTypes = constructor.getGenericParameterTypes();
     Annotation[][] annotations = constructor.getParameterAnnotations();
 
-    List<Type> typeList = new ArrayList<Type>();
+    List<Type> typeList = Lists.newArrayList();
     allParameters = new ArrayList<Parameter>();
 
     // categorize params as @Assisted or @Injected
-    for (int i = 0; i < parameterTypes.length; i++) {
-      Parameter parameter = new Parameter(parameterTypes[i], annotations[i]);
+    for (int i = 0; i < parameterTypes.size(); i++) {
+      Parameter parameter = new Parameter(parameterTypes.get(i).getType(), annotations[i]);
       allParameters.add(parameter);
       if (parameter.isProvidedByFactory()) {
         typeList.add(parameter.getType());

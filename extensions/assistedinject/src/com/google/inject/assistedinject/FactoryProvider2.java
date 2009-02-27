@@ -41,7 +41,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,25 +93,29 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
    * @param producedType a concrete type that is assignable to the return types of all factory
    *      methods.
    */
-  FactoryProvider2(Class<F> factoryType, Key<?> producedType) {
+  FactoryProvider2(TypeLiteral<F> factoryType, Key<?> producedType) {
     this.producedType = producedType;
 
     Errors errors = new Errors();
+
+    @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
+    Class<F> factoryRawType = (Class) factoryType.getRawType();
+
     try {
       ImmutableMap.Builder<Method, Key<?>> returnTypesBuilder = ImmutableMap.builder();
       ImmutableMap.Builder<Method, ImmutableList<Key<?>>> paramTypesBuilder
           = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
-      for (Method method : factoryType.getMethods()) {
-        Key<?> returnType = getKey(TypeLiteral.get(method.getGenericReturnType()),
-            method, method.getAnnotations(), errors);
+      for (Method method : factoryRawType.getMethods()) {
+        Key<?> returnType = getKey(
+            factoryType.getReturnType(method), method, method.getAnnotations(), errors);
         returnTypesBuilder.put(method, returnType);
-        Type[] params = method.getGenericParameterTypes();
+        List<TypeLiteral<?>> params = factoryType.getParameterTypes(method);
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
         int p = 0;
         List<Key<?>> keys = Lists.newArrayList();
-        for (Type param : params) {
-          Key<?> paramKey = getKey(TypeLiteral.get(param), method, paramAnnotations[p++], errors);
+        for (TypeLiteral<?> param : params) {
+          Key<?> paramKey = getKey(param, method, paramAnnotations[p++], errors);
           keys.add(assistKey(method, paramKey, errors));
         }
         paramTypesBuilder.put(method, ImmutableList.copyOf(keys));
@@ -123,8 +126,8 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
 
-    factory = factoryType.cast(Proxy.newProxyInstance(factoryType.getClassLoader(),
-        new Class[] { factoryType }, this));
+    factory = factoryRawType.cast(Proxy.newProxyInstance(factoryRawType.getClassLoader(),
+        new Class[] { factoryRawType }, this));
   }
 
   public F get() {
