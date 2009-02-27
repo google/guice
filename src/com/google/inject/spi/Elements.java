@@ -37,6 +37,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
 import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
@@ -181,6 +182,8 @@ public final class Elements {
     }
 
     public void install(Module module) {
+      checkNotNull(module, "module");
+
       if (modules.add(module)) {
         Binder binder = this;
         if (module instanceof PrivateModule) {
