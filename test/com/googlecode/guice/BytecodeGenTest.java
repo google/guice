@@ -42,6 +42,8 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class BytecodeGenTest extends TestCase {
 
+  private final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+
   private final Module interceptorModule = new AbstractModule() {
     protected void configure() {
       bindInterceptor(any(), any(), new MethodInterceptor() {
@@ -188,14 +190,20 @@ public class BytecodeGenTest extends TestCase {
       }
     }).getInstance(ProxyTest.class);
 
-    assertSame(testProxy.getClass().getClassLoader(), ClassLoader.getSystemClassLoader());
+    // unforunately, the expected classloader depends on which class loader loaded this test.
+    if (ProxyTest.class.getClassLoader() == systemClassLoader) {
+      assertSame(testProxy.getClass().getClassLoader(), systemClassLoader);
+    } else {
+      assertNotSame(testProxy.getClass().getClassLoader(), ProxyTest.class.getClassLoader());
+      assertNotSame(testProxy.getClass().getClassLoader(), systemClassLoader);
+    }
   }
   
   public void testProxyClassUnloading() {
     Object testObject = Guice.createInjector(interceptorModule, testModule)
         .getInstance(proxyTestClass);
     assertNotNull(testObject.getClass().getClassLoader());
-    assertNotSame(testObject.getClass().getClassLoader(), ClassLoader.getSystemClassLoader());
+    assertNotSame(testObject.getClass().getClassLoader(), systemClassLoader);
 
     // take a weak reference to the generated proxy class
     Reference<Class<?>> clazzRef = new WeakReference<Class<?>>(testObject.getClass());

@@ -99,7 +99,7 @@ public class AllTests {
 
     // names
     suite.addTestSuite(NamesTest.class);
-    
+
     // tools
     // suite.addTestSuite(JmxTest.class); not a testcase
 
@@ -111,6 +111,7 @@ public class AllTests {
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(MethodInterceptionTest.class);
     suite.addTestSuite(com.googlecode.guice.BytecodeGenTest.class);
+    suite.addTest(com.googlecode.guice.StrictContainerTestSuite.suite());
     /*end[AOP]*/
 
     return suite;

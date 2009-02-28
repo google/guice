@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -103,12 +104,25 @@ public final class BytecodeGen {
 
   /**
    * For class loaders, {@code null}, is always an alias to the
-   * {@link ClassLoader#getSystemClassLoader() system class loader}.
+   * {@link ClassLoader#getSystemClassLoader() system class loader}. This method
+   * will not return null.
    */
   private static ClassLoader canonicalize(ClassLoader classLoader) {
     return classLoader != null
         ? classLoader
-        : ClassLoader.getSystemClassLoader();
+        : checkNotNull(getSystemClassLoaderOrNull(), "Couldn't get a ClassLoader");
+  }
+
+  /**
+   * Returns the system classloader, or {@code null} if we don't have
+   * permission.
+   */
+  private static ClassLoader getSystemClassLoaderOrNull() {
+    try {
+      return ClassLoader.getSystemClassLoader();
+    } catch (SecurityException e) {
+      return null;
+    }
   }
 
   /**
@@ -122,7 +136,7 @@ public final class BytecodeGen {
     delegate = canonicalize(delegate);
 
     // if the application is running in the System classloader, assume we can run there too
-    if (delegate == ClassLoader.getSystemClassLoader()) {
+    if (delegate == getSystemClassLoaderOrNull()) {
       return delegate;
     }
 
