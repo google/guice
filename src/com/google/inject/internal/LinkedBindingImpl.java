@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.LinkedKeyBinding;
 
@@ -38,7 +39,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitLinkedKey(this);
+    return visitor.visit(this);
   }
 
   public Key<? extends T> getLinkedKey() {
@@ -51,6 +52,10 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedBindingImpl<T>(getSource(), key, getScoping(), targetKey);
+  }
+
+  public void applyTo(Binder binder) {
+    getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).to(getLinkedKey()));
   }
 
   @Override public String toString() {

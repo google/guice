@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.internal.BytecodeGen;
-import com.google.inject.internal.BytecodeGen.Visibility;
-import static com.google.inject.internal.BytecodeGen.newEnhancer;
-import com.google.inject.internal.Function;
+import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.Lists;
-import com.google.inject.internal.MapMaker;
 import com.google.inject.internal.Maps;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
@@ -41,92 +38,12 @@ import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
- * Proxies classes applying interceptors to methods.
+ * Builds a construction proxy that can participate in AOP. This class manages applying type and
+ * method matchers to come up with the set of intercepted methods.
  *
- * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
-class ProxyFactory implements ConstructionProxyFactory {
-
-  final List<MethodAspect> methodAspects;
-  final ConstructionProxyFactory defaultFactory;
-
-  ProxyFactory(List<MethodAspect> methodAspects) {
-    this.methodAspects = methodAspects;
-    defaultFactory = new DefaultConstructionProxyFactory();
-  }
-
-  /** Cached construction proxies for each injection point */
-  Map<InjectionPoint, ConstructionProxy> constructionProxies = new MapMaker().makeComputingMap(
-      new Function<InjectionPoint, ConstructionProxy>() {
-    public ConstructionProxy apply(InjectionPoint key) {
-      return createConstructionProxy(key);
-    }
-  });
-
-  @SuppressWarnings("unchecked") // the constructed T is the same as the injection point's T
-  public <T> ConstructionProxy<T> get(InjectionPoint injectionPoint) {
-    return (ConstructionProxy<T>) constructionProxies.get(injectionPoint);
-  }
-
-  // TODO: This isn't safe.
-  <T> ConstructionProxy<T> createConstructionProxy(InjectionPoint injectionPoint) {
-    @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
-    Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
-    Class<T> declaringClass = constructor.getDeclaringClass();
-
-    // Find applicable aspects. Bow out if none are applicable to this class.
-    List<MethodAspect> applicableAspects = Lists.newArrayList();
-    for (MethodAspect methodAspect : methodAspects) {
-      if (methodAspect.matches(declaringClass)) {
-        applicableAspects.add(methodAspect);
-      }
-    }
-    if (applicableAspects.isEmpty()) {
-      return defaultFactory.get(injectionPoint);
-    }
-
-    // Get list of methods from cglib.
-    List<Method> methods = Lists.newArrayList();
-    Enhancer.getMethods(declaringClass, null, methods);
-
-    // Create method/interceptor holders and record indices.
-    List<MethodInterceptorsPair> methodInterceptorsPairs = Lists.newArrayList();
-    for (Method method : methods) {
-      methodInterceptorsPairs.add(new MethodInterceptorsPair(method));
-    }
-
-    // PUBLIC if all the methods we're intercepting are public. This impacts which classloader we
-    // should use for loading the enhanced class
-    Visibility visibility = Visibility.PUBLIC;
-
-    // Iterate over aspects and add interceptors for the methods they apply to
-    boolean anyMatched = false;
-    for (MethodAspect methodAspect : applicableAspects) {
-      for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
-        if (methodAspect.matches(pair.method)) {
-          visibility = visibility.and(Visibility.forMember(pair.method));
-          pair.addAll(methodAspect.interceptors());
-          anyMatched = true;
-        }
-      }
-    }
-    if (!anyMatched) {
-      // not test-covered
-      return defaultFactory.get(injectionPoint);
-    }
-
-    @SuppressWarnings("unchecked")
-    Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
-    Arrays.fill(callbackTypes, net.sf.cglib.proxy.MethodInterceptor.class);
-
-    // Create the proxied class. We're careful to ensure that all enhancer state is not-specific to
-    // this injector. Otherwise, the proxies for each injector will waste Permgen memory
-    Enhancer enhancer = newEnhancer(declaringClass, visibility);
-    enhancer.setCallbackFilter(new IndicesCallbackFilter(declaringClass, methods));
-    enhancer.setCallbackTypes(callbackTypes);
-
-    return new ProxyConstructor<T>(methods, methodInterceptorsPairs, enhancer, injectionPoint);
-  }
+class ProxyFactory<T> implements ConstructionProxyFactory<T> {
 
   private static final net.sf.cglib.proxy.MethodInterceptor NO_OP_METHOD_INTERCEPTOR
       = new net.sf.cglib.proxy.MethodInterceptor() {
@@ -137,78 +54,122 @@ class ProxyFactory implements ConstructionProxyFactory {
     }
   };
 
+  private final InjectionPoint injectionPoint;
+  private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
+  private final Class<T> declaringClass;
+  private final List<Method> methods;
+  private final Callback[] callbacks;
+
   /**
-   * Constructs instances that participate in AOP.
+   * PUBLIC is default; it's used if all the methods we're intercepting are public. This impacts
+   * which classloader we should use for loading the enhanced class
    */
-  private static class ProxyConstructor<T> implements ConstructionProxy<T> {
-    private final Class<?> enhanced;
-    private final InjectionPoint injectionPoint;
-    private final Constructor<T> constructor;
+  private BytecodeGen.Visibility visibility = BytecodeGen.Visibility.PUBLIC;
 
-    private final Callback[] callbacks;
-    private final FastConstructor fastConstructor;
-    private final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
+  ProxyFactory(InjectionPoint injectionPoint, Iterable<MethodAspect> methodAspects) {
+    this.injectionPoint = injectionPoint;
 
-    @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
-    ProxyConstructor(List<Method> methods, List<MethodInterceptorsPair> methodInterceptorsPairs,
-        Enhancer enhancer, InjectionPoint injectionPoint) {
-      this.enhanced = enhancer.createClass(); // this returns a cached class if possible
-      this.injectionPoint = injectionPoint;
-      this.constructor = (Constructor<T>) injectionPoint.getMember();
+    @SuppressWarnings("unchecked") // the member of injectionPoint is always a Constructor<T>
+        Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
+    declaringClass = constructor.getDeclaringClass();
 
-      ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder = null; // lazy
-
-      this.callbacks = new Callback[methods.size()];
-      for (int i = 0; i < methods.size(); i++) {
-        MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
-
-        if (!pair.hasInterceptors()) {
-          callbacks[i] = NO_OP_METHOD_INTERCEPTOR;
-          continue;
-        }
-
-        if (interceptorsMapBuilder == null) {
-          interceptorsMapBuilder = ImmutableMap.builder();
-        }
-        interceptorsMapBuilder.put(pair.method, ImmutableList.copyOf(pair.interceptors));
-        callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
-      }
-
-      FastClass fastClass = BytecodeGen.newFastClass(enhanced, Visibility.forMember(constructor));
-      this.fastConstructor = fastClass.getConstructor(constructor.getParameterTypes());
-      this.methodInterceptors = interceptorsMapBuilder != null
-          ? interceptorsMapBuilder.build()
-          : ImmutableMap.<Method, List<MethodInterceptor>>of();
-    }
-
-    @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
-    public T newInstance(Object[] arguments) throws InvocationTargetException {
-      Enhancer.registerCallbacks(enhanced, callbacks);
-      try {
-        return (T) fastConstructor.newInstance(arguments);
-      } finally {
-        Enhancer.registerCallbacks(enhanced, null);
+    // Find applicable aspects. Bow out if none are applicable to this class.
+    List<MethodAspect> applicableAspects = Lists.newArrayList();
+    for (MethodAspect methodAspect : methodAspects) {
+      if (methodAspect.matches(declaringClass)) {
+        applicableAspects.add(methodAspect);
       }
     }
 
-    public InjectionPoint getInjectionPoint() {
-      return injectionPoint;
+    if (applicableAspects.isEmpty()) {
+      interceptors = ImmutableMap.of();
+      methods = ImmutableList.of();
+      callbacks = null;
+      return;
     }
 
-    public Constructor<T> getConstructor() {
-      return constructor;
+    // Get list of methods from cglib.
+    methods = Lists.newArrayList();
+    Enhancer.getMethods(declaringClass, null, methods);
+
+    // Create method/interceptor holders and record indices.
+    List<MethodInterceptorsPair> methodInterceptorsPairs = Lists.newArrayList();
+    for (Method method : methods) {
+      methodInterceptorsPairs.add(new MethodInterceptorsPair(method));
     }
 
-    public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
-      return methodInterceptors;
+    // Iterate over aspects and add interceptors for the methods they apply to
+    boolean anyMatched = false;
+    for (MethodAspect methodAspect : applicableAspects) {
+      for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
+        if (methodAspect.matches(pair.method)) {
+          visibility = visibility.and(BytecodeGen.Visibility.forMember(pair.method));
+          pair.addAll(methodAspect.interceptors());
+          anyMatched = true;
+        }
+      }
     }
+
+    if (!anyMatched) {
+      interceptors = ImmutableMap.of();
+      callbacks = null;
+      return;
+    }
+
+    ImmutableMap.Builder<Method, List<MethodInterceptor>> interceptorsMapBuilder = null; // lazy
+
+    callbacks = new Callback[methods.size()];
+    for (int i = 0; i < methods.size(); i++) {
+      MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
+
+      if (!pair.hasInterceptors()) {
+        callbacks[i] = NO_OP_METHOD_INTERCEPTOR;
+        continue;
+      }
+
+      if (interceptorsMapBuilder == null) {
+        interceptorsMapBuilder = ImmutableMap.builder();
+      }
+
+      interceptorsMapBuilder.put(pair.method, ImmutableList.copyOf(pair.interceptors));
+      callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
+    }
+
+    interceptors = interceptorsMapBuilder != null
+        ? interceptorsMapBuilder.build()
+        : ImmutableMap.<Method, List<MethodInterceptor>>of();
+  }
+
+  /**
+   * Returns the interceptors that apply to the constructed type. When InjectableType.Listeners
+   * add additional interceptors, this builder will be thrown out and another created.n
+   */
+  public ImmutableMap<Method, List<MethodInterceptor>> getInterceptors() {
+    return interceptors;
+  }
+
+  public ConstructionProxy<T> create() {
+    if (interceptors.isEmpty()) {
+      return new DefaultConstructionProxyFactory<T>(injectionPoint).create();
+    }
+
+    @SuppressWarnings("unchecked")
+    Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
+    Arrays.fill(callbackTypes, net.sf.cglib.proxy.MethodInterceptor.class);
+
+    // Create the proxied class. We're careful to ensure that all enhancer state is not-specific
+    // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
+    Enhancer enhancer = BytecodeGen.newEnhancer(declaringClass, visibility);
+    enhancer.setCallbackFilter(new IndicesCallbackFilter(declaringClass, methods));
+    enhancer.setCallbackTypes(callbackTypes);
+    return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
   }
 
   private static class MethodInterceptorsPair {
     final Method method;
-    List<MethodInterceptor> interceptors;
+    List<MethodInterceptor> interceptors; // lazy
 
-    public MethodInterceptorsPair(Method method) {
+    MethodInterceptorsPair(Method method) {
       this.method = method;
     }
 
@@ -232,7 +193,7 @@ class ProxyFactory implements ConstructionProxyFactory {
     final Class<?> declaringClass;
     final Map<Method, Integer> indices;
 
-    public IndicesCallbackFilter(Class<?> declaringClass, List<Method> methods) {
+    IndicesCallbackFilter(Class<?> declaringClass, List<Method> methods) {
       this.declaringClass = declaringClass;
       final Map<Method, Integer> indices = Maps.newHashMap();
       for (int i = 0; i < methods.size(); i++) {
@@ -254,6 +215,54 @@ class ProxyFactory implements ConstructionProxyFactory {
 
     @Override public int hashCode() {
       return declaringClass.hashCode();
+    }
+  }
+
+  /**
+   * Constructs instances that participate in AOP.
+   */
+  private static class ProxyConstructor<T> implements ConstructionProxy<T> {
+    final Class<?> enhanced;
+    final InjectionPoint injectionPoint;
+    final Constructor<T> constructor;
+    final Callback[] callbacks;
+
+    final FastConstructor fastConstructor;
+    final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
+
+    @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
+    ProxyConstructor(Enhancer enhancer, InjectionPoint injectionPoint, Callback[] callbacks,
+        ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors) {
+      this.enhanced = enhancer.createClass(); // this returns a cached class if possible
+      this.injectionPoint = injectionPoint;
+      this.constructor = (Constructor<T>) injectionPoint.getMember();
+      this.callbacks = callbacks;
+      this.methodInterceptors = methodInterceptors;
+
+      FastClass fastClass = newFastClass(enhanced, BytecodeGen.Visibility.forMember(constructor));
+      this.fastConstructor = fastClass.getConstructor(constructor.getParameterTypes());
+    }
+
+    @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
+    public T newInstance(Object[] arguments) throws InvocationTargetException {
+      Enhancer.registerCallbacks(enhanced, callbacks);
+      try {
+        return (T) fastConstructor.newInstance(arguments);
+      } finally {
+        Enhancer.registerCallbacks(enhanced, null);
+      }
+    }
+
+    public InjectionPoint getInjectionPoint() {
+      return injectionPoint;
+    }
+
+    public Constructor<T> getConstructor() {
+      return constructor;
+    }
+
+    public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+      return methodInterceptors;
     }
   }
 }

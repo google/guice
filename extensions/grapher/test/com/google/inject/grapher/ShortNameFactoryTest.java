@@ -156,11 +156,11 @@ public class ShortNameFactoryTest extends TestCase {
     injector.getBinding(Integer.class).acceptTargetVisitor(
         new DefaultBindingTargetVisitor<Object, Void>() {
           @SuppressWarnings("unchecked") @Override
-          public Void visitProviderInstance(ProviderInstanceBinding<?> binding) {
+          public Void visit(ProviderInstanceBinding<?> binding) {
             methodHolder[0] = (ProviderMethod) binding.getProviderInstance();
             return null;
           }
-    });
+        });
     
     assertEquals("Method provider should pretty print as the method signature",
         "#provideInteger(String)", nameFactory.getInstanceName(methodHolder[0]));

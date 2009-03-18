@@ -16,19 +16,15 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.InjectionPoint;
-
 /**
  * Creates {@link ConstructionProxy} instances.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-interface ConstructionProxyFactory {
+interface ConstructionProxyFactory<T> {
 
   /**
    * Gets a construction proxy for the given constructor.
-   *
-   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
    */
-  <T> ConstructionProxy<T> get(InjectionPoint injectionPoint);
+  ConstructionProxy<T> create();
 }

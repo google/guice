@@ -32,47 +32,58 @@ public interface ElementVisitor<V> {
    * Visit a mapping from a key (type and optional annotation) to the strategy for getting
    * instances of the type.
    */
-  <T> V visitBinding(Binding<T> binding);
+  <T> V visit(Binding<T> binding);
 
   /*if[AOP]*/
   /**
    * Visit a registration of interceptors for matching methods of matching classes.
    */
-  V visitInterceptorBinding(InterceptorBinding interceptorBinding);
+  V visit(InterceptorBinding binding);
   /*end[AOP]*/
 
   /**
    * Visit a registration of a scope annotation with the scope that implements it.
    */
-  V visitScopeBinding(ScopeBinding scopeBinding);
+  V visit(ScopeBinding binding);
 
   /**
    * Visit a registration of type converters for matching target types.
    */
-  V visitTypeConverterBinding(TypeConverterBinding typeConverterBinding);
+  V visit(TypeConverterBinding binding);
 
   /**
    * Visit a request to inject the instance fields and methods of an instance.
    */
-  V visitInjectionRequest(InjectionRequest injectionRequest);
+  V visit(InjectionRequest request);
 
   /**
    * Visit a request to inject the static fields and methods of type.
    */
-  V visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest);
+  V visit(StaticInjectionRequest request);
 
   /**
    * Visit a lookup of the provider for a type.
    */
-  <T> V visitProviderLookup(ProviderLookup<T> providerLookup);
+  <T> V visit(ProviderLookup<T> lookup);
+
+  /**
+   * Visit a lookup of the members injector.
+   */
+  <T> V visit(MembersInjectorLookup<T> lookup);
 
   /**
    * Visit an error message and the context in which it occured.
    */
-  V visitMessage(Message message);
+  V visit(Message message);
 
   /**
-   * Visit a collection of configuration elements for a private environment.
+   * Visit a collection of configuration elements for a {@linkplain com.google.inject.PrivateBinder
+   * private binder}.
    */
-  V visitPrivateElements(PrivateElements privateElements);
+  V visit(PrivateElements elements);
+
+  /**
+   * Visit an injectable type listener binding.
+   */
+  V visit(InjectableTypeListenerBinding binding);
 }

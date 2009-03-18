@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Binder;
 import com.google.inject.internal.BindingBuilder.ExposureBuilder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
@@ -90,7 +91,7 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitPrivateElements(this);
+    return visitor.visit(this);
   }
 
   public List<Element> getElementsMutable() {
@@ -99,5 +100,9 @@ public final class PrivateElementsImpl implements PrivateElements {
 
   public void addExposureBuilder(ExposureBuilder<?> exposureBuilder) {
     exposureBuilders.add(exposureBuilder);
+  }
+
+  public void applyTo(Binder binder) {
+    throw new UnsupportedOperationException("TODO");
   }
 }

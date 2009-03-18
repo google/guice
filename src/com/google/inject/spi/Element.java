@@ -16,6 +16,8 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
+
 /**
  * A core component of a module or injector.
  *
@@ -28,6 +30,7 @@ package com.google.inject.spi;
  * com.google.inject.Injector#getBindings Injector.getBindings()} to reflect on Guice injectors.
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @author crazybob@google.com (Bob Lee)
  * @since 2.0
  */
 public interface Element {
@@ -48,5 +51,14 @@ public interface Element {
    * @param visitor to call back on
    */
   <T> T acceptVisitor(ElementVisitor<T> visitor);
+
+  /**
+   * Writes this module element to the given binder (optional operation).
+   *
+   * @param binder to apply configuration element to
+   * @throws UnsupportedOperationException if the {@code applyTo} method is not supported by this
+   *     element.
+   */
+  void applyTo(Binder binder);
 
 }

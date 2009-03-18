@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2008 Google Inc.
+/*
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,20 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binding;
-import com.google.inject.Binder;
-
 /**
- * A binding to a key exposed from an enclosed private environment.
+ * Listens for injections into instances of type {@code I}. Useful for performing further
+ * injections, post-injection initialization, and more.
  *
+ * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
+public interface InjectionListener<I> {
 
   /**
-   * Returns the enclosed environment that holds the original binding.
+   * Invoked by Guice after it injects the fields and methods of instance.
+   *
+   * @param injectee instance that Guice injected dependencies into
    */
-  PrivateElements getPrivateElements();
-
-  /**
-   * Unsupported. Always throws {@link UnsupportedOperationException}.
-   */
-  void applyTo(Binder binder);
+  void afterInjection(I injectee);
 }

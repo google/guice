@@ -24,6 +24,7 @@ import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
+import com.google.inject.spi.InjectableType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -140,11 +141,11 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#requestInjection(Object[])
+   * @see Binder#requestInjection(Object)
    * @since 2.0
    */
-  protected void requestInjection(Object... objects) {
-    binder.requestInjection(objects);
+  protected void requestInjection(Object instance) {
+    binder.requestInjection(instance);
   }
 
   /**
@@ -222,5 +223,31 @@ public abstract class AbstractModule implements Module {
    */
   protected Stage currentStage() {
     return binder.currentStage();
+  }
+
+  /**
+   * @see Binder#getMembersInjector(Class)
+   * @since 2.0
+   */
+  protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+    return binder.getMembersInjector(type);
+  }
+
+  /**
+   * @see Binder#getMembersInjector(TypeLiteral)
+   * @since 2.0
+   */
+  protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
+    return binder.getMembersInjector(type);
+  }
+
+  /**
+   * @see Binder#bindListener(com.google.inject.matcher.Matcher,
+   *  com.google.inject.spi.InjectableType.Listener) 
+   * @since 2.0
+   */
+  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
+      InjectableType.Listener listener) {
+    binder.bindListener(typeMatcher, listener);
   }
 }

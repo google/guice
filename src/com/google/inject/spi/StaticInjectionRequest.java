@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.ConfigurationException;
+import com.google.inject.Binder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.util.Set;
 
@@ -63,7 +64,11 @@ public final class StaticInjectionRequest implements Element {
     return InjectionPoint.forStaticMethodsAndFields(type);
   }
 
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).requestStaticInjection(type);
+  }
+
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitStaticInjectionRequest(this);
+    return visitor.visit(this);
   }
 }

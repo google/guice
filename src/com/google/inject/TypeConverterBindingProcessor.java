@@ -166,7 +166,7 @@ class TypeConverterBindingProcessor extends AbstractProcessor {
         new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
   }
 
-  @Override public Boolean visitTypeConverterBinding(TypeConverterBinding command) {
+  @Override public Boolean visit(TypeConverterBinding command) {
     injector.state.addConverter(new MatcherAndConverter(
         command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
     return true;

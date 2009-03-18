@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ProviderKeyBinding;
 
@@ -41,7 +42,7 @@ public final class LinkedProviderBindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitProviderKey(this);
+    return visitor.visit(this);
   }
 
   public Key<? extends Provider<? extends T>> getProviderKey() {
@@ -54,6 +55,10 @@ public final class LinkedProviderBindingImpl<T>
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedProviderBindingImpl<T>(getSource(), key, getScoping(), providerKey);
+  }
+
+  public void applyTo(Binder binder) {
+    getScoping().applyTo(binder.bind(getKey()).toProvider(getProviderKey()));
   }
 
   @Override public String toString() {

@@ -61,49 +61,57 @@ public class ModuleWriter {
 
     ElementVisitor<Void> visitor = new ElementVisitor<Void>() {
 
-      public Void visitMessage(Message message) {
+      public Void visit(Message message) {
         writeMessage(binder, message);
         return null;
       }
 
       /*if[AOP]*/
-      public Void visitInterceptorBinding(InterceptorBinding element) {
+      public Void visit(InterceptorBinding element) {
         writeBindInterceptor(binder, element);
         return null;
       }
       /*end[AOP]*/
 
-      public Void visitScopeBinding(ScopeBinding element) {
+      public Void visit(ScopeBinding element) {
         writeBindScope(binder, element);
         return null;
       }
 
-      public Void visitInjectionRequest(InjectionRequest element) {
+      public Void visit(InjectionRequest element) {
         writeRequestInjection(binder, element);
         return null;
       }
 
-      public Void visitStaticInjectionRequest(StaticInjectionRequest element) {
+      public Void visit(StaticInjectionRequest element) {
         writeRequestStaticInjection(binder, element);
         return null;
       }
 
-      public Void visitTypeConverterBinding(TypeConverterBinding element) {
+      public Void visit(TypeConverterBinding element) {
         writeConvertToTypes(binder, element);
         return null;
       }
 
-      public <T> Void visitBinding(Binding<T> element) {
+      public <T> Void visit(Binding<T> element) {
         writeBind(binder, element);
         return null;
       }
 
-      public <T> Void visitProviderLookup(ProviderLookup<T> element) {
+      public <T> Void visit(ProviderLookup<T> element) {
         writeGetProvider(binder, element);
         return null;
       }
 
-      public Void visitPrivateElements(PrivateElements privateElements) {
+      public <T> Void visit(MembersInjectorLookup<T> lookup) {
+        throw new UnsupportedOperationException("TODO");
+      }
+
+      public Void visit(InjectableTypeListenerBinding binding) {
+        throw new UnsupportedOperationException("TODO");
+      }
+
+      public Void visit(PrivateElements privateElements) {
         writePrivateElements(binder, privateElements);
         return null;
       }
@@ -168,44 +176,44 @@ public class ModuleWriter {
   protected <T> ScopedBindingBuilder bindKeyToTarget(
       final Binding<T> binding, final Binder binder, final Key<T> key) {
     return binding.acceptTargetVisitor(new BindingTargetVisitor<T, ScopedBindingBuilder>() {
-      public ScopedBindingBuilder visitInstance(InstanceBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(InstanceBinding<? extends T> binding) {
         binder.bind(key).toInstance(binding.getInstance());
         return null;
       }
 
-      public ScopedBindingBuilder visitProviderInstance(
+      public ScopedBindingBuilder visit(
           ProviderInstanceBinding<? extends T> binding) {
         return binder.bind(key).toProvider(binding.getProviderInstance());
       }
 
-      public ScopedBindingBuilder visitProviderKey(ProviderKeyBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(ProviderKeyBinding<? extends T> binding) {
         return binder.bind(key).toProvider(binding.getProviderKey());
       }
 
-      public ScopedBindingBuilder visitLinkedKey(LinkedKeyBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(LinkedKeyBinding<? extends T> binding) {
         return binder.bind(key).to(binding.getLinkedKey());
       }
 
-      public ScopedBindingBuilder visitUntargetted(UntargettedBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(UntargettedBinding<? extends T> binding) {
         return binder.bind(key);
       }
 
-      public ScopedBindingBuilder visitExposed(ExposedBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(ExposedBinding<? extends T> binding) {
         PrivateBinder privateBinder = getPrivateBinder(binding.getPrivateElements());
         privateBinder.withSource(binding.getSource()).expose(key);
         return null;
       }
 
-      public ScopedBindingBuilder visitConvertedConstant(
+      public ScopedBindingBuilder visit(
           ConvertedConstantBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitConstructor(ConstructorBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(ConstructorBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
 
-      public ScopedBindingBuilder visitProviderBinding(ProviderBinding<? extends T> binding) {
+      public ScopedBindingBuilder visit(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Non-module element");
       }
     });
@@ -254,6 +262,6 @@ public class ModuleWriter {
 
   protected <T> void writeGetProvider(Binder binder, ProviderLookup<T> element) {
     Provider<T> provider = binder.withSource(element.getSource()).getProvider(element.getKey());
-    element.initDelegate(provider);
+    element.initializeDelegate(provider);
   }
 }

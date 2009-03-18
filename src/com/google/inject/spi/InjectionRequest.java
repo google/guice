@@ -16,13 +16,15 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
+import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.util.Set;
 
 /**
  * A request to inject the instance fields and methods of an instance. Requests are created
- * explicitly in a module using {@link com.google.inject.Binder#requestInjection(Object[])
+ * explicitly in a module using {@link com.google.inject.Binder#requestInjection(Object)
  * requestInjection()} statements:
  * <pre>
  *     requestInjection(serviceInstance);</pre>
@@ -30,12 +32,15 @@ import java.util.Set;
  * @author mikeward@google.com (Mike Ward)
  * @since 2.0
  */
-public final class InjectionRequest implements Element {
-  private Object source;
-  private Object instance;
+public final class InjectionRequest<T> implements Element {
 
-  public InjectionRequest(Object source, Object instance) {
+  private final Object source;
+  private final TypeLiteral<T> type;
+  private final T instance;
+
+  public InjectionRequest(Object source, TypeLiteral<T> type, T instance) {
     this.source = checkNotNull(source, "source");
+    this.type = checkNotNull(type, "type");
     this.instance = checkNotNull(instance, "instance");
   }
 
@@ -43,8 +48,12 @@ public final class InjectionRequest implements Element {
     return source;
   }
 
-  public Object getInstance() {
+  public T getInstance() {
     return instance;
+  }
+
+  public TypeLiteral<T> getType() {
+    return type;
   }
 
   /**
@@ -63,7 +72,11 @@ public final class InjectionRequest implements Element {
     return InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
   }
 
-  public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitInjectionRequest(this);
+  public <R> R acceptVisitor(ElementVisitor<R> visitor) {
+    return visitor.visit(this);
+  }
+
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).requestInjection(type, instance);
   }
 }

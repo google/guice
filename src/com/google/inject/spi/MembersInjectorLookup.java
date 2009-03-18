@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,41 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
+import com.google.inject.MembersInjector;
 import com.google.inject.Binder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
 
 /**
- * A lookup of the provider for a type. Lookups are created explicitly in a module using
- * {@link com.google.inject.Binder#getProvider(Class) getProvider()} statements:
+ * A lookup of the members injector for a type. Lookups are created explicitly in a module using
+ * {@link com.google.inject.Binder#getMembersInjector(Class) getMembersInjector()} statements:
  * <pre>
- *     Provider&lt;PaymentService&gt; paymentServiceProvider
- *         = getProvider(PaymentService.class);</pre>
+ *     MembersInjector&lt;PaymentService&gt; membersInjector
+ *         = getMembersInjector(PaymentService.class);</pre>
  *
- * @author jessewilson@google.com (Jesse Wilson)
+ * @author crazybob@google.com (Bob Lee)
  * @since 2.0
  */
-public final class ProviderLookup<T> implements Element {
-  private final Object source;
-  private final Key<T> key;
-  private Provider<T> delegate;
+public final class MembersInjectorLookup<T> implements Element {
 
-  ProviderLookup(Object source, Key<T> key) {
+  private final Object source;
+  private final InjectableType<T> injectableType;
+  private MembersInjector<T> delegate;
+
+  MembersInjectorLookup(Object source, InjectableType<T> injectableType) {
     this.source = checkNotNull(source, "source");
-    this.key = checkNotNull(key, "key");
+    this.injectableType = checkNotNull(injectableType, "injectableType");
   }
 
   public Object getSource() {
     return source;
   }
 
-  public Key<T> getKey() {
-    return key;
+  /**
+   * Gets the injectable type containing the members to be injected.
+   */
+  public InjectableType<T> getInjectableType() {
+    return injectableType;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -55,27 +58,28 @@ public final class ProviderLookup<T> implements Element {
   }
 
   /**
-   * Sets the actual provider.
+   * Sets the actual members injector.
    *
-   * @param delegate provider
+   * @param delegate members injector
    * @throws IllegalStateException if the delegate is already set
    * @throws NullPointerException if the delegate is null
    */
-  public void initializeDelegate(Provider<T> delegate) {
+  public void initializeDelegate(MembersInjector<T> delegate) {
     checkState(this.delegate == null, "delegate already initialized");
     checkNotNull(delegate, "delegate");
     this.delegate = delegate;
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).getProvider(key);
+    binder.withSource(getSource()).getMembersInjector(injectableType.getType());
   }
 
   /**
-   * Returns the delegate provider, or {@code null} if it has not yet been initialized. The delegate
-   * will be initialized when this element is processed, or otherwise used to create an injector.
+   * Returns the delegate members injector, or {@code null} if it has not yet been initialized.
+   * The delegate will be initialized when this element is processed, or otherwise used to create
+   * an injector.
    */
-  public Provider<T> getDelegate() {
+  public MembersInjector<T> getDelegate() {
     return delegate;
   }
 }

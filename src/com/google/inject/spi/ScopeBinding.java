@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.Scope;
+import com.google.inject.Binder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 
@@ -55,6 +56,10 @@ public final class ScopeBinding implements Element {
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitScopeBinding(this);
+    return visitor.visit(this);
+  }
+
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).bindScope(annotationType, scope);
   }
 }

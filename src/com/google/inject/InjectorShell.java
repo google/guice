@@ -146,6 +146,11 @@ class InjectorShell {
       injector.constructionProxyFactory = new DefaultConstructionProxyFactory();
       end[NO_AOP]*/
 
+      new InjectableTypeListenerBindingProcessor(errors).process(injector, elements);
+      stopwatch.resetAndLog("InjectableType listeners creation");
+      injector.constructors = new ConstructorInjectorStore(
+          injector, injector.state.getInjectableTypeListenerBindings());
+
       new ScopeBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Scopes creation");
 

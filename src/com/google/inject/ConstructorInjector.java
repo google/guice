@@ -20,9 +20,9 @@ import com.google.inject.internal.ConstructionContext;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
-import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InjectableType;
+import com.google.inject.spi.InjectionListener;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -33,35 +33,24 @@ import java.lang.reflect.InvocationTargetException;
  */
 class ConstructorInjector<T> {
 
-  final TypeLiteral<T> implementation;
-  final InjectionPoint injectionPoint;
-  final ImmutableList<SingleMemberInjector> memberInjectors;
-  final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
-  final ConstructionProxy<T> constructionProxy;
+  private final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
+  private final ConstructionProxy<T> constructionProxy;
+  private final ImmutableList<SingleMemberInjector> memberInjectors;
+  private final ImmutableList<InjectionListener<? super T>> injectionListeners;
 
-  ConstructorInjector(Errors errors, InjectorImpl injector, TypeLiteral<T> implementation)
+  private final InjectableType<T> injectableType;
+
+  ConstructorInjector(ConstructionProxy<T> constructionProxy,
+      ImmutableList<SingleParameterInjector<?>> parameterInjectors,
+      ImmutableList<SingleMemberInjector> memberInjectors,
+      ImmutableList<InjectionListener<? super T>> injectionListeners,
+      InjectableType<T> injectableType)
       throws ErrorsException {
-    this.implementation = implementation;
-
-    try {
-      this.injectionPoint = InjectionPoint.forConstructorOf(implementation);
-    } catch (ConfigurationException e) {
-      throw errors.merge(e.getErrorMessages()).toException();
-    }
-
-    constructionProxy = injector.constructionProxyFactory.get(injectionPoint);
-    parameterInjectors = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
-    memberInjectors = injector.injectors.get(implementation, errors);
-  }
-
-  ImmutableSet<InjectionPoint> getInjectionPoints() {
-    InjectionPoint[] injectionPoints = new InjectionPoint[memberInjectors.size() + 1];
-    injectionPoints[0] = constructionProxy.getInjectionPoint();
-    int i = 1;
-    for (SingleMemberInjector memberInjector : memberInjectors) {
-      injectionPoints[i++] = memberInjector.getInjectionPoint();
-    }
-    return ImmutableSet.of(injectionPoints);
+    this.constructionProxy = constructionProxy;
+    this.parameterInjectors = parameterInjectors;
+    this.memberInjectors = memberInjectors;
+    this.injectionListeners = injectionListeners;
+    this.injectableType = injectableType;
   }
 
   /**
@@ -105,6 +94,10 @@ class ConstructorInjector<T> {
         injector.inject(errors, context, t);
       }
 
+      for (InjectionListener<? super T> injectionListener : injectionListeners) {
+        injectionListener.afterInjection(t); // TODO: handle user exceptions here
+      }
+
       return t;
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null
@@ -115,5 +108,9 @@ class ConstructorInjector<T> {
     } finally {
       constructionContext.removeCurrentReference();
     }
+  }
+
+  public InjectableType<T> getInjectableType() {
+    return injectableType;
   }
 }

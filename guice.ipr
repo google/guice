@@ -206,7 +206,7 @@
       <profile version="1.0" is_locked="false">
         <option name="myName" value="Project Default" />
         <option name="myLocal" value="false" />
-        <inspection_tool class="SSBasedInspection" level="WARNING" enabled="true">
+        <inspection_tool class="SSBasedInspection" level="WARNING" enabled="false">
           <replaceConfiguration name="use Lists.newArrayList" text="java.util.List&lt;$T$&gt; $var$ = new java.util.ArrayList&lt;$T$&gt;();" recursive="false" caseInsensitive="true" reformatAccordingToStyle="true" shortenFQN="true" replacement="java.util.List&lt;$T$&gt; $var$ = com.google.common.collect.Lists.newArrayList();">
             <constraint name="var" within="" contains="" />
             <constraint name="T" within="" contains="" />
@@ -566,6 +566,20 @@
     </option>
     <option name="myVersion" value="124" />
     <option name="mySupportsUserInfoFilter" value="true" />
+  </component>
+  <component name="UMLDiagramComponent">
+    <diagram name="spi">
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType.Encounter" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType.Listener" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.Element" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.BinderElement" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableTypeListenerBinding" />
+      <command command-class="de.frag.umlplugin.uml.command.ConnectClassesCommand" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.Binder" />
+      <command command-class="de.frag.umlplugin.uml.command.AddDependentClassesCommand" psi-class="com.google.inject.spi.InjectableTypeListenerBinding" />
+      <compartment-visibility />
+    </diagram>
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />

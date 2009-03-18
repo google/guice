@@ -20,7 +20,7 @@ import com.google.inject.Binding;
 
 /**
  * No-op visitor for subclassing. All interface methods simply delegate to
- * {@link #visitElement(Element)}, returning its result.
+ * {@link #visitOther(Element)}, returning its result.
  *
  * @param <V> any type to be returned by the visit method. Use {@link Void} with
  *     {@code return null} if no return type is needed.
@@ -31,47 +31,55 @@ import com.google.inject.Binding;
 public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
 
   /**
-   * Visit {@code element} and return a result.
+   * Default visit implementation. Returns {@code null}.
    */
-  protected V visitElement(Element element) {
+  protected V visitOther(Element element) {
     return null;
   }
 
-  public V visitMessage(Message message) {
-    return visitElement(message);
+  public V visit(Message message) {
+    return visitOther(message);
   }
 
-  public <T> V visitBinding(Binding<T> binding) {
-    return visitElement(binding);
+  public <T> V visit(Binding<T> binding) {
+    return visitOther(binding);
   }
 
   /*if[AOP]*/
-  public V visitInterceptorBinding(InterceptorBinding interceptorBinding) {
-    return visitElement(interceptorBinding);
+  public V visit(InterceptorBinding interceptorBinding) {
+    return visitOther(interceptorBinding);
   }
   /*end[AOP]*/
 
-  public V visitScopeBinding(ScopeBinding scopeBinding) {
-    return visitElement(scopeBinding);
+  public V visit(ScopeBinding scopeBinding) {
+    return visitOther(scopeBinding);
   }
 
-  public V visitTypeConverterBinding(TypeConverterBinding typeConverterBinding) {
-    return visitElement(typeConverterBinding);
+  public V visit(TypeConverterBinding typeConverterBinding) {
+    return visitOther(typeConverterBinding);
   }
 
-  public <T> V visitProviderLookup(ProviderLookup<T> providerLookup) {
-    return visitElement(providerLookup);
+  public <T> V visit(ProviderLookup<T> providerLookup) {
+    return visitOther(providerLookup);
   }
 
-  public V visitInjectionRequest(InjectionRequest injectionRequest) {
-    return visitElement(injectionRequest);
+  public V visit(InjectionRequest injectionRequest) {
+    return visitOther(injectionRequest);
   }
 
-  public V visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
-    return visitElement(staticInjectionRequest);
+  public V visit(StaticInjectionRequest staticInjectionRequest) {
+    return visitOther(staticInjectionRequest);
   }
 
-  public V visitPrivateElements(PrivateElements privateElements) {
-    return visitElement(privateElements);
+  public V visit(PrivateElements privateElements) {
+    return visitOther(privateElements);
+  }
+
+  public <T> V visit(MembersInjectorLookup<T> lookup) {
+    return visitOther(lookup);
+  }
+
+  public V visit(InjectableTypeListenerBinding binding) {
+    return visitOther(binding);
   }
 }

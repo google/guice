@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.TypeLiteral;
+import com.google.inject.Binder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 
@@ -55,6 +56,10 @@ public final class TypeConverterBinding implements Element {
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitTypeConverterBinding(this);
+    return visitor.visit(this);
+  }
+
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).convertToTypes(typeMatcher, typeConverter);
   }
 }

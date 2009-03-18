@@ -28,15 +28,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Default {@link ConstructionProxyFactory} implementation. Simply invokes the
- * constructor. Can be reused by other {@code ConstructionProxyFactory}
- * implementations.
+ * Produces construction proxies that invoke the class constructor.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-class DefaultConstructionProxyFactory implements ConstructionProxyFactory {
+class DefaultConstructionProxyFactory<T> implements ConstructionProxyFactory<T> {
 
-  public <T> ConstructionProxy<T> get(final InjectionPoint injectionPoint) {
+  private final InjectionPoint injectionPoint;
+
+  /**
+   * @param injectionPoint an injection point whose member is a constructor of {@code T}.
+   */
+  DefaultConstructionProxyFactory(InjectionPoint injectionPoint) {
+    this.injectionPoint = injectionPoint;
+  }
+
+  public ConstructionProxy<T> create() {
     @SuppressWarnings("unchecked") // the injection point is for a constructor of T
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 

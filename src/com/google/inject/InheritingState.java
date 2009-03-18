@@ -22,7 +22,9 @@ import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
 import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.spi.InjectableTypeListenerBinding;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ class InheritingState implements State {
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   /*end[AOP]*/
+  private final List<InjectableTypeListenerBinding> listenerBindings = Lists.newArrayList();
   private final WeakKeySet blacklistedKeys = new WeakKeySet();
   private final Object lock;
 
@@ -114,6 +117,19 @@ class InheritingState implements State {
     return result;
   }
   /*end[AOP]*/
+
+  public void addInjectableTypeListener(InjectableTypeListenerBinding listenerBinding) {
+    listenerBindings.add(listenerBinding);
+  }
+
+  public List<InjectableTypeListenerBinding> getInjectableTypeListenerBindings() {
+    List<InjectableTypeListenerBinding> parentBindings = parent.getInjectableTypeListenerBindings();
+    List<InjectableTypeListenerBinding> result
+        = new ArrayList<InjectableTypeListenerBinding>(parentBindings.size() + 1);
+    result.addAll(parentBindings);
+    result.addAll(listenerBindings);
+    return result;
+  }
 
   public void blacklist(Key<?> key) {
     parent.blacklist(key);

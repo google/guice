@@ -20,6 +20,7 @@ import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import java.lang.annotation.Annotation;
 
@@ -47,6 +48,10 @@ public abstract class Scoping {
     @Override public String toString() {
       return Scopes.NO_SCOPE.toString();
     }
+
+    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      // do nothing
+    }
   };
 
   public static final Scoping SINGLETON_ANNOTATION = new Scoping() {
@@ -60,6 +65,10 @@ public abstract class Scoping {
 
     @Override public String toString() {
       return Singleton.class.getName();
+    }
+
+    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      scopedBindingBuilder.in(Singleton.class);
     }
   };
 
@@ -75,6 +84,10 @@ public abstract class Scoping {
     @Override public String toString() {
       return Scopes.SINGLETON.toString();
     }
+
+    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      scopedBindingBuilder.in(Scopes.SINGLETON);
+    }
   };
 
   public static final Scoping EAGER_SINGLETON = new Scoping() {
@@ -88,6 +101,10 @@ public abstract class Scoping {
 
     @Override public String toString() {
       return "eager singleton";
+    }
+
+    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      scopedBindingBuilder.asEagerSingleton();
     }
   };
 
@@ -108,6 +125,10 @@ public abstract class Scoping {
       @Override public String toString() {
         return scopingAnnotation.getName();
       }
+
+      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+        scopedBindingBuilder.in(scopingAnnotation);
+      }
     };
   }
 
@@ -127,6 +148,10 @@ public abstract class Scoping {
 
       @Override public String toString() {
         return scope.toString();
+      }
+
+      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+        scopedBindingBuilder.in(scope);
       }
     };
   }
@@ -177,6 +202,8 @@ public abstract class Scoping {
   }
 
   public abstract <V> V acceptVisitor(BindingScopingVisitor<V> visitor);
+
+  public abstract void applyTo(ScopedBindingBuilder scopedBindingBuilder);
 
   private Scoping() {}
 }

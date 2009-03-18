@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.UntargettedBinding;
@@ -37,7 +38,7 @@ public class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarge
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitUntargetted(this);
+    return visitor.visit(this);
   }
 
   public BindingImpl<T> withScoping(Scoping scoping) {
@@ -46,6 +47,10 @@ public class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarge
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new UntargettedBindingImpl<T>(getSource(), key, getScoping());
+  }
+
+  public void applyTo(Binder binder) {
+    getScoping().applyTo(binder.withSource(getSource()).bind(getKey()));
   }
 
   @Override public String toString() {

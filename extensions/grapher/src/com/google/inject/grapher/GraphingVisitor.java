@@ -35,6 +35,7 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
+import com.google.inject.spi.InjectableType;
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.List;
@@ -121,12 +122,14 @@ implements BindingTargetVisitor<Object, Void> {
    * will instantiate, rather than a specific instance.
    */
   protected M newClassImplementationNode(Binding<?> binding,
-      Collection<InjectionPoint> injectionPoints) {
+      InjectionPoint constructorInjectionPoint,
+      Collection<InjectionPoint> memberInjectionPoints) {
     M node = implementationNodeFactory.newImplementationNode(getClassNodeId(binding));
     node.setClassKey(binding.getKey());
     // we don't set the source here because it's not interesting for classes
 
-    for (InjectionPoint injectionPoint : injectionPoints) {
+    node.addMember(constructorInjectionPoint.getMember());
+    for (InjectionPoint injectionPoint : memberInjectionPoints) {
       node.addMember(injectionPoint.getMember());
     }
 
@@ -229,8 +232,10 @@ implements BindingTargetVisitor<Object, Void> {
    * @see #newClassImplementationNode(Binding)
    * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
    */
-  public Void visitConstructor(ConstructorBinding<?> binding) {
-    M node = newClassImplementationNode(binding, binding.getInjectionPoints());
+  public Void visit(ConstructorBinding<?> binding) {
+    InjectableType<?> injectableType = binding.getInjectableType();
+    M node = newClassImplementationNode(binding, injectableType.getInjectableConstructor(),
+        injectableType.getInjectableMembers());
     newDependencyEdges(getClassNodeId(binding), node, binding.getDependencies());
 
     return null;
@@ -244,13 +249,13 @@ implements BindingTargetVisitor<Object, Void> {
    * <p>
    * We render this as an {@link InterfaceNode} that has a
    * {@link BindingEdge} to the source {@link Key}. That will then be rendered
-   * by {@link #visitInstance(InstanceBinding)} as an {@link InterfaceNode}
+   * by {@link #visit(InstanceBinding)} as an {@link InterfaceNode}
    * with a {@link BindingEdge} to the {@link String} instance.
    * 
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
    */
-  public Void visitConvertedConstant(ConvertedConstantBinding<?> binding) {
+  public Void visit(ConvertedConstantBinding<?> binding) {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), idFactory.getClassNodeId(binding.getSourceKey()),
         BindingEdge.Type.CONVERTED_CONSTANT);
@@ -261,7 +266,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Currently not displayed on the graph.
    */
-  public Void visitExposed(ExposedBinding<?> binding) {
+  public Void visit(ExposedBinding<?> binding) {
     // TODO(phopkins): Decide if this is needed for graphing.
     return null;
   }
@@ -282,7 +287,7 @@ implements BindingTargetVisitor<Object, Void> {
    * @see #newInstanceImplementationNode(Binding, Object)
    * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
    */
-  public Void visitInstance(InstanceBinding<?> binding) {
+  public Void visit(InstanceBinding<?> binding) {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), getInstanceNodeId(binding),
         BindingEdge.Type.NORMAL);
@@ -302,7 +307,7 @@ implements BindingTargetVisitor<Object, Void> {
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
    */
-  public Void visitLinkedKey(LinkedKeyBinding<?> binding) {
+  public Void visit(LinkedKeyBinding<?> binding) {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), idFactory.getClassNodeId(binding.getLinkedKey()), 
         BindingEdge.Type.NORMAL);
@@ -320,7 +325,7 @@ implements BindingTargetVisitor<Object, Void> {
    * 
    * @see NodeAliasFactory#newAlias(Object, Object)
    */
-  public Void visitProviderBinding(ProviderBinding<?> binding) {
+  public Void visit(ProviderBinding<?> binding) {
     nodeAliasFactory.newAlias(getClassNodeId(binding),
         idFactory.getClassNodeId(binding.getProvidedKey()));
 
@@ -328,7 +333,7 @@ implements BindingTargetVisitor<Object, Void> {
   }
 
   /**
-   * Same as {@link #visitInstance(InstanceBinding)}, but the
+   * Same as {@link #visit(InstanceBinding)}, but the
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
    * 
    * @see #newInterfaceNode(Binding)
@@ -336,7 +341,7 @@ implements BindingTargetVisitor<Object, Void> {
    * @see #newInstanceImplementationNode(Binding, Object)
    * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
    */
-  public Void visitProviderInstance(ProviderInstanceBinding<?> binding) {
+  public Void visit(ProviderInstanceBinding<?> binding) {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), getInstanceNodeId(binding), BindingEdge.Type.PROVIDER);
 
@@ -347,13 +352,13 @@ implements BindingTargetVisitor<Object, Void> {
   }
 
   /**
-   * Same as {@link #visitLinkedKey(LinkedKeyBinding)}, but the
+   * Same as {@link #visit(LinkedKeyBinding)}, but the
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
    * 
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
    */
-  public Void visitProviderKey(ProviderKeyBinding<?> binding) {
+  public Void visit(ProviderKeyBinding<?> binding) {
     newInterfaceNode(binding);
     newBindingEdge(getClassNodeId(binding), idFactory.getClassNodeId(binding.getProviderKey()),
         BindingEdge.Type.PROVIDER);
@@ -364,7 +369,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Currently not displayed on the graph.
    */
-  public Void visitUntargetted(UntargettedBinding<?> binding) {
+  public Void visit(UntargettedBinding<?> binding) {
     // TODO(phopkins): Decide if this is needed for graphing.
     return null;
   }

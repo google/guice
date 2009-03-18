@@ -20,6 +20,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Annotation;
@@ -183,13 +184,21 @@ import java.lang.reflect.Method;
  * documentation.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
+ * @author kevinb@google.com (Kevin Bourrillion)
  */
 public interface Binder {
 
   /*if[AOP]*/
   /**
-   * Binds a method interceptor to methods matched by class and method
-   * matchers.
+   * Binds method interceptor[s] to methods matched by class and method matchers. A method is
+   * eligible for interception if:
+   *
+   * <ul>
+   *  <li>Guice created the instance the method is on</li>
+   *  <li>Neither the enclosing type nor the method is final</li>
+   *  <li>And the method is package-private, protected, or public</li>
+   * </ul>
    *
    * @param classMatcher matches classes the interceptor should apply to. For
    *     example: {@code only(Runnable.class)}.
@@ -229,12 +238,22 @@ public interface Binder {
 
   /**
    * Upon successful creation, the {@link Injector} will inject instance fields
-   * and methods of the given objects.
+   * and methods of the given object.
    *
-   * @param instances for which members will be injected
+   * @param type of instance
+   * @param instance for which members will be injected
    * @since 2.0
    */
-  void requestInjection(Object... instances);
+  <T> void requestInjection(TypeLiteral<T> type, T instance);
+
+  /**
+   * Upon successful creation, the {@link Injector} will inject instance fields
+   * and methods of the given object.
+   *
+   * @param instance for which members will be injected
+   * @since 2.0
+   */
+  void requestInjection(Object instance);
 
   /**
    * Upon successful creation, the {@link Injector} will inject static fields
@@ -290,13 +309,35 @@ public interface Binder {
 
   /**
    * Returns the provider used to obtain instances for the given injection type.
-   * The returned will not be valid until the {@link Injector} has been
+   * The returned provider will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.
    *
    * @since 2.0
    */
   <T> Provider<T> getProvider(Class<T> type);
+
+  /**
+   * Returns the members injector used to inject dependencies into methods and fields on instances
+   * of the given type {@code T}. The returned members injector will not be valid until the main
+   * {@link Injector} has been created. The members injector will throw an {@code
+   * IllegalStateException} if you try to use it beforehand.
+   *
+   * @param typeLiteral type to get members injector for
+   * @since 2.0
+   */
+  <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral);
+
+  /**
+   * Returns the members injector used to inject dependencies into methods and fields on instances
+   * of the given type {@code T}. The returned members injector will not be valid until the main
+   * {@link Injector} has been created. The members injector will throw an {@code
+   * IllegalStateException} if you try to use it beforehand.
+   *
+   * @param type type to get members injector for
+   * @since 2.0
+   */
+  <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
   /**
    * Binds a type converter. The injector will use the given converter to
@@ -306,7 +347,19 @@ public interface Binder {
    * @param converter converts values
    * @since 2.0
    */
-  void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher, TypeConverter converter);
+  void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter);
+
+  /**
+   * Registers a listener for injectable types. Guice will notify the listener when it encounters
+   * injectable types matched by the given type matcher.
+   *
+   * @param typeMatcher that matches injectable types the listener should be notified of
+   * @param listener for injectable types matched by typeMatcher
+   * @since 2.0
+   */
+  void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
+      InjectableType.Listener listener);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

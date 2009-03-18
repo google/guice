@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -55,7 +56,7 @@ public class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBi
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitInstance(this);
+    return visitor.visit(this);
   }
 
   public T getInstance() {
@@ -78,6 +79,11 @@ public class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBi
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new InstanceBindingImpl<T>(getSource(), key, getScoping(), injectionPoints, instance);
+  }
+
+  public void applyTo(Binder binder) {
+    // instance bindings aren't scoped
+    binder.withSource(getSource()).bind(getKey()).toInstance(instance);
   }
 
   @Override public String toString() {

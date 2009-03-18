@@ -35,7 +35,7 @@ class MessageProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visitMessage(Message message) {
+  @Override public Boolean visit(Message message) {
     if (message.getCause() != null) {
       String rootMessage = getRootMessage(message.getCause());
       logger.log(Level.INFO,

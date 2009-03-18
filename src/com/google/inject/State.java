@@ -21,6 +21,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.MatcherAndConverter;
+import com.google.inject.spi.InjectableTypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,15 @@ interface State {
     }
     /*end[AOP]*/
 
+    public void addInjectableTypeListener(
+        InjectableTypeListenerBinding injectableTypeListenerBinding) {
+      throw new UnsupportedOperationException();
+    }
+
+    public List<InjectableTypeListenerBinding> getInjectableTypeListenerBindings() {
+      return ImmutableList.of();
+    }
+
     public void blacklist(Key<?> key) {
     }
 
@@ -122,6 +132,10 @@ interface State {
 
   List<MethodAspect> getMethodAspects();
   /*end[AOP]*/
+
+  void addInjectableTypeListener(InjectableTypeListenerBinding injectableTypeListenerBinding);
+
+  List<InjectableTypeListenerBinding> getInjectableTypeListenerBindings();
 
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors

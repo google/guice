@@ -56,6 +56,7 @@ public class AllTests {
     suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
+    suite.addTestSuite(InjectableTypeListenerTest.class);
     suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(InjectorTest.class);
     suite.addTestSuite(KeyTest.class);

@@ -44,12 +44,12 @@ class InjectionRequestProcessor extends AbstractProcessor {
     this.initializer = initializer;
   }
 
-  @Override public Boolean visitStaticInjectionRequest(StaticInjectionRequest request) {
+  @Override public Boolean visit(StaticInjectionRequest request) {
     staticInjections.add(new StaticInjection(injector, request));
     return true;
   }
 
-  @Override public Boolean visitInjectionRequest(InjectionRequest request) {
+  @Override public Boolean visit(InjectionRequest request) {
     Set<InjectionPoint> injectionPoints;
     try {
       injectionPoints = request.getInjectionPoints();

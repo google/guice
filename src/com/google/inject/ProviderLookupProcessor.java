@@ -32,11 +32,11 @@ class ProviderLookupProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public <T> Boolean visitProviderLookup(ProviderLookup<T> command) {
+  @Override public <T> Boolean visit(ProviderLookup<T> command) {
     // ensure the provider can be created
     try {
       Provider<T> provider = injector.getProviderOrThrow(command.getKey(), errors);
-      command.initDelegate(provider);
+      command.initializeDelegate(provider);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }

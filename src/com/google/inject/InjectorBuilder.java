@@ -251,6 +251,14 @@ class InjectorBuilder {
       throw new UnsupportedOperationException(
         "Injector.getProvider(Class<T>) is not supported in Stage.TOOL");
     }
+    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
+      throw new UnsupportedOperationException(
+        "Injector.getMembersInjector(TypeLiteral<T>) is not supported in Stage.TOOL");
+    }
+    public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+      throw new UnsupportedOperationException(
+        "Injector.getMembersInjector(Class<T>) is not supported in Stage.TOOL");
+    }
     public <T> T getInstance(Key<T> key) {
       throw new UnsupportedOperationException(
         "Injector.getInstance(Key<T>) is not supported in Stage.TOOL");

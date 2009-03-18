@@ -34,7 +34,6 @@ import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
 import com.google.inject.internal.Nullable;
-import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.SourceProvider;
 import com.google.inject.internal.ToStringBuilder;
@@ -47,7 +46,6 @@ import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
@@ -71,7 +69,7 @@ class InjectorImpl implements Injector {
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Initializer initializer;
-  ConstructionProxyFactory constructionProxyFactory;
+  ImmutableList<MethodAspect> methodAspects;
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
@@ -226,7 +224,11 @@ class InjectorImpl implements Injector {
     }
 
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super Provider<T>, V> visitor) {
-      return visitor.visitProviderBinding(this);
+      return visitor.visit(this);
+    }
+
+    public void applyTo(Binder binder) {
+      throw new UnsupportedOperationException("This element represents a synthetic binding.");
     }
 
     @Override public String toString() {
@@ -308,7 +310,7 @@ class InjectorImpl implements Injector {
     }
 
     public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-      return visitor.visitConvertedConstant(this);
+      return visitor.visit(this);
     }
 
     public T getValue() {
@@ -321,6 +323,10 @@ class InjectorImpl implements Injector {
 
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(getSourceKey()));
+    }
+
+    public void applyTo(Binder binder) {
+      throw new UnsupportedOperationException("This element represents a synthetic binding.");
     }
 
     @Override public String toString() {
@@ -336,13 +342,13 @@ class InjectorImpl implements Injector {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
     // Note: We don't need to synchronize on state.lock() during injector creation.
-    if (binding instanceof ClassBindingImpl<?>) {
+    // TODO: for the above example, remove the binding for BarImpl if the binding for FooImpl fails
+    if (binding instanceof ConstructorBindingImpl<?>) {
       Key<T> key = binding.getKey();
       jitBindings.put(key, binding);
       boolean successful = false;
       try {
-        // TODO: does this put the binding in JIT bindings?
-        binding.initialize(this, errors);
+        ((ConstructorBindingImpl) binding).initialize(this, errors);
         successful = true;
       } finally {
         if (!successful) {
@@ -399,8 +405,6 @@ class InjectorImpl implements Injector {
       throw errors.cannotInjectInnerClass(rawType).toException();
     }
 
-    LateBoundConstructor<T> lateBoundConstructor = new LateBoundConstructor<T>();
-
     if (!scoping.isExplicitlyScoped()) {
       Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
       if (scopeAnnotation != null) {
@@ -409,10 +413,7 @@ class InjectorImpl implements Injector {
       }
     }
 
-    InternalFactory<? extends T> scopedFactory
-        = Scopes.scope(key, this, lateBoundConstructor, scoping);
-    return new ClassBindingImpl<T>(
-        this, key, source, scopedFactory, scoping, lateBoundConstructor);
+    return ConstructorBindingImpl.create(this, key, source, scoping);
   }
 
   /**
@@ -443,34 +444,6 @@ class InjectorImpl implements Injector {
         Initializables.of(value));
     return new InstanceBindingImpl<TypeLiteral<T>>(this, key, SourceProvider.UNKNOWN_SOURCE,
         factory, ImmutableSet.<InjectionPoint>of(), value);
-  }
-
-  static class LateBoundConstructor<T> implements InternalFactory<T> {
-    ConstructorInjector<T> constructorInjector;
-
-    @SuppressWarnings("unchecked") // the constructor T is the same as the implementation T
-    void bind(Injector injector, TypeLiteral<T> implementation, Errors errors)
-        throws ErrorsException {
-      InjectorImpl injectorImpl = (InjectorImpl) injector;
-      constructorInjector
-          = (ConstructorInjector<T>) injectorImpl.constructors.get(implementation, errors);
-    }
-
-    public Constructor<T> getConstructor() {
-      checkState(constructorInjector != null, "Constructor is not ready");
-      return constructorInjector.constructionProxy.getConstructor();
-    }
-
-    @SuppressWarnings("unchecked")
-    public T get(Errors errors, InternalContext context, Dependency<?> dependency)
-        throws ErrorsException {
-      checkState(constructorInjector != null, "Construct before bind, " + constructorInjector);
-
-      // This may not actually be safe because it could return a super type of T (if that's all the
-      // client needs), but it should be OK in practice thanks to the wonders of erasure.
-      return (T) constructorInjector.construct(
-          errors, context, dependency.getKey().getRawType());
-    }
   }
 
   /** Creates a binding for a type annotated with @ProvidedBy. */
@@ -751,14 +724,7 @@ class InjectorImpl implements Injector {
   }
 
   /** Cached constructor injectors for each type */
-  final FailableCache<TypeLiteral<?>, ConstructorInjector<?>> constructors
-      = new FailableCache<TypeLiteral<?>, ConstructorInjector<?>>() {
-    @SuppressWarnings("unchecked")
-    protected ConstructorInjector<?> create(TypeLiteral<?> type, Errors errors)
-        throws ErrorsException {
-      return new ConstructorInjector(errors, InjectorImpl.this, type);
-    }
-  };
+  FailableCache<TypeLiteral<?>, ConstructorInjector<?>> constructors;
 
   void injectMembers(Errors errors, Object o, InternalContext context,
       List<SingleMemberInjector> injectors)
@@ -788,6 +754,14 @@ class InjectorImpl implements Injector {
     }
 
     errors.throwProvisionExceptionIfErrorsExist();
+  }
+
+  public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
+    throw new UnsupportedOperationException("TODO");
+  }
+
+  public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+    throw new UnsupportedOperationException("TODO");
   }
 
   public void injectMembersOrThrow(final Errors errors, final Object o,

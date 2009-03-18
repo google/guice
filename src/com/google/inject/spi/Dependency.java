@@ -68,6 +68,20 @@ public final class Dependency<T> implements Serializable {
   }
 
   /**
+   * Returns the dependencies from the given injectable type.
+   */
+  public static Set<Dependency<?>> forInjectableType(InjectableType<?> injectableType) {
+    List<Dependency<?>> dependencies = Lists.newArrayList();
+    if (injectableType.getInjectableConstructor() != null) {
+      dependencies.addAll(injectableType.getInjectableConstructor().getDependencies());
+    }
+    for (InjectionPoint injectionPoint : injectableType.getInjectableMembers()) {
+      dependencies.addAll(injectionPoint.getDependencies());
+    }
+    return ImmutableSet.copyOf(dependencies);
+  }
+
+  /**
    * Returns the key to the binding that satisfies this dependency.
    */
   public Key<T> getKey() {

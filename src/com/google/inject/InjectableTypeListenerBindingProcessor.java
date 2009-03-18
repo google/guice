@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject;
 
-import com.google.inject.Binding;
-import com.google.inject.Binder;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.InjectableTypeListenerBinding;
 
 /**
- * A binding to a key exposed from an enclosed private environment.
+ * Handles {@link Binder#bindListener} commands.
  *
  * @author jessewilson@google.com (Jesse Wilson)
- * @since 2.0
  */
-public interface ExposedBinding<T> extends Binding<T>, HasDependencies {
+class InjectableTypeListenerBindingProcessor extends AbstractProcessor {
 
-  /**
-   * Returns the enclosed environment that holds the original binding.
-   */
-  PrivateElements getPrivateElements();
+  InjectableTypeListenerBindingProcessor(Errors errors) {
+    super(errors);
+  }
 
-  /**
-   * Unsupported. Always throws {@link UnsupportedOperationException}.
-   */
-  void applyTo(Binder binder);
+  @Override public Boolean visit(InjectableTypeListenerBinding binding) {
+    injector.state.addInjectableTypeListener(binding);
+    return true;
+  }
 }

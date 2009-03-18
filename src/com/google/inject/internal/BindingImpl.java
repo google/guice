@@ -90,17 +90,12 @@ public abstract class BindingImpl<T> implements Binding<T> {
   }
 
   public <V> V acceptVisitor(ElementVisitor<V> visitor) {
-    return visitor.visitBinding(this);
+    return visitor.visit(this);
   }
 
   public <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor) {
     return scoping.acceptVisitor(visitor);
   }
-
-  /**
-   * Perform any post-creation initialization, that could require construction of other bindings.
-   */
-  public void initialize(Injector injector, Errors errors) throws ErrorsException {}
 
   protected BindingImpl<T> withScoping(Scoping scoping) {
     throw new AssertionError();

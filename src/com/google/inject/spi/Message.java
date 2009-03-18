@@ -21,6 +21,7 @@ import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Objects;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.internal.SourceProvider;
+import com.google.inject.Binder;
 import java.io.Serializable;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public final class Message implements Serializable, Element {
 
   /** @since 2.0 */
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitMessage(this);
+    return visitor.visit(this);
   }
 
   /**
@@ -108,5 +109,9 @@ public final class Message implements Serializable, Element {
     }
     Message e = (Message) o;
     return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
+  }
+
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).addError(this);
   }
 }

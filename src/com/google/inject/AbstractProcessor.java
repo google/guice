@@ -26,6 +26,8 @@ import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.StaticInjectionRequest;
 import com.google.inject.spi.TypeConverterBinding;
+import com.google.inject.spi.MembersInjectorLookup;
+import com.google.inject.spi.InjectableTypeListenerBinding;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,42 +73,50 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
     }
   }
 
-  public Boolean visitMessage(Message message) {
+  public Boolean visit(Message message) {
     return false;
   }
 
   /*if[AOP]*/
-  public Boolean visitInterceptorBinding(
+  public Boolean visit(
       com.google.inject.spi.InterceptorBinding interceptorBinding) {
     return false;
   }
   /*end[AOP]*/
 
-  public Boolean visitScopeBinding(ScopeBinding scopeBinding) {
+  public Boolean visit(ScopeBinding scopeBinding) {
     return false;
   }
 
-  public Boolean visitInjectionRequest(InjectionRequest injectionRequest) {
+  public Boolean visit(InjectionRequest injectionRequest) {
     return false;
   }
 
-  public Boolean visitStaticInjectionRequest(StaticInjectionRequest staticInjectionRequest) {
+  public Boolean visit(StaticInjectionRequest staticInjectionRequest) {
     return false;
   }
 
-  public Boolean visitTypeConverterBinding(TypeConverterBinding typeConverterBinding) {
+  public Boolean visit(TypeConverterBinding typeConverterBinding) {
     return false;
   }
 
-  public <T> Boolean visitBinding(Binding<T> binding) {
+  public <T> Boolean visit(Binding<T> binding) {
     return false;
   }
 
-  public <T> Boolean visitProviderLookup(ProviderLookup<T> providerLookup) {
+  public <T> Boolean visit(ProviderLookup<T> providerLookup) {
     return false;
   }
 
-  public Boolean visitPrivateElements(PrivateElements privateElements) {
+  public Boolean visit(PrivateElements privateElements) {
+    return false;
+  }
+
+  public <T> Boolean visit(MembersInjectorLookup<T> lookup) {
+    return false;
+  }
+
+  public Boolean visit(InjectableTypeListenerBinding binding) {
     return false;
   }
 }

@@ -55,40 +55,40 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
     return dependencies;
   }
   
-  public Collection<Key<?>> visitConstructor(ConstructorBinding<?> binding) {
+  public Collection<Key<?>> visit(ConstructorBinding<?> binding) {
     return visitHasDependencies(binding);
   }
 
-  public Collection<Key<?>> visitConvertedConstant(ConvertedConstantBinding<?> binding) {
+  public Collection<Key<?>> visit(ConvertedConstantBinding<?> binding) {
     return visitHasDependencies(binding);
   }
 
-  public Collection<Key<?>> visitExposed(ExposedBinding<?> binding) {
+  public Collection<Key<?>> visit(ExposedBinding<?> binding) {
     // TODO(phopkins): Figure out if this is needed for graphing.
     return ImmutableSet.of();
   }
 
-  public Collection<Key<?>> visitInstance(InstanceBinding<?> binding) {
+  public Collection<Key<?>> visit(InstanceBinding<?> binding) {
     return visitHasDependencies(binding);
   }
 
-  public Collection<Key<?>> visitLinkedKey(LinkedKeyBinding<?> binding) {
+  public Collection<Key<?>> visit(LinkedKeyBinding<?> binding) {
     return ImmutableSet.<Key<?>>of(binding.getLinkedKey());
   }
 
-  public Collection<Key<?>> visitProviderBinding(ProviderBinding<?> binding) {
+  public Collection<Key<?>> visit(ProviderBinding<?> binding) {
     return ImmutableSet.<Key<?>>of(binding.getProvidedKey());
   }
 
-  public Collection<Key<?>> visitProviderInstance(ProviderInstanceBinding<?> binding) {
+  public Collection<Key<?>> visit(ProviderInstanceBinding<?> binding) {
     return visitHasDependencies(binding);
   }
 
-  public Collection<Key<?>> visitProviderKey(ProviderKeyBinding<?> binding) {
+  public Collection<Key<?>> visit(ProviderKeyBinding<?> binding) {
     return ImmutableSet.<Key<?>>of(binding.getProviderKey());
   }
 
-  public Collection<Key<?>> visitUntargetted(UntargettedBinding<?> binding) {
+  public Collection<Key<?>> visit(UntargettedBinding<?> binding) {
     // TODO(phopkins): Figure out if this is needed for graphing.
     return null;
   }

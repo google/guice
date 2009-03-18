@@ -16,11 +16,11 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
+import com.google.inject.internal.ImmutableList;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import static java.util.Collections.unmodifiableList;
 import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -33,6 +33,10 @@ import org.aopalliance.intercept.MethodInterceptor;
  *         Matchers.annotatedWith(Transactional.class),
  *         new MyTransactionInterceptor());</pre>
  *
+ * or from an injectable type listener using
+ * {@link com.google.inject.spi.InjectableType.Encounter#bindInterceptor(com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
+ * InjectableType.Encounter.bindInterceptor()}.  
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
@@ -40,7 +44,7 @@ public final class InterceptorBinding implements Element {
   private final Object source;
   private final Matcher<? super Class<?>> classMatcher;
   private final Matcher<? super Method> methodMatcher;
-  private final List<MethodInterceptor> interceptors;
+  private final ImmutableList<MethodInterceptor> interceptors;
 
   InterceptorBinding(
       Object source,
@@ -50,7 +54,7 @@ public final class InterceptorBinding implements Element {
     this.source = checkNotNull(source, "source");
     this.classMatcher = checkNotNull(classMatcher, "classMatcher");
     this.methodMatcher = checkNotNull(methodMatcher, "methodMatcher");
-    this.interceptors = unmodifiableList(Arrays.asList(interceptors.clone()));
+    this.interceptors = ImmutableList.of(interceptors);
   }
 
   public Object getSource() {
@@ -70,6 +74,11 @@ public final class InterceptorBinding implements Element {
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
-    return visitor.visitInterceptorBinding(this);
+    return visitor.visit(this);
+  }
+
+  public void applyTo(Binder binder) {
+    binder.withSource(getSource()).bindInterceptor(classMatcher, methodMatcher,
+        interceptors.toArray(new MethodInterceptor[interceptors.size()]));
   }
 }

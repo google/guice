@@ -27,6 +27,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.MembersInjector;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
@@ -37,7 +38,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
 import static com.google.inject.internal.Preconditions.checkArgument;
-import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
@@ -62,7 +62,7 @@ import java.util.Set;
 public final class Elements {
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
-    @Override public Object visitInstance(InstanceBinding<?> binding) {
+    @Override public Object visit(InstanceBinding<?> binding) {
       return binding.getInstance();
     }
 
@@ -169,10 +169,26 @@ public final class Elements {
       elements.add(new ScopeBinding(getSource(), annotationType, scope));
     }
 
-    public void requestInjection(Object... instances) {
-      for (Object instance : instances) {
-        elements.add(new InjectionRequest(getSource(), instance));
-      }
+    @SuppressWarnings("unchecked") // it is safe to use the type literal for the raw type
+    public void requestInjection(Object instance) {
+      requestInjection((TypeLiteral) TypeLiteral.get(instance.getClass()), instance);
+    }
+
+    public <T> void requestInjection(TypeLiteral<T> type, T instance) {
+      elements.add(new InjectionRequest<T>(getSource(), type, instance));
+    }
+
+    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
+      throw new UnsupportedOperationException("TODO");
+    }
+
+    public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+      throw new UnsupportedOperationException("TODO");
+    }
+
+    public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
+        InjectableType.Listener listener) {
+      elements.add(new InjectableTypeListenerBinding(getSource(), listener, typeMatcher));
     }
 
     public void requestStaticInjection(Class<?>... types) {
@@ -182,8 +198,6 @@ public final class Elements {
     }
 
     public void install(Module module) {
-      checkNotNull(module, "module");
-
       if (modules.add(module)) {
         Binder binder = this;
         if (module instanceof PrivateModule) {

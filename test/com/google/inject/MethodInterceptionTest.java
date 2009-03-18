@@ -119,12 +119,12 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(
         fooMethod, ImmutableList.of(countingInterceptor, returnNullInterceptor),
         barMethod, ImmutableList.of(returnNullInterceptor)),
-        interceptedBinding.getMethodInterceptors());
+        interceptedBinding.getInjectableType().getMethodInterceptors());
 
     ConstructorBinding<?> nonInterceptedBinding
         = (ConstructorBinding<?>) injector.getBinding(Foo.class);
     assertEquals(ImmutableMap.<Method, List<MethodInterceptor>>of(),
-        nonInterceptedBinding.getMethodInterceptors());
+        nonInterceptedBinding.getInjectableType().getMethodInterceptors());
 
     injector.getInstance(Interceptable.class).foo();
     assertEquals("expected counting interceptor to be invoked first", 1, count.get());

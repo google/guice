@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -41,7 +42,7 @@ public class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBind
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visitExposed(this);
+    return visitor.visit(this);
   }
 
   public Set<Dependency<?>> getDependencies() {
@@ -66,5 +67,9 @@ public class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBind
         .add("source", getSource())
         .add("privateElements", privateElements)
         .toString();
+  }
+
+  public void applyTo(Binder binder) {
+    throw new UnsupportedOperationException("This element represents a synthetic binding.");
   }
 }

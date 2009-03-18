@@ -89,5 +89,4 @@ public interface Binding<T> extends Element {
    * @since 2.0
    */
   <V> V acceptScopingVisitor(BindingScopingVisitor<V> visitor);
-
 }

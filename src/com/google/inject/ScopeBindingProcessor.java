@@ -34,7 +34,7 @@ class ScopeBindingProcessor extends AbstractProcessor {
     super(errors);
   }
 
-  @Override public Boolean visitScopeBinding(ScopeBinding command) {
+  @Override public Boolean visit(ScopeBinding command) {
     Scope scope = command.getScope();
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 

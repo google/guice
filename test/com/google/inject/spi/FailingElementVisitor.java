@@ -19,7 +19,7 @@ package com.google.inject.spi;
 import junit.framework.AssertionFailedError;
 
 class FailingElementVisitor extends DefaultElementVisitor<Void> {
-  @Override protected Void visitElement(Element element) {
+  @Override protected Void visitOther(Element element) {
     throw new AssertionFailedError();
   }
 }

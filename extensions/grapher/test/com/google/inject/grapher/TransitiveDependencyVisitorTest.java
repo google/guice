@@ -56,7 +56,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitConstructor() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class));
-    Collection<Key<?>> dependencies = visitor.visitConstructor((ConstructorBinding<?>) binding);
+    Collection<Key<?>> dependencies = visitor.visit((ConstructorBinding<?>) binding);
     
     assertDependencies(dependencies, Key.get(A.class), Key.get(B.class), Key.get(C.class),
         Key.get(D.class));
@@ -65,7 +65,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
   public void testVisitConvertedConstant() {
     Binding<?> binding = getBinding(Key.get(Integer.class, Names.named("number")),
         new ConvertedConstantModule());
-    Collection<Key<?>> dependencies = visitor.visitConvertedConstant(
+    Collection<Key<?>> dependencies = visitor.visit(
         (ConvertedConstantBinding<?>) binding);
     
     assertDependencies(dependencies, Key.get(String.class, Names.named("number")));
@@ -73,7 +73,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitInstance() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class), new InstanceModule());
-    Collection<Key<?>> dependencies = visitor.visitInstance(
+    Collection<Key<?>> dependencies = visitor.visit(
         (InstanceBinding<?>) binding);
     
     // Dependencies will only be on the field- and method-injected classes.
@@ -82,7 +82,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitInstance_instanceHasDependencies() {
     Binding<?> binding = getBinding(Key.get(Interface.class), new HasDependenciesModule());
-    Collection<Key<?>> dependencies = visitor.visitInstance(
+    Collection<Key<?>> dependencies = visitor.visit(
         (InstanceBinding<?>) binding);
     
     // Dependencies should only be on the stated
@@ -92,7 +92,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitLinkedKey() {
     Binding<?> binding = getBinding(Key.get(Interface.class), new LinkedKeyModule());
-    Collection<Key<?>> dependencies = visitor.visitLinkedKey((LinkedKeyBinding<?>) binding);
+    Collection<Key<?>> dependencies = visitor.visit((LinkedKeyBinding<?>) binding);
 
     // Dependency should be to the class this interface is bound to.
     assertDependencies(dependencies, Key.get(ConstructedClass.class));
@@ -100,7 +100,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitProviderBinding() {
     Binding<?> binding = getBinding(Key.get(new TypeLiteral<Provider<ConstructedClass>>() {}));
-    Collection<Key<?>> dependencies = visitor.visitProviderBinding((ProviderBinding<?>) binding);
+    Collection<Key<?>> dependencies = visitor.visit((ProviderBinding<?>) binding);
     
     assertDependencies(dependencies, Key.get(ConstructedClass.class));
   }
@@ -108,7 +108,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
   public void testVisitProviderInstance() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class),
         new ProviderInstanceModule());
-    Collection<Key<?>> dependencies = visitor.visitProviderInstance(
+    Collection<Key<?>> dependencies = visitor.visit(
         (ProviderInstanceBinding<?>) binding);
     
     // Dependencies will only be on the field- and method-injected classes.
@@ -117,7 +117,7 @@ public class TransitiveDependencyVisitorTest extends TestCase {
 
   public void testVisitProviderKey() {
     Binding<?> binding = getBinding(Key.get(ConstructedClass.class), new ProviderKeyModule());
-    Collection<Key<?>> dependencies = visitor.visitProviderKey((ProviderKeyBinding<?>) binding);
+    Collection<Key<?>> dependencies = visitor.visit((ProviderKeyBinding<?>) binding);
 
     // Dependency should be to the class that provides this one.
     assertDependencies(dependencies, Key.get(ConstructedClassProvider.class));

@@ -31,6 +31,9 @@ import java.lang.annotation.Annotation;
  */
 public class DefaultBindingScopingVisitor<V> implements BindingScopingVisitor<V> {
 
+  /**
+   * Default visit implementation. Returns {@code null}.
+   */
   protected V visitOther() {
     return null;
   }

@@ -47,6 +47,7 @@ import java.util.Map;
  * enables tools and extensions to operate on an injector reflectively.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface Injector {
 
@@ -57,8 +58,36 @@ public interface Injector {
    * <p>Whenever Guice creates an instance, it performs this injection automatically (after first
    * performing constructor injection), so if you're able to let Guice create all your objects for
    * you, you'll never need to use this method.
+   *
+   * @param instance to inject members on
+   *
+   * @see Binder#getMembersInjector(Class) for a preferred alternative that supports checks before
+   *  run time
    */
   void injectMembers(Object instance);
+
+  /**
+   * Returns the members injector used to inject dependencies into methods and fields on instances
+   * of the given type {@code T}.
+   *
+   * @param typeLiteral type to get members injector for
+   * @see Binder#getMembersInjector(TypeLiteral) for an alternative that offers up front error
+   *  detection
+   * @since 2.0
+   */
+  <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral);
+
+  /**
+   * Returns the members injector used to inject dependencies into methods and fields on instances
+   * of the given type {@code T}. When feasible, use {@link Binder#getMembersInjector(TypeLiteral)}
+   * instead to get increased up front error detection.
+   *
+   * @param type type to get members injector for
+   * @see Binder#getMembersInjector(Class) for an alternative that offers up front error
+   *  detection
+   * @since 2.0
+   */
+  <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
   /**
    * Returns all explicit bindings.
@@ -69,7 +98,6 @@ public interface Injector {
    * the order in which bindings appear in user Modules.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
-   *
    */
   Map<Key<?>, Binding<?>> getBindings();
 
@@ -108,6 +136,7 @@ public interface Injector {
    * using this method, in favor of having Guice inject your dependencies ahead of time.
    *
    * @throws ConfigurationException if this injector cannot find or create the provider.
+   * @see Binder#getProvider(Key) for an alternative that offers up front error detection
    */
   <T> Provider<T> getProvider(Key<T> key);
 
@@ -116,6 +145,7 @@ public interface Injector {
    * using this method, in favor of having Guice inject your dependencies ahead of time.
    *
    * @throws ConfigurationException if this injector cannot find or create the provider.
+   * @see Binder#getProvider(Class) for an alternative that offers up front error detection
    */
   <T> Provider<T> getProvider(Class<T> type);
 
