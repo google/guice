@@ -17,6 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Injector;
+import java.lang.ref.WeakReference;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -37,6 +38,9 @@ public abstract class GuiceServletContextListener
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     ServletContext servletContext = servletContextEvent.getServletContext();
     servletContext.setAttribute(INJECTOR_NAME, getInjector());
+
+    // Set the Servletcontext early for those people who are using this class.
+    GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
   }
 
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
