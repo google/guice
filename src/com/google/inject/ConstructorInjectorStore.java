@@ -64,8 +64,16 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
 
   private <T> ConstructorInjector<T> createConstructor(TypeLiteral<T> type, Errors errors)
       throws ErrorsException {
+    int numErrorsBefore = errors.size();
 
-    InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(type);
+    InjectionPoint injectionPoint;
+    try {
+      injectionPoint = InjectionPoint.forConstructorOf(type);
+    } catch (ConfigurationException e) {
+      errors.merge(e.getErrorMessages());
+      throw errors.toException();
+    }
+
     ImmutableList<SingleParameterInjector<?>> constructorParameterInjectors
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
     ImmutableList<SingleMemberInjector> memberInjectors = injector.injectors.get(type, errors);
@@ -83,8 +91,11 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
 
     for (InjectableTypeListenerBinding typeListener : injectableTypeListenerBindings) {
       if (typeListener.getTypeMatcher().matches(type)) {
-        // TODO: wrap this user code in a better try/catch block
-        typeListener.getListener().hear(injectableType, encounter);
+        try {
+          typeListener.getListener().hear(injectableType, encounter);
+        } catch (RuntimeException e) {
+          errors.errorNotifyingTypeListener(typeListener, injectableType, e);
+        }
       }
     }
 
@@ -95,6 +106,8 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
       injectableType = new InjectableTypeImpl<T>(
           injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
     }
+
+    errors.throwIfNewErrors(numErrorsBefore);
 
     return new ConstructorInjector<T>(proxyFactory.create(), constructorParameterInjectors,
         memberInjectors, encounter.getInjectionListeners(), injectableType);
@@ -193,5 +206,9 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
       return methodInterceptors;
     }
     /*end[AOP]*/
+
+    @Override public String toString() {
+      return type.toString();
+    }
   }
 }

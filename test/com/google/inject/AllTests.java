@@ -30,6 +30,7 @@ import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ModuleWriterTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
+import com.google.inject.spi.BindingTargetVisitorTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
 import junit.framework.Test;
@@ -51,18 +52,18 @@ public class AllTests {
     suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
-    suite.addTestSuite(TypeConversionTest.class);
-    // suite.addTestSuite(ErrorHandlingTest.class); not a testcase
+    // ErrorHandlingTest.class is not a testcase
     suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(InjectableTypeListenerTest.class);
-    suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(InjectorTest.class);
+    // IntegrationTest is AOP-only
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
-    suite.addTestSuite(ModuleTest.class);
+    // MethodInterceptionTest is AOP-only
     suite.addTestSuite(ModulesTest.class);
+    suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
     suite.addTestSuite(OptionalBindingTest.class);
     suite.addTestSuite(OverrideModuleTest.class);
@@ -70,29 +71,22 @@ public class AllTests {
     suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
+    // ProxyFactoryTest is AOP-only
     suite.addTestSuite(ReflectionTest.class);
+    suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
-    suite.addTestSuite(RequestInjectionTest.class);
     suite.addTestSuite(SuperclassTest.class);
+    suite.addTestSuite(TypeConversionTest.class);
     suite.addTestSuite(TypeLiteralInjectionTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
     suite.addTestSuite(TypeLiteralTypeResolutionTest.class);
 
-    // spi
-    suite.addTestSuite(ElementsTest.class);
-    suite.addTestSuite(HasDependenciesTest.class);
-    suite.addTestSuite(ProviderMethodsTest.class);
-    suite.addTestSuite(ModuleWriterTest.class);
-    suite.addTestSuite(ModuleRewriterTest.class);
-    suite.addTestSuite(SpiBindingsTest.class);
-
     // internal
     suite.addTestSuite(FinalizableReferenceQueueTest.class);
+    suite.addTestSuite(Jsr166HashMapTest.class);
     suite.addTestSuite(LineNumbersTest.class);
     suite.addTest(MapMakerTestSuite.suite());
-    suite.addTestSuite(Jsr166HashMapTest.class);
-    suite.addTestSuite(TypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
 
     // matcher
@@ -101,11 +95,22 @@ public class AllTests {
     // names
     suite.addTestSuite(NamesTest.class);
 
+    // spi
+    suite.addTestSuite(BindingTargetVisitorTest.class);
+    suite.addTestSuite(ElementsTest.class);
+    suite.addTestSuite(HasDependenciesTest.class);
+    suite.addTestSuite(InjectionPointTest.class);
+    suite.addTestSuite(ModuleRewriterTest.class);
+    suite.addTestSuite(ModuleWriterTest.class);
+    suite.addTestSuite(ProviderMethodsTest.class);
+    suite.addTestSuite(SpiBindingsTest.class);
+
     // tools
     // suite.addTestSuite(JmxTest.class); not a testcase
 
     // util
     suite.addTestSuite(ProvidersTest.class);
+    suite.addTestSuite(TypesTest.class);
 
     /*if[AOP]*/
     suite.addTestSuite(ProxyFactoryTest.class);

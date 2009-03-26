@@ -24,6 +24,9 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectableType;
+import com.google.inject.spi.InjectableTypeListenerBinding;
+import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import java.io.PrintWriter;
@@ -125,8 +128,8 @@ public final class Errors implements Serializable {
   }
 
   public Errors conversionError(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter matchingConverter, Exception cause) {
-    return addMessage(cause, "Error converting '%s' (bound at %s) to %s%n" 
+      TypeLiteral<?> type, MatcherAndConverter matchingConverter, RuntimeException cause) {
+    return errorInUserCode(cause, "Error converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Reason: %s",
         stringValue, convert(source), type, matchingConverter, cause);
@@ -248,15 +251,29 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorInjectingMethod(Throwable cause) {
-    return errorInUserCode("Error injecting method, %s", cause);
+    return errorInUserCode(cause, "Error injecting method, %s", cause);
+  }
+
+  public Errors errorNotifyingTypeListener(InjectableTypeListenerBinding listener,
+      InjectableType<?> injectableType, Throwable cause) {
+    return errorInUserCode(cause,
+        "Error notifying InjectableType.Listener %s (bound at %s) of %s.%n"
+        + " Reason: %s",
+        listener.getListener(), convert(listener.getSource()), injectableType, cause);
   }
 
   public Errors errorInjectingConstructor(Throwable cause) {
-    return errorInUserCode("Error injecting constructor, %s", cause);
+    return errorInUserCode(cause, "Error injecting constructor, %s", cause);
   }
 
   public Errors errorInProvider(RuntimeException runtimeException) {
-    return errorInUserCode("Error in custom provider, %s", runtimeException);
+    return errorInUserCode(runtimeException, "Error in custom provider, %s", runtimeException);
+  }
+
+  public Errors errorNotifyingInjectionListener(
+      InjectionListener listener, InjectableType<?> injectableType, RuntimeException cause) {
+    return errorInUserCode(cause, "Error notifying InjectionListener %s of %s.%n"
+        + " Reason: %s", listener, injectableType, cause);
   }
 
   public void exposedButNotBound(Key<?> key) {
@@ -275,13 +292,13 @@ public final class Errors implements Serializable {
     }
   }
 
-  public Errors errorInUserCode(String message, Throwable cause) {
+  public Errors errorInUserCode(Throwable cause, String messageFormat, Object... arguments) {
     Collection<Message> messages = getMessagesFromThrowable(cause);
 
     if (!messages.isEmpty()) {
       return merge(messages);
     } else {
-      return addMessage(cause, message, cause);
+      return addMessage(cause, messageFormat, arguments);
     }
   }
 

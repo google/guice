@@ -25,6 +25,7 @@ import static com.google.inject.matcher.Matchers.any;
 import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectableType.Encounter;
 import com.google.inject.spi.InjectionListener;
+import static com.google.inject.Asserts.assertContains;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -131,9 +132,129 @@ public class InjectableTypeListenerTest extends TestCase {
     assertEquals("felibeep", c.beep());
   }
 
-  // TODO(jessewilson): injectableType.Listener throws test
+  public void testInjectableTypeListenerThrows() {
+    final InjectableType.Listener clumsyListener = new InjectableType.Listener() {
+      int failures = 0;
 
-  // TODO(jessewilson): injectionlistener throws test
+      public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+        throw new ClassCastException("whoops, failure #" + (++failures));
+      }
+
+      @Override public String toString() {
+        return "clumsy";
+      }
+    };
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bindListener(any(), clumsyListener);
+          bind(B.class);
+          bind(C.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error notifying InjectableType.Listener clumsy (bound at " + getClass().getName(),
+          ".configure(InjectableTypeListenerTest.java:",
+          "of " + B.class.getName(), 
+          "Reason: java.lang.ClassCastException: whoops, failure #1",
+          "2) Error notifying InjectableType.Listener clumsy (bound at " + getClass().getName(),
+          ".configure(InjectableTypeListenerTest.java:",
+          "of " + C.class.getName(),
+          "Reason: java.lang.ClassCastException: whoops, failure #2");
+    }
+    
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(any(), clumsyListener);
+      }
+    });
+    try {
+      injector.getProvider(B.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error notifying InjectableType.Listener clumsy (bound at " + getClass().getName(),
+          ".configure(InjectableTypeListenerTest.java:",
+          "of " + B.class.getName(),
+          "Reason: java.lang.ClassCastException: whoops, failure #3");
+    }
+
+    // getting it again should yield the same exception #3
+    try {
+      injector.getInstance(B.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Error notifying InjectableType.Listener clumsy (bound at " + getClass().getName(),
+          ".configure(InjectableTypeListenerTest.java:",
+          "of " + B.class.getName(),
+          "Reason: java.lang.ClassCastException: whoops, failure #3");
+    }
+
+    // non-constructed types do not participate
+    assertSame(Stage.DEVELOPMENT, injector.getInstance(Stage.class));
+  }
+
+  public void testInjectionListenerThrows() {
+    final InjectionListener<Object> injectionListener = new InjectionListener<Object>() {
+      int failures = 0;
+
+      public void afterInjection(Object injectee) {
+        throw new ClassCastException("whoops, failure #" + (++failures));
+      }
+
+      @Override public String toString() {
+        return "goofy";
+      }
+    };
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(any(), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            encounter.register(injectionListener);
+          }
+        });
+        bind(B.class);
+      }
+    });
+
+    try {
+      injector.getInstance(A.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "1) Error notifying InjectionListener goofy of " + A.class.getName(),
+          " Reason: java.lang.ClassCastException: whoops, failure #1");
+    }
+
+    // second time through should be a new cause (#2)
+    try {
+      injector.getInstance(A.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "1) Error notifying InjectionListener goofy of " + A.class.getName(),
+          " Reason: java.lang.ClassCastException: whoops, failure #2");
+    }
+
+    // we should get errors for all types, but only on getInstance()
+    Provider<B> bProvider = injector.getProvider(B.class);
+    try {
+      bProvider.get();
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "1) Error notifying InjectionListener goofy of " + B.class.getName(),
+          " Reason: java.lang.ClassCastException: whoops, failure #3");
+    }
+
+    // non-constructed types do not participate
+    assertSame(Stage.DEVELOPMENT, injector.getInstance(Stage.class));
+  }
 
   static class A {
     @Inject Injector injector;

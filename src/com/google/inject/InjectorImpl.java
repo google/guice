@@ -284,7 +284,7 @@ class InjectorImpl implements Injector {
       return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
     } catch (ErrorsException e) {
       throw e;
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       throw errors.conversionError(stringValue, source, type, matchingConverter, e)
           .toException();
     }

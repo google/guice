@@ -95,7 +95,12 @@ class ConstructorInjector<T> {
       }
 
       for (InjectionListener<? super T> injectionListener : injectionListeners) {
-        injectionListener.afterInjection(t); // TODO: handle user exceptions here
+        try {
+          injectionListener.afterInjection(t);
+        } catch (RuntimeException e) {
+          throw errors.withSource(constructionProxy.getInjectionPoint())
+              .errorNotifyingInjectionListener(injectionListener, injectableType, e).toException();
+        }
       }
 
       return t;
