@@ -37,10 +37,10 @@ public abstract class GuiceServletContextListener
 
   public void contextInitialized(ServletContextEvent servletContextEvent) {
     ServletContext servletContext = servletContextEvent.getServletContext();
-    servletContext.setAttribute(INJECTOR_NAME, getInjector());
 
     // Set the Servletcontext early for those people who are using this class.
     GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
+    servletContext.setAttribute(INJECTOR_NAME, getInjector());
   }
 
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
