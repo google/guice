@@ -20,13 +20,16 @@ import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
@@ -613,11 +616,12 @@ public class ElementsTest extends TestCase {
     checkModule(
         new AbstractModule() {
           protected void configure() {
-            Provider<String> keyGetProvider = getProvider(Key.get(String.class, SampleAnnotation.class));
+            Provider<String> keyGetProvider
+                = getProvider(Key.get(String.class, SampleAnnotation.class));
             try {
               keyGetProvider.get();
             } catch (IllegalStateException e) {
-              assertEquals("This provider cannot be used until the Injector has been created.",
+              assertEquals("This Provider cannot be used until the Injector has been created.",
                   e.getMessage());
             }
 
@@ -625,14 +629,14 @@ public class ElementsTest extends TestCase {
             try {
               typeGetProvider.get();
             } catch (IllegalStateException e) {
-              assertEquals("This provider cannot be used until the Injector has been created.",
+              assertEquals("This Provider cannot be used until the Injector has been created.",
                   e.getMessage());
             }
           }
         },
 
         new FailingElementVisitor() {
-          @Override public Void visit(ProviderLookup command) {
+          @Override public <T> Void visit(ProviderLookup<T> command) {
             assertEquals(Key.get(String.class, SampleAnnotation.class), command.getKey());
             assertNull(command.getDelegate());
             return null;
@@ -640,8 +644,51 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visit(ProviderLookup command) {
+          @Override public <T> Void visit(ProviderLookup<T> command) {
             assertEquals(Key.get(String.class), command.getKey());
+            assertNull(command.getDelegate());
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testGetMembersInjector() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            MembersInjector<A<String>> typeMembersInjector
+                = getMembersInjector(new TypeLiteral<A<String>>() {});
+            try {
+              typeMembersInjector.injectMembers(new A<String>());
+            } catch (IllegalStateException e) {
+              assertEquals(
+                  "This MembersInjector cannot be used until the Injector has been created.",
+                  e.getMessage());
+            }
+
+            MembersInjector<String> classMembersInjector = getMembersInjector(String.class);
+            try {
+              classMembersInjector.injectMembers("hello");
+            } catch (IllegalStateException e) {
+              assertEquals(
+                  "This MembersInjector cannot be used until the Injector has been created.",
+                  e.getMessage());
+            }
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(MembersInjectorLookup<T> command) {
+            assertEquals(new TypeLiteral<A<String>>() {}, command.getTypeLiteral());
+            assertNull(command.getDelegate());
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(MembersInjectorLookup<T> command) {
+            assertEquals(TypeLiteral.get(String.class), command.getTypeLiteral());
             assertNull(command.getDelegate());
             return null;
           }
@@ -1004,4 +1051,8 @@ public class ElementsTest extends TestCase {
   public @interface SampleAnnotation { }
 
   public enum CoinSide { HEADS, TAILS }
+
+  static class A<T> {
+    @Inject Stage stage;
+  }
 }

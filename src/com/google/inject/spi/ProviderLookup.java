@@ -57,14 +57,11 @@ public final class ProviderLookup<T> implements Element {
   /**
    * Sets the actual provider.
    *
-   * @param delegate provider
    * @throws IllegalStateException if the delegate is already set
-   * @throws NullPointerException if the delegate is null
    */
   public void initializeDelegate(Provider<T> delegate) {
     checkState(this.delegate == null, "delegate already initialized");
-    checkNotNull(delegate, "delegate");
-    this.delegate = delegate;
+    this.delegate = checkNotNull(delegate, "delegate");
   }
 
   public void applyTo(Binder binder) {

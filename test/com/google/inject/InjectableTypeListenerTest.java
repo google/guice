@@ -47,6 +47,30 @@ public class InjectableTypeListenerTest extends TestCase {
     };
   }
 
+  final InjectableType.Listener failingInjectableTypeListener = new InjectableType.Listener() {
+    int failures = 0;
+
+    public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+      throw new ClassCastException("whoops, failure #" + (++failures));
+    }
+
+    @Override public String toString() {
+      return "clumsy";
+    }
+  };
+
+  final InjectionListener<Object> failingInjectionListener = new InjectionListener<Object>() {
+    int failures = 0;
+
+    public void afterInjection(Object injectee) {
+      throw new ClassCastException("whoops, failure #" + (++failures));
+    }
+
+    @Override public String toString() {
+      return "goofy";
+    }
+  };
+
   public void testTypeListenersAreFired() throws NoSuchMethodException {
     final Constructor<A> aConstructor = A.class.getDeclaredConstructor();
     final AtomicInteger firedCount = new AtomicInteger();
@@ -133,22 +157,10 @@ public class InjectableTypeListenerTest extends TestCase {
   }
 
   public void testInjectableTypeListenerThrows() {
-    final InjectableType.Listener clumsyListener = new InjectableType.Listener() {
-      int failures = 0;
-
-      public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
-        throw new ClassCastException("whoops, failure #" + (++failures));
-      }
-
-      @Override public String toString() {
-        return "clumsy";
-      }
-    };
-
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
-          bindListener(any(), clumsyListener);
+          bindListener(any(), failingInjectableTypeListener);
           bind(B.class);
           bind(C.class);
         }
@@ -168,7 +180,7 @@ public class InjectableTypeListenerTest extends TestCase {
     
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bindListener(any(), clumsyListener);
+        bindListener(any(), failingInjectableTypeListener);
       }
     });
     try {
@@ -199,23 +211,11 @@ public class InjectableTypeListenerTest extends TestCase {
   }
 
   public void testInjectionListenerThrows() {
-    final InjectionListener<Object> injectionListener = new InjectionListener<Object>() {
-      int failures = 0;
-
-      public void afterInjection(Object injectee) {
-        throw new ClassCastException("whoops, failure #" + (++failures));
-      }
-
-      @Override public String toString() {
-        return "goofy";
-      }
-    };
-
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bindListener(any(), new InjectableType.Listener() {
           public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
-            encounter.register(injectionListener);
+            encounter.register(failingInjectionListener);
           }
         });
         bind(B.class);
@@ -254,6 +254,20 @@ public class InjectableTypeListenerTest extends TestCase {
 
     // non-constructed types do not participate
     assertSame(Stage.DEVELOPMENT, injector.getInstance(Stage.class));
+  }
+
+  public void testInjectMembersInjectableTypeListener() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          getMembersInjector(A.class);
+          bindListener(any(), failingInjectableTypeListener);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "foo");
+    }
   }
 
   static class A {

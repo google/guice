@@ -726,54 +726,36 @@ class InjectorImpl implements Injector {
   /** Cached constructor injectors for each type */
   FailableCache<TypeLiteral<?>, ConstructorInjector<?>> constructors;
 
-  void injectMembers(Errors errors, Object o, InternalContext context,
-      List<SingleMemberInjector> injectors)
-      throws ErrorsException {
-    for (SingleMemberInjector injector : injectors) {
-      injector.inject(errors, context, o);
-    }
-  }
-
-  // Not test-covered
-  public void injectMembers(final Object o) {
-    Errors errors = new Errors(o.getClass());
-
-    // configuration/validation stuff throws ConfigurationException
-    List<SingleMemberInjector> injectors;
-    try {
-      injectors = this.injectors.get(TypeLiteral.get(o.getClass()), errors);
-    } catch (ErrorsException e) {
-      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
-    }
-
-    // injection can throw ProvisionException
-    try {
-      injectMembersOrThrow(errors, o, injectors);
-    } catch (ErrorsException e) {
-      errors.merge(e.getErrors());
-    }
-
-    errors.throwProvisionExceptionIfErrorsExist();
+  @SuppressWarnings("unchecked") // the members injector type is consistent with instance's type
+  public void injectMembers(Object instance) {
+    MembersInjector membersInjector = getMembersInjector(instance.getClass());
+    membersInjector.injectMembers(instance);
   }
 
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-    throw new UnsupportedOperationException("TODO");
+    Errors errors = new Errors(typeLiteral);
+    try {
+      return getMembersInjectorOrThrow(typeLiteral, errors);
+    } catch (ErrorsException e) {
+      throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
+    }
   }
 
   public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-    throw new UnsupportedOperationException("TODO");
+    return getMembersInjector(TypeLiteral.get(type));
   }
 
-  public void injectMembersOrThrow(final Errors errors, final Object o,
-      final List<SingleMemberInjector> injectors)
-      throws ErrorsException {
-    if (o == null) {
+  public void injectMembersOrThrow(final Errors errors, final Object instance,
+      final List<SingleMemberInjector> injectors) throws ErrorsException {
+    if (instance == null) {
       return;
     }
 
     callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) throws ErrorsException {
-        injectMembers(errors, o, context, injectors);
+        for (SingleMemberInjector injector : injectors) {
+          injector.inject(errors, context, instance);
+        }
         return null;
       }
     });
@@ -810,6 +792,23 @@ class InjectorImpl implements Injector {
 
       @Override public String toString() {
         return factory.toString();
+      }
+    };
+  }
+
+  <T> MembersInjector<T> getMembersInjectorOrThrow(TypeLiteral<T> type, final Errors errors)
+      throws ErrorsException {
+    final ImmutableList<SingleMemberInjector> memberInjectors = injectors.get(type, errors);
+
+    return new MembersInjector<T>() {
+      public void injectMembers(T instance) {
+        try {
+          injectMembersOrThrow(errors, instance, memberInjectors);
+        } catch (ErrorsException e) {
+          errors.merge(e.getErrors());
+        }
+
+        errors.throwProvisionExceptionIfErrorsExist();
       }
     };
   }

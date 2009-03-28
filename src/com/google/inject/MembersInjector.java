@@ -36,7 +36,7 @@ public interface MembersInjector<T> {
    * performing constructor injection), so if you're able to let Guice create all your objects for
    * you, you'll never need to use this method.
    *
-   * @param instance to inject members on
+   * @param instance to inject members on. May be {@code null}.
    */
   void injectMembers(T instance);
 }

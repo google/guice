@@ -20,6 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.PrivateBinder;
 import com.google.inject.PrivateModule;
@@ -27,7 +28,6 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.MembersInjector;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
@@ -178,12 +178,26 @@ public final class Elements {
       elements.add(new InjectionRequest<T>(getSource(), type, instance));
     }
 
-    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-      throw new UnsupportedOperationException("TODO");
+    public <T> MembersInjector<T> getMembersInjector(final TypeLiteral<T> typeLiteral) {
+      final MembersInjectorLookup<T> element
+          = new MembersInjectorLookup<T>(getSource(), typeLiteral);
+      elements.add(element);
+      return new MembersInjector<T>() {
+        public void injectMembers(T instance) {
+          MembersInjector<T> delegate = element.getDelegate();
+          checkState(delegate != null,
+              "This MembersInjector cannot be used until the Injector has been created.");
+          delegate.injectMembers(instance);
+        }
+
+        @Override public String toString() {
+          return "MembersInjector<" + typeLiteral + ">";
+        }
+      };
     }
 
     public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-      throw new UnsupportedOperationException("TODO");
+      return getMembersInjector(TypeLiteral.get(type));
     }
 
     public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
@@ -252,13 +266,13 @@ public final class Elements {
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      final ProviderLookup<T> command = new ProviderLookup<T>(getSource(), key);
-      elements.add(command);
+      final ProviderLookup<T> element = new ProviderLookup<T>(getSource(), key);
+      elements.add(element);
       return new Provider<T>() {
         public T get() {
-          Provider<T> delegate = command.getDelegate();
+          Provider<T> delegate = element.getDelegate();
           checkState(delegate != null,
-              "This provider cannot be used until the Injector has been created.");
+              "This Provider cannot be used until the Injector has been created.");
           return delegate.get();
         }
 

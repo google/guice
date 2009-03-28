@@ -578,6 +578,9 @@ public final class Errors implements Serializable {
     } else if (source instanceof Member) {
       formatter.format("  at %s%n", StackTraceElements.forMember((Member) source));
 
+    } else if (source instanceof TypeLiteral) {
+      formatter.format("  while locating %s%n", source);
+
     } else if (source instanceof Key) {
       Key<?> key = (Key<?>) source;
       formatter.format("  while locating %s%n", convert(key));

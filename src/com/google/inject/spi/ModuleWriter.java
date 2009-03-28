@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
@@ -103,8 +104,9 @@ public class ModuleWriter {
         return null;
       }
 
-      public <T> Void visit(MembersInjectorLookup<T> lookup) {
-        throw new UnsupportedOperationException("TODO");
+      public <T> Void visit(MembersInjectorLookup<T> element) {
+        writeGetMembersInjector(binder, element);
+        return null;
       }
 
       public Void visit(InjectableTypeListenerBinding binding) {
@@ -263,5 +265,11 @@ public class ModuleWriter {
   protected <T> void writeGetProvider(Binder binder, ProviderLookup<T> element) {
     Provider<T> provider = binder.withSource(element.getSource()).getProvider(element.getKey());
     element.initializeDelegate(provider);
+  }
+
+  protected <T> void writeGetMembersInjector(Binder binder, MembersInjectorLookup<T> element) {
+    MembersInjector<T> membersInjector
+        = binder.withSource(element.getSource()).getMembersInjector(element.getTypeLiteral());
+    element.initializeDelegate(membersInjector);
   }
 }

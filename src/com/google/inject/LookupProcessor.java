@@ -18,25 +18,38 @@ package com.google.inject;
 
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.ProviderLookup;
 
 /**
- * Handles {@link Binder#getProvider} commands.
+ * Handles {@link Binder#getProvider} and {@link Binder#getMembersInjector(TypeLiteral)} commands.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class ProviderLookupProcessor extends AbstractProcessor {
+class LookupProcessor extends AbstractProcessor {
 
-  ProviderLookupProcessor(Errors errors) {
+  LookupProcessor(Errors errors) {
     super(errors);
   }
 
-  @Override public <T> Boolean visit(ProviderLookup<T> command) {
+  @Override public <T> Boolean visit(MembersInjectorLookup<T> lookup) {
+    try {
+      MembersInjector<T> membersInjector
+          = injector.getMembersInjectorOrThrow(lookup.getTypeLiteral(), errors);
+      lookup.initializeDelegate(membersInjector);
+    } catch (ErrorsException e) {
+      errors.merge(e.getErrors()); // TODO: source
+    }
+
+    return true;
+  }
+
+  @Override public <T> Boolean visit(ProviderLookup<T> lookup) {
     // ensure the provider can be created
     try {
-      Provider<T> provider = injector.getProviderOrThrow(command.getKey(), errors);
-      command.initializeDelegate(provider);
+      Provider<T> provider = injector.getProviderOrThrow(lookup.getKey(), errors);
+      lookup.initializeDelegate(provider);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors()); // TODO: source
     }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,11 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.ConfigurationException;
-import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.MembersInjector;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -44,32 +43,47 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public interface InjectableType<I> {
+public final class InjectableType<T> {
+  private final InjectionPoint injectableConstructor;
+  private final TypeLiteral<T> type;
+  private final Set<InjectionPoint> injectableMembers;
+  private final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
+
+  public InjectableType(InjectionPoint injectableConstructor, TypeLiteral<T> type,
+      Set<InjectionPoint> injectableMembers,
+      Map<Method, List<MethodInterceptor>> methodInterceptors) {
+    this.injectableConstructor = injectableConstructor;
+    this.type = type;
+    this.injectableMembers = injectableMembers;
+    this.methodInterceptors = ImmutableMap.copyOf(methodInterceptors);
+  }
 
   /**
-   * Gets the type literal.
+   * Returns the type literal.
    */
-  TypeLiteral<I> getType();
+  public TypeLiteral<T> getType() {
+    return type;
+  }
 
   /**
    * Returns the injection point representing the contructor or {@code null} if no injectable
    * constructor is present
    */
-  InjectionPoint getInjectableConstructor();
+  public InjectionPoint getInjectableConstructor() {
+    return injectableConstructor;
+  }
 
   /**
    * Returns the instance methods and fields of {@code T} that can be injected.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order.
-   *  All fields are returned and then all methods. Within the fields, supertype fields are
-   *  returned before subtype fields. Similarly, supertype methods are returned before subtype
-   *  methods.
-   * @throws com.google.inject.ConfigurationException if there is a malformed injection point on
-   *  the class of {@code instance}, such as a field with multiple binding annotations. The
-   *  exception's {@link com.google.inject.ConfigurationException#getPartialValue() partial value}
-   *  is a {@code Set<InjectionPoint>} of the valid injection points.
+   *     All fields are returned and then all methods. Within the fields, supertype fields are
+   *     returned before subtype fields. Similarly, supertype methods are returned before subtype
+   *     methods.
    */
-  Set<InjectionPoint> getInjectableMembers() throws ConfigurationException;
+  public Set<InjectionPoint> getInjectableMembers() {
+    return injectableMembers;
+  }
 
   /*if[AOP]*/
   /**
@@ -78,8 +92,14 @@ public interface InjectableType<I> {
    *
    * @return a possibly empty map
    */
-  Map<Method, List<MethodInterceptor>> getMethodInterceptors();
+  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+    return methodInterceptors;
+  }
   /*end[AOP]*/
+
+  @Override public String toString() {
+    return type.toString();
+  }
 
   /**
    * Listens for Guice to encounter injectable types. If a given type has its constructor injected
@@ -95,8 +115,8 @@ public interface InjectableType<I> {
 
     /**
      * Invoked when Guice encounters a new type eligible for constructor or members injection.
-     * Called during {@link Injector} creation (or afterwords if Guice encounters a type at run
-     * time and creates a JIT binding).
+     * Called during injector creation (or afterwords if Guice encounters a type at run time and
+     * creates a JIT binding).
      *
      * @param injectableType encountered by Guice
      * @param encounter context of this encounter, enables reporting errors, registering injection
@@ -139,23 +159,23 @@ public interface InjectableType<I> {
 
     /**
      * Returns the provider used to obtain instances for the given injection key. The returned
-     * provider will not be valid until the {@link Injector} has been created. The provider will
-     * throw an {@code IllegalStateException} if you try to use it beforehand.
+     * provider will not be valid until the injector has been created. The provider will throw an
+     * {@code IllegalStateException} if you try to use it beforehand.
      */
     <T> Provider<T> getProvider(Key<T> key);
 
     /**
      * Returns the provider used to obtain instances for the given injection type. The returned
-     * provider will not be valid until the {@link Injector} has been created. The provider will
-     * throw an {@code IllegalStateException} if you try to use it beforehand.
+     * provider will not be valid until the injetor has been created. The provider will throw an
+     * {@code IllegalStateException} if you try to use it beforehand.
      */
     <T> Provider<T> getProvider(Class<T> type);
 
     /**
      * Returns the members injector used to inject dependencies into methods and fields on instances
      * of the given type {@code T}. The returned members injector will not be valid until the main
-     * {@link Injector} has been created. The members injector will throw an {@code
-     * IllegalStateException} if you try to use it beforehand.
+     * injector has been created. The members injector will throw an {@code IllegalStateException}
+     * if you try to use it beforehand.
      *
      * @param typeLiteral type to get members injector for
      */
@@ -164,8 +184,8 @@ public interface InjectableType<I> {
     /**
      * Returns the members injector used to inject dependencies into methods and fields on instances
      * of the given type {@code T}. The returned members injector will not be valid until the main
-     * {@link Injector} has been created. The members injector will throw an {@code
-     * IllegalStateException} if you try to use it beforehand.
+     * injector has been created. The members injector will throw an {@code IllegalStateException}
+     * if you try to use it beforehand.
      *
      * @param type type to get members injector for
      */
@@ -175,7 +195,7 @@ public interface InjectableType<I> {
      * Registers an injection listener for type {@code I}. Guice will notify the listener after
      * injecting an instance of {@code I}. The order in which Guice will invoke listeners is
      * unspecified.
-     * 
+     *
      * @param listener for injections into instances of type {@code I}
      */
     void register(InjectionListener<? super I> listener);

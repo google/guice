@@ -32,8 +32,6 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
@@ -86,7 +84,7 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
 
     ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, injector.methodAspects);
     EncounterImpl<T> encounter = new EncounterImpl<T>();
-    InjectableType<T> injectableType = new InjectableTypeImpl<T>(
+    InjectableType<T> injectableType = new InjectableType<T>(
         injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
 
     for (InjectableTypeListenerBinding typeListener : injectableTypeListenerBindings) {
@@ -103,7 +101,7 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
     if (encounter.hasAddedAspects()) {
       proxyFactory = new ProxyFactory<T>(
           injectionPoint, concat(injector.methodAspects, encounter.aspects));
-      injectableType = new InjectableTypeImpl<T>(
+      injectableType = new InjectableType<T>(
           injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
     }
 
@@ -174,41 +172,4 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
     }
   }
 
-  static class InjectableTypeImpl<T> implements InjectableType<T> {
-    private final InjectionPoint injectionPoint;
-    private final TypeLiteral<T> type;
-    private final Set<InjectionPoint> injectableMembers;
-    private final Map<Method, List<MethodInterceptor>> methodInterceptors;
-
-    InjectableTypeImpl(InjectionPoint injectionPoint, TypeLiteral<T> type,
-        Set<InjectionPoint> injectableMembers,
-        Map<Method, List<MethodInterceptor>> methodInterceptors) {
-      this.injectionPoint = injectionPoint;
-      this.type = type;
-      this.injectableMembers = injectableMembers;
-      this.methodInterceptors = methodInterceptors;
-    }
-
-    public TypeLiteral<T> getType() {
-      return type;
-    }
-
-    public InjectionPoint getInjectableConstructor() {
-      return injectionPoint;
-    }
-
-    public Set<InjectionPoint> getInjectableMembers() throws ConfigurationException {
-      return injectableMembers;
-    }
-
-    /*if[AOP]*/
-    public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
-      return methodInterceptors;
-    }
-    /*end[AOP]*/
-
-    @Override public String toString() {
-      return type.toString();
-    }
-  }
 }

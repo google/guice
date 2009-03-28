@@ -16,8 +16,9 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.MembersInjector;
 import com.google.inject.Binder;
+import com.google.inject.MembersInjector;
+import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
 
@@ -34,12 +35,12 @@ import static com.google.inject.internal.Preconditions.checkState;
 public final class MembersInjectorLookup<T> implements Element {
 
   private final Object source;
-  private final InjectableType<T> injectableType;
+  private final TypeLiteral<T> typeLiteral;
   private MembersInjector<T> delegate;
 
-  MembersInjectorLookup(Object source, InjectableType<T> injectableType) {
+  MembersInjectorLookup(Object source, TypeLiteral<T> typeLiteral) {
     this.source = checkNotNull(source, "source");
-    this.injectableType = checkNotNull(injectableType, "injectableType");
+    this.typeLiteral = checkNotNull(typeLiteral, "typeLiteral");
   }
 
   public Object getSource() {
@@ -47,10 +48,10 @@ public final class MembersInjectorLookup<T> implements Element {
   }
 
   /**
-   * Gets the injectable type containing the members to be injected.
+   * Gets the type containing the members to be injected.
    */
-  public InjectableType<T> getInjectableType() {
-    return injectableType;
+  public TypeLiteral<T> getTypeLiteral() {
+    return typeLiteral;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -60,18 +61,15 @@ public final class MembersInjectorLookup<T> implements Element {
   /**
    * Sets the actual members injector.
    *
-   * @param delegate members injector
    * @throws IllegalStateException if the delegate is already set
-   * @throws NullPointerException if the delegate is null
    */
   public void initializeDelegate(MembersInjector<T> delegate) {
     checkState(this.delegate == null, "delegate already initialized");
-    checkNotNull(delegate, "delegate");
-    this.delegate = delegate;
+    this.delegate = checkNotNull(delegate, "delegate");
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).getMembersInjector(injectableType.getType());
+    binder.withSource(getSource()).getMembersInjector(typeLiteral);
   }
 
   /**

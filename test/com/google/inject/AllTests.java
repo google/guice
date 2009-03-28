@@ -62,6 +62,7 @@ public class AllTests {
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);
     // MethodInterceptionTest is AOP-only
+    suite.addTestSuite(MembersInjectorTest.class);
     suite.addTestSuite(ModulesTest.class);
     suite.addTestSuite(ModuleTest.class);
     suite.addTestSuite(NullableInjectionPointTest.class);
