@@ -176,12 +176,41 @@ class InjectorImpl implements Injector {
     }
   }
 
-  /* Returns true if the key type is Provider<?> (but not a subclass of Provider<?>). */
+  /** Returns true if the key type is Provider (but not a subclass of Provider). */
   static boolean isProvider(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(Provider.class);
   }
 
-  /** Creates a synthetic binding to Provider<T>, i.e. a binding to the provider from Binding<T>. */
+  /** Returns true if the key type is MembersInjector (but not a subclass of MembersInjector). */
+  static boolean isMembersInjector(Key<?> key) {
+    return key.getTypeLiteral().getRawType().equals(MembersInjector.class)
+        && !key.hasAnnotationType();
+  }
+
+  private <T> BindingImpl<MembersInjector<T>> createMembersInjectorBinding(
+      Key<MembersInjector<T>> key, Errors errors) throws ErrorsException {
+    Type membersInjectorType = key.getTypeLiteral().getType();
+    if (!(membersInjectorType instanceof ParameterizedType)) {
+      throw errors.cannotInjectRawMembersInjector().toException();
+    }
+
+    @SuppressWarnings("unchecked") // safe because T came from Key<MembersInjector<T>>
+    TypeLiteral<T> instanceType = (TypeLiteral<T>) TypeLiteral.get(
+        ((ParameterizedType) membersInjectorType).getActualTypeArguments()[0]);
+    MembersInjector<T> membersInjector = getMembersInjectorOrThrow(instanceType, errors);
+
+    InternalFactory<MembersInjector<T>> factory = new ConstantFactory<MembersInjector<T>>(
+        Initializables.of(membersInjector));
+
+
+    return new InstanceBindingImpl<MembersInjector<T>>(this, key, SourceProvider.UNKNOWN_SOURCE, 
+        factory, ImmutableSet.<InjectionPoint>of(), membersInjector);
+  }
+
+  /**
+   * Creates a synthetic binding to {@code Provider<T>}, i.e. a binding to the provider from
+   * {@code Binding<T>}.
+   */
   private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key, Errors errors)
       throws ErrorsException {
     Type providerType = key.getTypeLiteral().getType();
@@ -585,6 +614,15 @@ class InjectorImpl implements Injector {
       return binding;
     }
 
+    // Handle cases where T is a MembersInjector<?>
+    if (isMembersInjector(key)) {
+      // These casts are safe. T extends MembersInjector<X> and that given Key<MembersInjector<X>>,
+      // createMembersInjectorBinding() will return BindingImpl<MembersInjector<X>>.
+      @SuppressWarnings("unchecked")
+      BindingImpl binding = createMembersInjectorBinding((Key) key, errors);
+      return binding;
+    }
+
     // Try to convert a constant string binding to the requested type.
     BindingImpl<T> convertedBinding = convertConstantStringBinding(key, errors);
     if (convertedBinding != null) {
@@ -796,7 +834,7 @@ class InjectorImpl implements Injector {
     };
   }
 
-  <T> MembersInjector<T> getMembersInjectorOrThrow(TypeLiteral<T> type, final Errors errors)
+  <T> MembersInjector<T> getMembersInjectorOrThrow(final TypeLiteral<T> type, final Errors errors)
       throws ErrorsException {
     final ImmutableList<SingleMemberInjector> memberInjectors = injectors.get(type, errors);
 
@@ -809,6 +847,10 @@ class InjectorImpl implements Injector {
         }
 
         errors.throwProvisionExceptionIfErrorsExist();
+      }
+
+      @Override public String toString() {
+        return "MembersInjector<" + type + ">";
       }
     };
   }

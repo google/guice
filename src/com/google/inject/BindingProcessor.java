@@ -260,8 +260,9 @@ class BindingProcessor extends AbstractProcessor {
       Binding.class,
       Injector.class,
       Key.class,
+      MembersInjector.class,
       Module.class,
-      Provider.class, 
+      Provider.class,
       Scope.class,
       TypeLiteral.class);
   // TODO(jessewilson): fix BuiltInModule, then add Stage

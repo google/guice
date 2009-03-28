@@ -306,6 +306,10 @@ public final class Errors implements Serializable {
     return addMessage("Cannot inject a Provider that has no type parameter");
   }
 
+  public Errors cannotInjectRawMembersInjector() {
+    return addMessage("Cannot inject a MembersInjector that has no type parameter");
+  }
+
   public Errors cannotInjectTypeLiteralOf(Type unsupportedType) {
     return addMessage("Cannot inject a TypeLiteral of %s", unsupportedType);
   }
