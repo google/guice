@@ -271,9 +271,9 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorNotifyingInjectionListener(
-      InjectionListener listener, InjectableType<?> injectableType, RuntimeException cause) {
+      InjectionListener listener, TypeLiteral<?> typeLiteral, RuntimeException cause) {
     return errorInUserCode(cause, "Error notifying InjectionListener %s of %s.%n"
-        + " Reason: %s", listener, injectableType, cause);
+        + " Reason: %s", listener, typeLiteral, cause);
   }
 
   public void exposedButNotBound(Key<?> key) {

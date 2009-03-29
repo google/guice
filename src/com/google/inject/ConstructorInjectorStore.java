@@ -22,42 +22,41 @@ import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import static com.google.inject.internal.Iterables.concat;
-import com.google.inject.internal.Lists;
-import com.google.inject.matcher.Matcher;
-import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectableTypeListenerBinding;
-import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.Message;
-import java.lang.reflect.Method;
 import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Constructor injectors by type.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, ConstructorInjector<?>> {
-
+class ConstructorInjectorStore {
   private final InjectorImpl injector;
   private final ImmutableList<InjectableTypeListenerBinding> injectableTypeListenerBindings;
 
-  public ConstructorInjectorStore(InjectorImpl injector,
+  private final FailableCache<TypeLiteral<?>, ConstructorInjector<?>>  cache
+      = new FailableCache<TypeLiteral<?>, ConstructorInjector<?>> () {
+    @SuppressWarnings("unchecked")
+    protected ConstructorInjector<?> create(TypeLiteral<?> type, Errors errors)
+        throws ErrorsException {
+      return createConstructor(type, errors);
+    }
+  };
+
+  ConstructorInjectorStore(InjectorImpl injector,
       List<InjectableTypeListenerBinding> injectableTypeListenerBindings) {
     this.injector = injector;
     this.injectableTypeListenerBindings = ImmutableList.copyOf(injectableTypeListenerBindings);
   }
 
-  @SuppressWarnings("unchecked")
-  protected ConstructorInjector<?> create(TypeLiteral<?> type, Errors errors)
-      throws ErrorsException {
-    try {
-      return createConstructor(type, errors);
-    } catch (ConfigurationException e) {
-      throw errors.merge(e.getErrorMessages()).toException();
-    }
+  /**
+   * Returns a new complete constructor injector with injection listeners registered.
+   */
+  @SuppressWarnings("unchecked") // the ConstructorInjector type always agrees with the passed type
+  public <T> ConstructorInjector<T> get(TypeLiteral<T> key, Errors errors) throws ErrorsException {
+    return (ConstructorInjector<T>) cache.get(key, errors);
   }
 
   private <T> ConstructorInjector<T> createConstructor(TypeLiteral<T> type, Errors errors)
@@ -74,13 +73,10 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
 
     ImmutableList<SingleParameterInjector<?>> constructorParameterInjectors
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
-    ImmutableList<SingleMemberInjector> memberInjectors = injector.injectors.get(type, errors);
+    MembersInjectorImpl<T> membersInjector
+        = injector.membersInjectorStore.createWithoutListeners(type, errors);
 
-    ImmutableSet.Builder<InjectionPoint> injectableMembersBuilder = ImmutableSet.builder();
-    for (SingleMemberInjector memberInjector : memberInjectors) {
-      injectableMembersBuilder.add(memberInjector.getInjectionPoint());
-    }
-    ImmutableSet<InjectionPoint> injectableMembers = injectableMembersBuilder.build();
+    ImmutableSet<InjectionPoint> injectableMembers = membersInjector.getInjectionPoints();
 
     ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, injector.methodAspects);
     EncounterImpl<T> encounter = new EncounterImpl<T>();
@@ -100,7 +96,7 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
     // rebuild the proxy factory and injectable type if new interceptors were added
     if (encounter.hasAddedAspects()) {
       proxyFactory = new ProxyFactory<T>(
-          injectionPoint, concat(injector.methodAspects, encounter.aspects));
+          injectionPoint, concat(injector.methodAspects, encounter.getAspects()));
       injectableType = new InjectableType<T>(
           injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
     }
@@ -108,68 +104,6 @@ class ConstructorInjectorStore extends FailableCache<TypeLiteral<?>, Constructor
     errors.throwIfNewErrors(numErrorsBefore);
 
     return new ConstructorInjector<T>(proxyFactory.create(), constructorParameterInjectors,
-        memberInjectors, encounter.getInjectionListeners(), injectableType);
+        membersInjector, encounter.getInjectionListeners(), injectableType);
   }
-
-  private static class EncounterImpl<T> implements InjectableType.Encounter<T> {
-    private List<InjectionListener<? super T>> injectionListeners; // lazy
-    private List<MethodAspect> aspects; // lazy
-
-    boolean hasAddedAspects() {
-      return aspects != null;
-    }
-
-    ImmutableList<InjectionListener<? super T>> getInjectionListeners() {
-      return injectionListeners == null
-          ? ImmutableList.<InjectionListener<? super T>>of()
-          : ImmutableList.copyOf(injectionListeners);
-    }
-
-    public void register(InjectionListener<? super T> injectionListener) {
-      if (injectionListeners == null) {
-        injectionListeners = Lists.newArrayList();
-      }
-
-      injectionListeners.add(injectionListener);
-    }
-
-    public void bindInterceptor(Matcher<? super Method> methodMatcher,
-        MethodInterceptor... interceptors) {
-      // make sure the applicable aspects is mutable
-      if (aspects == null) {
-        aspects = Lists.newArrayList();
-      }
-
-      aspects.add(new MethodAspect(Matchers.any(), methodMatcher, interceptors));
-    }
-
-    public void addError(String message, Object... arguments) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public void addError(Throwable t) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public void addError(Message message) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public <T> Provider<T> getProvider(Key<T> key) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public <T> Provider<T> getProvider(Class<T> type) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-      throw new UnsupportedOperationException("TODO");
-    }
-
-    public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-      throw new UnsupportedOperationException("TODO");
-    }
-  }
-
 }

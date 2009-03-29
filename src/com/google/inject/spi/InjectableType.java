@@ -21,7 +21,11 @@ import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableMap;
+import com.google.inject.internal.ImmutableSet;
+import static com.google.inject.internal.Preconditions.checkArgument;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -46,16 +50,30 @@ import org.aopalliance.intercept.MethodInterceptor;
 public final class InjectableType<T> {
   private final InjectionPoint injectableConstructor;
   private final TypeLiteral<T> type;
-  private final Set<InjectionPoint> injectableMembers;
+  private final ImmutableSet<InjectionPoint> injectableMembers;
   private final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
 
   public InjectableType(InjectionPoint injectableConstructor, TypeLiteral<T> type,
       Set<InjectionPoint> injectableMembers,
       Map<Method, List<MethodInterceptor>> methodInterceptors) {
+    checkArgument(injectableConstructor == null
+        || injectableConstructor.getMember() instanceof Constructor);
+
     this.injectableConstructor = injectableConstructor;
-    this.type = type;
-    this.injectableMembers = injectableMembers;
+    this.type = checkNotNull(type, "type");
+    this.injectableMembers = ImmutableSet.copyOf(injectableMembers);
     this.methodInterceptors = ImmutableMap.copyOf(methodInterceptors);
+  }
+
+  public InjectableType(InjectionPoint injectableConstructor, TypeLiteral<T> type,
+      Set<InjectionPoint> injectableMembers) {
+    checkArgument(injectableConstructor == null
+        || injectableConstructor.getMember() instanceof Constructor);
+
+    this.injectableConstructor = injectableConstructor;
+    this.type = checkNotNull(type, "type");
+    this.injectableMembers = ImmutableSet.copyOf(injectableMembers);
+    this.methodInterceptors = ImmutableMap.of();
   }
 
   /**

@@ -33,6 +33,7 @@ import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.PrivateElements;
 import java.util.List;
@@ -148,8 +149,10 @@ class InjectorShell {
 
       new InjectableTypeListenerBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("InjectableType listeners creation");
-      injector.constructors = new ConstructorInjectorStore(
-          injector, injector.state.getInjectableTypeListenerBindings());
+      List<InjectableTypeListenerBinding> listenerBindings
+          = injector.state.getInjectableTypeListenerBindings();
+      injector.constructors = new ConstructorInjectorStore(injector, listenerBindings);
+      injector.membersInjectorStore = new MembersInjectorStore(injector, listenerBindings);
 
       new ScopeBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Scopes creation");

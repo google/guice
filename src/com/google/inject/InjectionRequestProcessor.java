@@ -97,7 +97,8 @@ class InjectionRequestProcessor extends AbstractProcessor {
         errors.merge(e.getErrorMessages());
         injectionPoints = e.getPartialValue();
       }
-      memberInjectors = injector.getInjectors(injectionPoints, errorsForMember);
+      memberInjectors = injector.membersInjectorStore.getInjectors(
+          injectionPoints, errorsForMember);
     }
 
     void injectMembers() {

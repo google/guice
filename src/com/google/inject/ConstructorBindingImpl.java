@@ -51,10 +51,8 @@ class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBin
         injector, key, source, scopedFactory, scoping, factoryFactory);
   }
 
-  @SuppressWarnings("unchecked")
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-    factory.constructorInjector = (ConstructorInjector<T>) injector.constructors.get(
-        getKey().getTypeLiteral(), errors);
+    factory.constructorInjector = injector.constructors.get(getKey().getTypeLiteral(), errors);
     injectableType = factory.constructorInjector.getInjectableType();
   }
 

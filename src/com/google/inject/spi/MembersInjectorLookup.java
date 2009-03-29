@@ -35,12 +35,12 @@ import static com.google.inject.internal.Preconditions.checkState;
 public final class MembersInjectorLookup<T> implements Element {
 
   private final Object source;
-  private final TypeLiteral<T> typeLiteral;
+  private final TypeLiteral<T> type;
   private MembersInjector<T> delegate;
 
-  MembersInjectorLookup(Object source, TypeLiteral<T> typeLiteral) {
+  MembersInjectorLookup(Object source, TypeLiteral<T> type) {
     this.source = checkNotNull(source, "source");
-    this.typeLiteral = checkNotNull(typeLiteral, "typeLiteral");
+    this.type = checkNotNull(type, "type");
   }
 
   public Object getSource() {
@@ -50,8 +50,8 @@ public final class MembersInjectorLookup<T> implements Element {
   /**
    * Gets the type containing the members to be injected.
    */
-  public TypeLiteral<T> getTypeLiteral() {
-    return typeLiteral;
+  public TypeLiteral<T> getType() {
+    return type;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -69,7 +69,7 @@ public final class MembersInjectorLookup<T> implements Element {
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).getMembersInjector(typeLiteral);
+    binder.withSource(getSource()).getMembersInjector(type);
   }
 
   /**

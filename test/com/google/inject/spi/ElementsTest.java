@@ -680,7 +680,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visit(MembersInjectorLookup<T> command) {
-            assertEquals(new TypeLiteral<A<String>>() {}, command.getTypeLiteral());
+            assertEquals(new TypeLiteral<A<String>>() {}, command.getType());
             assertNull(command.getDelegate());
             return null;
           }
@@ -688,7 +688,7 @@ public class ElementsTest extends TestCase {
 
         new FailingElementVisitor() {
           @Override public <T> Void visit(MembersInjectorLookup<T> command) {
-            assertEquals(TypeLiteral.get(String.class), command.getTypeLiteral());
+            assertEquals(TypeLiteral.get(String.class), command.getType());
             assertNull(command.getDelegate());
             return null;
           }

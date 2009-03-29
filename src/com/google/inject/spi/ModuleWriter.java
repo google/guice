@@ -269,7 +269,7 @@ public class ModuleWriter {
 
   protected <T> void writeGetMembersInjector(Binder binder, MembersInjectorLookup<T> element) {
     MembersInjector<T> membersInjector
-        = binder.withSource(element.getSource()).getMembersInjector(element.getTypeLiteral());
+        = binder.withSource(element.getSource()).getMembersInjector(element.getType());
     element.initializeDelegate(membersInjector);
   }
 }

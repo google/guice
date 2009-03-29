@@ -256,7 +256,7 @@ public class InjectableTypeListenerTest extends TestCase {
     assertSame(Stage.DEVELOPMENT, injector.getInstance(Stage.class));
   }
 
-  public void testInjectMembersInjectableTypeListener() {
+  public void testInjectMembersInjectableTypeListenerFails() {
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
@@ -266,8 +266,82 @@ public class InjectableTypeListenerTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "foo");
+      assertContains(expected.getMessage(),
+          "1) Error notifying InjectableType.Listener clumsy (bound at ",
+          InjectableTypeListenerTest.class.getName(), ".configure(InjectableTypeListenerTest.java:",
+          "of " + A.class.getName(),
+          " Reason: java.lang.ClassCastException: whoops, failure #1");
     }
+  }
+
+  public void testConstructedTypeListenerIsDistinctFromMembersInjectorListener() {
+    final AtomicInteger constructionCounts = new AtomicInteger();
+    final AtomicInteger memberInjectionCounts = new AtomicInteger();
+
+    final InjectionListener<A> constructorListener = new InjectionListener<A>() {
+      public void afterInjection(A injectee) {
+        constructionCounts.incrementAndGet();
+        assertNotNull(injectee.injector);
+      }
+    };
+
+    final InjectionListener<A> memberInjectionListener = new InjectionListener<A>() {
+      public void afterInjection(A injectee) {
+        memberInjectionCounts.incrementAndGet();
+        assertNotNull(injectee.injector);
+      }
+    };
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(any(), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            if (injectableType.getInjectableConstructor() != null) {
+              constructionCounts.incrementAndGet();
+              encounter.register((InjectionListener) constructorListener);
+            } else {
+              memberInjectionCounts.incrementAndGet();
+              encounter.register((InjectionListener) memberInjectionListener);
+            }
+          }
+        });
+
+        bind(A.class);
+        getMembersInjector(A.class);
+      }
+    });
+
+    // creating the injector should be sufficient to trigger each injection listener
+    assertEquals(1, constructionCounts.getAndSet(0));
+    assertEquals(1, memberInjectionCounts.getAndSet(0));
+
+    // constructing an A should trigger only the constructionCounts
+    injector.getInstance(A.class);
+    assertEquals(1, constructionCounts.getAndSet(0));
+    assertEquals(0, memberInjectionCounts.getAndSet(0));
+
+    // injecting an A should only trigger the member injection counts
+    injector.injectMembers(new A());
+    assertEquals(0, constructionCounts.getAndSet(0));
+    assertEquals(1, memberInjectionCounts.getAndSet(0));
+
+    // getting a provider shouldn't make a difference
+    Provider<A> aProvider = injector.getProvider(A.class);
+    MembersInjector<A> aMembersInjector = injector.getMembersInjector(A.class);
+    assertEquals(0, constructionCounts.getAndSet(0));
+    assertEquals(0, memberInjectionCounts.getAndSet(0));
+
+    // exercise the provider
+    aProvider.get();
+    aProvider.get();
+    assertEquals(2, constructionCounts.getAndSet(0));
+    assertEquals(0, memberInjectionCounts.getAndSet(0));
+
+    // exercise the members injector
+    aMembersInjector.injectMembers(new A());
+    aMembersInjector.injectMembers(new A());
+    assertEquals(0, constructionCounts.getAndSet(0));
+    assertEquals(2, memberInjectionCounts.getAndSet(0));
   }
 
   static class A {

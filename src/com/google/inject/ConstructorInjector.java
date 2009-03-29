@@ -35,20 +35,20 @@ class ConstructorInjector<T> {
 
   private final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
   private final ConstructionProxy<T> constructionProxy;
-  private final ImmutableList<SingleMemberInjector> memberInjectors;
+  private final MembersInjectorImpl<T> membersInjector;
   private final ImmutableList<InjectionListener<? super T>> injectionListeners;
 
   private final InjectableType<T> injectableType;
 
   ConstructorInjector(ConstructionProxy<T> constructionProxy,
       ImmutableList<SingleParameterInjector<?>> parameterInjectors,
-      ImmutableList<SingleMemberInjector> memberInjectors,
+      MembersInjectorImpl<T> membersInjector,
       ImmutableList<InjectionListener<? super T>> injectionListeners,
       InjectableType<T> injectableType)
       throws ErrorsException {
     this.constructionProxy = constructionProxy;
     this.parameterInjectors = parameterInjectors;
-    this.memberInjectors = memberInjectors;
+    this.membersInjector = membersInjector;
     this.injectionListeners = injectionListeners;
     this.injectableType = injectableType;
   }
@@ -90,16 +90,14 @@ class ConstructorInjector<T> {
       constructionContext.setCurrentReference(t);
 
       // Inject fields and methods.
-      for (SingleMemberInjector injector : memberInjectors) {
-        injector.inject(errors, context, t);
-      }
+      membersInjector.injectMembers(t, errors, context);
 
       for (InjectionListener<? super T> injectionListener : injectionListeners) {
         try {
           injectionListener.afterInjection(t);
         } catch (RuntimeException e) {
-          throw errors.withSource(constructionProxy.getInjectionPoint())
-              .errorNotifyingInjectionListener(injectionListener, injectableType, e).toException();
+          throw errors.errorNotifyingInjectionListener(
+              injectionListener, injectableType.getType(), e).toException();
         }
       }
 

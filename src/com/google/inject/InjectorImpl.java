@@ -22,7 +22,6 @@ import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Classes;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InstanceBindingImpl;
@@ -45,11 +44,8 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -197,7 +193,7 @@ class InjectorImpl implements Injector {
     @SuppressWarnings("unchecked") // safe because T came from Key<MembersInjector<T>>
     TypeLiteral<T> instanceType = (TypeLiteral<T>) TypeLiteral.get(
         ((ParameterizedType) membersInjectorType).getActualTypeArguments()[0]);
-    MembersInjector<T> membersInjector = getMembersInjectorOrThrow(instanceType, errors);
+    MembersInjector<T> membersInjector = membersInjectorStore.get(instanceType, errors);
 
     InternalFactory<MembersInjector<T>> factory = new ConstantFactory<MembersInjector<T>>(
         Initializables.of(membersInjector));
@@ -654,53 +650,9 @@ class InjectorImpl implements Injector {
     return getBindingOrThrow(key, errors).getInternalFactory();
   }
 
-  /** Cached field and method injectors for a type. */
-  final FailableCache<TypeLiteral<?>, ImmutableList<SingleMemberInjector>> injectors
-      = new FailableCache<TypeLiteral<?>, ImmutableList<SingleMemberInjector>>() {
-    protected ImmutableList<SingleMemberInjector> create(TypeLiteral<?> type, Errors errors)
-        throws ErrorsException {
-      int numErrorsBefore = errors.size();
-      Set<InjectionPoint> injectionPoints;
-      try {
-        injectionPoints = InjectionPoint.forInstanceMethodsAndFields(type);
-      } catch (ConfigurationException e) {
-        errors.merge(e.getErrorMessages());
-        injectionPoints = e.getPartialValue();
-      }
-      ImmutableList<SingleMemberInjector> injectors = getInjectors(injectionPoints, errors);
-      errors.throwIfNewErrors(numErrorsBefore);
-      return injectors;
-    }
-  };
-
-  /** Returns the injectors for the specified injection points. */
-  ImmutableList<SingleMemberInjector> getInjectors(
-      Set<InjectionPoint> injectionPoints, Errors errors) {
-    List<SingleMemberInjector> injectors = Lists.newArrayList();
-    for (InjectionPoint injectionPoint : injectionPoints) {
-      try {
-        Errors errorsForMember = injectionPoint.isOptional()
-            ? new Errors(injectionPoint)
-            : errors.withSource(injectionPoint);
-        SingleMemberInjector injector = injectionPoint.getMember() instanceof Field
-            ? new SingleFieldInjector(this, injectionPoint, errorsForMember)
-            : new SingleMethodInjector(this, injectionPoint, errorsForMember);
-        injectors.add(injector);
-      } catch (ErrorsException ignoredForNow) {
-        // ignored for now
-      }
-    }
-    return ImmutableList.copyOf(injectors);
-  }
-
   // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
     return state.getExplicitBindingsThisLevel();
-  }
-
-  interface SingleInjectorFactory<M extends Member & AnnotatedElement> {
-    SingleMemberInjector create(InjectorImpl injector, M member, Errors errors)
-        throws ErrorsException;
   }
 
   private static class BindingsMultimap {
@@ -762,7 +714,10 @@ class InjectorImpl implements Injector {
   }
 
   /** Cached constructor injectors for each type */
-  FailableCache<TypeLiteral<?>, ConstructorInjector<?>> constructors;
+  ConstructorInjectorStore constructors;
+
+  /** Cached field and method injectors for each type. */
+  MembersInjectorStore membersInjectorStore;
 
   @SuppressWarnings("unchecked") // the members injector type is consistent with instance's type
   public void injectMembers(Object instance) {
@@ -773,7 +728,7 @@ class InjectorImpl implements Injector {
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
     Errors errors = new Errors(typeLiteral);
     try {
-      return getMembersInjectorOrThrow(typeLiteral, errors);
+      return membersInjectorStore.get(typeLiteral, errors);
     } catch (ErrorsException e) {
       throw new ConfigurationException(errors.merge(e.getErrors()).getMessages());
     }
@@ -781,22 +736,6 @@ class InjectorImpl implements Injector {
 
   public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
     return getMembersInjector(TypeLiteral.get(type));
-  }
-
-  public void injectMembersOrThrow(final Errors errors, final Object instance,
-      final List<SingleMemberInjector> injectors) throws ErrorsException {
-    if (instance == null) {
-      return;
-    }
-
-    callInContext(new ContextualCallable<Void>() {
-      public Void call(InternalContext context) throws ErrorsException {
-        for (SingleMemberInjector injector : injectors) {
-          injector.inject(errors, context, instance);
-        }
-        return null;
-      }
-    });
   }
 
   public <T> Provider<T> getProvider(Class<T> type) {
@@ -830,27 +769,6 @@ class InjectorImpl implements Injector {
 
       @Override public String toString() {
         return factory.toString();
-      }
-    };
-  }
-
-  <T> MembersInjector<T> getMembersInjectorOrThrow(final TypeLiteral<T> type, final Errors errors)
-      throws ErrorsException {
-    final ImmutableList<SingleMemberInjector> memberInjectors = injectors.get(type, errors);
-
-    return new MembersInjector<T>() {
-      public void injectMembers(T instance) {
-        try {
-          injectMembersOrThrow(errors, instance, memberInjectors);
-        } catch (ErrorsException e) {
-          errors.merge(e.getErrors());
-        }
-
-        errors.throwProvisionExceptionIfErrorsExist();
-      }
-
-      @Override public String toString() {
-        return "MembersInjector<" + type + ">";
       }
     };
   }
@@ -899,4 +817,5 @@ class InjectorImpl implements Injector {
         .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
   }
+
 }
