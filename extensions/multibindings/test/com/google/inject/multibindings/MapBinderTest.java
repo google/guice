@@ -29,6 +29,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Maps;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
@@ -38,6 +39,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
@@ -312,6 +314,42 @@ public class MapBinderTest extends TestCase {
     Key<?> setKey = new Key<Set<Map.Entry<Integer, Provider<String>>>>() {};
     assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(setKey)),
         withDependencies.getDependencies());
+  }
+
+
+  /**
+   * Our implementation maintains order, but doesn't guarantee it in the API spec.
+   * TODO: specify the iteration order?
+   */
+  public void testBindOrderEqualsIterationOrder() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          protected void configure() {
+            MapBinder<String, String> mapBinder
+                = MapBinder.newMapBinder(binder(), String.class, String.class);
+            mapBinder.addBinding("leonardo").toInstance("blue");
+            mapBinder.addBinding("donatello").toInstance("purple");
+            install(new AbstractModule() {
+              protected void configure() {
+                MapBinder.newMapBinder(binder(), String.class, String.class)
+                    .addBinding("michaelangelo").toInstance("orange");
+              }
+            });
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {
+            MapBinder.newMapBinder(binder(), String.class, String.class)
+                .addBinding("raphael").toInstance("red");
+          }
+        });
+
+    Map<String, String> map = injector.getInstance(new Key<Map<String, String>>() {});
+    Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+    assertEquals(Maps.immutableEntry("leonardo", "blue"), iterator.next());
+    assertEquals(Maps.immutableEntry("donatello", "purple"), iterator.next());
+    assertEquals(Maps.immutableEntry("michaelangelo", "orange"), iterator.next());
+    assertEquals(Maps.immutableEntry("raphael", "red"), iterator.next());
   }
 
   @Retention(RUNTIME) @BindingAnnotation

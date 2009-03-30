@@ -28,6 +28,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Sets;
 import com.google.inject.name.Names;
@@ -39,6 +40,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import junit.framework.TestCase;
 
@@ -281,6 +283,35 @@ public class MultibinderTest extends TestCase {
       elements.add((String) injector.getInstance(dependency.getKey()));
     }
     assertEquals(ImmutableSet.of("A", "B"), elements);
+  }
+
+  /**
+   * Our implementation maintains order, but doesn't guarantee it in the API spec.
+   * TODO: specify the iteration order?
+   */
+  public void testBindOrderEqualsIterationOrder() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("leonardo");
+            multibinder.addBinding().toInstance("donatello");
+            install(new AbstractModule() {
+              protected void configure() {
+                Multibinder.newSetBinder(binder(), String.class)
+                    .addBinding().toInstance("michaelangelo");
+              }
+            });
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("raphael");
+          }
+        });
+
+    List<String> inOrder = ImmutableList.copyOf(injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableList.of("leonardo", "donatello", "michaelangelo", "raphael"), inOrder);
   }
 
   @Retention(RUNTIME) @BindingAnnotation
