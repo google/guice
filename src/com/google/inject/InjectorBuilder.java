@@ -138,6 +138,9 @@ class InjectorBuilder {
     stopwatch.resetAndLog("Instance member validation");
 
     new LookupProcessor(errors).process(shells);
+    for (InjectorShell shell : shells) {
+      ((DeferredLookups) shell.getInjector().lookups).initialize(errors);
+    }
     stopwatch.resetAndLog("Provider verification");
 
     for (InjectorShell shell : shells) {

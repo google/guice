@@ -79,7 +79,7 @@ class ConstructorInjectorStore {
     ImmutableSet<InjectionPoint> injectableMembers = membersInjector.getInjectionPoints();
 
     ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, injector.methodAspects);
-    EncounterImpl<T> encounter = new EncounterImpl<T>();
+    EncounterImpl<T> encounter = new EncounterImpl<T>(errors, injector.lookups);
     InjectableType<T> injectableType = new InjectableType<T>(
         injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
 

@@ -16,20 +16,21 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.Lists;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.only;
 import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectableType.Encounter;
 import com.google.inject.spi.InjectionListener;
-import static com.google.inject.Asserts.assertContains;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -134,7 +135,7 @@ public class InjectableTypeListenerTest extends TestCase {
   }
   
   public void testAddingInterceptors() throws NoSuchMethodException {
-    final Matcher<Object> buzz = Matchers.only(C.class.getMethod("buzz"));
+    final Matcher<Object> buzz = only(C.class.getMethod("buzz"));
 
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -343,6 +344,69 @@ public class InjectableTypeListenerTest extends TestCase {
     assertEquals(0, constructionCounts.getAndSet(0));
     assertEquals(2, memberInjectionCounts.getAndSet(0));
   }
+
+  public void testLookupsAtInjectorCreateTime() {
+    final AtomicReference<Provider<B>> bProviderReference = new AtomicReference<Provider<B>>();
+    final AtomicReference<MembersInjector<A>> aMembersInjectorReference
+        = new AtomicReference<MembersInjector<A>>();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(only(TypeLiteral.get(C.class)), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            Provider<B> bProvider = encounter.getProvider(B.class);
+            try {
+              bProvider.get();
+              fail();
+            } catch (IllegalStateException expected) {
+              assertEquals("This Provider cannot be used until the Injector has been created.",
+                  expected.getMessage());
+            }
+            bProviderReference.set(bProvider);
+
+            MembersInjector<A> aMembersInjector = encounter.getMembersInjector(A.class);
+            try {
+              aMembersInjector.injectMembers(new A());
+              fail();
+            } catch (IllegalStateException expected) {
+              assertEquals(
+                  "This MembersInjector cannot be used until the Injector has been created.",
+                  expected.getMessage());
+            }
+            aMembersInjectorReference.set(aMembersInjector);
+          }
+        });
+
+        bind(C.class);
+      }
+    });
+
+    assertNotNull(bProviderReference.get().get());
+
+    A a = new A();
+    aMembersInjectorReference.get().injectMembers(a);
+    assertNotNull(a.injector);
+  }
+
+  public void testLookupsPostCreate() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(only(TypeLiteral.get(C.class)), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            assertNotNull(encounter.getProvider(B.class).get());
+
+            A a = new A();
+            encounter.getMembersInjector(A.class).injectMembers(a);
+            assertNotNull(a.injector);
+          }
+        });
+      }
+    });
+    
+    injector.getInstance(C.class);
+  }
+
+  // TODO: recursively accessing a lookup should fail
 
   static class A {
     @Inject Injector injector;

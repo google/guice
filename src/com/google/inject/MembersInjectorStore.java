@@ -21,15 +21,12 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
-import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Members injectors by type.
@@ -92,13 +89,7 @@ class MembersInjectorStore {
     InjectableType<T> injectableType = new InjectableType<T>(null, type,
         membersInjector.getInjectionPoints());
 
-    EncounterImpl<T> encounter = new EncounterImpl<T>() {
-      @Override public void bindInterceptor(Matcher<? super Method> methodMatcher,
-          MethodInterceptor... interceptors) {
-        throw new UnsupportedOperationException("TODO");
-        // TODO: add an error here
-      }
-    };
+    EncounterImpl<T> encounter = new EncounterImpl<T>(errors, injector.lookups);
 
     for (InjectableTypeListenerBinding typeListener : injectableTypeListenerBindings) {
       if (typeListener.getTypeMatcher().matches(type)) {

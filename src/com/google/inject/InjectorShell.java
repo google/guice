@@ -148,11 +148,11 @@ class InjectorShell {
       end[NO_AOP]*/
 
       new InjectableTypeListenerBindingProcessor(errors).process(injector, elements);
-      stopwatch.resetAndLog("InjectableType listeners creation");
       List<InjectableTypeListenerBinding> listenerBindings
           = injector.state.getInjectableTypeListenerBindings();
       injector.constructors = new ConstructorInjectorStore(injector, listenerBindings);
       injector.membersInjectorStore = new MembersInjectorStore(injector, listenerBindings);
+      stopwatch.resetAndLog("InjectableType listeners creation");
 
       new ScopeBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Scopes creation");

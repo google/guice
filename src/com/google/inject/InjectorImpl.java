@@ -60,7 +60,7 @@ import java.util.Set;
  * @author crazybob@google.com (Bob Lee)
  * @see InjectorBuilder
  */
-class InjectorImpl implements Injector {
+class InjectorImpl implements Injector, Lookups {
   final State state;
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
@@ -69,6 +69,8 @@ class InjectorImpl implements Injector {
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
+
+  Lookups lookups = new DeferredLookups(this);
 
   InjectorImpl(@Nullable InjectorImpl parent, State state, Initializer initializer) {
     this.parent = parent;

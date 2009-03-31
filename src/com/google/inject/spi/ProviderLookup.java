@@ -37,7 +37,7 @@ public final class ProviderLookup<T> implements Element {
   private final Key<T> key;
   private Provider<T> delegate;
 
-  ProviderLookup(Object source, Key<T> key) {
+  public ProviderLookup(Object source, Key<T> key) {
     this.source = checkNotNull(source, "source");
     this.key = checkNotNull(key, "key");
   }
@@ -74,5 +74,24 @@ public final class ProviderLookup<T> implements Element {
    */
   public Provider<T> getDelegate() {
     return delegate;
+  }
+
+  /**
+   * Returns the looked up provider. The result is not valid until this lookup has been initialized,
+   * which usually happens when the injector is created. The provider will throw an {@code
+   * IllegalStateException} if you try to use it beforehand.
+   */
+  public Provider<T> getProvider() {
+    return new Provider<T>() {
+      public T get() {
+        checkState(delegate != null,
+            "This Provider cannot be used until the Injector has been created.");
+        return delegate.get();
+      }
+
+      @Override public String toString() {
+        return "Provider<" + key.getTypeLiteral() + ">";
+      }
+    };
   }
 }

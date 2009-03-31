@@ -38,7 +38,7 @@ public final class MembersInjectorLookup<T> implements Element {
   private final TypeLiteral<T> type;
   private MembersInjector<T> delegate;
 
-  MembersInjectorLookup(Object source, TypeLiteral<T> type) {
+  public MembersInjectorLookup(Object source, TypeLiteral<T> type) {
     this.source = checkNotNull(source, "source");
     this.type = checkNotNull(type, "type");
   }
@@ -79,5 +79,24 @@ public final class MembersInjectorLookup<T> implements Element {
    */
   public MembersInjector<T> getDelegate() {
     return delegate;
+  }
+
+  /**
+   * Returns the looked up members injector. The result is not valid until this lookup has been
+   * initialized, which usually happens when the injector is created. The members injector will
+   * throw an {@code IllegalStateException} if you try to use it beforehand.
+   */
+  public MembersInjector<T> getMembersInjector() {
+    return new MembersInjector<T>() {
+      public void injectMembers(T instance) {
+        checkState(delegate != null,
+            "This MembersInjector cannot be used until the Injector has been created.");
+        delegate.injectMembers(instance);
+      }
+
+      @Override public String toString() {
+        return "MembersInjector<" + type + ">";
+      }
+    };
   }
 }

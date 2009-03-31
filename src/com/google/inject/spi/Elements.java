@@ -38,7 +38,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
 import static com.google.inject.internal.Preconditions.checkArgument;
-import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.Sets;
@@ -182,18 +181,7 @@ public final class Elements {
       final MembersInjectorLookup<T> element
           = new MembersInjectorLookup<T>(getSource(), typeLiteral);
       elements.add(element);
-      return new MembersInjector<T>() {
-        public void injectMembers(T instance) {
-          MembersInjector<T> delegate = element.getDelegate();
-          checkState(delegate != null,
-              "This MembersInjector cannot be used until the Injector has been created.");
-          delegate.injectMembers(instance);
-        }
-
-        @Override public String toString() {
-          return "MembersInjector<" + typeLiteral + ">";
-        }
-      };
+      return element.getMembersInjector();
     }
 
     public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
@@ -268,18 +256,7 @@ public final class Elements {
     public <T> Provider<T> getProvider(final Key<T> key) {
       final ProviderLookup<T> element = new ProviderLookup<T>(getSource(), key);
       elements.add(element);
-      return new Provider<T>() {
-        public T get() {
-          Provider<T> delegate = element.getDelegate();
-          checkState(delegate != null,
-              "This Provider cannot be used until the Injector has been created.");
-          return delegate.get();
-        }
-
-        @Override public String toString() {
-          return "Provider<" + key.getTypeLiteral() + ">";
-        }
-      };
+      return element.getProvider();
     }
 
     public <T> Provider<T> getProvider(Class<T> type) {

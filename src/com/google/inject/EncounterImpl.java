@@ -16,25 +16,34 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.InjectableType;
-import com.google.inject.spi.InjectionListener;
-import com.google.inject.spi.Message;
+import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
-import java.util.List;
+import com.google.inject.spi.InjectableType;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.Message;
 import java.lang.reflect.Method;
+import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class EncounterImpl<T> implements InjectableType.Encounter<T> {
+public final class EncounterImpl<T> implements InjectableType.Encounter<T> {
+
+  private final Errors errors;
+  private final Lookups lookups;
   private List<InjectionListener<? super T>> injectionListeners; // lazy
   private List<MethodAspect> aspects; // lazy
 
-  boolean hasAddedAspects() {
+  public EncounterImpl(Errors errors, Lookups lookups) {
+    this.errors = errors;
+    this.lookups = lookups;
+  }
+
+  public boolean hasAddedAspects() {
     return aspects != null;
   }
 
@@ -46,7 +55,7 @@ class EncounterImpl<T> implements InjectableType.Encounter<T> {
     return aspects;
   }
 
-  ImmutableList<InjectionListener<? super T>> getInjectionListeners() {
+  public ImmutableList<InjectionListener<? super T>> getInjectionListeners() {
     return injectionListeners == null
         ? ImmutableList.<InjectionListener<? super T>>of()
         : ImmutableList.copyOf(injectionListeners);
@@ -58,7 +67,7 @@ class EncounterImpl<T> implements InjectableType.Encounter<T> {
       injectionListeners = Lists.newArrayList();
     }
 
-    injectionListeners.add((InjectionListener<T>) injectionListener);
+    injectionListeners.add(injectionListener);
   }
 
   public void bindInterceptor(Matcher<? super Method> methodMatcher,
@@ -72,30 +81,30 @@ class EncounterImpl<T> implements InjectableType.Encounter<T> {
   }
 
   public void addError(String message, Object... arguments) {
-    throw new UnsupportedOperationException("TODO");
+    errors.addMessage(message, arguments);
   }
 
   public void addError(Throwable t) {
-    throw new UnsupportedOperationException("TODO");
+    errors.errorInUserCode(t, "An exception was caught and reported. Message: %s", t.getMessage());
   }
 
   public void addError(Message message) {
-    throw new UnsupportedOperationException("TODO");
+    errors.addMessage(message);
   }
 
   public <T> Provider<T> getProvider(Key<T> key) {
-    throw new UnsupportedOperationException("TODO");
+    return lookups.getProvider(key);
   }
 
   public <T> Provider<T> getProvider(Class<T> type) {
-    throw new UnsupportedOperationException("TODO");
+    return getProvider(Key.get(type));
   }
 
   public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-    throw new UnsupportedOperationException("TODO");
+    return lookups.getMembersInjector(typeLiteral);
   }
 
   public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-    throw new UnsupportedOperationException("TODO");
+    return getMembersInjector(TypeLiteral.get(type));
   }
 }
