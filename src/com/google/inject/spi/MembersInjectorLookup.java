@@ -69,7 +69,7 @@ public final class MembersInjectorLookup<T> implements Element {
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).getMembersInjector(type);
+    initializeDelegate(binder.withSource(getSource()).getMembersInjector(type));
   }
 
   /**

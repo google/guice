@@ -39,6 +39,7 @@ import com.google.inject.internal.ImmutableSet;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
+import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
 
 /**
@@ -677,6 +679,51 @@ public class ElementsTest extends TestCase {
           }
         }
     );
+  }
+  
+  public void testElementInitialization() {
+    final AtomicReference<Provider<String>> providerFromBinder
+        = new AtomicReference<Provider<String>>();
+    final AtomicReference<MembersInjector<String>> membersInjectorFromBinder
+        = new AtomicReference<MembersInjector<String>>();
+
+    final AtomicReference<String> lastInjected = new AtomicReference<String>();
+    final MembersInjector<String> stringInjector = new MembersInjector<String>() {
+      public void injectMembers(String instance) {
+        lastInjected.set(instance);
+      }
+    };
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            providerFromBinder.set(getProvider(String.class));
+            membersInjectorFromBinder.set(getMembersInjector(String.class));
+          }
+        },
+
+        new FailingElementVisitor() {
+          public <T> Void visit(ProviderLookup<T> providerLookup) {
+            @SuppressWarnings("unchecked") // we know that T is a String here
+            ProviderLookup<String> stringLookup = (ProviderLookup<String>) providerLookup;
+            stringLookup.initializeDelegate(Providers.of("out"));
+
+            assertEquals("out", providerFromBinder.get().get());
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(MembersInjectorLookup<T> lookup) {
+            @SuppressWarnings("unchecked") // we know that T is a String here
+            MembersInjectorLookup<String> stringLookup = (MembersInjectorLookup<String>) lookup;
+            stringLookup.initializeDelegate(stringInjector);
+
+            membersInjectorFromBinder.get().injectMembers("in");
+            assertEquals("in", lastInjected.get());
+            return null;
+          }
+        });
   }
 
   public void testGetMembersInjector() {

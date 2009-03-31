@@ -65,7 +65,7 @@ public final class ProviderLookup<T> implements Element {
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).getProvider(key);
+    initializeDelegate(binder.withSource(getSource()).getProvider(key));
   }
 
   /**
