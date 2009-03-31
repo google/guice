@@ -588,6 +588,32 @@ public class ElementsTest extends TestCase {
     );
   }
 
+  public void testBindListener() {
+    final Matcher<Object> typeMatcher = Matchers.only(TypeLiteral.get(String.class));
+    final InjectableType.Listener listener = new InjectableType.Listener() {
+      public <I> void hear(
+          InjectableType<I> injectableType, InjectableType.Encounter<I> encounter) {
+        throw new UnsupportedOperationException();
+      }
+    };
+    
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bindListener(typeMatcher, listener);
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visit(InjectableTypeListenerBinding binding) {
+            assertSame(typeMatcher, binding.getTypeMatcher());
+            assertSame(listener, binding.getListener());
+            return null;
+          }
+        }
+    );
+  }
+
   public void testConvertToTypes() {
     final TypeConverter typeConverter = new TypeConverter() {
       public Object convert(String value, TypeLiteral<?> toType) {

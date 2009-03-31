@@ -109,8 +109,9 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visit(InjectableTypeListenerBinding binding) {
-        throw new UnsupportedOperationException("TODO");
+      public Void visit(InjectableTypeListenerBinding element) {
+        writeBindListener(binder, element);
+        return null;
       }
 
       public Void visit(PrivateElements privateElements) {
@@ -137,13 +138,18 @@ public class ModuleWriter {
   }
   /*end[AOP]*/
 
+  protected void writeBindListener(Binder binder, InjectableTypeListenerBinding element) {
+    binder.withSource(element.getSource())
+        .bindListener(element.getTypeMatcher(), element.getListener());
+  }
+
   protected void writeBindScope(Binder binder, ScopeBinding element) {
     binder.withSource(element.getSource()).bindScope(
         element.getAnnotationType(), element.getScope());
   }
 
-  protected void writeRequestInjection(Binder binder, InjectionRequest command) {
-    binder.withSource(command.getSource()).requestInjection(command.getInstance());
+  protected void writeRequestInjection(Binder binder, InjectionRequest element) {
+    binder.withSource(element.getSource()).requestInjection(element.getInstance());
   }
 
   protected void writeRequestStaticInjection(Binder binder, StaticInjectionRequest element) {
