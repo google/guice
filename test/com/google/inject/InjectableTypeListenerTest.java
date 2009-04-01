@@ -350,6 +350,16 @@ public class InjectableTypeListenerTest extends TestCase {
     final AtomicReference<MembersInjector<A>> aMembersInjectorReference
         = new AtomicReference<MembersInjector<A>>();
 
+    final InjectionListener<Object> lookupsTester = new InjectionListener<Object>() {
+      public void afterInjection(Object injectee) {
+        assertNotNull(bProviderReference.get().get());
+
+        A a = new A();
+        aMembersInjectorReference.get().injectMembers(a);
+        assertNotNull(a.injector);
+      }
+    };
+
     Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bindListener(only(TypeLiteral.get(C.class)), new InjectableType.Listener() {
@@ -374,18 +384,17 @@ public class InjectableTypeListenerTest extends TestCase {
                   expected.getMessage());
             }
             aMembersInjectorReference.set(aMembersInjector);
+
+            encounter.register(lookupsTester);
           }
         });
 
-        bind(C.class);
+        // this ensures the type listener fires, and also the afterInjection() listener
+        bind(C.class).asEagerSingleton();
       }
     });
 
-    assertNotNull(bProviderReference.get().get());
-
-    A a = new A();
-    aMembersInjectorReference.get().injectMembers(a);
-    assertNotNull(a.injector);
+    lookupsTester.afterInjection(null);
   }
 
   public void testLookupsPostCreate() {
@@ -404,6 +413,29 @@ public class InjectableTypeListenerTest extends TestCase {
     });
     
     injector.getInstance(C.class);
+  }
+
+  /**
+   * We had a bug where we weren't notifying of types encountered for member injection when those
+   * types had no members to be injected. Constructed types are always injected because they always
+   * have at least one injection point: the class constructor.
+   */
+  public void testTypesWithNoInjectableMembersAreNotified() {
+    final AtomicInteger notificationCount = new AtomicInteger();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(any(), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            notificationCount.incrementAndGet();
+          }
+        });
+
+        bind(C.class).toInstance(new C());
+      }
+    });
+
+    assertEquals(1, notificationCount.get());
   }
 
   // TODO: recursively accessing a lookup should fail
