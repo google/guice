@@ -100,6 +100,7 @@ class MembersInjectorStore {
         }
       }
     }
+    encounter.invalidate();
 
     errors.throwIfNewErrors(numErrorsBefore);
     return membersInjector.withListeners(encounter.getInjectionListeners());

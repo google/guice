@@ -148,7 +148,9 @@ public final class InjectableType<T> {
 
   /**
    * Context of the injectable type encounter. Enables reporting errors, registering injection
-   * listeners and binding method interceptors for injectable type {@code I}.
+   * listeners and binding method interceptors for injectable type {@code I}. It is an error to use
+   * an encounter after the {@link Listener#hear(InjectableType,Encounter) hear()} method has
+   * returned.
    *
    * @param <I> the injectable type encountered
    */

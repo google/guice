@@ -438,6 +438,59 @@ public class InjectableTypeListenerTest extends TestCase {
     assertEquals(1, notificationCount.get());
   }
 
+  public void testEncounterCannotBeUsedAfterHearReturns() {
+    final AtomicReference<Encounter<?>> encounterReference = new AtomicReference<Encounter<?>>();
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindListener(any(), new InjectableType.Listener() {
+          public <I> void hear(InjectableType<I> injectableType, Encounter<I> encounter) {
+            encounterReference.set(encounter);
+          }
+        });
+
+        bind(C.class);
+      }
+    });
+    Encounter<?> encounter = encounterReference.get();
+
+    try {
+      encounter.register(new InjectionListener<Object>() {
+        public void afterInjection(Object injectee) {}
+      });
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+
+    try {
+      encounter.bindInterceptor(any(), new MethodInterceptor() {
+        public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+          return methodInvocation.proceed();
+        }
+      });
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+
+    try {
+      encounter.addError(new Exception());
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+
+    try {
+      encounter.getMembersInjector(A.class);
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+
+    try {
+      encounter.getProvider(B.class);
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+  }
+
   // TODO: recursively accessing a lookup should fail
 
   static class A {

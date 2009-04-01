@@ -92,6 +92,7 @@ class ConstructorInjectorStore {
         }
       }
     }
+    encounter.invalidate();
 
     // rebuild the proxy factory and injectable type if new interceptors were added
     if (encounter.hasAddedAspects()) {
