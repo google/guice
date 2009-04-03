@@ -577,7 +577,7 @@ public class MoreTypes {
     private final Type lowerBound;
 
     public WildcardTypeImpl(Type[] upperBounds, Type[] lowerBounds) {
-      checkArgument(upperBounds.length <= 1, "Must have at most one lower bound.");
+      checkArgument(lowerBounds.length <= 1, "Must have at most one lower bound.");
       checkArgument(upperBounds.length == 1, "Must have exactly one upper bound.");
 
       if (lowerBounds.length == 1) {
