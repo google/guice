@@ -22,7 +22,7 @@ import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
 import static com.google.inject.internal.Preconditions.checkNotNull;
-import com.google.inject.spi.InjectableTypeListenerBinding;
+import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +45,7 @@ class InheritingState implements State {
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   /*end[AOP]*/
-  private final List<InjectableTypeListenerBinding> listenerBindings = Lists.newArrayList();
+  private final List<TypeListenerBinding> listenerBindings = Lists.newArrayList();
   private final WeakKeySet blacklistedKeys = new WeakKeySet();
   private final Object lock;
 
@@ -118,14 +118,14 @@ class InheritingState implements State {
   }
   /*end[AOP]*/
 
-  public void addInjectableTypeListener(InjectableTypeListenerBinding listenerBinding) {
+  public void addTypeListener(TypeListenerBinding listenerBinding) {
     listenerBindings.add(listenerBinding);
   }
 
-  public List<InjectableTypeListenerBinding> getInjectableTypeListenerBindings() {
-    List<InjectableTypeListenerBinding> parentBindings = parent.getInjectableTypeListenerBindings();
-    List<InjectableTypeListenerBinding> result
-        = new ArrayList<InjectableTypeListenerBinding>(parentBindings.size() + 1);
+  public List<TypeListenerBinding> getTypeListenerBindings() {
+    List<TypeListenerBinding> parentBindings = parent.getTypeListenerBindings();
+    List<TypeListenerBinding> result
+        = new ArrayList<TypeListenerBinding>(parentBindings.size() + 1);
     result.addAll(parentBindings);
     result.addAll(listenerBindings);
     return result;

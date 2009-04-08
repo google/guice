@@ -33,9 +33,9 @@ import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
-import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.PrivateElements;
+import com.google.inject.spi.TypeListenerBinding;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -147,9 +147,8 @@ class InjectorShell {
       injector.constructionProxyFactory = new DefaultConstructionProxyFactory();
       end[NO_AOP]*/
 
-      new InjectableTypeListenerBindingProcessor(errors).process(injector, elements);
-      List<InjectableTypeListenerBinding> listenerBindings
-          = injector.state.getInjectableTypeListenerBindings();
+      new TypeListenerBindingProcessor(errors).process(injector, elements);
+      List<TypeListenerBinding> listenerBindings = injector.state.getTypeListenerBindings();
       injector.membersInjectorStore = new MembersInjectorStore(injector, listenerBindings);
       stopwatch.resetAndLog("TypeListeners creation");
 

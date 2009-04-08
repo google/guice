@@ -43,9 +43,8 @@ public interface TypeEncounter<I> {
 
   /**
    * Records an exception for type {@code I}, the full details of which will be logged, and the
-   * message of which will be presented to the user at a later time. If your
-   * InjectableTypeListener calls something that you worry may fail, you should catch the
-   * exception and pass it to this method.
+   * message of which will be presented to the user at a later time. If your type listener calls
+   * something that you worry may fail, you should catch the exception and pass it to this method.
    */
   void addError(Throwable t);
 
@@ -89,11 +88,14 @@ public interface TypeEncounter<I> {
   <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
   /**
-   * Registers an injection listener for type {@code I}. Guice will notify the listener after
-   * injecting an instance of {@code I}. The order in which Guice will invoke listeners is
-   * unspecified.
-   *
-   * @param listener for injections into instances of type {@code I}
+   * Registers a members injector for type {@code I}. Guice will use the members injector after its
+   * performed its own injections on an instance of {@code I}.
+   */
+  void register(MembersInjector<? super I> membersInjector);
+
+  /**
+   * Registers an injection listener for type {@code I}. Guice will notify the listener after all
+   * injections have been performed on an instance of {@code I}.
    */
   void register(InjectionListener<? super I> listener);
 

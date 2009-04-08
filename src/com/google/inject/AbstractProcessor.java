@@ -20,14 +20,14 @@ import com.google.inject.internal.Errors;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InjectionRequest;
+import com.google.inject.spi.MembersInjectorLookup;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.StaticInjectionRequest;
 import com.google.inject.spi.TypeConverterBinding;
-import com.google.inject.spi.MembersInjectorLookup;
-import com.google.inject.spi.InjectableTypeListenerBinding;
+import com.google.inject.spi.TypeListenerBinding;
 import java.util.Iterator;
 import java.util.List;
 
@@ -116,7 +116,7 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
     return false;
   }
 
-  public Boolean visit(InjectableTypeListenerBinding binding) {
+  public Boolean visit(TypeListenerBinding binding) {
     return false;
   }
 }

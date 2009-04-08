@@ -109,7 +109,7 @@ public class ModuleWriter {
         return null;
       }
 
-      public Void visit(InjectableTypeListenerBinding element) {
+      public Void visit(TypeListenerBinding element) {
         writeBindListener(binder, element);
         return null;
       }
@@ -138,7 +138,7 @@ public class ModuleWriter {
   }
   /*end[AOP]*/
 
-  protected void writeBindListener(Binder binder, InjectableTypeListenerBinding element) {
+  protected void writeBindListener(Binder binder, TypeListenerBinding element) {
     binder.withSource(element.getSource())
         .bindListener(element.getTypeMatcher(), element.getListener());
   }

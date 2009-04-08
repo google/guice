@@ -85,5 +85,5 @@ public interface ElementVisitor<V> {
   /**
    * Visit an injectable type listener binding.
    */
-  V visit(InjectableTypeListenerBinding binding);
+  V visit(TypeListenerBinding binding);
 }

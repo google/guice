@@ -21,8 +21,8 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
-import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.TypeListenerBinding;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,7 @@ import java.util.Set;
  */
 class MembersInjectorStore {
   private final InjectorImpl injector;
-  private final ImmutableList<InjectableTypeListenerBinding> injectableTypeListenerBindings;
+  private final ImmutableList<TypeListenerBinding> typeListenerBindings;
 
   private final FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>> cache
       = new FailableCache<TypeLiteral<?>, MembersInjectorImpl<?>>() {
@@ -45,9 +45,9 @@ class MembersInjectorStore {
   };
 
   MembersInjectorStore(InjectorImpl injector,
-      List<InjectableTypeListenerBinding> injectableTypeListenerBindings) {
+      List<TypeListenerBinding> typeListenerBindings) {
     this.injector = injector;
-    this.injectableTypeListenerBindings = ImmutableList.copyOf(injectableTypeListenerBindings);
+    this.typeListenerBindings = ImmutableList.copyOf(typeListenerBindings);
   }
 
   /**
@@ -55,7 +55,7 @@ class MembersInjectorStore {
    * aren't any type listeners.
    */
   public boolean hasTypeListeners() {
-    return !injectableTypeListenerBindings.isEmpty();
+    return !typeListenerBindings.isEmpty();
   }
 
   /**
@@ -84,7 +84,7 @@ class MembersInjectorStore {
     errors.throwIfNewErrors(numErrorsBefore);
 
     EncounterImpl<T> encounter = new EncounterImpl<T>(errors, injector.lookups);
-    for (InjectableTypeListenerBinding typeListener : injectableTypeListenerBindings) {
+    for (TypeListenerBinding typeListener : typeListenerBindings) {
       if (typeListener.getTypeMatcher().matches(type)) {
         try {
           typeListener.getListener().hear(type, encounter);
@@ -96,8 +96,8 @@ class MembersInjectorStore {
     encounter.invalidate();
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new MembersInjectorImpl<T>(injector, type, injectors, encounter.getInjectionListeners(),
-        encounter.getAspects());
+    return new MembersInjectorImpl<T>(injector, type, injectors, encounter.getMembersInjectors(),
+        encounter.getInjectionListeners(), encounter.getAspects());
   }
 
   /**

@@ -37,7 +37,7 @@ public interface TypeListener {
    *
    * @param type encountered by Guice
    * @param encounter context of this encounter, enables reporting errors, registering injection
-   *     listeners and binding method interceptors for injectableType
+   *     listeners and binding method interceptors for {@code type}.
    *
    * @param <I> the injectable type
    */

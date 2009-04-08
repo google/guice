@@ -79,7 +79,7 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitOther(lookup);
   }
 
-  public V visit(InjectableTypeListenerBinding binding) {
+  public V visit(TypeListenerBinding binding) {
     return visitOther(binding);
   }
 }

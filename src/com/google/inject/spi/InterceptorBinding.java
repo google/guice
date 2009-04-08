@@ -34,7 +34,7 @@ import org.aopalliance.intercept.MethodInterceptor;
  *         new MyTransactionInterceptor());</pre>
  *
  * or from an injectable type listener using {@link TypeEncounter#bindInterceptor(Matcher,
- * org.aopalliance.intercept.MethodInterceptor[]) InjectableType.Encounter.bindInterceptor()}.
+ * org.aopalliance.intercept.MethodInterceptor[]) TypeEncounter.bindInterceptor()}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

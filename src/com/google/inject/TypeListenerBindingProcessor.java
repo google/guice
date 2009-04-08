@@ -17,21 +17,21 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.InjectableTypeListenerBinding;
+import com.google.inject.spi.TypeListenerBinding;
 
 /**
  * Handles {@link Binder#bindListener} commands.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-class InjectableTypeListenerBindingProcessor extends AbstractProcessor {
+class TypeListenerBindingProcessor extends AbstractProcessor {
 
-  InjectableTypeListenerBindingProcessor(Errors errors) {
+  TypeListenerBindingProcessor(Errors errors) {
     super(errors);
   }
 
-  @Override public Boolean visit(InjectableTypeListenerBinding binding) {
-    injector.state.addInjectableTypeListener(binding);
+  @Override public Boolean visit(TypeListenerBinding binding) {
+    injector.state.addTypeListener(binding);
     return true;
   }
 }

@@ -56,7 +56,7 @@ public class AllTests {
     suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);
     suite.addTestSuite(ImplicitBindingTest.class);
-    suite.addTestSuite(InjectableTypeListenerTest.class);
+    suite.addTestSuite(TypeListenerTest.class);
     suite.addTestSuite(InjectorTest.class);
     // IntegrationTest is AOP-only
     suite.addTestSuite(KeyTest.class);

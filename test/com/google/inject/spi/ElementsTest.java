@@ -606,7 +606,7 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visit(InjectableTypeListenerBinding binding) {
+          @Override public Void visit(TypeListenerBinding binding) {
             assertSame(typeMatcher, binding.getTypeMatcher());
             assertSame(listener, binding.getListener());
             return null;

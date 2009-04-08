@@ -33,16 +33,19 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final TypeLiteral<T> typeLiteral;
   private final InjectorImpl injector;
   private final ImmutableList<SingleMemberInjector> memberInjectors;
+  private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
   private final ImmutableList<InjectionListener<? super T>> injectionListeners;
   private final ImmutableList<MethodAspect> addedAspects;
 
   MembersInjectorImpl(InjectorImpl injector, TypeLiteral<T> typeLiteral,
       ImmutableList<SingleMemberInjector> memberInjectors,
+      ImmutableList<MembersInjector<? super T>> userMembersInjectors,
       ImmutableList<InjectionListener<? super T>> injectionListeners,
       ImmutableList<MethodAspect> addedAspects) {
     this.injector = injector;
     this.typeLiteral = typeLiteral;
     this.memberInjectors = memberInjectors;
+    this.userMembersInjectors = userMembersInjectors;
     this.injectionListeners = injectionListeners;
     this.addedAspects = addedAspects;
   }
@@ -92,6 +95,14 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
   void injectMembers(T t, Errors errors, InternalContext context) {
     for (SingleMemberInjector injector : memberInjectors) {
       injector.inject(errors, context, t);
+    }
+
+    for (MembersInjector<? super T> userMembersInjector : userMembersInjectors) {
+      try {
+        userMembersInjector.injectMembers(t);
+      } catch (RuntimeException e) {
+        errors.errorInUserInjector(userMembersInjector, typeLiteral, e);
+      }
     }
   }
 

@@ -36,6 +36,7 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
 
   private final Errors errors;
   private final Lookups lookups;
+  private List<MembersInjector<? super T>> membersInjectors; // lazy
   private List<InjectionListener<? super T>> injectionListeners; // lazy
   private List<MethodAspect> aspects; // lazy
   private boolean valid = true;
@@ -55,13 +56,28 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
         : ImmutableList.copyOf(aspects);
   }
 
+  public ImmutableList<MembersInjector<? super T>> getMembersInjectors() {
+    return membersInjectors == null
+        ? ImmutableList.<MembersInjector<? super T>>of()
+        : ImmutableList.copyOf(membersInjectors);
+  }
+
   public ImmutableList<InjectionListener<? super T>> getInjectionListeners() {
     return injectionListeners == null
         ? ImmutableList.<InjectionListener<? super T>>of()
         : ImmutableList.copyOf(injectionListeners);
   }
 
-  @SuppressWarnings("unchecked") // an InjectionListener<? super T> is an InjectionListener<T>
+  public void register(MembersInjector<? super T> membersInjector) {
+    checkState(valid, "Encounters may not be used after hear() returns.");
+
+    if (membersInjectors == null) {
+      membersInjectors = Lists.newArrayList();
+    }
+
+    membersInjectors.add(membersInjector);
+  }
+
   public void register(InjectionListener<? super T> injectionListener) {
     checkState(valid, "Encounters may not be used after hear() returns.");
 

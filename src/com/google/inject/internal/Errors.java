@@ -19,15 +19,16 @@ package com.google.inject.internal;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Key;
+import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.TypeListenerBinding;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -253,7 +254,7 @@ public final class Errors implements Serializable {
     return errorInUserCode(cause, "Error injecting method, %s", cause);
   }
 
-  public Errors errorNotifyingTypeListener(InjectableTypeListenerBinding listener,
+  public Errors errorNotifyingTypeListener(TypeListenerBinding listener,
       TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(cause,
         "Error notifying TypeListener %s (bound at %s) of %s.%n"
@@ -269,10 +270,16 @@ public final class Errors implements Serializable {
     return errorInUserCode(runtimeException, "Error in custom provider, %s", runtimeException);
   }
 
+  public Errors errorInUserInjector(
+      MembersInjector<?> listener, TypeLiteral<?> type, RuntimeException cause) {
+    return errorInUserCode(cause, "Error injecting %s using %s.%n"
+        + " Reason: %s", type, listener, cause);
+  }
+
   public Errors errorNotifyingInjectionListener(
-      InjectionListener listener, TypeLiteral<?> typeLiteral, RuntimeException cause) {
+      InjectionListener<?> listener, TypeLiteral<?> type, RuntimeException cause) {
     return errorInUserCode(cause, "Error notifying InjectionListener %s of %s.%n"
-        + " Reason: %s", listener, typeLiteral, cause);
+        + " Reason: %s", listener, type, cause);
   }
 
   public void exposedButNotBound(Key<?> key) {

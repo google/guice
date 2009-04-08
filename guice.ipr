@@ -574,10 +574,10 @@
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.Element" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.BinderElement" />
-      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableTypeListenerBinding" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.TypeListenerBinding" />
       <command command-class="de.frag.umlplugin.uml.command.ConnectClassesCommand" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.Binder" />
-      <command command-class="de.frag.umlplugin.uml.command.AddDependentClassesCommand" psi-class="com.google.inject.spi.InjectableTypeListenerBinding" />
+      <command command-class="de.frag.umlplugin.uml.command.AddDependentClassesCommand" psi-class="com.google.inject.spi.TypeListenerBinding" />
       <compartment-visibility />
     </diagram>
   </component>

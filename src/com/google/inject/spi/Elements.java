@@ -189,7 +189,7 @@ public final class Elements {
     }
 
     public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
-      elements.add(new InjectableTypeListenerBinding(getSource(), listener, typeMatcher));
+      elements.add(new TypeListenerBinding(getSource(), listener, typeMatcher));
     }
 
     public void requestStaticInjection(Class<?>... types) {

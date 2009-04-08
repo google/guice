@@ -141,8 +141,7 @@ class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   }
 
   /**
-   * Returns the interceptors that apply to the constructed type. When InjectableType.Listeners
-   * add additional interceptors, this builder will be thrown out and another created.n
+   * Returns the interceptors that apply to the constructed type.
    */
   public ImmutableMap<Method, List<MethodInterceptor>> getInterceptors() {
     return interceptors;
