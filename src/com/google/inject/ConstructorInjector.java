@@ -20,10 +20,14 @@ import com.google.inject.internal.ConstructionContext;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.ImmutableMap;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
-import com.google.inject.spi.InjectableType;
-import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Creates instances using an injectable constructor. After construction, all injectable fields and
@@ -33,24 +37,32 @@ import java.lang.reflect.InvocationTargetException;
  */
 class ConstructorInjector<T> {
 
+  private final ImmutableSet<InjectionPoint> injectableMembers;
   private final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
   private final ConstructionProxy<T> constructionProxy;
   private final MembersInjectorImpl<T> membersInjector;
-  private final ImmutableList<InjectionListener<? super T>> injectionListeners;
 
-  private final InjectableType<T> injectableType;
-
-  ConstructorInjector(ConstructionProxy<T> constructionProxy,
+  ConstructorInjector(ImmutableSet<InjectionPoint> injectableMembers,
+      ConstructionProxy<T> constructionProxy,
       ImmutableList<SingleParameterInjector<?>> parameterInjectors,
-      MembersInjectorImpl<T> membersInjector,
-      ImmutableList<InjectionListener<? super T>> injectionListeners,
-      InjectableType<T> injectableType)
+      MembersInjectorImpl<T> membersInjector)
       throws ErrorsException {
+    this.injectableMembers = injectableMembers;
     this.constructionProxy = constructionProxy;
     this.parameterInjectors = parameterInjectors;
     this.membersInjector = membersInjector;
-    this.injectionListeners = injectionListeners;
-    this.injectableType = injectableType;
+  }
+
+  public ImmutableSet<InjectionPoint> getInjectableMembers() {
+    return injectableMembers;
+  }
+
+  public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
+    return constructionProxy.getMethodInterceptors();
+  }
+
+  ConstructionProxy<T> getConstructionProxy() {
+    return constructionProxy;
   }
 
   /**
@@ -85,21 +97,11 @@ class ConstructorInjector<T> {
         constructionContext.finishConstruction();
       }
 
-      // Store reference. If an injector re-enters this factory, they'll
-      // get the same reference.
+      // Store reference. If an injector re-enters this factory, they'll get the same reference.
       constructionContext.setCurrentReference(t);
 
-      // Inject fields and methods.
       membersInjector.injectMembers(t, errors, context);
-
-      for (InjectionListener<? super T> injectionListener : injectionListeners) {
-        try {
-          injectionListener.afterInjection(t);
-        } catch (RuntimeException e) {
-          throw errors.errorNotifyingInjectionListener(
-              injectionListener, injectableType.getType(), e).toException();
-        }
-      }
+      membersInjector.notifyListeners(t, errors);
 
       return t;
     } catch (InvocationTargetException userException) {
@@ -111,9 +113,5 @@ class ConstructorInjector<T> {
     } finally {
       constructionContext.removeCurrentReference();
     }
-  }
-
-  public InjectableType<T> getInjectableType() {
-    return injectableType;
   }
 }

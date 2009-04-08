@@ -20,9 +20,9 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
-import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
+import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -359,7 +359,7 @@ public interface Binder {
    * @since 2.0
    */
   void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-      InjectableType.Listener listener);
+      TypeListener listener);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

@@ -188,8 +188,7 @@ public final class Elements {
       return getMembersInjector(TypeLiteral.get(type));
     }
 
-    public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-        InjectableType.Listener listener) {
+    public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
       elements.add(new InjectableTypeListenerBinding(getSource(), listener, typeMatcher));
     }
 

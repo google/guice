@@ -16,12 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Proxies calls to a {@link java.lang.reflect.Constructor} for a class
@@ -51,6 +52,6 @@ interface ConstructionProxy<T> {
   /**
    * Returns the interceptors applied to each method, in order of invocation.
    */
-  Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors();
+  ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors();
   /*end[AOP]*/
 }

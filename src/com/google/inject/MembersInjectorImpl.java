@@ -21,8 +21,8 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
-import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.InjectionPoint;
 
 /**
  * Injects members of instances of a given type.
@@ -34,19 +34,17 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final InjectorImpl injector;
   private final ImmutableList<SingleMemberInjector> memberInjectors;
   private final ImmutableList<InjectionListener<? super T>> injectionListeners;
-
-  MembersInjectorImpl(InjectorImpl injector, TypeLiteral<T> typeLiteral,
-      ImmutableList<SingleMemberInjector> memberInjectors) {
-    this(injector, typeLiteral, memberInjectors, ImmutableList.<InjectionListener<? super T>>of());
-  }
+  private final ImmutableList<MethodAspect> addedAspects;
 
   MembersInjectorImpl(InjectorImpl injector, TypeLiteral<T> typeLiteral,
       ImmutableList<SingleMemberInjector> memberInjectors,
-      ImmutableList<InjectionListener<? super T>> injectionListeners) {
+      ImmutableList<InjectionListener<? super T>> injectionListeners,
+      ImmutableList<MethodAspect> addedAspects) {
     this.injector = injector;
     this.typeLiteral = typeLiteral;
     this.memberInjectors = memberInjectors;
     this.injectionListeners = injectionListeners;
+    this.addedAspects = addedAspects;
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
@@ -56,7 +54,7 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
   public void injectMembers(T instance) {
     Errors errors = new Errors(typeLiteral);
     try {
-      injectMembers(instance, errors);
+      injectAndNotify(instance, errors);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -64,7 +62,7 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwProvisionExceptionIfErrorsExist();
   }
 
-  void injectMembers(final T instance, final Errors errors) throws ErrorsException {
+  void injectAndNotify(final T instance, final Errors errors) throws ErrorsException {
     if (instance == null) {
       return;
     }
@@ -76,14 +74,19 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
       }
     });
 
+    notifyListeners(instance, errors);
+  }
+
+  void notifyListeners(T instance, Errors errors) throws ErrorsException {
+    int numErrorsBefore = errors.size();
     for (InjectionListener<? super T> injectionListener : injectionListeners) {
       try {
         injectionListener.afterInjection(instance);
       } catch (RuntimeException e) {
-        throw errors.errorNotifyingInjectionListener(
-            injectionListener, typeLiteral, e).toException();
+        errors.errorNotifyingInjectionListener(injectionListener, typeLiteral, e);
       }
     }
+    errors.throwIfNewErrors(numErrorsBefore);
   }
 
   void injectMembers(T t, Errors errors, InternalContext context) {
@@ -104,10 +107,7 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
     return builder.build();
   }
 
-  MembersInjectorImpl<T> withListeners(
-      ImmutableList<InjectionListener<? super T>> injectionListeners) {
-    return injectionListeners.isEmpty()
-        ? this
-        : new MembersInjectorImpl<T>(injector, typeLiteral, memberInjectors, injectionListeners);
+  public ImmutableList<MethodAspect> getAddedAspects() {
+    return addedAspects;
   }
 }

@@ -35,7 +35,6 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
-import com.google.inject.spi.InjectableType;
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.List;
@@ -229,13 +228,12 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link ImplementationNode} for the class, then add edges to everything
    * that it depends on to be instantiated.
    *
-   * @see #newClassImplementationNode(Binding)
-   * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
+   * @see #newClassImplementationNode(Binding, InjectionPoint, Collection)
+   * @see #newDependencyEdges(Object, ImplementationNode, Collection)
    */
   public Void visit(ConstructorBinding<?> binding) {
-    InjectableType<?> injectableType = binding.getInjectableType();
-    M node = newClassImplementationNode(binding, injectableType.getInjectableConstructor(),
-        injectableType.getInjectableMembers());
+    M node = newClassImplementationNode(binding, binding.getConstructor(),
+        binding.getInjectableMembers());
     newDependencyEdges(getClassNodeId(binding), node, binding.getDependencies());
 
     return null;
@@ -253,7 +251,7 @@ implements BindingTargetVisitor<Object, Void> {
    * with a {@link BindingEdge} to the {@link String} instance.
    * 
    * @see #newInterfaceNode(Binding)
-   * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
+   * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
   public Void visit(ConvertedConstantBinding<?> binding) {
     newInterfaceNode(binding);
@@ -275,7 +273,7 @@ implements BindingTargetVisitor<Object, Void> {
    * Visitor for {@link InstanceBinding}. We render two nodes in this case: a
    * {@link InterfaceNode} for the binding's {@link Key}, and then an
    * {@link ImplementationNode} for the instance {@link Object} itself. We run
-   * a {@link BindingNode} between them.
+   * a binding node between them.
    * <p>
    * We then render any {@link DependencyEdge}s that the instance may have,
    * which come either from {@link InjectionPoint}s (method and field) on the
@@ -283,9 +281,9 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link HasDependencies} interface.
    * 
    * @see #newInterfaceNode(Binding)
-   * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
+   * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    * @see #newInstanceImplementationNode(Binding, Object)
-   * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
+   * @see #newDependencyEdges(Object, ImplementationNode, java.util.Collection)
    */
   public Void visit(InstanceBinding<?> binding) {
     newInterfaceNode(binding);
@@ -305,7 +303,7 @@ implements BindingTargetVisitor<Object, Void> {
    * node of the implementing class.
    * 
    * @see #newInterfaceNode(Binding)
-   * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
+   * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
   public Void visit(LinkedKeyBinding<?> binding) {
     newInterfaceNode(binding);
@@ -337,9 +335,9 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
    * 
    * @see #newInterfaceNode(Binding)
-   * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
+   * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    * @see #newInstanceImplementationNode(Binding, Object)
-   * @see #newDependencyEdges(ImplementationNode, Collection, Collection)
+   * @see #newDependencyEdges(Object, ImplementationNode, java.util.Collection)
    */
   public Void visit(ProviderInstanceBinding<?> binding) {
     newInterfaceNode(binding);
@@ -356,7 +354,7 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
    * 
    * @see #newInterfaceNode(Binding)
-   * @see #newBindingEdge(InterfaceNode, Object, BindingEdge.Type)
+   * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
   public Void visit(ProviderKeyBinding<?> binding) {
     newInterfaceNode(binding);

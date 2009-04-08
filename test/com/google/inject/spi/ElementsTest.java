@@ -592,9 +592,8 @@ public class ElementsTest extends TestCase {
 
   public void testBindListener() {
     final Matcher<Object> typeMatcher = Matchers.only(TypeLiteral.get(String.class));
-    final InjectableType.Listener listener = new InjectableType.Listener() {
-      public <I> void hear(
-          InjectableType<I> injectableType, InjectableType.Encounter<I> encounter) {
+    final TypeListener listener = new TypeListener() {
+      public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
         throw new UnsupportedOperationException();
       }
     };

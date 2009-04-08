@@ -24,7 +24,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
@@ -255,11 +254,11 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorNotifyingTypeListener(InjectableTypeListenerBinding listener,
-      InjectableType<?> injectableType, Throwable cause) {
+      TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(cause,
-        "Error notifying InjectableType.Listener %s (bound at %s) of %s.%n"
+        "Error notifying TypeListener %s (bound at %s) of %s.%n"
         + " Reason: %s",
-        listener.getListener(), convert(listener.getSource()), injectableType, cause);
+        listener.getListener(), convert(listener.getSource()), type, cause);
   }
 
   public Errors errorInjectingConstructor(Throwable cause) {

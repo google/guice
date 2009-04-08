@@ -54,8 +54,9 @@ class Initializer {
       Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
 
-    // short circuit if the object doesn't have any @Inject members
-    if (injectionPoints.isEmpty()) {
+    // short circuit if the object has no injections
+    if (instance == null
+        || (injectionPoints.isEmpty() && !injector.membersInjectorStore.hasTypeListeners())) {
       return Initializables.of(instance);
     }
 
@@ -141,7 +142,7 @@ class Initializer {
 
       // toInject needs injection, do it right away. we only do this once, even if it fails
       if (pendingInjection.remove(instance) != null) {
-        membersInjector.injectMembers(instance, errors.withSource(source));
+        membersInjector.injectAndNotify(instance, errors.withSource(source));
       }
 
       return instance;

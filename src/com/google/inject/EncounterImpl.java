@@ -22,9 +22,9 @@ import com.google.inject.internal.Lists;
 import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
-import com.google.inject.spi.InjectableType;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.TypeEncounter;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -32,7 +32,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class EncounterImpl<T> implements InjectableType.Encounter<T> {
+final class EncounterImpl<T> implements TypeEncounter<T> {
 
   private final Errors errors;
   private final Lookups lookups;
@@ -49,16 +49,10 @@ public final class EncounterImpl<T> implements InjectableType.Encounter<T> {
     valid = false;
   }
 
-  public boolean hasAddedAspects() {
-    return aspects != null;
-  }
-
-  public boolean hasAddedListeners() {
-    return injectionListeners != null;
-  }
-
-  public List<MethodAspect> getAspects() {
-    return aspects;
+  public ImmutableList<MethodAspect> getAspects() {
+    return aspects == null
+        ? ImmutableList.<MethodAspect>of()
+        : ImmutableList.copyOf(aspects);
   }
 
   public ImmutableList<InjectionListener<? super T>> getInjectionListeners() {

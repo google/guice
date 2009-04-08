@@ -33,9 +33,8 @@ import org.aopalliance.intercept.MethodInterceptor;
  *         Matchers.annotatedWith(Transactional.class),
  *         new MyTransactionInterceptor());</pre>
  *
- * or from an injectable type listener using
- * {@link com.google.inject.spi.InjectableType.Encounter#bindInterceptor(com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
- * InjectableType.Encounter.bindInterceptor()}.  
+ * or from an injectable type listener using {@link TypeEncounter#bindInterceptor(Matcher,
+ * org.aopalliance.intercept.MethodInterceptor[]) InjectableType.Encounter.bindInterceptor()}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

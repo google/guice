@@ -716,7 +716,7 @@ class InjectorImpl implements Injector, Lookups {
   }
 
   /** Cached constructor injectors for each type */
-  ConstructorInjectorStore constructors;
+  final ConstructorInjectorStore constructors = new ConstructorInjectorStore(this);
 
   /** Cached field and method injectors for each type. */
   MembersInjectorStore membersInjectorStore;

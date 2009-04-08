@@ -193,7 +193,8 @@ public class SpiBindingsTest extends TestCase {
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(ConstructorBinding<? extends T> binding) {
                 Constructor<?> expected = D.class.getDeclaredConstructors()[0];
-                assertEquals(expected, binding.getConstructor());
+                assertEquals(expected, binding.getConstructor().getMember());
+                assertEquals(ImmutableSet.<InjectionPoint>of(), binding.getInjectableMembers());
                 return null;
               }
             });

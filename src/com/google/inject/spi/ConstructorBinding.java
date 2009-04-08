@@ -17,7 +17,11 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A binding to the constructor of a concrete clss. To resolve injections, an instance is
@@ -29,12 +33,25 @@ import java.lang.reflect.Constructor;
 public interface ConstructorBinding<T> extends Binding<T>, HasDependencies {
 
   /**
-   * Returns the injected type.
-   */
-  InjectableType<T> getInjectableType();
-
-  /**
    * Gets the constructor this binding injects.
    */
-  Constructor<?> getConstructor();
+  InjectionPoint getConstructor();
+
+  /**
+   * Returns all instance method and field injection points on {@code type}.
+   *
+   * @return a possibly empty set of injection points. The set has a specified iteration order. All
+   *      fields are returned and then all methods. Within the fields, supertype fields are returned
+   *      before subtype fields. Similarly, supertype methods are returned before subtype methods.
+   */
+  Set<InjectionPoint> getInjectableMembers();
+
+  /*if[AOP]*/
+  /**
+   * Returns the interceptors applied to each method, in the order that they will be applied.
+   *
+   * @return a possibly empty map
+   */
+  Map<Method, List<MethodInterceptor>> getMethodInterceptors();
+  /*end[AOP]*/
 }

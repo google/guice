@@ -20,12 +20,8 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.FailableCache;
 import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableSet;
 import static com.google.inject.internal.Iterables.concat;
-import com.google.inject.spi.InjectableType;
-import com.google.inject.spi.InjectableTypeListenerBinding;
 import com.google.inject.spi.InjectionPoint;
-import java.util.List;
 
 /**
  * Constructor injectors by type.
@@ -34,7 +30,6 @@ import java.util.List;
  */
 class ConstructorInjectorStore {
   private final InjectorImpl injector;
-  private final ImmutableList<InjectableTypeListenerBinding> injectableTypeListenerBindings;
 
   private final FailableCache<TypeLiteral<?>, ConstructorInjector<?>>  cache
       = new FailableCache<TypeLiteral<?>, ConstructorInjector<?>> () {
@@ -45,10 +40,8 @@ class ConstructorInjectorStore {
     }
   };
 
-  ConstructorInjectorStore(InjectorImpl injector,
-      List<InjectableTypeListenerBinding> injectableTypeListenerBindings) {
+  ConstructorInjectorStore(InjectorImpl injector) {
     this.injector = injector;
-    this.injectableTypeListenerBindings = ImmutableList.copyOf(injectableTypeListenerBindings);
   }
 
   /**
@@ -73,38 +66,17 @@ class ConstructorInjectorStore {
 
     ImmutableList<SingleParameterInjector<?>> constructorParameterInjectors
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
-    MembersInjectorImpl<T> membersInjector
-        = injector.membersInjectorStore.createWithoutListeners(type, errors);
+    MembersInjectorImpl<T> membersInjector = injector.membersInjectorStore.get(type, errors);
 
-    ImmutableSet<InjectionPoint> injectableMembers = membersInjector.getInjectionPoints();
+    ImmutableList<MethodAspect> methodAspects = membersInjector.getAddedAspects().isEmpty()
+        ? injector.methodAspects
+        : ImmutableList.copyOf(concat(injector.methodAspects, membersInjector.getAddedAspects()));
 
-    ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, injector.methodAspects);
-    EncounterImpl<T> encounter = new EncounterImpl<T>(errors, injector.lookups);
-    InjectableType<T> injectableType = new InjectableType<T>(
-        injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
-
-    for (InjectableTypeListenerBinding typeListener : injectableTypeListenerBindings) {
-      if (typeListener.getTypeMatcher().matches(type)) {
-        try {
-          typeListener.getListener().hear(injectableType, encounter);
-        } catch (RuntimeException e) {
-          errors.errorNotifyingTypeListener(typeListener, injectableType, e);
-        }
-      }
-    }
-    encounter.invalidate();
-
-    // rebuild the proxy factory and injectable type if new interceptors were added
-    if (encounter.hasAddedAspects()) {
-      proxyFactory = new ProxyFactory<T>(
-          injectionPoint, concat(injector.methodAspects, encounter.getAspects()));
-      injectableType = new InjectableType<T>(
-          injectionPoint, type, injectableMembers, proxyFactory.getInterceptors());
-    }
+    ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, methodAspects);
 
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new ConstructorInjector<T>(proxyFactory.create(), constructorParameterInjectors,
-        membersInjector, encounter.getInjectionListeners(), injectableType);
+    return new ConstructorInjector<T>(membersInjector.getInjectionPoints(), proxyFactory.create(),
+        constructorParameterInjectors, membersInjector);
   }
 }

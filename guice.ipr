@@ -569,8 +569,8 @@
   </component>
   <component name="UMLDiagramComponent">
     <diagram name="spi">
-      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType.Encounter" />
-      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType.Listener" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.TypeEncounter" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.TypeListener" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.InjectableType" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.Element" />
       <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.google.inject.spi.BinderElement" />

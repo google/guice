@@ -23,19 +23,21 @@ import com.google.inject.matcher.Matcher;
 /**
  * Binds injectable types (picked using a Matcher) to an injectable type listener.
  * Registrations are created explicitly in a module using {@link
- * com.google.inject.Binder#bindListener(com.google.inject.matcher.Matcher,
- * com.google.inject.spi.InjectableType.Listener)} statements:
+ * com.google.inject.Binder#bindListener(com.google.inject.matcher.Matcher, TypeListener)}
+ * statements:
  *
  * <pre>
- *     register(any(), listener);</pre>
+ *     register(only(new TypeLiteral&lt;PaymentService&lt;CreditCard>>() {}), listener);</pre>
+ *
+ * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class InjectableTypeListenerBinding implements Element {
 
   final Object source;
   final Matcher<? super TypeLiteral<?>> typeMatcher;
-  final InjectableType.Listener listener;
+  final TypeListener listener;
 
-  InjectableTypeListenerBinding(Object source, InjectableType.Listener listener,
+  InjectableTypeListenerBinding(Object source, TypeListener listener,
       Matcher<? super TypeLiteral<?>> typeMatcher) {
     this.source = source;
     this.listener = listener;
@@ -43,7 +45,7 @@ public final class InjectableTypeListenerBinding implements Element {
   }
 
   /** Returns the registered listener. */
-  public InjectableType.Listener getListener() {
+  public TypeListener getListener() {
     return listener;
   }
 

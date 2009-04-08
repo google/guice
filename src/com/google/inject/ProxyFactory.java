@@ -261,7 +261,7 @@ class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       return constructor;
     }
 
-    public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+    public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
       return methodInterceptors;
     }
   }

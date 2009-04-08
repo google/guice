@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import static com.google.inject.internal.Preconditions.checkState;
@@ -27,14 +28,16 @@ import com.google.inject.internal.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectableType;
-import java.lang.reflect.Constructor;
+import com.google.inject.spi.InjectionPoint;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 
 class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T> {
 
   private final Factory<T> factory;
-  private InjectableType<T> injectableType;
 
   private ConstructorBindingImpl(Injector injector, Key<T> key, Object source,
       InternalFactory<? extends T> scopedFactory, Scoping scoping, Factory<T> factory) {
@@ -53,26 +56,33 @@ class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBin
 
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     factory.constructorInjector = injector.constructors.get(getKey().getTypeLiteral(), errors);
-    injectableType = factory.constructorInjector.getInjectableType();
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    checkState(injectableType != null, "not initialized");
+    checkState(factory.constructorInjector != null, "not initialized");
     return visitor.visit(this);
   }
 
-  @SuppressWarnings("unchecked") // our injectable type always has a constructor of type T
-  public Constructor<? extends T> getConstructor() {
-    checkState(factory.constructorInjector != null, "Constructor is not ready");
-    return (Constructor<? extends T>) injectableType.getInjectableConstructor().getMember();
+  public InjectionPoint getConstructor() {
+    checkState(factory.constructorInjector != null, "Binding is not ready");
+    return factory.constructorInjector.getConstructionProxy().getInjectionPoint();
   }
 
-  public InjectableType<T> getInjectableType() {
-    return injectableType;
+  public Set<InjectionPoint> getInjectableMembers() {
+    checkState(factory.constructorInjector != null, "Binding is not ready");
+    return factory.constructorInjector.getInjectableMembers();
+  }
+
+  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+    checkState(factory.constructorInjector != null, "Binding is not ready");
+    return factory.constructorInjector.getMethodInterceptors();
   }
 
   public Set<Dependency<?>> getDependencies() {
-    return Dependency.forInjectableType(injectableType);
+    return Dependency.forInjectionPoints(new ImmutableSet.Builder<InjectionPoint>()
+        .add(getConstructor())
+        .addAll(getInjectableMembers())
+        .build());
   }
 
   public void applyTo(Binder binder) {

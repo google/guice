@@ -24,7 +24,7 @@ import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
-import com.google.inject.spi.InjectableType;
+import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -284,10 +284,10 @@ public abstract class PrivateModule implements Module {
   }
 
   /**
-   * @see Binder#bindListener(com.google.inject.matcher.Matcher, com.google.inject.spi.InjectableType.Listener)
+   * @see Binder#bindListener(com.google.inject.matcher.Matcher, com.google.inject.spi.TypeListener)
    */
   protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-      InjectableType.Listener listener) {
+      TypeListener listener) {
     binder.bindListener(typeMatcher, listener);
   }
 }
