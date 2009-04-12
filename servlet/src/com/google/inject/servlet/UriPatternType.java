@@ -15,6 +15,7 @@
  */
 package com.google.inject.servlet;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -73,11 +74,11 @@ enum UriPatternType {
       return pattern.equals(uri);
     }
 
-    public String extractPath(String pattern) {
-      if (pattern.startsWith("*")) {
+    public String extractPath(String path) {
+      if (patternKind == Kind.PREFIX) {
         return null;
-      } else if (pattern.endsWith("*")) {
-        String extract = pattern.substring(0, pattern.length() - 1);
+      } else if (patternKind == Kind.SUFFIX) {
+        String extract = pattern;
 
         //trim the trailing '/'
         if (extract.endsWith("/")) {
@@ -88,7 +89,7 @@ enum UriPatternType {
       }
 
       //else treat as literal
-      return pattern;
+      return path;
     }
   }
 
@@ -109,7 +110,11 @@ enum UriPatternType {
       return null != uri && this.pattern.matcher(uri).matches();
     }
 
-    public String extractPath(String pattern) {
+    public String extractPath(String path) {
+      Matcher matcher = pattern.matcher(path);
+      if (matcher.matches() && matcher.groupCount() >= 1) {
+         return path.substring(0, matcher.start(1));
+      }
       return null;
     }
   }

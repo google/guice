@@ -200,11 +200,12 @@ class ServletDefinition {
       // Memoizer pattern.
       private String computePath() {
         if (!pathComputed) {
-          path = patternMatcher.extractPath(pattern);
+          String servletPath = super.getServletPath();
+          path = patternMatcher.extractPath(servletPath);
           pathComputed = true;
 
           if (null == path) {
-            path = super.getServletPath();
+            path = servletPath;
           }
         }
 

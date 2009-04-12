@@ -30,7 +30,7 @@ interface UriPatternMatcher {
   boolean matches(String uri);
 
   /**
-   * @param pattern A String containing some pattern that this service can match against.
+   * @param pattern The Path that this service pattern can match against.
    * @return Returns a canonical servlet path from this pattern. For instance, if the pattern is
    *         {@code /home/*} then the path extracted will be {@code /home}. Each pattern matcher
    *         implementation must decide and publish what a canonical path represents.

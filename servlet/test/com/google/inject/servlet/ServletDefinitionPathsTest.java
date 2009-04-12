@@ -199,11 +199,15 @@ public class ServletDefinitionPathsTest extends TestCase {
     pathInfoWithRegexMatching("/path/thing", "/path", "/thing/(.)*", null, "/thing");
 
     // *.xx style mapping
-    pathInfoWithRegexMatching("/path/thing.thing", "/path", "(.)*\\.thing", null, "/thing.thing");
-    pathInfoWithRegexMatching("/path///h.thing", "/path", "(.)*\\.thing", null, "/h.thing");
-    pathInfoWithRegexMatching("/path///...//h.thing", "/path", "(.)*\\.thing", null,
+    pathInfoWithRegexMatching("/path/thing.thing", "/path", ".*\\.thing", null, "/thing.thing");
+    pathInfoWithRegexMatching("/path///h.thing", "/path", ".*\\.thing", null, "/h.thing");
+    pathInfoWithRegexMatching("/path///...//h.thing", "/path", ".*\\.thing", null,
         "/.../h.thing");
-    pathInfoWithRegexMatching("/path/my/h.thing", "/path", "(.)*\\.thing", null, "/my/h.thing");
+    pathInfoWithRegexMatching("/path/my/h.thing", "/path", ".*\\.thing", null, "/my/h.thing");
+
+    // path
+    pathInfoWithRegexMatching("/path/test.com/com.test.MyServletModule", "", "/path/[^/]+/(.*)",
+        "com.test.MyServletModule", "/path/test.com/com.test.MyServletModule");
   }
 
   public final void pathInfoWithRegexMatching(final String requestUri, final String contextPath,
