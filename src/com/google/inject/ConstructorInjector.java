@@ -20,14 +20,10 @@ import com.google.inject.internal.ConstructionContext;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Creates instances using an injectable constructor. After construction, all injectable fields and
@@ -55,10 +51,6 @@ class ConstructorInjector<T> {
 
   public ImmutableSet<InjectionPoint> getInjectableMembers() {
     return injectableMembers;
-  }
-
-  public ImmutableMap<Method, List<MethodInterceptor>> getMethodInterceptors() {
-    return constructionProxy.getMethodInterceptors();
   }
 
   ConstructionProxy<T> getConstructionProxy() {

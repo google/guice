@@ -77,7 +77,7 @@ interface State {
       throw new UnsupportedOperationException();
     }
 
-    public List<MethodAspect> getMethodAspects() {
+    public ImmutableList<MethodAspect> getMethodAspects() {
       return ImmutableList.of();
     }
     /*end[AOP]*/
@@ -129,7 +129,7 @@ interface State {
   /*if[AOP]*/
   void addMethodAspect(MethodAspect methodAspect);
 
-  List<MethodAspect> getMethodAspects();
+  ImmutableList<MethodAspect> getMethodAspects();
   /*end[AOP]*/
 
   void addTypeListener(TypeListenerBinding typeListenerBinding);

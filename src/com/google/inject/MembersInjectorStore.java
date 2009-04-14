@@ -96,8 +96,7 @@ class MembersInjectorStore {
     encounter.invalidate();
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new MembersInjectorImpl<T>(injector, type, injectors, encounter.getMembersInjectors(),
-        encounter.getInjectionListeners(), encounter.getAspects());
+    return new MembersInjectorImpl<T>(injector, type, encounter, injectors);
   }
 
   /**

@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.BindingImpl;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.MatcherAndConverter;
@@ -110,11 +111,11 @@ class InheritingState implements State {
     methodAspects.add(methodAspect);
   }
 
-  public List<MethodAspect> getMethodAspects() {
-    List<MethodAspect> result = Lists.newArrayList();
-    result.addAll(parent.getMethodAspects());
-    result.addAll(methodAspects);
-    return result;
+  public ImmutableList<MethodAspect> getMethodAspects() {
+    return new ImmutableList.Builder<MethodAspect>()
+        .addAll(parent.getMethodAspects())
+        .addAll(methodAspects)
+        .build();
   }
   /*end[AOP]*/
 

@@ -35,19 +35,20 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final ImmutableList<SingleMemberInjector> memberInjectors;
   private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
   private final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  /*if[AOP]*/
   private final ImmutableList<MethodAspect> addedAspects;
+  /*end[AOP]*/
 
   MembersInjectorImpl(InjectorImpl injector, TypeLiteral<T> typeLiteral,
-      ImmutableList<SingleMemberInjector> memberInjectors,
-      ImmutableList<MembersInjector<? super T>> userMembersInjectors,
-      ImmutableList<InjectionListener<? super T>> injectionListeners,
-      ImmutableList<MethodAspect> addedAspects) {
+      EncounterImpl<T> encounter, ImmutableList<SingleMemberInjector> memberInjectors) {
     this.injector = injector;
     this.typeLiteral = typeLiteral;
     this.memberInjectors = memberInjectors;
-    this.userMembersInjectors = userMembersInjectors;
-    this.injectionListeners = injectionListeners;
-    this.addedAspects = addedAspects;
+    this.userMembersInjectors = encounter.getMembersInjectors();
+    this.injectionListeners = encounter.getInjectionListeners();
+    /*if[AOP]*/
+    this.addedAspects = encounter.getAspects();
+    /*end[AOP]*/
   }
 
   public ImmutableList<SingleMemberInjector> getMemberInjectors() {
@@ -118,7 +119,9 @@ class MembersInjectorImpl<T> implements MembersInjector<T> {
     return builder.build();
   }
 
+  /*if[AOP]*/
   public ImmutableList<MethodAspect> getAddedAspects() {
     return addedAspects;
   }
+  /*end[AOP]*/
 }

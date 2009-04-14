@@ -51,7 +51,9 @@ public class StrictContainerTestSuite {
     };
 
     StrictContainerTestSuiteBuilder builder = new StrictContainerTestSuiteBuilder(securityManager);
+    /*if[AOP]*/
     builder.add(BytecodeGenTest.class.getName());
+    /*end[AOP]*/
     builder.addSuite(MapMakerTestSuite.class.getName());
     return builder.build();
   }

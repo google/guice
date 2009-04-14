@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * A binding to the constructor of a concrete clss. To resolve injections, an instance is
@@ -52,6 +51,6 @@ public interface ConstructorBinding<T> extends Binding<T>, HasDependencies {
    *
    * @return a possibly empty map
    */
-  Map<Method, List<MethodInterceptor>> getMethodInterceptors();
+  Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors();
   /*end[AOP]*/
 }

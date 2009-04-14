@@ -68,15 +68,20 @@ class ConstructorInjectorStore {
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
     MembersInjectorImpl<T> membersInjector = injector.membersInjectorStore.get(type, errors);
 
+    /*if[AOP]*/
+    ImmutableList<MethodAspect> injectorAspects = injector.state.getMethodAspects();
     ImmutableList<MethodAspect> methodAspects = membersInjector.getAddedAspects().isEmpty()
-        ? injector.methodAspects
-        : ImmutableList.copyOf(concat(injector.methodAspects, membersInjector.getAddedAspects()));
-
-    ProxyFactory<T> proxyFactory = new ProxyFactory<T>(injectionPoint, methodAspects);
+        ? injectorAspects
+        : ImmutableList.copyOf(concat(injectorAspects, membersInjector.getAddedAspects()));
+    ConstructionProxyFactory<T> factory = new ProxyFactory<T>(injectionPoint, methodAspects);
+    /*end[AOP]*/
+    /*if[NO_AOP]
+    ConstructionProxyFactory<T> factory = new DefaultConstructionProxyFactory<T>(injectionPoint);
+    end[NO_AOP]*/
 
     errors.throwIfNewErrors(numErrorsBefore);
 
-    return new ConstructorInjector<T>(membersInjector.getInjectionPoints(), proxyFactory.create(),
+    return new ConstructorInjector<T>(membersInjector.getInjectionPoints(), factory.create(),
         constructorParameterInjectors, membersInjector);
   }
 }

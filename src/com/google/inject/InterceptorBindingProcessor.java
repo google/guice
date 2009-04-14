@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ImmutableList;
 import com.google.inject.spi.InterceptorBinding;
 
 /**
@@ -36,9 +35,5 @@ class InterceptorBindingProcessor extends AbstractProcessor {
     injector.state.addMethodAspect(new MethodAspect(
         command.getClassMatcher(), command.getMethodMatcher(), command.getInterceptors()));
     return true;
-  }
-
-  void setupProxyFactory(InjectorImpl injector) {
-    injector.methodAspects = ImmutableList.copyOf(injector.state.getMethodAspects());
   }
 }

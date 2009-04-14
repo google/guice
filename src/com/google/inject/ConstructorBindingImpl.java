@@ -33,7 +33,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.aopalliance.intercept.MethodInterceptor;
 
 class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T> {
 
@@ -73,10 +72,12 @@ class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBin
     return factory.constructorInjector.getInjectableMembers();
   }
 
-  public Map<Method, List<MethodInterceptor>> getMethodInterceptors() {
+  /*if[AOP]*/
+  public Map<Method, List<org.aopalliance.intercept.MethodInterceptor>> getMethodInterceptors() {
     checkState(factory.constructorInjector != null, "Binding is not ready");
-    return factory.constructorInjector.getMethodInterceptors();
+    return factory.constructorInjector.getConstructionProxy().getMethodInterceptors();
   }
+  /*end[AOP]*/
 
   public Set<Dependency<?>> getDependencies() {
     return Dependency.forInjectionPoints(new ImmutableSet.Builder<InjectionPoint>()

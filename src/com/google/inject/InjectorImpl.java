@@ -65,7 +65,6 @@ class InjectorImpl implements Injector, Lookups {
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
   final Initializer initializer;
-  ImmutableList<MethodAspect> methodAspects;
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();

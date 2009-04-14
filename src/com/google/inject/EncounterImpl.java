@@ -27,7 +27,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
 import java.lang.reflect.Method;
 import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -38,7 +37,9 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
   private final Lookups lookups;
   private List<MembersInjector<? super T>> membersInjectors; // lazy
   private List<InjectionListener<? super T>> injectionListeners; // lazy
+  /*if[AOP]*/
   private List<MethodAspect> aspects; // lazy
+  /*end[AOP]*/
   private boolean valid = true;
 
   public EncounterImpl(Errors errors, Lookups lookups) {
@@ -50,11 +51,25 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
     valid = false;
   }
 
+  /*if[AOP]*/
   public ImmutableList<MethodAspect> getAspects() {
     return aspects == null
         ? ImmutableList.<MethodAspect>of()
         : ImmutableList.copyOf(aspects);
   }
+
+  public void bindInterceptor(Matcher<? super Method> methodMatcher,
+      org.aopalliance.intercept.MethodInterceptor... interceptors) {
+    checkState(valid, "Encounters may not be used after hear() returns.");
+
+    // make sure the applicable aspects is mutable
+    if (aspects == null) {
+      aspects = Lists.newArrayList();
+    }
+
+    aspects.add(new MethodAspect(Matchers.any(), methodMatcher, interceptors));
+  }
+  /*end[AOP]*/
 
   public ImmutableList<MembersInjector<? super T>> getMembersInjectors() {
     return membersInjectors == null
@@ -86,18 +101,6 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
     }
 
     injectionListeners.add(injectionListener);
-  }
-
-  public void bindInterceptor(Matcher<? super Method> methodMatcher,
-      MethodInterceptor... interceptors) {
-    checkState(valid, "Encounters may not be used after hear() returns.");
-
-    // make sure the applicable aspects is mutable
-    if (aspects == null) {
-      aspects = Lists.newArrayList();
-    }
-
-    aspects.add(new MethodAspect(Matchers.any(), methodMatcher, interceptors));
   }
 
   public void addError(String message, Object... arguments) {

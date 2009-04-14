@@ -140,12 +140,8 @@ class InjectorShell {
       /*if[AOP]*/
       InterceptorBindingProcessor interceptors = new InterceptorBindingProcessor(errors);
       interceptors.process(injector, elements);
-      interceptors.setupProxyFactory(injector);
       stopwatch.resetAndLog("Interceptors creation");
       /*end[AOP]*/
-      /*if[NO_AOP]
-      injector.constructionProxyFactory = new DefaultConstructionProxyFactory();
-      end[NO_AOP]*/
 
       new TypeListenerBindingProcessor(errors).process(injector, elements);
       List<TypeListenerBinding> listenerBindings = injector.state.getTypeListenerBindings();

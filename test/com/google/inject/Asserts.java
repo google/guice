@@ -51,6 +51,13 @@ public class Asserts {
    * Fails unless {@code text} includes all {@code substrings}, in order.
    */
   public static void assertContains(String text, String... substrings) {
+    /*if[NO_AOP]
+    // when we strip out bytecode manipulation, we lose the ability to generate some source lines.
+    if (text.contains("(Unknown Source)")) {
+      return;
+    }
+    end[NO_AOP]*/
+
     int startingFrom = 0;
     for (String substring : substrings) {
       int index = text.indexOf(substring, startingFrom);

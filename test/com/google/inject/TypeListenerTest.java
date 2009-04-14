@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -43,14 +41,6 @@ public class TypeListenerTest extends TestCase {
       .or(only(new TypeLiteral<B>() {}))
       .or(only(new TypeLiteral<C>() {}))
       .or(only(new TypeLiteral<D>() {}));
-
-  private static MethodInterceptor prefixInterceptor(final String prefix) {
-    return new MethodInterceptor() {
-      public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        return prefix + methodInvocation.proceed();
-      }
-    };
-  }
 
   final TypeListener failingTypeListener = new TypeListener() {
     int failures = 0;
@@ -145,6 +135,17 @@ public class TypeListenerTest extends TestCase {
     assertEquals(ImmutableList.of(a1, a2, b1, a3, a4), injectees);
   }
   
+  /*if[AOP]*/
+  private static org.aopalliance.intercept.MethodInterceptor prefixInterceptor(
+      final String prefix) {
+    return new org.aopalliance.intercept.MethodInterceptor() {
+      public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation)
+          throws Throwable {
+        return prefix + methodInvocation.proceed();
+      }
+    };
+  }
+
   public void testAddingInterceptors() throws NoSuchMethodException {
     final Matcher<Object> buzz = only(C.class.getMethod("buzz"));
 
@@ -167,6 +168,7 @@ public class TypeListenerTest extends TestCase {
     assertEquals("kafelinobuzz", c.buzz());
     assertEquals("felibeep", c.beep());
   }
+  /*end[AOP]*/
 
   public void testTypeListenerThrows() {
     try {
@@ -554,15 +556,18 @@ public class TypeListenerTest extends TestCase {
     } catch (IllegalStateException expected) {
     }
 
+    /*if[AOP]*/
     try {
-      encounter.bindInterceptor(any(), new MethodInterceptor() {
-        public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+      encounter.bindInterceptor(any(), new org.aopalliance.intercept.MethodInterceptor() {
+        public Object invoke(org.aopalliance.intercept.MethodInvocation methodInvocation)
+            throws Throwable {
           return methodInvocation.proceed();
         }
       });
       fail();
     } catch (IllegalStateException expected) {
     }
+    /*end[AOP]*/
 
     try {
       encounter.addError(new Exception());
