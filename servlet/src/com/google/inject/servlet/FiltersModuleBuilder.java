@@ -19,11 +19,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Lists;
-import static com.google.inject.name.Names.named;
+import com.google.inject.internal.UniqueAnnotations;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.servlet.Filter;
 
 /**
@@ -41,7 +40,7 @@ class FiltersModuleBuilder extends AbstractModule {
   protected void configure() {
     // Bind these filter definitions to a unique random key. Doesn't matter what it is,
     // coz it's never used.
-    bind(Key.get(new TypeLiteral<List<FilterDefinition>>() {}, named(UUID.randomUUID().toString())))
+    bind(Key.get(new TypeLiteral<List<FilterDefinition>>() {}, UniqueAnnotations.create()))
         .toInstance(filterDefinitions);
   }
 

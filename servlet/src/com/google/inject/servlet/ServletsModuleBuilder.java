@@ -20,12 +20,11 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.Sets;
-import static com.google.inject.name.Names.named;
+import com.google.inject.internal.UniqueAnnotations;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -56,8 +55,8 @@ class ServletsModuleBuilder extends AbstractModule {
 
     // Bind these servlet definitions to a unique random key. Doesn't matter what it is,
     // coz it's never used.
-    bind(Key.get(new TypeLiteral<List<ServletDefinition>>() {},
-        named(UUID.randomUUID().toString()))).toInstance(servletDefinitions);
+    bind(Key.get(new TypeLiteral<List<ServletDefinition>>() {}, UniqueAnnotations.create()))
+        .toInstance(servletDefinitions);
   }
 
   //the first level of the EDSL--
