@@ -28,6 +28,7 @@ import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.LinkedProviderBindingImpl;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.ProviderInstanceBindingImpl;
+import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.Scoping;
 import com.google.inject.internal.UntargettedBindingImpl;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -66,7 +67,12 @@ class BindingProcessor extends AbstractProcessor {
     final Object source = command.getSource();
 
     if (Void.class.equals(command.getKey().getRawType())) {
-      errors.missingConstantValues();
+      if (command instanceof ProviderInstanceBinding
+          && ((ProviderInstanceBinding) command).getProviderInstance() instanceof ProviderMethod) {
+        errors.voidProviderMethod();
+      } else {
+        errors.missingConstantValues();
+      }
       return true;
     }
 

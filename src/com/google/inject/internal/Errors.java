@@ -218,6 +218,10 @@ public final class Errors implements Serializable {
         annotationType, scope);
   }
 
+  public Errors voidProviderMethod() {
+    return addMessage("Provider methods must return a value. Do not return void.");
+  }
+
   public Errors missingConstantValues() {
     return addMessage("Missing constant value. Please call to(...).");
   }

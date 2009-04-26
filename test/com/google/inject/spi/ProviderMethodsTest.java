@@ -17,7 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Asserts;
+import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
@@ -190,7 +190,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       });
       fail();
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(),
           "more than one annotation annotated with @BindingAnnotation:", "Named", "Blue",
           "at " + getClass().getName(), ".provideString(ProviderMethodsTest.java:");
     }
@@ -352,5 +352,20 @@ public class ProviderMethodsTest extends TestCase implements Module {
     Provider provider = binding.getProviderInstance();    
     assertEquals(ProviderMethod.class, provider.getClass());
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
+  }
+
+  public void testVoidProviderMethods() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {}
+
+        @Provides void provideFoo() {}
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), 
+          "1) Provider methods must return a value. Do not return void.",
+          getClass().getName(), ".provideFoo(ProviderMethodsTest.java:");
+    }
   }
 }
