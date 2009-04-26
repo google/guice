@@ -83,4 +83,32 @@ public class CircularDependencyTest extends TestCase {
   static class D {
     @Inject D(C c) {}
   }
+
+  /**
+   * As reported by issue 349, we give a lousy trace when a class is circularly
+   * dependent on itself in multiple ways.
+   */
+  public void testCircularlyDependentMultipleWays() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        binder.bind(A.class).to(E.class);
+        binder.bind(B.class).to(E.class);
+      }
+    });
+    injector.getInstance(A.class);
+  }
+
+  @Singleton
+  static class E implements A, B {
+    @Inject
+    public E(A a, B b) {}
+
+    public B getB() {
+      return this;
+    }
+
+    public A getA() {
+      return this;
+    }
+  }
 }
