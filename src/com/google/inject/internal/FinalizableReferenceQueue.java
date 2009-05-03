@@ -16,15 +16,15 @@
 
 package com.google.inject.internal;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A reference queue with an associated background thread that dequeues
@@ -108,19 +108,59 @@ public class FinalizableReferenceQueue {
   final ReferenceQueue<Object> queue;
 
   /**
+   * Whether or not the background thread started successfully.
+   */
+  final boolean threadStarted;
+
+  /**
    * Constructs a new queue.
    */
   @SuppressWarnings("unchecked")
   public FinalizableReferenceQueue() {
     // We could start the finalizer lazily, but I'd rather it blow up early.
+    ReferenceQueue<Object> queue;
+    boolean threadStarted = false;
     try {
-      this.queue = (ReferenceQueue<Object>) startFinalizer.invoke(null,
+      queue = (ReferenceQueue<Object>) startFinalizer.invoke(null,
           FinalizableReference.class, this);
+      threadStarted = true;
     } catch (IllegalAccessException e) {
       // Finalizer.startFinalizer() is public.
       throw new AssertionError(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
+    } catch (Throwable t) {
+      logger.log(Level.INFO, "Failed to start reference finalizer thread."
+          + " Reference cleanup will only occur when new references are"
+          + " created.", t);
+      queue = new ReferenceQueue<Object>();
+    }
+
+    this.queue = queue;
+    this.threadStarted = threadStarted;
+  }
+
+  /**
+   * Repeatedly dequeues references from the queue and invokes
+   * {@link FinalizableReference#finalizeReferent()} on them until the queue
+   * is empty. This method is a no-op if the background thread was created
+   * successfully.
+   */
+  void cleanUp() {
+    if (threadStarted) {
+      return;
+    }
+
+    Reference<?> reference;
+    while ((reference = queue.poll()) != null) {
+      /*
+       * This is for the benefit of phantom references. Weak and soft
+       * references will have already been cleared by this point.
+       */
+      reference.clear();
+      try {
+        ((FinalizableReference) reference).finalizeReferent();
+      } catch (Throwable t) {
+        logger.log(Level.SEVERE, "Error cleaning up after reference.", t);
+      }
     }
   }
 

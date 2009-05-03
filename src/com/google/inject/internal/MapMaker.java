@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.CustomConcurrentHashMap.ComputingStrategy;
-import com.google.inject.internal.CustomConcurrentHashMap.Internals;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -28,6 +26,8 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.inject.internal.CustomConcurrentHashMap.Internals;
+import com.google.inject.internal.CustomConcurrentHashMap.ComputingStrategy;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  *
  * These features are all optional; {@code new MapMaker().makeMap()}
  * returns a valid concurrent map that behaves exactly like a
- * {@link ConcurrentHashMap}.   
+ * {@link ConcurrentHashMap}.
  *
  * The returned map is implemented as a hash table with similar performance
  * characteristics to {@link ConcurrentHashMap}. It supports all optional
@@ -74,7 +74,7 @@ import java.util.concurrent.TimeUnit;
  * <p>An entry whose key or value is reclaimed by the garbage collector
  * immediately disappears from the map. (If the default settings of strong
  * keys and strong values are used, this will never happen.) The client can
- * never observe a partially-reclaimed entry. Any {@link Map.Entry}
+ * never observe a partially-reclaimed entry. Any {@link java.util.Map.Entry}
  * instance retrieved from the map's {@linkplain Map#entrySet() entry set}
  * is snapshot of that entry's state at the time of retrieval.
  *
@@ -129,7 +129,7 @@ public final class MapMaker {
     return this;
   }
 
-  /**C
+  /**
    * Guides the allowed concurrency among update operations. Used as a
    * hint for internal sizing. The table is internally partitioned to try
    * to permit the indicated number of concurrent updates without
@@ -254,17 +254,38 @@ public final class MapMaker {
             builder.loadFactor, builder.concurrencyLevel);
   }
 
-  // TODO: Clone the referenced doc here after things stabilize more so
-  // we don't expose this implementation detail.
   /**
-   * See {@link CustomConcurrentHashMap.Builder#buildComputingMap(
-   * CustomConcurrentHashMap.ComputingStrategy, Function)}.
+   * Builds a map that supports atomic, on-demand computation of values. {@link
+   * Map#get} returns the value corresponding to the given key, atomically
+   * computes it using the computer function passed to this builder, or waits
+   * for another thread to compute the value if necessary. Only one value will
+   * be computed for each key at a given time.
    *
-   * <p>If {@link java.util.Map#put} is called before a computation
-   * completes, other threads waiting on the computation will wake up and
-   * return the put value up until the computation completes, at which
-   * point the computation result will overwrite the value from the
-   * {@code put} in the map.
+   * <p>If an entry's value has not finished computing yet, query methods
+   * besides {@link java.util.Map#get} return immediately as if an entry doesn't
+   * exist. In other words, an entry isn't externally visible until the value's
+   * computation completes.
+   *
+   * <p>{@link Map#get} in the returned map implementation throws:
+   *
+   * <ul>
+   * <li>{@link NullPointerException} if the key is null or the computer returns
+   *     null</li>
+   * <li>or {@link ComputationException} wrapping an exception thrown by the
+   *     computation</li>
+   * </ul>
+   *
+   * <p><b>Note:</b> Callers of {@code get()} <i>must</i> ensure that the key
+   * argument is of type {@code K}. {@code Map.get()} takes {@code Object}, so
+   * the key type is not checked at compile time. Passing an object of a type
+   * other than {@code K} can result in that object being unsafely passed to the
+   * computer function as type {@code K} not to mention the unsafe key being
+   * stored in the map.
+   *
+   * <p>If {@link java.util.Map#put} is called before a computation completes,
+   * other threads waiting on the computation will wake up and return the put
+   * value up until the computation completes, at which point the computation
+   * result will overwrite the value from the {@code put} in the map.
    */
   public <K, V> ConcurrentMap<K, V> makeComputingMap(
       Function<? super K, ? extends V> computer) {
@@ -1018,7 +1039,7 @@ public final class MapMaker {
       return new SoftValueReference<K, V>(get(), entry);
     }
 
-    public V waitForValue() throws InterruptedException {
+    public V waitForValue() {
       return get();
     }
   }
@@ -1041,7 +1062,7 @@ public final class MapMaker {
       return this;
     }
 
-    public V waitForValue() throws InterruptedException {
+    public V waitForValue() {
       return get();
     }
   }

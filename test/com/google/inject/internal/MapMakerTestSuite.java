@@ -17,11 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.CustomConcurrentHashMap.Impl;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,6 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -52,6 +48,7 @@ public class MapMakerTestSuite extends TestCase {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
+    suite.addTestSuite(MakerTest.class);
     suite.addTestSuite(RecursiveComputationTest.class);
     suite.addTestSuite(ReferenceMapTest.class);
     suite.addTestSuite(ComputingTest.class);
@@ -86,7 +83,7 @@ public class MapMakerTestSuite extends TestCase {
     }
 
     public void testInitialCapacity_large() {
-      MapMaker maker = new MapMaker().initialCapacity(Integer.MAX_VALUE);
+      new MapMaker().initialCapacity(Integer.MAX_VALUE);
       // that the maker didn't blow up is enough;
       // don't actually create this monster!
     }
@@ -157,7 +154,7 @@ public class MapMakerTestSuite extends TestCase {
     }
 
     public void testConcurrencyLevel_large() {
-      MapMaker maker = new MapMaker().concurrencyLevel(Integer.MAX_VALUE);
+      new MapMaker().concurrencyLevel(Integer.MAX_VALUE);
       // don't actually build this beast
     }
 
@@ -228,19 +225,19 @@ public class MapMakerTestSuite extends TestCase {
     }
 
     public void testExpiration_small() {
-      MapMaker maker = new MapMaker().expiration(1, NANOSECONDS);
+      new MapMaker().expiration(1, NANOSECONDS);
       // well, it didn't blow up.
     }
 
-//    public void testExpiration_setTwice() {
-//      MapMaker maker = new MapMaker().expiration(1, HOURS);
-//      try {
-//        // even to the same value is not allowed
-//        maker.expiration(1, HOURS);
-//        fail();
-//      } catch (IllegalStateException expected) {
-//      }
-//    }
+    public void testExpiration_setTwice() {
+      MapMaker maker = new MapMaker().expiration(3600, SECONDS);
+      try {
+        // even to the same value is not allowed
+        maker.expiration(3600, SECONDS);
+        fail();
+      } catch (IllegalStateException expected) {
+      }
+    }
 
     public void testReturnsPlainConcurrentHashMapWhenPossible() {
       Map<?, ?> map = new MapMaker()
@@ -255,7 +252,7 @@ public class MapMakerTestSuite extends TestCase {
       // Use makeComputingMap() to force it to return CCHM.Impl, not
       // ConcurrentHashMap.
       return (Impl<?, ?, ?>) maker.makeComputingMap(new Function<Object, Object>() {
-        public Object apply(Object from) {
+        public Object apply(@Nullable Object from) {
           return from;
         }
       });
@@ -420,9 +417,9 @@ public class MapMakerTestSuite extends TestCase {
       Integer key1 = new Integer(12357);
       Integer key2 = new Integer(12357);
       map.put(key1, "a");
-      assertFalse(map.entrySet().remove(entry(key2, "a")));
+      assertFalse(map.entrySet().remove(Maps.immutableEntry(key2, "a")));
       assertEquals(1, map.size());
-      assertTrue(map.entrySet().remove(entry(key1, "a")));
+      assertTrue(map.entrySet().remove(Maps.immutableEntry(key1, "a")));
       assertEquals(0, map.size());
     }
 
@@ -447,17 +444,6 @@ public class MapMakerTestSuite extends TestCase {
       iterator.next();
       iterator.remove();
       assertEquals(0, map.size());
-    }
-
-    public void testSerialization() {
-      ConcurrentMap<String, Integer> map =
-          new MapMaker().makeMap();
-      map.put("one", 1);
-      reserializeAndAssert(map);
-
-      map = new MapMaker().weakKeys().makeMap();
-      map.put("one", 1);
-      reserialize(map);
     }
   }
 
@@ -611,7 +597,7 @@ public class MapMakerTestSuite extends TestCase {
   /**
    * Tests combinations of key and value reference types.
    */
-  public static class ReferenceCombinationTestSuite {
+  public static class ReferenceCombinationTestSuite extends TestCase {
 
     interface BuilderOption {
       void applyTo(MapMaker maker);
@@ -783,8 +769,9 @@ public class MapMakerTestSuite extends TestCase {
         final ConcurrentMap<String, String> map = newMap();
         map.put("a", "1");
         map.put("b", "2");
+        @SuppressWarnings("unchecked")
         Set<Map.Entry<String, String>> expected
-            = set(entry("a", "1"), entry("b", "2"));
+            = set(Maps.immutableEntry("a", "1"), Maps.immutableEntry("b", "2"));
         assertEquals(expected, map.entrySet());
       }
 
@@ -837,18 +824,6 @@ public class MapMakerTestSuite extends TestCase {
         assertEquals(1, map.size());
       }
 
-      public void testReferenceMapSerialization() throws IOException,
-          ClassNotFoundException {
-        Map<Key, Value> original = newMap();
-        original.put(Key.FOO, Value.FOO);
-        @SuppressWarnings("unchecked")
-        Map<Key, Value> map = reserialize(original);
-        map.put(Key.BAR, Value.BAR);
-        assertSame(Value.FOO, map.get(Key.FOO));
-        assertSame(Value.BAR, map.get(Key.BAR));
-        assertNull(map.get(Key.TEE));
-      }
-
       static class MockFunction implements Function<Object, Object>,
           Serializable {
         int count;
@@ -856,19 +831,7 @@ public class MapMakerTestSuite extends TestCase {
           count++;
           return Value.valueOf(key.toString());
         }
-      }
-
-      public void testReferenceCacheSerialization() throws IOException,
-          ClassNotFoundException {
-        MockFunction f = new MockFunction();
-        ConcurrentMap<Object, Object> map = newBuilder().makeComputingMap(f);
-        assertSame(Value.FOO, map.get(Key.FOO));
-        assertSame(Value.BAR, map.get(Key.BAR));
-        map = reserialize(map);
-        assertSame(Value.FOO, map.get(Key.FOO));
-        assertSame(Value.BAR, map.get(Key.BAR));
-        assertSame(Value.TEE, map.get(Key.TEE));
-        assertEquals(2, f.count);
+        private static final long serialVersionUID = 0;
       }
     }
 
@@ -937,7 +900,8 @@ public class MapMakerTestSuite extends TestCase {
 
       for (int i = 0; i < 10; i++) {
         map.putIfAbsent(KEY_PREFIX + i, VALUE_PREFIX + i);
-        assertEquals(Integer.valueOf(VALUE_PREFIX + i), map.get(KEY_PREFIX + i));
+        assertEquals(Integer.valueOf(VALUE_PREFIX + i),
+            map.get(KEY_PREFIX + i));
       }
 
       runTasks();
@@ -947,7 +911,8 @@ public class MapMakerTestSuite extends TestCase {
 
     public void testExpiringGetForSoft() {
       ConcurrentMap<String, Integer> map = new MapMaker()
-          .expiration(EXPIRING_TIME, TimeUnit.MILLISECONDS).makeMap();
+          .softValues().expiration(EXPIRING_TIME, TimeUnit.MILLISECONDS)
+          .makeMap();
 
       runExpirationTest(map);
     }
@@ -968,7 +933,8 @@ public class MapMakerTestSuite extends TestCase {
 
     public void testRemovalSchedulerForSoft() {
       ConcurrentMap<String, Integer> map = new MapMaker()
-          .softValues().expiration(EXPIRING_TIME, TimeUnit.MILLISECONDS).makeMap();
+          .softValues().expiration(EXPIRING_TIME, TimeUnit.MILLISECONDS)
+          .makeMap();
 
       runRemovalScheduler(map, KEY_PREFIX, EXPIRING_TIME);
     }
@@ -1065,7 +1031,8 @@ public class MapMakerTestSuite extends TestCase {
 
     public void testExpiringPut() {
       ConcurrentMap<String, Integer> cache = new MapMaker()
-          .expiration(50, TimeUnit.MILLISECONDS).makeComputingMap(WATCHED_CREATOR);
+          .expiration(50, TimeUnit.MILLISECONDS)
+          .makeComputingMap(WATCHED_CREATOR);
 
       for (int i = 0; i < 10; i++) {
         cache.put(KEY_PREFIX + i, i + VALUE_SUFFIX);
@@ -1088,7 +1055,8 @@ public class MapMakerTestSuite extends TestCase {
 
     public void testExpiringPutIfAbsent() {
       ConcurrentMap<String, Integer> cache = new MapMaker()
-          .expiration(50, TimeUnit.MILLISECONDS).makeComputingMap(WATCHED_CREATOR);
+          .expiration(50, TimeUnit.MILLISECONDS)
+          .makeComputingMap(WATCHED_CREATOR);
 
       for (int i = 0; i < 10; i++) {
         cache.putIfAbsent(KEY_PREFIX + i, i + VALUE_SUFFIX);
@@ -1111,7 +1079,8 @@ public class MapMakerTestSuite extends TestCase {
 
     public void testExpiringGetForStrong() {
       ConcurrentMap<String, Integer> cache = new MapMaker()
-          .expiration(10, TimeUnit.MILLISECONDS).makeComputingMap(WATCHED_CREATOR);
+          .expiration(10, TimeUnit.MILLISECONDS)
+          .makeComputingMap(WATCHED_CREATOR);
 
       runExpirationTest(cache);
     }
@@ -1230,38 +1199,6 @@ public class MapMakerTestSuite extends TestCase {
 
     static final WatchedCreatorFunction WATCHED_CREATOR =
         new WatchedCreatorFunction();
-  }
-
-  static <T> T reserializeAndAssert(T object) {
-    T copy = reserialize(object);
-    if (!copy.equals(object)) {
-      throw new AssertionError("The re-serialized object " + copy +
-          " does not equal the original object " + object);
-    }
-    return copy;
-  }
-
-  @SuppressWarnings("unchecked")
-  static <T> T reserialize(T object) {
-    if (object == null) {
-      throw new NullPointerException();
-    }
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    try {
-      ObjectOutputStream out = new ObjectOutputStream(bytes);
-      out.writeObject(object);
-      ObjectInputStream in = new ObjectInputStream(
-          new ByteArrayInputStream(bytes.toByteArray()));
-      return (T) in.readObject();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  static <K, V> Map.Entry<K, V> entry(K key, V value) {
-    return new SimpleEntry<K, V>(key, value);
   }
 
   static <E> Set<E> set(E... elements) {

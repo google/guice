@@ -18,8 +18,10 @@ package com.googlecode.guice;
 
 import com.google.inject.internal.MapMakerTestSuite;
 import java.io.FilePermission;
+import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Arrays;
+import java.util.PropertyPermission;
 import junit.framework.Test;
 
 /**
@@ -34,14 +36,15 @@ public class StrictContainerTestSuite {
   public static Test suite() {
     SecurityManager securityManager = new SecurityManager() {
       @Override public void checkPermission(Permission permission) {
-        if (permission instanceof FilePermission) {
-          return;
+        if (permission instanceof FilePermission
+            || permission instanceof PropertyPermission) {
+          return; // avoid creating a stacktrace for common permissions
         }
 
-        if (permission instanceof RuntimePermission
-            && permission.getName().equals("getClassLoader")
-            && Arrays.toString(new Throwable().getStackTrace()).contains(".getSystemClassLoader(")) {
-          throw new SecurityException("StrictContainerTestSuite forbids this!");
+        String stacktrace = Arrays.toString(new Throwable().getStackTrace());
+        if (stacktrace.contains("Thread.<init>")
+            || stacktrace.contains(".getSystemClassLoader(")) {
+          throw new AccessControlException("StrictContainerTestSuite forbids this!");
         }
       }
 

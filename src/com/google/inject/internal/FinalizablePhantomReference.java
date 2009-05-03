@@ -41,5 +41,6 @@ public abstract class FinalizablePhantomReference<T>
   protected FinalizablePhantomReference(T referent,
       FinalizableReferenceQueue queue) {
     super(referent, queue.queue);
+    queue.cleanUp();
   }
 }
