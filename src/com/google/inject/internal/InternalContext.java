@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.spi.Dependency;
 import java.util.Map;
 
@@ -30,7 +29,6 @@ public final class InternalContext {
 
   private Map<Object, ConstructionContext<?>> constructionContexts = Maps.newHashMap();
   private Dependency dependency;
-  private int acquired = 0;
 
   @SuppressWarnings("unchecked")
   public <T> ConstructionContext<T> getConstructionContext(Object key) {
@@ -41,19 +39,6 @@ public final class InternalContext {
       constructionContexts.put(key, constructionContext);
     }
     return constructionContext;
-  }
-
-  public void acquire() {
-    acquired++;
-  }
-
-  public void release() {
-    checkState(acquired > 0);
-    acquired--;
-    if (acquired == 0) {
-      constructionContexts.clear();
-      dependency = null;
-    }
   }
 
   public Dependency getDependency() {
