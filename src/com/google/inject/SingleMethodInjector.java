@@ -21,7 +21,6 @@ import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +32,7 @@ import java.lang.reflect.Modifier;
  */
 class SingleMethodInjector implements SingleMemberInjector {
   final MethodInvoker methodInvoker;
-  final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
+  final SingleParameterInjector<?>[] parameterInjectors;
   final InjectionPoint injectionPoint;
 
   public SingleMethodInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)

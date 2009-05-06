@@ -64,7 +64,7 @@ class ConstructorInjectorStore {
       throw errors.toException();
     }
 
-    ImmutableList<SingleParameterInjector<?>> constructorParameterInjectors
+    SingleParameterInjector<?>[] constructorParameterInjectors
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
     MembersInjectorImpl<T> membersInjector = injector.membersInjectorStore.get(type, errors);
 

@@ -79,9 +79,9 @@ class InjectorImpl implements Injector, Lookups {
     if (parent != null) {
       localContext = parent.localContext;
     } else {
-      localContext = new ThreadLocal<InternalContext[]>() {
-        protected InternalContext[] initialValue() {
-          return new InternalContext[1];
+      localContext = new ThreadLocal<InternalContext>() {
+        protected InternalContext initialValue() {
+          return new InternalContext();
         }
       };
     }
@@ -681,7 +681,7 @@ class InjectorImpl implements Injector, Lookups {
   /**
    * Returns parameter injectors, or {@code null} if there are no parameters.
    */
-  ImmutableList<SingleParameterInjector<?>> getParametersInjectors(
+  SingleParameterInjector<?>[] getParametersInjectors(
       List<Dependency<?>> parameters, Errors errors) throws ErrorsException {
     if (parameters.isEmpty()) {
       return null;
@@ -699,7 +699,7 @@ class InjectorImpl implements Injector, Lookups {
     }
 
     errors.throwIfNewErrors(numErrorsBefore);
-    return ImmutableList.of(result);
+    return result;
   }
 
   <T> SingleParameterInjector<T> createParameterInjector(final Dependency<T> dependency,
@@ -793,23 +793,16 @@ class InjectorImpl implements Injector, Lookups {
     return getProvider(type).get();
   }
 
-  final ThreadLocal<InternalContext[]> localContext;
+  final ThreadLocal<InternalContext> localContext;
 
   /** Looks up thread local context. Creates (and removes) a new context if necessary. */
   <T> T callInContext(ContextualCallable<T> callable) throws ErrorsException {
-    InternalContext[] reference = localContext.get();
-    if (reference[0] == null) {
-      reference[0] = new InternalContext();
-      try {
-        return callable.call(reference[0]);
-      } finally {
-        // Only remove the context if this call created it.
-        localContext.remove();
-      }
-    }
-    else {
-      // Someone else will clean up this context.
-      return callable.call(reference[0]);
+    InternalContext reference = localContext.get();
+    reference.acquire();
+    try {
+      return callable.call(reference);
+    } finally {
+      reference.release();
     }
   }
 

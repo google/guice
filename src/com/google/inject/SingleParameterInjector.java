@@ -21,7 +21,6 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.InternalFactory;
 import com.google.inject.spi.Dependency;
-import java.util.List;
 
 /**
  * Resolves a single parameter, to be used in a constructor or method invocation.
@@ -50,18 +49,21 @@ class SingleParameterInjector<T> {
    * Returns an array of parameter values.
    */
   static Object[] getAll(Errors errors, InternalContext context,
-      List<SingleParameterInjector<?>> parameterInjectors) throws ErrorsException {
+      SingleParameterInjector<?>[] parameterInjectors) throws ErrorsException {
     if (parameterInjectors == null) {
       return NO_ARGUMENTS;
     }
 
     int numErrorsBefore = errors.size();
-    Object[] parameters = new Object[parameterInjectors.size()];
 
-    int i = 0;
-    for (SingleParameterInjector<?> parameterInjector : parameterInjectors) {
+    int size = parameterInjectors.length;
+    Object[] parameters = new Object[size];
+
+    // optimization: use manual for/each to save allocating an iterator here  
+    for (int i = 0; i < size; i++) {
+      SingleParameterInjector<?> parameterInjector = parameterInjectors[i];
       try {
-        parameters[i++] = parameterInjector.inject(errors, context);
+        parameters[i] = parameterInjector.inject(errors, context);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }

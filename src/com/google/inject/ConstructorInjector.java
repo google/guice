@@ -19,7 +19,6 @@ package com.google.inject;
 import com.google.inject.internal.ConstructionContext;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.spi.InjectionPoint;
@@ -34,13 +33,13 @@ import java.lang.reflect.InvocationTargetException;
 class ConstructorInjector<T> {
 
   private final ImmutableSet<InjectionPoint> injectableMembers;
-  private final ImmutableList<SingleParameterInjector<?>> parameterInjectors;
+  private final SingleParameterInjector<?>[] parameterInjectors;
   private final ConstructionProxy<T> constructionProxy;
   private final MembersInjectorImpl<T> membersInjector;
 
   ConstructorInjector(ImmutableSet<InjectionPoint> injectableMembers,
       ConstructionProxy<T> constructionProxy,
-      ImmutableList<SingleParameterInjector<?>> parameterInjectors,
+      SingleParameterInjector<?>[] parameterInjectors,
       MembersInjectorImpl<T> membersInjector)
       throws ErrorsException {
     this.injectableMembers = injectableMembers;
