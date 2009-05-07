@@ -72,13 +72,18 @@ public final class Types {
 
   /**
    * Returns a type that represents an unknown type that extends {@code bound}.
+   * For example, if {@code bound} is {@code CharSequence.class}, this returns
+   * {@code ? extends CharSequence}. If {@code bound} is {@code Object.class},
+   * this returns {@code ?}, which is shorthand for {@code ? extends Object}.
    */
   public static WildcardType subtypeOf(Type bound) {
     return new WildcardTypeImpl(new Type[] { bound }, MoreTypes.EMPTY_TYPE_ARRAY);
   }
 
   /**
-   * Returns a type that represents an unknown supertype of {@code bound}.
+   * Returns a type that represents an unknown supertype of {@code bound}. For
+   * example, if {@code bound} is {@code String.class}, this returns {@code ?
+   * super String}.
    */
   public static WildcardType supertypeOf(Type bound) {
     return new WildcardTypeImpl(new Type[] { Object.class }, new Type[] { bound });
