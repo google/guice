@@ -11,6 +11,16 @@
       <properties />
     </buildFile>
   </component>
+  <component name="BlazePluginSettings" buildBeforeRefresh="true" />
+  <component name="Build editor project-level loader">
+    <settings>
+      <class-settings class="com.google.devtools.intellig.configcheck.ClearOutputChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.JavacHeapChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectJdkChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.ProjectPathChecker" />
+      <class-settings class="com.google.devtools.intellig.configcheck.PythonSdkChecker" />
+    </settings>
+  </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
@@ -102,7 +112,25 @@
         <option name="VARIABLE_ANNOTATION_WRAP" value="1" />
         <option name="ENUM_CONSTANTS_WRAP" value="1" />
         <ADDITIONAL_INDENT_OPTIONS fileType="">
-          <option name="INDENT_SIZE" value="4" />
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
+          <option name="INDENT_SIZE" value="2" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
           <option name="TAB_SIZE" value="4" />
           <option name="USE_TAB_CHARACTER" value="false" />
@@ -137,6 +165,24 @@
           <option name="LABEL_INDENT_SIZE" value="0" />
           <option name="LABEL_INDENT_ABSOLUTE" value="false" />
         </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="sql">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="txt">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="xml">
           <option name="INDENT_SIZE" value="4" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
@@ -155,6 +201,11 @@
     <option name="DEPLOY_AFTER_MAKE" value="0" />
     <resourceExtensions />
     <wildcardResourcePatterns />
+  </component>
+  <component name="ContinuousBuildConfigurationComponent">
+    <builds>
+      <build intervalToCheckBuild="1" buildKey="" buildLabel="" enabled="false" />
+    </builds>
   </component>
   <component name="CopyrightManager" default="">
     <module2copyright />
@@ -387,6 +438,7 @@
     <option name="FILTER_INFO" value="true" />
     <option name="CUSTOM_FILTER" />
   </component>
+  <component name="Mach LOCAL_PREFIX stripper" stripping="true" />
   <component name="Palette2">
     <group name="Swing">
       <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
@@ -513,7 +565,7 @@
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectKey">
-    <option name="state" value="https://google-guice.googlecode.com/svn/trunk/guice.ipr" />
+    <option name="state" value="https://google-guice.googlecode.com/svn/tags/snapshot20090512/guice.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
@@ -528,7 +580,7 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" filepath="$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="java version &quot;1.5.0_06&quot;" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="ResourceManagerContainer">

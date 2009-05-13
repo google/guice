@@ -26,18 +26,17 @@ import java.util.Collection;
  * Thrown when a programming error such as a misplaced annotation, illegal binding, or unsupported
  * scope is found. Clients should catch this exception, log it, and stop execution.
  *
+ * <strong>Note:</strong> this class temporarily extends ProvisionException to ease migration.
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public final class ConfigurationException extends RuntimeException {
+public final class ConfigurationException extends ProvisionException {
 
-  private final ImmutableSet<Message> messages;
   private Object partialValue = null;
 
   /** Creates a ConfigurationException containing {@code messages}. */
   public ConfigurationException(Iterable<Message> messages) {
-    this.messages = ImmutableSet.copyOf(messages);
-    initCause(Errors.getOnlyCause(this.messages));
+    super(messages);
   }
 
   /** Returns a copy of this configuration exception with the specified partial value. */

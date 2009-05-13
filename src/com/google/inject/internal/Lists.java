@@ -20,17 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
-/**
- * Static utility methods pertaining to {@link List} instances. Also see this
- * class's counterparts {@link Sets} and {@link Maps}.
- *
- * @author Kevin Bourrillion
- * @author Mike Bostock
- */
-public final class Lists {
-  private Lists() {}
+/** @deprecated please use the official version in {@code com.google.common.collect}. */
+@Deprecated
+public class Lists {
 
   // ArrayList
 

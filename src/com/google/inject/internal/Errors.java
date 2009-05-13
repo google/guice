@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
+import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
@@ -42,6 +43,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -60,9 +63,20 @@ import java.util.List;
  */
 public final class Errors implements Serializable {
 
+  private static final AtomicInteger warningsLogged = new AtomicInteger(0);
+
   // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad
-      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+  private static boolean allowNullsBadBadBad(Dependency<?> dependency) {
+    boolean allowNulls = "I'm a bad hack"
+        .equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+
+    if (allowNulls && warningsLogged.getAndIncrement() < 10) {
+      Logger.getLogger(Guice.class.getName()).warning(
+          "Guice injected null into " + dependency + "; please mark it @Nullable");
+    }
+
+    return allowNulls;
+  }
 
   /**
    * The root errors object. Used to access the list of error messages.
@@ -278,7 +292,7 @@ public final class Errors implements Serializable {
       TypeLiteral<?> type, Throwable cause) {
     return errorInUserCode(cause,
         "Error notifying TypeListener %s (bound at %s) of %s.%n"
-        + " Reason: %s",
+            + " Reason: %s",
         listener.getListener(), convert(listener.getSource()), type, cause);
   }
 
@@ -505,7 +519,7 @@ public final class Errors implements Serializable {
       throws ErrorsException {
     if (value != null
         || dependency.isNullable()
-        || allowNullsBadBadBad) {
+        || allowNullsBadBadBad(dependency)) {
       return value;
     }
 

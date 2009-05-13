@@ -20,20 +20,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-/**
- * Static utility methods pertaining to {@link Map} instances. Also see this
- * class's counterparts {@link Lists} and {@link Sets}.
- *
- * @author Kevin Bourrillion
- * @author Mike Bostock
- * @author Isaac Shum
- */
-public final class Maps {
-  private Maps() {}
+/** @deprecated please use the official version in {@code com.google.common.collect}. */
+@Deprecated
+public class Maps {
 
   /**
    * Creates a {@code HashMap} instance.

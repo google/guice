@@ -17,6 +17,10 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
+import com.google.inject.Provider;
+import com.google.inject.Key;
+import java.util.Set;
+import java.lang.reflect.Constructor;
 
 /**
  * No-op visitor for subclassing. All interface methods simply delegate to {@link
@@ -38,40 +42,157 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
   }
 
   public V visit(InstanceBinding<? extends T> instanceBinding) {
-    return visitOther(instanceBinding);
+    return visitInstance(instanceBinding);
   }
 
   public V visit(ProviderInstanceBinding<? extends T> providerInstanceBinding) {
-    return visitOther(providerInstanceBinding);
+    return visitProviderInstance(providerInstanceBinding);
   }
 
   public V visit(ProviderKeyBinding<? extends T> providerKeyBinding) {
-    return visitOther(providerKeyBinding);
+    return visitProviderKey(providerKeyBinding);
   }
 
   public V visit(LinkedKeyBinding<? extends T> linkedKeyBinding) {
-    return visitOther(linkedKeyBinding);
+    return visitLinkedKey(linkedKeyBinding);
   }
 
   public V visit(ExposedBinding<? extends T> exposedBinding) {
-    return visitOther(exposedBinding);
+    return visitExposed(exposedBinding);
   }
 
   public V visit(UntargettedBinding<? extends T> untargettedBinding) {
-    return visitOther(untargettedBinding);
+    return visitUntargetted(untargettedBinding);
   }
 
   public V visit(ConstructorBinding<? extends T> constructorBinding) {
-    return visitOther(constructorBinding);
+    return visitConstructor(constructorBinding);
   }
 
   public V visit(ConvertedConstantBinding<? extends T> convertedConstantBinding) {
-    return visitOther(convertedConstantBinding);
+    return visitConvertedConstant(convertedConstantBinding);
   }
 
-   // javac says it's an error to cast ProviderBinding<? extends T> to Binding<? extends T>
+  // javac says it's an error to cast ProviderBinding<? extends T> to Binding<? extends T>
   @SuppressWarnings("unchecked")
   public V visit(ProviderBinding<? extends T> providerBinding) {
     return visitOther((Binding) providerBinding);
+  }
+
+  // this API has gone through two major changes
+  //   originally each method had the form visitInstance(T, injectionPoints)
+  //                     and then the form visitInstance(InstanceBinding)
+  //                      and now the form visit(InstanceBinding)
+  //
+  // apologies for the churn.
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated protected V visitOther() {
+    return null;
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitInstance(T instance, Set<InjectionPoint> injectionPoints) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitProvider(
+      Provider<? extends T> provider, Set<InjectionPoint> injectionPoints) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitProviderKey(Key<? extends Provider<? extends T>> providerKey) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitKey(Key<? extends T> key) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitUntargetted() {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitConstructor(Constructor<? extends T> constructor,
+      Set<InjectionPoint> injectionPoints) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitConvertedConstant(T value) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitProviderBinding(Key<?> provided) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitExposed(PrivateElements privateElements) {
+    return visitOther();
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitInstance(InstanceBinding<? extends T> binding) {
+    V result = visitInstance(binding.getInstance(), binding.getInjectionPoints());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitProviderInstance(ProviderInstanceBinding<? extends T> binding) {
+    V result = visitProvider(binding.getProviderInstance(), binding.getInjectionPoints());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitProviderKey(ProviderKeyBinding<? extends T> binding) {
+    V result = visitProviderKey(binding.getProviderKey());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitLinkedKey(LinkedKeyBinding<? extends T> binding) {
+    V result = visitKey(binding.getLinkedKey());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitExposed(ExposedBinding<? extends T> binding) {
+    V result = visitExposed(binding.getPrivateElements());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitUntargetted(UntargettedBinding<? extends T> binding) {
+    V result = visitUntargetted();
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @SuppressWarnings("unchecked")
+  @Deprecated public V visitConstructor(ConstructorBinding<? extends T> binding) {
+    V result = visitConstructor((Constructor) binding.getConstructor().getMember(),
+        binding.getInjectableMembers());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  @Deprecated public V visitConvertedConstant(ConvertedConstantBinding<? extends T> binding) {
+    V result = visitConvertedConstant(binding.getValue());
+    return result != null ? result : visitOther(binding);
+  }
+
+  /** @deprecated override {@code visit} instead. */
+  // javac says it's an error to cast ProviderBinding<? extends T> to Binding<? extends T>
+  @SuppressWarnings("unchecked")
+  @Deprecated public V visitProviderBinding(ProviderBinding<? extends T> binding) {
+    V result = visitProviderBinding(binding.getProvidedKey());
+    return result != null ? result : visitOther((Binding) binding);
   }
 }
