@@ -22,12 +22,10 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
-import com.google.inject.binder.AnnotatedElementBuilder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.PrivateElements;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
@@ -130,48 +128,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
-  public ExposureBuilder<T> usingKeyFrom(PrivateElements privateElements) {
-    checkNotTargetted();
-    checkNotScoped();
-
-    BindingImpl<T> base = getBinding();
-    ExposedBindingImpl<T> exposedBinding = new ExposedBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), privateElements);
-    setBinding(exposedBinding);
-
-    return new ExposureBuilder<T>(this, exposedBinding);
-  }
-
   @Override public String toString() {
     return "BindingBuilder<" + getBinding().getKey().getTypeLiteral() + ">";
-  }
-
-  /**
-   * For private binder's expose() method.
-   */
-  public static class ExposureBuilder<T> implements AnnotatedElementBuilder {
-    private final BindingBuilder<T> bindingBuilder;
-    private BindingImpl<T> binding;
-
-    public ExposureBuilder(BindingBuilder<T> bindingBuilder, ExposedBindingImpl<T> binding) {
-      this.binding = binding;
-      this.bindingBuilder = bindingBuilder;
-    }
-
-    public void annotatedWith(Class<? extends Annotation> annotationType) {
-      binding = bindingBuilder.annotatedWithInternal(annotationType);
-    }
-
-    public void annotatedWith(Annotation annotation) {
-      binding = bindingBuilder.annotatedWithInternal(annotation);
-    }
-
-    public Key<?> getKey() {
-      return binding.getKey();
-    }
-
-    @Override public String toString() {
-      return "AnnotatedElementBuilder";
-    }
   }
 }

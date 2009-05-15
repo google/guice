@@ -51,8 +51,8 @@ public interface BindingTargetVisitor<T, V> {
   V visit(LinkedKeyBinding<? extends T> binding);
 
   /**
-   * Visit a binding to a key exposed from an enclosed private environment. This target is found in
-   * both module and injector bindings.
+   * Visit a binding to a key exposed from an enclosed private environment. This target is only
+   * found in injector bindings.
    */
   V visit(ExposedBinding<? extends T> binding);
 

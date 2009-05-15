@@ -14,31 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.inject.spi;
+package com.google.inject.util;
 
 import com.google.inject.Module;
-import java.util.List;
-
+import com.google.inject.spi.ElementVisitor;
+import com.google.inject.spi.ElementsTest;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class ModuleWriterTest extends ElementsTest {
+public class NoopOverrideTest extends ElementsTest {
 
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
-    // get some elements to apply
-    List<Element> elements = Elements.getElements(module);
-
-    // apply the recorded elements, and record them again!
-    List<Element> rewrittenElements
-        = Elements.getElements(new ModuleWriter().create(elements));
-
-    // verify that the replayed elements are as expected
-    assertEquals(rewrittenElements.size(), visitors.length);
-    for (int i = 0; i < visitors.length; i++) {
-      ElementVisitor<?> visitor = visitors[i];
-      Element element = rewrittenElements.get(i);
-      element.acceptVisitor(visitor);
-    }
+    Module overridden = Modules.override(module).with(Modules.EMPTY_MODULE);
+    super.checkModule(overridden, visitors);
   }
 }

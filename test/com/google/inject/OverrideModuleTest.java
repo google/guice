@@ -201,6 +201,21 @@ public class OverrideModuleTest extends TestCase {
     }
   }
 
+  public void testStandardScopeAnnotation() {
+    final SingleUseScope scope = new SingleUseScope();
+
+    Module module = new AbstractModule() {
+      protected void configure() {
+        bindScope(TestScopeAnnotation.class, scope);
+        bind(String.class).in(TestScopeAnnotation.class);
+      }
+    };
+    assertFalse(scope.used);
+
+    Guice.createInjector(module);
+    assertTrue(scope.used);
+  }
+
   public void testOverrideUntargettedBinding() {
     Module original = new AbstractModule() {
       @Override protected void configure() {
@@ -296,6 +311,80 @@ public class OverrideModuleTest extends TestCase {
     Injector injector = Guice.createInjector(overridden);
     assertEquals("B", injector.getInstance(Key.get(String.class, named("original"))));
     assertEquals("B", injector.getInstance(Key.get(String.class, named("override"))));
+  }
+
+  public void testOverridePrivateModuleOverPrivateModule() {
+    Module exposes5and6 = new AbstractModule() {
+      protected void configure() {
+        install(new PrivateModule() {
+          protected void configure() {
+            bind(Integer.class).toInstance(5);
+            expose(Integer.class);
+
+            bind(Character.class).toInstance('E');
+          }
+        });
+
+        install(new PrivateModule() {
+          protected void configure() {
+            bind(Long.class).toInstance(6L);
+            expose(Long.class);
+
+            bind(Character.class).toInstance('F');
+          }
+        });
+      }
+    };
+
+    AbstractModule exposes15 = new AbstractModule() {
+      protected void configure() {
+        install(new PrivateModule() {
+          protected void configure() {
+            bind(Integer.class).toInstance(15);
+            expose(Integer.class);
+
+            bind(Character.class).toInstance('G');
+          }
+        });
+
+        install(new PrivateModule() {
+          protected void configure() {
+            bind(Character.class).toInstance('H');
+          }
+        });
+      }
+    };
+
+    // override forwards
+    Injector injector = Guice.createInjector(Modules.override(exposes5and6).with(exposes15));
+    assertEquals(15, injector.getInstance(Integer.class).intValue());
+    assertEquals(6L, injector.getInstance(Long.class).longValue());
+
+    // and in reverse order
+    Injector reverse = Guice.createInjector(Modules.override(exposes15).with(exposes5and6));
+    assertEquals(5, reverse.getInstance(Integer.class).intValue());
+    assertEquals(6L, reverse.getInstance(Long.class).longValue());
+  }
+
+  public void testOverrideModuleAndPrivateModule() {
+    Module exposes5 = new PrivateModule() {
+      protected void configure() {
+        bind(Integer.class).toInstance(5);
+        expose(Integer.class);
+      }
+    };
+
+    Module binds15 = new AbstractModule() {
+      protected void configure() {
+        bind(Integer.class).toInstance(15);
+      }
+    };
+
+    Injector injector = Guice.createInjector(Modules.override(exposes5).with(binds15));
+    assertEquals(15, injector.getInstance(Integer.class).intValue());
+
+    Injector reverse = Guice.createInjector(Modules.override(binds15).with(exposes5));
+    assertEquals(5, reverse.getInstance(Integer.class).intValue());
   }
 
   @Retention(RUNTIME)

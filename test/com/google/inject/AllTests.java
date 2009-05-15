@@ -23,16 +23,17 @@ import com.google.inject.internal.MapMakerTestSuite;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamesTest;
+import com.google.inject.spi.BindingTargetVisitorTest;
 import com.google.inject.spi.ElementsTest;
 import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.ModuleRewriterTest;
-import com.google.inject.spi.ModuleWriterTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
-import com.google.inject.spi.BindingTargetVisitorTest;
+import com.google.inject.spi.ElementApplyToTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
+import com.google.inject.util.NoopOverrideTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -99,10 +100,10 @@ public class AllTests {
     // spi
     suite.addTestSuite(BindingTargetVisitorTest.class);
     suite.addTestSuite(ElementsTest.class);
+    suite.addTestSuite(ElementApplyToTest.class);
     suite.addTestSuite(HasDependenciesTest.class);
     suite.addTestSuite(InjectionPointTest.class);
     suite.addTestSuite(ModuleRewriterTest.class);
-    suite.addTestSuite(ModuleWriterTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(SpiBindingsTest.class);
 
@@ -110,6 +111,7 @@ public class AllTests {
     // suite.addTestSuite(JmxTest.class); not a testcase
 
     // util
+    suite.addTestSuite(NoopOverrideTest.class);
     suite.addTestSuite(ProvidersTest.class);
     suite.addTestSuite(TypesTest.class);
 

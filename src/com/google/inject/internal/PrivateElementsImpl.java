@@ -16,16 +16,18 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Binder;
-import com.google.inject.internal.BindingBuilder.ExposureBuilder;
+import com.google.inject.PrivateBinder;
+import static com.google.inject.internal.Preconditions.checkArgument;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.PrivateElements;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,7 +50,7 @@ public final class PrivateElementsImpl implements PrivateElements {
   private ImmutableList<Element> elements;
 
   /** lazily instantiated */
-  private ImmutableSet<Key<?>> exposedKeys;
+  private ImmutableMap<Key<?>, Object> exposedKeysToSources;
   private Injector injector;
 
   public PrivateElementsImpl(Object source) {
@@ -78,16 +80,16 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   public Set<Key<?>> getExposedKeys() {
-    if (exposedKeys == null) {
-      Set<Key<?>> exposedKeysMutable = Sets.newLinkedHashSet();
+    if (exposedKeysToSources == null) {
+      Map<Key<?>, Object> exposedKeysToSourcesMutable = Maps.newLinkedHashMap();
       for (ExposureBuilder<?> exposureBuilder : exposureBuilders) {
-        exposedKeysMutable.add(exposureBuilder.getKey());
+        exposedKeysToSourcesMutable.put(exposureBuilder.getKey(), exposureBuilder.getSource());
       }
-      exposedKeys = ImmutableSet.copyOf(exposedKeysMutable);
+      exposedKeysToSources = ImmutableMap.copyOf(exposedKeysToSourcesMutable);
       exposureBuilders = null;
     }
 
-    return exposedKeys;
+    return exposedKeysToSources.keySet();
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -103,6 +105,29 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   public void applyTo(Binder binder) {
-    throw new UnsupportedOperationException("TODO");
+    PrivateBinder privateBinder = binder.withSource(source).newPrivateBinder();
+
+    for (Element element : getElements()) {
+      element.applyTo(privateBinder);
+    }
+
+    getExposedKeys(); // ensure exposedKeysToSources is populated
+    for (Map.Entry<Key<?>, Object> entry : exposedKeysToSources.entrySet()) {
+      privateBinder.withSource(entry.getValue()).expose(entry.getKey());
+    }
+  }
+
+  public Object getExposedSource(Key<?> key) {
+    getExposedKeys(); // ensure exposedKeysToSources is populated
+    Object source = exposedKeysToSources.get(key);
+    checkArgument(source != null, "%s not exposed by %s.", key, this);
+    return source;
+  }
+
+  @Override public String toString() {
+    return new ToStringBuilder(PrivateElements.class)
+        .add("exposedKeys", getExposedKeys())
+        .add("source", getSource())
+        .toString();
   }
 }

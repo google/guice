@@ -178,12 +178,7 @@ class BindingProcessor extends AbstractProcessor {
       }
 
       public Void visit(ExposedBinding<? extends T> binding) {
-        PrivateElements privateElements = binding.getPrivateElements();
-        ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateElements);
-        creationListeners.add(exposedKeyFactory);
-        putBinding(new ExposedBindingImpl<T>(
-            injector, source, key, exposedKeyFactory, privateElements));
-        return null;
+        throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
       public Void visit(ConvertedConstantBinding<? extends T> binding) {
@@ -200,6 +195,20 @@ class BindingProcessor extends AbstractProcessor {
     });
 
     return true;
+  }
+
+  @Override public Boolean visit(PrivateElements privateElements) {
+    for (Key<?> key : privateElements.getExposedKeys()) {
+      bindExposed(privateElements, key);
+    }
+    return false; // leave the private elements for the PrivateElementsProcessor to handle
+  }
+
+  private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
+    ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateElements);
+    creationListeners.add(exposedKeyFactory);
+    putBinding(new ExposedBindingImpl<T>(
+        injector, privateElements.getExposedSource(key), key, exposedKeyFactory, privateElements));
   }
 
   private <T> void validateKey(Object source, Key<T> key) {

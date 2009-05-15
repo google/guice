@@ -42,6 +42,7 @@ import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.Sets;
 import com.google.inject.internal.SourceProvider;
+import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.matcher.Matcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -52,8 +53,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Exposes elements of a module so they can be inspected, validated or {@link ModuleWriter 
- * rewritten}.
+ * Exposes elements of a module so they can be inspected, validated or {@link
+ * Element#applyTo(Binder) rewritten}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
@@ -100,6 +101,19 @@ public final class Elements {
       binder.install(module);
     }
     return Collections.unmodifiableList(binder.elements);
+  }
+
+  /**
+   * Returns the module composed of {@code elements}.
+   */
+  public static Module getModule(final Iterable<? extends Element> elements) {
+    return new Module() {
+      public void configure(Binder binder) {
+        for (Element element : elements) {
+          element.applyTo(binder);
+        }
+      }
+    };
   }
 
   @SuppressWarnings("unchecked")
@@ -309,10 +323,7 @@ public final class Elements {
         };
       }
 
-      BindingBuilder<T> exposeBinding = new BindingBuilder<T>(
-          this, parent.elements, getSource(), key);
-
-      BindingBuilder.ExposureBuilder<T> builder = exposeBinding.usingKeyFrom(privateElements);
+      ExposureBuilder<T> builder = new ExposureBuilder<T>(this, getSource(), key);
       privateElements.addExposureBuilder(builder);
       return builder;
     }

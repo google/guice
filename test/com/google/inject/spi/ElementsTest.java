@@ -854,34 +854,6 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
-            assertTrue(binding instanceof ExposedBinding);
-            assertEquals(arrayList, binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ExposedBinding<? extends T> binding) {
-                assertEquals(collections, binding.getPrivateElements().getExposedKeys());
-                return null;
-              }
-            });
-            return null;
-          }
-        },
-
-        new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
-            assertTrue(binding instanceof ExposedBinding);
-            assertEquals(collection, binding.getKey());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ExposedBinding<? extends T> binding) {
-                assertEquals(collections, binding.getPrivateElements().getExposedKeys());
-                return null;
-              }
-            });
-            return null;
-          }
-        },
-
-        new FailingElementVisitor() {
           @Override public Void visit(PrivateElements two) {
             assertEquals(ab, two.getExposedKeys());
             assertEquals("1 ElementsTest.java", two.getSource());
@@ -894,36 +866,6 @@ public class ElementsTest extends TestCase {
                   }
                 }
             );
-            return null;
-          }
-        },
-
-        new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
-            assertTrue(binding instanceof ExposedBinding);
-            assertEquals(a, binding.getKey());
-            assertEquals("2 ElementsTest.java", binding.getSource());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ExposedBinding<? extends T> binding) {
-                assertEquals(ab, binding.getPrivateElements().getExposedKeys());
-                return null;
-              }
-            });
-            return null;
-          }
-        },
-
-        new FailingElementVisitor() {
-          @Override public <T> Void visit(Binding<T> binding) {
-            assertTrue(binding instanceof ExposedBinding);
-            assertEquals(b, binding.getKey());
-            assertEquals("2 ElementsTest.java", binding.getSource());
-            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
-              @Override public Void visit(ExposedBinding<? extends T> binding) {
-                assertEquals(ab, binding.getPrivateElements().getExposedKeys());
-                return null;
-              }
-            });
             return null;
           }
         }

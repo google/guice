@@ -16,9 +16,7 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import java.util.List;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -26,24 +24,7 @@ import java.util.List;
 public class ElementApplyToTest extends ElementsTest {
 
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
-    // get some elements to apply
-    final List<Element> elements = Elements.getElements(module);
-
-    // apply the elements, and extract them again!
-    List<Element> rewrittenElements = Elements.getElements(new AbstractModule() {
-      protected void configure() {
-        for (Element element : elements) {
-          element.applyTo(binder());
-        }
-      }
-    });
-
-    // verify that the replayed elements are as expected
-    assertEquals(rewrittenElements.size(), visitors.length);
-    for (int i = 0; i < visitors.length; i++) {
-      ElementVisitor<?> visitor = visitors[i];
-      Element element = rewrittenElements.get(i);
-      element.acceptVisitor(visitor);
-    }
+    // convert from module to elements and back
+    super.checkModule(Elements.getModule(Elements.getElements(module)), visitors);
   }
 }

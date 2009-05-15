@@ -58,7 +58,8 @@ public final class LinkedProviderBindingImpl<T>
   }
 
   public void applyTo(Binder binder) {
-    getScoping().applyTo(binder.bind(getKey()).toProvider(getProviderKey()));
+    getScoping().applyTo(binder.withSource(getSource())
+        .bind(getKey()).toProvider(getProviderKey()));
   }
 
   @Override public String toString() {

@@ -441,6 +441,8 @@ public class PrivateModuleTest extends TestCase {
     PrivateElements privateElements = binding.getPrivateElements();
     assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class, named("b"))),
         privateElements.getExposedKeys());
+    assertContains(privateElements.getExposedSource(Key.get(String.class, named("b"))).toString(),
+        PrivateModuleTest.class.getName(), ".configure(PrivateModuleTest.java:");
     Injector privateInjector = privateElements.getInjector();
     assertEquals("private", privateInjector.getInstance(Key.get(String.class, Names.named("a"))));
   }

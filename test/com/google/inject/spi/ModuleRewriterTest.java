@@ -17,14 +17,15 @@
 package com.google.inject.spi;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.internal.Lists;
 import com.google.inject.name.Names;
 import java.util.List;
 import junit.framework.TestCase;
@@ -48,24 +49,34 @@ public class ModuleRewriterTest extends TestCase {
     List<Element> elements = Elements.getElements(module);
 
     // create a rewriter that rewrites the binding to 'Wine' with a binding to 'Beer'
-    ModuleWriter rewriter = new ModuleWriter() {
-      @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
-        T target = binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
-        if ("Wine".equals(target)) {
-          binder.bind(CharSequence.class).toInstance("Beer");
-        } else {
-          super.writeBind(binder, binding);
+    List<Element> rewritten = Lists.newArrayList();
+    for (Element element : elements) {
+      element = element.acceptVisitor(new DefaultElementVisitor<Element>() {
+        @Override public <T> Element visit(Binding<T> binding) {
+          T target = binding.acceptTargetVisitor(Elements.<T>getInstanceVisitor());
+          if ("Wine".equals(target)) {
+            return null;
+          }
+          else {
+            return binding;
+          }
         }
+      });
+      if (element != null) {
+        rewritten.add(element);
       }
-    };
+    }
 
     // create a module from the original list of elements and the rewriter
-    Module rewrittenModule = rewriter.create(elements);
+    Module rewrittenModule = Elements.getModule(rewritten);
 
-    // it all works
+    // the wine binding is dropped
     Injector injector = Guice.createInjector(rewrittenModule);
-    assertEquals("Pizza", injector.getInstance(String.class));
-    assertEquals("Beer", injector.getInstance(CharSequence.class));
+    try {
+      injector.getInstance(CharSequence.class);
+      fail();
+    } catch (ConfigurationException expected) {
+    }
   }
 
   public void testGetProviderAvailableAtInjectMembersTime() {
@@ -95,7 +106,7 @@ public class ModuleRewriterTest extends TestCase {
 
     // and it should also work fine if we rewrite it
     List<Element> elements = Elements.getElements(module);
-    Module replayed = new ModuleWriter().create(elements);
+    Module replayed = Elements.getModule(elements);
     Injector replayedInjector = Guice.createInjector(replayed);
     assertEquals("A", replayedInjector.getInstance(Key.get(String.class, Names.named("2"))));
   }

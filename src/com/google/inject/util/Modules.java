@@ -22,15 +22,17 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Scope;
+import com.google.inject.PrivateBinder;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import com.google.inject.spi.DefaultBindingScopingVisitor;
+import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
-import com.google.inject.spi.ModuleWriter;
 import com.google.inject.spi.ScopeBinding;
+import com.google.inject.spi.PrivateElements;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
@@ -144,27 +146,32 @@ public final class Modules {
           final Set<Class<? extends Annotation>> overridesScopeAnnotations = Sets.newHashSet();
 
           // execute the overrides module, keeping track of which keys and scopes are bound
-          new ModuleWriter() {
-            @Override public <T> void writeBind(Binder binder, Binding<T> binding) {
+          new ModuleWriter(binder()) {
+            @Override public <T> Void visit(Binding<T> binding) {
               overriddenKeys.add(binding.getKey());
-              super.writeBind(binder, binding);
+              return super.visit(binding);
             }
 
-            @Override public void writeBindScope(Binder binder, ScopeBinding element) {
-              overridesScopeAnnotations.add(element.getAnnotationType());
-              super.writeBindScope(binder, element);
+            @Override public Void visit(ScopeBinding scopeBinding) {
+              overridesScopeAnnotations.add(scopeBinding.getAnnotationType());
+              return super.visit(scopeBinding);
             }
-          }.apply(binder(), overrideElements);
+
+            @Override public Void visit(PrivateElements privateElements) {
+              overriddenKeys.addAll(privateElements.getExposedKeys());
+              return super.visit(privateElements);
+            }
+          }.writeAll(overrideElements);
 
           // execute the original module, skipping all scopes and overridden keys. We only skip each
           // overridden binding once so things still blow up if the module binds the same thing
           // multiple times.
           final Map<Scope, Object> scopeInstancesInUse = Maps.newHashMap();
           final List<ScopeBinding> scopeBindings = Lists.newArrayList();
-          new ModuleWriter() {
-            @Override public <T> void writeBind(Binder binder, final Binding<T> binding) {
+          new ModuleWriter(binder()) {
+            @Override public <T> Void visit(Binding<T> binding) {
               if (!overriddenKeys.remove(binding.getKey())) {
-                super.writeBind(binder, binding);
+                super.visit(binding);
 
                 // Record when a scope instance is used in a binding
                 Scope scope = getScopeInstanceOrNull(binding);
@@ -172,29 +179,60 @@ public final class Modules {
                   scopeInstancesInUse.put(scope, binding.getSource());
                 }
               }
+
+              return null;
             }
 
-            @Override public void writeBindScope(Binder binder, ScopeBinding element) {
-              scopeBindings.add(element);
+            @Override public Void visit(PrivateElements privateElements) {
+              PrivateBinder privateBinder = binder.withSource(privateElements.getSource())
+                  .newPrivateBinder();
+
+              Set<Key<?>> skippedExposes = Sets.newHashSet();
+
+              for (Key<?> key : privateElements.getExposedKeys()) {
+                if (overriddenKeys.remove(key)) {
+                  skippedExposes.add(key);
+                } else {
+                  privateBinder.withSource(privateElements.getExposedSource(key)).expose(key);
+                }
+              }
+
+              // we're not skipping deep exposes, but that should be okay. If we ever need to, we
+              // have to search through this set of elements for PrivateElements, recursively
+              for (Element element : privateElements.getElements()) {
+                if (element instanceof Binding
+                    && skippedExposes.contains(((Binding) element).getKey())) {
+                  continue;
+                }
+                element.applyTo(privateBinder);
+              }
+
+              return null;
             }
-          }.apply(binder(), elements);
+
+            @Override public Void visit(ScopeBinding scopeBinding) {
+              scopeBindings.add(scopeBinding);
+              return null;
+            }
+          }.writeAll(elements);
 
           // execute the scope bindings, skipping scopes that have been overridden. Any scope that
           // is overridden and in active use will prompt an error
-          new ModuleWriter() {
-            @Override public void writeBindScope(Binder binder, ScopeBinding element) {
-              if (!overridesScopeAnnotations.remove(element.getAnnotationType())) {
-                super.writeBindScope(binder, element);
+          new ModuleWriter(binder()) {
+            @Override public Void visit(ScopeBinding scopeBinding) {
+              if (!overridesScopeAnnotations.remove(scopeBinding.getAnnotationType())) {
+                super.visit(scopeBinding);
               } else {
-                Object source = scopeInstancesInUse.get(element.getScope());
+                Object source = scopeInstancesInUse.get(scopeBinding.getScope());
                 if (source != null) {
                   binder().withSource(source).addError(
                       "The scope for @%s is bound directly and cannot be overridden.",
-                      element.getAnnotationType().getSimpleName());
+                      scopeBinding.getAnnotationType().getSimpleName());
                 }
               }
+              return null;
             }
-          }.apply(binder(), scopeBindings);
+          }.writeAll(scopeBindings);
 
           // TODO: bind the overridden keys using multibinder
         }
@@ -207,6 +245,25 @@ public final class Modules {
           });
         }
       };
+    }
+  }
+
+  private static class ModuleWriter extends DefaultElementVisitor<Void> {
+    protected final Binder binder;
+
+    ModuleWriter(Binder binder) {
+      this.binder = binder;
+    }
+
+    @Override protected Void visitOther(Element element) {
+      element.applyTo(binder);
+      return null;
+    }
+
+    void writeAll(Iterable<? extends Element> elements) {
+      for (Element element : elements) {
+        element.acceptVisitor(this);
+      }
     }
   }
 }
