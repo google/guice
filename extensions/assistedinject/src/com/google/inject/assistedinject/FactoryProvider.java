@@ -69,6 +69,7 @@ import java.util.Set;
  *     ...
  *   }
  * }</pre>
+ * Any parameter that permits a null value should also be annotated {@code @Nullable}.
  *
  * <h3>Configuring factories</h3>
  * In your {@link com.google.inject.Module module}, bind the factory interface to the returned
