@@ -27,6 +27,8 @@ import com.google.inject.TypeLiteral;
  * registering injection listeners}, and {@linkplain TypeEncounter#bindInterceptor(
  * com.google.inject.matcher.Matcher, org.aopalliance.intercept.MethodInterceptor[])
  * binding method interceptors}.
+ * 
+ * @since 2.0
  */
 public interface TypeListener {
 

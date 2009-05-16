@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class DeferredLookups implements Lookups {
+class DeferredLookups implements Lookups {
   private final InjectorImpl injector;
   private final List<Element> lookups = Lists.newArrayList();
 

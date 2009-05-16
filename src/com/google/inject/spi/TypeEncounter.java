@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
  * returned.
  *
  * @param <I> the injectable type encountered
+ * @since 2.0
  */
 public interface TypeEncounter<I> {
 

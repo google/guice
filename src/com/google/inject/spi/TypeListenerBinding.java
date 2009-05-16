@@ -28,6 +28,7 @@ import com.google.inject.matcher.Matcher;
  *     register(only(new TypeLiteral&lt;PaymentService&lt;CreditCard>>() {}), listener);</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
+ * @since 2.0
  */
 public final class TypeListenerBinding implements Element {
 

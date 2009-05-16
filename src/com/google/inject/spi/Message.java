@@ -66,9 +66,7 @@ public final class Message implements Serializable, Element {
         : Errors.convert(sources.get(sources.size() - 1)).toString();
   }
 
-  /**
-   * @since 2.0
-   */
+  /** @since 2.0 */
   public List<Object> getSources() {
     return sources;
   }
@@ -111,6 +109,7 @@ public final class Message implements Serializable, Element {
     return message.equals(e.message) && Objects.equal(cause, e.cause) && sources.equals(e.sources);
   }
 
+  /** @since 2.0 */
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).addError(this);
   }
