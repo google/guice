@@ -6,8 +6,8 @@
 
   <!-- can be overridden at the command line with -Dversion=
        or in IDEA, in the ant properties dialog -->
-  <property name="version" value="snapshot"/>
-  <property name="api.version" value="1.0"/>
+  <property name="version" value="2.0"/>
+  <property name="api.version" value="1.2"/>
 
   <target name="compile" description="Compile Java source.">
     <mkdir dir="${build.dir}/classes"/>
