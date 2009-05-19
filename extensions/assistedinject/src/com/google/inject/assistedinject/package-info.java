@@ -15,6 +15,7 @@
  */
 
 /**
- * Extension for combining factory interfaces with injection.
+ * Extension for combining factory interfaces with injection; this extension requires {@code
+ * guice-jndi-2.0.jar}.
  */
 package com.google.inject.assistedinject;

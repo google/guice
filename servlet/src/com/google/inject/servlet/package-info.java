@@ -15,9 +15,11 @@
  */
 
 /**
- * Servlet API scopes and bindings. Apply {@link com.google.inject.servlet.GuiceFilter} to any
- * servlets which will use the servlet scopes. Install {@link
- * com.google.inject.servlet.ServletModule} into your {@link com.google.inject.Injector} to install
- * everything at once.
+ * Servlet API scopes, bindings and registration; this extension requires {@code
+ * guice-servlet-2.0.jar}.
+ *
+ * <p>Apply {@link com.google.inject.servlet.GuiceFilter} to any servlets which will use the servlet
+ * scopes. Install {@link com.google.inject.servlet.ServletModule} into your {@link
+ * com.google.inject.Injector} to install everything at once.
  */
 package com.google.inject.servlet;

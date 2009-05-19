@@ -15,6 +15,6 @@
  */
 
 /**
- * Spring integration
+ * Spring integration; this extension requires {@code guice-spring-2.0.jar}.
  */
 package com.google.inject.spring;

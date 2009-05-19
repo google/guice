@@ -15,6 +15,7 @@
  */
 
 /**
- * Extension for injecting objects that may throw at provision time.
+ * Extension for injecting objects that may throw at provision time; this extension requires {@code
+ * guice-throwingproviders-2.0.jar}.
  */
 package com.google.inject.throwingproviders;

@@ -520,6 +520,8 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" filepath="$PROJECT_DIR$/extensions/assistedinject/assistedinject.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/grapher/grapher.iml" filepath="$PROJECT_DIR$/extensions/grapher/grapher.iml" />
       <module fileurl="file://$PROJECT_DIR$/guice.iml" filepath="$PROJECT_DIR$/guice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/jmx/jmx.iml" filepath="$PROJECT_DIR$/extensions/jmx/jmx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/jndi/jndi.iml" filepath="$PROJECT_DIR$/extensions/jndi/jndi.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
       <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />

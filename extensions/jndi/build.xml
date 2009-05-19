@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="guice-jmx" basedir="." default="jar">
+<project name="guice-jndi" basedir="." default="jar">
 
   <import file="../../common.xml"/>
   

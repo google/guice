@@ -15,6 +15,6 @@
  */
 
 /**
- * JNDI integration
+ * JNDI integration; this extension requires {@code guice-jndi-2.0.jar}.
  */
 package com.google.inject.jndi;
