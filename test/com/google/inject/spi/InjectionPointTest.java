@@ -17,7 +17,7 @@
 package com.google.inject.spi;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import static com.google.inject.Asserts.assertSimilarWhenReserialized;
+import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -56,7 +56,7 @@ public class InjectionPointTest extends TestCase {
     assertFalse(injectionPoint.isOptional());
     assertEquals(getClass().getName() + ".foo", injectionPoint.toString());
     assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, fooField));
-    assertSimilarWhenReserialized(injectionPoint);
+    assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=a)]@"
@@ -65,7 +65,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(-1, dependency.getParameterIndex());
     Assert.assertEquals(Key.get(String.class, named("a")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
-    assertSimilarWhenReserialized(dependency);
+    assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, fooField).getDependencies()));
   }
@@ -79,7 +79,7 @@ public class InjectionPointTest extends TestCase {
     assertFalse(injectionPoint.isOptional());
     assertEquals(getClass().getName() + ".bar()", injectionPoint.toString());
     assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, barMethod));
-    assertSimilarWhenReserialized(injectionPoint);
+    assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=b)]@"
@@ -88,7 +88,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("b")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
-    assertSimilarWhenReserialized(dependency);
+    assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, barMethod).getDependencies()));
   }
@@ -103,7 +103,7 @@ public class InjectionPointTest extends TestCase {
     assertFalse(injectionPoint.isOptional());
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());
     assertEqualsBothWays(injectionPoint, new InjectionPoint(typeLiteral, constructor));
-    assertSimilarWhenReserialized(injectionPoint);
+    assertNotSerializable(injectionPoint);
 
     Dependency<?> dependency = getOnlyElement(injectionPoint.getDependencies());
     assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=c)]@"
@@ -112,7 +112,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("c")), dependency.getKey());
     assertEquals(false, dependency.isNullable());
-    assertSimilarWhenReserialized(dependency);
+    assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
   }
@@ -125,7 +125,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(-1, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("d")), dependency.getKey());
     assertEquals(true, dependency.isNullable());
-    assertSimilarWhenReserialized(dependency);
+    assertNotSerializable(dependency);
     assertEqualsBothWays(dependency, Dependency.get(Key.get(String.class, named("d"))));
   }
   
