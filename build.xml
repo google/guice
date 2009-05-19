@@ -150,6 +150,7 @@
     <move file="${build.dir}/javadoc/allclasses-frame.html" tofile="${build.dir}/javadoc/allclasses-frame-with-extensions.html"/>
     <copy file="${build.dir}/javadoc-core/allclasses-frame.html" tofile="${build.dir}/javadoc/allclasses-frame.html"/>
     <replace file="${build.dir}/javadoc/allclasses-frame.html" token="All Classes" value="Core Classes"/>
+    <move file="${build.dir}/javadoc-core/overview-summary.html" tofile="${build.dir}/javadoc/overview-summary.html"/>
   </target>
 
   <target name="no_aop"
