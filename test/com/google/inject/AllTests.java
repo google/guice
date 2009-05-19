@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import com.google.inject.internal.FinalizableReferenceQueueTest;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Jsr166HashMapTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.MapMakerTestSuite;
@@ -24,16 +25,18 @@ import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.BindingTargetVisitorTest;
+import com.google.inject.spi.ElementApplyToTest;
 import com.google.inject.spi.ElementsTest;
 import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
-import com.google.inject.spi.ElementApplyToTest;
+import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.google.inject.util.NoopOverrideTest;
+import java.util.Enumeration;
+import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -41,6 +44,13 @@ import junit.framework.TestSuite;
  * @author crazybob@google.com (Bob Lee)
  */
 public class AllTests {
+
+  private static final Set<String> SUPPRESSED_TEST_NAMES = ImmutableSet.of(
+      "testCircularlyDependentMultipleWays(" + CircularDependencyTest.class.getName() + ")",
+      "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
+      "testNullScopedAsASingleton(" + ScopesTest.class.getName() + ")",
+      "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")"
+  );
 
   public static Test suite() {
     TestSuite suite = new TestSuite();
@@ -123,6 +133,24 @@ public class AllTests {
     suite.addTest(com.googlecode.guice.StrictContainerTestSuite.suite());
     /*end[AOP]*/
 
-    return suite;
+    return removeSuppressedTests(suite, SUPPRESSED_TEST_NAMES);
+  }
+
+  public static TestSuite removeSuppressedTests(TestSuite suite, Set<String> suppressedTestNames) {
+    TestSuite result = new TestSuite(suite.getName());
+
+    for(Enumeration e = suite.tests(); e.hasMoreElements(); ) {
+      Test test = (Test) e.nextElement();
+
+      if (suppressedTestNames.contains(test.toString())) {
+        continue;
+      } else if (test instanceof TestSuite) {
+        result.addTest(removeSuppressedTests((TestSuite) test, suppressedTestNames));
+      } else {
+        result.addTest(test);
+      }
+    }
+
+    return result;
   }
 }

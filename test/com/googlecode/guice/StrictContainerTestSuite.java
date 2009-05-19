@@ -16,12 +16,17 @@
 
 package com.googlecode.guice;
 
+import com.google.inject.AllTests;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.MapMakerTestSuite;
+import com.google.inject.internal.MapMakerTestSuite.ReferenceMapTest;
+import com.google.inject.internal.MapMakerTestSuite.ComputingTest;
 import java.io.FilePermission;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.PropertyPermission;
+import java.util.Set;
 import junit.framework.Test;
 
 /**
@@ -32,6 +37,26 @@ import junit.framework.Test;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class StrictContainerTestSuite {
+
+  /** Tests tests require background threads to pass, which the strict container forbids */
+  private static final Set<String> SUPPRESSED_TEST_NAMES = ImmutableSet.of(
+      "testValueCleanupWithWeakKey(" + ReferenceMapTest.class.getName() + ")",
+      "testValueCleanupWithSoftKey(" + ReferenceMapTest.class.getName() + ")",
+      "testKeyCleanupWithWeakKey(" + ReferenceMapTest.class.getName() + ")",
+      "testKeyCleanupWithSoftKey(" + ReferenceMapTest.class.getName() + ")",
+      "testKeyCleanupWithWeakValue(" + ReferenceMapTest.class.getName() + ")",
+      "testKeyCleanupWithSoftValue(" + ReferenceMapTest.class.getName() + ")",
+      "testInternedValueCleanupWithWeakKey(" + ReferenceMapTest.class.getName() + ")",
+      "testInternedValueCleanupWithSoftKey(" + ReferenceMapTest.class.getName() + ")",
+      "testInternedKeyCleanupWithWeakValue(" + ReferenceMapTest.class.getName() + ")",
+      "testInternedKeyCleanupWithSoftValue(" + ReferenceMapTest.class.getName() + ")",
+      "testSleepConcurrency(" + ComputingTest.class.getName() + ")",
+      "testBusyConcurrency(" + ComputingTest.class.getName() + ")",
+      "testFastConcurrency(" + ComputingTest.class.getName() + ")",
+      "testSleepCanonical(" + ComputingTest.class.getName() + ")",
+      "testBusyCanonical(" + ComputingTest.class.getName() + ")",
+      "testFastCanonical(" + ComputingTest.class.getName() + ")"
+  );
 
   public static Test suite() {
     SecurityManager securityManager = new SecurityManager() {
@@ -58,6 +83,7 @@ public class StrictContainerTestSuite {
     builder.add(BytecodeGenTest.class.getName());
     /*end[AOP]*/
     builder.addSuite(MapMakerTestSuite.class.getName());
-    return builder.build();
+
+    return AllTests.removeSuppressedTests(builder.build(), SUPPRESSED_TEST_NAMES);
   }
 }

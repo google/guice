@@ -20,6 +20,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
+import java.util.Enumeration;
 import junit.extensions.TestDecorator;
 import junit.framework.Test;
 import junit.framework.TestResult;
@@ -44,7 +46,7 @@ public class StrictContainerTestSuiteBuilder {
   public void add(String testClassName) {
     try {
       Class<?> testClass = classLoader.loadClass(testClassName);
-      testSuite.addTest(new SecurityManagedTest(new TestSuite(testClass)));
+      testSuite.addTest(securityManaged(new TestSuite(testClass)));
     } catch (Exception e) {
       testSuite.addTest(new SuiteConstructionError(testClassName, e));
     }
@@ -54,7 +56,7 @@ public class StrictContainerTestSuiteBuilder {
     try {
       Class<?> suiteClass = classLoader.loadClass(suiteClassname);
       Test testSuite = (Test) suiteClass.getMethod("suite").invoke(null);
-      this.testSuite.addTest(new SecurityManagedTest(testSuite));
+      this.testSuite.addTest(securityManaged(testSuite));
     } catch (Exception e) {
       testSuite.addTest(new SuiteConstructionError(suiteClassname, e));
     }
@@ -113,22 +115,33 @@ public class StrictContainerTestSuiteBuilder {
   }
 
   /**
-   * A test that sets up and tears down a security manager while it's run.
+   * Returns a test that sets up and tears down a security manager while it's run.
    */
-  private class SecurityManagedTest extends TestDecorator {
-    public SecurityManagedTest(Test delegate) {
-      super(delegate);
-    }
+  public Test securityManaged(Test test) {
+    if (test instanceof TestSuite) {
+      TestSuite suite = (TestSuite) test;
+      TestSuite result = new TestSuite(suite.getName());
 
-    public void run(TestResult testResult) {
-      SecurityManager originalSecurityManager = System.getSecurityManager();
-      System.setSecurityManager(securityManager);
-      try {
-        basicRun(testResult);
-      } finally {
-        testResult.endTest(this);
-        System.setSecurityManager(originalSecurityManager);
+      @SuppressWarnings("unchecked") // a test suite's elements are tests
+      Enumeration<Test> children = (Enumeration<Test>) suite.tests();
+      for (Test child : Collections.list(children)) {
+        result.addTest(securityManaged(child));
       }
+      return result;
+
+    } else {
+      return new TestDecorator(test) {
+        public void run(TestResult testResult) {
+          SecurityManager originalSecurityManager = System.getSecurityManager();
+          System.setSecurityManager(securityManager);
+          try {
+            basicRun(testResult);
+          } finally {
+            testResult.endTest(this);
+            System.setSecurityManager(originalSecurityManager);
+          }
+        }
+      };
     }
   }
 
