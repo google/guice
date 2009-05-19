@@ -96,21 +96,6 @@
     </java>
   </target>
   
-  <target name="javadoc.core"
-      description="Generate Javadocs.">
-    <mkdir dir="${build.dir}/javadoc-core"/>
-    <javadoc packagenames="${javadoc.packagenames}"
-         destdir="${build.dir}/javadoc-core"
-         author="false"
-         protected="true"
-         windowtitle="Guice 2.0 Core API"
-         sourcepath="${src.dir}">
-      <classpath refid="compile.classpath"/>
-      <link href="http://aopalliance.sourceforge.net/doc"/>
-      <link href="http://java.sun.com/javase/6/docs/api"/>
-    </javadoc>
-  </target>
-
   <target name="javadoc"
       description="Generate Javadocs.">
     <mkdir dir="${build.dir}/javadoc"/>
@@ -137,6 +122,34 @@
       <link href="http://java.sun.com/javase/6/docs/api"/>
       <link href="http://www.springframework.org/docs/api/"/>
     </javadoc>
+    <!-- generate core javadocs, used only for its left-side nav -->
+    <mkdir dir="${build.dir}/javadoc-core"/>
+    <javadoc packagenames="${javadoc.packagenames}"
+         destdir="${build.dir}/javadoc-core"
+         author="false"
+         protected="true"
+         windowtitle="Guice 2.0 Core API"
+         sourcepath="${src.dir}">
+      <classpath refid="compile.classpath"/>
+      <link href="http://aopalliance.sourceforge.net/doc"/>
+      <link href="http://java.sun.com/javase/6/docs/api"/>
+    </javadoc>
+    <!-- setup the left-side navigation frames to toggle between core and all classes -->
+    <move file="${build.dir}/javadoc/overview-frame.html" tofile="${build.dir}/javadoc/overview-frame-with-extensions.html"/>
+    <copy file="${build.dir}/javadoc-core/overview-frame.html" tofile="${build.dir}/javadoc/overview-frame.html"/>
+    <replace file="${build.dir}/javadoc/overview-frame.html" token="&lt;A HREF=&quot;allclasses-frame.html&quot; target=&quot;packageFrame&quot;&gt;All Classes&lt;/A&gt;&lt;/FONT&gt;"
+             value="&lt;A HREF=&quot;allclasses-frame.html&quot; target=&quot;packageFrame&quot;&gt;&lt;b&gt;Core&lt;/b&gt;&lt;/A&gt;
+             &amp;nbsp;
+             &lt;a href='overview-frame-with-extensions.html'&gt;Show Extensions&lt;/a&gt;
+             &lt;/FONT&gt;"/>
+    <replace file="${build.dir}/javadoc/overview-frame-with-extensions.html" token="&lt;A HREF=&quot;allclasses-frame.html&quot; target=&quot;packageFrame&quot;&gt;All Classes&lt;/A&gt;&lt;/FONT&gt;"
+             value="&lt;A HREF=&quot;allclasses-frame-with-extensions.html&quot; target=&quot;packageFrame&quot;&gt;&lt;b&gt;All&lt;/b&gt;&lt;/A&gt;
+             &amp;nbsp;
+             &lt;a href='overview-frame.html'&gt;Hide Extensions&lt;/a&gt;
+             &lt;/FONT&gt;"/>
+    <move file="${build.dir}/javadoc/allclasses-frame.html" tofile="${build.dir}/javadoc/allclasses-frame-with-extensions.html"/>
+    <copy file="${build.dir}/javadoc-core/allclasses-frame.html" tofile="${build.dir}/javadoc/allclasses-frame.html"/>
+    <replace file="${build.dir}/javadoc/allclasses-frame.html" token="All Classes" value="Core Classes"/>
   </target>
 
   <target name="no_aop"
