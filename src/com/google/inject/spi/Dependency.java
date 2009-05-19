@@ -20,7 +20,6 @@ import com.google.inject.Key;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.Objects;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +33,7 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-public final class Dependency<T> implements Serializable {
+public final class Dependency<T> {
   private final InjectionPoint injectionPoint;
   private final Key<T> key;
   private final boolean nullable;
@@ -124,6 +123,4 @@ public final class Dependency<T> implements Serializable {
     }
     return builder.toString();
   }
-
-  private static final long serialVersionUID = 0;
 }

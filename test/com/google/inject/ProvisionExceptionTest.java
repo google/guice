@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.assertSimilarWhenReserialized;
+import static com.google.inject.Asserts.reserialize;
 import java.io.IOException;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
@@ -143,7 +143,17 @@ public class ProvisionExceptionTest extends TestCase {
       Guice.createInjector().getInstance(A.class);
       fail();
     } catch (ProvisionException expected) {
-      assertSimilarWhenReserialized(expected);
+      ProvisionException reserialized = reserialize(expected);
+      assertContains(reserialized.getMessage(),
+          "1) Error injecting constructor, java.lang.UnsupportedOperationException",
+              "at com.google.inject.ProvisionExceptionTest$RealD.<init>()",
+              "at Key[type=com.google.inject.ProvisionExceptionTest$RealD, annotation=[none]]",
+              "@com.google.inject.ProvisionExceptionTest$C.setD()[0]",
+              "at Key[type=com.google.inject.ProvisionExceptionTest$C, annotation=[none]]",
+              "@com.google.inject.ProvisionExceptionTest$B.c",
+              "at Key[type=com.google.inject.ProvisionExceptionTest$B, annotation=[none]]",
+              "@com.google.inject.ProvisionExceptionTest$A.<init>()[0]",
+              "at Key[type=com.google.inject.ProvisionExceptionTest$A, annotation=[none]]");
     }
   }
 

@@ -29,8 +29,6 @@ import com.google.inject.internal.Lists;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.getRawType;
 import com.google.inject.internal.Nullability;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -52,7 +50,7 @@ import java.util.Set;
  * @author crazybob@google.com (Bob Lee)
  * @since 2.0
  */
-public final class InjectionPoint implements Serializable {
+public final class InjectionPoint {
 
   private final boolean optional;
   private final Member member;
@@ -168,11 +166,6 @@ public final class InjectionPoint implements Serializable {
 
   @Override public String toString() {
     return MoreTypes.toString(member);
-  }
-
-  private Object writeReplace() throws ObjectStreamException {
-    Member serializableMember = member != null ? MoreTypes.serializableCopy(member) : null;
-    return new InjectionPoint(serializableMember, dependencies, optional);
   }
 
   /**
@@ -410,6 +403,4 @@ public final class InjectionPoint implements Serializable {
     M[] getMembers(Class<?> type);
     InjectionPoint create(TypeLiteral<?> typeLiteral, M member, Errors errors);
   }
-
-  private static final long serialVersionUID = 0;
 }

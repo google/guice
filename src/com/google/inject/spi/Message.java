@@ -16,12 +16,13 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Objects;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.internal.SourceProvider;
-import com.google.inject.Binder;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -113,4 +114,18 @@ public final class Message implements Serializable, Element {
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).addError(this);
   }
+
+  /**
+   * When serialized, we eagerly convert sources to strings. This hurts our formatting, but it
+   * guarantees that the receiving end will be able to read the message.
+   */
+  private Object writeReplace() throws ObjectStreamException {
+    Object[] sourcesAsStrings = sources.toArray();
+    for (int i = 0; i < sourcesAsStrings.length; i++) {
+      sourcesAsStrings[i] = Errors.convert(sourcesAsStrings[i]).toString();
+    }
+    return new Message(ImmutableList.of(sourcesAsStrings), message, cause);
+  }
+
+  private static final long serialVersionUID = 0;
 }

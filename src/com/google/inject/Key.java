@@ -21,9 +21,6 @@ import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.Preconditions.checkArgument;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.internal.ToStringBuilder;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -50,7 +47,7 @@ import java.lang.reflect.Type;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Key<T> implements Serializable {
+public class Key<T> {
 
   private final AnnotationStrategy annotationStrategy;
 
@@ -318,8 +315,7 @@ public class Key<T> implements Serializable {
     return new Key<T>(typeLiteral, annotationStrategy.withoutAttributes());
   }
 
-  interface AnnotationStrategy extends Serializable {
-
+  interface AnnotationStrategy {
     Annotation getAnnotation();
     Class<? extends Annotation> getAnnotationType();
     boolean hasAttributes();
@@ -438,8 +434,6 @@ public class Key<T> implements Serializable {
     @Override public String toString() {
       return annotation.toString();
     }
-
-    private static final long serialVersionUID = 0;
   }
 
   static class AnnotationTypeStrategy implements AnnotationStrategy {
@@ -487,8 +481,6 @@ public class Key<T> implements Serializable {
     @Override public String toString() {
       return "@" + annotationType.getName();
     }
-
-    private static final long serialVersionUID = 0;
   }
 
   static boolean isBindingAnnotation(Annotation annotation) {
@@ -498,38 +490,5 @@ public class Key<T> implements Serializable {
   static boolean isBindingAnnotation(
       Class<? extends Annotation> annotationType) {
     return annotationType.isAnnotationPresent(BindingAnnotation.class);
-  }
-
-  /**
-   * Serializes the key without its type literal, annotation strategy, or
-   * hash code.
-   */
-  private static class SerializedForm implements Serializable {
-    final Type type;
-    final Class<? extends Annotation> annotationType;
-    final Annotation annotationInstance;
-
-    SerializedForm(Key<?> key) {
-      this.type = key.getTypeLiteral().getType();
-      this.annotationType = key.getAnnotationType();
-      this.annotationInstance = key.getAnnotation();
-    }
-
-    final Object readResolve() {
-      return annotationInstance != null ? Key.get(type, annotationInstance)
-          : annotationType != null ? Key.get(type, annotationType)
-          : Key.get(type);
-    }
-
-    private static final long serialVersionUID = 0;
-  }
-
-  private void readObject(ObjectInputStream stream) throws InvalidObjectException {
-    throw new InvalidObjectException("Use SerializedForm");
-  }
-
-  /** @since 2.0 */
-  protected final Object writeReplace() {
-    return new SerializedForm(this);
   }
 }

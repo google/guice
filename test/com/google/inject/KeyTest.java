@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+import static com.google.inject.Asserts.assertNotSerializable;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Types;
@@ -125,14 +125,13 @@ public class KeyTest extends TestCase {
   }
 
   public void testSerialization() throws IOException, NoSuchFieldException {
-    assertEqualWhenReserialized(Key.get(B.class));
-    assertEqualWhenReserialized(Key.get(B.class, Names.named("bee")));
-    assertEqualWhenReserialized(Key.get(B.class, Named.class));
-    assertEqualWhenReserialized(Key.get(B[].class));
-    assertEqualWhenReserialized(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
-    assertEqualWhenReserialized(Key.get(new TypeLiteral<List<B[]>>() {}));
-    assertEquals(new Key<List<B[]>>() {}, Asserts.reserialize(new Key<List<B[]>>() {}));
-    assertEqualWhenReserialized(Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
+    assertNotSerializable(Key.get(B.class));
+    assertNotSerializable(Key.get(B.class, Names.named("bee")));
+    assertNotSerializable(Key.get(B.class, Named.class));
+    assertNotSerializable(Key.get(B[].class));
+    assertNotSerializable(Key.get(new TypeLiteral<Map<List<B>, B>>() {}));
+    assertNotSerializable(Key.get(new TypeLiteral<List<B[]>>() {}));
+    assertNotSerializable(Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
   }
 
   public void testEqualityOfAnnotationTypesAndInstances() throws NoSuchFieldException {
