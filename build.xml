@@ -26,6 +26,8 @@
     <ant antfile="spring/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="struts2/plugin/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/assistedinject/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/jmx/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
 
@@ -40,6 +42,12 @@
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/assistedinject/build" includes="*.jar" excludes="*-with-deps.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/jmx/build" includes="*.jar" excludes="*-with-deps.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/jndi/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/throwingproviders/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -101,6 +109,8 @@
         <pathelement location="${servlet.src.dir}"/>
         <pathelement location="${spring.src.dir}"/>
         <pathelement location="${assistedinject.src.dir}"/>
+        <pathelement location="${jmx.src.dir}"/>
+        <pathelement location="${jndi.src.dir}"/>
         <pathelement location="${throwingproviders.src.dir}"/>
         <pathelement location="${multibindings.src.dir}"/>
       </sourcepath>
@@ -156,6 +166,8 @@
     <ant dir="spring" antfile="build.xml" target="clean"/>
     <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
     <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/jmx" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
   </target>
