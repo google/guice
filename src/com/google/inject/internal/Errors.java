@@ -60,10 +60,6 @@ import java.util.List;
  */
 public final class Errors implements Serializable {
 
-  // TODO(kevinb): gee, ya think we might want to remove this?
-  private static final boolean allowNullsBadBadBad
-      = "I'm a bad hack".equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
-
   /**
    * The root errors object. Used to access the list of error messages.
    */
@@ -503,9 +499,7 @@ public final class Errors implements Serializable {
    */
   public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
       throws ErrorsException {
-    if (value != null
-        || dependency.isNullable()
-        || allowNullsBadBadBad) {
+    if (value != null || dependency.isNullable()) {
       return value;
     }
 
