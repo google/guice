@@ -96,6 +96,21 @@
     </java>
   </target>
   
+  <target name="javadoc.core"
+      description="Generate Javadocs.">
+    <mkdir dir="${build.dir}/javadoc-core"/>
+    <javadoc packagenames="${javadoc.packagenames}"
+         destdir="${build.dir}/javadoc-core"
+         author="false"
+         protected="true"
+         windowtitle="Guice 2.0 Core API"
+         sourcepath="${src.dir}">
+      <classpath refid="compile.classpath"/>
+      <link href="http://aopalliance.sourceforge.net/doc"/>
+      <link href="http://java.sun.com/javase/6/docs/api"/>
+    </javadoc>
+  </target>
+
   <target name="javadoc"
       description="Generate Javadocs.">
     <mkdir dir="${build.dir}/javadoc"/>
