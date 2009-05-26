@@ -7,7 +7,7 @@
     <artifactId>google</artifactId>
     <version>1</version>
   </parent>
-  <groupId>com.google.guice</groupId>
+  <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
   <packaging>pom</packaging>
   <version>1.0</version>
@@ -39,7 +39,7 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>${groupId}</groupId>
+        <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
         <version>${version}</version>
       </dependency>

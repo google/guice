@@ -3,11 +3,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.google.guice</groupId>
+    <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
     <version>1.0</version>
   </parent>
-  <groupId>com.google.guice.integration</groupId>
+  <groupId>com.google.inject.integration</groupId>
   <artifactId>integration</artifactId>
   <packaging>pom</packaging>
   <name>Google Guice - Integration</name>
@@ -23,24 +23,6 @@
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.5</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>2.0.2</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>opensymphony</groupId>
-        <artifactId>xwork</artifactId>
-        <version>2.0.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.struts</groupId>
-        <artifactId>struts2-core</artifactId>
-        <version>2.0.5</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>

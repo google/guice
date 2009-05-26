@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.google.guice.integration</groupId>
+    <groupId>com.google.inject.integration</groupId>
     <artifactId>integration</artifactId>
     <version>1.0</version>
   </parent>
@@ -11,9 +11,10 @@
   <packaging>jar</packaging>
   <name>Google Guice - Integration: Servlet</name>
   <description>Guice integration with servlets</description>
+  <!-- Note: this pom is for dependency management only.  It will not build the project -->
   <dependencies>
     <dependency>
-      <groupId>com.google.guice</groupId>
+      <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
