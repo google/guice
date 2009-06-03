@@ -216,6 +216,33 @@ public class ParentInjectorTest extends TestCase {
     assertNotNull(child.getProvider(F.class).get());
   }
 
+  public void testErrorInParentButOkayInChild() {
+    Injector parent = Guice.createInjector();
+    Injector childInjector = parent.createChildInjector(new AbstractModule() {
+      protected void configure() {
+        bindScope(MyScope.class, Scopes.SINGLETON);
+        bind(Object.class).to(F.class);
+      }
+    });
+    Object one = childInjector.getInstance(Object.class);
+    Object two = childInjector.getInstance(Object.class);
+    assertSame(one, two);
+  }
+
+  public void testErrorInParentAndChild() {
+    Injector parent = Guice.createInjector();
+    Injector childInjector = parent.createChildInjector();
+
+    try {
+      childInjector.getInstance(G.class);
+      fail();
+    } catch(ConfigurationException expected) {
+      assertContains(expected.getMessage(), "No scope is bound to " + MyScope.class.getName(),
+          "at " + F.class.getName() + ".class(ParentInjectorTest.java:",
+          "  while locating " + G.class.getName());
+    }
+  }
+
   @Singleton
   static class A {}
 
@@ -276,5 +303,8 @@ public class ParentInjectorTest extends TestCase {
   };
 
   @MyScope
-  static class F {}
+  static class F implements G {}
+
+  @ImplementedBy(F.class)
+  interface G {}
 }

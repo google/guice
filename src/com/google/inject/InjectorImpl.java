@@ -598,6 +598,8 @@ class InjectorImpl implements Injector, Lookups {
    * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
    */
   <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors) throws ErrorsException {
+    int numErrorsBefore = errors.size();
+
     if (state.isBlacklisted(key)) {
       throw errors.childBindingAlreadySet(key).toException();
     }
@@ -642,6 +644,7 @@ class InjectorImpl implements Injector, Lookups {
 
     Object source = key.getTypeLiteral().getRawType();
     BindingImpl<T> binding = createUnitializedBinding(key, Scoping.UNSCOPED, source, errors);
+    errors.throwIfNewErrors(numErrorsBefore);
     initializeBinding(binding, errors);
     return binding;
   }
