@@ -195,6 +195,27 @@ public class ParentInjectorTest extends TestCase {
     }
   }
 
+  public void testScopeBoundInChildInjectorOnly() {
+    Injector parent = Guice.createInjector();
+    Injector child = parent.createChildInjector(new AbstractModule() {
+      protected void configure() {
+        bindScope(MyScope.class, Scopes.SINGLETON);
+      }
+    });
+
+    try {
+      parent.getProvider(F.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(),
+          "No scope is bound to com.google.inject.ParentInjectorTest$MyScope.",
+          "at " + F.class.getName() + ".class(ParentInjectorTest.java",
+          "  while locating " + F.class.getName());
+    }
+    
+    assertNotNull(child.getProvider(F.class).get());
+  }
+
   @Singleton
   static class A {}
 
@@ -253,4 +274,7 @@ public class ParentInjectorTest extends TestCase {
       bind(D.class);
     }
   };
+
+  @MyScope
+  static class F {}
 }
