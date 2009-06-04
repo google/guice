@@ -23,10 +23,13 @@ import junit.framework.TestCase;
  */
 public class EagerSingletonTest extends TestCase {
 
-  public void testJustInTimeEagerSingletons() {
+  @Override public void setUp() {
     A.instanceCount = 0;
     B.instanceCount = 0;
     C.instanceCount = 0;
+  }
+
+  public void testJustInTimeEagerSingletons() {
     Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
       protected void configure() {
         // create a just-in-time binding for A
@@ -47,6 +50,23 @@ public class EagerSingletonTest extends TestCase {
     assertEquals(1, C.instanceCount);
   }
 
+  public void testJustInTimeSingletonsAreNotEager() {
+    Injector injector = Guice.createInjector(Stage.PRODUCTION);
+    injector.getProvider(B.class);
+    assertEquals(0, B.instanceCount);
+  }
+
+  public void testChildEagerSingletons() {
+    Injector parent = Guice.createInjector(Stage.PRODUCTION);
+    parent.createChildInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bind(D.class).to(C.class);
+      }
+    });
+
+    assertEquals(1, C.instanceCount);
+  }
+
   @Singleton
   static class A {
     static int instanceCount = 0;
@@ -64,8 +84,10 @@ public class EagerSingletonTest extends TestCase {
   }
 
   @Singleton
-  static class C {
+  static class C implements D {
     static int instanceCount = 0;
     int instanceId = instanceCount++;
   }
+
+  private static interface D {}
 }

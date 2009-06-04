@@ -22,6 +22,7 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.InternalContext;
 import com.google.inject.internal.Iterables;
+import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.internal.Stopwatch;
 import com.google.inject.spi.Dependency;
 import java.util.Collection;
@@ -189,7 +190,7 @@ class InjectorBuilder {
         (Collection) injector.state.getExplicitBindingsThisLevel().values(),
         injector.jitBindings.values()));
     for (final BindingImpl<?> binding : candidateBindings) {
-      if (binding.getScoping().isEagerSingleton(stage)) {
+      if (isEagerSingleton(injector, binding, stage)) {
         try {
           injector.callInContext(new ContextualCallable<Void>() {
             Dependency<?> dependency = Dependency.get(binding.getKey());
@@ -212,6 +213,22 @@ class InjectorBuilder {
         }
       }
     }
+  }
+
+  private boolean isEagerSingleton(InjectorImpl injector, BindingImpl<?> binding, Stage stage) {
+    if (binding.getScoping().isEagerSingleton(stage)) {
+      return true;
+    }
+
+    // handle a corner case where a child injector links to a binding in a parent injector, and
+    // that binding is singleton. We won't catch this otherwise because we only iterate the child's
+    // bindings.
+    if (binding instanceof LinkedBindingImpl) {
+      Key<?> linkedBinding = ((LinkedBindingImpl<?>) binding).getLinkedKey();
+      return isEagerSingleton(injector, injector.getBinding(linkedBinding), stage);
+    }
+
+    return false;
   }
 
   /** {@link Injector} exposed to users in {@link Stage#TOOL}. */
