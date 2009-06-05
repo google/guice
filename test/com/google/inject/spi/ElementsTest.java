@@ -356,6 +356,7 @@ public class ElementsTest extends TestCase {
             bind(String.class).toProvider(aProvider);
             bind(List.class).toProvider(ListProvider.class);
             bind(Collection.class).toProvider(Key.get(ListProvider.class));
+            bind(Iterable.class).toProvider(new TypeLiteral<TProvider<List>>() {});
           }
         },
 
@@ -395,6 +396,20 @@ public class ElementsTest extends TestCase {
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
                 assertEquals(Key.get(ListProvider.class), binding.getProviderKey());
+                return null;
+              }
+            });
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> command) {
+            assertTrue(command instanceof ProviderKeyBinding);
+            assertEquals(Key.get(Iterable.class), command.getKey());
+            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
+                assertEquals(new Key<TProvider<List>>() {}, binding.getProviderKey());
                 return null;
               }
             });
@@ -1056,6 +1071,12 @@ public class ElementsTest extends TestCase {
   private static class ListProvider implements Provider<List> {
     public List get() {
       return new ArrayList();
+    }
+  }
+
+  private static class TProvider<T> implements Provider<T> {
+    public T get() {
+      return null;
     }
   }
 
