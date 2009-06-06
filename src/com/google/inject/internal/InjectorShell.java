@@ -53,10 +53,6 @@ final class InjectorShell {
     this.injector = injector;
   }
 
-  private PrivateElements getPrivateElements() {
-    return privateElements;
-  }
-
   InjectorImpl getInjector() {
     return injector;
   }

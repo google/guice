@@ -16,6 +16,13 @@
 
 package com.google.inject;
 
+import com.google.inject.name.Named;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 import junit.framework.TestCase;
 
 /**
@@ -62,4 +69,48 @@ public class BoundInstanceInjectionTest extends TestCase {
     assertEquals(5, injector.getInstance(O.class).fromMethod);
   }
 
+  public void testMalformedInstance() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(Object.class).toInstance(new MalformedInjectable());
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      Asserts.assertContains(expected.getMessage(), MalformedInjectable.class.getName(),
+          ".doublyAnnotated() has more than one ", "annotation annotated with @BindingAnnotation: ",
+          Named.class.getName() + " and " + Another.class.getName());
+    }
+  }
+
+  public void testMalformedProvider() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(String.class).toProvider(new MalformedProvider());
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      Asserts.assertContains(expected.getMessage(), MalformedProvider.class.getName(),
+          ".doublyAnnotated() has more than one ", "annotation annotated with @BindingAnnotation: ",
+          Named.class.getName() + " and " + Another.class.getName());
+    }
+  }
+
+  static class MalformedInjectable {
+    @Inject void doublyAnnotated(@Named("a") @Another String unused) {}
+  }
+
+  static class MalformedProvider implements Provider<String> {
+    @Inject void doublyAnnotated(@Named("a") @Another String s) {}
+
+    public String get() {
+      return "a";
+    }
+  }
+
+  @BindingAnnotation @Target({ FIELD, PARAMETER, METHOD }) @Retention(RUNTIME)
+  public @interface Another {}
 }

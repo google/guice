@@ -35,12 +35,6 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
     this.privateElements = privateElements;
   }
 
-  public ExposedBindingImpl(Object source, Key<T> key, Scoping scoping,
-      PrivateElements privateElements) {
-    super(source, key, scoping);
-    this.privateElements = privateElements;
-  }
-
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     return visitor.visit(this);
   }
@@ -51,14 +45,6 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
 
   public PrivateElements getPrivateElements() {
     return privateElements;
-  }
-
-  public BindingImpl<T> withScoping(Scoping scoping) {
-    return new ExposedBindingImpl<T>(getSource(), getKey(), scoping, privateElements);
-  }
-
-  public ExposedBindingImpl<T> withKey(Key<T> key) {
-    return new ExposedBindingImpl<T>(getSource(), key, getScoping(), privateElements);
   }
 
   @Override public String toString() {

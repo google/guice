@@ -133,17 +133,6 @@ public class MoreTypes {
     }
   }
 
-  /**
-   * Returns a type that's functionally equal but not necessarily equal
-   * according to {@link Object#equals(Object) Object.equals}. The returned
-   * member is {@link Serializable}.
-   */
-  public static Member serializableCopy(Member member) {
-    return member instanceof MemberImpl
-        ? member
-        : new MemberImpl(member);
-  }
-
   public static Class<?> getRawType(Type type) {
     if (type instanceof Class<?>) {
       // type is a normal class.
@@ -321,10 +310,7 @@ public class MoreTypes {
   public static Class<? extends Member> memberType(Member member) {
     checkNotNull(member, "member");
 
-    if (member instanceof MemberImpl) {
-      return ((MemberImpl) member).memberType;
-
-    } else if (member instanceof Field) {
+    if (member instanceof Field) {
       return Field.class;
 
     } else if (member instanceof Method) {
@@ -361,10 +347,7 @@ public class MoreTypes {
     checkNotNull(member, "member");
 
     /*if[AOP]*/
-    if (member instanceof MemberImpl) {
-      return ((MemberImpl) member).memberKey;
-
-    } else if (member instanceof Field) {
+    if (member instanceof Field) {
       return member.getName();
 
     } else if (member instanceof Method) {
@@ -627,49 +610,6 @@ public class MoreTypes {
   private static void checkNotPrimitive(Type type, String use) {
     checkArgument(!(type instanceof Class<?>) || !((Class) type).isPrimitive(),
         "Primitive types are not allowed in %s: %s", use, type);
-  }
-
-  /**
-   * We cannot serialize the built-in Java member classes, which prevents us from using Members in
-   * our exception types. We workaround this with this serializable implementation. It includes all
-   * of the API methods, plus everything we use for line numbers and messaging.
-   */
-  public static class MemberImpl implements Member, Serializable {
-    private final Class<?> declaringClass;
-    private final String name;
-    private final int modifiers;
-    private final boolean synthetic;
-    private final Class<? extends Member> memberType;
-    private final String memberKey;
-
-    private MemberImpl(Member member) {
-      this.declaringClass = member.getDeclaringClass();
-      this.name = member.getName();
-      this.modifiers = member.getModifiers();
-      this.synthetic = member.isSynthetic();
-      this.memberType = memberType(member);
-      this.memberKey = memberKey(member);
-    }
-
-    public Class getDeclaringClass() {
-      return declaringClass;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public int getModifiers() {
-      return modifiers;
-    }
-
-    public boolean isSynthetic() {
-      return synthetic;
-    }
-
-    @Override public String toString() {
-      return MoreTypes.toString(this);
-    }
   }
 
   /** A type formed from other types, such as arrays, parameterized types or wildcard types */

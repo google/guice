@@ -25,6 +25,7 @@ import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import java.util.List;
@@ -585,6 +586,29 @@ public class TypeListenerTest extends TestCase {
       encounter.getProvider(B.class);
       fail();
     } catch (IllegalStateException expected) {
+    }
+  }
+
+  public void testAddErrors() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bindListener(Matchers.only(new TypeLiteral<Stage>() {}), new TypeListener() {
+            public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+              encounter.addError("There was an error on %s", type);
+              encounter.addError(new IllegalArgumentException("whoops!"));
+              encounter.addError(new Message("And another problem"));
+            }
+          });
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) There was an error on com.google.inject.Stage",
+          "2) An exception was caught and reported. Message: whoops!",
+          "3) And another problem",
+          "3 errors");
     }
   }
 

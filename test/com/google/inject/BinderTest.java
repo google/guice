@@ -18,7 +18,9 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Iterables;
+import com.google.inject.internal.Lists;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
@@ -28,6 +30,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 /**
@@ -35,7 +40,29 @@ import junit.framework.TestCase;
  */
 public class BinderTest extends TestCase {
 
+  private final Logger loggerToWatch = Logger.getLogger(Guice.class.getName());
+
+  private final List<LogRecord> logRecords = Lists.newArrayList();
+  private final Handler fakeHandler = new Handler() {
+    public void publish(LogRecord logRecord) {
+      logRecords.add(logRecord);
+    }
+
+    public void flush() {}
+    public void close() throws SecurityException {}
+  };
+
   Provider<Foo> fooProvider;
+
+  @Override protected void setUp() throws Exception {
+    super.setUp();
+    loggerToWatch.addHandler(fakeHandler);
+  }
+
+  @Override protected void tearDown() throws Exception {
+    loggerToWatch.removeHandler(fakeHandler);
+    super.tearDown();
+  }
 
   public void testProviderFromBinder() {
     Guice.createInjector(new Module() {
@@ -296,6 +323,22 @@ public class BinderTest extends TestCase {
     } catch (CreationException expected) {
       assertSame(message, Iterables.getOnlyElement(expected.getErrorMessages()));
     }
+  }
+
+  public void testUserReportedErrorsAreAlsoLogged() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          addError(new Message(ImmutableList.of(), "Whoops!", new IllegalArgumentException()));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+    }
+
+    LogRecord logRecord = Iterables.getOnlyElement(this.logRecords);
+    assertContains(logRecord.getMessage(),
+        "An exception was caught and reported. Message: java.lang.IllegalArgumentException");
   }
 
   public void testBindingToProvider() {
