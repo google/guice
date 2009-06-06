@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * @author mcculls@gmail.com (Stuart McCulloch)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class BytecodeGen {
+final class BytecodeGen {
 
   private static final Logger logger = Logger.getLogger(BytecodeGen.class.getName());
 

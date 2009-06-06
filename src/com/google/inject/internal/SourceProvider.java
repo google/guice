@@ -24,16 +24,12 @@ import java.util.List;
  * 
  * @author crazybob@google.com (Bob Lee)
  */
-public class SourceProvider {
+public final class SourceProvider {
 
   /** Indicates that the source is unknown. */
   public static final Object UNKNOWN_SOURCE = "[unknown source]";
 
   private final ImmutableSet<String> classNamesToSkip;
-
-  public SourceProvider() {
-    this.classNamesToSkip = ImmutableSet.of(SourceProvider.class.getName());
-  }
 
   public static final SourceProvider DEFAULT_INSTANCE
       = new SourceProvider(ImmutableSet.of(SourceProvider.class.getName()));

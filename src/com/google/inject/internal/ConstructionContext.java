@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ConstructionContext<T> {
+final class ConstructionContext<T> {
 
   T currentReference;
   boolean constructing;

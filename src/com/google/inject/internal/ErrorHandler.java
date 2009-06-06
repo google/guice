@@ -23,7 +23,7 @@ import com.google.inject.spi.Message;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ErrorHandler {
+interface ErrorHandler {
 
   /**
    * Handles an error.

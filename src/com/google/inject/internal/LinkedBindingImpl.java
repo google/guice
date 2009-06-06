@@ -16,17 +16,16 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.LinkedKeyBinding;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T> {
+final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T> {
 
   final Key<? extends T> targetKey;
 
-  public LinkedBindingImpl(Injector injector, Key<T> key, Object source,
+  public LinkedBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scoping scoping,
       Key<? extends T> targetKey) {
     super(injector, key, source, internalFactory, scoping);

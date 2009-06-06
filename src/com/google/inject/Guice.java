@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import java.util.Arrays;
+import com.google.inject.internal.InjectorBuilder;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from

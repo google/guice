@@ -291,7 +291,7 @@ public class TypeLiteral<T> {
       genericParameterTypes = method.getGenericParameterTypes();
 
     } else if (methodOrConstructor instanceof Constructor) {
-      Constructor constructor = (Constructor) methodOrConstructor;
+      Constructor<?> constructor = (Constructor<?>) methodOrConstructor;
       checkArgument(constructor.getDeclaringClass().isAssignableFrom(rawType),
           "%s does not construct a supertype of %s", constructor, type);
       genericParameterTypes = constructor.getGenericParameterTypes();

@@ -796,14 +796,14 @@ public class ElementsTest extends TestCase {
         },
 
         new FailingElementVisitor() {
-          @Override public Void visit(InjectionRequest command) {
+          @Override public Void visit(InjectionRequest<?> command) {
             assertEquals(firstObject, command.getInstance());
             return null;
           }
         },
 
         new FailingElementVisitor() {
-          @Override public Void visit(InjectionRequest command) {
+          @Override public Void visit(InjectionRequest<?> command) {
             assertEquals(secondObject, command.getInstance());
             return null;
           }

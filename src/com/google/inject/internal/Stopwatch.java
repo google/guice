@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class Stopwatch {
+final class Stopwatch {
   private static final Logger logger = Logger.getLogger(Stopwatch.class.getName());
 
   private long start = System.currentTimeMillis();

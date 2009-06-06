@@ -16,10 +16,9 @@ limitations under the License.
 
 package com.google.inject.internal;
 
-import com.google.inject.Injector;
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -27,13 +26,13 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import java.util.Set;
 
-public final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
+final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
     implements ProviderInstanceBinding<T> {
 
   final Provider<? extends T> providerInstance;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
-  public ProviderInstanceBindingImpl(Injector injector, Key<T> key,
+  public ProviderInstanceBindingImpl(InjectorImpl injector, Key<T> key,
       Object source, InternalFactory<? extends T> internalFactory, Scoping scoping,
       Provider<? extends T> providerInstance,
       Set<InjectionPoint> injectionPoints) {

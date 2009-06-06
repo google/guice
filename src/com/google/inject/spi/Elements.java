@@ -137,7 +137,7 @@ public final class Elements {
       this.modules = Sets.newHashSet();
       this.elements = Lists.newArrayList();
       this.source = null;
-      this.sourceProvider = new SourceProvider().plusSkippedClasses(
+      this.sourceProvider = SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
           Elements.class, RecordingBinder.class, AbstractModule.class,
           ConstantBindingBuilderImpl.class, AbstractBindingBuilder.class, BindingBuilder.class);
       this.parent = null;

@@ -16,10 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Injector;
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.Binder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -28,13 +27,13 @@ import com.google.inject.spi.InstanceBinding;
 import com.google.inject.util.Providers;
 import java.util.Set;
 
-public class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBinding<T> {
+final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBinding<T> {
 
   final T instance;
   final Provider<T> provider;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
-  public InstanceBindingImpl(Injector injector, Key<T> key, Object source,
+  public InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Set<InjectionPoint> injectionPoints,
       T instance) {
     super(injector, key, source, internalFactory, Scoping.UNSCOPED);

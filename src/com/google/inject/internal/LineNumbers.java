@@ -35,7 +35,7 @@ import org.objectweb.asm.Opcodes;
  *
  * @author Chris Nokleberg
  */
-public class LineNumbers {
+final class LineNumbers {
 
   private final Class type;
   private final Map<String, Integer> lines = Maps.newHashMap();

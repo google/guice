@@ -16,16 +16,15 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.UntargettedBinding;
 
-public class UntargettedBindingImpl<T> extends BindingImpl<T> implements UntargettedBinding<T> {
+final class UntargettedBindingImpl<T> extends BindingImpl<T> implements UntargettedBinding<T> {
 
-  public UntargettedBindingImpl(Injector injector, Key<T> key, Object source) {
+  UntargettedBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
     super(injector, key, source, new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, Dependency<?> dependency) {
         throw new AssertionError();

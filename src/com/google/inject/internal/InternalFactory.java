@@ -23,7 +23,7 @@ import com.google.inject.spi.Dependency;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface InternalFactory<T> {
+interface InternalFactory<T> {
 
   /**
    * Creates an object to be injected.

@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.Binding;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.spi.BindingScopingVisitor;
@@ -29,13 +28,13 @@ import com.google.inject.spi.InstanceBinding;
  */
 public abstract class BindingImpl<T> implements Binding<T> {
 
-  private final Injector injector;
+  private final InjectorImpl injector;
   private final Key<T> key;
   private final Object source;
   private final Scoping scoping;
   private final InternalFactory<? extends T> internalFactory;
 
-  public BindingImpl(Injector injector, Key<T> key, Object source,
+  public BindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scoping scoping) {
     this.injector = injector;
     this.key = key;
@@ -113,7 +112,7 @@ public abstract class BindingImpl<T> implements Binding<T> {
         .toString();
   }
 
-  public Injector getInjector() {
+  public InjectorImpl getInjector() {
     return injector;
   }
 }

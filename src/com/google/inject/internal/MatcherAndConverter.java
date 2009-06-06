@@ -24,7 +24,7 @@ import com.google.inject.spi.TypeConverter;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public final class MatcherAndConverter {
+final class MatcherAndConverter {
 
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;

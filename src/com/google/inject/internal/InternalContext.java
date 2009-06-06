@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public final class InternalContext {
+final class InternalContext {
 
   private Map<Object, ConstructionContext<?>> constructionContexts = Maps.newHashMap();
   private Dependency dependency;

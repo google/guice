@@ -21,7 +21,7 @@ import java.lang.reflect.Modifier;
 /**
  * Class utilities.
  */
-public class Classes {
+final class Classes {
 
   public static boolean isInnerClass(Class<?> clazz) {
     return !Modifier.isStatic(clazz.getModifiers())

@@ -63,7 +63,7 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitOther(providerLookup);
   }
 
-  public V visit(InjectionRequest injectionRequest) {
+  public V visit(InjectionRequest<?> injectionRequest) {
     return visitOther(injectionRequest);
   }
 
