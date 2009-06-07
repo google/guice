@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 /**
  * Creates instances using an injectable constructor. After construction, all injectable fields and
@@ -32,12 +33,11 @@ final class ConstructorInjector<T> {
   private final ConstructionProxy<T> constructionProxy;
   private final MembersInjectorImpl<T> membersInjector;
 
-  ConstructorInjector(ImmutableSet<InjectionPoint> injectableMembers,
+  ConstructorInjector(Set<InjectionPoint> injectableMembers,
       ConstructionProxy<T> constructionProxy,
       SingleParameterInjector<?>[] parameterInjectors,
-      MembersInjectorImpl<T> membersInjector)
-      throws ErrorsException {
-    this.injectableMembers = injectableMembers;
+      MembersInjectorImpl<T> membersInjector) {
+    this.injectableMembers = ImmutableSet.copyOf(injectableMembers);
     this.constructionProxy = constructionProxy;
     this.parameterInjectors = parameterInjectors;
     this.membersInjector = membersInjector;

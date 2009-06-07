@@ -56,13 +56,6 @@ public final class InjectionPoint {
   private final Member member;
   private final ImmutableList<Dependency<?>> dependencies;
 
-  private InjectionPoint(Member member,
-      ImmutableList<Dependency<?>> dependencies, boolean optional) {
-    this.member = member;
-    this.dependencies = dependencies;
-    this.optional = optional;
-  }
-
   InjectionPoint(TypeLiteral<?> type, Method method) {
     this.member = method;
 
@@ -166,6 +159,36 @@ public final class InjectionPoint {
 
   @Override public String toString() {
     return MoreTypes.toString(member);
+  }
+
+  /**
+   * Returns a new injection point for the specified constructor. If any parameter of
+   * {@code constructor} includes a type variable (such as {@code List<T>}), prefer the overload
+   * that includes a type literal.
+   *
+   * @param constructor any single constructor present on {@code type}.
+   */
+  public static <T> InjectionPoint forConstructor(Constructor<T> constructor) {
+    // TODO: verify that constructor is valid? (defined on a non-abstract class, etc.)
+    return new InjectionPoint(TypeLiteral.get(constructor.getDeclaringClass()), constructor);
+  }
+
+  /**
+   * Returns a new injection point for the specified constructor of {@code type}.
+   *
+   * @param constructor any single constructor present on {@code type}.
+   * @param type the concrete type that defines {@code constructor}.
+   */
+  public static <T> InjectionPoint forConstructor(
+      Constructor<T> constructor, TypeLiteral<? extends T> type) {
+    if (type.getRawType() != constructor.getDeclaringClass()) {
+      new Errors(type)
+          .constructorNotDefinedByType(constructor, type)
+          .throwConfigurationExceptionIfErrorsExist();
+    }
+
+    // TODO: verify that constructor is valid? (defined on a non-abstract class, etc.)
+    return new InjectionPoint(type, constructor);
   }
 
   /**

@@ -35,9 +35,12 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.ImmutableSet;
+import static com.google.inject.internal.Iterables.getOnlyElement;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
@@ -45,6 +48,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1024,6 +1029,84 @@ public class ElementsTest extends TestCase {
     );
   }
 
+  public void testBindToConstructor() throws NoSuchMethodException, NoSuchFieldException {
+    final Constructor<B> constructor = B.class.getDeclaredConstructor(Object.class);
+    final Field field = B.class.getDeclaredField("stage");
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(new TypeLiteral<B<Integer>>() {}).toConstructor((Constructor) constructor)
+                .in(Singleton.class);
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> binding) {
+            assertEquals(new Key<B<Integer>>() {}, binding.getKey());
+            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
+              @Override public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
+                assertEquals(Singleton.class, annotation);
+                return null;
+              }
+            });
+
+            binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visit(ConstructorBinding<? extends T> constructorBinding) {
+                assertEquals(constructor, constructorBinding.getConstructor().getMember());
+                assertEquals(Key.get(Integer.class),
+                    getOnlyElement(constructorBinding.getConstructor().getDependencies()).getKey());
+                assertEquals(field,
+                    getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
+                assertEquals(2, constructorBinding.getDependencies().size());
+                assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
+                return null;
+              }
+            });
+            return null;
+          }
+        }
+    );
+  }
+
+  public void testBindToMalformedConstructor() throws NoSuchMethodException, NoSuchFieldException {
+    final Constructor<C> constructor = C.class.getDeclaredConstructor(Integer.class);
+
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(C.class).toConstructor(constructor);
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> binding) {
+            assertEquals(Key.get(C.class), binding.getKey());
+            assertTrue(binding instanceof UntargettedBinding);
+            return null;
+          }
+        },
+
+        new ExternalFailureVisitor() {
+          @Override public Void visit(Message message) {
+            assertContains(message.getMessage(),
+                C.class.getName() + ".a has more than one annotation ",
+                Named.class.getName(), SampleAnnotation.class.getName());
+            return null;
+          }
+        },
+
+        new ExternalFailureVisitor() {
+          @Override public Void visit(Message message) {
+            assertContains(message.getMessage(),
+                C.class.getName() + ".<init>() has more than one annotation ",
+                Named.class.getName(), SampleAnnotation.class.getName());
+            return null;
+          }
+        }
+    );
+  }
+
   // Business logic tests
 
   public void testModulesAreInstalledAtMostOnce() {
@@ -1063,7 +1146,9 @@ public class ElementsTest extends TestCase {
     for (int i = 0; i < visitors.length; i++) {
       ElementVisitor<?> visitor = visitors[i];
       Element element = elements.get(i);
-      assertContains(element.getSource().toString(), "ElementsTest.java");
+      if (!(visitor instanceof ExternalFailureVisitor)) {
+        assertContains(element.getSource().toString(), "ElementsTest.java");
+      }
       element.acceptVisitor(visitor);
     }
   }
@@ -1080,6 +1165,12 @@ public class ElementsTest extends TestCase {
     }
   }
 
+  /**
+   * By extending this interface rather than FailingElementVisitor, the source of the error doesn't
+   * need to contain the string {@code ElementsTest.java}.
+   */
+  abstract class ExternalFailureVisitor extends FailingElementVisitor {}
+
   @Retention(RUNTIME)
   @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
   @BindingAnnotation
@@ -1089,5 +1180,15 @@ public class ElementsTest extends TestCase {
 
   static class A<T> {
     @Inject Stage stage;
+  }
+
+  static class B<T> {
+    @Inject Stage stage;
+    B(T t) {}
+  }
+
+  static class C {
+    @Inject @Named("foo") @SampleAnnotation String a;
+    C(@Named("bar") @SampleAnnotation Integer b) {}
   }
 }

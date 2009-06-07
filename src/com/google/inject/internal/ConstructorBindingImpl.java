@@ -23,6 +23,7 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,16 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
       InternalFactory<? extends T> scopedFactory, Scoping scoping, Factory<T> factory) {
     super(injector, key, source, scopedFactory, scoping);
     this.factory = factory;
+  }
+
+  public ConstructorBindingImpl(Key<T> key, Object source, Scoping scoping,
+      InjectionPoint constructorInjector, Set<InjectionPoint> injectionPoints) {
+    super(source, key, scoping);
+    this.factory = new Factory<T>();
+    ConstructionProxy<T> constructionProxy
+        = new DefaultConstructionProxyFactory<T>(constructorInjector).create();
+    factory.constructorInjector = new ConstructorInjector<T>(
+        injectionPoints, constructionProxy, null, null);
   }
 
   static <T> ConstructorBindingImpl<T> create(
@@ -80,8 +91,19 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
         .build());
   }
 
+  @Override protected BindingImpl<T> withScoping(Scoping scoping) {
+    return new ConstructorBindingImpl<T>(
+        null, getKey(), getSource(), factory, scoping, factory);
+  }
+
+  @Override protected BindingImpl<T> withKey(Key<T> key) {
+    return new ConstructorBindingImpl<T>(
+        null, key, getSource(), factory, getScoping(), factory);
+  }
+
   public void applyTo(Binder binder) {
-    throw new UnsupportedOperationException("This element represents a synthetic binding.");
+    getScoping().applyTo(binder.withSource(getSource())
+        .bind(getKey()).toConstructor((Constructor) getConstructor().getMember()));
   }
 
   @Override public String toString() {

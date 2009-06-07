@@ -22,11 +22,13 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
 
@@ -78,9 +80,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
       try {
         injectionPoints = InjectionPoint.forInstanceMethodsAndFields(instance.getClass());
       } catch (ConfigurationException e) {
-        for (Message message : e.getErrorMessages()) {
-          binder.addError(message);
-        }
+        copyErrorsToBinder(e);
         injectionPoints = e.getPartialValue();
       }
     } else {
@@ -102,9 +102,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     try {
       injectionPoints = InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
     } catch (ConfigurationException e) {
-      for (Message message : e.getErrorMessages()) {
-        binder.addError(message);
-      }
+      copyErrorsToBinder(e);
       injectionPoints = e.getPartialValue();
     }
 
@@ -132,7 +130,44 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
+  public ScopedBindingBuilder toConstructor(Constructor<? extends T> constructor) {
+    checkNotNull(constructor, "constructor");
+    checkNotTargetted();
+
+    BindingImpl<T> base = getBinding();
+    TypeLiteral<T> keyType = base.getKey().getTypeLiteral();
+    TypeLiteral<? extends T> toConstruct = (constructor.getDeclaringClass() == keyType.getRawType())
+        ? keyType
+        : TypeLiteral.get(constructor.getDeclaringClass());
+
+    Set<InjectionPoint> injectionPoints;
+    try {
+      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(toConstruct);
+    } catch (ConfigurationException e) {
+      copyErrorsToBinder(e);
+      injectionPoints = e.getPartialValue();
+    }
+
+    try {
+      @SuppressWarnings("unchecked") // safe; constructor is a subtype of toConstruct
+      InjectionPoint constructorPoint = InjectionPoint.forConstructor((Constructor) constructor,
+          toConstruct);
+      setBinding(new ConstructorBindingImpl<T>(base.getKey(), base.getSource(), base.getScoping(),
+          constructorPoint, injectionPoints));
+    } catch (ConfigurationException e) {
+      copyErrorsToBinder(e);
+    }
+
+    return this;
+  }
+
   @Override public String toString() {
     return "BindingBuilder<" + getBinding().getKey().getTypeLiteral() + ">";
+  }
+
+  private void copyErrorsToBinder(ConfigurationException e) {
+    for (Message message : e.getErrorMessages()) {
+      binder.addError(message);
+    }
   }
 }

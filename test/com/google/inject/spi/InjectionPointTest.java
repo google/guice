@@ -16,12 +16,15 @@
 
 package com.google.inject.spi;
 
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import static com.google.inject.internal.Iterables.getOnlyElement;
 import com.google.inject.name.Named;
@@ -30,6 +33,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.Assert;
@@ -128,7 +133,33 @@ public class InjectionPointTest extends TestCase {
     assertNotSerializable(dependency);
     assertEqualsBothWays(dependency, Dependency.get(Key.get(String.class, named("d"))));
   }
-  
+
+  public void testForConstructor() throws NoSuchMethodException {
+    Constructor<HashSet> constructor = HashSet.class.getConstructor();
+    TypeLiteral<HashSet<String>> hashSet = new TypeLiteral<HashSet<String>>() {};
+
+    InjectionPoint injectionPoint = InjectionPoint.forConstructor(constructor, hashSet);
+    assertSame(constructor, injectionPoint.getMember());
+    assertEquals(ImmutableList.<Dependency>of(), injectionPoint.getDependencies());
+    assertFalse(injectionPoint.isOptional());
+
+    try {
+      InjectionPoint.forConstructor(constructor, new TypeLiteral<LinkedHashSet<String>>() {});
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(), "java.util.LinkedHashSet<java.lang.String>",
+          " does not define java.util.HashSet.<init>()",
+          "  while locating java.util.LinkedHashSet<java.lang.String>");
+    }
+
+    try {
+      InjectionPoint.forConstructor((Constructor) constructor, new TypeLiteral<Set<String>>() {});
+    } catch (ConfigurationException expected) {
+      assertContains(expected.getMessage(), "java.util.Set<java.lang.String>",
+          " does not define java.util.HashSet.<init>()",
+          "  while locating java.util.Set<java.lang.String>");
+    }
+  }
+
   public void testForConstructorOf() {
     InjectionPoint injectionPoint = InjectionPoint.forConstructorOf(Constructable.class);
     assertEquals(Constructable.class.getName() + ".<init>()", injectionPoint.toString());

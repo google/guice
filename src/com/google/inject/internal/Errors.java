@@ -224,6 +224,10 @@ public final class Errors implements Serializable {
         + CONSTRUCTOR_RULES, implementation);
   }
 
+  public Errors constructorNotDefinedByType(Constructor<?> constructor, TypeLiteral<?> type) {
+    return addMessage("%s does not define %s", type, constructor);
+  }
+
   public Errors duplicateScopes(Scope existing,
       Class<? extends Annotation> annotationType, Scope scope) {
     return addMessage("Scope %s is already bound to %s. Cannot bind %s.", existing,
