@@ -36,7 +36,7 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
   public InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Set<InjectionPoint> injectionPoints,
       T instance) {
-    super(injector, key, source, internalFactory, Scoping.UNSCOPED);
+    super(injector, key, source, internalFactory, Scoping.EAGER_SINGLETON);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
     this.provider = Providers.of(instance);

@@ -562,6 +562,56 @@ public class ElementsTest extends TestCase {
     );
   }
 
+  public void testBindToInstanceInScope() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            AnnotatedBindingBuilder<String> b = bind(String.class);
+            b.toInstance("A");
+            b.in(Singleton.class);
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> command) {
+            return null;
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public Void visit(Message command) {
+            assertEquals("Setting the scope is not permitted when binding to a single instance.",
+                command.getMessage());
+            assertNull(command.getCause());
+            assertContains(command.getSource(), "ElementsTest.java");
+            return null;
+          }
+        }
+      );
+  }
+
+  public void testBindToInstanceScope() {
+    checkModule(
+        new AbstractModule() {
+          protected void configure() {
+            bind(String.class).toInstance("A");
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> binding) {
+            assertEquals(Key.get(String.class), binding.getKey());
+            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
+              public Void visitEagerSingleton() {
+                return null;
+              }
+            });
+            return null;
+          }
+        }
+      );
+  }
+
   /*if[AOP]*/
   public void testBindIntercepor() {
     final Matcher<Class> classMatcher = Matchers.subclassesOf(List.class);

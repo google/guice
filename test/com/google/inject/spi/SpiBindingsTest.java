@@ -82,6 +82,11 @@ public class SpiBindingsTest extends TestCase {
                 return null;
               }
             });
+            binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
+              public Void visitEagerSingleton() {
+                return null;
+              }
+            });
             return null;
           }
         }

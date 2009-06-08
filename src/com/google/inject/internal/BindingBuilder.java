@@ -90,7 +90,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
     BindingImpl<T> base = getBinding();
     setBinding(new InstanceBindingImpl<T>(
-        base.getSource(), base.getKey(), base.getScoping(), injectionPoints, instance));
+        base.getSource(), base.getKey(), Scoping.EAGER_SINGLETON, injectionPoints, instance));
   }
 
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
