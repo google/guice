@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * <pre>
  *   {@code @}Retention(RUNTIME)
- *   {@code @}Target(TYPE)
+ *   {@code @}Target(TYPE, METHOD)
  *   {@code @}ScopeAnnotation
  *   public {@code @}interface SessionScoped {}
  * </pre>
