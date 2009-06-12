@@ -103,4 +103,35 @@ public class ImplicitBindingTest extends TestCase {
     }
   }
 
+  /**
+   * When we're building the binding for A, we temporarily insert that binding to support circular
+   * dependencies. And so we can successfully create a binding for B. But later, when the binding
+   * for A ultimately fails, we need to clean up the dependent binding for B.
+   */
+  public void testCircularJitBindingsLeaveNoResidue() {
+    Injector injector = Guice.createInjector();
+
+    try {
+      injector.getBinding(A.class);
+      fail();
+    } catch (ConfigurationException expected) {
+    }
+
+    try {
+      injector.getBinding(B.class);
+      fail();
+    } catch (ConfigurationException expected) {
+    }
+  }
+
+  static class A {
+    @Inject B b;
+    @Inject D d;
+  }
+
+  static class B {
+    @Inject A a;
+  }
+
+  interface D {}
 }
