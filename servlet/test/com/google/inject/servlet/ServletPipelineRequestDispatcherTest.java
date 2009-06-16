@@ -24,6 +24,7 @@ import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -130,11 +131,11 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     mockResponse.resetBuffer();
     expectLastCall().once();
 
-    final boolean[] run = new boolean[1];
+    final List<String> paths = new ArrayList<String>();
     final HttpServlet mockServlet = new HttpServlet() {
       protected void service(HttpServletRequest request, HttpServletResponse httpServletResponse)
           throws ServletException, IOException {
-        run[0] = true;
+        paths.add(request.getRequestURI());
 
         final Object o = request.getAttribute(A_KEY);
         assertEquals("Wrong attrib returned - " + o, A_VALUE, o);
@@ -170,7 +171,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     assertNotNull(dispatcher);
     dispatcher.forward(mockRequest, mockResponse);
 
-    assertTrue("Include did not dispatch to our servlet!", run[0]);
+    assertTrue("Include did not dispatch to our servlet!", paths.contains(pattern));
 
     verify(injector, mockRequest, mockResponse, mockBinding);
   }

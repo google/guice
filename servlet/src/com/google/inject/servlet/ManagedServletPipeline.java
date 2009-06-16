@@ -35,6 +35,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
  * A wrapping dispatcher for servlets, in much the same way as {@link ManagedFilterPipeline} is for
@@ -112,13 +114,12 @@ class ManagedServletPipeline {
    * the given path or null if no mapping was found.
    */
   RequestDispatcher getRequestDispatcher(String path) {
+    final String newRequestUri = path;
     for (final ServletDefinition servletDefinition : servletDefinitions) {
       if (servletDefinition.shouldServe(path)) {
         return new RequestDispatcher() {
-
           public void forward(ServletRequest servletRequest, ServletResponse servletResponse)
               throws ServletException, IOException {
-
             Preconditions.checkState(!servletResponse.isCommitted(),
                 "Response has been committed--you can only call forward before"
                 + " committing the response (hint: don't flush buffers)");
@@ -126,8 +127,23 @@ class ManagedServletPipeline {
             // clear buffer before forwarding
             servletResponse.resetBuffer();
 
+            ServletRequest requestToProcess;
+            if (servletRequest instanceof HttpServletRequest) {
+               requestToProcess =
+                   new HttpServletRequestWrapper((HttpServletRequest) servletRequest) {
+                     public String getRequestURI() {
+                       return newRequestUri;
+                     }
+                   };
+            } else {
+              // This should never happen, but instead of throwing an exception
+              // we will allow a happy case pass thru for maximum tolerance to
+              // legacy (and internal) code.
+              requestToProcess = servletRequest;
+            }
+
             // now dispatch to the servlet
-            servletDefinition.doService(servletRequest, servletResponse);
+            servletDefinition.doService(requestToProcess, servletResponse);
           }
 
           public void include(ServletRequest servletRequest, ServletResponse servletResponse)
