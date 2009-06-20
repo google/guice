@@ -73,8 +73,7 @@ final class ConstructionContext<T> {
       invocationHandlers = new ArrayList<DelegatingInvocationHandler<T>>();
     }
 
-    DelegatingInvocationHandler<T> invocationHandler
-        = new DelegatingInvocationHandler<T>();
+    DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<T>();
     invocationHandlers.add(invocationHandler);
 
     ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);

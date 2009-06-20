@@ -28,7 +28,6 @@ import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
-import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
@@ -36,10 +35,8 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.util.Providers;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -412,27 +409,7 @@ final class InjectorImpl implements Injector, Lookups {
       return createProvidedByBinding(key, scoping, providedBy, errors);
     }
 
-    // We can't inject abstract classes.
-    // TODO: Method interceptors could actually enable us to implement
-    // abstract types. Should we remove this restriction?
-    if (Modifier.isAbstract(rawType.getModifiers())) {
-      throw errors.missingImplementation(key).toException();
-    }
-
-    // Error: Inner class.
-    if (Classes.isInnerClass(rawType)) {
-      throw errors.cannotInjectInnerClass(rawType).toException();
-    }
-
-    if (!scoping.isExplicitlyScoped()) {
-      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
-      if (scopeAnnotation != null) {
-        scoping = Scoping.makeInjectable(Scoping.forAnnotation(scopeAnnotation),
-            this, errors.withSource(rawType));
-      }
-    }
-
-    return ConstructorBindingImpl.create(this, key, source, scoping);
+    return ConstructorBindingImpl.create(this, key, null, source, scoping, errors);
   }
 
   /**

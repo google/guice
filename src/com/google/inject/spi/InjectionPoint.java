@@ -54,25 +54,30 @@ public final class InjectionPoint {
 
   private final boolean optional;
   private final Member member;
+  private final TypeLiteral<?> declaringType;
   private final ImmutableList<Dependency<?>> dependencies;
 
-  InjectionPoint(TypeLiteral<?> type, Method method) {
+  InjectionPoint(TypeLiteral<?> declaringType, Method method) {
     this.member = method;
+    this.declaringType = declaringType;
 
     Inject inject = method.getAnnotation(Inject.class);
     this.optional = inject.optional();
 
-    this.dependencies = forMember(method, type, method.getParameterAnnotations());
+    this.dependencies = forMember(method, declaringType, method.getParameterAnnotations());
   }
 
-  InjectionPoint(TypeLiteral<?> type, Constructor<?> constructor) {
+  InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
     this.member = constructor;
+    this.declaringType = declaringType;
     this.optional = false;
-    this.dependencies = forMember(constructor, type, constructor.getParameterAnnotations());
+    this.dependencies = forMember(
+        constructor, declaringType, constructor.getParameterAnnotations());
   }
 
-  InjectionPoint(TypeLiteral<?> type, Field field) {
+  InjectionPoint(TypeLiteral<?> declaringType, Field field) {
     this.member = field;
+    this.declaringType = declaringType;
 
     Inject inject = field.getAnnotation(Inject.class);
     this.optional = inject.optional();
@@ -82,7 +87,7 @@ public final class InjectionPoint {
     Errors errors = new Errors(field);
     Key<?> key = null;
     try {
-      key = Annotations.getKey(type.getFieldType(field), field, annotations, errors);
+      key = Annotations.getKey(declaringType.getFieldType(field), field, annotations, errors);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -148,6 +153,15 @@ public final class InjectionPoint {
     return optional;
   }
 
+  /**
+   * Returns the generic type that defines this injection point. If the member exists on a
+   * parameterized type, the result will include more type information than the member's {@link
+   * Member#getDeclaringClass() raw declaring class}.
+   */
+  public TypeLiteral<?> getDeclaringType() {
+    return declaringType;
+  }
+
   @Override public boolean equals(Object o) {
     return o instanceof InjectionPoint
         && member.equals(((InjectionPoint) o).member);
@@ -162,14 +176,13 @@ public final class InjectionPoint {
   }
 
   /**
-   * Returns a new injection point for the specified constructor. If any parameter of
-   * {@code constructor} includes a type variable (such as {@code List<T>}), prefer the overload
-   * that includes a type literal.
+   * Returns a new injection point for the specified constructor. If the declaring type of {@code
+   * constructor} is parameterized (such as {@code List<T>}), prefer the overload that includes a
+   * type literal.
    *
    * @param constructor any single constructor present on {@code type}.
    */
   public static <T> InjectionPoint forConstructor(Constructor<T> constructor) {
-    // TODO: verify that constructor is valid? (defined on a non-abstract class, etc.)
     return new InjectionPoint(TypeLiteral.get(constructor.getDeclaringClass()), constructor);
   }
 
@@ -187,7 +200,6 @@ public final class InjectionPoint {
           .throwConfigurationExceptionIfErrorsExist();
     }
 
-    // TODO: verify that constructor is valid? (defined on a non-abstract class, etc.)
     return new InjectionPoint(type, constructor);
   }
 

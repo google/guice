@@ -21,6 +21,7 @@ import com.google.inject.name.Names;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.reflect.Constructor;
 import junit.framework.TestCase;
 
 /**
@@ -206,4 +207,30 @@ public class BindingTest extends TestCase {
     @Inject TooManyConstructors(Injector i) {}
     @Inject TooManyConstructors() {}
   }
+
+  public void testToConstructorBindings() throws NoSuchMethodException {
+    final Constructor<C> constructor = C.class.getConstructor(Stage.class);
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(C.class).toConstructor(constructor);
+      }
+    });
+    
+    assertEquals(Stage.DEVELOPMENT, injector.getInstance(C.class).stage);
+  }
+
+  public static class C {
+    private final Stage stage;
+
+    public C(Stage stage) {
+      this.stage = stage;
+    }
+
+    @Inject C() {
+      this.stage = null;
+    }
+  }
+
+
 }

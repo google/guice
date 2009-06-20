@@ -18,13 +18,17 @@ package com.google.inject.internal;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.ConfigurationException;
 import static com.google.inject.internal.Preconditions.checkState;
+import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,34 +36,78 @@ import java.util.Set;
 final class ConstructorBindingImpl<T> extends BindingImpl<T> implements ConstructorBinding<T> {
 
   private final Factory<T> factory;
+  private final InjectionPoint constructorInjectionPoint;
 
   private ConstructorBindingImpl(InjectorImpl injector, Key<T> key, Object source,
-      InternalFactory<? extends T> scopedFactory, Scoping scoping, Factory<T> factory) {
+      InternalFactory<? extends T> scopedFactory, Scoping scoping, Factory<T> factory,
+      InjectionPoint constructorInjectionPoint) {
     super(injector, key, source, scopedFactory, scoping);
     this.factory = factory;
+    this.constructorInjectionPoint = constructorInjectionPoint;
   }
 
   public ConstructorBindingImpl(Key<T> key, Object source, Scoping scoping,
-      InjectionPoint constructorInjector, Set<InjectionPoint> injectionPoints) {
+      InjectionPoint constructorInjectionPoint, Set<InjectionPoint> injectionPoints) {
     super(source, key, scoping);
     this.factory = new Factory<T>();
     ConstructionProxy<T> constructionProxy
-        = new DefaultConstructionProxyFactory<T>(constructorInjector).create();
+        = new DefaultConstructionProxyFactory<T>(constructorInjectionPoint).create();
+    this.constructorInjectionPoint = constructorInjectionPoint;
     factory.constructorInjector = new ConstructorInjector<T>(
         injectionPoints, constructionProxy, null, null);
   }
 
-  static <T> ConstructorBindingImpl<T> create(
-      InjectorImpl injector, Key<T> key, Object source, Scoping scoping) {
+  /**
+   * @param constructorInjector the constructor to use, or {@code null} to use the default.
+   */
+  static <T> ConstructorBindingImpl<T> create(InjectorImpl injector, Key<T> key, 
+      InjectionPoint constructorInjector, Object source, Scoping scoping, Errors errors)
+      throws ErrorsException {
+    int numErrors = errors.size();
+    Class<? super T> rawType = key.getTypeLiteral().getRawType();
+
+    // We can't inject abstract classes.
+    if (Modifier.isAbstract(rawType.getModifiers())) {
+      errors.missingImplementation(key);
+    }
+
+    // Error: Inner class.
+    if (Classes.isInnerClass(rawType)) {
+      errors.cannotInjectInnerClass(rawType);
+    }
+
+    // if no scope is specified, look for a scoping annotation on the concrete class
+    if (!scoping.isExplicitlyScoped()) {
+      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
+      if (scopeAnnotation != null) {
+        scoping = Scoping.makeInjectable(Scoping.forAnnotation(scopeAnnotation),
+            injector, errors.withSource(rawType));
+      }
+    }
+
+    errors.throwIfNewErrors(numErrors);
+
     Factory<T> factoryFactory = new Factory<T>();
     InternalFactory<? extends T> scopedFactory
         = Scoping.scope(key, injector, factoryFactory, scoping);
+
+    // Find a constructor annotated @Inject
+    if (constructorInjector == null) {
+      try {
+        constructorInjector = InjectionPoint.forConstructorOf(key.getTypeLiteral());
+      } catch (ConfigurationException e) {
+        throw errors.merge(e.getErrorMessages()).toException();
+      }
+    }
+
     return new ConstructorBindingImpl<T>(
-        injector, key, source, scopedFactory, scoping, factoryFactory);
+        injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);
   }
 
+  @SuppressWarnings("unchecked") // the result type always agrees with the ConstructorInjector type
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
-    factory.constructorInjector = injector.constructors.get(getKey().getTypeLiteral(), errors);
+    factory.constructorInjector
+        = (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -93,12 +141,12 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
 
   @Override protected BindingImpl<T> withScoping(Scoping scoping) {
     return new ConstructorBindingImpl<T>(
-        null, getKey(), getSource(), factory, scoping, factory);
+        null, getKey(), getSource(), factory, scoping, factory, constructorInjectionPoint);
   }
 
   @Override protected BindingImpl<T> withKey(Key<T> key) {
     return new ConstructorBindingImpl<T>(
-        null, key, getSource(), factory, getScoping(), factory);
+        null, key, getSource(), factory, getScoping(), factory, constructorInjectionPoint);
   }
 
   public void applyTo(Binder binder) {

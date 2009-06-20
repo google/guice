@@ -16,8 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.ConfigurationException;
-import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Iterables.concat;
 import com.google.inject.spi.InjectionPoint;
 
@@ -29,12 +27,12 @@ import com.google.inject.spi.InjectionPoint;
 final class ConstructorInjectorStore {
   private final InjectorImpl injector;
 
-  private final FailableCache<TypeLiteral<?>, ConstructorInjector<?>>  cache
-      = new FailableCache<TypeLiteral<?>, ConstructorInjector<?>> () {
+  private final FailableCache<InjectionPoint, ConstructorInjector<?>>  cache
+      = new FailableCache<InjectionPoint, ConstructorInjector<?>> () {
     @SuppressWarnings("unchecked")
-    protected ConstructorInjector<?> create(TypeLiteral<?> type, Errors errors)
+    protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
         throws ErrorsException {
-      return createConstructor(type, errors);
+      return createConstructor(constructorInjector, errors);
     }
   };
 
@@ -45,26 +43,21 @@ final class ConstructorInjectorStore {
   /**
    * Returns a new complete constructor injector with injection listeners registered.
    */
-  @SuppressWarnings("unchecked") // the ConstructorInjector type always agrees with the passed type
-  public <T> ConstructorInjector<T> get(TypeLiteral<T> key, Errors errors) throws ErrorsException {
-    return (ConstructorInjector<T>) cache.get(key, errors);
+  public ConstructorInjector<?> get(InjectionPoint constructorInjector, Errors errors)
+      throws ErrorsException {
+    return cache.get(constructorInjector, errors);
   }
 
-  private <T> ConstructorInjector<T> createConstructor(TypeLiteral<T> type, Errors errors)
+  private <T> ConstructorInjector<T> createConstructor(InjectionPoint injectionPoint, Errors errors)
       throws ErrorsException {
     int numErrorsBefore = errors.size();
 
-    InjectionPoint injectionPoint;
-    try {
-      injectionPoint = InjectionPoint.forConstructorOf(type);
-    } catch (ConfigurationException e) {
-      errors.merge(e.getErrorMessages());
-      throw errors.toException();
-    }
-
     SingleParameterInjector<?>[] constructorParameterInjectors
         = injector.getParametersInjectors(injectionPoint.getDependencies(), errors);
-    MembersInjectorImpl<T> membersInjector = injector.membersInjectorStore.get(type, errors);
+
+    @SuppressWarnings("unchecked") // the injector type agrees with the injection point type
+    MembersInjectorImpl<T> membersInjector = (MembersInjectorImpl<T>) injector.membersInjectorStore
+        .get(injectionPoint.getDeclaringType(), errors);
 
     /*if[AOP]*/
     ImmutableList<MethodAspect> injectorAspects = injector.state.getMethodAspects();

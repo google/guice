@@ -85,6 +85,18 @@ final class BindingProcessor extends AbstractProcessor {
         ((BindingImpl<?>) command).getScoping(), injector, errors);
 
     command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
+      public Void visit(ConstructorBinding<? extends T> binding) {
+        try {
+          ConstructorBindingImpl<T> onInjector = ConstructorBindingImpl.create(injector, key, 
+              binding.getConstructor(), source, scoping, errors);
+          scheduleInitialization(onInjector);
+          putBinding(onInjector);
+        } catch (ErrorsException e) {
+          errors.merge(e.getErrors());
+          putBinding(invalidBinding(injector, key, source));
+        }
+        return null;
+      }
 
       public Void visit(InstanceBinding<? extends T> binding) {
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
@@ -148,25 +160,14 @@ final class BindingProcessor extends AbstractProcessor {
         }
 
         // This cast is safe after the preceeding check.
-        final BindingImpl<T> binding;
         try {
-          binding = injector.createUnitializedBinding(key, scoping, source, errors);
+          BindingImpl<T> binding = injector.createUnitializedBinding(key, scoping, source, errors);
+          scheduleInitialization(binding);
           putBinding(binding);
         } catch (ErrorsException e) {
           errors.merge(e.getErrors());
           putBinding(invalidBinding(injector, key, source));
-          return null;
         }
-
-        uninitializedBindings.add(new Runnable() {
-          public void run() {
-            try {
-              binding.getInjector().initializeBinding(binding, errors.withSource(source));
-            } catch (ErrorsException e) {
-              errors.merge(e.getErrors());
-            }
-          }
-        });
 
         return null;
       }
@@ -179,12 +180,20 @@ final class BindingProcessor extends AbstractProcessor {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visit(ConstructorBinding<? extends T> binding) {
+      public Void visit(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visit(ProviderBinding<? extends T> binding) {
-        throw new IllegalArgumentException("Cannot apply a non-module element");
+      private void scheduleInitialization(final BindingImpl<?> binding) {
+        uninitializedBindings.add(new Runnable() {
+          public void run() {
+            try {
+              binding.getInjector().initializeBinding(binding, errors.withSource(source));
+            } catch (ErrorsException e) {
+              errors.merge(e.getErrors());
+            }
+          }
+        });
       }
     });
 
