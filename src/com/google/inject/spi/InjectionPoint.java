@@ -164,11 +164,12 @@ public final class InjectionPoint {
 
   @Override public boolean equals(Object o) {
     return o instanceof InjectionPoint
-        && member.equals(((InjectionPoint) o).member);
+        && member.equals(((InjectionPoint) o).member)
+        && declaringType.equals(((InjectionPoint) o).declaringType);
   }
 
   @Override public int hashCode() {
-    return member.hashCode();
+    return member.hashCode() ^ declaringType.hashCode();
   }
 
   @Override public String toString() {

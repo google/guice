@@ -209,28 +209,57 @@ public class BindingTest extends TestCase {
   }
 
   public void testToConstructorBindings() throws NoSuchMethodException {
-    final Constructor<C> constructor = C.class.getConstructor(Stage.class);
+    final Constructor constructor = C.class.getConstructor(Stage.class, Object.class);
 
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(C.class).toConstructor(constructor);
+        bind(new TypeLiteral<C<Stage>>() {}).toConstructor(constructor);
+        bind(new TypeLiteral<C<Injector>>() {}).toConstructor(constructor);
       }
     });
-    
-    assertEquals(Stage.DEVELOPMENT, injector.getInstance(C.class).stage);
+
+    C<Stage> one = injector.getInstance(new Key<C<Stage>>() {});
+    assertEquals(Stage.DEVELOPMENT, one.stage);
+    assertEquals(Stage.DEVELOPMENT, one.t);
+    assertEquals(Stage.DEVELOPMENT, one.anotherT);
+
+    C<Injector> two = injector.getInstance(new Key<C<Injector>>() {});
+    assertEquals(Stage.DEVELOPMENT, two.stage);
+    assertEquals(injector, two.t);
+    assertEquals(injector, two.anotherT);
   }
 
-  public static class C {
-    private final Stage stage;
+  public static class C<T> {
+    private Stage stage;
+    private T t;
+    @Inject T anotherT;
 
-    public C(Stage stage) {
+    public C(Stage stage, T t) {
+      this.stage = stage;
+      this.t = t;
+    }
+
+    @Inject C() {}
+  }
+
+
+  public void testToConstructorBinding() throws NoSuchMethodException {
+    final Constructor<D> constructor = D.class.getConstructor(Stage.class);
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Object.class).toConstructor(constructor);
+      }
+    });
+
+    D d = (D) injector.getInstance(Object.class);
+    assertEquals(Stage.DEVELOPMENT, d.stage);
+  }
+
+  public static class D {
+    Stage stage;
+    public D(Stage stage) {
       this.stage = stage;
     }
-
-    @Inject C() {
-      this.stage = null;
-    }
   }
-
-
 }
