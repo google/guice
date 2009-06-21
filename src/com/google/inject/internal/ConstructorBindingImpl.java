@@ -17,8 +17,8 @@
 package com.google.inject.internal;
 
 import com.google.inject.Binder;
-import com.google.inject.Key;
 import com.google.inject.ConfigurationException;
+import com.google.inject.Key;
 import static com.google.inject.internal.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -76,9 +76,21 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
       errors.cannotInjectInnerClass(rawType);
     }
 
+    errors.throwIfNewErrors(numErrors);
+
+    // Find a constructor annotated @Inject
+    if (constructorInjector == null) {
+      try {
+        constructorInjector = InjectionPoint.forConstructorOf(key.getTypeLiteral());
+      } catch (ConfigurationException e) {
+        throw errors.merge(e.getErrorMessages()).toException();
+      }
+    }
+
     // if no scope is specified, look for a scoping annotation on the concrete class
     if (!scoping.isExplicitlyScoped()) {
-      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, rawType);
+      Class<?> annotatedType = constructorInjector.getMember().getDeclaringClass();
+      Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, annotatedType);
       if (scopeAnnotation != null) {
         scoping = Scoping.makeInjectable(Scoping.forAnnotation(scopeAnnotation),
             injector, errors.withSource(rawType));
@@ -90,15 +102,6 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
     Factory<T> factoryFactory = new Factory<T>();
     InternalFactory<? extends T> scopedFactory
         = Scoping.scope(key, injector, factoryFactory, scoping);
-
-    // Find a constructor annotated @Inject
-    if (constructorInjector == null) {
-      try {
-        constructorInjector = InjectionPoint.forConstructorOf(key.getTypeLiteral());
-      } catch (ConfigurationException e) {
-        throw errors.merge(e.getErrorMessages()).toException();
-      }
-    }
 
     return new ConstructorBindingImpl<T>(
         injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);

@@ -17,12 +17,20 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.name.Names;
+import com.google.inject.internal.ImmutableSet;
+import com.google.inject.internal.Sets;
+import com.google.inject.matcher.Matchers;
+import static com.google.inject.name.Names.named;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.lang.reflect.Constructor;
 import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -69,14 +77,14 @@ public class BindingTest extends TestCase {
 
       // Provider.
       bind(Foo.class)
-          .annotatedWith(Names.named("provider"))
+          .annotatedWith(named("provider"))
           .toProvider(FooProvider.class);
 
       // Class.
       bind(Bar.class).in(Scopes.SINGLETON);
 
       // Constant.
-      bindConstant().annotatedWith(Names.named("name")).to("Bob");
+      bindConstant().annotatedWith(named("name")).to("Bob");
     }
   }
 
@@ -229,20 +237,6 @@ public class BindingTest extends TestCase {
     assertEquals(injector, two.anotherT);
   }
 
-  public static class C<T> {
-    private Stage stage;
-    private T t;
-    @Inject T anotherT;
-
-    public C(Stage stage, T t) {
-      this.stage = stage;
-      this.t = t;
-    }
-
-    @Inject C() {}
-  }
-
-
   public void testToConstructorBinding() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
 
@@ -256,9 +250,129 @@ public class BindingTest extends TestCase {
     assertEquals(Stage.DEVELOPMENT, d.stage);
   }
 
+  public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {
+    final Constructor<D> constructor = D.class.getConstructor(Stage.class);
+    final AtomicInteger count = new AtomicInteger();
+    final MethodInterceptor countingInterceptor = new MethodInterceptor() {
+      public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        count.incrementAndGet();
+        return methodInvocation.proceed();
+      }
+    };
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Object.class).toConstructor(constructor);
+        bindInterceptor(Matchers.any(), Matchers.any(), countingInterceptor);
+      }
+    });
+
+    D d = (D) injector.getInstance(Object.class);
+    d.hashCode();
+    d.hashCode();
+    assertEquals(2, count.get());
+  }
+
+  public void testInaccessibleConstructor() throws NoSuchMethodException {
+    final Constructor<E> constructor = E.class.getDeclaredConstructor(Stage.class);
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(E.class).toConstructor(constructor);
+      }
+    });
+
+    E e = injector.getInstance(E.class);
+    assertEquals(Stage.DEVELOPMENT, e.stage);
+  }
+
+  public void testToConstructorAndScopes() throws NoSuchMethodException {
+    final Constructor<F> constructor = F.class.getConstructor(Stage.class);
+
+    final Key<Object> d = Key.get(Object.class, named("D")); // default scoping
+    final Key<Object> s = Key.get(Object.class, named("S")); // singleton
+    final Key<Object> n = Key.get(Object.class, named("N")); // "N" instances
+    final Key<Object> r = Key.get(Object.class, named("R")); // a regular binding
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(d).toConstructor(constructor);
+        bind(s).toConstructor(constructor).in(Singleton.class);
+        bind(n).toConstructor(constructor).in(Scopes.NO_SCOPE);
+        bind(r).to(F.class);
+      }
+    });
+
+    assertDistinct(injector, 1, d, d, d, d);
+    assertDistinct(injector, 1, s, s, s, s);
+    assertDistinct(injector, 4, n, n, n, n);
+    assertDistinct(injector, 1, r, r, r, r);
+    assertDistinct(injector, 4, d, d, r, r, s, s, n);
+  }
+
+  public void assertDistinct(Injector injector, int expectedCount, Key<?>... keys) {
+    ImmutableSet.Builder<Object> builder = ImmutableSet.builder();
+    for (Key<?> k : keys) {
+      builder.add(injector.getInstance(k));
+    }
+    assertEquals(expectedCount, builder.build().size());
+  }
+
+  public void testToConstructorSpiData() throws NoSuchMethodException {
+    final Set<TypeLiteral<?>> heardTypes = Sets.newHashSet();
+
+    final Constructor<D> constructor = D.class.getConstructor(Stage.class);
+    final TypeListener listener = new TypeListener() {
+      public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+        if (!heardTypes.add(type)) {
+          fail("Heard " + type + " multiple times!");
+        }
+      }
+    };
+
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Object.class).toConstructor(constructor);
+        bind(D.class).toConstructor(constructor);
+        bindListener(Matchers.any(), listener);
+      }
+    });
+    
+    assertEquals(ImmutableSet.of(TypeLiteral.get(Stage.class), TypeLiteral.get(D.class)),
+        heardTypes);
+  }
+
+  public static class C<T> {
+    private Stage stage;
+    private T t;
+    @Inject T anotherT;
+
+    public C(Stage stage, T t) {
+      this.stage = stage;
+      this.t = t;
+    }
+
+    @Inject C() {}
+  }
+
   public static class D {
     Stage stage;
     public D(Stage stage) {
+      this.stage = stage;
+    }
+  }
+
+  private static class E {
+    Stage stage;
+    private E(Stage stage) {
+      this.stage = stage;
+    }
+  }
+
+  @Singleton
+  public static class F {
+    Stage stage;
+    @Inject public F(Stage stage) {
       this.stage = stage;
     }
   }
