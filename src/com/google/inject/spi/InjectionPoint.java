@@ -88,6 +88,8 @@ public final class InjectionPoint {
     Key<?> key = null;
     try {
       key = Annotations.getKey(declaringType.getFieldType(field), field, annotations, errors);
+    } catch (ConfigurationException e) {
+      errors.merge(e.getErrorMessages());
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -111,6 +113,8 @@ public final class InjectionPoint {
         Key<?> key = Annotations.getKey(parameterType, member, parameterAnnotations, errors);
         dependencies.add(newDependency(key, Nullability.allowsNull(parameterAnnotations), index));
         index++;
+      } catch (ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }

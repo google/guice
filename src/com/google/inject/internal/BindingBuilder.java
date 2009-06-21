@@ -130,19 +130,21 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
-  public ScopedBindingBuilder toConstructor(Constructor<? extends T> constructor) {
+  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor) {
+    return toConstructor(constructor, TypeLiteral.get(constructor.getDeclaringClass()));
+  }
+
+  public <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor,
+      TypeLiteral<? extends S> type) {
     checkNotNull(constructor, "constructor");
+    checkNotNull(type, "type");
     checkNotTargetted();
 
     BindingImpl<T> base = getBinding();
-    TypeLiteral<T> keyType = base.getKey().getTypeLiteral();
-    TypeLiteral<? extends T> toConstruct = (constructor.getDeclaringClass() == keyType.getRawType())
-        ? keyType
-        : TypeLiteral.get(constructor.getDeclaringClass());
 
     Set<InjectionPoint> injectionPoints;
     try {
-      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(toConstruct);
+      injectionPoints = InjectionPoint.forInstanceMethodsAndFields(type);
     } catch (ConfigurationException e) {
       copyErrorsToBinder(e);
       injectionPoints = e.getPartialValue();
@@ -150,8 +152,7 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
 
     try {
       @SuppressWarnings("unchecked") // safe; constructor is a subtype of toConstruct
-      InjectionPoint constructorPoint = InjectionPoint.forConstructor((Constructor) constructor,
-          toConstruct);
+      InjectionPoint constructorPoint = InjectionPoint.forConstructor(constructor, type);
       setBinding(new ConstructorBindingImpl<T>(base.getKey(), base.getSource(), base.getScoping(),
           constructorPoint, injectionPoints));
     } catch (ConfigurationException e) {

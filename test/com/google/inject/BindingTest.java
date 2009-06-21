@@ -216,27 +216,6 @@ public class BindingTest extends TestCase {
     @Inject TooManyConstructors() {}
   }
 
-  public void testToConstructorBindings() throws NoSuchMethodException {
-    final Constructor constructor = C.class.getConstructor(Stage.class, Object.class);
-
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(new TypeLiteral<C<Stage>>() {}).toConstructor(constructor);
-        bind(new TypeLiteral<C<Injector>>() {}).toConstructor(constructor);
-      }
-    });
-
-    C<Stage> one = injector.getInstance(new Key<C<Stage>>() {});
-    assertEquals(Stage.DEVELOPMENT, one.stage);
-    assertEquals(Stage.DEVELOPMENT, one.t);
-    assertEquals(Stage.DEVELOPMENT, one.anotherT);
-
-    C<Injector> two = injector.getInstance(new Key<C<Injector>>() {});
-    assertEquals(Stage.DEVELOPMENT, two.stage);
-    assertEquals(injector, two.t);
-    assertEquals(injector, two.anotherT);
-  }
-
   public void testToConstructorBinding() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
 
@@ -248,6 +227,48 @@ public class BindingTest extends TestCase {
 
     D d = (D) injector.getInstance(Object.class);
     assertEquals(Stage.DEVELOPMENT, d.stage);
+  }
+
+  public void testToConstructorBindingsOnParameterizedTypes() throws NoSuchMethodException {
+    final Constructor<C> constructor = C.class.getConstructor(Stage.class, Object.class);
+    final Key<Object> s = new Key<Object>(named("s")) {};
+    final Key<Object> i = new Key<Object>(named("i")) {};
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(s).toConstructor(constructor, new TypeLiteral<C<Stage>>() {});
+        bind(i).toConstructor(constructor, new TypeLiteral<C<Injector>>() {});
+      }
+    });
+
+    C<Stage> one = (C<Stage>) injector.getInstance(s);
+    assertEquals(Stage.DEVELOPMENT, one.stage);
+    assertEquals(Stage.DEVELOPMENT, one.t);
+    assertEquals(Stage.DEVELOPMENT, one.anotherT);
+
+    C<Injector> two = (C<Injector>) injector.getInstance(i);
+    assertEquals(Stage.DEVELOPMENT, two.stage);
+    assertEquals(injector, two.t);
+    assertEquals(injector, two.anotherT);
+  }
+
+  public void testToConstructorBindingsFailsOnRawTypes() throws NoSuchMethodException {
+    final Constructor constructor = C.class.getConstructor(Stage.class, Object.class);
+
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(Object.class).toConstructor(constructor);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) T cannot be used as a key; It is not fully specified.",
+          "at " + C.class.getName() + ".<init>(BindingTest.java:",
+          "2) T cannot be used as a key; It is not fully specified.",
+          "at " + C.class.getName() + ".anotherT(BindingTest.java:");
+    }
   }
 
   public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {

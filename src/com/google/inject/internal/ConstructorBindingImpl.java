@@ -19,16 +19,17 @@ package com.google.inject.internal;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
-import static com.google.inject.internal.Preconditions.checkState;
+import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
+import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -153,8 +154,9 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
   }
 
   public void applyTo(Binder binder) {
-    getScoping().applyTo(binder.withSource(getSource())
-        .bind(getKey()).toConstructor((Constructor) getConstructor().getMember()));
+    InjectionPoint constructor = getConstructor();
+    getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).toConstructor(
+        (Constructor) getConstructor().getMember(), (TypeLiteral) constructor.getDeclaringType()));
   }
 
   @Override public String toString() {

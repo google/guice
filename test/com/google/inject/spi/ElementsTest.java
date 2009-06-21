@@ -1080,20 +1080,37 @@ public class ElementsTest extends TestCase {
   }
 
   public void testBindToConstructor() throws NoSuchMethodException, NoSuchFieldException {
-    final Constructor<B> constructor = B.class.getDeclaredConstructor(Object.class);
+    final Constructor<A> aConstructor = A.class.getDeclaredConstructor();
+    final Constructor<B> bConstructor = B.class.getDeclaredConstructor(Object.class);
     final Field field = B.class.getDeclaredField("stage");
 
     checkModule(
         new AbstractModule() {
           protected void configure() {
-            bind(new TypeLiteral<B<Integer>>() {}).toConstructor((Constructor) constructor)
+            bind(A.class).toConstructor(aConstructor);
+            bind(B.class).toConstructor(bConstructor, new TypeLiteral<B<Integer>>() {})
                 .in(Singleton.class);
           }
         },
 
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
-            assertEquals(new Key<B<Integer>>() {}, binding.getKey());
+            assertEquals(new Key<A>() {}, binding.getKey());
+
+            return binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visit(ConstructorBinding<? extends T> constructorBinding) {
+                InjectionPoint injectionPoint = constructorBinding.getConstructor();
+                assertEquals(aConstructor, injectionPoint.getMember());
+                assertEquals(new TypeLiteral<A>() {}, injectionPoint.getDeclaringType());
+                return null;
+              }
+            });
+          }
+        },
+
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> binding) {
+            assertEquals(new Key<B>() {}, binding.getKey());
             binding.acceptScopingVisitor(new FailingBindingScopingVisitor() {
               @Override public Void visitScopeAnnotation(Class<? extends Annotation> annotation) {
                 assertEquals(Singleton.class, annotation);
@@ -1103,7 +1120,7 @@ public class ElementsTest extends TestCase {
 
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(ConstructorBinding<? extends T> constructorBinding) {
-                assertEquals(constructor, constructorBinding.getConstructor().getMember());
+                assertEquals(bConstructor, constructorBinding.getConstructor().getMember());
                 assertEquals(Key.get(Integer.class),
                     getOnlyElement(constructorBinding.getConstructor().getDependencies()).getKey());
                 assertEquals(field,
