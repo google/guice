@@ -378,7 +378,7 @@ final class InjectorImpl implements Injector, Lookups {
    * Creates a binding for an injectable type with the given scope. Looks for a scope on the type if
    * none is specified.
    */
-  <T> BindingImpl<T> createUnitializedBinding(Key<T> key, Scoping scoping, Object source,
+  <T> BindingImpl<T> createUninitializedBinding(Key<T> key, Scoping scoping, Object source,
       Errors errors) throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
 
@@ -614,7 +614,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     Object source = key.getTypeLiteral().getRawType();
-    BindingImpl<T> binding = createUnitializedBinding(key, Scoping.UNSCOPED, source, errors);
+    BindingImpl<T> binding = createUninitializedBinding(key, Scoping.UNSCOPED, source, errors);
     errors.throwIfNewErrors(numErrorsBefore);
     initializeBinding(binding, errors);
     return binding;
