@@ -17,6 +17,9 @@
 package com.google.inject;
 
 import com.google.inject.internal.InjectorBuilder;
+import com.google.inject.internal.LinkedBindingImpl;
+import com.google.inject.spi.BindingScopingVisitor;
+import java.lang.annotation.Annotation;
 
 /**
  * Built-in scope implementations.
@@ -86,4 +89,49 @@ public class Scopes {
       return "Scopes.NO_SCOPE";
     }
   };
+
+  /**
+   * Returns true if {@code binding} is singleton-scoped. If the binding is a {@link
+   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
+   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
+   * also true if the target binding is singleton-scoped.
+   *
+   * @since 2.1
+   */
+  public static boolean isSingleton(Binding<?> binding) {
+    do {
+      boolean singleton = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
+        public Boolean visitNoScoping() {
+          return false;
+        }
+
+        public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
+          return Singleton.class == scopeAnnotation;
+        }
+
+        public Boolean visitScope(Scope scope) {
+          return scope == Scopes.SINGLETON;
+        }
+
+        public Boolean visitEagerSingleton() {
+          return true;
+        }
+      });
+
+      if (singleton) {
+        return true;
+      }
+
+      if (binding instanceof LinkedBindingImpl) {
+        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
+        Injector injector = (Injector) linkedBinding.getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(linkedBinding.getLinkedKey());
+          continue;
+        }
+      }
+
+      return false;
+    } while (true);
+  }
 }

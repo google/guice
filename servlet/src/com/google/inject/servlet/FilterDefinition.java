@@ -17,8 +17,8 @@ package com.google.inject.servlet;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Scopes;
 import com.google.inject.internal.Iterators;
-import static com.google.inject.servlet.ServletScopes.isSingletonBinding;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -63,7 +63,7 @@ class FilterDefinition {
       Set<Filter> initializedSoFar) throws ServletException {
 
     // This absolutely must be a singleton, and so is only initialized once.
-    if (!isSingletonBinding(injector.getBinding(filterKey))) {
+    if (!Scopes.isSingleton(injector.getBinding(filterKey))) {
       throw new ServletException("Filters must be bound as singletons. "
         + filterKey + " was not bound in singleton scope.");
     }

@@ -17,7 +17,13 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.Maps;
+import com.google.inject.name.Named;
+import static com.google.inject.name.Names.named;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
+import com.google.inject.util.Providers;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -441,5 +447,103 @@ public class ScopesTest extends TestCase {
         }
       };
     }
+  }
+
+  public void testIsSingletonPositive() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+    final Key<String> d = Key.get(String.class, named("D"));
+    final Key<String> e = Key.get(String.class, named("E"));
+    final Key<String> f = Key.get(String.class, named("F"));
+    final Key<String> g = Key.get(String.class, named("G"));
+    final Key<Object> h = Key.get(Object.class, named("H"));
+
+    Module singletonBindings = new AbstractModule() {
+      protected void configure() {
+        bind(a).to(b);
+        bind(b).to(c);
+        bind(c).toProvider(Providers.of("c")).in(Scopes.SINGLETON);
+        bind(d).toInstance("d");
+        bind(e).toProvider(Providers.of("e")).asEagerSingleton();
+        bind(f).toProvider(Providers.of("f")).in(Singleton.class);
+        bind(h).to(AnnotatedSingleton.class);
+      }
+
+      @Provides @Named("G") @Singleton String provideG() {
+        return "g";
+      }
+    };
+
+    @SuppressWarnings("unchecked") // we know the module contains only bindings
+    List<Element> moduleBindings = Elements.getElements(singletonBindings);
+    ImmutableMap<Key<?>, Binding<?>> map = indexBindings(moduleBindings);
+    assertFalse(Scopes.isSingleton(map.get(a))); // linked bindings are not followed by modules
+    assertFalse(Scopes.isSingleton(map.get(b)));
+    assertTrue(Scopes.isSingleton(map.get(c)));
+    assertTrue(Scopes.isSingleton(map.get(d)));
+    assertTrue(Scopes.isSingleton(map.get(e)));
+    assertTrue(Scopes.isSingleton(map.get(f)));
+    assertTrue(Scopes.isSingleton(map.get(g)));
+    assertFalse(Scopes.isSingleton(map.get(h))); // annotated classes are not followed by modules
+
+    Injector injector = Guice.createInjector(singletonBindings);
+    assertTrue(Scopes.isSingleton(injector.getBinding(a)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(b)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(c)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(d)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(e)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(f)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(g)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(h)));
+  }
+  
+  public void testIsSingletonNegative() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+    final Key<String> d = Key.get(String.class, named("D"));
+    final Key<String> e = Key.get(String.class, named("E"));
+
+    Module singletonBindings = new AbstractModule() {
+      protected void configure() {
+        bind(a).to(b);
+        bind(b).to(c);
+        bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
+        bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
+        bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+      }
+
+      @Provides @Named("E") @CustomScoped String provideE() {
+        return "e";
+      }
+    };
+
+    @SuppressWarnings("unchecked") // we know the module contains only bindings
+    List<Element> moduleBindings = Elements.getElements(singletonBindings);
+    ImmutableMap<Key<?>, Binding<?>> map = indexBindings(moduleBindings);
+    assertFalse(Scopes.isSingleton(map.get(a)));
+    assertFalse(Scopes.isSingleton(map.get(b)));
+    assertFalse(Scopes.isSingleton(map.get(c)));
+    assertFalse(Scopes.isSingleton(map.get(d)));
+    assertFalse(Scopes.isSingleton(map.get(e)));
+
+    Injector injector = Guice.createInjector(singletonBindings);
+    assertFalse(Scopes.isSingleton(injector.getBinding(a)));
+    assertFalse(Scopes.isSingleton(injector.getBinding(b)));
+    assertFalse(Scopes.isSingleton(injector.getBinding(c)));
+    assertFalse(Scopes.isSingleton(injector.getBinding(d)));
+    assertFalse(Scopes.isSingleton(injector.getBinding(e)));
+  }
+
+  ImmutableMap<Key<?>, Binding<?>> indexBindings(Iterable<Element> elements) {
+    ImmutableMap.Builder<Key<?>, Binding<?>> builder = ImmutableMap.builder();
+    for (Element element : elements) {
+      if (element instanceof Binding) {
+        Binding<?> binding = (Binding<?>) element;
+        builder.put(binding.getKey(), binding);
+      }
+    }
+    return builder.build();
   }
 }

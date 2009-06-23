@@ -17,8 +17,8 @@ package com.google.inject.servlet;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Scopes;
 import com.google.inject.internal.Iterators;
-import static com.google.inject.servlet.ServletScopes.isSingletonBinding;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -66,7 +66,7 @@ class ServletDefinition {
       Set<HttpServlet> initializedSoFar) throws ServletException {
 
     // This absolutely must be a singleton, and so is only initialized once.
-    if (!isSingletonBinding(injector.getBinding(servletKey))) {
+    if (!Scopes.isSingleton(injector.getBinding(servletKey))) {
       throw new ServletException("Servlets must be bound as singletons. "
         + servletKey + " was not bound in singleton scope.");
     }

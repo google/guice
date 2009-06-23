@@ -16,15 +16,9 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.inject.Scopes;
-import com.google.inject.Singleton;
-import com.google.inject.spi.DefaultBindingScopingVisitor;
-import java.lang.annotation.Annotation;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -97,36 +91,4 @@ public class ServletScopes {
       return "ServletScopes.SESSION";
     }
   };
-
-  static boolean isSingletonBinding(Binding<?> binding) {
-    final AtomicBoolean isSingleton = new AtomicBoolean(true);
-    binding.acceptScopingVisitor(new DefaultBindingScopingVisitor<Void>() {
-      @Override
-      public Void visitNoScoping() {
-        isSingleton.set(false);
-
-        return null;
-      }
-
-      @Override
-      public Void visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-        if (null != scopeAnnotation && !Singleton.class.equals(scopeAnnotation)) {
-          isSingleton.set(false);
-        }
-
-        return null;
-      }
-
-      @Override
-      public Void visitScope(Scope scope) {
-        if (null != scope && !Scopes.SINGLETON.equals(scope)) {
-          isSingleton.set(false);
-        }
-
-        return null;
-      }
-    });
-
-    return isSingleton.get();
-  }
 }

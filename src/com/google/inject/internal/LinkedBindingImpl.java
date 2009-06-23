@@ -21,7 +21,7 @@ import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.LinkedKeyBinding;
 
-final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T> {
+public final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T> {
 
   final Key<? extends T> targetKey;
 
