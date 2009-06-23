@@ -18,6 +18,7 @@ package com.google.inject.multibindings;
 
 import com.google.inject.Binder;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -195,6 +196,15 @@ public abstract class MapBinder<K, V> {
   }
 
   /**
+   * Configures the bound map to silently discard duplicate entries. When multiple equal keys are
+   * bound, the value that gets included is arbitrary. When multible modules contribute elements to
+   * the map, this configuration option impacts all of them.
+   *
+   * @return this map binder
+   */
+  public abstract MapBinder<K, V> permitDuplicates();
+
+  /**
    * Returns a binding builder used to add a new entry in the map. Each
    * key must be distinct (and non-null). Bound providers will be evaluated each
    * time the map is injected.
@@ -250,6 +260,11 @@ public abstract class MapBinder<K, V> {
       this.binder = binder;
     }
 
+    public MapBinder<K, V> permitDuplicates() {
+      entrySetBinder.permitDuplicates();
+      return this;
+    }
+
     /**
      * This creates two bindings. One for the {@code Map.Entry<K, Provider<V>>}
      * and another for {@code V}.
@@ -277,12 +292,14 @@ public abstract class MapBinder<K, V> {
         private Map<K, Provider<V>> providerMap;
 
         @SuppressWarnings("unused")
-        @Inject void initialize() {
+        @Inject void initialize(Injector injector) {
           RealMapBinder.this.binder = null;
+          boolean permitDuplicates = entrySetBinder.permitsDuplicates(injector);
 
           Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
           for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-            checkConfiguration(providerMapMutable.put(entry.getKey(), entry.getValue()) == null,
+            Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
+            checkConfiguration(previous == null || permitDuplicates,
                 "Map injection failed due to duplicated key \"%s\"", entry.getKey());
           }
 

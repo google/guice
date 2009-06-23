@@ -16,6 +16,7 @@
 
 package com.google.inject.multibindings;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -30,6 +31,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Lists;
+import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
@@ -159,6 +161,15 @@ public abstract class Multibinder<T> {
   }
 
   /**
+   * Configures the bound set to silently discard duplicate elements. When multiple equal values are
+   * bound, the one that gets included is arbitrary. When multible modules contribute elements to
+   * the set, this configuration option impacts all of them.
+   *
+   * @return this multibinder
+   */
+  public abstract Multibinder<T> permitDuplicates();
+
+  /**
    * Returns a binding builder used to add a new element in the set. Each
    * bound element must have a distinct value. Bound providers will be
    * evaluated each time the set is injected.
@@ -197,6 +208,7 @@ public abstract class Multibinder<T> {
     private final TypeLiteral<T> elementType;
     private final String setName;
     private final Key<Set<T>> setKey;
+    private final Key<Boolean> permitDuplicatesKey;
 
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
@@ -205,12 +217,16 @@ public abstract class Multibinder<T> {
     private List<Provider<T>> providers;
     private Set<Dependency<?>> dependencies;
 
+    /** whether duplicates are allowed. Possibly configured by a different instance */
+    private boolean permitDuplicates;
+
     private RealMultibinder(Binder binder, TypeLiteral<T> elementType,
         String setName, Key<Set<T>> setKey) {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
       this.setName = checkNotNull(setName, "setName");
       this.setKey = checkNotNull(setKey, "setKey");
+      this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
 
     @SuppressWarnings("unchecked")
@@ -218,6 +234,11 @@ public abstract class Multibinder<T> {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
       binder.bind(setKey).toProvider(this);
+    }
+
+    public Multibinder<T> permitDuplicates() {
+      binder.install(new PermitDuplicatesModule(permitDuplicatesKey));
+      return this;
     }
 
     @Override public LinkedBindingBuilder<T> addBinding() {
@@ -245,7 +266,12 @@ public abstract class Multibinder<T> {
       }
 
       this.dependencies = ImmutableSet.copyOf(dependencies);
+      this.permitDuplicates = permitsDuplicates(injector);
       this.binder = null;
+    }
+
+    boolean permitsDuplicates(Injector injector) {
+      return injector.getBindings().containsKey(permitDuplicatesKey);
     }
 
     private boolean keyMatches(Key<?> key) {
@@ -265,7 +291,7 @@ public abstract class Multibinder<T> {
       for (Provider<T> provider : providers) {
         final T newValue = provider.get();
         checkConfiguration(newValue != null, "Set injection failed due to null element");
-        checkConfiguration(result.add(newValue),
+        checkConfiguration(result.add(newValue) || permitDuplicates,
             "Set injection failed due to duplicated element \"%s\"", newValue);
       }
       return Collections.unmodifiableSet(result);
@@ -300,6 +326,32 @@ public abstract class Multibinder<T> {
           .append(elementType)
           .append(">")
           .toString();
+    }
+  }
+
+  /**
+   * We install the permit duplicates configuration as its own binding, all by itself. This way,
+   * if only half of a multibinder user's remember to call permitDuplicates(), they're still
+   * permitted.
+   */
+  private static class PermitDuplicatesModule extends AbstractModule {
+    private final Key<Boolean> key;
+
+    PermitDuplicatesModule(Key<Boolean> key) {
+      this.key = key;
+    }
+
+    protected void configure() {
+      bind(key).toInstance(true);
+    }
+
+    @Override public boolean equals(Object o) {
+      return o instanceof PermitDuplicatesModule
+          && ((PermitDuplicatesModule) o).key.equals(key);
+    }
+
+    @Override public int hashCode() {
+      return getClass().hashCode() ^ key.hashCode();
     }
   }
 

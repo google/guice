@@ -233,6 +233,29 @@ public class MapBinderTest extends TestCase {
     }
   }
 
+  public void testMapBinderMapPermitDuplicateElements() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class);
+            multibinder.addBinding("a").toInstance("A");
+            multibinder.addBinding("b").toInstance("B");
+          }
+        },
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class);
+            multibinder.addBinding("b").toInstance("B");
+            multibinder.addBinding("c").toInstance("C");
+            multibinder.permitDuplicates();
+          }
+        });
+
+    assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injector.getInstance(Key.get(mapOfString)));
+  }
+
   public void testMapBinderMapForbidsNullKeys() {
     try {
       Guice.createInjector(new AbstractModule() {

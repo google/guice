@@ -229,6 +229,49 @@ public class MultibinderTest extends TestCase {
           "1) Set injection failed due to duplicated element \"A\"");
     }
   }
+  
+  public void testMultibinderSetPermitDuplicateElements() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+          }
+        });
+
+    assertEquals(setOf("A", "B", "C"), injector.getInstance(Key.get(setOfString)));
+  }
+
+  public void testMultibinderSetPermitDuplicateCallsToPermitDuplicates() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("A");
+            multibinder.addBinding().toInstance("B");
+          }
+        },
+        new AbstractModule() {
+          protected void configure() {
+            Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+            multibinder.permitDuplicates();
+            multibinder.addBinding().toInstance("B");
+            multibinder.addBinding().toInstance("C");
+          }
+        });
+
+    assertEquals(setOf("A", "B", "C"), injector.getInstance(Key.get(setOfString)));
+  }
 
   public void testMultibinderSetForbidsNullElements() {
     Injector injector = Guice.createInjector(new AbstractModule() {
