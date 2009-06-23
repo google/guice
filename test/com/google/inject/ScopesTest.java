@@ -415,4 +415,31 @@ public class ScopesTest extends TestCase {
       return new ProvidedBySingleton();
     }
   }
+
+  public void testScopeThatGetsAnUnrelatedObject() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(B.class);
+        bind(C.class);
+        ProviderGetScope providerGetScope = new ProviderGetScope();
+        requestInjection(providerGetScope);
+        bindScope(CustomScoped.class, providerGetScope);
+      }
+    });
+
+    injector.getInstance(C.class);
+  }
+
+  class ProviderGetScope implements Scope {
+    @Inject Provider<B> bProvider;
+
+    public <T> Provider<T> scope(Key<T> key, final Provider<T> unscoped) {
+      return new Provider<T>() {
+        public T get() {
+          bProvider.get();
+          return unscoped.get();
+        }
+      };
+    }
+  }
 }

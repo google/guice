@@ -727,11 +727,11 @@ final class InjectorImpl implements Injector, Lookups {
         try {
           T t = callInContext(new ContextualCallable<T>() {
             public T call(InternalContext context) throws ErrorsException {
-              context.setDependency(dependency);
+              Dependency previous = context.setDependency(dependency);
               try {
                 return factory.get(errors, context, dependency);
               } finally {
-                context.setDependency(null);
+                context.setDependency(previous);
               }
             }
           });

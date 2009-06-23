@@ -45,7 +45,9 @@ final class InternalContext {
     return dependency;
   }
 
-  public void setDependency(Dependency dependency) {
+  public Dependency setDependency(Dependency dependency) {
+    Dependency previous = dependency;
     this.dependency = dependency;
+    return previous;
   }
 }

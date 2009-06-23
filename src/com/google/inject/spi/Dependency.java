@@ -20,6 +20,7 @@ import com.google.inject.Key;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Lists;
 import com.google.inject.internal.Objects;
+import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Set;
 
@@ -39,10 +40,9 @@ public final class Dependency<T> {
   private final boolean nullable;
   private final int parameterIndex;
 
-  Dependency(InjectionPoint injectionPoint, Key<T> key,
-      boolean nullable, int parameterIndex) {
+  Dependency(InjectionPoint injectionPoint, Key<T> key, boolean nullable, int parameterIndex) {
     this.injectionPoint = injectionPoint;
-    this.key = key;
+    this.key = checkNotNull(key, "key");
     this.nullable = nullable;
     this.parameterIndex = parameterIndex;
   }

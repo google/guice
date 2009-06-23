@@ -47,7 +47,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
   public void inject(Errors errors, InternalContext context, Object o) {
     errors = errors.withSource(dependency);
 
-    context.setDependency(dependency);
+    Dependency previous = context.setDependency(dependency);
     try {
       Object value = factory.get(errors, context, dependency);
       field.set(o, value);
@@ -56,7 +56,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } finally {
-      context.setDependency(null);
+      context.setDependency(previous);
     }
   }
 }

@@ -195,14 +195,14 @@ public final class InjectorBuilder {
           injector.callInContext(new ContextualCallable<Void>() {
             Dependency<?> dependency = Dependency.get(binding.getKey());
             public Void call(InternalContext context) {
-              context.setDependency(dependency);
+              Dependency previous = context.setDependency(dependency);
               Errors errorsForBinding = errors.withSource(dependency);
               try {
                 binding.getInternalFactory().get(errorsForBinding, context, dependency);
               } catch (ErrorsException e) {
                 errorsForBinding.merge(e.getErrors());
               } finally {
-                context.setDependency(null);
+                context.setDependency(previous);
               }
 
               return null;
