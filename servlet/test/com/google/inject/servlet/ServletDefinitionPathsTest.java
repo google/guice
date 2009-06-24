@@ -19,6 +19,7 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import junit.framework.TestCase;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.anyObject;
 
 /**
  * Ensures servlet spec compliance for CGI-style variables and general
@@ -58,11 +60,14 @@ public class ServletDefinitionPathsTest extends TestCase {
       final String expectedServletPath) throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
@@ -83,7 +88,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     expect(request.getServletPath())
         .andReturn(requestPath);
 
-    replay(injector, request);
+    replay(injector, binding, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
@@ -125,11 +130,14 @@ public class ServletDefinitionPathsTest extends TestCase {
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
@@ -169,7 +177,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     expect(request.getContextPath())
         .andReturn(contextPath);
 
-    replay(injector, request);
+    replay(injector, binding, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>());
@@ -215,11 +223,14 @@ public class ServletDefinitionPathsTest extends TestCase {
       throws IOException, ServletException {
 
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     final boolean[] run = new boolean[1];
     //get an instance of this servlet
@@ -259,7 +270,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     expect(request.getContextPath())
         .andReturn(contextPath);
 
-    replay(injector, request);
+    replay(injector, binding, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>());

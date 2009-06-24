@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
+import com.google.inject.spi.BindingScopingVisitor;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -33,17 +35,20 @@ public class FilterDefinitionTest extends TestCase {
   public final void testFilterInitAndConfig() throws ServletException {
 
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
 
     final MockFilter mockFilter = new MockFilter();
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(Filter.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     expect(injector.getInstance(Key.get(Filter.class)))
         .andReturn(mockFilter)
         .anyTimes();
 
-    replay(injector);
+    replay(binding, injector);
 
     //some init params
     //noinspection SSBasedInspection
@@ -85,12 +90,15 @@ public class FilterDefinitionTest extends TestCase {
 
   public final void testFilterCreateDispatchDestroy() throws ServletException, IOException {
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     final MockFilter mockFilter = new MockFilter();
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(Filter.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     expect(injector.getInstance(Key.get(Filter.class)))
         .andReturn(mockFilter)
@@ -98,7 +106,7 @@ public class FilterDefinitionTest extends TestCase {
 
     expect(request.getServletPath()).andReturn("/index.html");
 
-    replay(injector, request);
+    replay(injector, binding, request);
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
@@ -133,6 +141,7 @@ public class FilterDefinitionTest extends TestCase {
       throws ServletException, IOException {
 
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     final MockFilter mockFilter = new MockFilter() {
@@ -144,8 +153,10 @@ public class FilterDefinitionTest extends TestCase {
       }
     };
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(Filter.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
     
     expect(injector.getInstance(Key.get(Filter.class)))
         .andReturn(mockFilter)
@@ -153,7 +164,7 @@ public class FilterDefinitionTest extends TestCase {
 
     expect(request.getServletPath()).andReturn("/index.html");
 
-    replay(injector, request);
+    replay(injector, binding, request);
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),

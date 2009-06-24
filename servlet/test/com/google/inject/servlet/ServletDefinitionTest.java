@@ -19,6 +19,7 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import java.util.Enumeration;
@@ -32,6 +33,7 @@ import junit.framework.TestCase;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.anyObject;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).
@@ -42,16 +44,19 @@ public class ServletDefinitionTest extends TestCase {
 
   public final void testServletInitAndConfig() throws ServletException {
     Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
     final HttpServlet mockServlet = new HttpServlet() {
     };
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(mockServlet)
         .anyTimes();
 
-    replay(injector);
+    replay(injector, binding);
 
     //some init params
     //noinspection SSBasedInspection

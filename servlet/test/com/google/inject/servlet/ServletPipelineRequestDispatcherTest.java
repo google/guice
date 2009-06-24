@@ -20,6 +20,7 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
@@ -41,6 +42,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.anyObject;
 
 /**
  * Tests forwarding and inclusion (RequestDispatcher actions from the
@@ -61,6 +63,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
+    final Binding binding = createMock(Binding.class);
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
 
     expect(mockRequest.getAttribute(A_KEY))
@@ -77,8 +80,10 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       }
     };
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
@@ -94,7 +99,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest, mockBinding);
+    replay(injector, binding, mockRequest, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector,
@@ -119,6 +124,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
+    final Binding binding = createMock(Binding.class);
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
@@ -142,8 +148,10 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       }
     };
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
@@ -159,7 +167,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest, mockResponse, mockBinding);
+    replay(injector, binding, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector,
@@ -197,6 +205,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         new HashMap<String, String>());
 
     final Injector injector = createMock(Injector.class);
+    final Binding binding = createMock(Binding.class);
     final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
@@ -212,8 +221,10 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
       }
     };
 
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
     expect(injector.getBinding(Key.get(HttpServlet.class)))
-        .andReturn(createMock(Binding.class));
+        .andReturn(binding);
 
     expect(injector.getInstance(Key.get(HttpServlet.class)))
         .andReturn(mockServlet);
@@ -230,7 +241,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, mockRequest, mockResponse, mockBinding);
+    replay(injector, binding, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector,
