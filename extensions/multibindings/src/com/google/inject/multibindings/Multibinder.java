@@ -331,7 +331,7 @@ public abstract class Multibinder<T> {
 
   /**
    * We install the permit duplicates configuration as its own binding, all by itself. This way,
-   * if only half of a multibinder user's remember to call permitDuplicates(), they're still
+   * if only one of a multibinder's users remember to call permitDuplicates(), they're still
    * permitted.
    */
   private static class PermitDuplicatesModule extends AbstractModule {
