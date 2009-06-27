@@ -142,7 +142,7 @@ public final class Modules {
           final List<Element> elements = Elements.getElements(baseModules);
           final List<Element> overrideElements = Elements.getElements(overrides);
 
-          final Set<Key> overriddenKeys = Sets.newHashSet();
+          final Set<Key<?>> overriddenKeys = Sets.newHashSet();
           final Set<Class<? extends Annotation>> overridesScopeAnnotations = Sets.newHashSet();
 
           // execute the overrides module, keeping track of which keys and scopes are bound
@@ -183,30 +183,35 @@ public final class Modules {
               return null;
             }
 
-            @Override public Void visit(PrivateElements privateElements) {
+            void rewrite(Binder binder, PrivateElements privateElements, Set<Key<?>> keysToSkip) {
               PrivateBinder privateBinder = binder.withSource(privateElements.getSource())
                   .newPrivateBinder();
 
               Set<Key<?>> skippedExposes = Sets.newHashSet();
 
               for (Key<?> key : privateElements.getExposedKeys()) {
-                if (overriddenKeys.remove(key)) {
+                if (keysToSkip.remove(key)) {
                   skippedExposes.add(key);
                 } else {
                   privateBinder.withSource(privateElements.getExposedSource(key)).expose(key);
                 }
               }
 
-              // we're not skipping deep exposes, but that should be okay. If we ever need to, we
-              // have to search through this set of elements for PrivateElements, recursively
               for (Element element : privateElements.getElements()) {
                 if (element instanceof Binding
-                    && skippedExposes.contains(((Binding) element).getKey())) {
+                    && skippedExposes.remove(((Binding) element).getKey())) {
+                  continue;
+                }
+                if (element instanceof PrivateElements) {
+                  rewrite(privateBinder, (PrivateElements) element, skippedExposes);
                   continue;
                 }
                 element.applyTo(privateBinder);
               }
+            }
 
+            @Override public Void visit(PrivateElements privateElements) {
+              rewrite(binder, privateElements, overriddenKeys);
               return null;
             }
 

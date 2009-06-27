@@ -387,6 +387,59 @@ public class OverrideModuleTest extends TestCase {
     assertEquals(5, reverse.getInstance(Integer.class).intValue());
   }
 
+  public void testOverrideDeepExpose() {
+    final AtomicReference<Provider<Character>> charAProvider
+        = new AtomicReference<Provider<Character>>();
+
+    Module exposes5 = new PrivateModule() {
+      protected void configure() {
+        install(new PrivateModule() {
+          protected void configure() {
+            bind(Integer.class).toInstance(5);
+            expose(Integer.class);
+            charAProvider.set(getProvider(Character.class));
+            bind(Character.class).toInstance('A');
+          }
+        });
+        expose(Integer.class);
+      }
+    };
+
+    Injector injector = Guice.createInjector(Modules.override(exposes5).with(EMPTY_MODULE));
+    assertEquals(5, injector.getInstance(Integer.class).intValue());
+    assertEquals('A', charAProvider.getAndSet(null).get().charValue());
+
+    injector = Guice.createInjector(Modules.override(EMPTY_MODULE).with(exposes5));
+    assertEquals(5, injector.getInstance(Integer.class).intValue());
+    assertEquals('A', charAProvider.getAndSet(null).get().charValue());
+
+    final AtomicReference<Provider<Character>> charBProvider
+        = new AtomicReference<Provider<Character>>();
+
+    Module binds15 = new AbstractModule() {
+      protected void configure() {
+        bind(Integer.class).toInstance(15);
+
+        install(new PrivateModule() {
+          protected void configure() {
+            charBProvider.set(getProvider(Character.class));
+            bind(Character.class).toInstance('B');
+          }
+        });
+      }
+    };
+
+    injector = Guice.createInjector(Modules.override(binds15).with(exposes5));
+    assertEquals(5, injector.getInstance(Integer.class).intValue());
+    assertEquals('A', charAProvider.getAndSet(null).get().charValue());
+    assertEquals('B', charBProvider.getAndSet(null).get().charValue());
+
+    injector = Guice.createInjector(Modules.override(exposes5).with(binds15));
+    assertEquals(15, injector.getInstance(Integer.class).intValue());
+    assertEquals('A', charAProvider.getAndSet(null).get().charValue());
+    assertEquals('B', charBProvider.getAndSet(null).get().charValue());
+  }
+
   @Retention(RUNTIME)
   @Target(TYPE)
   @ScopeAnnotation
