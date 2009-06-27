@@ -16,16 +16,29 @@
 
 package com.google.inject.struts2.example;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.inject.servlet.ServletModule;
+import org.apache.struts2.dispatcher.FilterDispatcher;
 
 /**
  * Example application module.
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public class ExampleModule extends AbstractModule {
+public class ExampleListenerAndModule extends GuiceServletContextListener {
 
-  protected void configure() {
-    bind(Service.class).to(ServiceImpl.class);
+  protected Injector getInjector() {
+    return Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        bind(Service.class).to(ServiceImpl.class);
+
+        bind(FilterDispatcher.class).in(Singleton.class);
+        filter("/*").through(org.apache.struts2.dispatcher.FilterDispatcher.class);
+      }
+    });
   }
 }

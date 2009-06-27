@@ -8,7 +8,7 @@
 
   <bean type="com.opensymphony.xwork2.ObjectFactory" 
         name="guice"
-        class="com.google.inject.struts2.GuiceObjectFactory"/>
+        class="com.google.inject.servlet.Struts2Factory"/>
 
   <!--  Make the Guice object factory the automatic default -->
   <constant name="struts.objectFactory" value="guice" />

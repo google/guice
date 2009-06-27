@@ -95,7 +95,6 @@ enum UriPatternType {
 
   /**
    * Matchers URIs using a regular expression.
-   * NOTE(dhanji): No path info is available when using regex mapping.
    *
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */
@@ -113,7 +112,15 @@ enum UriPatternType {
     public String extractPath(String path) {
       Matcher matcher = pattern.matcher(path);
       if (matcher.matches() && matcher.groupCount() >= 1) {
-         return path.substring(0, matcher.start(1));
+
+        // Try to capture the everything before the regex begins to match
+        // the path. This is a rough approximation to try and get parity
+        // with the servlet style mapping where the path is a capture of
+        // the URI before the wildcard.
+        int end = matcher.start(1);
+        if (end < path.length()) {
+          return path.substring(0, end);
+        }
       }
       return null;
     }

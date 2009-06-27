@@ -4,13 +4,13 @@
 
 <struts>
 
-  <constant name="guice.module"
-            value="com.google.inject.struts2.example.ExampleModule"/>
+  <!-- No need to specify a module here. See ExampleListenerAndModule. -->
 
+  <!-- Register some actions, these get injected for you by Guice -->
   <package name="default" extends="struts-default">
-    <action name="Count"
+    <action name="Count" 
         class="com.google.inject.struts2.example.Count">
-      <result>/WEB-INF/Counter.jsp</result>
+      <result>/Counter.jsp</result>
     </action>      
   </package>
 

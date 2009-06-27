@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.inject.struts2;
+package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.ScopeAnnotation;
-import com.google.inject.servlet.ServletModule;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
@@ -38,19 +36,24 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * @deprecated Use {@link com.google.inject.servlet.Struts2Factory} instead.
+ * Cleanup up version from Bob's GuiceObjectFactory. Now works properly with
+ * GS2 and fixes several bugs.
+ *
+ * @author dhanji@gmail.com
  */
-@Deprecated
-public class GuiceObjectFactory extends ObjectFactory {
+public class Struts2Factory extends ObjectFactory {
 
   static final Logger logger =
-      Logger.getLogger(GuiceObjectFactory.class.getName());
+      Logger.getLogger(Struts2Factory.class.getName());
 
   Module module;
-  volatile Injector injector;
+  volatile Injector strutsInjector;
   boolean developmentMode = false;
   List<ProvidedInterceptor> interceptors
       = new ArrayList<ProvidedInterceptor>();
+  private static final String ERROR_NO_INJECTOR =
+      "Cannot find a Guice injector in the servlet context. Are you"
+          + " sure you registered GuiceServletContextListener in your application's web.xml?";
 
   @Override
   public boolean isNoArgConstructorRequired() {
@@ -72,7 +75,7 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   @Inject(value = "struts.devMode", required = false)
   void setDevelopmentMode(String developmentMode) {
-    this.developmentMode = developmentMode.trim().equals("true");
+    this.developmentMode = "true".equals(developmentMode.trim());
   }
 
   Set<Class<?>> boundClasses = new HashSet<Class<?>>();
@@ -81,7 +84,7 @@ public class GuiceObjectFactory extends ObjectFactory {
     Class<?> clazz = super.getClassInstance(name);
 
     synchronized (this) {
-      if (injector == null) {
+      if (strutsInjector == null) {
         // We can only bind each class once.
         if (!boundClasses.contains(clazz)) {
           try {
@@ -106,58 +109,59 @@ public class GuiceObjectFactory extends ObjectFactory {
 
   @SuppressWarnings("unchecked")
   public Object buildBean(Class clazz, Map extraContext) {
-    if (injector == null) {
+    if (strutsInjector == null) {
       synchronized (this) {
-        if (injector == null) {
+        if (strutsInjector == null) {
           createInjector();
         }
       }
     }
 
-    return injector.getInstance(clazz);
+    return strutsInjector.getInstance(clazz);
   }
 
   private void createInjector() {
-    try {
-      logger.info("Creating injector...");
-      this.injector = Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          // Install default servlet bindings.
-          install(new ServletModule());
+    logger.info("Loading struts2 Guice support...");
 
-          // Install user's module.
-          if (module != null) {
-            logger.info("Installing " + module + "...");
-            install(module);
-          }
-          else {
-            logger.info("No module found. Set 'guice.module' to a Module "
-                + "class name if you'd like to use one.");
-          }
+    // Attach to parent Guice injector from GS2.
+    Injector injector = (Injector) GuiceFilter.getServletContext()
+        .getAttribute(GuiceServletContextListener.INJECTOR_NAME);
 
-          // Tell the injector about all the action classes, etc., so it
-          // can validate them at startup.
-          for (Class<?> boundClass : boundClasses) {
-            // TODO: Set source from Struts XML.
-            bind(boundClass);
-          }
-
-          // Validate the interceptor class.
-          for (ProvidedInterceptor interceptor : interceptors) {
-            interceptor.validate(binder());
-          }
-        }
-      });
-
-      // Inject interceptors.
-      for (ProvidedInterceptor interceptor : interceptors) {
-        interceptor.inject();
-      }
-
-    } catch (Throwable t) {
-      t.printStackTrace();
-      System.exit(1);
+    // Something is wrong, since this should be there if GuiceServletContextListener
+    // was present.
+    if (null == injector) {
+      logger.severe(ERROR_NO_INJECTOR);
+      throw new RuntimeException(ERROR_NO_INJECTOR);
     }
+
+    if (module != null) {
+      throw new RuntimeException("The struts2 plugin no longer supports specifying a module"
+          + "via the 'guice.module' property in XML."
+          + " Please install your module via a GuiceServletContextListener instead.");
+    }
+
+    this.strutsInjector = injector.createChildInjector(new AbstractModule() {
+      protected void configure() {
+
+        // Tell the injector about all the action classes, etc., so it
+        // can validate them at startup.
+        for (Class<?> boundClass : boundClasses) {
+          // TODO: Set source from Struts XML.
+          bind(boundClass);
+        }
+
+        // Validate the interceptor class.
+        for (ProvidedInterceptor interceptor : interceptors) {
+          interceptor.validate(binder());
+        }
+      }
+    });
+
+    // Inject interceptors.
+    for (ProvidedInterceptor interceptor : interceptors) {
+      interceptor.inject();
+    }
+
     logger.info("Injector created successfully.");
   }
 
