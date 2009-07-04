@@ -90,16 +90,29 @@ public interface Injector {
   <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
   /**
-   * Returns all explicit bindings.
+   * Returns this injector's <strong>explicit</strong> bindings.
    *
    * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
    * injector}, should one exist. The returned map is guaranteed to iterate (for example, with
-   * its {@link java.util.Map#entrySet()} iterator) in the order of insertion. In other words,
-   * the order in which bindings appear in user Modules.
+   * its {@link Map#entrySet()} iterator) in the order of insertion. In other words, the order in
+   * which bindings appear in user Modules.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    */
   Map<Key<?>, Binding<?>> getBindings();
+
+  /**
+   * Returns a snapshot of this injector's bindings, <strong>both explicit and
+   * just-in-time</strong>. The returned map is immutable; it contains only the bindings that were
+   * present when {@code getAllBindings()} was invoked. Subsequent calls may return a map with
+   * additional just-in-time bindings.
+   *
+   * <p>The returned map does not include bindings inherited from a {@link #getParent() parent
+   * injector}, should one exist.
+   *
+   * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+   */
+  Map<Key<?>, Binding<?>> getAllBindings();
 
   /**
    * Returns the binding for the given injection key. This will be an explicit bindings if the key

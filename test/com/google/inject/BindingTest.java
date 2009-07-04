@@ -26,8 +26,10 @@ import com.google.inject.spi.TypeListener;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -361,6 +363,37 @@ public class BindingTest extends TestCase {
     
     assertEquals(ImmutableSet.of(TypeLiteral.get(Stage.class), TypeLiteral.get(D.class)),
         heardTypes);
+  }
+
+  public void testGetAllBindings() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(D.class).toInstance(new D(Stage.PRODUCTION));
+        bind(Object.class).to(D.class);
+        getProvider(new Key<C<Stage>>() {});
+      }
+    });
+
+    Map<Key<?>,Binding<?>> bindings = injector.getAllBindings();
+    assertEquals(ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(D.class),
+        Key.get(Logger.class), Key.get(Object.class), new Key<C<Stage>>() {}),
+        bindings.keySet());
+
+    // add a JIT binding
+    injector.getInstance(F.class);
+
+    Map<Key<?>,Binding<?>> bindings2 = injector.getAllBindings();
+    assertEquals(ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(D.class),
+        Key.get(Logger.class), Key.get(Object.class), new Key<C<Stage>>() {}, Key.get(F.class)),
+        bindings2.keySet());
+
+    // the original map shouldn't have changed
+    assertEquals(ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(D.class),
+        Key.get(Logger.class), Key.get(Object.class), new Key<C<Stage>>() {}),
+        bindings.keySet());
+
+    // check the bindings' values
+    assertEquals(injector, bindings.get(Key.get(Injector.class)).getProvider().get());
   }
 
   public static class C<T> {

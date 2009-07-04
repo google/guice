@@ -625,9 +625,17 @@ final class InjectorImpl implements Injector, Lookups {
     return getBindingOrThrow(key, errors).getInternalFactory();
   }
 
-  // not test-covered
   public Map<Key<?>, Binding<?>> getBindings() {
     return state.getExplicitBindingsThisLevel();
+  }
+
+  public Map<Key<?>, Binding<?>> getAllBindings() {
+    synchronized (state.lock()) {
+      return new ImmutableMap.Builder<Key<?>, Binding<?>>()
+          .putAll(state.getExplicitBindingsThisLevel())
+          .putAll(jitBindings)
+          .build();
+    }
   }
 
   private static class BindingsMultimap {

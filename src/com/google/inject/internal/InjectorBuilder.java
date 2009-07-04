@@ -245,6 +245,9 @@ public final class InjectorBuilder {
     public Map<Key<?>, Binding<?>> getBindings() {
       return this.delegateInjector.getBindings();
     }
+    public Map<Key<?>, Binding<?>> getAllBindings() {
+      return this.delegateInjector.getAllBindings();
+    }
     public <T> Binding<T> getBinding(Key<T> key) {
       return this.delegateInjector.getBinding(key);
     }
