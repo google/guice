@@ -22,12 +22,14 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
+import static com.google.inject.multibindings.Multibinder.setOf;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
@@ -36,6 +38,7 @@ import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -54,14 +57,14 @@ import java.util.Set;
  *   }
  * }</code></pre>
  *
- * <p>With this binding, a {@link Map}{@code <String, Snack>} can now be 
+ * <p>With this binding, a {@link Map}{@code <String, Snack>} can now be
  * injected:
  * <pre><code>
  * class SnackMachine {
  *   {@literal @}Inject
  *   public SnackMachine(Map&lt;String, Snack&gt; snacks) { ... }
  * }</code></pre>
- * 
+ *
  * <p>In addition to binding {@code Map<K, V>}, a mapbinder will also bind
  * {@code Map<K, Provider<V>>} for lazy value provision:
  * <pre><code>
@@ -72,8 +75,8 @@ import java.util.Set;
  *
  * <p>Creating mapbindings from different modules is supported. For example, it
  * is okay to have both {@code CandyModule} and {@code ChipsModule} both
- * create their own {@code MapBinder<String, Snack>}, and to each contribute 
- * bindings to the snacks map. When that map is injected, it will contain 
+ * create their own {@code MapBinder<String, Snack>}, and to each contribute
+ * bindings to the snacks map. When that map is injected, it will contain
  * entries from both modules.
  *
  * <p>Values are resolved at map injection time. If a value is bound to a
@@ -84,9 +87,11 @@ import java.util.Set;
  * type. Each distinct annotation gets its own independent map.
  *
  * <p><strong>Keys must be distinct.</strong> If the same key is bound more than
- * once, map injection will fail.
+ * once, map injection will fail. However, use {@link #permitDuplicates()} in
+ * order to allow duplicate keys; extra bindings to {@code Map<K, Set<V>>} and
+ * {@code Map<K, Set<Provider<V>>} will be added.
  *
- * <p><strong>Keys must be non-null.</strong> {@code addBinding(null)} will 
+ * <p><strong>Keys must be non-null.</strong> {@code addBinding(null)} will
  * throw an unchecked exception.
  *
  * <p><strong>Values must be non-null to use map injection.</strong> If any
@@ -102,12 +107,14 @@ public abstract class MapBinder<K, V> {
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
    * {@link Map} that is itself bound with no binding annotation.
    */
-  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
         Key.get(mapOf(keyType, valueType)),
         Key.get(mapOfProviderOf(keyType, valueType)),
+        Key.get(mapOf(keyType, setOf(valueType))),
+        Key.get(mapOfSetOfProviderOf(keyType, valueType)),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType)));
   }
 
@@ -124,12 +131,14 @@ public abstract class MapBinder<K, V> {
    * Returns a new mapbinder that collects entries of {@code keyType}/{@code valueType} in a
    * {@link Map} that is itself bound with {@code annotation}.
    */
-  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
+  public static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
       TypeLiteral<K> keyType, TypeLiteral<V> valueType, Annotation annotation) {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, valueType,
         Key.get(mapOf(keyType, valueType), annotation),
         Key.get(mapOfProviderOf(keyType, valueType), annotation),
+        Key.get(mapOf(keyType, setOf(valueType)), annotation),
+        Key.get(mapOfSetOfProviderOf(keyType, valueType), annotation),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotation));
   }
 
@@ -152,6 +161,8 @@ public abstract class MapBinder<K, V> {
     return newMapBinder(binder, valueType,
         Key.get(mapOf(keyType, valueType), annotationType),
         Key.get(mapOfProviderOf(keyType, valueType), annotationType),
+        Key.get(mapOf(keyType, setOf(valueType)), annotationType),
+        Key.get(mapOfSetOfProviderOf(keyType, valueType), annotationType),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotationType));
   }
 
@@ -178,7 +189,15 @@ public abstract class MapBinder<K, V> {
     return (TypeLiteral<Map<K, Provider<V>>>) TypeLiteral.get(
         Types.mapOf(keyType.getType(), newParameterizedType(Provider.class, valueType.getType())));
   }
-  
+
+  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
+  private static <K, V> TypeLiteral<Map<K, Set<Provider<V>>>> mapOfSetOfProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, Set<Provider<V>>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(),
+            Types.setOf(newParameterizedType(Provider.class, valueType.getType()))));
+  }
+
   @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
   private static <K, V> TypeLiteral<Map.Entry<K, Provider<V>>> entryOfProviderOf(
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
@@ -188,17 +207,28 @@ public abstract class MapBinder<K, V> {
 
   private static <K, V> MapBinder<K, V> newMapBinder(Binder binder, TypeLiteral<V> valueType,
       Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
+      Key<Map<K, Set<V>>> multimapKey, Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
       Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
     RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(
-        binder, valueType, mapKey, providerMapKey, entrySetBinder);
+        binder, valueType, mapKey, providerMapKey, multimapKey, providerMultimapKey,
+        entrySetBinder);
     binder.install(mapBinder);
     return mapBinder;
   }
 
   /**
-   * Configures the bound map to silently discard duplicate entries. When multiple equal keys are
-   * bound, the value that gets included is arbitrary. When multible modules contribute elements to
-   * the map, this configuration option impacts all of them.
+   * Configures the {@code MapBinder} to handle duplicate entries.
+   * <ul>
+   * <li>When multiple equal keys are bound, the value that gets included in the map is
+   * arbitrary.</li>
+   * <li>In addition to the {@code Map<K, V>} and {@code Map<K, Provider<V>>}
+   * maps that are normally bound, a {@code Map<K, Set<V>>} and
+   * {@code Map<K, Set<Provider<V>>>} are <em>also</em> bound, which contain
+   * all values bound to each key.</li>
+   * </ul>
+   * <p>
+   * When multiple modules contribute elements to the map, this configuration
+   * option impacts all of them.
    *
    * @return this map binder
    */
@@ -225,11 +255,11 @@ public abstract class MapBinder<K, V> {
    * entries (keys to value providers).
    *
    * <p>As a Module, it installs the binding to the map itself, as well as to
-   * a corresponding map whose values are providers. It uses the entry set 
+   * a corresponding map whose values are providers. It uses the entry set
    * multibinder to construct the map and the provider map.
-   * 
-   * <p>As a module, this implements equals() and hashcode() in order to trick 
-   * Guice into executing its configure() method only once. That makes it so 
+   *
+   * <p>As a module, this implements equals() and hashcode() in order to trick
+   * Guice into executing its configure() method only once. That makes it so
    * that multiple mapbinders can be created for the same target map, but
    * only one is bound. Since the list of bindings is retrieved from the
    * injector itself (and not the mapbinder), each mapbinder has access to
@@ -245,6 +275,8 @@ public abstract class MapBinder<K, V> {
     private final TypeLiteral<V> valueType;
     private final Key<Map<K, V>> mapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
+    private final Key<Map<K, Set<V>>> multimapKey;
+    private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
 
     /* the target injector's binder. non-null until initialization, null afterwards */
@@ -252,14 +284,18 @@ public abstract class MapBinder<K, V> {
 
     private RealMapBinder(Binder binder, TypeLiteral<V> valueType,
         Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
+        Key<Map<K, Set<V>>> multimapKey, Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
         Multibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
       this.valueType = valueType;
       this.mapKey = mapKey;
       this.providerMapKey = providerMapKey;
+      this.multimapKey = multimapKey;
+      this.providerMultimapKey = providerMultimapKey;
       this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
       this.binder = binder;
     }
 
+    @Override
     public MapBinder<K, V> permitDuplicates() {
       entrySetBinder.permitDuplicates();
       return this;
@@ -285,7 +321,7 @@ public abstract class MapBinder<K, V> {
       final ImmutableSet<Dependency<?>> dependencies
           = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetBinder.getSetKey()));
 
-      // binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>
+      // Binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>.
       final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
           .getProvider(entrySetBinder.getSetKey());
       binder.bind(providerMapKey).toProvider(new ProviderWithDependencies<Map<K, Provider<V>>>() {
@@ -333,6 +369,67 @@ public abstract class MapBinder<K, V> {
           return dependencies;
         }
       });
+
+      // Binds a Map<K, Set<Provider<V>>> from a collection of Map<Entry<K, Provider<V>> if
+      // permitDuplicates was called.
+      binder.bind(providerMultimapKey).toProvider(
+          new ProviderWithDependencies<Map<K, Set<Provider<V>>>>() {
+            private Map<K, Set<Provider<V>>> providerMultimap;
+
+            @SuppressWarnings("unused")
+            @Inject void initialize(Injector injector) {
+              if (entrySetBinder.permitsDuplicates(injector)) {
+                Map<K, Set<Provider<V>>> providerMultimapMutable = new LinkedHashMap<K, Set<Provider<V>>>();
+                for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+                  if (!providerMultimapMutable.containsKey(entry.getKey())) {
+                    providerMultimapMutable.put(entry.getKey(), new LinkedHashSet<Provider<V>>());
+                  }
+                  providerMultimapMutable.get(entry.getKey()).add(entry.getValue());
+                }
+
+                for (Entry<K, Set<Provider<V>>> entry : providerMultimapMutable.entrySet()) {
+                  entry.setValue(Collections.unmodifiableSet(entry.getValue()));
+                }
+                providerMultimap = Collections.unmodifiableMap(providerMultimapMutable);
+              }
+            }
+
+            public Map<K, Set<Provider<V>>> get() {
+              if (providerMultimap == null) {
+                throw new ProvisionException("no binding for " + providerMultimapKey
+                    + " because permitDuplicates was never called");
+              }
+              return providerMultimap;
+            }
+
+            public Set<Dependency<?>> getDependencies() {
+              return dependencies;
+            }
+          });
+
+      final Provider<Map<K, Set<Provider<V>>>> multimapProvider =
+          binder.getProvider(providerMultimapKey);
+      binder.bind(multimapKey).toProvider(new ProviderWithDependencies<Map<K, Set<V>>>() {
+        public Map<K, Set<V>> get() {
+          Map<K,Set<V>> multimap = new LinkedHashMap<K, Set<V>>();
+          for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
+            K key = entry.getKey();
+            Set<V> values = new LinkedHashSet<V>();
+            for (Provider<V> valueProvider : entry.getValue()) {
+              V value = valueProvider.get();
+              checkConfiguration(value != null,
+                  "Multimap injection failed due to null value for key \"%s\"", key);
+              values.add(value);
+            }
+            multimap.put(key, Collections.unmodifiableSet(values));
+          }
+          return Collections.unmodifiableMap(multimap);
+        }
+
+        public Set<Dependency<?>> getDependencies() {
+          return dependencies;
+        }
+      });
     }
 
     private boolean isInitialized() {
@@ -370,8 +467,8 @@ public abstract class MapBinder<K, V> {
       }
 
       @Override public boolean equals(Object obj) {
-        return obj instanceof Map.Entry 
-            && key.equals(((Map.Entry<?, ?>) obj).getKey()) 
+        return obj instanceof Map.Entry
+            && key.equals(((Map.Entry<?, ?>) obj).getKey())
             && value.equals(((Map.Entry<?, ?>) obj).getValue());
       }
 

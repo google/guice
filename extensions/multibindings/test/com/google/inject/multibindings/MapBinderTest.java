@@ -20,6 +20,7 @@ import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -37,8 +38,10 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +54,8 @@ public class MapBinderTest extends TestCase {
 
   final TypeLiteral<Map<String, String>> mapOfString = new TypeLiteral<Map<String, String>>() {};
   final TypeLiteral<Map<String, Integer>> mapOfInteger = new TypeLiteral<Map<String, Integer>>() {};
+  final TypeLiteral<Map<String, Set<String>>> mapOfSetOfString =
+      new TypeLiteral<Map<String, Set<String>>>() {};
 
   public void testMapBinderAggregatesMultipleModules() {
     Module abc = new AbstractModule() {
@@ -256,6 +261,82 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injector.getInstance(Key.get(mapOfString)));
   }
 
+  public void testMapBinderMultimap() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class);
+            multibinder.addBinding("a").toInstance("A");
+            multibinder.addBinding("b").toInstance("B1");
+            multibinder.addBinding("c").toInstance("C");
+          }
+        },
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class);
+            multibinder.addBinding("b").toInstance("B2");
+            multibinder.addBinding("c").toInstance("C");
+            multibinder.permitDuplicates();
+          }
+        });
+
+    assertEquals(mapOf("a", setOf("A"), "b", setOf("B1", "B2"), "c", setOf("C")),
+        injector.getInstance(Key.get(mapOfSetOfString)));
+  }
+
+  public void testMapBinderMultimapWithAnotation() {
+    Injector injector = Guice.createInjector(
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class, Abc.class);
+            multibinder.addBinding("a").toInstance("A");
+            multibinder.addBinding("b").toInstance("B1");
+          }
+        },
+        new AbstractModule() {
+          @Override protected void configure() {
+            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+                binder(), String.class, String.class, Abc.class);
+            multibinder.addBinding("b").toInstance("B2");
+            multibinder.addBinding("c").toInstance("C");
+            multibinder.permitDuplicates();
+          }
+        });
+
+    assertEquals(mapOf("a", setOf("A"), "b", setOf("B1", "B2"), "c", setOf("C")),
+        injector.getInstance(Key.get(mapOfSetOfString, Abc.class)));
+    try {
+      injector.getInstance(Key.get(mapOfSetOfString));
+      fail();
+    } catch (ConfigurationException expected) {}
+  }
+
+  public void testMapBinderMultimapIsUnmodifiable() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> mapBinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        mapBinder.addBinding("a").toInstance("A");
+        mapBinder.permitDuplicates();
+      }
+    });
+
+    Map<String, Set<String>> map = injector.getInstance(Key.get(mapOfSetOfString));
+    try {
+      map.clear();
+      fail();
+    } catch(UnsupportedOperationException expected) {
+    }
+    try {
+      map.get("a").clear();
+      fail();
+    } catch(UnsupportedOperationException expected) {
+    }
+  }
+
   public void testMapBinderMapForbidsNullKeys() {
     try {
       Guice.createInjector(new AbstractModule() {
@@ -323,7 +404,7 @@ public class MapBinderTest extends TestCase {
   public void testMultibinderDependencies() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        MapBinder<Integer, String> mapBinder 
+        MapBinder<Integer, String> mapBinder
             = MapBinder.newMapBinder(binder(), Integer.class, String.class);
         mapBinder.addBinding(1).toInstance("A");
         mapBinder.addBinding(2).to(Key.get(String.class, Names.named("b")));
@@ -388,5 +469,10 @@ public class MapBinderTest extends TestCase {
       result.put((K)elements[i], (V)elements[i+1]);
     }
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <V> Set<V> setOf(Object... elements) {
+    return new HashSet(Arrays.asList(elements));
   }
 }

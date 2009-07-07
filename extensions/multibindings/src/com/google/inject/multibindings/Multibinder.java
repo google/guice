@@ -155,14 +155,14 @@ public abstract class Multibinder<T> {
   }
 
   @SuppressWarnings("unchecked") // wrapping a T in a Set safely returns a Set<T>
-  private static <T> TypeLiteral<Set<T>> setOf(TypeLiteral<T> elementType) {
+  static <T> TypeLiteral<Set<T>> setOf(TypeLiteral<T> elementType) {
     Type type = Types.setOf(elementType.getType());
     return (TypeLiteral<Set<T>>) TypeLiteral.get(type);
   }
 
   /**
    * Configures the bound set to silently discard duplicate elements. When multiple equal values are
-   * bound, the one that gets included is arbitrary. When multible modules contribute elements to
+   * bound, the one that gets included is arbitrary. When multiple modules contribute elements to
    * the set, this configuration option impacts all of them.
    *
    * @return this multibinder
@@ -236,6 +236,7 @@ public abstract class Multibinder<T> {
       binder.bind(setKey).toProvider(this);
     }
 
+    @Override
     public Multibinder<T> permitDuplicates() {
       binder.install(new PermitDuplicatesModule(permitDuplicatesKey));
       return this;
@@ -296,11 +297,11 @@ public abstract class Multibinder<T> {
       }
       return Collections.unmodifiableSet(result);
     }
-    
+
     String getSetName() {
       return setName;
     }
-    
+
     Key<Set<T>> getSetKey() {
       return setKey;
     }
@@ -341,6 +342,7 @@ public abstract class Multibinder<T> {
       this.key = key;
     }
 
+    @Override
     protected void configure() {
       bind(key).toInstance(true);
     }
