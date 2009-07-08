@@ -22,9 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
@@ -33,12 +33,10 @@ import static com.google.inject.multibindings.Multibinder.setOf;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
-import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -187,15 +185,14 @@ public abstract class MapBinder<K, V> {
   private static <K, V> TypeLiteral<Map<K, Provider<V>>> mapOfProviderOf(
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     return (TypeLiteral<Map<K, Provider<V>>>) TypeLiteral.get(
-        Types.mapOf(keyType.getType(), newParameterizedType(Provider.class, valueType.getType())));
+        Types.mapOf(keyType.getType(), Types.providerOf(valueType.getType())));
   }
 
   @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
   private static <K, V> TypeLiteral<Map<K, Set<Provider<V>>>> mapOfSetOfProviderOf(
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     return (TypeLiteral<Map<K, Set<Provider<V>>>>) TypeLiteral.get(
-        Types.mapOf(keyType.getType(),
-            Types.setOf(newParameterizedType(Provider.class, valueType.getType()))));
+        Types.mapOf(keyType.getType(), Types.setOf(Types.providerOf(valueType.getType()))));
   }
 
   @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
@@ -218,14 +215,12 @@ public abstract class MapBinder<K, V> {
 
   /**
    * Configures the {@code MapBinder} to handle duplicate entries.
-   * <ul>
-   * <li>When multiple equal keys are bound, the value that gets included in the map is
-   * arbitrary.</li>
-   * <li>In addition to the {@code Map<K, V>} and {@code Map<K, Provider<V>>}
+   * <p>When multiple equal keys are bound, the value that gets included in the map is
+   * arbitrary.
+   * <p>In addition to the {@code Map<K, V>} and {@code Map<K, Provider<V>>}
    * maps that are normally bound, a {@code Map<K, Set<V>>} and
    * {@code Map<K, Set<Provider<V>>>} are <em>also</em> bound, which contain
-   * all values bound to each key.</li>
-   * </ul>
+   * all values bound to each key.
    * <p>
    * When multiple modules contribute elements to the map, this configuration
    * option impacts all of them.
@@ -298,6 +293,8 @@ public abstract class MapBinder<K, V> {
     @Override
     public MapBinder<K, V> permitDuplicates() {
       entrySetBinder.permitDuplicates();
+      binder.install(new MultimapBinder<K, V>(
+          multimapKey, providerMultimapKey, entrySetBinder.getSetKey()));
       return this;
     }
 
@@ -339,7 +336,7 @@ public abstract class MapBinder<K, V> {
                 "Map injection failed due to duplicated key \"%s\"", entry.getKey());
           }
 
-          providerMap = Collections.unmodifiableMap(providerMapMutable);
+          providerMap = ImmutableMap.copyOf(providerMapMutable);
         }
 
         public Map<K, Provider<V>> get() {
@@ -369,67 +366,6 @@ public abstract class MapBinder<K, V> {
           return dependencies;
         }
       });
-
-      // Binds a Map<K, Set<Provider<V>>> from a collection of Map<Entry<K, Provider<V>> if
-      // permitDuplicates was called.
-      binder.bind(providerMultimapKey).toProvider(
-          new ProviderWithDependencies<Map<K, Set<Provider<V>>>>() {
-            private Map<K, Set<Provider<V>>> providerMultimap;
-
-            @SuppressWarnings("unused")
-            @Inject void initialize(Injector injector) {
-              if (entrySetBinder.permitsDuplicates(injector)) {
-                Map<K, Set<Provider<V>>> providerMultimapMutable = new LinkedHashMap<K, Set<Provider<V>>>();
-                for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-                  if (!providerMultimapMutable.containsKey(entry.getKey())) {
-                    providerMultimapMutable.put(entry.getKey(), new LinkedHashSet<Provider<V>>());
-                  }
-                  providerMultimapMutable.get(entry.getKey()).add(entry.getValue());
-                }
-
-                for (Entry<K, Set<Provider<V>>> entry : providerMultimapMutable.entrySet()) {
-                  entry.setValue(Collections.unmodifiableSet(entry.getValue()));
-                }
-                providerMultimap = Collections.unmodifiableMap(providerMultimapMutable);
-              }
-            }
-
-            public Map<K, Set<Provider<V>>> get() {
-              if (providerMultimap == null) {
-                throw new ProvisionException("no binding for " + providerMultimapKey
-                    + " because permitDuplicates was never called");
-              }
-              return providerMultimap;
-            }
-
-            public Set<Dependency<?>> getDependencies() {
-              return dependencies;
-            }
-          });
-
-      final Provider<Map<K, Set<Provider<V>>>> multimapProvider =
-          binder.getProvider(providerMultimapKey);
-      binder.bind(multimapKey).toProvider(new ProviderWithDependencies<Map<K, Set<V>>>() {
-        public Map<K, Set<V>> get() {
-          Map<K,Set<V>> multimap = new LinkedHashMap<K, Set<V>>();
-          for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
-            K key = entry.getKey();
-            Set<V> values = new LinkedHashSet<V>();
-            for (Provider<V> valueProvider : entry.getValue()) {
-              V value = valueProvider.get();
-              checkConfiguration(value != null,
-                  "Multimap injection failed due to null value for key \"%s\"", key);
-              values.add(value);
-            }
-            multimap.put(key, Collections.unmodifiableSet(values));
-          }
-          return Collections.unmodifiableMap(multimap);
-        }
-
-        public Set<Dependency<?>> getDependencies() {
-          return dependencies;
-        }
-      });
     }
 
     private boolean isInitialized() {
@@ -443,6 +379,98 @@ public abstract class MapBinder<K, V> {
 
     @Override public int hashCode() {
       return mapKey.hashCode();
+    }
+
+    /**
+     * Binds {@code Map<K, Set<V>>} and {{@code Map<K, Set<Provider<V>>>}.
+     */
+    private static final class MultimapBinder<K, V> implements Module {
+
+      private final Key<Map<K, Set<V>>> multimapKey;
+      private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
+      private final Key<Set<Entry<K,Provider<V>>>> entrySetKey;
+
+      public MultimapBinder(
+          Key<Map<K, Set<V>>> multimapKey,
+          Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
+          Key<Set<Entry<K,Provider<V>>>> entrySetKey) {
+        this.multimapKey = multimapKey;
+        this.providerMultimapKey = providerMultimapKey;
+        this.entrySetKey = entrySetKey;
+      }
+
+      @Override
+      public void configure(Binder binder) {
+        final ImmutableSet<Dependency<?>> dependencies
+            = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetKey));
+
+        final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider =
+            binder.getProvider(entrySetKey);
+        // Binds a Map<K, Set<Provider<V>>> from a collection of Map<Entry<K, Provider<V>> if
+        // permitDuplicates was called.
+        binder.bind(providerMultimapKey).toProvider(
+            new ProviderWithDependencies<Map<K, Set<Provider<V>>>>() {
+              private Map<K, Set<Provider<V>>> providerMultimap;
+
+              @SuppressWarnings("unused")
+              @Inject void initialize(Injector injector) {
+                Map<K, ImmutableSet.Builder<Provider<V>>> providerMultimapMutable =
+                    new LinkedHashMap<K, ImmutableSet.Builder<Provider<V>>>();
+                for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+                  if (!providerMultimapMutable.containsKey(entry.getKey())) {
+                    providerMultimapMutable.put(
+                        entry.getKey(), ImmutableSet.<Provider<V>>builder());
+                  }
+                  providerMultimapMutable.get(entry.getKey()).add(entry.getValue());
+                }
+
+                ImmutableMap.Builder<K, Set<Provider<V>>> providerMultimapBuilder =
+                    ImmutableMap.builder();
+                for (Entry<K, ImmutableSet.Builder<Provider<V>>> entry
+                    : providerMultimapMutable.entrySet()) {
+                  providerMultimapBuilder.put(entry.getKey(), entry.getValue().build());
+                }
+                providerMultimap = providerMultimapBuilder.build();
+              }
+
+              @Override
+              public Map<K, Set<Provider<V>>> get() {
+                return providerMultimap;
+              }
+
+              @Override
+              public Set<Dependency<?>> getDependencies() {
+                return dependencies;
+              }
+            });
+
+        final Provider<Map<K, Set<Provider<V>>>> multimapProvider =
+            binder.getProvider(providerMultimapKey);
+        binder.bind(multimapKey).toProvider(new ProviderWithDependencies<Map<K, Set<V>>>() {
+
+          @Override
+          public Map<K, Set<V>> get() {
+            ImmutableMap.Builder<K, Set<V>> multimapBuilder = ImmutableMap.builder();
+            for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
+              K key = entry.getKey();
+              ImmutableSet.Builder<V> valuesBuilder = ImmutableSet.builder();
+              for (Provider<V> valueProvider : entry.getValue()) {
+                V value = valueProvider.get();
+                checkConfiguration(value != null,
+                    "Multimap injection failed due to null value for key \"%s\"", key);
+                valuesBuilder.add(value);
+              }
+              multimapBuilder.put(key, valuesBuilder.build());
+            }
+            return multimapBuilder.build();
+          }
+
+          @Override
+          public Set<Dependency<?>> getDependencies() {
+            return dependencies;
+          }
+        });
+      }
     }
 
     private static final class MapEntry<K, V> implements Map.Entry<K, V> {
