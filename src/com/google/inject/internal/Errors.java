@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.Guice;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
@@ -42,6 +43,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -59,6 +62,21 @@ import java.util.List;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Errors implements Serializable {
+
+  private static final AtomicInteger warningsLogged = new AtomicInteger(0);
+
+  // TODO(kevinb): gee, ya think we might want to remove this?
+  private static boolean allowNullsBadBadBad(Dependency<?> dependency) {
+    boolean allowNulls = "I'm a bad hack"
+        .equals(System.getProperty("guice.allow.nulls.bad.bad.bad"));
+
+    if (allowNulls && warningsLogged.getAndIncrement() < 50) {
+      Logger.getLogger(Guice.class.getName()).warning(
+          "Guice injected null into " + dependency + "; please mark it @Nullable");
+    }
+
+    return allowNulls;
+  }
 
   /**
    * The root errors object. Used to access the list of error messages.
@@ -503,7 +521,7 @@ public final class Errors implements Serializable {
    */
   public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
       throws ErrorsException {
-    if (value != null || dependency.isNullable()) {
+    if (value != null || dependency.isNullable() || allowNullsBadBadBad(dependency)) {
       return value;
     }
 

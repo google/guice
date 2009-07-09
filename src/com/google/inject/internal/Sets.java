@@ -31,15 +31,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * Static utility methods pertaining to {@link Set} instances. Also see this
- * class's counterparts {@link Lists} and {@link Maps}.
- *
- * @author Kevin Bourrillion
- * @author Jared Levy
- */
-public final class Sets {
-  private Sets() {}
+/** @deprecated please use the official version in {@code com.google.common.collect}. */
+@Deprecated
+public class Sets {
 
   // HashSet
 

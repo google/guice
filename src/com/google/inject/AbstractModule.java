@@ -149,6 +149,16 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
+   * @deprecated use multiple calls to {@link #requestInjection}.
+   */
+  @Deprecated
+  protected void requestInjection(Object... objects) {
+    for (Object o : objects) {
+      requestInjection(o);
+    }
+  }
+
+  /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {

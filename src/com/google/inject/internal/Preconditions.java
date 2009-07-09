@@ -17,48 +17,10 @@
 package com.google.inject.internal;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
-/**
- * Simple static methods to be called at the start of your own methods to verify
- * correct arguments and state. This allows constructs such as
- * <pre>
- *     if (count <= 0) {
- *       throw new IllegalArgumentException("must be positive: " + count);
- *     }</pre>
- *
- * to be replaced with the more compact
- * <pre>
- *     checkArgument(count > 0, "must be positive: %s", count);</pre>
- *
- * Note that the sense of the expression is inverted; with {@code Preconditions}
- * you declare what you expect to be <i>true</i>, just as you do with an
- * <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/assert.html">
- * {@code assert}</a> or a JUnit {@code assertTrue()} call.
- *
- * <p>Take care not to confuse precondition checking with other similar types
- * of checks! Precondition exceptions -- including those provided here, but also
- * {@link IndexOutOfBoundsException}, {@link NoSuchElementException}, {@link
- * UnsupportedOperationException} and others -- are used to signal that the
- * <i>calling method</i> has made an error. This tells the caller that it should
- * not have invoked the method when it did, with the arguments it did, or
- * perhaps <i>ever</i>. Postcondition or other invariant failures should not
- * throw these types of exceptions.
- *
- * <p><b>Note:</b> The methods of the {@code Preconditions} class are highly
- * unusual in one way: they are <i>supposed to</i> throw exceptions, and promise
- * in their specifications to do so even when given perfectly valid input. That
- * is, {@code null} is a valid parameter to the method {@link
- * #checkNotNull(Object)} -- and technically this parameter could be even marked
- * as {@link Nullable} -- yet the method will still throw an exception anyway,
- * because that's what its contract says to do.
- * 
- * <p>This class may be used with the Google Web Toolkit (GWT).
- *
- * @author Kevin Bourrillion
- */
-public final class Preconditions {
-  private Preconditions() {}
+/** @deprecated please use the official version in {@code com.google.common.base}. */
+@Deprecated
+public class Preconditions {
 
   /**
    * Ensures the truth of an expression involving one or more parameters to the

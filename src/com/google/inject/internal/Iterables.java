@@ -20,14 +20,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * This class contains static utility methods that operate on or return objects
- * of type {@code Iterable}. Also see the parallel implementations in {@link
- * Iterators}.
- *
- * @author Kevin Bourrillion
- * @author Scott Bonneau
- */
+/** @deprecated please use the official version in {@code com.google.common.collect}. */
+@Deprecated
 public final class Iterables {
   private Iterables() {}
 
