@@ -23,6 +23,12 @@ import junit.framework.TestCase;
  */
 public class CircularDependencyTest extends TestCase {
 
+  @Override protected void setUp() throws Exception {
+    super.setUp();
+    Chicken.nextInstanceId = 0;
+    Egg.nextInstanceId = 0;
+  }
+
   public void testCircularlyDependentConstructors()
       throws CreationException {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -110,5 +116,37 @@ public class CircularDependencyTest extends TestCase {
     public A getA() {
       return this;
     }
+  }
+
+  static class Chicken {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+    @Inject Egg source;
+  }
+
+  static class Egg {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+    @Inject Chicken source;
+  }
+
+  public void testCircularlyDependentSingletonsWithProviders() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(Chicken.class).in(Singleton.class);
+      }
+
+      @Provides @Singleton Egg provideEgg(Chicken chicken) {
+        Egg egg = new Egg();
+        egg.source = chicken;
+        return egg;
+      }
+    });
+
+    injector.getInstance(Egg.class);
+    injector.getInstance(Chicken.class);
+
+    assertEquals(1, Chicken.nextInstanceId);
+    assertEquals(1, Egg.nextInstanceId);
   }
 }
