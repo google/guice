@@ -396,6 +396,15 @@ public class BindingTest extends TestCase {
     assertEquals(injector, bindings.get(Key.get(Injector.class)).getProvider().get());
   }
 
+  public void testGetAllServletBindings() throws Exception {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(F.class); // an explicit binding that uses a JIT binding for a constructor
+      }
+    });
+    injector.getAllBindings();
+  }
+
   public static class C<T> {
     private Stage stage;
     private T t;

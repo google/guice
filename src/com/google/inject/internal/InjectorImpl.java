@@ -355,6 +355,12 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
+    if (binding instanceof ConstructorBindingImpl<?>) {
+      ((ConstructorBindingImpl) binding).initialize(this, errors);
+    }
+  }
+
+  <T> void initializeJitBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
     // Note: We don't need to synchronize on state.lock() during injector creation.
@@ -616,7 +622,7 @@ final class InjectorImpl implements Injector, Lookups {
     Object source = key.getTypeLiteral().getRawType();
     BindingImpl<T> binding = createUninitializedBinding(key, Scoping.UNSCOPED, source, errors);
     errors.throwIfNewErrors(numErrorsBefore);
-    initializeBinding(binding, errors);
+    initializeJitBinding(binding, errors);
     return binding;
   }
 
