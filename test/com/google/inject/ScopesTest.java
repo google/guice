@@ -63,6 +63,7 @@ public class ScopesTest extends TestCase {
     NotASingleton.nextInstanceId = 0;
     Implementation.nextInstanceId = 0;
     ProvidedBySingleton.nextInstanceId = 0;
+    ThrowingSingleton.nextInstanceId = 0;
   }
 
   public void testSingletons() {
@@ -545,5 +546,32 @@ public class ScopesTest extends TestCase {
       }
     }
     return builder.build();
+  }
+
+  @Singleton
+  static class ThrowingSingleton {
+    static int nextInstanceId;
+    final int instanceId = nextInstanceId++;
+
+    ThrowingSingleton() {
+      if (instanceId == 0) {
+        throw new RuntimeException();
+      }
+    }
+  }
+
+  public void testSingletonConstructorThrows() {
+    Injector injector = Guice.createInjector();
+
+    try {
+      injector.getInstance(ThrowingSingleton.class);
+      fail();
+    } catch (ProvisionException expected) {
+    }
+
+    // this behaviour is unspecified. If we change Guice to re-throw the exception, this test
+    // should be changed
+    injector.getInstance(ThrowingSingleton.class);
+    assertEquals(2, ThrowingSingleton.nextInstanceId);
   }
 }
