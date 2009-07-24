@@ -142,4 +142,8 @@ final class InheritingState implements State {
   public Object lock() {
     return lock;
   }
+
+  public Map<Class<? extends Annotation>, Scope> getScopes() {
+    return scopes;
+  }
 }

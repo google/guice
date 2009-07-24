@@ -99,6 +99,10 @@ interface State {
     public Object lock() {
       throw new UnsupportedOperationException();
     }
+
+    public Map<Class<? extends Annotation>, Scope> getScopes() {
+      return ImmutableMap.of();
+    }
   };
 
   State parent();
@@ -153,4 +157,9 @@ interface State {
    * to be used when reading mutable data (ie. just-in-time bindings, and binding blacklists).
    */
   Object lock();
+
+  /**
+   * Returns all the scope bindings at this level and parent levels.
+   */
+  Map<Class<? extends Annotation>, Scope> getScopes();
 }

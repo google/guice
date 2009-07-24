@@ -28,17 +28,20 @@ import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
+import com.google.inject.Scope;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderKeyBinding;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -217,7 +220,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   private static class ProviderBindingImpl<T> extends BindingImpl<Provider<T>>
-      implements ProviderBinding<Provider<T>> {
+      implements ProviderBinding<Provider<T>>, HasDependencies {
     final BindingImpl<T> providedBinding;
 
     ProviderBindingImpl(InjectorImpl injector, Key<Provider<T>> key, Binding<T> providedBinding) {
@@ -252,6 +255,10 @@ final class InjectorImpl implements Injector, Lookups {
           .add("key", getKey())
           .add("providedKey", getProvidedKey())
           .toString();
+    }
+
+    public Set<Dependency<?>> getDependencies() {
+      return ImmutableSet.<Dependency<?>>of(Dependency.get(getProvidedKey()));
     }
   }
 
@@ -642,6 +649,10 @@ final class InjectorImpl implements Injector, Lookups {
           .putAll(jitBindings)
           .build();
     }
+  }
+
+  public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
+    return state.getScopes();
   }
 
   private static class BindingsMultimap {

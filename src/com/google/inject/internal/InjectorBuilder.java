@@ -24,11 +24,13 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.Scope;
 import com.google.inject.spi.Dependency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.lang.annotation.Annotation;
 
 /**
  * Builds a tree of injectors. This is a primary injector, plus child injectors needed for each
@@ -265,6 +267,9 @@ public final class InjectorBuilder {
     }
     public Injector createChildInjector(Module... modules) {
       return delegateInjector.createChildInjector(modules);
+    }
+    public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
+      return delegateInjector.getScopeBindings();
     }
     public <T> Provider<T> getProvider(Key<T> key) {
       throw new UnsupportedOperationException(
