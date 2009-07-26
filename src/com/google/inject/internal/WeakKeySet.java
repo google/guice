@@ -33,13 +33,18 @@ final class WeakKeySet {
    * keys whose class names are equal but class loaders are different. This shouldn't be an issue
    * in practice.
    */
-  private Set<String> backingSet = Sets.newHashSet();
+  private Set<String> backingSet;
 
   public boolean add(Key<?> key) {
+    if (backingSet == null) {
+      backingSet = Sets.newHashSet();
+    }
     return backingSet.add(key.toString());
   }
 
   public boolean contains(Object o) {
-    return o instanceof Key && backingSet.contains(o.toString());
+    // avoid calling key.toString() if the backing set is empty. toString is expensive in aggregate,
+    // and most WeakKeySets are empty in practice (because they're used by top-level injectors)
+    return backingSet != null && o instanceof Key && backingSet.contains(o.toString());
   }
 }

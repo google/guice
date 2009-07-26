@@ -54,6 +54,8 @@ import java.util.Set;
  * @see InjectorBuilder
  */
 final class InjectorImpl implements Injector, Lookups {
+  public static final TypeLiteral<String> STRING_TYPE = TypeLiteral.get(String.class);
+
   final State state;
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
@@ -271,7 +273,7 @@ final class InjectorImpl implements Injector, Lookups {
   private <T> BindingImpl<T> convertConstantStringBinding(Key<T> key, Errors errors)
       throws ErrorsException {
     // Find a constant string binding.
-    Key<String> stringKey = key.ofType(String.class);
+    Key<String> stringKey = key.ofType(STRING_TYPE);
     BindingImpl<String> stringBinding = state.getExplicitBinding(stringKey);
     if (stringBinding == null || !stringBinding.isConstant()) {
       return null;

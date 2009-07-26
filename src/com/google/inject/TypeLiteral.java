@@ -82,7 +82,7 @@ public class TypeLiteral<T> {
   protected TypeLiteral() {
     this.type = getSuperclassTypeParameter(getClass());
     this.rawType = (Class<? super T>) MoreTypes.getRawType(type);
-    this.hashCode = MoreTypes.hashCode(type);
+    this.hashCode = type.hashCode();
   }
 
   /**
@@ -92,7 +92,7 @@ public class TypeLiteral<T> {
   TypeLiteral(Type type) {
     this.type = canonicalize(checkNotNull(type, "type"));
     this.rawType = (Class<? super T>) MoreTypes.getRawType(this.type);
-    this.hashCode = MoreTypes.hashCode(this.type);
+    this.hashCode = this.type.hashCode();
   }
 
   /**
@@ -151,7 +151,7 @@ public class TypeLiteral<T> {
   }
 
   @Override public final String toString() {
-    return MoreTypes.toString(type);
+    return MoreTypes.typeToString(type);
   }
 
   /**

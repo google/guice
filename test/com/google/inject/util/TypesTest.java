@@ -153,14 +153,14 @@ public class TypesTest extends TestCase {
   }
 
   public void testToString() {
-    Assert.assertEquals("java.lang.String", MoreTypes.toString(String.class));
-    assertEquals("java.lang.String[][]", MoreTypes.toString(stringArray));
+    Assert.assertEquals("java.lang.String", MoreTypes.typeToString(String.class));
+    assertEquals("java.lang.String[][]", MoreTypes.typeToString(stringArray));
     assertEquals("java.util.Map<java.lang.String, java.lang.Integer>",
-        MoreTypes.toString(mapStringInteger));
+        MoreTypes.typeToString(mapStringInteger));
     assertEquals("java.util.List<java.lang.String[][]>",
-        MoreTypes.toString(listStringArray));
+        MoreTypes.typeToString(listStringArray));
     assertEquals(innerFloatDouble.toString(),
-        MoreTypes.toString(innerFloatDouble));
+        MoreTypes.typeToString(innerFloatDouble));
   }
 
   static class Owning<A> {}

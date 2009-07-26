@@ -20,7 +20,6 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.Preconditions.checkArgument;
 import static com.google.inject.internal.Preconditions.checkNotNull;
-import com.google.inject.internal.ToStringBuilder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -195,10 +194,7 @@ public class Key<T> {
   }
 
   @Override public final String toString() {
-    return new ToStringBuilder(Key.class)
-        .add("type", typeLiteral)
-        .add("annotation", annotationStrategy)
-        .toString();
+    return "Key[type=" + typeLiteral + ", annotation=" + annotationStrategy + "]";
   }
 
   /**
@@ -296,7 +292,7 @@ public class Key<T> {
    * Returns a new key of the specified type with the same annotation as this
    * key.
    */
-  <T> Key<T> ofType(TypeLiteral<T> type) {
+  public <T> Key<T> ofType(TypeLiteral<T> type) {
     return new Key<T>(type, annotationStrategy);
   }
 

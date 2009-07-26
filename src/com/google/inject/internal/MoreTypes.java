@@ -105,9 +105,11 @@ public class MoreTypes {
    * type is {@link Serializable}.
    */
   public static Type canonicalize(Type type) {
-    if (type instanceof ParameterizedTypeImpl
-        || type instanceof GenericArrayTypeImpl
-        || type instanceof WildcardTypeImpl) {
+    if (type instanceof Class) {
+      Class<?> c = (Class<?>) type;
+      return c.isArray() ? new GenericArrayTypeImpl(canonicalize(c.getComponentType())) : c;
+
+    } else if (type instanceof CompositeType) {
       return type;
 
     } else if (type instanceof ParameterizedType) {
@@ -118,10 +120,6 @@ public class MoreTypes {
     } else if (type instanceof GenericArrayType) {
       GenericArrayType g = (GenericArrayType) type;
       return new GenericArrayTypeImpl(g.getGenericComponentType());
-
-    } else if (type instanceof Class && ((Class<?>) type).isArray()) {
-      Class<?> c = (Class<?>) type;
-      return new GenericArrayTypeImpl(c.getComponentType());
 
     } else if (type instanceof WildcardType) {
       WildcardType w = (WildcardType) type;
@@ -222,86 +220,12 @@ public class MoreTypes {
     }
   }
 
-  /**
-   * Returns the hashCode of {@code type}.
-   */
-  public static int hashCode(Type type) {
-    if (type instanceof Class) {
-      // Class specifies hashCode().
-      return type.hashCode();
-
-    } else if (type instanceof ParameterizedType) {
-      ParameterizedType p = (ParameterizedType) type;
-      return Arrays.hashCode(p.getActualTypeArguments())
-          ^ p.getRawType().hashCode()
-          ^ hashCodeOrZero(p.getOwnerType());
-
-    } else if (type instanceof GenericArrayType) {
-      return hashCode(((GenericArrayType) type).getGenericComponentType());
-
-    } else if (type instanceof WildcardType) {
-      WildcardType w = (WildcardType) type;
-      return Arrays.hashCode(w.getLowerBounds()) ^ Arrays.hashCode(w.getUpperBounds());
-
-    } else {
-      // This isn't a type we support. Probably a type variable
-      return hashCodeOrZero(type);
-    }
-  }
-
   private static int hashCodeOrZero(Object o) {
     return o != null ? o.hashCode() : 0;
   }
 
-  public static String toString(Type type) {
-    if (type instanceof Class<?>) {
-      return ((Class) type).getName();
-
-    } else if (type instanceof ParameterizedType) {
-      ParameterizedType parameterizedType = (ParameterizedType) type;
-      Type[] arguments = parameterizedType.getActualTypeArguments();
-      Type ownerType = parameterizedType.getOwnerType();
-      StringBuilder stringBuilder = new StringBuilder();
-      if (ownerType != null) {
-        stringBuilder.append(toString(ownerType)).append(".");
-      }
-      stringBuilder.append(toString(parameterizedType.getRawType()));
-      if (arguments.length > 0) {
-        stringBuilder
-            .append("<")
-            .append(toString(arguments[0]));
-        for (int i = 1; i < arguments.length; i++) {
-          stringBuilder.append(", ").append(toString(arguments[i]));
-        }
-      }
-      return stringBuilder.append(">").toString();
-
-    } else if (type instanceof GenericArrayType) {
-      return toString(((GenericArrayType) type).getGenericComponentType()) + "[]";
-
-    } else if (type instanceof WildcardType) {
-      WildcardType wildcardType = (WildcardType) type;
-      Type[] lowerBounds = wildcardType.getLowerBounds();
-      Type[] upperBounds = wildcardType.getUpperBounds();
-
-      if (upperBounds.length != 1 || lowerBounds.length > 1) {
-        throw new UnsupportedOperationException("Unsupported wildcard type " + type);
-      }
-
-      if (lowerBounds.length == 1) {
-        if (upperBounds[0] != Object.class) {
-          throw new UnsupportedOperationException("Unsupported wildcard type " + type);
-        }
-        return "? super " + toString(lowerBounds[0]);
-      } else if (upperBounds[0] == Object.class) {
-        return "?";
-      } else {
-        return "? extends " + toString(upperBounds[0]);
-      }
-
-    } else {
-      return type.toString();
-    }
+  public static String typeToString(Type type) {
+    return type instanceof Class ? ((Class) type).getName() : type.toString();
   }
 
   /**
@@ -508,11 +432,26 @@ public class MoreTypes {
     }
 
     @Override public int hashCode() {
-      return MoreTypes.hashCode(this);
+      return Arrays.hashCode(typeArguments)
+          ^ rawType.hashCode()
+          ^ hashCodeOrZero(ownerType);
     }
 
     @Override public String toString() {
-      return MoreTypes.toString(this);
+      StringBuilder stringBuilder = new StringBuilder(30 * (typeArguments.length + 1));
+      if (ownerType != null) {
+        stringBuilder.append(typeToString(ownerType)).append(".");
+      }
+      stringBuilder.append(typeToString(rawType));
+      if (typeArguments.length > 0) {
+        stringBuilder
+            .append("<")
+            .append(typeToString(typeArguments[0]));
+        for (int i = 1; i < typeArguments.length; i++) {
+          stringBuilder.append(", ").append(typeToString(typeArguments[i]));
+        }
+      }
+      return stringBuilder.append(">").toString();
     }
 
     private static final long serialVersionUID = 0;
@@ -540,11 +479,11 @@ public class MoreTypes {
     }
 
     @Override public int hashCode() {
-      return MoreTypes.hashCode(this);
+      return componentType.hashCode();
     }
 
     @Override public String toString() {
-      return MoreTypes.toString(this);
+      return typeToString(componentType) + "[]";
     }
 
     private static final long serialVersionUID = 0;
@@ -597,11 +536,19 @@ public class MoreTypes {
     }
 
     @Override public int hashCode() {
-      return MoreTypes.hashCode(this);
+      // this equals Arrays.hashCode(getLowerBounds()) ^ Arrays.hashCode(getUpperBounds());  
+      return (lowerBound != null ? 31 + lowerBound.hashCode() : 1)
+          ^ (31 + upperBound.hashCode());
     }
 
     @Override public String toString() {
-      return MoreTypes.toString(this);
+      if (lowerBound != null) {
+        return "? super " + typeToString(lowerBound);
+      } else if (upperBound == Object.class) {
+        return "?";
+      } else {
+        return "? extends " + typeToString(upperBound);
+      }
     }
 
     private static final long serialVersionUID = 0;
