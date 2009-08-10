@@ -35,6 +35,7 @@ import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -367,5 +368,38 @@ public class MultibinderTest extends TestCase {
     Set<T> result = Sets.newHashSet();
     result.addAll(Arrays.asList(elements));
     return result;
+  }
+
+  /**
+   * With overrides, we should get the union of all multibindings.
+   */
+  public void testModuleOverrideAndMultibindings() {
+    Module ab = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().toInstance("B");
+      }
+    };
+    Module cd = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("C");
+        multibinder.addBinding().toInstance("D");
+      }
+    };
+    Module ef = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("E");
+        multibinder.addBinding().toInstance("F");
+      }
+    };
+
+    Module abcd = Modules.override(ab).with(cd);
+    Injector injector = Guice.createInjector(abcd, ef);
+    assertEquals(ImmutableSet.of("A", "B", "C", "D", "E", "F"),
+        injector.getInstance(Key.get(setOfString)));
+
   }
 }

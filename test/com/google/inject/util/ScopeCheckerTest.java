@@ -58,11 +58,11 @@ public class ScopeCheckerTest extends TestCase {
 
   /** change your shirt daily. Depends on the sleeve length appropriate for the weather */
   static class Shirt {
-    @Inject SleeveLenth sleeveLenth;
+    @Inject SleeveLength sleeveLength;
   }
 
   /** long sleeves in the winter, short sleeves in the summer, etc. */
-  static class SleeveLenth {
+  static class SleeveLength {
     @Inject Style style;
   }
 
@@ -78,7 +78,7 @@ public class ScopeCheckerTest extends TestCase {
     Module module = new AbstractModule() {
       protected void configure() {
         bind(Style.class).in(Annually.class);
-        bind(SleeveLenth.class).in(Seasonally.class);
+        bind(SleeveLength.class).in(Seasonally.class);
         bind(Shirt.class).in(Daily.class);
       }
     };
@@ -91,7 +91,7 @@ public class ScopeCheckerTest extends TestCase {
     Module module = new AbstractModule() {
       protected void configure() {
         bind(Style.class);
-        bind(SleeveLenth.class);
+        bind(SleeveLength.class);
         bind(Shirt.class).in(Daily.class);
       }
     };
@@ -104,7 +104,7 @@ public class ScopeCheckerTest extends TestCase {
     Module module = new AbstractModule() {
       protected void configure() {
         bind(Style.class).in(Annually.class);
-        bind(SleeveLenth.class);
+        bind(SleeveLength.class);
         bind(Shirt.class);
       }
     };
@@ -117,7 +117,7 @@ public class ScopeCheckerTest extends TestCase {
     Module module = new AbstractModule() {
       protected void configure() {
         bind(Style.class).in(Annually.class);
-        bind(SleeveLenth.class).in(Seasonally.class);
+        bind(SleeveLength.class).in(Seasonally.class);
         bind(Shirt.class).in(Annually.class);
       }
     };
@@ -129,7 +129,7 @@ public class ScopeCheckerTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) Illegal scoped dependency: " + Shirt.class.getName() + " in @Annually",
-          "  depends on " + SleeveLenth.class.getName() + " in @Seasonally");
+          "  depends on " + SleeveLength.class.getName() + " in @Seasonally");
     }
   }
 
@@ -160,7 +160,7 @@ public class ScopeCheckerTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) Illegal scoped dependency: " + Shirt.class.getName() + " in @Annually",
-          "  depends on " + SleeveLenth.class.getName(),
+          "  depends on " + SleeveLength.class.getName(),
           "  depends on " + Style.class.getName() + " in @Seasonally");
     }
   }
