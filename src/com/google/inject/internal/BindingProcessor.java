@@ -104,7 +104,8 @@ final class BindingProcessor extends AbstractProcessor {
         Initializable<T> ref = initializer.requestInjection(
             injector, instance, source, injectionPoints);
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
-        InternalFactory<? extends T> scopedFactory = Scoping.scope(key, injector, factory, scoping);
+        InternalFactory<? extends T> scopedFactory
+            = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, injectionPoints,
             instance));
         return null;
@@ -116,7 +117,8 @@ final class BindingProcessor extends AbstractProcessor {
         Initializable<Provider<? extends T>> initializable = initializer
             .<Provider<? extends T>>requestInjection(injector, provider, source, injectionPoints);
         InternalFactory<T> factory = new InternalFactoryToProviderAdapter<T>(initializable, source);
-        InternalFactory<? extends T> scopedFactory = Scoping.scope(key, injector, factory, scoping);
+        InternalFactory<? extends T> scopedFactory
+            = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scoping,
             provider, injectionPoints));
         return null;
@@ -128,7 +130,7 @@ final class BindingProcessor extends AbstractProcessor {
             = new BoundProviderFactory<T>(injector, providerKey, source);
         creationListeners.add(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
-            key, injector, (InternalFactory<? extends T>) boundProviderFactory, scoping);
+            key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);
         putBinding(new LinkedProviderBindingImpl<T>(
             injector, key, source, scopedFactory, scoping, providerKey));
         return null;
@@ -142,7 +144,8 @@ final class BindingProcessor extends AbstractProcessor {
 
         FactoryProxy<T> factory = new FactoryProxy<T>(injector, key, linkedKey, source);
         creationListeners.add(factory);
-        InternalFactory<? extends T> scopedFactory = Scoping.scope(key, injector, factory, scoping);
+        InternalFactory<? extends T> scopedFactory
+            = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(
             new LinkedBindingImpl<T>(injector, key, source, scopedFactory, scoping, linkedKey));
         return null;

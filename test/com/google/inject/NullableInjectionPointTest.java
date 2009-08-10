@@ -156,8 +156,8 @@ public class NullableInjectionPointTest extends TestCase {
 
     try {
       injector.getInstance(FooField.class);
-    }
-    catch(ProvisionException expected) {
+      fail();
+    } catch(ProvisionException expected) {
       assertContains(expected.getMessage(), "null returned by binding "
           + "at com.google.inject.NullableInjectionPointTest");
     }

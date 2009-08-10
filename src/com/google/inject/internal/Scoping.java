@@ -211,7 +211,7 @@ public abstract class Scoping {
 
   /** Scopes an internal factory. */
   static <T> InternalFactory<? extends T> scope(Key<T> key, InjectorImpl injector,
-      InternalFactory<? extends T> creator, Scoping scoping) {
+      InternalFactory<? extends T> creator, Object source, Scoping scoping) {
 
     if (scoping.isNoScope()) {
       return creator;
@@ -222,7 +222,7 @@ public abstract class Scoping {
     Provider<T> scoped
         = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(
-        Initializables.<Provider<? extends T>>of(scoped));
+        Initializables.<Provider<? extends T>>of(scoped), source);
   }
 
   /**

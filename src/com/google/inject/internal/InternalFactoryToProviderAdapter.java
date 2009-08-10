@@ -28,10 +28,6 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
   private final Initializable<Provider<? extends T>> initializable;
   private final Object source;
 
-  public InternalFactoryToProviderAdapter(Initializable<Provider<? extends T>> initializable) {
-    this(initializable, SourceProvider.UNKNOWN_SOURCE);
-  }
-
   public InternalFactoryToProviderAdapter(
       Initializable<Provider<? extends T>> initializable, Object source) {
     this.initializable = checkNotNull(initializable, "provider");

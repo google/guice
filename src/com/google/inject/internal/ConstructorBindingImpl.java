@@ -102,7 +102,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
 
     Factory<T> factoryFactory = new Factory<T>();
     InternalFactory<? extends T> scopedFactory
-        = Scoping.scope(key, injector, factoryFactory, scoping);
+        = Scoping.scope(key, injector, factoryFactory, source, scoping);
 
     return new ConstructorBindingImpl<T>(
         injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);

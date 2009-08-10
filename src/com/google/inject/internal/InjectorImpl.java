@@ -495,11 +495,12 @@ final class InjectorImpl implements Injector, Lookups {
       }
     };
 
+    Object source = rawType;
     return new LinkedProviderBindingImpl<T>(
         this,
         key,
-        rawType /* source */,
-        Scoping.<T>scope(key, this, internalFactory, scoping),
+        source,
+        Scoping.<T>scope(key, this, internalFactory, source, scoping),
         scoping,
         providerKey);
   }
@@ -536,11 +537,12 @@ final class InjectorImpl implements Injector, Lookups {
       }
     };
 
+    Object source = rawType;
     return new LinkedBindingImpl<T>(
         this,
         key,
-        rawType /* source */,
-        Scoping.<T>scope(key, this, internalFactory, scoping),
+        source,
+        Scoping.<T>scope(key, this, internalFactory, source, scoping),
         scoping,
         targetKey);
   }
