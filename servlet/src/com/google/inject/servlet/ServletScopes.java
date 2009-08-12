@@ -19,6 +19,7 @@ package com.google.inject.servlet;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -31,6 +32,9 @@ public class ServletScopes {
 
   private ServletScopes() {}
 
+  /** A sentinel attribute value representing null. */
+  enum NullObject { INSTANCE }
+
   /**
    * HTTP servlet request scope.
    */
@@ -41,11 +45,15 @@ public class ServletScopes {
         public T get() {
           HttpServletRequest request = GuiceFilter.getRequest();
           synchronized (request) {
+            Object obj = request.getAttribute(name);
+            if (NullObject.INSTANCE == obj) {
+              return null;
+            }
             @SuppressWarnings("unchecked")
-            T t = (T) request.getAttribute(name);
+            T t = (T) obj;
             if (t == null) {
               t = creator.get();
-              request.setAttribute(name, t);
+              request.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
             }
             return t;
           }
@@ -72,11 +80,15 @@ public class ServletScopes {
         public T get() {
           HttpSession session = GuiceFilter.getRequest().getSession();
           synchronized (session) {
+            Object obj = session.getAttribute(name);
+            if (NullObject.INSTANCE == obj) {
+              return null;
+            }
             @SuppressWarnings("unchecked")
-            T t = (T) session.getAttribute(name);
+            T t = (T) obj;
             if (t == null) {
               t = creator.get();
-              session.setAttribute(name, t);
+              session.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
             }
             return t;
           }

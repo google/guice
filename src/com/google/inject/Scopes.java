@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.InjectorBuilder;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -30,14 +31,20 @@ public class Scopes {
 
   private Scopes() {}
 
+  /** A sentinel value representing null. */
+  private static final Object NULL = new Object();
+
   /**
    * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
    */
   public static final Scope SINGLETON = new Scope() {
     public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
-
-        private volatile T instance;
+        /*
+         * The lazily initialized singleton instance. Once set, this will either have type T or will
+         * be equal to NULL.
+         */
+        private volatile Object instance;
 
         // DCL on a volatile is safe as of Java 5, which we obviously require.
         @SuppressWarnings("DoubleCheckedLocking")
@@ -51,11 +58,16 @@ public class Scopes {
              */
             synchronized (InjectorBuilder.class) {
               if (instance == null) {
-                instance = creator.get();
+                T nullableInstance = creator.get();
+                instance = (nullableInstance != null) ? nullableInstance : NULL;
               }
             }
           }
-          return instance;
+          Object localInstance = instance;
+          // This is safe because instance has type T or is equal to NULL
+          @SuppressWarnings("unchecked")
+          T returnedInstance = (localInstance != NULL) ? (T) localInstance : null;
+          return returnedInstance;
         }
 
         public String toString() {
