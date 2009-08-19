@@ -78,7 +78,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
   };
 
   /** the produced type, or null if all methods return concrete types */
-  private final Key<?> producedType;
+  private final BindingCollector collector;
   private final ImmutableMap<Method, Key<?>> returnTypesByMethod;
   private final ImmutableMap<Method, ImmutableList<Key<?>>> paramTypes;
 
@@ -90,11 +90,11 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
   /**
    * @param factoryType a Java interface that defines one or more create methods.
-   * @param producedType a concrete type that is assignable to the return types of all factory
-   *      methods.
+   * @param collector binding configuration that maps method return types to
+   *    implementation types.
    */
-  FactoryProvider2(TypeLiteral<F> factoryType, Key<?> producedType) {
-    this.producedType = producedType;
+  FactoryProvider2(TypeLiteral<F> factoryType, BindingCollector collector) {
+    this.collector = collector;
 
     Errors errors = new Errors();
 
@@ -181,6 +181,9 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
     final Key<?> returnType = returnTypesByMethod.get(method);
 
+    // We ignore any pre-existing binding annotation.
+    final Key<?> assistedReturnType = Key.get(returnType.getTypeLiteral(), Assisted.class);
+
     Module assistedModule = new AbstractModule() {
       @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
       protected void configure() {
@@ -192,16 +195,16 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
           binder.bind((Key) paramKey).toProvider(Providers.of(args[p++]));
         }
 
-        if (producedType != null && !returnType.equals(producedType)) {
-          binder.bind(returnType).to((Key) producedType);
+        if (collector.getBindings().containsKey(returnType)) {
+          binder.bind(assistedReturnType).to((TypeLiteral) collector.getBindings().get(returnType));
         } else {
-          binder.bind(returnType);
+          binder.bind(assistedReturnType).to((Key) returnType);
         }
       }
     };
 
     Injector forCreate = injector.createChildInjector(assistedModule);
-    return forCreate.getBinding(returnType);
+    return forCreate.getBinding(assistedReturnType);
   }
 
   /**
@@ -230,8 +233,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
   }
 
   @Override public String toString() {
-    return factory.getClass().getInterfaces()[0].getName()
-        + " for " + producedType.getTypeLiteral();
+    return factory.getClass().getInterfaces()[0].getName();
   }
 
   @Override public boolean equals(Object o) {

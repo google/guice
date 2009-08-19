@@ -22,7 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import static com.google.inject.internal.Annotations.getKey;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableMap;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Lists;
@@ -137,7 +139,10 @@ import java.util.Set;
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
+ *
+ * @deprecated Use {@link FactoryModuleBuilder} instead.
  */
+@Deprecated
 public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   /*
@@ -150,8 +155,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
   private final TypeLiteral<F> factoryType;
   private final Map<Method, AssistedConstructor<?>> factoryMethodToConstructor;
 
-  public static <F> Provider<F> newFactory(
-      Class<F> factoryType, Class<?> implementationType){
+  public static <F> Provider<F> newFactory(Class<F> factoryType, Class<?> implementationType){
     return newFactory(TypeLiteral.get(factoryType), TypeLiteral.get(implementationType));
   }
 
@@ -163,7 +167,28 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     if (!factoryMethodToConstructor.isEmpty()) {
       return new FactoryProvider<F>(factoryType, factoryMethodToConstructor);
     } else {
-      return new FactoryProvider2<F>(factoryType, Key.get(implementationType));
+      BindingCollector collector = new BindingCollector();
+
+      // Preserving backwards-compatibility:  Map all return types in a factory
+      // interface to the passed implementation type.
+      Errors errors = new Errors();
+      Key implementationKey = Key.get(implementationType);
+
+      if (implementationType != null) {
+        try {
+          for (Method method : factoryType.getRawType().getMethods()) {
+            Key<?> returnType = getKey(factoryType.getReturnType(method), method,
+                method.getAnnotations(), errors);
+            if (!implementationKey.equals(returnType)) {
+              collector.addBinding(returnType, implementationType);
+            }
+          }
+        } catch (ErrorsException e) {
+          throw new ConfigurationException(e.getErrors().getMessages());
+        }
+      }
+
+      return new FactoryProvider2<F>(factoryType, collector);
     }
   }
 

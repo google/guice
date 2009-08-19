@@ -30,12 +30,14 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import java.awt.Color;
+
+import junit.framework.TestCase;
+
+import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.TestCase;
 
 public class FactoryProvider2Test extends TestCase {
 
@@ -186,26 +188,26 @@ public class FactoryProvider2Test extends TestCase {
         bind(int.class).toInstance(911);
         bind(double.class).toInstance(50000d);
         bind(ColoredCarFactory.class).toProvider(
-            FactoryProvider.newFactory(ColoredCarFactory.class, Porshe.class));
+            FactoryProvider.newFactory(ColoredCarFactory.class, Porsche.class));
       }
     });
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
-    Porshe grayPorshe = (Porshe) carFactory.create(Color.GRAY);
-    assertEquals(Color.GRAY, grayPorshe.color);
-    assertEquals(50000d, grayPorshe.price);
-    assertEquals(911, grayPorshe.model);
-    assertEquals("turbo", grayPorshe.name);
+    Porsche grayPorsche = (Porsche) carFactory.create(Color.GRAY);
+    assertEquals(Color.GRAY, grayPorsche.color);
+    assertEquals(50000d, grayPorsche.price);
+    assertEquals(911, grayPorsche.model);
+    assertEquals("turbo", grayPorsche.name);
   }
 
-  public static class Porshe implements Car {
+  public static class Porsche implements Car {
     private final Color color;
     private final double price;
     private @Inject String name;
     private int model;
 
     @Inject
-    public Porshe(@Assisted Color color, double price) {
+    public Porsche(@Assisted Color color, double price) {
       this.color = color;
       this.price = price;
     }
@@ -452,7 +454,7 @@ public class FactoryProvider2Test extends TestCase {
           "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
     }
   }
-  
+
   public void testMethodsDeclaredInObject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
         @Override protected void configure() {
@@ -465,8 +467,6 @@ public class FactoryProvider2Test extends TestCase {
     ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
 
     assertEqualsBothWays(carFactory, carFactory);
-    assertEquals(ColoredCarFactory.class.getName() + " for " + Mustang.class.getName(),
-        carFactory.toString());
   }
 
   static class Subaru implements Car {
@@ -574,7 +574,7 @@ public class FactoryProvider2Test extends TestCase {
     @Inject @Assisted("paint") Color paint;
     @Inject @Assisted("fabric") Color fabric;
   }
-  
+
   public void testDistinctKeys() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -689,8 +689,7 @@ public class FactoryProvider2Test extends TestCase {
     assertEqualsBothWays(FactoryProvider2.DEFAULT_ANNOTATION, plainAssisted);
     assertEquals(FactoryProvider2.DEFAULT_ANNOTATION.toString(), plainAssisted.toString());
   }
-  
-  
+
   interface GenericColoredCarFactory<T extends Car> {
     T create(Color color);
   }
@@ -728,17 +727,17 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(1984, redCamaro.modelYear);
     assertEquals(250, redCamaro.horsePower);
   }
-  
+
   public interface Insurance<T extends Car> {
   }
-  
+
   public static class MustangInsurance implements Insurance<Mustang> {
     private final double premium;
     private final double limit;
     private Mustang car;
 
     @Inject
-    public MustangInsurance(@Named("lowLimit") double limit, @Assisted Mustang car,  
+    public MustangInsurance(@Named("lowLimit") double limit, @Assisted Mustang car,
         @Assisted double premium) {
       this.premium = premium;
       this.limit = limit;
@@ -754,7 +753,7 @@ public class FactoryProvider2Test extends TestCase {
     private Camaro car;
 
     @Inject
-    public CamaroInsurance(@Named("highLimit") double limit, @Assisted Camaro car, 
+    public CamaroInsurance(@Named("highLimit") double limit, @Assisted Camaro car,
         @Assisted double premium) {
       this.premium = premium;
       this.limit = limit;
@@ -763,11 +762,11 @@ public class FactoryProvider2Test extends TestCase {
 
     public void sell() {}
   }
-  
+
   public interface MustangInsuranceFactory {
     public Insurance<Mustang> create(Mustang car, double premium);
   }
-  
+
   public interface CamaroInsuranceFactory {
     public Insurance<Camaro> create(Camaro car, double premium);
   }
@@ -786,13 +785,13 @@ public class FactoryProvider2Test extends TestCase {
       }
     });
 
-    MustangInsuranceFactory mustangInsuranceFactory = 
+    MustangInsuranceFactory mustangInsuranceFactory =
         injector.getInstance(MustangInsuranceFactory.class);
-    CamaroInsuranceFactory camaroInsuranceFactory = 
+    CamaroInsuranceFactory camaroInsuranceFactory =
         injector.getInstance(CamaroInsuranceFactory.class);
 
     Mustang mustang = new Mustang(5000d, Color.BLACK);
-    MustangInsurance mustangPolicy = 
+    MustangInsurance mustangPolicy =
         (MustangInsurance) mustangInsuranceFactory.create(mustang, 800.0d);
     assertEquals(800.0d, mustangPolicy.premium);
     assertEquals(50000.0d, mustangPolicy.limit);
@@ -802,7 +801,7 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(800.0d, camaroPolicy.premium);
     assertEquals(100000.0d, camaroPolicy.limit);
   }
-  
+
   public interface InsuranceFactory<T extends Car> {
     public Insurance<T> create(T car, double premium);
   }
@@ -825,13 +824,13 @@ public class FactoryProvider2Test extends TestCase {
       }
     });
 
-    InsuranceFactory<Mustang> mustangInsuranceFactory = 
+    InsuranceFactory<Mustang> mustangInsuranceFactory =
         injector.getInstance(Key.get(mustangInsuranceFactoryType));
-    InsuranceFactory<Camaro> camaroInsuranceFactory = 
+    InsuranceFactory<Camaro> camaroInsuranceFactory =
         injector.getInstance(Key.get(camaroInsuranceFactoryType));
 
     Mustang mustang = new Mustang(5000d, Color.BLACK);
-    MustangInsurance mustangPolicy = 
+    MustangInsurance mustangPolicy =
         (MustangInsurance) mustangInsuranceFactory.create(mustang, 800.0d);
     assertEquals(800.0d, mustangPolicy.premium);
     assertEquals(50000.0d, mustangPolicy.limit);
@@ -856,7 +855,7 @@ public class FactoryProvider2Test extends TestCase {
 
     public void sell() {}
   }
-  
+
   public void testAssistedFactoryForTypeVariableParameters() {
     final TypeLiteral<InsuranceFactory<Camaro>> camaroInsuranceFactoryType =
         new TypeLiteral<InsuranceFactory<Camaro>>() {};
