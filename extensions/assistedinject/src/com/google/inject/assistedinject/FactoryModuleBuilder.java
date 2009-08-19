@@ -123,7 +123,7 @@ import java.lang.annotation.Annotation;
  * }
  * ...
  * protected void configure() {
- *   install(new FactoryModuleBuilder().build(FruitFacory.class));
+ *   install(new FactoryModuleBuilder().build(FruitFactory.class));
  * }</pre>
  *
  * Note that any type returned by the factory in this manner needs to be an implementation class
