@@ -43,7 +43,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides a factory that combines the caller's arguments with injector-supplied values to
+ * <strong>Obsolete.</strong> Prefer {@link FactoryModuleBuilder} for its more concise API and
+ * additional capability.
+ *
+ * <p>Provides a factory that combines the caller's arguments with injector-supplied values to
  * construct objects.
  *
  * <h3>Defining a factory</h3>
@@ -139,10 +142,7 @@ import java.util.Set;
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
- *
- * @deprecated Use {@link FactoryModuleBuilder} instead.
  */
-@Deprecated
 public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   /*
@@ -172,7 +172,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       // Preserving backwards-compatibility:  Map all return types in a factory
       // interface to the passed implementation type.
       Errors errors = new Errors();
-      Key implementationKey = Key.get(implementationType);
+      Key<?> implementationKey = Key.get(implementationType);
 
       if (implementationType != null) {
         try {

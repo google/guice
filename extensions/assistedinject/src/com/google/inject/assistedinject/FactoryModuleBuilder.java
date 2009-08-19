@@ -39,11 +39,11 @@ import java.lang.annotation.Annotation;
  * or <i>newPayment</i>.
  *
  * <h3>Creating a type that accepts factory parameters</h3>
- * {@code constructedType} is a concrete class with an {@literal @}{@link Inject}-annotated
- * constructor. In addition to injector-supplied parameters, the constructor should have
- * parameters that match each of the factory method's parameters. Each factory-supplied parameter
- * requires an {@literal @}{@link Assisted} annotation. This serves to document that the parameter
- * is not bound by your application's modules.
+ * {@code constructedType} is a concrete class with an {@literal @}{@link com.google.inject.Inject
+ * Inject}-annotated constructor. In addition to injector-supplied parameters, the constructor
+ * should have parameters that match each of the factory method's parameters. Each factory-supplied
+ * parameter requires an {@literal @}{@link Assisted} annotation. This serves to document that the
+ * parameter is not bound by your application's modules.
  *
  * <pre>public class RealPayment implements Payment {
  *   {@literal @}Inject
@@ -161,7 +161,6 @@ import java.lang.annotation.Annotation;
  *       .implement(Animal.class, Chicken.class)
  *       .build(AnimalFactory.class));
  * }</pre>
- *
  *
  * @author schmitt@google.com (Peter Schmitt)
  */

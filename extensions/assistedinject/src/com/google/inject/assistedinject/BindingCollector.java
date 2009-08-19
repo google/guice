@@ -18,13 +18,14 @@ package com.google.inject.assistedinject;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Maps;
 import com.google.inject.spi.Message;
 import java.util.Collections;
 import java.util.Map;
 
 /**
- * Utility class for collecting factory bindings.  Used for configuring {@link FactoryProvider2}.
+ * Utility class for collecting factory bindings. Used for configuring {@link FactoryProvider2}.
  *
  * @author schmitt@google.com (Peter Schmitt)
  */
@@ -34,7 +35,7 @@ class BindingCollector {
 
   public BindingCollector addBinding(Key<?> key, TypeLiteral<?> target) {
     if (bindings.containsKey(key)) {
-      throw new ConfigurationException(Collections.singleton(
+      throw new ConfigurationException(ImmutableSet.of(
           new Message("Only one implementation can be specified for " + key)));
     }
 

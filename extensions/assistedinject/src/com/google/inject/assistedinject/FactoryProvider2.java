@@ -50,6 +50,7 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
+ * @author schmitt@google.com (Peter Schmitt)
  */
 final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
