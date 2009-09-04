@@ -30,6 +30,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
@@ -187,5 +188,51 @@ public class ServletDispatchIntegrationTest extends TestCase {
     public void destroy() {
       destroys++;
     }
+  }
+
+
+  @Singleton
+  public static class ForwardingServlet extends HttpServlet {
+    public void service(ServletRequest servletRequest, ServletResponse servletResponse)
+        throws IOException, ServletException {
+      final HttpServletRequest request = (HttpServletRequest) servletRequest;
+
+      request.getRequestDispatcher("/blah.jsp")
+          .forward(servletRequest, servletResponse);
+    }
+  }
+
+  @Singleton
+  public static class ForwardedServlet extends HttpServlet {
+    public void service(ServletRequest servletRequest, ServletResponse servletResponse)
+        throws IOException, ServletException {
+      final HttpServletRequest request = (HttpServletRequest) servletRequest;
+
+      System.out.println(request.getRequestURI());
+ }
+  }
+
+  public void testForwardUsingRequestDispatcher() throws IOException, ServletException {
+    Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        serve("/*").with(ForwardingServlet.class);
+        serve("/blah.jsp").with(ForwardedServlet.class);
+      }
+    });
+
+    final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+    HttpServletResponse responseMock = createMock(HttpServletResponse.class);
+    expect(requestMock.getServletPath())
+        .andReturn("/")
+        .anyTimes();
+
+    expect(responseMock.isCommitted()).andReturn(false);
+
+    replay(requestMock, responseMock);
+
+    new GuiceFilter()
+        .doFilter(requestMock, responseMock,
+            createMock(FilterChain.class));
   }
 }

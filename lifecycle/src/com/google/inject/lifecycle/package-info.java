@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2008 Google Inc.
+/*
+ * Copyright (C) 2009 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.inject.servlet;
-
-import com.google.inject.Singleton;
-import javax.servlet.http.HttpServlet;
 
 /**
- * Used in unit tests to verify the EDSL.
- *
- * @author Dhanji R. Prasanna (dhanji@gmail com)
+ * Lifecycle extension; this extension requires {@code guice-lifecycle-2.0.jar}.
  */
-@Singleton
-public class DummyServlet extends HttpServlet {
-
-}
+package com.google.inject.lifecycle;
