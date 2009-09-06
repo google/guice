@@ -10,7 +10,7 @@ package com.google.inject.lifecycle;
  * All instances that wish to use startable *must* be bound as
  * singletons.
  *
- * @author dhanji@google.com (Dhanji R. Prasanna)
+ * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public interface Startable {
   /**

@@ -14,11 +14,16 @@ import static com.google.inject.matcher.Matchers.any;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import net.sf.cglib.proxy.InvocationHandler;
 import net.sf.cglib.proxy.Proxy;
 
-/** @author dhanji@google.com (Dhanji R. Prasanna) */
-@Singleton class BroadcastingLifecycle implements Lifecycle {
+/**
+ * @author dhanji@gmail.com (Dhanji R. Prasanna)
+ */
+@Singleton
+class BroadcastingLifecycle implements Lifecycle {
   private final Injector injector;
   private final List<Class<?>> callableClasses;
 
@@ -103,6 +108,26 @@ import net.sf.cglib.proxy.Proxy;
   }
 
   public <T> T broadcast(Class<T> clazz, Matcher<? super T> matcher) {
+    final List<T> ts = instantiateForBroadcast(clazz, matcher);
+
+    @SuppressWarnings("unchecked") T caster = (T) Proxy
+        .newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
+          public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+
+            // propagate the method call with the same arg list to all instances.
+            for (T t : ts) {
+              method.invoke(t, objects);
+            }
+
+            // We can't return from multiple instances, so just return null.
+            return null;
+          }
+        });
+
+    return caster;
+  }
+
+  private <T> List<T> instantiateForBroadcast(Class<T> clazz, Matcher<? super T> matcher) {
     final List<T> ts = Lists.newArrayList();
     for (Key<?> key : callableKeys.get(clazz)) {
       // Should this get instancing happen during method call?
@@ -113,14 +138,31 @@ import net.sf.cglib.proxy.Proxy;
         ts.add(t);
       }
     }
+    return ts;
+  }
+
+  public <T> T broadcast(Class<T> clazz, final ExecutorService executorService) {
+    return broadcast(clazz, executorService, any());
+  }
+
+  public <T> T broadcast(Class<T> clazz, final ExecutorService executorService,
+      Matcher<? super T> matcher) {
+    final List<T> ts = instantiateForBroadcast(clazz, matcher);
 
     @SuppressWarnings("unchecked") T caster = (T) Proxy
         .newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
-          public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+          public Object invoke(Object o, final Method method, final Object[] objects)
+              throws Throwable {
 
             // propagate the method call with the same arg list to all instances.
-            for (T t : ts) {
-              method.invoke(t, objects);
+            for (final T t : ts) {
+              // Submit via executor service. TODO See if this can be parallelized by
+              // yet another dimension, i.e. inParallel(N)
+              executorService.submit(new Callable() {
+                public Object call() throws Exception {
+                  return method.invoke(t, objects);
+                }
+              });
             }
 
             // We can't return from multiple instances, so just return null.

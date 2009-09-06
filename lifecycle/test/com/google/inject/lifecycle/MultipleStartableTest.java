@@ -4,7 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Singleton;
 import junit.framework.TestCase;
 
-/** @author dhanji@google.com (Dhanji R. Prasanna) */
+/** @author dhanji@gmail.com (Dhanji R. Prasanna) */
 public class MultipleStartableTest extends TestCase {
   private static int started;
 
