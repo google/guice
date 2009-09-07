@@ -79,15 +79,13 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="multibindings" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/build/cglib-2.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/atinject.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../cglib-src-2.2.jar!/src/proxy" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
   </component>

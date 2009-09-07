@@ -16,11 +16,11 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.internal.Annotations;
 import static com.google.inject.internal.Preconditions.checkArgument;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -144,11 +144,11 @@ class Parameter {
    */
   private Annotation getBindingAnnotation(Annotation[] annotations) {
     Annotation bindingAnnotation = null;
-    for (Annotation a : annotations) {
-      if (a.annotationType().getAnnotation(BindingAnnotation.class) != null) {
+    for (Annotation annotation : annotations) {
+      if (Annotations.isBindingAnnotation(annotation.annotationType())) {
         checkArgument(bindingAnnotation == null,
-            "Parameter has multiple binding annotations: %s and %s", bindingAnnotation, a);
-        bindingAnnotation = a;
+            "Parameter has multiple binding annotations: %s and %s", bindingAnnotation, annotation);
+        bindingAnnotation = annotation;
       }
     }
     return bindingAnnotation;

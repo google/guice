@@ -42,7 +42,7 @@ package com.google.inject;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface Provider<T> {
+public interface Provider<T> extends javax.inject.Provider<T> {
 
   /**
    * Provides an instance of {@code T}. Must never return {@code null}.

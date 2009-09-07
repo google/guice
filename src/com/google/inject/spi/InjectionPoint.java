@@ -57,13 +57,10 @@ public final class InjectionPoint {
   private final TypeLiteral<?> declaringType;
   private final ImmutableList<Dependency<?>> dependencies;
 
-  InjectionPoint(TypeLiteral<?> declaringType, Method method) {
+  InjectionPoint(TypeLiteral<?> declaringType, Method method, boolean optional) {
     this.member = method;
     this.declaringType = declaringType;
-
-    Inject inject = method.getAnnotation(Inject.class);
-    this.optional = inject.optional();
-
+    this.optional = optional;
     this.dependencies = forMember(method, declaringType, method.getParameterAnnotations());
   }
 
@@ -75,12 +72,10 @@ public final class InjectionPoint {
         constructor, declaringType, constructor.getParameterAnnotations());
   }
 
-  InjectionPoint(TypeLiteral<?> declaringType, Field field) {
+  InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
     this.member = field;
     this.declaringType = declaringType;
-
-    Inject inject = field.getAnnotation(Inject.class);
-    this.optional = inject.optional();
+    this.optional = optional;
 
     Annotation[] annotations = field.getAnnotations();
 
@@ -223,19 +218,29 @@ public final class InjectionPoint {
 
     Constructor<?> injectableConstructor = null;
     for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
-      Inject inject = constructor.getAnnotation(Inject.class);
-      if (inject != null) {
-        if (inject.optional()) {
-          errors.optionalConstructor(constructor);
-        }
 
-        if (injectableConstructor != null) {
-          errors.tooManyConstructors(rawType);
+      boolean optional;
+      Inject guiceInject = constructor.getAnnotation(Inject.class);
+      if (guiceInject == null) {
+        javax.inject.Inject javaxInject = constructor.getAnnotation(javax.inject.Inject.class);
+        if (javaxInject == null) {
+          continue;
         }
-
-        injectableConstructor = constructor;
-        checkForMisplacedBindingAnnotations(injectableConstructor, errors);
+        optional = javaxInject.optional();
+      } else {
+        optional = guiceInject.optional();
       }
+
+      if (optional) {
+        errors.optionalConstructor(constructor);
+      }
+
+      if (injectableConstructor != null) {
+        errors.tooManyConstructors(rawType);
+      }
+
+      injectableConstructor = constructor;
+      checkForMisplacedBindingAnnotations(injectableConstructor, errors);
     }
 
     errors.throwConfigurationExceptionIfErrorsExist();
@@ -401,15 +406,22 @@ public final class InjectionPoint {
         continue;
       }
 
-      Inject inject = member.getAnnotation(Inject.class);
-      if (inject == null) {
-        continue;
+      boolean optional;
+      Inject guiceInject = member.getAnnotation(Inject.class);
+      if (guiceInject == null) {
+        javax.inject.Inject javaxInject = member.getAnnotation(javax.inject.Inject.class);
+        if (javaxInject == null) {
+          continue;
+        }
+        optional = javaxInject.optional();
+      } else {
+        optional = guiceInject.optional();
       }
 
       try {
-        injectionPoints.add(factory.create(typeLiteral, member, errors));
+        injectionPoints.add(factory.create(typeLiteral, member, optional, errors));
       } catch (ConfigurationException ignorable) {
-        if (!inject.optional()) {
+        if (!optional) {
           errors.merge(ignorable.getErrorMessages());
         }
       }
@@ -425,8 +437,9 @@ public final class InjectionPoint {
       public Field[] getMembers(Class<?> type) {
         return type.getDeclaredFields();
       }
-      public InjectionPoint create(TypeLiteral<?> typeLiteral, Field member, Errors errors) {
-        return new InjectionPoint(typeLiteral, member);
+      public InjectionPoint create(
+          TypeLiteral<?> typeLiteral, Field member, boolean optional, Errors errors) {
+        return new InjectionPoint(typeLiteral, member, optional);
       }
     };
 
@@ -434,13 +447,14 @@ public final class InjectionPoint {
       public Method[] getMembers(Class<?> type) {
         return type.getDeclaredMethods();
       }
-      public InjectionPoint create(TypeLiteral<?> typeLiteral, Method member, Errors errors) {
+      public InjectionPoint create(
+          TypeLiteral<?> typeLiteral, Method member, boolean optional, Errors errors) {
         checkForMisplacedBindingAnnotations(member, errors);
-        return new InjectionPoint(typeLiteral, member);
+        return new InjectionPoint(typeLiteral, member, optional);
       }
     };
 
     M[] getMembers(Class<?> type);
-    InjectionPoint create(TypeLiteral<?> typeLiteral, M member, Errors errors);
+    InjectionPoint create(TypeLiteral<?> typeLiteral, M member, boolean optional, Errors errors);
   }
 }

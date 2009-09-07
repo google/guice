@@ -22,6 +22,7 @@ import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Preconditions.checkArgument;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Message;
+import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -63,22 +64,38 @@ public class MoreTypes {
           .build();
 
   /**
-   * Returns an equivalent type that's safe for use in a key. The returned type will be free of
-   * primitive types. Type literals of primitives will return the corresponding wrapper types.
+   * Returns an type that's appropriate for use in a key.
+   *
+   * <p>If the raw type of {@code typeLiteral} is a {@code javax.inject.Provider}, this returns a
+   * {@code com.google.inject.Provider} with the same type parameters.
+   *
+   * <p>If the type is a primitive, the corresponding wrapper type will be returned.
    *
    * @throws ConfigurationException if {@code type} contains a type variable
    */
-  public static <T> TypeLiteral<T> makeKeySafe(TypeLiteral<T> type) {
-    if (!isFullySpecified(type.getType())) {
-      String message = type + " cannot be used as a key; It is not fully specified.";
+  public static <T> TypeLiteral<T> canonicalizeForKey(TypeLiteral<T> typeLiteral) {
+    Type type = typeLiteral.getType();
+    if (!isFullySpecified(type)) {
+      String message = typeLiteral + " cannot be used as a key; It is not fully specified.";
       throw new ConfigurationException(ImmutableSet.of(new Message(message)));
     }
 
+    if (typeLiteral.getRawType() == javax.inject.Provider.class) {
+      ParameterizedType parameterizedType = (ParameterizedType) type;
+
+      // the following casts are generally unsafe, but com.google.inject.Provider extends
+      // javax.inject.Provider and is covariant
+      @SuppressWarnings("unchecked")
+      TypeLiteral<T> guiceProviderType = (TypeLiteral<T>) TypeLiteral.get(
+          Types.providerOf(parameterizedType.getActualTypeArguments()[0]));
+      return guiceProviderType;
+    }
+
     @SuppressWarnings("unchecked")
-    TypeLiteral<T> wrappedPrimitives = (TypeLiteral<T>) PRIMITIVE_TO_WRAPPER.get(type);
+    TypeLiteral<T> wrappedPrimitives = (TypeLiteral<T>) PRIMITIVE_TO_WRAPPER.get(typeLiteral);
     return wrappedPrimitives != null
         ? wrappedPrimitives
-        : type;
+        : typeLiteral;
   }
 
   /**

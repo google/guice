@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Member;
+import javax.inject.Qualifier;
 
 /**
  * Annotation utilities.
@@ -100,10 +101,10 @@ public class Annotations {
     Annotation found = null;
 
     for (Annotation annotation : annotations) {
-      if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
+      Class<? extends Annotation> annotationType = annotation.annotationType();
+      if (isBindingAnnotation(annotationType)) {
         if (found != null) {
-          errors.duplicateBindingAnnotations(member,
-              found.annotationType(), annotation.annotationType());
+          errors.duplicateBindingAnnotations(member, found.annotationType(), annotationType);
         } else {
           found = annotation;
         }
@@ -111,5 +112,13 @@ public class Annotations {
     }
 
     return found;
+  }
+
+  /**
+   * Returns true if annotations of the specified type are binding annotations.
+   */
+  public static boolean isBindingAnnotation(Class<? extends Annotation> annotationType) {
+    return annotationType.isAnnotationPresent(BindingAnnotation.class) 
+          || annotationType.isAnnotationPresent(Qualifier.class);
   }
 }

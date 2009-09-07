@@ -116,14 +116,14 @@ public class Key<T> {
   @SuppressWarnings("unchecked")
   private Key(Type type, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = MoreTypes.makeKeySafe((TypeLiteral<T>) TypeLiteral.get(type));
+    this.typeLiteral = MoreTypes.canonicalizeForKey((TypeLiteral<T>) TypeLiteral.get(type));
     this.hashCode = computeHashCode();
   }
 
   /** Constructs a key from a manually specified type. */
   private Key(TypeLiteral<T> typeLiteral, AnnotationStrategy annotationStrategy) {
     this.annotationStrategy = annotationStrategy;
-    this.typeLiteral = MoreTypes.makeKeySafe(typeLiteral);
+    this.typeLiteral = MoreTypes.canonicalizeForKey(typeLiteral);
     this.hashCode = computeHashCode();
   }
 
@@ -358,9 +358,8 @@ public class Key<T> {
         annotationType.getName());
   }
 
-  private static void ensureIsBindingAnnotation(
-      Class<? extends Annotation> annotationType) {
-    checkArgument(isBindingAnnotation(annotationType),
+  private static void ensureIsBindingAnnotation(Class<? extends Annotation> annotationType) {
+    checkArgument(Annotations.isBindingAnnotation(annotationType),
         "%s is not a binding annotation. Please annotate it with @BindingAnnotation.",
         annotationType.getName());
   }
@@ -477,14 +476,5 @@ public class Key<T> {
     @Override public String toString() {
       return "@" + annotationType.getName();
     }
-  }
-
-  static boolean isBindingAnnotation(Annotation annotation) {
-    return isBindingAnnotation(annotation.annotationType());
-  }
-
-  static boolean isBindingAnnotation(
-      Class<? extends Annotation> annotationType) {
-    return annotationType.isAnnotationPresent(BindingAnnotation.class);
   }
 }
