@@ -19,6 +19,10 @@ package com.googlecode.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Scope;
+import com.google.inject.Scopes;
+import com.google.inject.Stage;
 import com.google.inject.util.Jsr330;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -27,6 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
+import javax.inject.Singleton;
 import junit.framework.TestCase;
 
 public class Jsr330Test extends TestCase {
@@ -35,6 +40,11 @@ public class Jsr330Test extends TestCase {
   private final C c = new C();
   private final D d = new D();
   private final E e = new E();
+
+  @Override protected void setUp() throws Exception {
+    J.nextInstanceId = 0;
+    K.nextInstanceId = 0;
+  }
 
   public void testInject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -88,6 +98,76 @@ public class Jsr330Test extends TestCase {
     assertSame(c, g.cProvider.get());
     assertSame(d, g.dProvider.get());
     assertSame(e, g.eProvider.get());
+  }
+
+  public void testScopeAnnotation() {
+    final TestScope scope = new TestScope();
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(B.class).in(scope);
+        bind(C.class).in(TestScoped.class);
+        bindScope(TestScoped.class, scope);
+      }
+    });
+
+    B b = injector.getInstance(B.class);
+    assertSame(b, injector.getInstance(B.class));
+    assertSame(b, injector.getInstance(B.class));
+
+    C c = injector.getInstance(C.class);
+    assertSame(c, injector.getInstance(C.class));
+    assertSame(c, injector.getInstance(C.class));
+
+    H h = injector.getInstance(H.class);
+    assertSame(h, injector.getInstance(H.class));
+    assertSame(h, injector.getInstance(H.class));
+
+    scope.reset();
+
+    assertNotSame(b, injector.getInstance(B.class));
+    assertNotSame(c, injector.getInstance(C.class));
+    assertNotSame(h, injector.getInstance(H.class));
+  }
+  
+  public void testSingleton() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(B.class).in(Singleton.class);
+      }
+    });
+
+    B b = injector.getInstance(B.class);
+    assertSame(b, injector.getInstance(B.class));
+    assertSame(b, injector.getInstance(B.class));
+
+    J j = injector.getInstance(J.class);
+    assertSame(j, injector.getInstance(J.class));
+    assertSame(j, injector.getInstance(J.class));
+  }
+
+  public void testEagerSingleton() {
+    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
+      protected void configure() {
+        bind(J.class);
+        bind(K.class).in(Singleton.class);
+      }
+    });
+
+    assertEquals(1, J.nextInstanceId);
+    assertEquals(1, K.nextInstanceId);
+  }
+  
+  public void testScopesIsSingleton() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(J.class);
+        bind(K.class).in(Singleton.class);
+      }
+    });
+
+    assertTrue(Scopes.isSingleton(injector.getBinding(J.class)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(K.class)));
   }
 
   static class A {
@@ -158,5 +238,46 @@ public class Jsr330Test extends TestCase {
       this.dProvider = dProvider;
       this.eProvider = eProvider;
     }
+  }
+
+  @javax.inject.Scope @Retention(RUNTIME)
+  @interface TestScoped {}
+
+  static class TestScope implements Scope {
+    private int now = 0;
+
+    public <T> com.google.inject.Provider<T> scope(Key<T> key,
+        final com.google.inject.Provider<T> unscoped) {
+      return new com.google.inject.Provider<T>() {
+        private T value;
+        private int snapshotTime = -1;
+
+        public T get() {
+          if (snapshotTime != now) {
+            value = unscoped.get();
+            snapshotTime = now;
+          }
+          return value;
+        }
+      };
+    }
+
+    public void reset() {
+      now++;
+    }
+  }
+
+  @TestScoped
+  static class H {}
+
+  @Singleton
+  static class J {
+    static int nextInstanceId = 0;
+    int instanceId = nextInstanceId++;
+  }
+
+  static class K {
+    static int nextInstanceId = 0;
+    int instanceId = nextInstanceId++;
   }
 }

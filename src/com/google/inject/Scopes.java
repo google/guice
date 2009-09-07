@@ -118,7 +118,8 @@ public class Scopes {
         }
 
         public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-          return Singleton.class == scopeAnnotation;
+          return scopeAnnotation == Singleton.class
+              || scopeAnnotation == javax.inject.Singleton.class;
         }
 
         public Boolean visitScope(Scope scope) {

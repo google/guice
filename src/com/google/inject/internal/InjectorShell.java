@@ -248,6 +248,7 @@ final class InjectorShell {
       binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
       binder.bind(Stage.class).toInstance(stage);
       binder.bindScope(Singleton.class, SINGLETON);
+      binder.bindScope(javax.inject.Singleton.class, SINGLETON);
     }
   }
 }

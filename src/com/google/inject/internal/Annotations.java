@@ -52,11 +52,12 @@ public class Annotations {
     Class<? extends Annotation> found = null;
 
     for (Annotation annotation : annotations) {
-      if (annotation.annotationType().isAnnotationPresent(ScopeAnnotation.class)) {
+      Class<? extends Annotation> annotationType = annotation.annotationType();
+      if (isScopeAnnotation(annotationType)) {
         if (found != null) {
-          errors.duplicateScopeAnnotations(found, annotation.annotationType());
+          errors.duplicateScopeAnnotations(found, annotationType);
         } else {
-          found = annotation.annotationType();
+          found = annotationType;
         }
       }
     }
@@ -65,7 +66,8 @@ public class Annotations {
   }
 
   public static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
-    return annotationType.isAnnotationPresent(ScopeAnnotation.class);
+    return annotationType.isAnnotationPresent(ScopeAnnotation.class) 
+        || annotationType.isAnnotationPresent(javax.inject.Scope.class);
   }
 
   /**

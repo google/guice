@@ -20,7 +20,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.ScopeAnnotation;
+import com.google.inject.internal.Annotations;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ObjectFactory;
 import com.opensymphony.xwork2.config.ConfigurationException;
@@ -238,11 +238,9 @@ public class Struts2Factory extends ObjectFactory {
   /**
    * Returns true if the given class has a scope annotation.
    */
-  private static boolean hasScope(
-      Class<? extends Interceptor> interceptorClass) {
+  private static boolean hasScope(Class<? extends Interceptor> interceptorClass) {
     for (Annotation annotation : interceptorClass.getAnnotations()) {
-      if (annotation.annotationType()
-          .isAnnotationPresent(ScopeAnnotation.class)) {
+      if (Annotations.isScopeAnnotation(annotation.annotationType())) {
         return true;
       }
     }
