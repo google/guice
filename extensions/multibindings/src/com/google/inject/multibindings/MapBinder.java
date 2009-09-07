@@ -399,7 +399,6 @@ public abstract class MapBinder<K, V> {
         this.entrySetKey = entrySetKey;
       }
 
-      @Override
       public void configure(Binder binder) {
         final ImmutableSet<Dependency<?>> dependencies
             = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetKey));
@@ -433,12 +432,10 @@ public abstract class MapBinder<K, V> {
                 providerMultimap = providerMultimapBuilder.build();
               }
 
-              @Override
               public Map<K, Set<Provider<V>>> get() {
                 return providerMultimap;
               }
 
-              @Override
               public Set<Dependency<?>> getDependencies() {
                 return dependencies;
               }
@@ -448,7 +445,6 @@ public abstract class MapBinder<K, V> {
             binder.getProvider(providerMultimapKey);
         binder.bind(multimapKey).toProvider(new ProviderWithDependencies<Map<K, Set<V>>>() {
 
-          @Override
           public Map<K, Set<V>> get() {
             ImmutableMap.Builder<K, Set<V>> multimapBuilder = ImmutableMap.builder();
             for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
@@ -465,7 +461,6 @@ public abstract class MapBinder<K, V> {
             return multimapBuilder.build();
           }
 
-          @Override
           public Set<Dependency<?>> getDependencies() {
             return dependencies;
           }
