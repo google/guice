@@ -17,6 +17,8 @@
 package com.googlecode.guice;
 
 import com.google.inject.AbstractModule;
+import static com.google.inject.Asserts.assertContains;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -170,6 +172,62 @@ public class Jsr330Test extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(K.class)));
   }
 
+  public void testInjectingFinalFieldsIsForbidden() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(L.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Injected field " + L.class.getName() + ".b cannot be final.");
+    }
+  }
+
+  public void testInjectingAbstractMethodsIsForbidden() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(M.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Injected method " + AbstractM.class.getName() + ".setB() cannot be abstract.");
+    }
+  }
+
+  public void testInjectingMethodsWithTypeParametersIsForbidden() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(N.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "1) Injected method " + N.class.getName()
+          + ".setB() cannot declare type parameters of its own.");
+    }
+  }
+
+  public void testInjectingMethodsWithNonVoidReturnTypes() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          bind(P.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) Injected method " + P.class.getName() + ".setB() must return void.");
+    }
+  }
+
   static class A {
     final B b;
     @Inject C c;
@@ -279,5 +337,27 @@ public class Jsr330Test extends TestCase {
   static class K {
     static int nextInstanceId = 0;
     int instanceId = nextInstanceId++;
+  }
+
+  static class L {
+    @Inject final B b = null;
+  }
+
+  static abstract class AbstractM {
+    @Inject abstract void setB(B b);
+  }
+
+  static class M extends AbstractM {
+    void setB(B b) {}
+  }
+
+  static class N {
+    @Inject <T> void setB(B b) {}
+  }
+
+  static class P {
+    @Inject B setB(B b) {
+      return b;
+    }
   }
 }

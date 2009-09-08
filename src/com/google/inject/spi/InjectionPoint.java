@@ -407,14 +407,17 @@ public final class InjectionPoint {
       }
 
       boolean optional;
-      Inject guiceInject = member.getAnnotation(Inject.class);
-      if (guiceInject == null) {
-        javax.inject.Inject javaxInject = member.getAnnotation(javax.inject.Inject.class);
-        if (javaxInject == null) {
+      javax.inject.Inject javaxInject = member.getAnnotation(javax.inject.Inject.class);
+      if (javaxInject != null) {
+        optional = javaxInject.optional();
+        if (!factory.checkJsr330Compliance(member, errors)) {
+          continue; // don't bother to inject noncompliant members
+        }
+      } else {
+        Inject guiceInject = member.getAnnotation(Inject.class);
+        if (guiceInject == null) {
           continue;
         }
-        optional = javaxInject.optional();
-      } else {
         optional = guiceInject.optional();
       }
 
@@ -441,6 +444,13 @@ public final class InjectionPoint {
           TypeLiteral<?> typeLiteral, Field member, boolean optional, Errors errors) {
         return new InjectionPoint(typeLiteral, member, optional);
       }
+      public boolean checkJsr330Compliance(Field member, Errors errors) {
+        if (Modifier.isFinal(member.getModifiers())) {
+          errors.cannotInjectFinalField(member);
+          return false;
+        }
+        return true;
+      }
     };
 
     Factory<Method> METHODS = new Factory<Method>() {
@@ -452,9 +462,32 @@ public final class InjectionPoint {
         checkForMisplacedBindingAnnotations(member, errors);
         return new InjectionPoint(typeLiteral, member, optional);
       }
+      public boolean checkJsr330Compliance(Method member, Errors errors) {
+        boolean result = true;
+        if (Modifier.isAbstract(member.getModifiers())) {
+          errors.cannotInjectAbstractMethod(member);
+          result = false;
+        }
+        if (member.getReturnType() != void.class) {
+          errors.cannotInjectNonVoidMethod(member);
+          result = false;
+        }
+        if (member.getTypeParameters().length > 0) {
+          errors.cannotInjectMethodWithTypeParameters(member);
+          result = false;
+        }
+        return result;
+      }
     };
 
     M[] getMembers(Class<?> type);
     InjectionPoint create(TypeLiteral<?> typeLiteral, M member, boolean optional, Errors errors);
+
+    /**
+     * Checks if the member conforms to JSR 330's tight constraints.
+     *
+     * @return true if the member is conformant.
+     */
+    boolean checkJsr330Compliance(M member, Errors errors);
   }
 }

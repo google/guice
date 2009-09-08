@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
@@ -251,6 +252,22 @@ public final class Errors implements Serializable {
       Class<? extends Annotation> a, Class<? extends Annotation> b) {
     return addMessage("%s has more than one annotation annotated with @BindingAnnotation: "
         + "%s and %s", member, a, b);
+  }
+
+  public Errors cannotInjectFinalField(Field field) {
+    return addMessage("Injected field %s cannot be final.", field);
+  }
+
+  public Errors cannotInjectAbstractMethod(Method method) {
+    return addMessage("Injected method %s cannot be abstract.", method);
+  }
+
+  public Errors cannotInjectNonVoidMethod(Method method) {
+    return addMessage("Injected method %s must return void.", method);
+  }
+
+  public Errors cannotInjectMethodWithTypeParameters(Method method) {
+    return addMessage("Injected method %s cannot declare type parameters of its own.", method);
   }
 
   public Errors duplicateScopeAnnotations(
