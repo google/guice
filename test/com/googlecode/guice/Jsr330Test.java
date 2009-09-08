@@ -251,6 +251,25 @@ public class Jsr330Test extends TestCase {
     injector.getInstance(Key.get(B.class, Jsr330.named("3")));
   }
 
+  public void testGuicify330Provider() {
+    Provider<String> jsr330Provider = new Provider<String>() {
+      public String get() {
+        return "A";
+      }
+
+      @Override public String toString() {
+        return "jsr330Provider";
+      }
+    };
+
+    com.google.inject.Provider<String> guicified = Jsr330.guicify(jsr330Provider);
+    assertEquals("guicified(jsr330Provider)", guicified.toString());
+    assertEquals("A", guicified.get());
+
+    // when you guicify the Guice-friendly, it's a no-op
+    assertSame(guicified, Jsr330.guicify(guicified));
+  }
+
   static class A {
     final B b;
     @Inject C c;

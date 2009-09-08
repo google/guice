@@ -20,6 +20,7 @@ import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * Utility methods for use with <a href="http://code.google.com/p/atinject/">JSR
@@ -33,6 +34,28 @@ public class Jsr330 {
 
   public static Named named(String name) {
     return new NamedImpl(name);
+  }
+
+  /**
+   * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
+   * JSR-330 {@code javax.inject.Provider}. The converse method is unnecessary,
+   * since Guice providers directly implement the JSR-330 interface.
+   */
+  public static <T> com.google.inject.Provider<T> guicify(Provider<T> provider) {
+    if (provider instanceof com.google.inject.Provider) {
+      return (com.google.inject.Provider<T>) provider;
+    }
+
+    final Provider<T> delegate = checkNotNull(provider, "provider");
+    return new com.google.inject.Provider<T>() {
+      public T get() {
+        return delegate.get();
+      }
+
+      @Override public String toString() {
+        return "guicified(" + delegate + ")";
+      }
+    };
   }
 
   // TODO: support binding properties like Names does?
