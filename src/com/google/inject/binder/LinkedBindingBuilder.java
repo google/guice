@@ -61,19 +61,19 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   ScopedBindingBuilder toProvider(
-      Class<? extends Provider<? extends T>> providerType);
+      Class<? extends javax.inject.Provider<? extends T>> providerType);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   ScopedBindingBuilder toProvider(
-      TypeLiteral<? extends Provider<? extends T>> providerType);
+      TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.
    */
   ScopedBindingBuilder toProvider(
-      Key<? extends Provider<? extends T>> providerKey);
+      Key<? extends javax.inject.Provider<? extends T>> providerKey);
 
   /**
    * See the EDSL examples at {@link com.google.inject.Binder}.

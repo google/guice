@@ -112,15 +112,18 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
 
-  public BindingBuilder<T> toProvider(Class<? extends Provider<? extends T>> providerType) {
+  public BindingBuilder<T> toProvider(
+      Class<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
-  public BindingBuilder<T> toProvider(TypeLiteral<? extends Provider<? extends T>> providerType) {
+  public BindingBuilder<T> toProvider(
+      TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
     return toProvider(Key.get(providerType));
   }
 
-  public BindingBuilder<T> toProvider(Key<? extends Provider<? extends T>> providerKey) {
+  public BindingBuilder<T> toProvider(
+      Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     checkNotNull(providerKey, "providerKey");
     checkNotTargetted();
 

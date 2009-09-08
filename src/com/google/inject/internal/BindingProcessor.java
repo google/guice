@@ -125,7 +125,7 @@ final class BindingProcessor extends AbstractProcessor {
       }
 
       public Void visit(ProviderKeyBinding<? extends T> binding) {
-        Key<? extends Provider<? extends T>> providerKey = binding.getProviderKey();
+        Key<? extends javax.inject.Provider<? extends T>> providerKey = binding.getProviderKey();
         BoundProviderFactory<T> boundProviderFactory
             = new BoundProviderFactory<T>(injector, providerKey, source);
         creationListeners.add(boundProviderFactory);

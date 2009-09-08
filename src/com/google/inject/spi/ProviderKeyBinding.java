@@ -18,7 +18,6 @@ package com.google.inject.spi;
 
 import com.google.inject.Binding;
 import com.google.inject.Key;
-import com.google.inject.Provider;
 
 /**
  * A binding to a provider key. To resolve injections, the provider key is first resolved, then that
@@ -34,6 +33,6 @@ public interface ProviderKeyBinding<T> extends Binding<T> {
    * injector using {@link com.google.inject.Injector#getBinding(Key)
    * Injector.getBinding(providerKey)}
    */
-  Key<? extends Provider<? extends T>> getProviderKey();
+  Key<? extends javax.inject.Provider<? extends T>> getProviderKey();
 
 }

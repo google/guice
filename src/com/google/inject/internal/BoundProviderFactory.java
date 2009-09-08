@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.Provider;
 import com.google.inject.internal.BindingProcessor.CreationListener;
 import com.google.inject.spi.Dependency;
 
@@ -27,13 +26,13 @@ import com.google.inject.spi.Dependency;
 final class BoundProviderFactory<T> implements InternalFactory<T>, CreationListener {
 
   private final InjectorImpl injector;
-  final Key<? extends Provider<? extends T>> providerKey;
+  final Key<? extends javax.inject.Provider<? extends T>> providerKey;
   final Object source;
-  private InternalFactory<? extends Provider<? extends T>> providerFactory;
+  private InternalFactory<? extends javax.inject.Provider<? extends T>> providerFactory;
 
   BoundProviderFactory(
       InjectorImpl injector,
-      Key<? extends Provider<? extends T>> providerKey,
+      Key<? extends javax.inject.Provider<? extends T>> providerKey,
       Object source) {
     this.injector = injector;
     this.providerKey = providerKey;
@@ -51,7 +50,7 @@ final class BoundProviderFactory<T> implements InternalFactory<T>, CreationListe
   public T get(Errors errors, InternalContext context, Dependency<?> dependency)
       throws ErrorsException {
     errors = errors.withSource(providerKey);
-    Provider<? extends T> provider = providerFactory.get(errors, context, dependency);
+    javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency);
     try {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch(RuntimeException userException) {
