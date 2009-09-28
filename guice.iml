@@ -78,11 +78,10 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/build" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="multibindings" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/atinject.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/javax.inject.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

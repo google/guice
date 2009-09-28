@@ -216,17 +216,11 @@ public class Jsr330Test extends TestCase {
   }
 
   public void testInjectingMethodsWithNonVoidReturnTypes() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(P.class);
-        }
-      });
-      fail();
-    } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "1) Injected method " + P.class.getName() + ".setB() must return void.");
-    }
+    Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(P.class);
+      }
+    });
   }
 
   /**
