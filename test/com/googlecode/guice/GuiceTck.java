@@ -18,28 +18,25 @@ package com.googlecode.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.util.Jsr330;
-import com.googlecode.atinject.Candidate;
-import com.googlecode.atinject.Tck;
-import com.googlecode.atinject.auto.Car;
-import com.googlecode.atinject.auto.Convertible;
-import com.googlecode.atinject.auto.Drivers;
-import com.googlecode.atinject.auto.DriversSeat;
-import com.googlecode.atinject.auto.Engine;
-import com.googlecode.atinject.auto.FuelTank;
-import com.googlecode.atinject.auto.Seat;
-import com.googlecode.atinject.auto.Tire;
-import com.googlecode.atinject.auto.V8Engine;
-import com.googlecode.atinject.auto.accessories.Cupholder;
-import com.googlecode.atinject.auto.accessories.SpareTire;
+import junit.framework.Test;
+import org.atinject.tck.Tck;
+import org.atinject.tck.auto.Car;
+import org.atinject.tck.auto.Convertible;
+import org.atinject.tck.auto.Drivers;
+import org.atinject.tck.auto.DriversSeat;
+import org.atinject.tck.auto.Engine;
+import org.atinject.tck.auto.FuelTank;
+import org.atinject.tck.auto.Seat;
+import org.atinject.tck.auto.Tire;
+import org.atinject.tck.auto.V8Engine;
+import org.atinject.tck.auto.accessories.Cupholder;
+import org.atinject.tck.auto.accessories.SpareTire;
 
-public class GuiceCandidate implements Candidate {
+public class GuiceTck extends Tck {
 
-  private final Injector injector;
-
-  public GuiceCandidate() {
-    this.injector = Guice.createInjector(new AbstractModule() {
+  protected Car getCar() {
+    return Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(Car.class).to(Convertible.class);
         bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
@@ -49,15 +46,10 @@ public class GuiceCandidate implements Candidate {
         bind(Tire.class);
         bind(FuelTank.class);
       }
-    });
+    }).getInstance(Car.class);
   }
 
-  public Car getCar() {
-    return injector.getInstance(Car.class);
-  }
-
-  public static void main(String[] args) throws IllegalAccessException,
-      InstantiationException, ClassNotFoundException {
-    Tck.main(new String[] { GuiceCandidate.class.getName() });
+  public static Test suite() {
+    return new GuiceTck();
   }
 }
