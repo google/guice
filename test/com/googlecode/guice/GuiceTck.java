@@ -33,10 +33,10 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.Cupholder;
 import org.atinject.tck.auto.accessories.SpareTire;
 
-public class GuiceTck extends Tck {
+public class GuiceTck {
 
-  protected Car getCar() {
-    return Guice.createInjector(new AbstractModule() {
+  public static Test suite() {
+    return Tck.testsFor(Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(Car.class).to(Convertible.class);
         bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
@@ -46,10 +46,6 @@ public class GuiceTck extends Tck {
         bind(Tire.class);
         bind(FuelTank.class);
       }
-    }).getInstance(Car.class);
-  }
-
-  public static Test suite() {
-    return new GuiceTck();
+    }).getInstance(Car.class));
   }
 }
