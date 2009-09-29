@@ -438,6 +438,9 @@ public final class InjectionPoint {
 
   private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
       boolean statics, Errors errors) {
+    // TODO: Turn InjectableMember into an identity wrapper. Use it as the key in
+    // injectableMembers and the values in bySignature. This will be a lot faster than
+    // hashing the Method objects.
     LinkedHashMap<Member, InjectableMember> injectableMembers
         = new LinkedHashMap<Member, InjectableMember>();
     HashMap<Signature, List<Method>> bySignature = null;
