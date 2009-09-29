@@ -503,6 +503,9 @@ public final class InjectionPoint {
     Method lastMethod;
     Signature lastSignature;
 
+    /**
+     * Removes a method overridden by the given method, if present.
+     */
     void removeIfOverriddenBy(Method method) {
       if (position == Position.TOP) {
         // If we're at the top of the hierarchy, there's nothing to override.
@@ -539,6 +542,10 @@ public final class InjectionPoint {
       }
     }
 
+    /**
+     * Adds the given method to the list of injection points. Keeps track of it in this index
+     * in case it gets overridden.
+     */
     void add(InjectableMethod injectableMethod) {
       injectableMembers.add(injectableMethod);
       if (position == Position.BOTTOM
