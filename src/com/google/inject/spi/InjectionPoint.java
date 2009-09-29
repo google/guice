@@ -36,16 +36,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 /**
  * A constructor, field or method that can receive injections. Typically this is a member with the
  * {@literal @}{@link Inject} annotation. For non-private, no argument constructors, the member may
- * omit the annotation. 
+ * omit the annotation.
  *
  * @author crazybob@google.com (Bob Lee)
  * @since 2.0
@@ -128,6 +131,7 @@ public final class InjectionPoint {
    * Returns the injected constructor, field, or method.
    */
   public Member getMember() {
+    // TODO: Don't expose the original member (which probably has setAccessible(true)).
     return member;
   }
 
@@ -293,13 +297,9 @@ public final class InjectionPoint {
    *      of the valid injection points.
    */
   public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral type) {
-    List<InjectionPoint> sink = Lists.newArrayList();
     Errors errors = new Errors();
 
-    addInjectionPoints(type, Factory.FIELDS, true, sink, errors);
-    addInjectionPoints(type, Factory.METHODS, true, sink, errors);
-
-    ImmutableSet<InjectionPoint> result = ImmutableSet.copyOf(sink);
+    Set<InjectionPoint> result = getInjectionPoints(type, true, errors);
     if (errors.hasErrors()) {
       throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
     }
@@ -333,14 +333,8 @@ public final class InjectionPoint {
    *      of the valid injection points.
    */
   public static Set<InjectionPoint> forInstanceMethodsAndFields(TypeLiteral<?> type) {
-    List<InjectionPoint> sink = Lists.newArrayList();
     Errors errors = new Errors();
-
-    // TODO (crazybob): Filter out overridden members.
-    addInjectionPoints(type, Factory.FIELDS, false, sink, errors);
-    addInjectionPoints(type, Factory.METHODS, false, sink, errors);
-
-    ImmutableSet<InjectionPoint> result = ImmutableSet.copyOf(sink);
+    Set<InjectionPoint> result = getInjectionPoints(type, false, errors);
     if (errors.hasErrors()) {
       throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
     }
@@ -362,11 +356,11 @@ public final class InjectionPoint {
     return forInstanceMethodsAndFields(TypeLiteral.get(type));
   }
 
-  private static void checkForMisplacedBindingAnnotations(Member member, Errors errors) {
+  private static boolean checkForMisplacedBindingAnnotations(Member member, Errors errors) {
     Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
         errors, member, ((AnnotatedElement) member).getAnnotations());
     if (misplacedBindingAnnotation == null) {
-      return;
+      return false;
     }
 
     // don't warn about misplaced binding annotations on methods when there's a field with the same
@@ -374,116 +368,254 @@ public final class InjectionPoint {
     if (member instanceof Method) {
       try {
         if (member.getDeclaringClass().getDeclaredField(member.getName()) != null) {
-          return;
+          return false;
         }
       } catch (NoSuchFieldException ignore) {
       }
     }
 
     errors.misplacedBindingAnnotation(member, misplacedBindingAnnotation);
+    return true;
   }
 
-  private static <M extends Member & AnnotatedElement> void addInjectionPoints(TypeLiteral<?> type,
-      Factory<M> factory, boolean statics, Collection<InjectionPoint> injectionPoints,
-      Errors errors) {
-    if (type.getType() == Object.class) {
-      return;
+  static abstract class InjectableMember {
+    final TypeLiteral<?> declaringType;
+    final boolean injectable;
+    final boolean optional;
+    final boolean jsr330;
+
+    InjectableMember(TypeLiteral<?> declaringType, AnnotatedElement member) {
+      this.declaringType = declaringType;
+
+      javax.inject.Inject jsr330Inject = member.getAnnotation(javax.inject.Inject.class);
+      if (jsr330Inject != null) {
+        injectable = true;
+        optional = false;
+        jsr330 = true;
+        return;
+      }
+
+      jsr330 = false;
+
+      Inject inject = member.getAnnotation(Inject.class);
+      if (inject != null) {
+        injectable = true;
+        optional = inject.optional();
+        return;
+      }
+
+      injectable = false;
+      optional = false;
     }
 
-    // Add injectors for superclass first.
-    TypeLiteral<?> superType = type.getSupertype(type.getRawType().getSuperclass());
-    addInjectionPoints(superType, factory, statics, injectionPoints, errors);
-
-    // Add injectors for all members next
-    addInjectorsForMembers(type, factory, statics, injectionPoints, errors);
+    abstract InjectionPoint toInjectionPoint(Errors errors);
   }
 
-  private static <M extends Member & AnnotatedElement> void addInjectorsForMembers(
-      TypeLiteral<?> typeLiteral, Factory<M> factory, boolean statics,
-      Collection<InjectionPoint> injectionPoints, Errors errors) {
-    for (M member : factory.getMembers(getRawType(typeLiteral.getType()))) {
-      if (isStatic(member) != statics) {
-        continue;
+  static class InjectableField extends InjectableMember {
+    final Field field;
+    InjectableField(TypeLiteral<?> declaringType, Field field) {
+      super(declaringType, field);
+      this.field = field;
+    }
+
+    InjectionPoint toInjectionPoint(Errors errors) {
+      return new InjectionPoint(declaringType, field, optional);
+    }
+  }
+
+  static class InjectableMethod extends InjectableMember {
+    final Method method;
+    InjectableMethod(TypeLiteral<?> declaringType, Method method) {
+      super(declaringType, method);
+      this.method = method;
+    }
+
+    InjectionPoint toInjectionPoint(Errors errors) {
+      checkForMisplacedBindingAnnotations(method, errors);
+      return new InjectionPoint(declaringType, method, optional);
+    }
+  }
+
+  private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
+      boolean statics, Errors errors) {
+    LinkedHashMap<Member, InjectableMember> injectableMembers
+        = new LinkedHashMap<Member, InjectableMember>();
+    HashMap<Signature, List<Method>> bySignature = null;
+
+    for (TypeLiteral<?> current : hierarchyFor(type)) {
+      for (Field field : current.getRawType().getDeclaredFields()) {
+        if (Modifier.isStatic(field.getModifiers()) == statics) {
+          InjectableField injectableField = new InjectableField(current, field);
+          if (injectableField.injectable) {
+            if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
+              errors.cannotInjectFinalField(field);
+              continue;
+            }
+            injectableMembers.put(field, injectableField);
+          }
+        }
       }
 
-      boolean optional;
-      javax.inject.Inject javaxInject = member.getAnnotation(javax.inject.Inject.class);
-      if (javaxInject != null) {
-        optional = false;
-        if (!factory.checkJsr330Compliance(member, errors)) {
-          continue; // don't bother to inject noncompliant members
-        }
-      } else {
-        Inject guiceInject = member.getAnnotation(Inject.class);
-        if (guiceInject == null) {
-          continue;
-        }
-        optional = guiceInject.optional();
-      }
+      for (Method method : current.getRawType().getDeclaredMethods()) {
+        boolean isStatic = Modifier.isStatic(method.getModifiers());
+        if (isStatic == statics) {
+          InjectableMethod injectableMethod = new InjectableMethod(current, method);
 
+          if (injectableMethod.injectable) {
+            boolean result = true;
+            if (injectableMethod.jsr330) {
+              if (Modifier.isAbstract(method.getModifiers())) {
+                errors.cannotInjectAbstractMethod(method);
+                result = false;
+              }
+              if (method.getTypeParameters().length > 0) {
+                errors.cannotInjectMethodWithTypeParameters(method);
+                result = false;
+              }
+            }
+            if (!result) {
+              continue;
+            }
+            if (isStatic && statics) {
+              injectableMembers.put(method, injectableMethod);
+            }
+          }
+
+          if (!isStatic) {
+            // Remove overridden method if present.
+            List<Method> possibleOverrides = null;
+            Signature signature = new Signature(method);
+            if (bySignature == null) {
+              // Lazily initialize the bySignature map.
+              bySignature = new HashMap<Signature, List<Method>>();
+            } else {
+              possibleOverrides = bySignature.get(signature);
+              if (possibleOverrides != null) {
+                Method overridden = removeOverriddenMethod(method, possibleOverrides);
+                if (overridden != null) {
+                  injectableMembers.remove(overridden);
+                }
+              }
+            }
+
+            if (injectableMethod.injectable) {
+              // Keep track of this method in case it gets overridden.
+              if (possibleOverrides == null) {
+                possibleOverrides = new ArrayList<Method>();
+                bySignature.put(signature, possibleOverrides);
+              }
+              possibleOverrides.add(method);
+              injectableMembers.put(method, injectableMethod);
+            }
+          }
+        }
+      }
+    }
+
+    if (injectableMembers.isEmpty()) {
+      return Collections.emptySet();
+    }
+
+    ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
+    for (InjectableMember injectableMember : injectableMembers.values()) {
       try {
-        injectionPoints.add(factory.create(typeLiteral, member, optional, errors));
+        builder.add(injectableMember.toInjectionPoint(errors));
       } catch (ConfigurationException ignorable) {
-        if (!optional) {
+        if (!injectableMember.optional) {
           errors.merge(ignorable.getErrorMessages());
         }
       }
     }
+    return builder.build();
   }
 
-  private static boolean isStatic(Member member) {
-    return Modifier.isStatic(member.getModifiers());
+  private static List<TypeLiteral<?>> hierarchyFor(TypeLiteral<?> type) {
+    // Construct type hierarchy from Object.class down.
+    List<TypeLiteral<?>> hierarchy = new ArrayList<TypeLiteral<?>>();
+    TypeLiteral<?> current = type;
+    while (current.getRawType() != Object.class) {
+      hierarchy.add(current);
+      current = current.getSupertype(current.getRawType().getSuperclass());
+    }
+    Collections.reverse(hierarchy);
+    return hierarchy;
   }
 
-  private interface Factory<M extends Member & AnnotatedElement> {
-    Factory<Field> FIELDS = new Factory<Field>() {
-      public Field[] getMembers(Class<?> type) {
-        return type.getDeclaredFields();
+  private static Method removeOverriddenMethod(Method method, List<Method> possibleOverrides) {
+    for (Iterator<Method> iterator = possibleOverrides.iterator(); iterator.hasNext();) {
+      Method possibleOverride = iterator.next();
+      if (overrides(method, possibleOverride)) {
+        iterator.remove();
+        return possibleOverride;
       }
-      public InjectionPoint create(
-          TypeLiteral<?> typeLiteral, Field member, boolean optional, Errors errors) {
-        return new InjectionPoint(typeLiteral, member, optional);
+    }
+    return null;
+  }
+
+  /**
+   * Returns true if a overrides b. Assumes signatures of a and b are the same and a's declaring
+   * class is a subclass of b's declaring class.
+   */
+  private static boolean overrides(Method a, Method b) {
+    // See JLS section 8.4.8.1
+    // TODO: Do I need to worry about the visibility of the declaring class? I don't think so...
+    int modifiers = b.getModifiers();
+    if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
+      return true;
+    }
+    if (Modifier.isPrivate(modifiers)) {
+      return false;
+    }
+    // b must be package-private
+    return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
+  }
+
+  /**
+   * A method signature. Used to handle method overridding.
+   */
+  static class Signature {
+
+    final String name;
+    final Class[] parameterTypes;
+    final int hash;
+
+    Signature(Method method) {
+      this.name = method.getName();
+      this.parameterTypes = method.getParameterTypes();
+
+      int h = name.hashCode();
+      h = h * 31 + parameterTypes.length;
+      for (Class parameterType : parameterTypes) {
+        h = h * 31 + parameterType.hashCode();
       }
-      public boolean checkJsr330Compliance(Field member, Errors errors) {
-        if (Modifier.isFinal(member.getModifiers())) {
-          errors.cannotInjectFinalField(member);
+      this.hash = h;
+    }
+
+    @Override public int hashCode() {
+      return this.hash;
+    }
+
+    @Override public boolean equals(Object o) {
+      if (!(o instanceof Signature)) {
+        return false;
+      }
+
+      Signature other = (Signature) o;
+      if (!name.equals(other.name)) {
+        return false;
+      }
+
+      if (parameterTypes.length != other.parameterTypes.length) {
+        return false;
+      }
+
+      for (int i = 0; i < parameterTypes.length; i++) {
+        if (parameterTypes[i] != other.parameterTypes[i]) {
           return false;
         }
-        return true;
       }
-    };
 
-    Factory<Method> METHODS = new Factory<Method>() {
-      public Method[] getMembers(Class<?> type) {
-        return type.getDeclaredMethods();
-      }
-      public InjectionPoint create(
-          TypeLiteral<?> typeLiteral, Method member, boolean optional, Errors errors) {
-        checkForMisplacedBindingAnnotations(member, errors);
-        return new InjectionPoint(typeLiteral, member, optional);
-      }
-      public boolean checkJsr330Compliance(Method member, Errors errors) {
-        boolean result = true;
-        if (Modifier.isAbstract(member.getModifiers())) {
-          errors.cannotInjectAbstractMethod(member);
-          result = false;
-        }
-        if (member.getTypeParameters().length > 0) {
-          errors.cannotInjectMethodWithTypeParameters(member);
-          result = false;
-        }
-        return result;
-      }
-    };
-
-    M[] getMembers(Class<?> type);
-    InjectionPoint create(TypeLiteral<?> typeLiteral, M member, boolean optional, Errors errors);
-
-    /**
-     * Checks if the member conforms to JSR 330's tight constraints.
-     *
-     * @return true if the member is conformant.
-     */
-    boolean checkJsr330Compliance(M member, Errors errors);
+      return true;
+    }
   }
 }
