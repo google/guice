@@ -38,6 +38,7 @@ import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
 import com.googlecode.guice.BytecodeGenTest;
 import com.googlecode.guice.Jsr330Test;
+import com.googlecode.guice.GuiceTck;
 import java.util.Enumeration;
 import java.util.Set;
 import junit.framework.Test;
@@ -58,6 +59,7 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
+    suite.addTestSuite(GuiceTck.class);
     suite.addTestSuite(BinderTest.class);
     suite.addTest(BinderTestSuite.suite());
     suite.addTestSuite(BindingAnnotationTest.class);
