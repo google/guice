@@ -39,11 +39,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 
 /**
  * A constructor, field or method that can receive injections. Typically this is a member with the
@@ -356,6 +356,9 @@ public final class InjectionPoint {
     return forInstanceMethodsAndFields(TypeLiteral.get(type));
   }
 
+  /**
+   * Returns true if the binding annotation is in the wrong place.
+   */
   private static boolean checkForMisplacedBindingAnnotations(Member member, Errors errors) {
     Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
         errors, member, ((AnnotatedElement) member).getAnnotations());
@@ -380,135 +383,230 @@ public final class InjectionPoint {
 
   static abstract class InjectableMember {
     final TypeLiteral<?> declaringType;
-    final boolean injectable;
     final boolean optional;
     final boolean jsr330;
+    InjectableMember previous;
+    InjectableMember next;
 
-    InjectableMember(TypeLiteral<?> declaringType, AnnotatedElement member) {
+    InjectableMember(TypeLiteral<?> declaringType, Annotation atInject) {
       this.declaringType = declaringType;
 
-      javax.inject.Inject jsr330Inject = member.getAnnotation(javax.inject.Inject.class);
-      if (jsr330Inject != null) {
-        injectable = true;
+      if (atInject.annotationType() == javax.inject.Inject.class) {
         optional = false;
         jsr330 = true;
         return;
       }
 
       jsr330 = false;
-
-      Inject inject = member.getAnnotation(Inject.class);
-      if (inject != null) {
-        injectable = true;
-        optional = inject.optional();
-        return;
-      }
-
-      injectable = false;
-      optional = false;
+      optional = ((Inject) atInject).optional();
     }
 
-    abstract InjectionPoint toInjectionPoint(Errors errors);
+    abstract InjectionPoint toInjectionPoint();
   }
 
   static class InjectableField extends InjectableMember {
     final Field field;
-    InjectableField(TypeLiteral<?> declaringType, Field field) {
-      super(declaringType, field);
+    InjectableField(TypeLiteral<?> declaringType, Field field,
+        Annotation atInject) {
+      super(declaringType, atInject);
       this.field = field;
     }
 
-    InjectionPoint toInjectionPoint(Errors errors) {
+    InjectionPoint toInjectionPoint() {
       return new InjectionPoint(declaringType, field, optional);
     }
   }
 
   static class InjectableMethod extends InjectableMember {
     final Method method;
-    InjectableMethod(TypeLiteral<?> declaringType, Method method) {
-      super(declaringType, method);
+    InjectableMethod(TypeLiteral<?> declaringType, Method method,
+        Annotation atInject) {
+      super(declaringType, atInject);
       this.method = method;
     }
 
-    InjectionPoint toInjectionPoint(Errors errors) {
-      checkForMisplacedBindingAnnotations(method, errors);
+    InjectionPoint toInjectionPoint() {
       return new InjectionPoint(declaringType, method, optional);
+    }
+
+    public boolean isFinal() {
+      return Modifier.isFinal(method.getModifiers());
+    }
+  }
+
+  static Annotation getAtInject(AnnotatedElement member) {
+    Annotation a = member.getAnnotation(javax.inject.Inject.class);
+    return a == null ? member.getAnnotation(Inject.class) : a;
+  }
+
+  /**
+   * Linked list of injectable members.
+   */
+  static class InjectableMembers {
+    InjectableMember head;
+    InjectableMember tail;
+
+    void add(InjectableMember member) {
+      if (head == null) {
+        head = tail = member;
+      } else {
+        member.previous = tail;
+        tail.next = member;
+        tail = member;
+      }
+    }
+
+    void remove(InjectableMember member) {
+      if (member.previous != null) {
+        member.previous.next = member.next;
+      }
+      if (member.next != null) {
+        member.next.previous = member.previous;
+      }
+      if (head == member) {
+        head = member.next;
+      }
+      if (tail == member) {
+        tail = member.previous;
+      }
+    }
+
+    boolean isEmpty() {
+      return head == null;
+    }
+  }
+
+  /** Position in type hierarchy. */
+  enum Position {
+    TOP, // No need to check for overridden methods
+    MIDDLE,
+    BOTTOM // Methods won't be overridden
+  }
+
+  static class OverrideIndex {
+    final InjectableMembers injectableMembers;
+    Map<Signature, List<InjectableMethod>> bySignature;
+    Position position = Position.TOP;
+    boolean hasMethods = false;
+
+    OverrideIndex(InjectableMembers injectableMembers) {
+      this.injectableMembers = injectableMembers;
+    }
+
+    /* Caches the signature for the last method. */
+    Method lastMethod;
+    Signature lastSignature;
+
+    void removeIfOverriddenBy(Method method) {
+      if (!hasMethods || position == Position.TOP) {
+        // There's nothing to remove.
+        return;
+      }
+
+      if (bySignature == null) {
+        // We encountered a method in a subclass. Time to index the
+        // methods in the parent class.
+        bySignature = new HashMap<Signature, List<InjectableMethod>>();
+        for (InjectableMember member = injectableMembers.head; member != null;
+            member = member.next) {
+          if (!(member instanceof InjectableMethod)) continue;
+          InjectableMethod im = (InjectableMethod) member;
+          if (im.isFinal()) continue;
+          List<InjectableMethod> methods = new ArrayList<InjectableMethod>();
+          methods.add(im);
+          bySignature.put(new Signature(im.method), methods);
+        }
+      }
+
+      lastMethod = method;
+      Signature signature = lastSignature = new Signature(method);
+      List<InjectableMethod> methods = bySignature.get(signature);
+      if (methods != null) {
+        for (Iterator<InjectableMethod> iterator = methods.iterator();
+            iterator.hasNext();) {
+          InjectableMethod possiblyOverridden = iterator.next();
+          if (overrides(method, possiblyOverridden.method)) {
+            iterator.remove();
+            injectableMembers.remove(possiblyOverridden);
+          }
+        }
+      }
+    }
+
+    void add(InjectableMethod injectableMethod) {
+      hasMethods = true;
+      injectableMembers.add(injectableMethod);
+      if (position == Position.BOTTOM
+          || injectableMethod.isFinal()) {
+        // This method can't be overridden, so there's no need to index it.
+        return;
+      }
+      if (bySignature != null) {
+        // Try to reuse the signature we created during removal
+        Signature signature = injectableMethod.method == lastMethod
+            ? lastSignature : new Signature(injectableMethod.method);
+        List<InjectableMethod> methods = bySignature.get(signature);
+        if (methods == null) {
+          methods = new ArrayList<InjectableMethod>();
+          bySignature.put(signature, methods);
+        }
+        methods.add(injectableMethod);
+      }
     }
   }
 
   private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
       boolean statics, Errors errors) {
-    // TODO: Turn InjectableMember into an identity wrapper. Use it as the key in
-    // injectableMembers and the values in bySignature. This will be a lot faster than
-    // hashing the Method objects.
-    LinkedHashMap<Member, InjectableMember> injectableMembers
-        = new LinkedHashMap<Member, InjectableMember>();
-    HashMap<Signature, List<Method>> bySignature = null;
+    InjectableMembers injectableMembers = new InjectableMembers();
+    OverrideIndex overrideIndex = null;
 
-    for (TypeLiteral<?> current : hierarchyFor(type)) {
+    List<TypeLiteral<?>> hierarchy = hierarchyFor(type);
+    int topIndex = hierarchy.size() - 1;
+    for (int i = topIndex; i >= 0; i--) {
+      if (overrideIndex != null && i < topIndex) {
+        // Knowing the position within the hierarchy helps us make optimizations.
+        if (i == 0) {
+          overrideIndex.position = Position.BOTTOM;
+        } else {
+          overrideIndex.position = Position.MIDDLE;
+        }
+      }
+
+      TypeLiteral<?> current = hierarchy.get(i);
+
       for (Field field : current.getRawType().getDeclaredFields()) {
         if (Modifier.isStatic(field.getModifiers()) == statics) {
-          InjectableField injectableField = new InjectableField(current, field);
-          if (injectableField.injectable) {
+          Annotation atInject = getAtInject(field);
+          if (atInject != null) {
+            InjectableField injectableField = new InjectableField(current, field, atInject);
             if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
               errors.cannotInjectFinalField(field);
-              continue;
             }
-            injectableMembers.put(field, injectableField);
+            injectableMembers.add(injectableField);
           }
         }
       }
 
       for (Method method : current.getRawType().getDeclaredMethods()) {
-        boolean isStatic = Modifier.isStatic(method.getModifiers());
-        if (isStatic == statics) {
-          InjectableMethod injectableMethod = new InjectableMethod(current, method);
-
-          if (injectableMethod.injectable) {
-            boolean result = true;
-            if (injectableMethod.jsr330) {
-              if (Modifier.isAbstract(method.getModifiers())) {
-                errors.cannotInjectAbstractMethod(method);
-                result = false;
-              }
-              if (method.getTypeParameters().length > 0) {
-                errors.cannotInjectMethodWithTypeParameters(method);
-                result = false;
-              }
-            }
-            if (!result) {
+        if (Modifier.isStatic(method.getModifiers()) == statics) {
+          if (overrideIndex != null) {
+            overrideIndex.removeIfOverriddenBy(method);
+          }
+          Annotation atInject = getAtInject(method);
+          if (atInject != null) {
+            InjectableMethod injectableMethod = new InjectableMethod(
+                current, method, atInject);
+            if (checkForMisplacedBindingAnnotations(method, errors)
+                | !isValidMethod(injectableMethod, errors)) {
               continue;
             }
-            if (isStatic && statics) {
-              injectableMembers.put(method, injectableMethod);
-            }
-          }
-
-          if (!isStatic) {
-            // Remove overridden method if present.
-            List<Method> possibleOverrides = null;
-            Signature signature = new Signature(method);
-            if (bySignature == null) {
-              // Lazily initialize the bySignature map.
-              bySignature = new HashMap<Signature, List<Method>>();
+            if (statics) {
+              injectableMembers.add(injectableMethod);
             } else {
-              possibleOverrides = bySignature.get(signature);
-              if (possibleOverrides != null) {
-                Method overridden = removeOverriddenMethod(method, possibleOverrides);
-                if (overridden != null) {
-                  injectableMembers.remove(overridden);
-                }
+              if (overrideIndex == null) {
+                overrideIndex = new OverrideIndex(injectableMembers);
               }
-            }
-
-            if (injectableMethod.injectable) {
-              // Keep track of this method in case it gets overridden.
-              if (possibleOverrides == null) {
-                possibleOverrides = new ArrayList<Method>();
-                bySignature.put(signature, possibleOverrides);
-              }
-              possibleOverrides.add(method);
-              injectableMembers.put(method, injectableMethod);
+              overrideIndex.add(injectableMethod);
             }
           }
         }
@@ -520,11 +618,12 @@ public final class InjectionPoint {
     }
 
     ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
-    for (InjectableMember injectableMember : injectableMembers.values()) {
+    for (InjectableMember im = injectableMembers.head; im != null;
+        im = im.next) {
       try {
-        builder.add(injectableMember.toInjectionPoint(errors));
+        builder.add(im.toInjectionPoint());
       } catch (ConfigurationException ignorable) {
-        if (!injectableMember.optional) {
+        if (!im.optional) {
           errors.merge(ignorable.getErrorMessages());
         }
       }
@@ -532,27 +631,31 @@ public final class InjectionPoint {
     return builder.build();
   }
 
+  private static boolean isValidMethod(InjectableMethod injectableMethod,
+      Errors errors) {
+    boolean result = true;
+    if (injectableMethod.jsr330) {
+      Method method = injectableMethod.method;
+      if (Modifier.isAbstract(method.getModifiers())) {
+        errors.cannotInjectAbstractMethod(method);
+        result = false;
+      }
+      if (method.getTypeParameters().length > 0) {
+        errors.cannotInjectMethodWithTypeParameters(method);
+        result = false;
+      }
+    }
+    return result;
+  }
+
   private static List<TypeLiteral<?>> hierarchyFor(TypeLiteral<?> type) {
-    // Construct type hierarchy from Object.class down.
     List<TypeLiteral<?>> hierarchy = new ArrayList<TypeLiteral<?>>();
     TypeLiteral<?> current = type;
     while (current.getRawType() != Object.class) {
       hierarchy.add(current);
       current = current.getSupertype(current.getRawType().getSuperclass());
     }
-    Collections.reverse(hierarchy);
     return hierarchy;
-  }
-
-  private static Method removeOverriddenMethod(Method method, List<Method> possibleOverrides) {
-    for (Iterator<Method> iterator = possibleOverrides.iterator(); iterator.hasNext();) {
-      Method possibleOverride = iterator.next();
-      if (overrides(method, possibleOverride)) {
-        iterator.remove();
-        return possibleOverride;
-      }
-    }
-    return null;
   }
 
   /**
