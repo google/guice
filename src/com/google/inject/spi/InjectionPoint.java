@@ -296,7 +296,7 @@ public final class InjectionPoint {
    *      ConfigurationException#getPartialValue() partial value} is a {@code Set<InjectionPoint>}
    *      of the valid injection points.
    */
-  public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral type) {
+  public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral<?> type) {
     Errors errors = new Errors();
 
     Set<InjectionPoint> result = getInjectionPoints(type, true, errors);

@@ -45,6 +45,7 @@ public class GuiceTck {
         bind(Cupholder.class);
         bind(Tire.class);
         bind(FuelTank.class);
+        requestStaticInjection(Convertible.class, SpareTire.class);
       }
     }).getInstance(Car.class));
   }

@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import com.google.inject.spi.InjectionPoint.Signature;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -121,7 +122,7 @@ public class InjectionPointTest extends TestCase {
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
   }
-  
+
   public void testUnattachedDependency() throws IOException {
     Dependency<String> dependency = Dependency.get(Key.get(String.class, named("d")));
     assertEquals("Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=d)]",
@@ -209,5 +210,30 @@ public class InjectionPointTest extends TestCase {
   static class ParameterizedInjections<T> {
     @Inject Set<T> setOfTees;
     @Inject public ParameterizedInjections(Map<T, T> map) {}
+  }
+
+  public void testSignature() throws Exception {
+    Signature fooA = new Signature(Foo.class.getDeclaredMethod(
+        "a", String.class, int.class));
+    Signature fooB = new Signature(Foo.class.getDeclaredMethod("b"));
+    Signature barA = new Signature(Bar.class.getDeclaredMethod(
+        "a", String.class, int.class));
+    Signature barB = new Signature(Bar.class.getDeclaredMethod("b"));
+
+    assertEquals(fooA.hashCode(), barA.hashCode());
+    assertEquals(fooB.hashCode(), barB.hashCode());
+    assertEquals(fooA, barA);
+    assertEquals(fooB, barB);
+  }
+
+  static class Foo {
+    void a(String s, int i) {}
+    int b() {
+      return 0;
+    }
+  }
+  static class Bar {
+    public void a(String s, int i) {}
+    void b() {}
   }
 }

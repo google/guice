@@ -66,6 +66,11 @@ final class InjectionRequestProcessor extends AbstractProcessor {
   }
 
   void injectMembers() {
+    /*
+     * TODO: If you request both a parent class and one of its
+     * subclasses, the parent class's static members will be
+     * injected twice.
+     */
     for (StaticInjection staticInjection : staticInjections) {
       staticInjection.injectMembers();
     }
