@@ -18,7 +18,8 @@ package com.googlecode.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.util.Jsr330;
+import com.google.inject.Provides;
+import javax.inject.Named;
 import junit.framework.Test;
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.Car;
@@ -41,11 +42,14 @@ public class GuiceTck {
         bind(Car.class).to(Convertible.class);
         bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
         bind(Engine.class).to(V8Engine.class);
-        bind(Tire.class).annotatedWith(Jsr330.named("spare")).to(SpareTire.class);
         bind(Cupholder.class);
         bind(Tire.class);
         bind(FuelTank.class);
         requestStaticInjection(Convertible.class, SpareTire.class);
+      }
+
+      @Provides @Named("spare") Tire provideSpareTire(SpareTire spare) {
+        return spare;
       }
     }).getInstance(Car.class));
   }
