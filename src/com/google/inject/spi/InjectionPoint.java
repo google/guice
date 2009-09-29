@@ -604,6 +604,12 @@ public final class InjectionPoint {
               injectableMembers.add(injectableMethod);
             } else {
               if (overrideIndex == null) {
+                /*
+                 * Creating the override index lazily means that the first type in the hierarchy
+                 * with injectable methods (not necessarily the top most top) will be treated as
+                 * the TOP position and will enjoy the same optimizations (no checks for overridden
+                 * methods, etc.).
+                 */
                 overrideIndex = new OverrideIndex(injectableMembers);
               }
               overrideIndex.add(injectableMethod);
