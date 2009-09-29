@@ -59,7 +59,7 @@ public class AllTests {
   public static Test suite() {
     TestSuite suite = new TestSuite();
 
-    suite.addTestSuite(GuiceTck.class);
+    suite.addTest(GuiceTck.suite());
     suite.addTestSuite(BinderTest.class);
     suite.addTest(BinderTestSuite.suite());
     suite.addTestSuite(BindingAnnotationTest.class);
