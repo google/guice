@@ -483,6 +483,10 @@ public final class InjectionPoint {
     BOTTOM // Methods won't be overridden
   }
 
+  /**
+   * Keeps track of injectable methods so we can remove methods that get overridden in O(1) time.
+   * Uses our position in the type hierarchy to perform optimizations.
+   */
   static class OverrideIndex {
     final InjectableMembers injectableMembers;
     Map<Signature, List<InjectableMethod>> bySignature;
@@ -606,7 +610,7 @@ public final class InjectionPoint {
               if (overrideIndex == null) {
                 /*
                  * Creating the override index lazily means that the first type in the hierarchy
-                 * with injectable methods (not necessarily the top most top) will be treated as
+                 * with injectable methods (not necessarily the top most type) will be treated as
                  * the TOP position and will enjoy the same optimizations (no checks for overridden
                  * methods, etc.).
                  */
