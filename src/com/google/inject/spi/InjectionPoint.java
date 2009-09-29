@@ -664,7 +664,6 @@ public final class InjectionPoint {
    */
   private static boolean overrides(Method a, Method b) {
     // See JLS section 8.4.8.1
-    // TODO: Do I need to worry about the visibility of the declaring class? I don't think so...
     int modifiers = b.getModifiers();
     if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
       return true;
