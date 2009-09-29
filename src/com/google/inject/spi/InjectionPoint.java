@@ -491,7 +491,6 @@ public final class InjectionPoint {
     final InjectableMembers injectableMembers;
     Map<Signature, List<InjectableMethod>> bySignature;
     Position position = Position.TOP;
-    boolean hasMethods = false;
 
     OverrideIndex(InjectableMembers injectableMembers) {
       this.injectableMembers = injectableMembers;
@@ -502,8 +501,8 @@ public final class InjectionPoint {
     Signature lastSignature;
 
     void removeIfOverriddenBy(Method method) {
-      if (!hasMethods || position == Position.TOP) {
-        // There's nothing to remove.
+      if (position == Position.TOP) {
+        // If we're at the top of the hierarchy, there's nothing to override.
         return;
       }
 
@@ -538,7 +537,6 @@ public final class InjectionPoint {
     }
 
     void add(InjectableMethod injectableMethod) {
-      hasMethods = true;
       injectableMembers.add(injectableMethod);
       if (position == Position.BOTTOM
           || injectableMethod.isFinal()) {
