@@ -381,6 +381,9 @@ public final class InjectionPoint {
     return true;
   }
 
+  /**
+   * Node in the doubly-linked list of injectable members (fields and methods).
+   */
   static abstract class InjectableMember {
     final TypeLiteral<?> declaringType;
     final boolean optional;
@@ -557,6 +560,14 @@ public final class InjectionPoint {
     }
   }
 
+  /**
+   * Returns an ordered, immutable set of injection points for the given type. Members in
+   * superclasses come before members in subclasses. Within a class, fields come before methods.
+   * Overridden methods are filtered out.
+   *
+   * @param statics true is this method should return static members, false for instance members
+   * @param errors used to record errors
+   */
   private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
       boolean statics, Errors errors) {
     InjectableMembers injectableMembers = new InjectableMembers();
