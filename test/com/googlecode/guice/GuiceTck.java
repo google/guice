@@ -51,6 +51,6 @@ public class GuiceTck {
       @Provides @Named("spare") Tire provideSpareTire(SpareTire spare) {
         return spare;
       }
-    }).getInstance(Car.class));
+    }).getInstance(Car.class), true, true);
   }
 }
