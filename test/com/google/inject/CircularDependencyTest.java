@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import junit.framework.TestCase;
+import static com.google.inject.Asserts.assertContains;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -76,7 +77,7 @@ public class CircularDependencyTest extends TestCase {
       Guice.createInjector().getInstance(C.class);
       fail();
     } catch (ProvisionException expected) {
-      Asserts.assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(),
           "Tried proxying " + C.class.getName() + " to support a circular dependency, ",
           "but it is not an interface.");
     }
@@ -143,10 +144,68 @@ public class CircularDependencyTest extends TestCase {
       }
     });
 
-    injector.getInstance(Egg.class);
-    injector.getInstance(Chicken.class);
-
-    assertEquals(1, Chicken.nextInstanceId);
-    assertEquals(1, Egg.nextInstanceId);
+    try {
+      injector.getInstance(Egg.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "Provider was reentrant while creating a singleton",
+          " at " + CircularDependencyTest.class.getName(), "provideEgg(",
+          " while locating " + Egg.class.getName());
+    }
   }
+
+  public void testCircularDependencyProxyDelegateNeverInitialized() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(F.class).to(RealF.class);
+        bind(G.class).to(RealG.class);
+      }
+    });
+    F f = injector.getInstance(F.class);
+    assertEquals("F", f.g().f().toString());
+    assertEquals("G", f.g().f().g().toString());
+
+  }
+
+  public interface F {
+    G g();
+  }
+
+  @Singleton
+  public static class RealF implements F {
+    private final G g;
+    @Inject RealF(G g) {
+      this.g = g;
+    }
+
+    public G g() {
+      return g;
+    }
+
+    @Override public String toString() {
+      return "F";
+    }
+  }
+
+  public interface G {
+    F f();
+  }
+
+  @Singleton
+  public static class RealG implements G {
+    private final F f;
+    @Inject RealG(F f) {
+      this.f = f;
+    }
+
+    public F f() {
+      return f;
+    }
+
+    @Override public String toString() {
+      return "G";
+    }
+  }
+
 }

@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.DelegatingInvocationHandler;
 import com.google.inject.internal.InjectorBuilder;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
-
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Proxy;
 
 /**
  * Built-in scope implementations.
@@ -38,7 +39,7 @@ public class Scopes {
    * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
    */
   public static final Scope SINGLETON = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
+    public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
         /*
          * The lazily initialized singleton instance. Once set, this will either have type T or will
@@ -55,14 +56,30 @@ public class Scopes {
              * when two threads try to load circularly-dependent objects.
              * Maybe one of these days we will identify independent graphs of
              * objects and offer to load them in parallel.
+             *
+             * This block is re-entrant for circular dependencies.
              */
             synchronized (InjectorBuilder.class) {
               if (instance == null) {
-                T nullableInstance = creator.get();
-                instance = (nullableInstance != null) ? nullableInstance : NULL;
+                T provided = creator.get();
+                Object providedOrSentinel = (provided == null) ? NULL : provided;
+
+                // don't remember proxies; these exist only to serve circular dependencies
+                if (Proxy.isProxyClass(providedOrSentinel.getClass()) && Proxy.getInvocationHandler(
+                    providedOrSentinel) instanceof DelegatingInvocationHandler) {
+                  return provided;
+                }
+
+                if (instance != null && instance != providedOrSentinel) {
+                  throw new ProvisionException(
+                      "Provider was reentrant while creating a singleton");
+                }
+
+                instance = providedOrSentinel;
               }
             }
           }
+
           Object localInstance = instance;
           // This is safe because instance has type T or is equal to NULL
           @SuppressWarnings("unchecked")

@@ -110,4 +110,8 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
   public Set<Dependency<?>> getDependencies() {
     return dependencies;
   }
+
+  @Override public String toString() {
+    return "@Provides " + StackTraceElements.forMember(method).toString();
+  }
 }

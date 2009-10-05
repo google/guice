@@ -50,7 +50,6 @@ import junit.framework.TestSuite;
 public class AllTests {
 
   private static final Set<String> SUPPRESSED_TEST_NAMES = ImmutableSet.of(
-      "testCircularlyDependentMultipleWays(" + CircularDependencyTest.class.getName() + ")",
       "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
       "testNullScopedAsASingleton(" + ScopesTest.class.getName() + ")",
       "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")"

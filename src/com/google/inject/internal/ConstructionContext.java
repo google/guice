@@ -16,9 +16,6 @@
 
 package com.google.inject.internal;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,39 +83,6 @@ final class ConstructionContext<T> {
       for (DelegatingInvocationHandler<T> handler : invocationHandlers) {
         handler.setDelegate(delegate);
       }
-    }
-  }
-
-  static class DelegatingInvocationHandler<T> implements InvocationHandler {
-
-    T delegate;
-
-    public Object invoke(Object proxy, Method method, Object[] args)
-        throws Throwable {
-      if (delegate == null) {
-        throw new IllegalStateException("This is a proxy used to support"
-            + " circular references involving constructors. The object we're"
-            + " proxying is not constructed yet. Please wait until after"
-            + " injection has completed to use this object.");
-      }
-
-      try {
-        // This appears to be not test-covered
-        return method.invoke(delegate, args);
-      }
-      catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      }
-      catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      }
-      catch (InvocationTargetException e) {
-        throw e.getTargetException();
-      }
-    }
-
-    void setDelegate(T delegate) {
-      this.delegate = delegate;
     }
   }
 }
