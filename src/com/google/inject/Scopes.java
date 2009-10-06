@@ -16,12 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.DelegatingInvocationHandler;
+import com.google.inject.internal.CircularDependencyProxy;
 import com.google.inject.internal.InjectorBuilder;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Proxy;
 
 /**
  * Built-in scope implementations.
@@ -62,14 +61,13 @@ public class Scopes {
             synchronized (InjectorBuilder.class) {
               if (instance == null) {
                 T provided = creator.get();
-                Object providedOrSentinel = (provided == null) ? NULL : provided;
 
                 // don't remember proxies; these exist only to serve circular dependencies
-                if (Proxy.isProxyClass(providedOrSentinel.getClass()) && Proxy.getInvocationHandler(
-                    providedOrSentinel) instanceof DelegatingInvocationHandler) {
+                if (provided instanceof CircularDependencyProxy) {
                   return provided;
                 }
 
+                Object providedOrSentinel = (provided == null) ? NULL : provided;
                 if (instance != null && instance != providedOrSentinel) {
                   throw new ProvisionException(
                       "Provider was reentrant while creating a singleton");

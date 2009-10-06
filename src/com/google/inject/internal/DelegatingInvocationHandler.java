@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-public class DelegatingInvocationHandler<T> implements InvocationHandler {
+class DelegatingInvocationHandler<T> implements InvocationHandler {
 
   private T delegate;
 

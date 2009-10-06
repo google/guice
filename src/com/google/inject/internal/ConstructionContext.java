@@ -75,7 +75,7 @@ final class ConstructionContext<T> {
 
     ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);
     return expectedType.cast(Proxy.newProxyInstance(classLoader,
-        new Class[] { expectedType }, invocationHandler));
+        new Class[] { expectedType, CircularDependencyProxy.class }, invocationHandler));
   }
 
   public void setProxyDelegates(T delegate) {
