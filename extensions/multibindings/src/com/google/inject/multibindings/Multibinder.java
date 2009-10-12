@@ -65,11 +65,17 @@ import java.util.Set;
  *   public SnackMachine(Set&lt;Snack&gt; snacks) { ... }
  * }</code></pre>
  *
- * <p>Create multibindings from different modules is supported. For example, it
- * is okay to have both {@code CandyModule} and {@code ChipsModule} to both
- * create their own {@code Multibinder<Snack>}, and to each contribute bindings
- * to the set of snacks. When that set is injected, it will contain elements
- * from both modules.
+ * <p>Contributing multibindings from different modules is supported. For
+ * example, it is okay to have both {@code CandyModule} and {@code ChipsModule}
+ * to both create their own {@code Multibinder<Snack>}, and to each contribute
+ * bindings to the set of snacks. When that set is injected, it will contain
+ * elements from both modules.
+ * 
+ * <p>The set's iteration order is consistent with the binding order. This is
+ * convenient when multiple elements are contributed by the same module because
+ * that module can order its bindings appropriately. Avoid relying on the
+ * iteration order of elements contributed by different modules, since there is
+ * no equivalent mechanism to order modules.
  *
  * <p>Elements are resolved at set injection time. If an element is bound to a
  * provider, that provider's get method will be called each time the set is

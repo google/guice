@@ -71,11 +71,17 @@ import java.util.Set;
  *   public SnackMachine(Map&lt;String, Provider&lt;Snack&gt;&gt; snackProviders) { ... }
  * }</code></pre>
  *
- * <p>Creating mapbindings from different modules is supported. For example, it
- * is okay to have both {@code CandyModule} and {@code ChipsModule} both
+ * <p>Contributing mapbindings from different modules is supported. For example,
+ * it is okay to have both {@code CandyModule} and {@code ChipsModule} both
  * create their own {@code MapBinder<String, Snack>}, and to each contribute
  * bindings to the snacks map. When that map is injected, it will contain
  * entries from both modules.
+ *
+ * <p>The map's iteration order is consistent with the binding order. This is
+ * convenient when multiple elements are contributed by the same module because
+ * that module can order its bindings appropriately. Avoid relying on the
+ * iteration order of elements contributed by different modules, since there is
+ * no equivalent mechanism to order modules.
  *
  * <p>Values are resolved at map injection time. If a value is bound to a
  * provider, that provider's get method will be called each time the map is

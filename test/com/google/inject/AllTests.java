@@ -51,7 +51,6 @@ public class AllTests {
 
   private static final Set<String> SUPPRESSED_TEST_NAMES = ImmutableSet.of(
       "testUnscopedProviderWorksOutsideOfRequestedScope(" + ScopesTest.class.getName() + ")",
-      "testNullScopedAsASingleton(" + ScopesTest.class.getName() + ")",
       "testCannotConvertUnannotatedBindings(" + TypeConversionTest.class.getName() + ")"
   );
 
@@ -152,7 +151,9 @@ public class AllTests {
 
       if (suppressedTestNames.contains(test.toString())) {
         continue;
-      } else if (test instanceof TestSuite) {
+      }
+
+      if (test instanceof TestSuite) {
         result.addTest(removeSuppressedTests((TestSuite) test, suppressedTestNames));
       } else {
         result.addTest(test);
