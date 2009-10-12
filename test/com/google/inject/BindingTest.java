@@ -365,6 +365,21 @@ public class BindingTest extends TestCase {
         heardTypes);
   }
 
+  public void testInterfaceToImplementationConstructor() throws NoSuchMethodException {
+    final Constructor<CFoo> constructor = CFoo.class.getDeclaredConstructor();
+
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(IFoo.class).toConstructor(constructor);
+      }
+    });
+
+    injector.getInstance(IFoo.class);
+  }
+
+  public static interface IFoo {}
+  public static class CFoo implements IFoo {}
+
   public void testGetAllBindings() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {

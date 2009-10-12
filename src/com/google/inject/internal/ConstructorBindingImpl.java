@@ -65,7 +65,11 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
       InjectionPoint constructorInjector, Object source, Scoping scoping, Errors errors)
       throws ErrorsException {
     int numErrors = errors.size();
-    Class<? super T> rawType = key.getTypeLiteral().getRawType();
+
+    @SuppressWarnings("unchecked") // constructorBinding guarantees type is consistent
+    Class<? super T> rawType = constructorInjector == null 
+        ? key.getTypeLiteral().getRawType()
+        : (Class) constructorInjector.getDeclaringType().getRawType();
 
     // We can't inject abstract classes.
     if (Modifier.isAbstract(rawType.getModifiers())) {
