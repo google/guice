@@ -24,6 +24,7 @@ import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Types;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -165,8 +166,8 @@ public class MoreTypes {
       return (Class<?>) rawType;
 
     } else if (type instanceof GenericArrayType) {
-      // TODO: Is this sufficient?
-      return Object[].class;
+      Type componentType = ((GenericArrayType)type).getGenericComponentType();
+      return Array.newInstance(getRawType(componentType), 0).getClass();
 
     } else if (type instanceof TypeVariable) {
       // we could use the variable's bounds, but that'll won't work if there are multiple.
