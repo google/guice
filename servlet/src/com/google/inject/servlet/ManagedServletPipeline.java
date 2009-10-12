@@ -26,7 +26,6 @@ import com.google.inject.internal.Maps;
 import com.google.inject.internal.Preconditions;
 import com.google.inject.internal.Sets;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
@@ -46,17 +45,17 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 @Singleton
 class ManagedServletPipeline {
-  private final List<ServletDefinition> servletDefinitions;
+  private final ServletDefinition[] servletDefinitions;
   private static final TypeLiteral<List<ServletDefinition>> SERVLET_DEFS =
       new TypeLiteral<List<ServletDefinition>>() {};
 
   @Inject
   public ManagedServletPipeline(Injector injector) {
-    this.servletDefinitions = Collections.unmodifiableList(collectServletDefinitions(injector));
+    this.servletDefinitions = collectServletDefinitions(injector);
   }
 
   boolean hasServletsMapped() {
-    return !servletDefinitions.isEmpty();
+    return servletDefinitions.length > 0;
   }
 
   /**
@@ -66,7 +65,7 @@ class ManagedServletPipeline {
    * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
    * that preserves insertion order in entry-set iterators.
    */
-  private List<ServletDefinition> collectServletDefinitions(Injector injector) {
+  private ServletDefinition[] collectServletDefinitions(Injector injector) {
     List<ServletDefinition> servletDefinitions = Lists.newArrayList();
     for (Binding<?> entry : injector.findBindingsByType(SERVLET_DEFS)) {
 
@@ -75,7 +74,8 @@ class ManagedServletPipeline {
         servletDefinitions.addAll(injector.getInstance(defsKey));
     }
 
-    return servletDefinitions;
+    // Copy to a fixed size array for speed.
+    return servletDefinitions.toArray(new ServletDefinition[servletDefinitions.size()]);
   }
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {

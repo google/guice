@@ -16,7 +16,6 @@
 package com.google.inject.servlet;
 
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -35,14 +34,14 @@ import javax.servlet.ServletResponse;
  * @since 1.0
  */
 class FilterChainInvocation implements FilterChain {
-  private final List<FilterDefinition> filterDefinitions;
+  private final FilterDefinition[] filterDefinitions;
   private final FilterChain proceedingChain;
   private final ManagedServletPipeline servletPipeline;
 
   //state variable tracks current link in filterchain
   private int index = -1;
 
-  public FilterChainInvocation(List<FilterDefinition> filterDefinitions,
+  public FilterChainInvocation(FilterDefinition[] filterDefinitions,
       ManagedServletPipeline servletPipeline, FilterChain proceedingChain) {
 
     this.filterDefinitions = filterDefinitions;
@@ -55,8 +54,8 @@ class FilterChainInvocation implements FilterChain {
     index++;
 
     //dispatch down the chain while there are more filters
-    if (index < filterDefinitions.size()) {
-      filterDefinitions.get(index).doFilter(servletRequest, servletResponse, this);
+    if (index < filterDefinitions.length) {
+      filterDefinitions[index].doFilter(servletRequest, servletResponse, this);
     } else {
 
       //we've reached the end of the filterchain, let's try to dispatch to a servlet

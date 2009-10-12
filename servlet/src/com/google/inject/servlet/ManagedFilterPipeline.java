@@ -26,7 +26,6 @@ import com.google.inject.internal.Lists;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.Filter;
@@ -47,7 +46,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 @Singleton
 class ManagedFilterPipeline implements FilterPipeline{
-  private final List<FilterDefinition> filterDefinitions;
+  private final FilterDefinition[] filterDefinitions;
   private final ManagedServletPipeline servletPipeline;
   private final Provider<ServletContext> servletContext;
 
@@ -66,7 +65,7 @@ class ManagedFilterPipeline implements FilterPipeline{
     this.servletPipeline = servletPipeline;
     this.servletContext = servletContext;
 
-    this.filterDefinitions = Collections.unmodifiableList(collectFilterDefinitions(injector));
+    this.filterDefinitions = collectFilterDefinitions(injector);
   }
 
   /**
@@ -76,7 +75,7 @@ class ManagedFilterPipeline implements FilterPipeline{
    * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
    * that preserves insertion order in entry-set iterators.
    */
-  private List<FilterDefinition> collectFilterDefinitions(Injector injector) {
+  private FilterDefinition[] collectFilterDefinitions(Injector injector) {
     List<FilterDefinition> filterDefinitions = Lists.newArrayList();
     for (Binding<?> entry : injector.findBindingsByType(FILTER_DEFS)) {
 
@@ -85,7 +84,8 @@ class ManagedFilterPipeline implements FilterPipeline{
       filterDefinitions.addAll(injector.getInstance(defsKey));
     }
 
-    return filterDefinitions;
+    // Convert to a fixed size array for speed.
+    return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
   }
 
   public synchronized void initPipeline(ServletContext servletContext)
