@@ -227,7 +227,7 @@ public interface Injector {
   /**
    * Returns a map containing all scopes in the injector. The maps keys are scoping annotations
    * like {@code Singleton.class}, and the values are scope instances, such as {@code
-   * Scopes.SINGLETON. The returned map is immutable.
+   * Scopes.SINGLETON}. The returned map is immutable.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    */

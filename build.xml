@@ -88,6 +88,8 @@
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
+        <pathelement location="lib/javax.inject.jar"/>
+        <pathelement location="lib/build/javax.inject-tck.jar"/>
       </classpath>
       <arg value="com.google.inject.AllTests"/>    
       <syspropertyset>
@@ -113,6 +115,7 @@
         <pathelement location="${jndi.src.dir}"/>
         <pathelement location="${throwingproviders.src.dir}"/>
         <pathelement location="${multibindings.src.dir}"/>
+        <pathelement location="${lifecycle.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <classpath>

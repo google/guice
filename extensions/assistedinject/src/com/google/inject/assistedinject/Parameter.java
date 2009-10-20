@@ -39,6 +39,8 @@ class Parameter {
   private final Annotation bindingAnnotation;
   private final boolean isProvider;
 
+  private volatile Provider<? extends Object> provider;
+
   public Parameter(Type type, Annotation[] annotations) {
     this.type = type;
     this.bindingAnnotation = getBindingAnnotation(annotations);
@@ -82,9 +84,17 @@ class Parameter {
    * Returns the Guice {@link Key} for this parameter.
    */
   public Object getValue(Injector injector) {
-    return isProvider
-        ? injector.getProvider(getBindingForType(getProvidedType(type)))
-        : injector.getInstance(getPrimaryBindingKey());
+    if (null == provider) {
+      synchronized (this) {
+        if (null == provider) {
+          provider = isProvider
+              ? injector.getProvider(getBindingForType(getProvidedType(type)))
+              : injector.getProvider(getPrimaryBindingKey());
+        }
+      }
+    }
+
+    return provider.get();
   }
 
   public boolean isBound(Injector injector) {
