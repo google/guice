@@ -39,6 +39,7 @@ public class EdslTest extends TestCase {
         filter("/*").through(DummyFilterImpl.class);
         filter("*.html").through(DummyFilterImpl.class);
         filter("/*").through(Key.get(DummyFilterImpl.class));
+        filter("/*").through(new DummyFilterImpl());
 
         filter("*.html").through(DummyFilterImpl.class,
             new HashMap<String, String>());
@@ -51,10 +52,15 @@ public class EdslTest extends TestCase {
         filterRegex("/person/[0-9]*").through(Key.get(DummyFilterImpl.class),
             new HashMap<String, String>());
 
+        filterRegex("/person/[0-9]*").through(new DummyFilterImpl());
+        filterRegex("/person/[0-9]*").through(new DummyFilterImpl(),
+            new HashMap<String, String>());
+
 
         serve("/1/*").with(DummyServlet.class);
         serve("/2/*").with(Key.get(DummyServlet.class));
-        serve("/3/*").with(DummyServlet.class, new HashMap<String, String>());
+        serve("/3/*").with(new DummyServlet());
+        serve("/4/*").with(DummyServlet.class, new HashMap<String, String>());
 
         serve("*.htm").with(Key.get(DummyServlet.class));
         serve("*.html").with(Key.get(DummyServlet.class),
@@ -66,6 +72,10 @@ public class EdslTest extends TestCase {
 
         serveRegex("/person/[0-6]*").with(Key.get(DummyServlet.class));
         serveRegex("/person/[0-9]/2/*").with(Key.get(DummyServlet.class),
+            new HashMap<String, String>());
+
+        serveRegex("/person/[0-5]*").with(new DummyServlet());
+        serveRegex("/person/[0-9]/3/*").with(new DummyServlet(),
             new HashMap<String, String>());
       }
     };

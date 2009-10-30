@@ -34,10 +34,16 @@ import javax.servlet.Filter;
  */
 class FiltersModuleBuilder extends AbstractModule {
   private final List<FilterDefinition> filterDefinitions = Lists.newArrayList();
+  private final List<FilterInstanceBindingEntry> filterInstanceEntries = Lists.newArrayList();
 
   //invoked on injector config
   @Override
   protected void configure() {
+    // Create bindings for filter instances
+    for (FilterInstanceBindingEntry entry : filterInstanceEntries) {
+      bind(entry.key).toInstance(entry.filter);
+    }
+
     // Bind these filter definitions to a unique random key. Doesn't matter what it is,
     // coz it's never used.
     bind(Key.get(new TypeLiteral<List<FilterDefinition>>() {}, UniqueAnnotations.create()))
@@ -50,6 +56,16 @@ class FiltersModuleBuilder extends AbstractModule {
 
   public ServletModule.FilterKeyBindingBuilder filterRegex(List<String> regexes) {
     return new FilterKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
+  }
+
+  private static class FilterInstanceBindingEntry {
+    final Key<Filter> key;
+    final Filter filter;
+
+    FilterInstanceBindingEntry(Key<Filter> key, Filter filter) {
+      this.key = key;
+      this.filter = filter;
+    }
   }
 
   //non-static inner class so it can access state of enclosing module class
@@ -70,6 +86,10 @@ class FiltersModuleBuilder extends AbstractModule {
       through(filterKey, new HashMap<String, String>());
     }
 
+    public void through(Filter filter) {
+      through(filter, new HashMap<String, String>());
+    }
+
     public void through(Class<? extends Filter> filterKey,
         Map<String, String> contextParams) {
       
@@ -85,6 +105,13 @@ class FiltersModuleBuilder extends AbstractModule {
             new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
                 contextParams));
       }
+    }
+
+    public void through(Filter filter,
+        Map<String, String> contextParams) {
+      Key<Filter> filterKey = Key.get(Filter.class, UniqueAnnotations.create());
+      filterInstanceEntries.add(new FilterInstanceBindingEntry(filterKey, filter));
+      through(filterKey, contextParams);
     }
   }
 }

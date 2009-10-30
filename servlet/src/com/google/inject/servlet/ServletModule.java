@@ -90,10 +90,12 @@ public class ServletModule extends AbstractModule {
    *     protected void configureServlets() {
    *       filter("/*").through(MyFilter.class);
    *       filter("*.css").through(MyCssFilter.class);
+   *       filter("*.jpg").through(new MyJpgFilter());
    *       // etc..
    *
    *       serve("*.html").with(MyServlet.class);
    *       serve("/my/*").with(MyServlet.class);
+   *       serve("*.jpg").with(new MyServlet());
    *       // etc..
    *      }
    *    }
@@ -259,8 +261,10 @@ public class ServletModule extends AbstractModule {
   public static interface FilterKeyBindingBuilder {
     void through(Class<? extends Filter> filterKey);
     void through(Key<? extends Filter> filterKey);
+    void through(Filter filter);
     void through(Class<? extends Filter> dummyFilterClass, Map<String, String> contextParams);
     void through(Key<? extends Filter> dummyFilterClass, Map<String, String> contextParams);
+    void through(Filter filter, Map<String, String> contextParams);
   }
 
   /**
@@ -271,7 +275,9 @@ public class ServletModule extends AbstractModule {
   public static interface ServletKeyBindingBuilder {
     void with(Class<? extends HttpServlet> servletKey);
     void with(Key<? extends HttpServlet> servletKey);
+    void with(HttpServlet servlet);
     void with(Class<? extends HttpServlet> servletKey, Map<String, String> contextParams);
     void with(Key<? extends HttpServlet> servletKey, Map<String, String> contextParams);
+    void with(HttpServlet servlet, Map<String, String> contextParams);
   }
 }

@@ -36,10 +36,15 @@ import javax.servlet.http.HttpServlet;
  */
 class ServletsModuleBuilder extends AbstractModule {
   private final List<ServletDefinition> servletDefinitions = Lists.newArrayList();
+  private final List<ServletInstanceBindingEntry> servletInstanceEntries = Lists.newArrayList();
 
   //invoked on injector config
   @Override
   protected void configure() {
+    // Create bindings for servlet instances
+    for (ServletInstanceBindingEntry entry : servletInstanceEntries) {
+      bind(entry.key).toInstance(entry.servlet);
+    }
 
     // Ensure that servlets are not bound twice to the same pattern.
     Set<String> servletUris = Sets.newHashSet();
@@ -68,6 +73,16 @@ class ServletsModuleBuilder extends AbstractModule {
     return new ServletKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
   }
 
+  private static class ServletInstanceBindingEntry {
+    final Key<HttpServlet> key;
+    final HttpServlet servlet;
+
+    ServletInstanceBindingEntry(Key<HttpServlet> key, HttpServlet servlet) {
+      this.key = key;
+      this.servlet = servlet;
+    }
+  }
+
   //non-static inner class so it can access state of enclosing module class
   class ServletKeyBindingBuilderImpl implements ServletModule.ServletKeyBindingBuilder {
     private final List<String> uriPatterns;
@@ -86,6 +101,10 @@ class ServletsModuleBuilder extends AbstractModule {
       with(servletKey, new HashMap<String, String>());
     }
 
+    public void with(HttpServlet servlet) {
+      with(servlet, new HashMap<String, String>());
+    }
+
     public void with(Class<? extends HttpServlet> servletKey,
         Map<String, String> contextParams) {
       with(Key.get(servletKey), contextParams);
@@ -99,6 +118,13 @@ class ServletsModuleBuilder extends AbstractModule {
             new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType, pattern),
                 contextParams));
       }
+    }
+
+    public void with(HttpServlet servlet,
+        Map<String, String> contextParams) {
+      Key<HttpServlet> servletKey = Key.get(HttpServlet.class, UniqueAnnotations.create());
+      servletInstanceEntries.add(new ServletInstanceBindingEntry(servletKey, servlet));
+      with(servletKey, contextParams);
     }
   }
 }
