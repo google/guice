@@ -27,21 +27,20 @@ import com.google.inject.Module;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
-import com.google.inject.TypeLiteral;
 import com.google.inject.Scope;
+import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
-import com.google.inject.spi.ProviderKeyBinding;
-import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -253,7 +252,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     @Override public String toString() {
-      return new ToStringBuilder(ProviderKeyBinding.class)
+      return new ToStringBuilder(ProviderBinding.class)
           .add("key", getKey())
           .add("providedKey", getProvidedKey())
           .toString();
