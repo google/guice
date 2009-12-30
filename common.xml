@@ -65,6 +65,7 @@
          destdir="${build.dir}/test"
          source="1.5" target="1.5">
       <classpath path="${build.dir}/classes"/>
+      <classpath path="${build.dir}/test"/>
       <classpath refid="compile.classpath"/>
     </javac>
     <copy toDir="${build.dir}/test">

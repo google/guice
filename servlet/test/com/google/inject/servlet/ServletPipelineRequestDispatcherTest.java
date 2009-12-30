@@ -20,10 +20,10 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
+import com.google.inject.spi.BindingScopingVisitor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,13 +36,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
+
+import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.easymock.EasyMock.anyObject;
 
 /**
  * Tests forwarding and inclusion (RequestDispatcher actions from the
@@ -64,10 +66,14 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
-    final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+    final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(mockRequest.getAttribute(A_KEY))
+    expect(requestMock.getAttribute(A_KEY))
         .andReturn(A_VALUE);
+
+
+    requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
+    requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
 
     final boolean[] run = new boolean[1];
     final HttpServlet mockServlet = new HttpServlet() {
@@ -99,7 +105,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, binding, mockRequest, mockBinding);
+    replay(injector, binding, requestMock, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector,
@@ -110,11 +116,11 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
-    dispatcher.include(mockRequest, createMock(HttpServletResponse.class));
+    dispatcher.include(requestMock, createMock(HttpServletResponse.class));
 
     assertTrue("Include did not dispatch to our servlet!", run[0]);
 
-    verify(injector, mockRequest, mockBinding);
+    verify(injector, requestMock, mockBinding);
   }
 
   public final void testForwardToManagedServlet() throws IOException, ServletException {
@@ -125,11 +131,15 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
-    final HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+    final HttpServletRequest requestMock = createMock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = createMock(HttpServletResponse.class);
 
-    expect(mockRequest.getAttribute(A_KEY))
+    expect(requestMock.getAttribute(A_KEY))
         .andReturn(A_VALUE);
+
+
+    requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
+    requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
 
     expect(mockResponse.isCommitted())
         .andReturn(false);
@@ -167,7 +177,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(servetDefsKey))
         .andReturn(ImmutableList.of(servletDefinition));
 
-    replay(injector, binding, mockRequest, mockResponse, mockBinding);
+    replay(injector, binding, requestMock, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector,
@@ -177,11 +187,11 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         .getRequestDispatcher(pattern);
 
     assertNotNull(dispatcher);
-    dispatcher.forward(mockRequest, mockResponse);
+    dispatcher.forward(requestMock, mockResponse);
 
     assertTrue("Include did not dispatch to our servlet!", paths.contains(pattern));
 
-    verify(injector, mockRequest, mockResponse, mockBinding);
+    verify(injector, requestMock, mockResponse, mockBinding);
   }
 
   public final void testForwardToManagedServletFailureOnCommittedBuffer()

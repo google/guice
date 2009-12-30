@@ -18,9 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
+
+import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
-import org.easymock.IMocksControl;
 
 /**
  *
@@ -76,6 +78,9 @@ public class FilterDispatchIntegrationTest extends TestCase {
     expect(requestMock.getRequestURI())
             .andReturn("/index.html")
             .anyTimes();
+
+    requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
+    requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
 
     HttpServletResponse responseMock = control.createMock(HttpServletResponse.class);
     expect(responseMock.isCommitted())

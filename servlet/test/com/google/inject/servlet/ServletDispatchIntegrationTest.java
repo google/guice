@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
+
+import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -204,19 +206,27 @@ public class ServletDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class ForwardedServlet extends HttpServlet {
+    static int forwardedTo = 0;
+
+    // Reset for test.
+    public ForwardedServlet() {
+      forwardedTo = 0;
+    }
+
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
         throws IOException, ServletException {
       final HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-      System.out.println(request.getRequestURI());
- }
+      assertTrue((Boolean) request.getAttribute(REQUEST_DISPATCHER_REQUEST));
+      forwardedTo++;
+    }
   }
 
   public void testForwardUsingRequestDispatcher() throws IOException, ServletException {
     Guice.createInjector(new ServletModule() {
       @Override
       protected void configureServlets() {
-        serve("/*").with(ForwardingServlet.class);
+        serve("/").with(ForwardingServlet.class);
         serve("/blah.jsp").with(ForwardedServlet.class);
       }
     });
@@ -227,12 +237,20 @@ public class ServletDispatchIntegrationTest extends TestCase {
         .andReturn("/")
         .anyTimes();
 
+    requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
+    expect(requestMock.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(true);
+    requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
+
     expect(responseMock.isCommitted()).andReturn(false);
+    responseMock.resetBuffer();
 
     replay(requestMock, responseMock);
 
     new GuiceFilter()
         .doFilter(requestMock, responseMock,
             createMock(FilterChain.class));
+
+    assertEquals("Incorrect number of forwards", 1, ForwardedServlet.forwardedTo);
+    verify(requestMock, responseMock);
   }
 }

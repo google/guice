@@ -21,6 +21,7 @@ import com.google.inject.Key;
 import com.google.inject.internal.Lists;
 import java.util.Map;
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -251,6 +252,16 @@ public class ServletModule extends AbstractModule {
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
     return servletsModuleBuilder.serveRegex(Lists.newArrayList(regex, regexes));
+  }
+
+  /**
+   * This method only works if you are using the {@linkplain GuiceServletContextListener} to
+   * create your injector. Otherwise, it returns null.
+   * @return The current servlet context.
+   * @since 2.1
+   */
+  protected final ServletContext getServletContext() {
+    return GuiceFilter.getServletContext();
   }
 
   /**

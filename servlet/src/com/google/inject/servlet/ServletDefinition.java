@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+
 /**
  * An internal representation of a servlet definition mapped to a particular URI pattern. Also
  * performs the request dispatch to that servlet. How nice and OO =)
@@ -156,7 +158,6 @@ class ServletDefinition {
   void doService(final ServletRequest servletRequest, ServletResponse servletResponse)
       throws ServletException, IOException {
 
-    //noinspection OverlyComplexAnonymousInnerClass
     HttpServletRequest request = new HttpServletRequestWrapper(
         (HttpServletRequest) servletRequest) {
       private String path;
@@ -168,7 +169,7 @@ class ServletDefinition {
 
       @Override
       public String getPathInfo() {
-        if (!pathInfoComputed) {
+        if (!isPathInfoComputed()) {
           final int servletPathLength = getServletPath().length();
           pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/")
               .substring(servletPathLength);
@@ -185,6 +186,18 @@ class ServletDefinition {
         return pathInfo;
       }
 
+      // NOTE(dhanji): These two are a bit of a hack to help ensure that request dipatcher-sent
+      // requests don't use the same path info that was memoized for the original request.
+      private boolean isPathInfoComputed() {
+        return pathInfoComputed
+            && !(null != servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST));
+      }
+
+      private boolean isPathComputed() {
+        return pathComputed
+            && !(null != servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST));
+      }
+
       @Override
       public String getServletPath() {
         return computePath();
@@ -199,7 +212,7 @@ class ServletDefinition {
 
       // Memoizer pattern.
       private String computePath() {
-        if (!pathComputed) {
+        if (!isPathComputed()) {
           String servletPath = super.getServletPath();
           path = patternMatcher.extractPath(servletPath);
           pathComputed = true;

@@ -94,7 +94,7 @@ enum UriPatternType {
   }
 
   /**
-   * Matchers URIs using a regular expression.
+   * Matches URIs using a regular expression.
    *
    * @author dhanji@gmail.com (Dhanji R. Prasanna)
    */

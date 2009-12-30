@@ -19,9 +19,9 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
+import com.google.inject.spi.BindingScopingVisitor;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
@@ -29,10 +29,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
+
+import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.anyObject;
 
 /**
  * Ensures servlet spec compliance for CGI-style variables and general
@@ -177,6 +179,8 @@ public class ServletDefinitionPathsTest extends TestCase {
     expect(request.getContextPath())
         .andReturn(contextPath);
 
+    expect(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(null);
+
     replay(injector, binding, request);
 
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
@@ -269,6 +273,8 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     expect(request.getContextPath())
         .andReturn(contextPath);
+
+    expect(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).andReturn(null);
 
     replay(injector, binding, request);
 
