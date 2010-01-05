@@ -170,6 +170,17 @@ import java.lang.reflect.Method;
  * names will live in a single flat namespace with all the other names used in
  * your application.
  *
+ * <pre>
+ *     Constructor<T> loneCtor = getLoneCtorFromServiceImplViaReflection();
+ *     bind(ServiceImpl.class)
+ *         .toConstructor(loneCtor);</pre>
+ *
+ * In this example, we directly tell Guice which constructor to use in a concrete
+ * class implementation. It means that we do not need to place {@literal @}Inject
+ * on any of the constructors and that Guice treats the provided constructor as though
+ * it were annotated so. It is useful for cases where you cannot modify existing
+ * classes and is a bit simpler than using a {@link Provider}.
+ *
  * <p>The above list of examples is far from exhaustive.  If you can think of
  * how the concepts of one example might coexist with the concepts from another,
  * you can most likely weave the two together.  If the two concepts make no
