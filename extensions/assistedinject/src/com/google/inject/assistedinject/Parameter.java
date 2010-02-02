@@ -94,7 +94,7 @@ class Parameter {
       }
     }
 
-    return provider.get();
+    return isProvider ? provider : provider.get();
   }
 
   public boolean isBound(Injector injector) {
