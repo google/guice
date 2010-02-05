@@ -36,6 +36,7 @@ import static com.google.inject.internal.Iterables.getOnlyElement;
 import com.google.inject.internal.Lists;
 import static com.google.inject.internal.Preconditions.checkState;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.Toolable;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -157,7 +158,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
    * At injector-creation time, we initialize the invocation handler. At this time we make sure
    * all factory methods will be able to build the target types.
    */
-  @Inject
+  @Inject @Toolable
   void initialize(Injector injector) {
     if (this.injector != null) {
       throw new ConfigurationException(ImmutableList.of(new Message(FactoryProvider2.class,

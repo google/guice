@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
@@ -154,6 +155,13 @@ public final class InjectionPoint {
    */
   public boolean isOptional() {
     return optional;
+  }
+  
+  /**
+   * Returns true if the element is annotated with {@literal @}{@link Toolable}.
+   */
+  public boolean isToolable() {
+    return ((AnnotatedElement)member).isAnnotationPresent(Toolable.class);
   }
 
   /**

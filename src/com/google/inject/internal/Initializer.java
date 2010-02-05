@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import com.google.inject.spi.InjectionPoint;
@@ -139,7 +140,9 @@ final class Initializer {
 
       // toInject needs injection, do it right away. we only do this once, even if it fails
       if (pendingInjection.remove(instance) != null) {
-        membersInjector.injectAndNotify(instance, errors.withSource(source));
+        // if in Stage.TOOL, we only want to inject & notify toolable injection points.
+        // (otherwise we'll inject all of them)
+        membersInjector.injectAndNotify(instance, errors.withSource(source), injector.stage == Stage.TOOL);
       }
 
       return instance;

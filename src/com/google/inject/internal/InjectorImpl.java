@@ -28,6 +28,7 @@ import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
@@ -58,17 +59,17 @@ final class InjectorImpl implements Injector, Lookups {
   final State state;
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Initializer initializer;
+  final Stage stage;
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
 
   Lookups lookups = new DeferredLookups(this);
 
-  InjectorImpl(@Nullable InjectorImpl parent, State state, Initializer initializer) {
+  InjectorImpl(@Nullable InjectorImpl parent, State state, Stage stage) {
     this.parent = parent;
     this.state = state;
-    this.initializer = initializer;
+    this.stage = stage;
 
     if (parent != null) {
       localContext = parent.localContext;

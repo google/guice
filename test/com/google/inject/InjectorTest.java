@@ -290,39 +290,6 @@ public class InjectorTest extends TestCase {
     });
   }
 
-  public void testToolStageInjectorRestrictions() {
-    Injector injector = Guice.createInjector(Stage.TOOL);
-    try {
-      injector.injectMembers(new Object());
-      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
-    } catch (UnsupportedOperationException expected) {
-    }
-
-    try {
-      injector.getInstance(Injector.class);
-      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
-    } catch (UnsupportedOperationException expected) {
-    }
-
-    try {
-      injector.getInstance(Key.get(Injector.class));
-      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
-    } catch (UnsupportedOperationException expected) {
-    }
-
-    try {
-      injector.getProvider(Injector.class);
-      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
-    } catch (UnsupportedOperationException expected) {
-    }
-
-    try {
-      injector.getProvider(Key.get(Injector.class));
-      fail("Non-SPI Injector methods must throw an exception in the TOOL stage.");
-    } catch (UnsupportedOperationException expected) {
-    }
-  }
-
   public void testSubtypeNotProvided() {
     try {
       Guice.createInjector().getInstance(Money.class);

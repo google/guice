@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.MembersInjector;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
@@ -55,7 +56,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   public void injectMembers(T instance) {
     Errors errors = new Errors(typeLiteral);
     try {
-      injectAndNotify(instance, errors);
+      injectAndNotify(instance, errors, false);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -63,19 +64,29 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwProvisionExceptionIfErrorsExist();
   }
 
-  void injectAndNotify(final T instance, final Errors errors) throws ErrorsException {
+  void injectAndNotify(final T instance, final Errors errors, final boolean toolableOnly) throws ErrorsException {
     if (instance == null) {
       return;
     }
 
     injector.callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) throws ErrorsException {
-        injectMembers(instance, errors, context);
+        injectMembers(instance, errors, context, toolableOnly);
         return null;
       }
     });
 
-    notifyListeners(instance, errors);
+    // TODO: We *could* notify listeners too here,
+    // but it's not clear if we want to.  There's no way to know
+    // if a MembersInjector from the usersMemberInjector list wants
+    // toolable injections, so do we really want to notify
+    // about injection?  (We could take a strategy of only notifying
+    // if atleast one InjectionPoint was toolable, in which case
+    // the above callInContext could return 'true' if it injected
+    // anything.)
+    if(!toolableOnly) {
+      notifyListeners(instance, errors);
+    }
   }
 
   void notifyListeners(T instance, Errors errors) throws ErrorsException {
@@ -90,19 +101,25 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwIfNewErrors(numErrorsBefore);
   }
 
-  void injectMembers(T t, Errors errors, InternalContext context) {
+  void injectMembers(T t, Errors errors, InternalContext context, boolean toolableOnly) {
     // optimization: use manual for/each to save allocating an iterator here
     for (int i = 0, size = memberInjectors.size(); i < size; i++) {
-      memberInjectors.get(i).inject(errors, context, t);
+      SingleMemberInjector injector = memberInjectors.get(i);
+      if(!toolableOnly || injector.getInjectionPoint().isToolable()) {
+        injector.inject(errors, context, t);
+      }
     }
 
+    // TODO: There's no way to know if a user's MembersInjector wants toolable injections.
+    if(!toolableOnly) {
     // optimization: use manual for/each to save allocating an iterator here
-    for (int i = 0, size = userMembersInjectors.size(); i < size; i++) {
-      MembersInjector<? super T> userMembersInjector = userMembersInjectors.get(i);
-      try {
-        userMembersInjector.injectMembers(t);
-      } catch (RuntimeException e) {
-        errors.errorInUserInjector(userMembersInjector, typeLiteral, e);
+      for (int i = 0, size = userMembersInjectors.size(); i < size; i++) {
+        MembersInjector<? super T> userMembersInjector = userMembersInjectors.get(i);
+        try {
+          userMembersInjector.injectMembers(t);
+        } catch (RuntimeException e) {
+          errors.errorInUserInjector(userMembersInjector, typeLiteral, e);
+        }
       }
     }
   }

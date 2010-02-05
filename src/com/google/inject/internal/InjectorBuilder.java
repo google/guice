@@ -102,20 +102,21 @@ public final class InjectorBuilder {
     // Synchronize while we're building up the bindings and other injector state. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
-      shells = shellBuilder.build(initializer, bindingProcesor, stopwatch, errors);
+      shells = shellBuilder.build(bindingProcesor, stopwatch, errors);
       stopwatch.resetAndLog("Injector construction");
 
       initializeStatically();
     }
 
-    // If we're in the tool stage, stop here. Don't eagerly inject or load anything.
-    if (stage == Stage.TOOL) {
-      return new ToolStageInjector(primaryInjector());
-    }
-
     injectDynamically();
 
-    return primaryInjector();
+    if (stage == Stage.TOOL) {
+      // wrap the primaryInjector in a ToolStageInjector
+      // to prevent non-tool-friendy methods from being called.
+      return new ToolStageInjector(primaryInjector());
+    } else {
+      return primaryInjector();
+    }
   }
 
   /** Initialize and validate everything. */
@@ -175,10 +176,12 @@ public final class InjectorBuilder {
     stopwatch.resetAndLog("Instance injection");
     errors.throwCreationExceptionIfErrorsExist();
 
-    for (InjectorShell shell : shells) {
-      loadEagerSingletons(shell.getInjector(), stage, errors);
+    if(stage != Stage.TOOL) {
+      for (InjectorShell shell : shells) {
+        loadEagerSingletons(shell.getInjector(), stage, errors);
+      }
+      stopwatch.resetAndLog("Preloading singletons");
     }
-    stopwatch.resetAndLog("Preloading singletons");
     errors.throwCreationExceptionIfErrorsExist();
   }
 

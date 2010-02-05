@@ -107,13 +107,13 @@ final class InjectorShell {
      * returned if any modules contain {@link Binder#newPrivateBinder private environments}. The
      * primary injector will be first in the returned list.
      */
-    List<InjectorShell> build(Initializer initializer, BindingProcessor bindingProcessor,
+    List<InjectorShell> build(BindingProcessor bindingProcessor,
         Stopwatch stopwatch, Errors errors) {
       checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
 
-      InjectorImpl injector = new InjectorImpl(parent, state, initializer);
+      InjectorImpl injector = new InjectorImpl(parent, state, stage);
       if (privateElements != null) {
         privateElements.initInjector(injector);
       }
@@ -158,7 +158,7 @@ final class InjectorShell {
       PrivateElementProcessor processor = new PrivateElementProcessor(errors, stage);
       processor.process(injector, elements);
       for (Builder builder : processor.getInjectorShellBuilders()) {
-        injectorShells.addAll(builder.build(initializer, bindingProcessor, stopwatch, errors));
+        injectorShells.addAll(builder.build(bindingProcessor, stopwatch, errors));
       }
       stopwatch.resetAndLog("Private environment creation");
 

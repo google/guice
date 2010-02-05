@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
@@ -442,6 +443,22 @@ public class FactoryProvider2Test extends TestCase {
   public void testFactoryFailsWithMissingBinding() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(ColoredCarFactory.class).toProvider(
+              FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "Could not find a suitable constructor in java.lang.Double.",
+          "at " + ColoredCarFactory.class.getName() + ".create(FactoryProvider2Test.java");
+    }
+  }
+  
+  public void testFactoryFailsWithMissingBindingInToolStage() {
+    try {
+      Guice.createInjector(Stage.TOOL, new AbstractModule() {
         @Override protected void configure() {
           bind(ColoredCarFactory.class).toProvider(
               FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));

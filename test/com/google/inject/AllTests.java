@@ -33,6 +33,7 @@ import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
+import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
@@ -120,6 +121,7 @@ public class AllTests {
     suite.addTestSuite(ModuleRewriterTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(SpiBindingsTest.class);
+    suite.addTestSuite(ToolStageInjectorTest.class);
 
     // tools
     // suite.addTestSuite(JmxTest.class); not a testcase

@@ -86,7 +86,7 @@ final class ConstructorInjector<T> {
       // Store reference. If an injector re-enters this factory, they'll get the same reference.
       constructionContext.setCurrentReference(t);
 
-      membersInjector.injectMembers(t, errors, context);
+      membersInjector.injectMembers(t, errors, context, false);
       membersInjector.notifyListeners(t, errors);
 
       return t;

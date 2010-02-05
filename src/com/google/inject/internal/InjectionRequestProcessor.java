@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.ConfigurationException;
+import com.google.inject.Stage;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InjectionRequest;
 import com.google.inject.spi.StaticInjectionRequest;
@@ -106,8 +107,12 @@ final class InjectionRequestProcessor extends AbstractProcessor {
       try {
         injector.callInContext(new ContextualCallable<Void>() {
           public Void call(InternalContext context) {
-            for (SingleMemberInjector injector : memberInjectors) {
-              injector.inject(errors, context, null);
+            for (SingleMemberInjector memberInjector : memberInjectors) {
+              // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
+              // or if we are in tool stage and the injection point is toolable.
+              if(injector.stage != Stage.TOOL || memberInjector.getInjectionPoint().isToolable()) {
+                memberInjector.inject(errors, context, null);
+              }
             }
             return null;
           }
