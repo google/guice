@@ -16,10 +16,11 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+
 import junit.framework.TestCase;
-import com.google.inject.internal.InjectorBuilder;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -30,7 +31,6 @@ public class ReflectionTest extends TestCase {
   @BindingAnnotation @interface I {}
 
   public void testNormalBinding() throws CreationException {
-    InjectorBuilder builder = new InjectorBuilder();
     final Foo foo = new Foo();
 
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -59,7 +59,6 @@ public class ReflectionTest extends TestCase {
   }
 
   public void testLinkedBinding() throws CreationException {
-    InjectorBuilder builder = new InjectorBuilder();
     final Bar bar = new Bar();
 
     Injector injector = Guice.createInjector(new AbstractModule() {

@@ -34,7 +34,7 @@ final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
     this.source = checkNotNull(source, "source");
   }
 
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency)
+  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     try {
       return errors.checkForNull(initializable.get(errors).get(), source, dependency);

@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Key;
 import com.google.inject.internal.BindingProcessor.CreationListener;
+import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 
 /**
@@ -41,16 +42,16 @@ final class BoundProviderFactory<T> implements InternalFactory<T>, CreationListe
 
   public void notify(Errors errors) {
     try {
-      providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source));
+      providerFactory = injector.getInternalFactory(providerKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
   }
 
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency)
+  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     errors = errors.withSource(providerKey);
-    javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency);
+    javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency, true);
     try {
       return errors.checkForNull(provider.get(), source, dependency);
     } catch(RuntimeException userException) {

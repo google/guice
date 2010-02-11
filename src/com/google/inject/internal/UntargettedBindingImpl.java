@@ -26,7 +26,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
 
   UntargettedBindingImpl(InjectorImpl injector, Key<T> key, Object source) {
     super(injector, key, source, new InternalFactory<T>() {
-      public T get(Errors errors, InternalContext context, Dependency<?> dependency) {
+      public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
         throw new AssertionError();
       }
     }, Scoping.UNSCOPED);

@@ -70,6 +70,7 @@ final class InjectorShell {
 
     private InjectorImpl parent;
     private Stage stage;
+    private boolean jitDisabled;
 
     /** null unless this exists in a {@link Binder#newPrivateBinder private environment} */
     private PrivateElementsImpl privateElements;
@@ -82,6 +83,11 @@ final class InjectorShell {
 
     Builder stage(Stage stage) {
       this.stage = stage;
+      return this;
+    }
+    
+    Builder jitDisabled(boolean jitDisabled) {
+      this.jitDisabled = jitDisabled;
       return this;
     }
 
@@ -113,7 +119,7 @@ final class InjectorShell {
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
 
-      InjectorImpl injector = new InjectorImpl(parent, state, stage);
+      InjectorImpl injector = new InjectorImpl(parent, state, stage, jitDisabled);
       if (privateElements != null) {
         privateElements.initInjector(injector);
       }
@@ -193,7 +199,7 @@ final class InjectorShell {
       this.injector = injector;
     }
 
-    public Injector get(Errors errors, InternalContext context, Dependency<?> dependency)
+    public Injector get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
         throws ErrorsException {
       return injector;
     }
@@ -221,7 +227,7 @@ final class InjectorShell {
   }
 
   private static class LoggerFactory implements InternalFactory<Logger>, Provider<Logger> {
-    public Logger get(Errors errors, InternalContext context, Dependency<?> dependency) {
+    public Logger get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked) {
       InjectionPoint injectionPoint = dependency.getInjectionPoint();
       return injectionPoint == null
           ? Logger.getAnonymousLogger()

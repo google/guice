@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Field;
@@ -37,7 +38,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
 
     // Ewwwww...
     field.setAccessible(true);
-    factory = injector.getInternalFactory(dependency.getKey(), errors);
+    factory = injector.getInternalFactory(dependency.getKey(), errors, JitLimitation.NO_JIT);
   }
 
   public InjectionPoint getInjectionPoint() {
@@ -49,7 +50,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
 
     Dependency previous = context.setDependency(dependency);
     try {
-      Object value = factory.get(errors, context, dependency);
+      Object value = factory.get(errors, context, dependency, false);
       field.set(o, value);
     } catch (ErrorsException e) {
       errors.withSource(injectionPoint).merge(e.getErrors());

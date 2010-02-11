@@ -49,8 +49,8 @@ final class ExposedKeyFactory<T> implements InternalFactory<T>, BindingProcessor
     this.delegate = explicitBinding;
   }
 
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency)
+  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    return delegate.getInternalFactory().get(errors, context, dependency);
+    return delegate.getInternalFactory().get(errors, context, dependency, linked);
   }
 }

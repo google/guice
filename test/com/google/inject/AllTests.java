@@ -74,6 +74,7 @@ public class AllTests {
     suite.addTestSuite(ImplicitBindingTest.class);
     suite.addTestSuite(TypeListenerTest.class);
     suite.addTestSuite(InjectorTest.class);
+    suite.addTestSuite(JitBindingsTest.class);
     // IntegrationTest is AOP-only
     suite.addTestSuite(KeyTest.class);
     suite.addTestSuite(LoggerInjectionTest.class);

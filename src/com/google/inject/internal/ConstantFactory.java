@@ -29,7 +29,7 @@ final class ConstantFactory<T> implements InternalFactory<T> {
     this.initializable = initializable;
   }
 
-  public T get(Errors errors, InternalContext context, Dependency dependency)
+  public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
     return initializable.get(errors);
   }

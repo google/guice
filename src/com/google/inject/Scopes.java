@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
+import java.lang.annotation.Annotation;
+
 import com.google.inject.internal.CircularDependencyProxy;
-import com.google.inject.internal.InjectorBuilder;
+import com.google.inject.internal.InjectorBuilderImpl;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
-import java.lang.annotation.Annotation;
 
 /**
  * Built-in scope implementations.
@@ -58,7 +59,7 @@ public class Scopes {
              *
              * This block is re-entrant for circular dependencies.
              */
-            synchronized (InjectorBuilder.class) {
+            synchronized (InjectorBuilderImpl.class) {
               if (instance == null) {
                 T provided = creator.get();
 

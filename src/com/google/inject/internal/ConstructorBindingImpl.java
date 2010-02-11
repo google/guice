@@ -50,7 +50,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
   public ConstructorBindingImpl(Key<T> key, Object source, Scoping scoping,
       InjectionPoint constructorInjectionPoint, Set<InjectionPoint> injectionPoints) {
     super(source, key, scoping);
-    this.factory = new Factory<T>();
+    this.factory = new Factory<T>(false, key);
     ConstructionProxy<T> constructionProxy
         = new DefaultConstructionProxyFactory<T>(constructorInjectionPoint).create();
     this.constructorInjectionPoint = constructorInjectionPoint;
@@ -60,9 +60,12 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
 
   /**
    * @param constructorInjector the constructor to use, or {@code null} to use the default.
+   * @param failIfNotLinked true if this ConstructorBindingImpl's InternalFactory should
+   *                             only succeed if retrieved from a linked binding
    */
   static <T> ConstructorBindingImpl<T> create(InjectorImpl injector, Key<T> key, 
-      InjectionPoint constructorInjector, Object source, Scoping scoping, Errors errors)
+      InjectionPoint constructorInjector, Object source, Scoping scoping, Errors errors,
+      boolean failIfNotLinked)
       throws ErrorsException {
     int numErrors = errors.size();
 
@@ -104,7 +107,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
 
     errors.throwIfNewErrors(numErrors);
 
-    Factory<T> factoryFactory = new Factory<T>();
+    Factory<T> factoryFactory = new Factory<T>(failIfNotLinked, key);
     InternalFactory<? extends T> scopedFactory
         = Scoping.scope(key, injector, factoryFactory, source, scoping);
 
@@ -172,12 +175,23 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
   }
 
   private static class Factory<T> implements InternalFactory<T> {
+    private final boolean failIfNotLinked;
+    private final Key<?> key;
     private ConstructorInjector<T> constructorInjector;
+    
+    Factory(boolean failIfNotLinked, Key<?> key) {
+      this.failIfNotLinked = failIfNotLinked;
+      this.key = key;
+    }
 
     @SuppressWarnings("unchecked")
-    public T get(Errors errors, InternalContext context, Dependency<?> dependency)
+    public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
         throws ErrorsException {
       checkState(constructorInjector != null, "Constructor not ready");
+      
+      if(failIfNotLinked && !linked) {
+        throw errors.jitDisabled(key).toException();
+      }
 
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.

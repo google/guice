@@ -27,11 +27,12 @@ interface InternalFactory<T> {
 
   /**
    * Creates an object to be injected.
-   *
    * @param context of this injection
+   * @param linked true if getting as a result of a linked binding
+   *
    * @throws com.google.inject.internal.ErrorsException if a value cannot be provided
    * @return instance to be injected
    */
-  T get(Errors errors, InternalContext context, Dependency<?> dependency)
+  T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException;
 }

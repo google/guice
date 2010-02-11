@@ -35,7 +35,7 @@ final class SingleParameterInjector<T> {
   private T inject(Errors errors, InternalContext context) throws ErrorsException {
     Dependency previous = context.setDependency(dependency);
     try {
-      return factory.get(errors.withSource(dependency), context, dependency);
+      return factory.get(errors.withSource(dependency), context, dependency, false);
     } finally {
       context.setDependency(previous);
     }

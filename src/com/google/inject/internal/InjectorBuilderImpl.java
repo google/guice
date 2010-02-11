@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Binding;
 import com.google.inject.Injector;
+import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
@@ -26,6 +27,8 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.Scope;
 import com.google.inject.spi.Dependency;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +54,7 @@ import java.lang.annotation.Annotation;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class InjectorBuilder {
+public final class InjectorBuilderImpl implements InjectorBuilder {
 
   private final Stopwatch stopwatch = new Stopwatch();
   private final Errors errors = new Errors();
@@ -65,7 +68,7 @@ public final class InjectorBuilder {
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
   private List<InjectorShell> shells;
 
-  public InjectorBuilder() {
+  public InjectorBuilderImpl() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
     bindingProcesor = new BindingProcessor(errors, initializer);
   }
@@ -79,6 +82,11 @@ public final class InjectorBuilder {
     this.stage = stage;
     return this;
   }
+  
+  public InjectorBuilder requireExplicitBindings() {
+    shellBuilder.jitDisabled(true);
+    return this;
+  }  
 
   /**
    * Sets the parent of the injector to-be-constructed. As a side effect, this sets this injector's
@@ -91,6 +99,12 @@ public final class InjectorBuilder {
 
   public InjectorBuilder addModules(Iterable<? extends Module> modules) {
     shellBuilder.addModules(modules);
+    return this;
+  }
+  
+  @Override
+  public InjectorBuilder addModules(Module... modules) {
+    shellBuilder.addModules(Arrays.asList(modules));
     return this;
   }
 
@@ -203,7 +217,7 @@ public final class InjectorBuilder {
               Dependency previous = context.setDependency(dependency);
               Errors errorsForBinding = errors.withSource(dependency);
               try {
-                binding.getInternalFactory().get(errorsForBinding, context, dependency);
+                binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
               } catch (ErrorsException e) {
                 errorsForBinding.merge(e.getErrors());
               } finally {
@@ -270,6 +284,9 @@ public final class InjectorBuilder {
     }
     public Injector createChildInjector(Module... modules) {
       return delegateInjector.createChildInjector(modules);
+    }
+    public InjectorBuilder createChildInjectorBuilder() {
+      return delegateInjector.createChildInjectorBuilder();
     }
     public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
       return delegateInjector.getScopeBindings();

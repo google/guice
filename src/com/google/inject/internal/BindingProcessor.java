@@ -88,7 +88,7 @@ final class BindingProcessor extends AbstractProcessor {
       public Void visit(ConstructorBinding<? extends T> binding) {
         try {
           ConstructorBindingImpl<T> onInjector = ConstructorBindingImpl.create(injector, key, 
-              binding.getConstructor(), source, scoping, errors);
+              binding.getConstructor(), source, scoping, errors, false);
           scheduleInitialization(onInjector);
           putBinding(onInjector);
         } catch (ErrorsException e) {
@@ -165,7 +165,7 @@ final class BindingProcessor extends AbstractProcessor {
         // This cast is safe after the preceeding check.
         try {
           BindingImpl<T> binding = injector.createUninitializedBinding(
-              key, scoping, source, errors);
+              key, scoping, source, errors, false);
           scheduleInitialization(binding);
           putBinding(binding);
         } catch (ErrorsException e) {

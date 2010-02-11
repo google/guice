@@ -17,10 +17,12 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
+import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 
 /**
  * A placeholder which enables us to swap in the real factory once the injector is created.
+ * Used for a linked binding, so that getting the linked binding returns the link's factory.
  */
 final class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.CreationListener {
 
@@ -40,15 +42,15 @@ final class FactoryProxy<T> implements InternalFactory<T>, BindingProcessor.Crea
 
   public void notify(final Errors errors) {
     try {
-      targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source));
+      targetFactory = injector.getInternalFactory(targetKey, errors.withSource(source), JitLimitation.NEW_OR_EXISTING_JIT);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
   }
 
-  public T get(Errors errors, InternalContext context, Dependency<?> dependency)
+  public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    return targetFactory.get(errors.withSource(targetKey), context, dependency);
+    return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
   }
 
   @Override public String toString() {
