@@ -18,12 +18,10 @@ package com.google.inject;
 
 import java.util.Arrays;
 
-import com.google.inject.internal.InjectorBuilderImpl;
-
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
- * {@link Module}s.
+ * {@link Module}s.  For advanced usage, see {@link InjectorBuilder}.
  *
  * <p>Guice supports a model of development that draws clear boundaries between
  * APIs, Implementations of these APIs, Modules which configure these
@@ -54,6 +52,9 @@ public final class Guice {
 
   /**
    * Creates an injector for the given set of modules.
+   * 
+   * To create an Injector with a {@link Stage} or other options, see
+   * {@link InjectorBuilder}.
    *
    * @throws CreationException if one or more errors occur during Injector
    *     construction
@@ -64,6 +65,9 @@ public final class Guice {
 
   /**
    * Creates an injector for the given set of modules.
+   * 
+   * To create an Injector with a {@link Stage} or other options, see
+   * {@link InjectorBuilder}.
    *
    * @throws CreationException if one or more errors occur during Injector
    *     creation
@@ -77,8 +81,11 @@ public final class Guice {
    * stage.
    *
    * @throws CreationException if one or more errors occur during Injector
-   *     creation
+   *     creation.
+   *     
+   * @deprecated Use {@link InjectorBuilder} for advanced Injector creation.
    */
+  @Deprecated
   public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
   }
@@ -89,21 +96,15 @@ public final class Guice {
    *
    * @throws CreationException if one or more errors occur during Injector
    *     construction
+   *     
+   * @deprecated Use {@link InjectorBuilder} for advanced Injector creation.
    */
+  @Deprecated
   public static Injector createInjector(Stage stage,
       Iterable<? extends Module> modules) {
-    return new InjectorBuilderImpl()
+    return new InjectorBuilder()
         .stage(stage)
         .addModules(modules)
         .build();
-  }
-  
-  /** 
-   * Creates an {@link InjectorBuilder} which can be used to create an injector.
-   *
-   * @since 2.1
-   */
-  public static InjectorBuilder createInjectorBuilder() {
-    return new InjectorBuilderImpl().stage(Stage.DEVELOPMENT);
   }
 }

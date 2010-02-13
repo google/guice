@@ -1,5 +1,6 @@
 package com.google.inject;
 
+import static com.google.inject.Asserts.assertContains;
 import junit.framework.TestCase;
 
 /**
@@ -18,7 +19,7 @@ public class JitBindingsTest extends TestCase {
   }
   
   public void testLinkedBindingWorks() {
-    Injector injector = Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
       protected void configure() {
         bind(Foo.class).to(FooImpl.class);
@@ -33,7 +34,7 @@ public class JitBindingsTest extends TestCase {
   }
   
   public void testMoreBasicsWork() {
-    Injector injector = Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
       protected void configure() {
         bind(Foo.class).to(FooImpl.class);
@@ -50,7 +51,7 @@ public class JitBindingsTest extends TestCase {
   }
   
   public void testLinkedProviderBindingWorks() {
-    Injector injector = Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
       protected void configure() {
         bind(Foo.class).toProvider(FooProvider.class);
@@ -65,17 +66,17 @@ public class JitBindingsTest extends TestCase {
   
   public void testJitGetFails() {
     try {
-      Guice.createInjectorBuilder().requireExplicitBindings().build().getInstance(Bar.class);
+      new InjectorBuilder().requireExplicitBindings().build().getInstance(Bar.class);
       fail("should have failed");
     } catch(ConfigurationException expected) {
-      Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
+      assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
       assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
     }
   }
   
   public void testJitInjectionFails() {
     try {
-      Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
         @Override
         protected void configure() {
           bind(Foo.class).to(FooImpl.class);
@@ -84,24 +85,24 @@ public class JitBindingsTest extends TestCase {
       }).build();
       fail("should have failed");
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
+      assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
       assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
     }
   }
 
   public void testJitProviderGetFails() {
     try {
-      Guice.createInjectorBuilder().requireExplicitBindings().build().getProvider(Bar.class);
+      new InjectorBuilder().requireExplicitBindings().build().getProvider(Bar.class);
       fail("should have failed");
     } catch (ConfigurationException expected) {
-      Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
+      assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
       assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
     }
   }
 
   public void testJitProviderInjectionFails() {
     try {
-      Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
         @Override
         protected void configure() {
           bind(Foo.class).to(FooImpl.class);
@@ -110,13 +111,13 @@ public class JitBindingsTest extends TestCase {
       }).build();
       fail("should have failed");
     } catch (CreationException expected) {
-      Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
+      assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
       assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
     }
   }
   
   public void testImplementedBy() {
-    Injector injector = Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
       protected void configure() {
         bind(ImplBy.class);
@@ -127,7 +128,7 @@ public class JitBindingsTest extends TestCase {
   }
   
   public void testProvidedBy() {
-    Injector injector = Guice.createInjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
       protected void configure() {
         bind(ProvBy.class);
@@ -135,6 +136,80 @@ public class JitBindingsTest extends TestCase {
     }).build();
     ensureWorks(injector, ProvBy.class);
     ensureFails(injector, true, ProvByProvider.class);
+  }
+  
+  public void testProviderMethods() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override protected void configure() {}
+      @SuppressWarnings("unused") @Provides Foo foo() { return new FooImpl(); }
+    }).build();
+    ensureWorks(injector, Foo.class);
+  }
+  
+  public void testChildInjectors() {
+    Injector parent = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Bar.class);
+      }
+    }).build();
+    ensureWorks(parent, Bar.class);
+    ensureFails(parent, false, FooImpl.class, FooBar.class, Foo.class);
+    
+    try {
+      parent.createChildInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(FooBar.class);
+        }
+      });
+      fail("should have failed");
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(), "1) " + jitFailed(Foo.class));
+      assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
+    }
+    
+    Injector child = parent.createChildInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).to(FooImpl.class);
+      }
+    });
+    ensureWorks(child, Foo.class, Bar.class);
+    ensureFails(child, true, FooImpl.class);
+    ensureFails(parent, false, FooImpl.class, FooBar.class, Foo.class); // parent still doesn't have these
+    
+    Injector grandchild = child.createChildInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(FooBar.class);
+      }
+    });
+    ensureWorks(grandchild, FooBar.class, Foo.class, Bar.class);
+    ensureFails(grandchild, true, FooImpl.class);
+    ensureFails(child, true, FooImpl.class);
+    ensureFails(parent, false, FooImpl.class, FooBar.class, Foo.class); // parent still doesn't have these    
+  }
+
+  public void testPrivateModules() {
+    try {
+      new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+        protected void configure() {
+          bind(Foo.class).to(FooImpl.class);
+  
+          install(new PrivateModule() {
+            public void configure() {
+              bind(FooBar.class);
+              expose(FooBar.class);
+            }
+          });
+        }
+      }).build();
+      fail("should have failed");
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
+      assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
+    }
   }
   
   private void ensureWorks(Injector injector, Class<?>... classes) {
@@ -151,7 +226,7 @@ public class JitBindingsTest extends TestCase {
         injector.getInstance(classes[i]);
         fail("should have failed");
       } catch(ConfigurationException expected) {
-        Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
+        assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
         assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
       }
       
@@ -159,7 +234,7 @@ public class JitBindingsTest extends TestCase {
         injector.getProvider(classes[i]);
         fail("should have failed");
       } catch(ConfigurationException expected) {
-        Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
+        assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
         assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
       }
       
@@ -169,7 +244,7 @@ public class JitBindingsTest extends TestCase {
           binding.getProvider();
           fail("should have failed");
         } catch(ConfigurationException expected) {
-          Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
+          assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
           assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
         }
       } else {
@@ -177,7 +252,7 @@ public class JitBindingsTest extends TestCase {
           injector.getBinding(classes[i]);
           fail("should have failed");          
         } catch(ConfigurationException expected) {
-          Asserts.assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
+          assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
           assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
         }
       }
@@ -196,7 +271,6 @@ public class JitBindingsTest extends TestCase {
     @SuppressWarnings("unused") @Inject Provider<Bar> bar;
   }
   private static class FooProvider implements Provider<Foo> {
-    @Override
     public Foo get() {
       return new FooImpl();
     }
@@ -209,7 +283,6 @@ public class JitBindingsTest extends TestCase {
   @ProvidedBy(ProvByProvider.class)
   private static interface ProvBy {}
   private static class ProvByProvider implements Provider<ProvBy> {
-    @Override
     public ProvBy get() {
       return new ProvBy() {};
     }

@@ -223,13 +223,6 @@ public interface Injector {
    * @since 2.0
    */
   Injector createChildInjector(Module... modules);
-  
-  /**
-   * Creates an InjectorBuilder for a child injector.
-   *
-   * @since 2.1
-   */
-  InjectorBuilder createChildInjectorBuilder();
 
   /**
    * Returns a map containing all scopes in the injector. The maps keys are scoping annotations

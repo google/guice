@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import com.google.inject.Binding;
 import com.google.inject.Injector;
-import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
@@ -28,7 +27,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.Scope;
 import com.google.inject.spi.Dependency;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +52,10 @@ import java.lang.annotation.Annotation;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public final class InjectorBuilderImpl implements InjectorBuilder {
+public final class InternalInjectorCreator {
 
   private final Stopwatch stopwatch = new Stopwatch();
   private final Errors errors = new Errors();
-
-  private Stage stage;
 
   private final Initializer initializer = new Initializer();
   private final BindingProcessor bindingProcesor;
@@ -67,44 +63,40 @@ public final class InjectorBuilderImpl implements InjectorBuilder {
 
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
   private List<InjectorShell> shells;
+  
+  public static class InjectorOptions {
+    final Stage stage;
+    final boolean jitDisabled;
+    
+    public InjectorOptions(Stage stage, boolean jitDisabled) {
+      this.stage = stage;
+      this.jitDisabled = jitDisabled;
+    }
+  }
 
-  public InjectorBuilderImpl() {
+  public InternalInjectorCreator() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
     bindingProcesor = new BindingProcessor(errors, initializer);
   }
-
-  /**
-   * Sets the stage for the created injector. If the stage is {@link Stage#PRODUCTION}, this class
-   * will eagerly load singletons.
-   */
-  public InjectorBuilder stage(Stage stage) {
-    shellBuilder.stage(stage);
-    this.stage = stage;
-    return this;
-  }
   
-  public InjectorBuilder requireExplicitBindings() {
-    shellBuilder.jitDisabled(true);
+  public InternalInjectorCreator injectorOptions(InjectorOptions options) {
+    shellBuilder.setInjectorOptions(options);
     return this;
   }  
 
   /**
-   * Sets the parent of the injector to-be-constructed. As a side effect, this sets this injector's
-   * stage to the stage of {@code parent}.
+   * Sets the parent of the injector to-be-constructed.As a side effect, this sets this injector's
+   * stage to the stage of {@code parent} and sets {@link #requireExplicitBindings()} if the parent
+   * injector also required them.
    */
-  public InjectorBuilder parentInjector(InjectorImpl parent) {
+  public InternalInjectorCreator parentInjector(InjectorImpl parent) {
     shellBuilder.parent(parent);
-    return stage(parent.getInstance(Stage.class));
-  }
-
-  public InjectorBuilder addModules(Iterable<? extends Module> modules) {
-    shellBuilder.addModules(modules);
+    shellBuilder.setInjectorOptions(parent.options);
     return this;
   }
-  
-  @Override
-  public InjectorBuilder addModules(Module... modules) {
-    shellBuilder.addModules(Arrays.asList(modules));
+
+  public InternalInjectorCreator addModules(Iterable<? extends Module> modules) {
+    shellBuilder.addModules(modules);
     return this;
   }
 
@@ -124,7 +116,7 @@ public final class InjectorBuilderImpl implements InjectorBuilder {
 
     injectDynamically();
 
-    if (stage == Stage.TOOL) {
+    if (shellBuilder.getInjectorOptions().stage == Stage.TOOL) {
       // wrap the primaryInjector in a ToolStageInjector
       // to prevent non-tool-friendy methods from being called.
       return new ToolStageInjector(primaryInjector());
@@ -190,9 +182,9 @@ public final class InjectorBuilderImpl implements InjectorBuilder {
     stopwatch.resetAndLog("Instance injection");
     errors.throwCreationExceptionIfErrorsExist();
 
-    if(stage != Stage.TOOL) {
+    if(shellBuilder.getInjectorOptions().stage != Stage.TOOL) {
       for (InjectorShell shell : shells) {
-        loadEagerSingletons(shell.getInjector(), stage, errors);
+        loadEagerSingletons(shell.getInjector(), shellBuilder.getInjectorOptions().stage, errors);
       }
       stopwatch.resetAndLog("Preloading singletons");
     }
@@ -284,9 +276,6 @@ public final class InjectorBuilderImpl implements InjectorBuilder {
     }
     public Injector createChildInjector(Module... modules) {
       return delegateInjector.createChildInjector(modules);
-    }
-    public InjectorBuilder createChildInjectorBuilder() {
-      return delegateInjector.createChildInjectorBuilder();
     }
     public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
       return delegateInjector.getScopeBindings();

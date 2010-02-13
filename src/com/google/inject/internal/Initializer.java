@@ -142,7 +142,7 @@ final class Initializer {
       if (pendingInjection.remove(instance) != null) {
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
-        membersInjector.injectAndNotify(instance, errors.withSource(source), injector.stage == Stage.TOOL);
+        membersInjector.injectAndNotify(instance, errors.withSource(source), injector.options.stage == Stage.TOOL);
       }
 
       return instance;

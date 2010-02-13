@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Stage;
+import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
 import com.google.inject.spi.PrivateElements;
 import java.util.List;
 
@@ -27,18 +27,18 @@ import java.util.List;
  */
 final class PrivateElementProcessor extends AbstractProcessor {
 
-  private final Stage stage;
+  private final InjectorOptions options;
   private final List<InjectorShell.Builder> injectorShellBuilders = Lists.newArrayList();
 
-  PrivateElementProcessor(Errors errors, Stage stage) {
+  PrivateElementProcessor(Errors errors, InjectorOptions options) {
     super(errors);
-    this.stage = stage;
+    this.options = options;
   }
 
   @Override public Boolean visit(PrivateElements privateElements) {
     InjectorShell.Builder builder = new InjectorShell.Builder()
         .parent(injector)
-        .stage(stage)
+        .setInjectorOptions(options)
         .privateElements(privateElements);
     injectorShellBuilders.add(builder);
     return true;

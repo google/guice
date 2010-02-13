@@ -29,8 +29,8 @@ import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
-import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
@@ -70,19 +70,17 @@ final class InjectorImpl implements Injector, Lookups {
   final State state;
   final InjectorImpl parent;
   final BindingsMultimap bindingsMultimap = new BindingsMultimap();
-  final Stage stage;
-  final boolean jitDisabled;
+  final InjectorOptions options;
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
 
   Lookups lookups = new DeferredLookups(this);
 
-  InjectorImpl(@Nullable InjectorImpl parent, State state, Stage stage, boolean jitDisabled) {
+  InjectorImpl(@Nullable InjectorImpl parent, State state, InjectorOptions injectorOptions) {
     this.parent = parent;
     this.state = state;
-    this.stage = stage;
-    this.jitDisabled = jitDisabled;
+    this.options = injectorOptions;
 
     if (parent != null) {
       localContext = parent.localContext;
@@ -149,7 +147,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   public Injector createChildInjector(Iterable<? extends Module> modules) {
-    return new InjectorBuilderImpl()
+    return new InternalInjectorCreator()
         .parentInjector(this)
         .addModules(modules)
         .build();
@@ -157,12 +155,6 @@ final class InjectorImpl implements Injector, Lookups {
 
   public Injector createChildInjector(Module... modules) {
     return createChildInjector(ImmutableList.of(modules));
-  }
-  
-  @Override
-  public InjectorBuilder createChildInjectorBuilder() {
-    return new InjectorBuilderImpl()
-      .parentInjector(this);
   }
 
   /**
@@ -174,7 +166,7 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
 
 
-    if(jitDisabled && jitType == JitLimitation.NO_JIT && !isProvider(key)) {
+    if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !isProvider(key)) {
       throw errors.jitDisabled(key).toException();
     }
     
@@ -189,7 +181,7 @@ final class InjectorImpl implements Injector, Lookups {
         }
       }
       
-      if(jitDisabled && jitType != JitLimitation.NEW_OR_EXISTING_JIT && !isProvider(key)) {
+      if(options.jitDisabled && jitType != JitLimitation.NEW_OR_EXISTING_JIT && !isProvider(key)) {
         throw errors.jitDisabled(key).toException();
       } else {
         return createJustInTimeBindingRecursive(key, errors);
@@ -454,7 +446,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     
-    return ConstructorBindingImpl.create(this, key, null, source, scoping, errors, jitBinding && jitDisabled);
+    return ConstructorBindingImpl.create(this, key, null, source, scoping, errors, jitBinding && options.jitDisabled);
   }
 
   /**
@@ -584,7 +576,7 @@ final class InjectorImpl implements Injector, Lookups {
   private <T> BindingImpl<T> createJustInTimeBindingRecursive(Key<T> key, Errors errors)
       throws ErrorsException {
     // ask the parent to create the JIT binding
-    if (parent != null && !parent.jitDisabled) {
+    if (parent != null && !parent.options.jitDisabled) {
       try {
         return parent.createJustInTimeBindingRecursive(key, new Errors());
       } catch (ErrorsException ignored) {

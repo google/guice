@@ -110,7 +110,7 @@ final class InjectionRequestProcessor extends AbstractProcessor {
             for (SingleMemberInjector memberInjector : memberInjectors) {
               // Run injections if we're not in tool stage (ie, PRODUCTION or DEV),
               // or if we are in tool stage and the injection point is toolable.
-              if(injector.stage != Stage.TOOL || memberInjector.getInjectionPoint().isToolable()) {
+              if(injector.options.stage != Stage.TOOL || memberInjector.getInjectionPoint().isToolable()) {
                 memberInjector.inject(errors, context, null);
               }
             }
