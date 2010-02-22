@@ -310,7 +310,7 @@ public interface Binder {
 
   /**
    * Returns the provider used to obtain instances for the given injection key.
-   * The returned will not be valid until the {@link Injector} has been
+   * The returned provider will not be valid until the {@link Injector} has been
    * created. The provider will throw an {@code IllegalStateException} if you
    * try to use it beforehand.
    *

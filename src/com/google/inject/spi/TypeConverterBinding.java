@@ -26,7 +26,7 @@ import com.google.inject.matcher.Matcher;
  * explicitly in a module using {@link com.google.inject.Binder#convertToTypes(Matcher,
  * TypeConverter) convertToTypes()} statements:
  * <pre>
- *     convertToTypes(Matchers.only(DateTime.class), new DateTimeConverter());</pre>
+ *     convertToTypes(Matchers.only(TypeLiteral.get(DateTime.class)), new DateTimeConverter());</pre>
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
