@@ -265,6 +265,9 @@ public final class InternalInjectorCreator {
     public <T> Binding<T> getBinding(Class<T> type) {
       return this.delegateInjector.getBinding(type);
     }
+    public <T> Binding<T> getExistingBinding(Key<T> key) {
+      return this.delegateInjector.getExistingBinding(key);
+    }
     public <T> List<Binding<T>> findBindingsByType(TypeLiteral<T> type) {
       return this.delegateInjector.findBindingsByType(type);
     }

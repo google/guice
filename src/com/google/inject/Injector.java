@@ -137,6 +137,15 @@ public interface Injector {
    * @since 2.0
    */
   <T> Binding<T> getBinding(Class<T> type);
+  
+  /**
+   * Returns the binding if it already exists, or null if does not exist. Unlike
+   * {@link #getBinding(Key)}, this does not attempt to create just-in-time bindings
+   * for keys that aren't bound.
+   * 
+   * <p> This method is part of the Guice SPI and is intended for use by tools and extensions.
+   */
+  <T> Binding<T> getExistingBinding(Key<T> key);  
 
   /**
    * Returns all explicit bindings for {@code type}.

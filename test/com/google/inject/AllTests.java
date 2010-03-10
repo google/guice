@@ -30,6 +30,7 @@ import com.google.inject.spi.ElementApplyToTest;
 import com.google.inject.spi.ElementsTest;
 import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
+import com.google.inject.spi.InjectorSpiTest;
 import com.google.inject.spi.ModuleRewriterTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
@@ -119,6 +120,7 @@ public class AllTests {
     suite.addTestSuite(ElementApplyToTest.class);
     suite.addTestSuite(HasDependenciesTest.class);
     suite.addTestSuite(InjectionPointTest.class);
+    suite.addTestSuite(InjectorSpiTest.class);
     suite.addTestSuite(ModuleRewriterTest.class);
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(SpiBindingsTest.class);

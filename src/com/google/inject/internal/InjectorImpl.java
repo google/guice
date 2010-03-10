@@ -120,6 +120,42 @@ final class InjectorImpl implements Injector, Lookups {
     }
   }
 
+  public <T> BindingImpl<T> getExistingBinding(Key<T> key) {
+    // Check explicit bindings, i.e. bindings created by modules.
+    BindingImpl<T> explicitBinding = state.getExplicitBinding(key);
+    if (explicitBinding != null) {
+      return explicitBinding;
+    }
+    synchronized (state.lock()) {
+      // See if any jit bindings have been created for this key.
+      for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
+        @SuppressWarnings("unchecked")
+        BindingImpl<T> jitBinding = (BindingImpl<T>) injector.jitBindings.get(key);
+        if(jitBinding != null) {
+          return jitBinding;
+        }
+      }
+    }
+    
+    // If Key is a Provider, we have to see if the type it is providing exists,
+    // and, if so, we have to create the binding for the provider.
+    if(isProvider(key)) {
+      try {
+        // This is safe because isProvider above ensures that T is a Provider<?>
+        @SuppressWarnings("unchecked")
+        Key<?> providedKey = (Key<?>)getProvidedKey((Key)key, new Errors());
+        if(getExistingBinding(providedKey) != null) {
+          return getBinding(key);
+        }
+      } catch(ErrorsException e) {
+        throw new ConfigurationException(e.getErrors().getMessages());
+      }
+    }
+
+    // No existing binding exists.
+    return null;
+  }
+
   /**
    * Gets a binding implementation.  First, it check to see if the parent has a binding.  If the
    * parent has a binding and the binding is scoped, it will use that binding.  Otherwise, this
@@ -193,6 +229,21 @@ final class InjectorImpl implements Injector, Lookups {
   private static boolean isProvider(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(Provider.class);
   }
+  
+  private static <T> Key<T> getProvidedKey(Key<Provider<T>> key, Errors errors) throws ErrorsException {
+    Type providerType = key.getTypeLiteral().getType();
+
+    // If the Provider has no type parameter (raw Provider)...
+    if (!(providerType instanceof ParameterizedType)) {
+      throw errors.cannotInjectRawProvider().toException();
+    }
+
+    Type entryType = ((ParameterizedType) providerType).getActualTypeArguments()[0];
+
+    @SuppressWarnings("unchecked") // safe because T came from Key<Provider<T>>
+    Key<T> providedKey = (Key<T>) key.ofType(entryType);
+    return providedKey;
+  }
 
   /** Returns true if the key type is MembersInjector (but not a subclass of MembersInjector). */
   private static boolean isMembersInjector(Key<?> key) {
@@ -226,18 +277,7 @@ final class InjectorImpl implements Injector, Lookups {
    */
   private <T> BindingImpl<Provider<T>> createProviderBinding(Key<Provider<T>> key, Errors errors)
       throws ErrorsException {
-    Type providerType = key.getTypeLiteral().getType();
-
-    // If the Provider has no type parameter (raw Provider)...
-    if (!(providerType instanceof ParameterizedType)) {
-      throw errors.cannotInjectRawProvider().toException();
-    }
-
-    Type entryType = ((ParameterizedType) providerType).getActualTypeArguments()[0];
-
-    @SuppressWarnings("unchecked") // safe because T came from Key<Provider<T>>
-    Key<T> providedKey = (Key<T>) key.ofType(entryType);
-
+    Key<T> providedKey = getProvidedKey(key, errors);
     BindingImpl<T> delegate = getBindingOrThrow(providedKey, errors, JitLimitation.NO_JIT);
     return new ProviderBindingImpl<T>(this, key, delegate);
   }
