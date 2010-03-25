@@ -244,6 +244,39 @@ public class FactoryProvider2Test extends TestCase {
       this.color = color;
     }
   }
+  
+  public void testAssistedProviderInjection() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(String.class).toInstance("trans am");
+        bind(ColoredCarFactory.class).toProvider(
+            FactoryProvider.newFactory(ColoredCarFactory.class, Flamingbird.class));
+      }
+    });
+    ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
+
+    Flamingbird flamingbird = (Flamingbird) carFactory.create(Color.BLACK);
+    assertEquals(Color.BLACK, flamingbird.colorProvider.get());
+    assertEquals("trans am", flamingbird.modifiersProvider.get());
+    
+    Flamingbird flamingbird2 = (Flamingbird) carFactory.create(Color.RED);
+    assertEquals(Color.RED, flamingbird2.colorProvider.get());
+    assertEquals("trans am", flamingbird2.modifiersProvider.get());
+    // Make sure the original flamingbird is black still.
+    assertEquals(Color.BLACK, flamingbird.colorProvider.get());
+  }  
+  
+  public static class Flamingbird implements Car {
+    private final Provider<String> modifiersProvider;
+    private final Provider<Color> colorProvider;
+
+    @Inject
+    public Flamingbird(Provider<String> modifiersProvider, @Assisted Provider<Color> colorProvider) {
+      this.modifiersProvider = modifiersProvider;
+      this.colorProvider = colorProvider;
+    }
+  }
 
   public void testTypeTokenInjection() {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -502,6 +535,13 @@ public class FactoryProvider2Test extends TestCase {
     Subaru subaru = (Subaru) carFactory.create(Color.RED);
 
     assertSame(Color.RED, subaru.colorProvider.get());
+    assertSame(Color.RED, subaru.colorProvider.get());
+    
+    Subaru sedan  = (Subaru) carFactory.create(Color.BLUE);
+    assertSame(Color.BLUE, sedan.colorProvider.get());
+    assertSame(Color.BLUE, sedan.colorProvider.get());
+    
+    // and make sure the subaru is still red
     assertSame(Color.RED, subaru.colorProvider.get());
   }
 
@@ -895,4 +935,31 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(50000.0d, camaroPolicy.limit);
     assertEquals(camaro, camaroPolicy.car);
   }
+
+  public void testInjectingAndUsingInjector() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bind(ColoredCarFactory.class).toProvider(
+            FactoryProvider.newFactory(ColoredCarFactory.class, Segway.class));
+      }
+    });
+
+    ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
+    Segway green = (Segway)carFactory.create(Color.GREEN);
+    assertSame(Color.GREEN, green.getColor());
+    assertSame(Color.GREEN, green.getColor());
+    
+    Segway pink = (Segway)carFactory.create(Color.PINK);
+    assertSame(Color.PINK, pink.getColor());
+    assertSame(Color.PINK, pink.getColor());
+    assertSame(Color.GREEN, green.getColor());
+  }
+  
+  static class Segway implements Car {
+    @Inject Injector injector;
+    
+    Color getColor() { return injector.getInstance(Key.get(Color.class, FactoryProvider2.DEFAULT_ANNOTATION)); }
+  }
+  
+  
 }
