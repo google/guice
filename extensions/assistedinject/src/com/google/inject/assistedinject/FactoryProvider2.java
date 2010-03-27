@@ -172,22 +172,17 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         if(implementation == null) {
           implementation = returnType.getTypeLiteral();
         }
-        // TODO: Support finding the proper constructor per method...
-        // Right now, this will fail later on if it's the wrong constructor, because it will
-        // be missing necessary bindings.
-        InjectionPoint ctorInjectionPoint = null;
+        InjectionPoint ctorInjectionPoint = findMatchingConstructorInjectionPoint(method, implementation, immutableParamList, errors);
         Constructor<?> constructor = null;
-        try {
-          ctorInjectionPoint = InjectionPoint.forConstructorOf(implementation);
-        } catch(ConfigurationException ce) {
-          // There are two reasons this could throw.
+        if(ctorInjectionPoint != null) {
+          // There are three reasons this could be null:
           // 1) The implementation is an interface and is forwarded (explicitly or implicitly)
           //    to another binding (see FactoryModuleBuildTest.test[Implicit|Explicit]ForwardingAssistedBinding.
           //    In this case, things are OK and the exception is right to be ignored.
           // 2) The implementation has something wrong with its constructors (two @injects, invalid ctor, etc..)
           //    In this case, by having a null constructor we let the proper exception be recreated later on.
-        }
-        if(ctorInjectionPoint != null) {
+          // 3) findMatchingConstructor added errors to the Errors object and returned null, in which case
+          //    this method will appropriately throw an exception later on.
           constructor = (Constructor)ctorInjectionPoint.getMember();
         }
         
@@ -225,6 +220,97 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
   public F get() {
     return factory;
+  }
+
+  /**
+   * Finds a constructor suitable for the method.  If the implementation contained any constructors
+   * marked with {@link AssistedInject}, this requires all {@link Assisted} parameters to exactly
+   * match the parameters (in any order) listed in the method.  Otherwise, if no
+   * {@link AssistedInject} constructors exist, this will default to looking for an
+   * {@literal @}{@link Inject} constructor.
+   */
+  private InjectionPoint findMatchingConstructorInjectionPoint(Method method,
+      TypeLiteral<?> implementation, List<Key<?>> paramList, Errors errors) throws ErrorsException {
+    Constructor<?> matchingConstructor = null;
+    boolean anyAssistedInjectConstructors = false;
+    // Look for AssistedInject constructors...
+    for (Constructor<?> constructor : implementation.getRawType().getDeclaredConstructors()) {
+      if (constructor.isAnnotationPresent(AssistedInject.class)) {
+        anyAssistedInjectConstructors = true;
+        if (constructorHasMatchingParams(implementation, constructor, paramList, errors)) {
+          if (matchingConstructor != null) {
+            errors
+                .addMessage(
+                    "%s has more than one constructor annotated with @AssistedInject"
+                        + " that matches the parameters in method %s.  Unable to create AssistedInject factory.",
+                    implementation, method);
+            return null;
+          } else {
+            matchingConstructor = constructor;
+          }
+        }
+      }
+    }
+    
+    if(!anyAssistedInjectConstructors) {
+      // If none existed, use @Inject.
+      try {
+        return InjectionPoint.forConstructorOf(implementation);
+      } catch(ConfigurationException ignored) {
+        // This will be handled later more appropriately (with a good message).
+        return null;
+      }
+    } else {
+      // Otherwise, use it or fail with a good error message.
+      if(matchingConstructor != null) {
+          // safe because we got the constructor from this implementation.
+          @SuppressWarnings("unchecked")
+          InjectionPoint ip = InjectionPoint.forConstructor(
+              (Constructor)matchingConstructor, implementation);
+          return ip;
+      } else {
+        errors.addMessage(
+            "%s has @AssistedInject constructors, but none of them match the"
+            + " parameters in method %s.  Unable to create AssistedInject factory.",
+            implementation, method);
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Matching logic for constructors annotated with AssistedInject.
+   * This returns true if and only if all @Assisted parameters in the
+   * constructor exactly match (in any order) all @Assisted parameters
+   * the method's parameter.
+   */
+  private boolean constructorHasMatchingParams(TypeLiteral<?> type,
+      Constructor<?> constructor, List<Key<?>> paramList, Errors errors)
+      throws ErrorsException {
+    List<TypeLiteral<?>> params = type.getParameterTypes(constructor);
+    Annotation[][] paramAnnotations = constructor.getParameterAnnotations();
+    int p = 0;
+    List<Key<?>> constructorKeys = Lists.newArrayList();
+    for (TypeLiteral<?> param : params) {
+      Key<?> paramKey = getKey(param, constructor, paramAnnotations[p++],
+          errors);
+      constructorKeys.add(paramKey);
+    }
+    // Require that every key exist in the constructor to match up exactly.
+    for (Key<?> key : paramList) {
+      // If it didn't exist in the constructor set, we can't use it.
+      if (!constructorKeys.remove(key)) {
+        return false;
+      }
+    }
+    // If any keys remain and their annotation is Assisted, we can't use it.
+    for (Key<?> key : constructorKeys) {
+      if (key.getAnnotationType() == Assisted.class) {
+        return false;
+      }
+    }
+    // All @Assisted params match up to the method's parameters.
+    return true;
   }
   
   /**

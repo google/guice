@@ -142,7 +142,10 @@ import java.util.Set;
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  * @author dtm@google.com (Daniel Martin)
+ * 
+ * @deprecated use {@link FactoryModuleBuilder} instead.
  */
+@Deprecated
 public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
   /*

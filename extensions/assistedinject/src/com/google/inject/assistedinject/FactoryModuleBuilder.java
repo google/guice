@@ -55,6 +55,36 @@ import java.lang.annotation.Annotation;
  *     ...
  *   }
  * }</pre>
+ * 
+ * <h3>Multiple factory methods for the same type</h3>
+ * If the factory contains many methods that return the same type, you can create multiple
+ * constructors in your concrete class, each constructor marked with with
+ * {@literal @}{@link AssistedInject}, in order to match the different parameters types of the
+ * factory methods. 
+ * 
+ * <pre>public interface PaymentFactory {
+ *    Payment create(Date startDate, Money amount);
+ *    Payment createWithoutDate(Money amount);
+ * }
+ * 
+ * public class RealPayment implements Payment {
+ *  {@literal @}AssistedInject
+ *   public RealPayment(
+ *      CreditService creditService,
+ *      AuthService authService,
+ *     <strong>{@literal @}Assisted Date startDate</strong>,
+ *     <strong>{@literal @}Assisted Money amount</strong>) {
+ *     ...
+ *   }
+ *   
+ *  {@literal @}AssistedInject
+ *   public RealPayment(
+ *      CreditService creditService,
+ *      AuthService authService,
+ *     <strong>{@literal @}Assisted Money amount</strong>) {
+ *     ...
+ *   }   
+ * }</pre> 
  *
  * <h3>Configuring simple factories</h3>
  * In your {@link Module module}, install a {@code FactoryModuleBuilder} that creates the
