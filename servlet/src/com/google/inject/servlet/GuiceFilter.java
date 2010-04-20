@@ -60,6 +60,12 @@ public class GuiceFilter implements Filter {
   static final ThreadLocal<Context> localContext = new ThreadLocal<Context>();
   static volatile FilterPipeline pipeline = new DefaultFilterPipeline();
 
+  /**
+   * We allow both the static and dynamic versions of the pipeline to exist.
+   */
+  @Inject
+  private final FilterPipeline injectedPipeline = null;
+
   /** Used to inject the servlets configured via {@link ServletModule} */
   static volatile WeakReference<ServletContext> servletContext =
       new WeakReference<ServletContext>(null);
@@ -69,21 +75,25 @@ public class GuiceFilter implements Filter {
           + " ServletModule in your web application. While you may "
           + "have more than one injector, you should only configure"
           + " guice-servlet in one of them. (Hint: look for legacy "
-          + "ServetModules or multiple calls to Servlets.configure()).";
+          + "ServetModules or multiple calls to Servlets.configure())."
+          + "You typically see this error if are not using."
+          + GuiceServletContextListener.class.getSimpleName()
+          + " as described in the documentation.";
 
   //VisibleForTesting
   @Inject
   static void setPipeline(FilterPipeline pipeline, Stage stage) {
 
     // Multiple injectors with Servlet pipelines?!
-    // We don't throw an exception in DEVELOPMENT stage, to allow for legacy
-    // tests that don't have a tearDown that calls GuiceFilter#destroy().
+    // We don't throw an exception, to allow for legacy
+    // tests that don't have a tearDown that calls GuiceFilter#destroy(),
+    // and so we don't force people to use the static filter pipeline
+    // (e.g. Jetty/OpenGSE filters constructed in Guice, rather than via web.xml)
     if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
-      if (Stage.PRODUCTION.equals(stage)) {
-        throw new RuntimeException(MULTIPLE_INJECTORS_ERROR);
-      } else {
         Logger.getLogger(GuiceFilter.class.getName()).warning(MULTIPLE_INJECTORS_ERROR);
-      }
+
+        // TODO(dhanji): should we return early here and refuse to overwrite
+        // the existing pipleine? That may break some broken apps =)
     }
 
     // We overwrite the default pipeline
@@ -100,7 +110,9 @@ public class GuiceFilter implements Filter {
       throws IOException, ServletException {
 
     Context previous = localContext.get();
-    FilterPipeline filterPipeline = pipeline;
+
+    // Prefer the injected pipeline, but fall back on the static one for web.xml users.
+    FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
 
     try {
       localContext.set(new Context((HttpServletRequest) servletRequest,
@@ -165,14 +177,16 @@ public class GuiceFilter implements Filter {
     // In the default pipeline, this is a noop. However, if replaced
     // by a managed pipeline, a lazy init will be triggered the first time
     // dispatch occurs.
-    GuiceFilter.pipeline.initPipeline(servletContext);
+    FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
+    filterPipeline.initPipeline(servletContext);
   }
 
   public void destroy() {
 
     try {
       // Destroy all registered filters & servlets in that order
-      pipeline.destroyPipeline();
+      FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
+      filterPipeline.destroyPipeline();
 
     } finally {
       reset();
