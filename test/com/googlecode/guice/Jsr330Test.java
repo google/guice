@@ -26,6 +26,7 @@ import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.google.inject.util.Jsr330;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -70,10 +71,10 @@ public class Jsr330Test extends TestCase {
   public void testQualifiedInject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(B.class).annotatedWith(Jsr330.named("jodie")).toInstance(b);
+        bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
         bind(C.class).annotatedWith(Red.class).toInstance(c);
         bind(D.class).annotatedWith(RED).toInstance(d);
-        bind(E.class).annotatedWith(Jsr330.named("jesse")).toInstance(e);
+        bind(E.class).annotatedWith(Names.named("jesse")).toInstance(e);
         bind(F.class);
       }
     });
@@ -88,7 +89,7 @@ public class Jsr330Test extends TestCase {
   public void testProviderInject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(B.class).annotatedWith(Jsr330.named("jodie")).toInstance(b);
+        bind(B.class).annotatedWith(Names.named("jodie")).toInstance(b);
         bind(C.class).toInstance(c);
         bind(D.class).annotatedWith(RED).toInstance(d);
         bind(E.class).toInstance(e);
@@ -233,16 +234,16 @@ public class Jsr330Test extends TestCase {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(B.class).toProvider(BProvider.class);
-        bind(B.class).annotatedWith(Jsr330.named("1")).toProvider(BProvider.class);
-        bind(B.class).annotatedWith(Jsr330.named("2")).toProvider(Key.get(BProvider.class));
-        bind(B.class).annotatedWith(Jsr330.named("3")).toProvider(TypeLiteral.get(BProvider.class));
+        bind(B.class).annotatedWith(Names.named("1")).toProvider(BProvider.class);
+        bind(B.class).annotatedWith(Names.named("2")).toProvider(Key.get(BProvider.class));
+        bind(B.class).annotatedWith(Names.named("3")).toProvider(TypeLiteral.get(BProvider.class));
       }
     });
     
     injector.getInstance(Key.get(B.class));
-    injector.getInstance(Key.get(B.class, Jsr330.named("1")));
-    injector.getInstance(Key.get(B.class, Jsr330.named("2")));
-    injector.getInstance(Key.get(B.class, Jsr330.named("3")));
+    injector.getInstance(Key.get(B.class, Names.named("1")));
+    injector.getInstance(Key.get(B.class, Names.named("2")));
+    injector.getInstance(Key.get(B.class, Names.named("3")));
   }
 
   public void testGuicify330Provider() {

@@ -17,9 +17,6 @@
 package com.google.inject.util;
 
 import static com.google.inject.internal.Preconditions.checkNotNull;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import javax.inject.Named;
 import javax.inject.Provider;
 
 /**
@@ -31,10 +28,6 @@ import javax.inject.Provider;
 public class Jsr330 {
 
   private Jsr330() {}
-
-  public static Named named(String name) {
-    return new NamedImpl(name);
-  }
 
   /**
    * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
@@ -56,43 +49,5 @@ public class Jsr330 {
         return "guicified(" + delegate + ")";
       }
     };
-  }
-
-  // TODO: support binding properties like Names does?
-
-  private static class NamedImpl implements Named, Serializable {
-    private final String value;
-
-    NamedImpl(String value) {
-      this.value = checkNotNull(value, "name");
-    }
-
-    public String value() {
-      return value;
-    }
-
-    @Override public int hashCode() {
-      // This is specified in java.lang.Annotation.
-      return (127 * "value".hashCode()) ^ value.hashCode();
-    }
-
-    @Override public boolean equals(Object o) {
-      if (!(o instanceof Named)) {
-        return false;
-      }
-
-      Named other = (Named) o;
-      return value.equals(other.value());
-    }
-
-    @Override public String toString() {
-      return "@" + Named.class.getName() + "(value=" + value + ")";
-    }
-
-    public Class<? extends Annotation> annotationType() {
-      return Named.class;
-    }
-
-    private static final long serialVersionUID = 0;
   }
 }

@@ -20,6 +20,9 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -122,5 +125,18 @@ public class Annotations {
   public static boolean isBindingAnnotation(Class<? extends Annotation> annotationType) {
     return annotationType.isAnnotationPresent(BindingAnnotation.class) 
           || annotationType.isAnnotationPresent(Qualifier.class);
+  }
+
+  /**
+   * If the annotation is an instance of {@code javax.inject.Named} or {@code
+   * com.google.inject.name.Named}, return a canonicalized instance that will be equal to instances
+   * of either that have the same value. Returns the given annotation otherwise.
+   */
+  public static Annotation canonicalizeIfNamed(Annotation annotation) {
+    if(annotation instanceof javax.inject.Named) {
+      return Names.named(((javax.inject.Named)annotation).value());       
+    } else {
+      return annotation;
+    }
   }
 }

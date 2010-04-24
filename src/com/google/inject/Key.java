@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
+
 import static com.google.inject.internal.Preconditions.checkArgument;
 import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
@@ -334,11 +335,11 @@ public class Key<T> {
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
 
-    if (annotationType.getDeclaredMethods().length == 0) {
+    if (isMarker(annotationType)) {
       return new AnnotationTypeStrategy(annotationType, annotation);
     }
 
-    return new AnnotationInstanceStrategy(annotation);
+    return new AnnotationInstanceStrategy(Annotations.canonicalizeIfNamed(annotation));
   }
 
   /**
