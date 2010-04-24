@@ -370,6 +370,12 @@ public final class Errors implements Serializable {
         "Tried proxying %s to support a circular dependency, but it is not an interface.",
         expectedType);
   }
+  
+  public Errors circularProxiesDisabled(Class<?> expectedType) {
+    return addMessage(
+        "Tried proxying %s to support a circular dependency, but circular proxies are disabled.",
+        expectedType);
+  }
 
   public void throwCreationExceptionIfErrorsExist() {
     if (!hasErrors()) {

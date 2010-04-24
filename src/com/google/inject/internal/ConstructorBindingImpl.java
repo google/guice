@@ -117,6 +117,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
 
   @SuppressWarnings("unchecked") // the result type always agrees with the ConstructorInjector type
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    factory.allowCircularProxy = injector.options.allowCircularProxy;
     factory.constructorInjector
         = (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
   }
@@ -177,6 +178,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
   private static class Factory<T> implements InternalFactory<T> {
     private final boolean failIfNotLinked;
     private final Key<?> key;
+    private boolean allowCircularProxy;
     private ConstructorInjector<T> constructorInjector;
     
     Factory(boolean failIfNotLinked, Key<?> key) {
@@ -196,7 +198,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
       return (T) constructorInjector.construct(errors, context,
-          dependency.getKey().getTypeLiteral().getRawType());
+          dependency.getKey().getTypeLiteral().getRawType(), allowCircularProxy);
     }
   }
 }

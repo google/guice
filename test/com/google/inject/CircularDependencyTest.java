@@ -104,6 +104,26 @@ public class CircularDependencyTest extends TestCase {
     });
     injector.getInstance(A.class);
   }
+  
+  public void testDisablingCircularProxies() {
+    Injector injector = new InjectorBuilder()
+      .disableCircularProxies()
+      .addModules(new AbstractModule() {
+      protected void configure() {
+        binder.bind(A.class).to(E.class);
+        binder.bind(B.class).to(E.class);
+      }
+    }).build();
+    
+    try {
+      injector.getInstance(A.class);
+      fail("expected exception");
+    } catch(ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Tried proxying " + A.class.getName() + " to support a circular dependency, but circular proxies are disabled", 
+          "Tried proxying " + B.class.getName() + " to support a circular dependency, but circular proxies are disabled");
+    }
+  }
 
   @Singleton
   static class E implements A, B {

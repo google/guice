@@ -67,10 +67,12 @@ public final class InternalInjectorCreator {
   public static class InjectorOptions {
     final Stage stage;
     final boolean jitDisabled;
+    final boolean allowCircularProxy;
     
-    public InjectorOptions(Stage stage, boolean jitDisabled) {
+    public InjectorOptions(Stage stage, boolean jitDisabled, boolean allowCircularProxy) {
       this.stage = stage;
       this.jitDisabled = jitDisabled;
+      this.allowCircularProxy = allowCircularProxy;
     }
   }
 

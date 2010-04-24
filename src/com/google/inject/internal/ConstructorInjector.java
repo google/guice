@@ -55,14 +55,18 @@ final class ConstructorInjector<T> {
    * Construct an instance. Returns {@code Object} instead of {@code T} because
    * it may return a proxy.
    */
-  Object construct(Errors errors, InternalContext context, Class<?> expectedType)
+  Object construct(Errors errors, InternalContext context, Class<?> expectedType, boolean allowProxy)
       throws ErrorsException {
     ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-      // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
-      return constructionContext.createProxy(errors, expectedType);
+      if(!allowProxy) {
+        throw errors.circularProxiesDisabled(expectedType).toException();
+      } else {      
+        // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
+        return constructionContext.createProxy(errors, expectedType);
+      }
     }
 
     // If we're re-entering this factory while injecting fields or methods,

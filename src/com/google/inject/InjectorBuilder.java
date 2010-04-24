@@ -1,5 +1,6 @@
 package com.google.inject;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import com.google.inject.internal.InternalInjectorCreator;
@@ -43,7 +44,8 @@ public class InjectorBuilder {
   private final InternalInjectorCreator creator = new InternalInjectorCreator();
   
   private Stage stage = Stage.DEVELOPMENT;
-  private boolean jitDisabled;
+  private boolean jitDisabled = false;
+  private boolean allowCircularProxy = true;
   
   /**
    * Sets the stage for the injector. If the stage is {@link Stage#PRODUCTION}, 
@@ -71,6 +73,15 @@ public class InjectorBuilder {
     this.jitDisabled = true;
     return this;
   }
+  
+  /**
+   * Prevents Guice from constructing a {@link Proxy} when a circular dependency
+   * is found.
+   */
+  public InjectorBuilder disableCircularProxies() {
+    this.allowCircularProxy = false;
+    return this;
+  }
 
   /** Adds more modules that will be used when the Injector is created. */
   public InjectorBuilder addModules(Iterable<? extends Module> modules) {
@@ -86,7 +97,7 @@ public class InjectorBuilder {
 
   /** Builds the injector. */
   public Injector build() {
-    creator.injectorOptions(new InternalInjectorCreator.InjectorOptions(stage, jitDisabled));
+    creator.injectorOptions(new InternalInjectorCreator.InjectorOptions(stage, jitDisabled, allowCircularProxy));
     return creator.build();
   }
 
