@@ -21,6 +21,7 @@ import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Jsr166HashMapTest;
 import com.google.inject.internal.LineNumbersTest;
 import com.google.inject.internal.MapMakerTestSuite;
+import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.ProxyFactoryTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
@@ -107,6 +108,7 @@ public class AllTests {
     suite.addTestSuite(Jsr166HashMapTest.class);
     suite.addTestSuite(LineNumbersTest.class);
     suite.addTest(MapMakerTestSuite.suite());
+    suite.addTestSuite(MoreTypesTest.class);
     suite.addTestSuite(UniqueAnnotationsTest.class);
 
     // matcher

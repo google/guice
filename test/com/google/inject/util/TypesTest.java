@@ -87,7 +87,13 @@ public class TypesTest extends TestCase {
         TypesTest.class, Inner.class, Float.class, Double.class);
     assertEquals(TypesTest.class, actual.getOwnerType());
     assertEqualsBothWays(innerFloatDouble, actual);
-    assertEquals(innerFloatDouble.toString(), actual.toString());
+    // The JDK prints this out as:
+    //     com.google.inject.util.TypesTest.com.google.inject.util.TypesTest$Inner<java.lang.Float, java.lang.Double>
+    // and we think that's wrong, so the assertEquals comparison is worthless. :-(
+//    assertEquals(innerFloatDouble.toString(), actual.toString());
+    
+    // We think the correct comparison is:
+    assertEquals("com.google.inject.util.TypesTest$Inner<java.lang.Float, java.lang.Double>", actual.toString());
   }
 
   public void testTypeParametersMustNotBePrimitives() {
