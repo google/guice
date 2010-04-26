@@ -24,10 +24,12 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Maps;
@@ -35,6 +37,7 @@ import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -420,6 +423,28 @@ public class MapBinderTest extends TestCase {
         withDependencies.getDependencies());
   }
 
+  /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
+  public void testMultibinderDependenciesInToolStage() {
+    Injector injector = new InjectorBuilder()
+      .stage(Stage.TOOL)
+      .addModules(new AbstractModule() {
+        protected void configure() {
+          MapBinder<Integer, String> mapBinder
+              = MapBinder.newMapBinder(binder(), Integer.class, String.class);
+          mapBinder.addBinding(1).toInstance("A");
+          mapBinder.addBinding(2).to(Key.get(String.class, Names.named("b")));
+  
+          bindConstant().annotatedWith(Names.named("b")).to("B");
+        }})
+      .build();
+
+    Binding<Map<Integer, String>> binding = injector.getBinding(new Key<Map<Integer, String>>() {});
+    HasDependencies withDependencies = (HasDependencies) binding;
+    Key<?> setKey = new Key<Set<Map.Entry<Integer, Provider<String>>>>() {};
+    assertEquals(ImmutableSet.<Dependency<?>>of(Dependency.get(setKey)),
+        withDependencies.getDependencies());
+  }
+  
 
   /**
    * Our implementation maintains order, but doesn't guarantee it in the API spec.
@@ -454,6 +479,39 @@ public class MapBinderTest extends TestCase {
     assertEquals(Maps.immutableEntry("donatello", "purple"), iterator.next());
     assertEquals(Maps.immutableEntry("michaelangelo", "orange"), iterator.next());
     assertEquals(Maps.immutableEntry("raphael", "red"), iterator.next());
+  }
+  
+  /**
+   * With overrides, we should get the union of all map bindings.
+   */
+  public void testModuleOverrideAndMapBindings() {
+    Module ab = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B");
+      }
+    };
+    Module cd = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("c").toInstance("C");
+        multibinder.addBinding("d").toInstance("D");
+      }
+    };
+    Module ef = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("e").toInstance("E");
+        multibinder.addBinding("f").toInstance("F");
+      }
+    };
+
+    Module abcd = Modules.override(ab).with(cd);
+    Injector injector = Guice.createInjector(abcd, ef);
+    assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"),
+        injector.getInstance(Key.get(mapOfString)));
+
   }
 
   @Retention(RUNTIME) @BindingAnnotation

@@ -35,6 +35,7 @@ import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -259,7 +260,7 @@ public abstract class Multibinder<T> {
      * element in this set. At this time the set's size is known, but its
      * contents are only evaluated when get() is invoked.
      */
-    @Inject void initialize(Injector injector) {
+    @Toolable @Inject void initialize(Injector injector) {
       providers = Lists.newArrayList();
       List<Dependency<?>> dependencies = Lists.newArrayList();
       for (Binding<?> entry : injector.findBindingsByType(elementType)) {

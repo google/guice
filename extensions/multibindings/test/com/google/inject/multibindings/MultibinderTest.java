@@ -23,10 +23,12 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
@@ -35,6 +37,8 @@ import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.InstanceBinding;
+import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Retention;
@@ -327,6 +331,60 @@ public class MultibinderTest extends TestCase {
       elements.add((String) injector.getInstance(dependency.getKey()));
     }
     assertEquals(ImmutableSet.of("A", "B"), elements);
+  }
+  
+  /**
+   * We just want to make sure that multibinder's binding depends on each of its values. We don't
+   * really care about the underlying structure of those bindings, which are implementation details.
+   */
+  public void testMultibinderDependenciesInToolStage() {
+    Injector injector = new InjectorBuilder()
+      .stage(Stage.TOOL)
+      .addModules(new AbstractModule() {
+        protected void configure() {
+          Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+          multibinder.addBinding().toInstance("A");
+          multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
+  
+          bindConstant().annotatedWith(Names.named("b")).to("B");
+        }})
+      .build();
+
+    Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
+    HasDependencies withDependencies = (HasDependencies) binding;
+    InstanceBinding<?> instanceBinding = null;
+    LinkedKeyBinding<?> linkedBinding = null;
+    // The non-tool stage test can test this by calling injector.getInstance to ensure
+    // the right values are returned -- in tool stage we can't do that.  It's also a
+    // little difficult to validate the dependencies & bindings, because they're
+    // bindings created internally within Multibinder.
+    // To workaround this, we just validate that the dependencies lookup to a single 
+    // InstanceBinding whose value is "A" and another LinkedBinding whose target is 
+    // the Key of @Named("b") String=B
+    for (Dependency<?> dependency : withDependencies.getDependencies()) {
+      Binding<?> b = injector.getBinding(dependency.getKey());
+      if(b instanceof InstanceBinding) {
+        if(instanceBinding != null) {
+          fail("Already have an instance binding of: " + instanceBinding + ", and now want to add: " + b);
+        } else {
+          instanceBinding = (InstanceBinding)b;
+        }
+      } else if(b instanceof LinkedKeyBinding) {
+        if(linkedBinding != null) {
+          fail("Already have a linked binding of: " + linkedBinding + ", and now want to add: " + b);
+        } else {
+          linkedBinding = (LinkedKeyBinding)b;
+        }
+      } else {
+        fail("Unexpected dependency of: " + dependency);
+      }
+    }
+    
+    assertNotNull(instanceBinding);
+    assertNotNull(linkedBinding);
+    
+    assertEquals("A", instanceBinding.getInstance());
+    assertEquals(Key.get(String.class, Names.named("b")), linkedBinding.getLinkedKey());
   }
 
   /**
