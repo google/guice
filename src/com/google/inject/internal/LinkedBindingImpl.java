@@ -16,12 +16,16 @@
 
 package com.google.inject.internal;
 
+import java.util.Set;
+
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.LinkedKeyBinding;
 
-public final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T> {
+public final class LinkedBindingImpl<T> extends BindingImpl<T> implements LinkedKeyBinding<T>, HasDependencies {
 
   final Key<? extends T> targetKey;
 
@@ -43,6 +47,10 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
 
   public Key<? extends T> getLinkedKey() {
     return targetKey;
+  }
+  
+  public Set<Dependency<?>> getDependencies() {
+    return ImmutableSet.<Dependency<?>>of(Dependency.get(targetKey));
   }
 
   public BindingImpl<T> withScoping(Scoping scoping) {
