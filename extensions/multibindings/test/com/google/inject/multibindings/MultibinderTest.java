@@ -460,4 +460,40 @@ public class MultibinderTest extends TestCase {
         injector.getInstance(Key.get(setOfString)));
 
   }
+  
+  /**
+   * With overrides, we should get the union of all multibindings.
+   */
+  public void testModuleOverrideAndMultibindingsWithPermitDuplicates() {
+    Module ab = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().toInstance("B");
+        multibinder.permitDuplicates();
+      }
+    };
+    Module cd = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("C");
+        multibinder.addBinding().toInstance("D");
+        multibinder.permitDuplicates();
+      }
+    };
+    Module ef = new AbstractModule() {
+      protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("E");
+        multibinder.addBinding().toInstance("F");
+        multibinder.permitDuplicates();
+      }
+    };
+
+    Module abcd = Modules.override(ab).with(cd);
+    Injector injector = Guice.createInjector(abcd, ef);
+    assertEquals(ImmutableSet.of("A", "B", "C", "D", "E", "F"),
+        injector.getInstance(Key.get(setOfString)));
+
+  }  
 }

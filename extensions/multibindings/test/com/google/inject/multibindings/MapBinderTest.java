@@ -513,6 +513,42 @@ public class MapBinderTest extends TestCase {
         injector.getInstance(Key.get(mapOfString)));
 
   }
+  
+  /**
+   * With overrides, we should get the union of all map bindings.
+   */
+  public void testModuleOverrideAndMapBindingsWithPermitDuplicates() {
+    Module ab = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B");
+        multibinder.permitDuplicates();
+      }
+    };
+    Module cd = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("c").toInstance("C");
+        multibinder.addBinding("d").toInstance("D");
+        multibinder.permitDuplicates();
+      }
+    };
+    Module ef = new AbstractModule() {
+      protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("e").toInstance("E");
+        multibinder.addBinding("f").toInstance("F");
+        multibinder.permitDuplicates();
+      }
+    };
+
+    Module abcd = Modules.override(ab).with(cd);
+    Injector injector = Guice.createInjector(abcd, ef);
+    assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"),
+        injector.getInstance(Key.get(mapOfString)));
+
+  }  
 
   @Retention(RUNTIME) @BindingAnnotation
   @interface Abc {}
