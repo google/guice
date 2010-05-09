@@ -40,7 +40,6 @@ import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.googlecode.guice.BytecodeGenTest;
 import com.googlecode.guice.Jsr330Test;
 import com.googlecode.guice.GuiceTck;
 import java.util.Enumeration;
@@ -143,11 +142,11 @@ public class AllTests {
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(MethodInterceptionTest.class);
     suite.addTestSuite(com.googlecode.guice.BytecodeGenTest.class);
-    suite.addTest(com.googlecode.guice.StrictContainerTestSuite.suite());
     /*end[AOP]*/
 
     // googlecode.guice
-    suite.addTestSuite(BytecodeGenTest.class);
+    suite.addTest(com.googlecode.guice.StrictContainerTestSuite.suite());
+    suite.addTestSuite(com.googlecode.guice.OSGiContainerTest.class);
     suite.addTestSuite(Jsr330Test.class);
 
     return removeSuppressedTests(suite, SUPPRESSED_TEST_NAMES);

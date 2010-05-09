@@ -7,7 +7,7 @@
   <!-- can be overridden at the command line with -Dversion=
        or in IDEA, in the ant properties dialog -->
   <property name="version" value="snapshot"/>
-  <property name="api.version" value="2.1"/>
+  <property name="api.version" value="1.3"/>
 
   <target name="compile" description="Compile Java source.">
     <mkdir dir="${build.dir}/classes"/>
@@ -25,13 +25,14 @@
   <target name="manifest" description="Generate OSGi manifest." depends="compile">
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef resource="aQute/bnd/ant/taskdef.properties"
-      classpath="${common.basedir}/lib/build/bnd-0.0.305.jar"/>
+      classpath="${common.basedir}/lib/build/bnd-0.0.384.jar"/>
 
     <fail unless="module" message="Missing 'module' property (use the primary package name in this jar)"/>
+    <property name="imports" value=""/>
 
     <property name="Bundle-Name" value="${ant.project.name}"/>
     <property name="Bundle-SymbolicName" value="${module}"/>
-    <property name="Bundle-Version" value="${replace;${version};^[^0-9];${api.version}.$0}"/>
+    <property name="Bundle-Version" value="${replace;${version};^[^0-9];0.0.0.$0}"/>
 
     <property name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 5 and above"/>
     <property name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
@@ -39,11 +40,17 @@
     <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
     <property name="Bundle-Vendor" value="Google Inc."/>
 
-    <property name="exclude.imports" value=""/>
-    <property name="api.range" value="&quot;[${api.version},${version;+;${api.version}})&quot;"/>
-    <property name="guice.imports" value="com.google.inject.*;version=${api.range}"/>
-    <property name="Import-Package" value="${exclude.imports},${guice.imports},*;resolution:=optional"/>
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
+
+    <condition property="Import-Package" value="!com.google.inject.*,*" else="!${module}.*,${imports},*">
+      <istrue value="${fragment}"/>
+    </condition>
+
+    <condition property="Fragment-Host" value="com.google.inject">
+      <istrue value="${fragment}"/>
+    </condition>
+
+    <property name="-nouses" value="true"/>
 
     <property name="-removeheaders" value="Bnd-LastModified,Ignore-Package,Include-Resource,Private-Package,Tool"/>
 

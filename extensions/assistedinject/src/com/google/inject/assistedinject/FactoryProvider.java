@@ -23,6 +23,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Annotations.getKey;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableMap;
@@ -365,7 +366,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
     Class<F> factoryRawType = (Class) factoryType.getRawType();
-    return factoryRawType.cast(Proxy.newProxyInstance(factoryRawType.getClassLoader(),
+    return factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
         new Class[] { factoryRawType }, invocationHandler));
   }
 

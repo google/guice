@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.Preconditions.checkNotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -55,19 +54,24 @@ import java.util.logging.Logger;
  * @author mcculls@gmail.com (Stuart McCulloch)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-final class BytecodeGen {
+public final class BytecodeGen {
 
-  private static final Logger logger = Logger.getLogger(BytecodeGen.class.getName());
+  static final Logger logger = Logger.getLogger(BytecodeGen.class.getName());
 
-  static final ClassLoader GUICE_CLASS_LOADER = BytecodeGen.class.getClassLoader();
+  static final ClassLoader GUICE_CLASS_LOADER = canonicalize(BytecodeGen.class.getClassLoader());
+
+  // initialization-on-demand...
+  private static class SystemBridgeHolder {
+    static final BridgeClassLoader SYSTEM_BRIDGE = new BridgeClassLoader();
+  }
 
   /** ie. "com.google.inject.internal" */
-  private static final String GUICE_INTERNAL_PACKAGE
+  static final String GUICE_INTERNAL_PACKAGE
       = BytecodeGen.class.getName().replaceFirst("\\.internal\\..*$", ".internal");
 
   /*if[AOP]*/
   /** either "net.sf.cglib", or "com.google.inject.internal.cglib" */
-  private static final String CGLIB_PACKAGE
+  static final String CGLIB_PACKAGE
       = net.sf.cglib.proxy.Enhancer.class.getName().replaceFirst("\\.cglib\\..*$", ".cglib");
 
   static final net.sf.cglib.core.NamingPolicy NAMING_POLICY
@@ -82,47 +86,39 @@ final class BytecodeGen {
   end[NO_AOP]*/
 
   /** Use "-Dguice.custom.loader=false" to disable custom classloading. */
-  static final boolean HOOK_ENABLED
-      = "true".equals(System.getProperty("guice.custom.loader", "true"));
+  private static final boolean CUSTOM_LOADER_ENABLED
+      = Boolean.parseBoolean(System.getProperty("guice.custom.loader", "true"));
 
   /**
    * Weak cache of bridge class loaders that make the Guice implementation
    * classes visible to various code-generated proxies of client classes.
    */
-  private static final Map<ClassLoader, ClassLoader> CLASS_LOADER_CACHE
-      = new MapMaker().weakKeys().weakValues().makeComputingMap(
-          new Function<ClassLoader, ClassLoader>() {
-    public ClassLoader apply(final @Nullable ClassLoader typeClassLoader) {
-      logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
-      return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-        public ClassLoader run() {
-          return new BridgeClassLoader(typeClassLoader);
-        }
-      });
-    }
-  });
+  private static final Map<ClassLoader, ClassLoader> CLASS_LOADER_CACHE;
 
-  /**
-   * For class loaders, {@code null}, is always an alias to the
-   * {@link ClassLoader#getSystemClassLoader() system class loader}. This method
-   * will not return null.
-   */
-  private static ClassLoader canonicalize(ClassLoader classLoader) {
-    return classLoader != null
-        ? classLoader
-        : checkNotNull(getSystemClassLoaderOrNull(), "Couldn't get a ClassLoader");
+  static {
+    if (CUSTOM_LOADER_ENABLED) {
+      CLASS_LOADER_CACHE = new MapMaker().weakKeys().weakValues().makeComputingMap(
+          new Function<ClassLoader, ClassLoader>() {
+            public ClassLoader apply(final @Nullable ClassLoader typeClassLoader) {
+              logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
+              return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+                public ClassLoader run() {
+                  return new BridgeClassLoader(typeClassLoader);
+                }
+              });
+            }
+          });
+    } else {
+      CLASS_LOADER_CACHE = ImmutableMap.of();
+    }
   }
 
   /**
-   * Returns the system classloader, or {@code null} if we don't have
-   * permission.
+   * Attempts to canonicalize null references to the system class loader.
+   * May return null if for some reason the system loader is unavailable.
    */
-  private static ClassLoader getSystemClassLoaderOrNull() {
-    try {
-      return ClassLoader.getSystemClassLoader();
-    } catch (SecurityException e) {
-      return null;
-    }
+  private static ClassLoader canonicalize(ClassLoader classLoader) {
+    return classLoader != null ? classLoader : SystemBridgeHolder.SYSTEM_BRIDGE.getParent();
   }
 
   /**
@@ -133,23 +129,30 @@ final class BytecodeGen {
   }
 
   private static ClassLoader getClassLoader(Class<?> type, ClassLoader delegate) {
+
+    // simple case: do nothing!
+    if (!CUSTOM_LOADER_ENABLED) {
+      return delegate;
+    }
+
     delegate = canonicalize(delegate);
 
-    // if the application is running in the System classloader, assume we can run there too
-    if (delegate == getSystemClassLoaderOrNull()) {
+    // no need for a bridge if using same class loader, or it's already a bridge
+    if (delegate == GUICE_CLASS_LOADER || delegate instanceof BridgeClassLoader) {
       return delegate;
     }
 
-    // Don't bother bridging existing bridge classloaders
-    if (delegate instanceof BridgeClassLoader) {
-      return delegate;
+    // don't try bridging private types as it won't work
+    if (Visibility.forType(type) == Visibility.PUBLIC) {
+      if (delegate != SystemBridgeHolder.SYSTEM_BRIDGE.getParent()) {
+        // delegate guaranteed to be non-null here
+        return CLASS_LOADER_CACHE.get(delegate);
+      }
+      // delegate may or may not be null here
+      return SystemBridgeHolder.SYSTEM_BRIDGE;
     }
 
-    if (HOOK_ENABLED && Visibility.forType(type) == Visibility.PUBLIC) {
-      return CLASS_LOADER_CACHE.get(delegate);
-    }
-
-    return delegate;
+    return delegate; // last-resort: do nothing!
   }
 
   /*if[AOP]*/
@@ -193,6 +196,7 @@ final class BytecodeGen {
      * target class. These generated classes may be loaded by our bridge classloader.
      */
     PUBLIC {
+      @Override
       public Visibility and(Visibility that) {
         return that;
       }
@@ -205,6 +209,7 @@ final class BytecodeGen {
      * garbage collected.
      */
     SAME_PACKAGE {
+      @Override
       public Visibility and(Visibility that) {
         return this;
       }
@@ -242,26 +247,44 @@ final class BytecodeGen {
    */
   private static class BridgeClassLoader extends ClassLoader {
 
-    public BridgeClassLoader(ClassLoader usersClassLoader) {
+    BridgeClassLoader() {
+      // use system loader as parent
+    }
+
+    BridgeClassLoader(ClassLoader usersClassLoader) {
       super(usersClassLoader);
     }
 
     @Override protected Class<?> loadClass(String name, boolean resolve)
         throws ClassNotFoundException {
 
-      // delegate internal requests to Guice class space
+      if (name.startsWith("sun.reflect")) {
+        // these reflection classes must be loaded from bootstrap class loader
+        return SystemBridgeHolder.SYSTEM_BRIDGE.classicLoadClass(name, resolve);
+      }
+
       if (name.startsWith(GUICE_INTERNAL_PACKAGE) || name.startsWith(CGLIB_PACKAGE)) {
+        if (null == GUICE_CLASS_LOADER) {
+          // use special system bridge to load classes from bootstrap class loader
+          return SystemBridgeHolder.SYSTEM_BRIDGE.classicLoadClass(name, resolve);
+        }
         try {
           Class<?> clazz = GUICE_CLASS_LOADER.loadClass(name);
           if (resolve) {
             resolveClass(clazz);
           }
           return clazz;
-        } catch (Exception e) {
-          // fall back to classic delegation
+        } catch (Throwable e) {
+          // fall-back to classic delegation
         }
       }
 
+      return classicLoadClass(name, resolve);
+    }
+
+    // make the classic delegating loadClass method visible
+    Class<?> classicLoadClass(String name, boolean resolve)
+      throws ClassNotFoundException {
       return super.loadClass(name, resolve);
     }
   }

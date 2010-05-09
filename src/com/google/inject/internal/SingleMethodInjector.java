@@ -45,6 +45,7 @@ final class SingleMethodInjector implements SingleMemberInjector {
     int modifiers = method.getModifiers();
     if (!Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers)) {
       /*if[AOP]*/
+      try {
       final net.sf.cglib.reflect.FastMethod fastMethod
           = BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method))
               .getMethod(method);
@@ -55,10 +56,12 @@ final class SingleMethodInjector implements SingleMemberInjector {
           return fastMethod.invoke(target, parameters);
         }
       };
+      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
       /*end[AOP]*/
     }
 
-    if (!Modifier.isPublic(modifiers)) {
+    if (!Modifier.isPublic(modifiers) ||
+        !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);
     }
 

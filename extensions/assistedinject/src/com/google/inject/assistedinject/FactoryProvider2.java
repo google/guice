@@ -28,6 +28,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Annotations.getKey;
+import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
@@ -214,7 +215,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
     
-    factory = factoryRawType.cast(Proxy.newProxyInstance(factoryRawType.getClassLoader(),
+    factory = factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
         new Class[] { factoryRawType }, this));
   }
 

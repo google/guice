@@ -17,6 +17,8 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.BytecodeGen.newFastClass;
+
+import com.google.inject.ProvisionException;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -153,10 +155,14 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
 
     // Create the proxied class. We're careful to ensure that all enhancer state is not-specific
     // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
+    try {
     Enhancer enhancer = BytecodeGen.newEnhancer(declaringClass, visibility);
     enhancer.setCallbackFilter(new IndicesCallbackFilter(declaringClass, methods));
     enhancer.setCallbackTypes(callbackTypes);
     return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
+    } catch (Throwable e) {
+      throw new ProvisionException("Unable to method intercept: " + declaringClass, e);
+    }
   }
 
   private static class MethodInterceptorsPair {

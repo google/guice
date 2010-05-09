@@ -190,11 +190,9 @@ public class BytecodeGenTest extends TestCase {
       }
     }).getInstance(ProxyTest.class);
 
-    // unforunately, the expected classloader depends on which class loader loaded this test.
     if (ProxyTest.class.getClassLoader() == systemClassLoader) {
       assertSame(testProxy.getClass().getClassLoader(), systemClassLoader);
     } else {
-      assertNotSame(testProxy.getClass().getClassLoader(), ProxyTest.class.getClassLoader());
       assertNotSame(testProxy.getClass().getClassLoader(), systemClassLoader);
     }
   }
@@ -217,8 +215,19 @@ public class BytecodeGenTest extends TestCase {
      * this should be enough to queue the weak reference
      * unless something is holding onto it accidentally.
      */
+    String[] buf;
     System.gc();
+    buf = new String[8 * 1024 * 1024];
+    buf = null;
     System.gc();
+    buf = new String[8 * 1024 * 1024];
+    buf = null;
+    System.gc();
+    buf = new String[8 * 1024 * 1024];
+    buf = null;
+    System.gc();
+    buf = new String[8 * 1024 * 1024];
+    buf = null;
     System.gc();
 
     // This test could be somewhat flaky when the GC isn't working.

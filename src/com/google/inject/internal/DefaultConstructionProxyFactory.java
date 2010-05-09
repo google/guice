@@ -46,13 +46,14 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
 
     // Use FastConstructor if the constructor is public.
     if (Modifier.isPublic(constructor.getModifiers())) {
+      Class<T> classToConstruct = constructor.getDeclaringClass();
       /*if[AOP]*/
-      return new ConstructionProxy<T>() {
-        Class<T> classToConstruct = constructor.getDeclaringClass();
+      try {
         final net.sf.cglib.reflect.FastConstructor fastConstructor
             = BytecodeGen.newFastClass(classToConstruct, Visibility.forMember(constructor))
                 .getConstructor(constructor);
 
+      return new ConstructionProxy<T>() {
         @SuppressWarnings("unchecked")
         public T newInstance(Object... arguments) throws InvocationTargetException {
           return (T) fastConstructor.newInstance(arguments);
@@ -68,7 +69,11 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
           return ImmutableMap.of();
         }
       };
+      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
       /*end[AOP]*/
+      if (!Modifier.isPublic(classToConstruct.getModifiers())) {
+        constructor.setAccessible(true);
+      }
     } else {
       constructor.setAccessible(true);
     }

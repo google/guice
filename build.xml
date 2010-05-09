@@ -2,9 +2,6 @@
 
 <project name="guice" default="compile">
 
-  <property name="DynamicImport-Package" value="org.aopalliance.intercept"/>
-  <property name="exclude.imports" value="!com.google.common.*,!net.sf.*,!org.objectweb.*"/>
-
   <import file="common.xml"/>
 
   <path id="compile.classpath">
@@ -90,10 +87,15 @@
         <pathelement location="lib/build/easymock.jar"/>
         <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/build/javax.inject-tck.jar"/>
+        <pathelement location="lib/build/bnd-0.0.384.jar"/>
+        <pathelement location="lib/build/felix-2.0.5.jar"/>
       </classpath>
       <arg value="com.google.inject.AllTests"/>    
       <syspropertyset>
         <propertyref name="guice.custom.loader"/>
+        <propertyref name="version"/>
+        <propertyref name="build.dir"/>
+        <propertyref name="lib.dir"/>
       </syspropertyset>
     </java>
   </target>
