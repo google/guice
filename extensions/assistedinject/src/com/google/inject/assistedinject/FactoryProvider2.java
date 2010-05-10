@@ -455,7 +455,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
           if(constructor == null) {
             binder.bind(assistedReturnType).to((Key)returnType);
           } else {
-            binder.bind(assistedReturnType).toConstructor((Constructor)constructor);
+            binder.bind(assistedReturnType).toConstructor((Constructor)constructor, (TypeLiteral)returnType.getTypeLiteral());
           }
         }
       }

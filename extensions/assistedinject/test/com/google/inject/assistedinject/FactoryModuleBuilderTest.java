@@ -17,9 +17,12 @@
 package com.google.inject.assistedinject;
 
 import com.google.inject.AbstractModule;
+
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
@@ -152,6 +155,18 @@ public class FactoryModuleBuilderTest extends TestCase {
     Beetle beetle = factory.getBeetle(Color.GREEN);
     assertEquals(Color.GREEN, beetle.color);
   }
+  
+  public void testParameterizedClassesWithNoImplements() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        install(new FactoryModuleBuilder().build(new TypeLiteral<Foo.Factory<String>>() {}));
+      }
+    });
+    
+    Foo.Factory<String> factory = injector.getInstance(Key.get(new TypeLiteral<Foo.Factory<String>>() {}));
+    Foo<String> foo = factory.create(new Bar());
+  }
 
   interface Car {}
 
@@ -192,4 +207,15 @@ public class FactoryModuleBuilderTest extends TestCase {
       this.color = color;
     }
   }
+  
+  public static class Foo<E> {
+    static interface Factory<E> {
+      Foo<E> create(Bar bar);
+    }
+    @Inject Foo(@Assisted Bar bar, Baz<E> baz) {}
+  }
+  
+  public static class Bar {}
+  public static class Baz<E> {}
+  
 }
