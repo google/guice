@@ -19,7 +19,6 @@ package com.google.inject.spi;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
-import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
@@ -45,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A constructor, field or method that can receive injections. Typically this is a member with the
@@ -55,6 +56,8 @@ import java.util.HashMap;
  * @since 2.0
  */
 public final class InjectionPoint {
+  
+  private static final Logger logger = Logger.getLogger(InjectionPoint.class.getName());
 
   private final boolean optional;
   private final Member member;
@@ -514,10 +517,10 @@ public final class InjectionPoint {
     /**
      * Removes a method overridden by the given method, if present.
      */
-    void removeIfOverriddenBy(Method method) {
+    boolean removeIfOverriddenBy(Method method) {
       if (position == Position.TOP) {
         // If we're at the top of the hierarchy, there's nothing to override.
-        return;
+        return false;
       }
 
       if (bySignature == null) {
@@ -538,16 +541,19 @@ public final class InjectionPoint {
       lastMethod = method;
       Signature signature = lastSignature = new Signature(method);
       List<InjectableMethod> methods = bySignature.get(signature);
+      boolean removed = false;
       if (methods != null) {
         for (Iterator<InjectableMethod> iterator = methods.iterator();
             iterator.hasNext();) {
           InjectableMethod possiblyOverridden = iterator.next();
           if (overrides(method, possiblyOverridden.method)) {
+            removed = true;
             iterator.remove();
             injectableMembers.remove(possiblyOverridden);
           }
         }
       }
+      return removed;
     }
 
     /**
@@ -617,8 +623,9 @@ public final class InjectionPoint {
 
       for (Method method : current.getRawType().getDeclaredMethods()) {
         if (Modifier.isStatic(method.getModifiers()) == statics) {
+          boolean removed = false;
           if (overrideIndex != null) {
-            overrideIndex.removeIfOverriddenBy(method);
+            removed = overrideIndex.removeIfOverriddenBy(method);
           }
           Annotation atInject = getAtInject(method);
           if (atInject != null) {
@@ -626,6 +633,13 @@ public final class InjectionPoint {
                 current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)
                 | !isValidMethod(injectableMethod, errors)) {
+              if(removed) {
+                logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
+                    + "because it either has misplaced binding annotations "
+                    + "or specifies type parameters) but is overriding a method that is valid. "
+                    + "Because it is not valid, the method will not be injected. "
+                    + "To fix this, make the method a valid injectable method.", method);
+              }
               continue;
             }
             if (statics) {
@@ -641,6 +655,13 @@ public final class InjectionPoint {
                 overrideIndex = new OverrideIndex(injectableMembers);
               }
               overrideIndex.add(injectableMethod);
+            }
+          } else {
+            if(removed) {
+              logger.log(Level.WARNING, "Method: {0} is not annotated with @Inject but "
+                  + "is overriding a method that is annotated with @Inject.  Because "
+                  + "it is not annotated with @Inject, the method will not be injected. "
+                  + "To fix this, annotate the method with @Inject.", method);
             }
           }
         }
