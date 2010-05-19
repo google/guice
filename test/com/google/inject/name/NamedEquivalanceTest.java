@@ -51,10 +51,17 @@ public class NamedEquivalanceTest extends TestCase {
     assertEquals(keyForAnnotation(new GuiceNamed("foo")), keyForAnnotation(new JsrNamed("foo")));
     assertEquals(keyForAnnotation(Names.named("foo")), keyForAnnotation(new GuiceNamed("foo")));
     assertEquals(keyForAnnotation(Names.named("foo")), keyForAnnotation(new JsrNamed("foo")));
+
+    assertEquals(keyForAnnotationType(com.google.inject.name.Named.class),
+        keyForAnnotationType(javax.inject.Named.class));
   }
 
   private static Key<String> keyForAnnotation(Annotation annotation) {
     return Key.get(String.class, annotation);
+  }
+  
+  private static Key<String> keyForAnnotationType(Class<? extends Annotation> annotationType) {
+    return Key.get(String.class, annotationType);
   }
 
   public void testBindingWithNamesCanInjectBothTypes() {
