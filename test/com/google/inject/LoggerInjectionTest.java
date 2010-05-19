@@ -20,6 +20,20 @@ public class LoggerInjectionTest extends TestCase {
     assertEquals("com.google.inject.LoggerInjectionTest", logger.getName());
   }
   
+  public void testLoggerInConstructor() {
+    Injector injector = Guice.createInjector();
+    Foo foo = injector.getInstance(Foo.class);
+    assertEquals("com.google.inject.LoggerInjectionTest$Foo", foo.logger.getName());
+  }
+  
+  private static class Foo {
+    Logger logger;
+    @SuppressWarnings("unused")
+    @Inject Foo(Logger logger) {
+      this.logger = logger;
+    }
+  }
+  
   public void testLoggerWithoutMember() {
     Injector injector = Guice.createInjector();
     assertNull(injector.getInstance(Logger.class).getName());

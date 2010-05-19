@@ -19,6 +19,7 @@ package com.google.inject.spi;
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -42,6 +43,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
+
 import junit.framework.TestCase;
 
 /**
@@ -366,6 +370,36 @@ public class ProviderMethodsTest extends TestCase implements Module {
       assertContains(expected.getMessage(), 
           "1) Provider methods must return a value. Do not return void.",
           getClass().getName(), ".provideFoo(ProviderMethodsTest.java:");
+    }
+  }
+  
+  public void testInjectsJustOneLogger() {
+    AtomicReference<Logger> loggerRef = new AtomicReference<Logger>();
+    Injector injector = Guice.createInjector(new FooModule(loggerRef));
+    
+    assertNull(loggerRef.get());
+    injector.getInstance(Integer.class);
+    Logger lastLogger = loggerRef.getAndSet(null);
+    assertNotNull(lastLogger);
+    injector.getInstance(Integer.class);
+    assertSame(lastLogger, loggerRef.get());
+    
+    assertEquals(FooModule.class.getName() + ".foo", lastLogger.getName());
+  }
+  
+  private static class FooModule extends AbstractModule {
+    private final AtomicReference<Logger> loggerRef;
+    
+    public FooModule(AtomicReference<Logger> loggerRef) {
+      this.loggerRef = loggerRef;
+    }
+
+    @Override protected void configure() {}
+
+    @SuppressWarnings("unused")
+    @Provides Integer foo(Logger logger) {
+      loggerRef.set(logger);
+      return 42;
     }
   }
 }

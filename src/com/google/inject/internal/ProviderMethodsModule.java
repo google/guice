@@ -30,6 +30,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
@@ -95,8 +96,16 @@ public final class ProviderMethodsModule implements Module {
     Annotation[][] parameterAnnotations = method.getParameterAnnotations();
     for (int i = 0; i < parameterTypes.size(); i++) {
       Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
+      if(key.equals(Key.get(Logger.class))) {
+        // If it was a Logger, change the key to be unique & bind it to a
+        // provider that provides a logger with a proper name.
+        // This solves issue 482 (returning a new anonymous logger on every call exhausts memory)
+        Key<Logger> loggerKey = Key.get(Logger.class, UniqueAnnotations.create());
+        binder.bind(loggerKey).toProvider(new LogProvider(method));
+        key = loggerKey;
+      }
       dependencies.add(Dependency.get(key));
-      parameterProviders.add(binder.getProvider(key));
+      parameterProviders.add(binder.getProvider(key));        
     }
 
     @SuppressWarnings("unchecked") // Define T as the method's return type.
@@ -126,5 +135,18 @@ public final class ProviderMethodsModule implements Module {
 
   @Override public int hashCode() {
     return delegate.hashCode();
+  }
+  
+  /** A provider that returns a logger based on the method name. */
+  private static final class LogProvider implements Provider<Logger> {
+    private final String name;
+    
+    public LogProvider(Method method) {
+      this.name = method.getDeclaringClass().getName() + "." + method.getName();
+    }
+    
+    public Logger get() {
+      return Logger.getLogger(name);
+    }
   }
 }
