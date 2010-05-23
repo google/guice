@@ -21,6 +21,8 @@ import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Sets;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.name.Names.named;
+
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import java.lang.reflect.Constructor;
@@ -453,5 +455,44 @@ public class BindingTest extends TestCase {
     @Inject public F(Stage stage) {
       this.stage = stage;
     }
+  }
+  
+  public void testTurkeyBaconProblemUsingToConstuctor() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public void configure() {
+        bind(Bacon.class).to(UncookedBacon.class);
+        bind(Bacon.class).annotatedWith(named("Turkey")).to(TurkeyBacon.class);
+        bind(Bacon.class).annotatedWith(named("Cooked")).toConstructor(
+            (Constructor)InjectionPoint.forConstructorOf(Bacon.class).getMember());
+      }
+    });
+    Bacon bacon = injector.getInstance(Bacon.class);
+    assertEquals(Food.PORK, bacon.getMaterial());
+    assertFalse(bacon.isCooked());
+    
+    Bacon turkeyBacon = injector.getInstance(Key.get(Bacon.class, named("Turkey")));
+    assertEquals(Food.TURKEY, turkeyBacon.getMaterial());
+    assertTrue(turkeyBacon.isCooked());
+    
+    Bacon cookedBacon = injector.getInstance(Key.get(Bacon.class, named("Cooked")));
+    assertEquals(Food.PORK, cookedBacon.getMaterial());
+    assertTrue(cookedBacon.isCooked());    
+  }
+  
+  enum Food { TURKEY, PORK }
+  
+  private static class Bacon {
+    public Food getMaterial() { return Food.PORK; }
+    public boolean isCooked() { return true; }
+  }
+
+  private static class TurkeyBacon extends Bacon {
+    public Food getMaterial() { return Food.TURKEY; }
+  }
+
+  private static class UncookedBacon extends Bacon {
+    public boolean isCooked() { return false; }
   }
 }
