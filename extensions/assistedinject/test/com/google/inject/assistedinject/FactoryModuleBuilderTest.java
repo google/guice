@@ -18,17 +18,21 @@ package com.google.inject.assistedinject;
 
 import com.google.inject.AbstractModule;
 
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 
 import junit.framework.TestCase;
 
 import java.awt.*;
+import java.util.Collection;
 
 public class FactoryModuleBuilderTest extends TestCase {
 
@@ -165,7 +169,26 @@ public class FactoryModuleBuilderTest extends TestCase {
     });
     
     Foo.Factory<String> factory = injector.getInstance(Key.get(new TypeLiteral<Foo.Factory<String>>() {}));
+    @SuppressWarnings("unused")
     Foo<String> foo = factory.create(new Bar());
+  }
+  
+  public void testGenericErrorMessageMakesSense() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+         install(new FactoryModuleBuilder().build(Key.get(Foo.Factory.class))); 
+        }
+      });
+      fail();
+    } catch(CreationException ce ) {
+      // Assert not only that it's the correct message, but also that it's the *only* message.
+      Collection<Message> messages = ce.getErrorMessages();
+      assertEquals(
+          Foo.Factory.class.getName() + " cannot be used as a key; It is not fully specified.", 
+          Iterables.getOnlyElement(messages).getMessage());
+    }
   }
 
   interface Car {}

@@ -77,8 +77,8 @@ public class MoreTypes {
   public static <T> TypeLiteral<T> canonicalizeForKey(TypeLiteral<T> typeLiteral) {
     Type type = typeLiteral.getType();
     if (!isFullySpecified(type)) {
-      String message = typeLiteral + " cannot be used as a key; It is not fully specified.";
-      throw new ConfigurationException(ImmutableSet.of(new Message(message)));
+      Errors errors = new Errors().keyNotFullySpecified(typeLiteral);
+      throw new ConfigurationException(errors.getMessages());
     }
 
     if (typeLiteral.getRawType() == javax.inject.Provider.class) {

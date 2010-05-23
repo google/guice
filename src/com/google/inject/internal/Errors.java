@@ -323,8 +323,12 @@ public final class Errors implements Serializable {
         + " Reason: %s", listener, type, cause);
   }
 
-  public void exposedButNotBound(Key<?> key) {
-    addMessage("Could not expose() %s, it must be explicitly bound.", key);
+  public Errors exposedButNotBound(Key<?> key) {
+    return addMessage("Could not expose() %s, it must be explicitly bound.", key);
+  }
+  
+  public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
+    return addMessage("%s cannot be used as a key; It is not fully specified.", typeLiteral);
   }
 
   public static Collection<Message> getMessagesFromThrowable(Throwable throwable) {

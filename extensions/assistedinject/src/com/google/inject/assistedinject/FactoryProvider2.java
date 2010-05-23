@@ -33,6 +33,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableMap;
+import com.google.inject.internal.Iterables;
 import com.google.inject.internal.ToStringBuilder;
 
 import static com.google.inject.internal.Iterables.getOnlyElement;
@@ -50,6 +51,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -156,8 +158,19 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
       ImmutableMap.Builder<Method, AssistData> assistDataBuilder = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
       for (Method method : factoryRawType.getMethods()) {
-        Key<?> returnType = getKey(
-            factoryType.getReturnType(method), method, method.getAnnotations(), errors);
+        TypeLiteral<?> returnTypeLiteral = factoryType.getReturnType(method);
+        Key<?> returnType;
+        try {
+          returnType = getKey(returnTypeLiteral, method, method.getAnnotations(), errors);
+        } catch(ConfigurationException ce) {
+          // If this was an error due to returnTypeLiteral not being specified, rephrase
+          // it as our factory not being specified, so it makes more sense to users.
+          if(isTypeNotSpecified(returnTypeLiteral, ce)) {
+            throw errors.keyNotFullySpecified(TypeLiteral.get(factoryRawType)).toException();
+          } else {
+            throw ce;
+          }
+        }
         List<TypeLiteral<?>> params = factoryType.getParameterTypes(method);
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
         int p = 0;
@@ -221,6 +234,21 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
   public F get() {
     return factory;
+  }
+
+  /**
+   * Returns true if the ConfigurationException is due to an error of TypeLiteral not being fully
+   * specified.
+   */
+  private boolean isTypeNotSpecified(TypeLiteral typeLiteral, ConfigurationException ce) {
+    Collection<Message> messages = ce.getErrorMessages();
+    if (messages.size() == 1) {
+      Message msg = Iterables.getOnlyElement(
+          new Errors().keyNotFullySpecified(typeLiteral).getMessages());
+      return msg.getMessage().equals(Iterables.getOnlyElement(messages).getMessage());
+    } else {
+      return false;
+    }
   }
 
   /**

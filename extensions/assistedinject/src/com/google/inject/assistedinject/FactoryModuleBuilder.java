@@ -19,6 +19,7 @@ package com.google.inject.assistedinject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
 import java.lang.annotation.Annotation;
@@ -324,8 +325,8 @@ public class FactoryModuleBuilder {
   public <F> Module build(final Key<F> factoryInterface) {
     return new AbstractModule() {
       @Override protected void configure() {
-        bind(factoryInterface).toProvider(
-            new FactoryProvider2<F>(factoryInterface.getTypeLiteral(), bindings));
+        Provider<F> provider = new FactoryProvider2<F>(factoryInterface.getTypeLiteral(), bindings);  
+        bind(factoryInterface).toProvider(provider);
       }
     };
   }
