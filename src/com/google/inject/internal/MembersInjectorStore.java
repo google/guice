@@ -64,6 +64,19 @@ final class MembersInjectorStore {
   }
 
   /**
+   * Purges a type literal from the cache. Use this only if the type is not actually valid for
+   * binding and needs to be purged. (See issue 319 and
+   * ImplicitBindingTest#testCircularJitBindingsLeaveNoResidue and
+   * #testInstancesRequestingProvidersForThemselvesWithChildInjectors for examples of when this is
+   * necessary.)
+   * 
+   * Returns true if the type was stored in the cache, false otherwise.
+   */
+  boolean remove(TypeLiteral<?> type) {
+    return cache.remove(type);
+  }
+
+  /**
    * Creates a new members injector and attaches both injection listeners and method aspects.
    */
   private <T> MembersInjectorImpl<T> createWithListeners(TypeLiteral<T> type, Errors errors)

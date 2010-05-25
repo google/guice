@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import java.util.List;
+
+import com.google.inject.internal.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;
@@ -107,31 +110,153 @@ public class ImplicitBindingTest extends TestCase {
    * When we're building the binding for A, we temporarily insert that binding to support circular
    * dependencies. And so we can successfully create a binding for B. But later, when the binding
    * for A ultimately fails, we need to clean up the dependent binding for B.
+   * 
+   * The test loops through linked bindings & bindings with constructor & member injections,
+   * to make sure that all are cleaned up and traversed.  It also makes sure we don't touch
+   * explicit bindings.
    */
   public void testCircularJitBindingsLeaveNoResidue() {
-    Injector injector = Guice.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Valid.class);
+        bind(Valid2.class);
+      }
+    });
+    
+    // Capture good bindings.
+    Binding v1 = injector.getBinding(Valid.class);
+    Binding v2 = injector.getBinding(Valid2.class);
+    Binding jv1 = injector.getBinding(JitValid.class);
+    Binding jv2 = injector.getBinding(JitValid2.class);
 
+    // Then validate that a whole series of invalid bindings are erased.
+    assertFailure(injector, Invalid.class);
+    assertFailure(injector, InvalidLinked.class);
+    assertFailure(injector, InvalidLinkedImpl.class);
+    assertFailure(injector, InvalidLinked2.class);
+    assertFailure(injector, InvalidLinked2Impl.class);
+    assertFailure(injector, Invalid2.class);
+    
+    // Validate we didn't do anything to the valid explicit bindings.
+    assertSame(v1, injector.getBinding(Valid.class));
+    assertSame(v2, injector.getBinding(Valid2.class));
+    
+    // Validate that we didn't erase the valid JIT bindings
+    assertSame(jv1, injector.getBinding(JitValid.class));
+    assertSame(jv2, injector.getBinding(JitValid2.class));
+  }
+  
+  @SuppressWarnings("unchecked")
+  private void assertFailure(Injector injector, Class clazz) {
     try {
-      injector.getBinding(A.class);
-      fail();
-    } catch (ConfigurationException expected) {
+      injector.getBinding(clazz);
+      fail("Shouldn't have been able to get binding of: " + clazz);
+    } catch(ConfigurationException expected) {
+      List<Object> sources = Iterables.getOnlyElement(expected.getErrorMessages()).getSources();
+      // Assert that the first item in the sources if the key for the class we're looking up,
+      // ensuring that each lookup is "new".
+      assertEquals(Key.get(clazz).toString(), sources.get(0).toString());
+      // Assert that the last item in each lookup contains the InvalidInterface class
+      Asserts.assertContains(sources.get(sources.size()-1).toString(),
+          Key.get(InvalidInterface.class).toString());
     }
+  }
 
-    try {
-      injector.getBinding(B.class);
-      fail();
-    } catch (ConfigurationException expected) {
+  static class Invalid {
+    @Inject Valid a;
+    @Inject JitValid b;    
+    @Inject Invalid(InvalidLinked a) {}    
+    @Inject void foo(InvalidInterface a) {}
+    
+  }
+
+  @ImplementedBy(InvalidLinkedImpl.class)
+  static interface InvalidLinked {}
+  static class InvalidLinkedImpl implements InvalidLinked {
+    @Inject InvalidLinked2 a;
+  }
+  
+  @ImplementedBy(InvalidLinked2Impl.class)
+  static interface InvalidLinked2 {}
+  static class InvalidLinked2Impl implements InvalidLinked2 {
+    @Inject InvalidLinked2Impl(Invalid2 a) {}
+  }
+  
+  static class Invalid2 {
+    @Inject Invalid a;
+  }
+
+  interface InvalidInterface {}
+  
+  static class Valid { @Inject Valid2 a; }
+  static class Valid2 {}
+  
+  static class JitValid { @Inject JitValid2 a; }
+  static class JitValid2 {}
+  
+  /**
+   * Regression test for http://code.google.com/p/google-guice/issues/detail?id=319
+   * 
+   * The bug is that a class that asks for a provider for itself during injection time, 
+   * where any one of the other types required to fulfill the object creation was bound 
+   * in a child constructor, explodes when the injected Provider is called.
+   * 
+   * It works just fine when the other types are bound in a main injector.
+   */  
+  public void testInstancesRequestingProvidersForThemselvesWithChildInjectors() {       
+    final Module testModule = new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(String.class)
+          .toProvider(TestStringProvider.class);
+      }            
+    };    
+    
+    // Verify it works when the type is setup in the parent.
+    Injector parentSetupRootInjector = Guice.createInjector(testModule);
+    Injector parentSetupChildInjector = parentSetupRootInjector.createChildInjector();
+    assertEquals(TestStringProvider.TEST_VALUE, 
+        parentSetupChildInjector.getInstance(
+            RequiresProviderForSelfWithOtherType.class).getValue());
+        
+    // Verify it works when the type is setup in the child, not the parent.
+    // If it still occurs, the bug will explode here.
+    Injector childSetupRootInjector = Guice.createInjector();
+    Injector childSetupChildInjector = childSetupRootInjector.createChildInjector(testModule);      
+    assertEquals(TestStringProvider.TEST_VALUE, 
+        childSetupChildInjector.getInstance(
+            RequiresProviderForSelfWithOtherType.class).getValue());
+  }
+  
+  static class TestStringProvider implements Provider<String> {
+    static final String TEST_VALUE = "This is to verify it all works";
+    
+    public String get() {
+      return TEST_VALUE;
+    }    
+  }    
+  
+  static class RequiresProviderForSelfWithOtherType {
+    private final Provider<RequiresProviderForSelfWithOtherType> selfProvider;
+    private final String providedStringValue;
+    
+    @Inject    
+    RequiresProviderForSelfWithOtherType(
+        String providedStringValue,
+        Provider<RequiresProviderForSelfWithOtherType> selfProvider
+        ) {
+      this.providedStringValue = providedStringValue;
+      this.selfProvider = selfProvider;      
     }
-  }
+    
+    public String getValue() {
+      // Attempt to get another instance of ourself. This pattern
+      // is possible for recursive processing. 
+      selfProvider.get();
+      
+      return providedStringValue;
+    }
+  }  
 
-  static class A {
-    @Inject B b;
-    @Inject D d;
-  }
-
-  static class B {
-    @Inject A a;
-  }
-
-  interface D {}
 }

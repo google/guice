@@ -47,6 +47,19 @@ final class ConstructorInjectorStore {
       throws ErrorsException {
     return cache.get(constructorInjector, errors);
   }
+  
+  /**
+   * Purges an injection point from the cache. Use this only if the cache is not actually valid and
+   * needs to be purged. (See issue 319 and
+   * ImplicitBindingTest#testCircularJitBindingsLeaveNoResidue and
+   * #testInstancesRequestingProvidersForThemselvesWithChildInjectors for examples of when this is
+   * necessary.)
+   * 
+   * Returns true if the injector for that point was stored in the cache, false otherwise.
+   */
+  boolean remove(InjectionPoint ip) {
+    return cache.remove(ip);
+  }
 
   private <T> ConstructorInjector<T> createConstructor(InjectionPoint injectionPoint, Errors errors)
       throws ErrorsException {

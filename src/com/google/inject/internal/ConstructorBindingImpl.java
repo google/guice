@@ -121,7 +121,39 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
     factory.constructorInjector
         = (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
   }
+  
+  /** True if this binding has been initialized and is ready for use. */
+  boolean isInitialized() {
+    return factory.constructorInjector != null;
+  }
 
+  /** Returns an injection point that can be used to clean up the constructor store. */
+  InjectionPoint getInternalConstructor() {
+    if(factory.constructorInjector != null) {
+      return factory.constructorInjector.getConstructionProxy().getInjectionPoint();
+    } else {
+      return constructorInjectionPoint;
+    }
+  }
+  
+  /** Returns a set of dependencies that can be iterated over to clean up stray JIT bindings. */
+  Set<Dependency<?>> getInternalDependencies() {
+    ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
+    if(factory.constructorInjector == null) {
+      builder.add(constructorInjectionPoint);
+      // If the below throws, it's OK -- we just ignore those dependencies, because no one
+      // could have used them anyway.
+      try {
+        builder.addAll(InjectionPoint.forInstanceMethodsAndFields(constructorInjectionPoint.getDeclaringType()));
+      } catch(ConfigurationException ignored) {}
+    } else {
+      builder.add(getConstructor())
+             .addAll(getInjectableMembers());
+    }
+    
+    return Dependency.forInjectionPoints(builder.build());   
+  }
+  
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     checkState(factory.constructorInjector != null, "not initialized");
     return visitor.visit(this);

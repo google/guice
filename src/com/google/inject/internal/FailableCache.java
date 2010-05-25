@@ -53,4 +53,8 @@ public abstract class FailableCache<K, V> {
       return result;
     }
   }
+  
+  boolean remove(K key) {
+    return delegate.remove(key) != null;
+  }
 }

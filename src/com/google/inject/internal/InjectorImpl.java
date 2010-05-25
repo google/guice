@@ -44,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -434,19 +435,79 @@ final class InjectorImpl implements Injector, Lookups {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
     // Note: We don't need to synchronize on state.lock() during injector creation.
-    // TODO: for the above example, remove the binding for BarImpl if the binding for FooImpl fails
     if (binding instanceof ConstructorBindingImpl<?>) {
       Key<T> key = binding.getKey();
       jitBindings.put(key, binding);
       boolean successful = false;
+      ConstructorBindingImpl cb = (ConstructorBindingImpl)binding;
       try {
-        ((ConstructorBindingImpl) binding).initialize(this, errors);
+        cb.initialize(this, errors);
         successful = true;
       } finally {
         if (!successful) {
-          jitBindings.remove(key);
+          // We do not pass cb.getInternalConstructor as the second parameter
+          // so that cached exceptions while constructing it get stored.
+          // See TypeListenerTest#testTypeListenerThrows
+          removeFailedJitBinding(key, null);
+          cleanup(binding, new HashSet<Key>());
         }
       }
+    }
+  }
+  
+  /**
+   * Iterates through the binding's dependencies to clean up any stray bindings that were leftover
+   * from a failed JIT binding. This is required because the bindings are eagerly &
+   * optimistically added to allow circular dependency support, so dependencies may pass where they
+   * should have failed.
+   */
+  private boolean cleanup(BindingImpl<?> binding, Set<Key> encountered) {
+    boolean bindingFailed = false;
+    Set<Dependency<?>> deps = getInternalDependencies(binding);
+    for(Dependency dep : deps) {
+      Key<?> depKey = dep.getKey();
+      InjectionPoint ip = dep.getInjectionPoint();
+      if(encountered.add(depKey)) { // only check if we haven't looked at this key yet
+        BindingImpl depBinding = jitBindings.get(depKey);
+        if(depBinding != null) { // if the binding still exists, validate
+          boolean failed = cleanup(depBinding, encountered); // if children fail, we fail
+          if(depBinding instanceof ConstructorBindingImpl) {
+            ConstructorBindingImpl ctorBinding = (ConstructorBindingImpl)depBinding;
+            ip = ctorBinding.getInternalConstructor();
+            if(!ctorBinding.isInitialized()) {
+              failed = true;
+            }
+          }
+          if(failed) {
+            removeFailedJitBinding(depKey, ip);
+            bindingFailed = true;
+          }
+        } else if(state.getExplicitBinding(depKey) == null) {
+          // ignore keys if they were explicitly bound, but if neither JIT
+          // nor explicit, it's also invalid & should let parent know.
+          bindingFailed = true;
+        }
+      }
+    }
+    return bindingFailed;
+  }
+  
+  /** Cleans up any state that may have been cached when constructing the JIT binding. */
+  private void removeFailedJitBinding(Key<?> key, InjectionPoint ip) {
+    jitBindings.remove(key);
+    membersInjectorStore.remove(key.getTypeLiteral());
+    if(ip != null) {
+      constructors.remove(ip);
+    }
+  }
+  
+  /** Safely gets the dependencies of possibly not initialized bindings. */
+  @SuppressWarnings("unchecked")
+  private Set<Dependency<?>> getInternalDependencies(BindingImpl<?> binding) {
+    if(binding instanceof ConstructorBindingImpl) {
+      return ((ConstructorBindingImpl)binding).getInternalDependencies();
+    } else {
+      return ((HasDependencies)binding).getDependencies();
     }
   }
 
