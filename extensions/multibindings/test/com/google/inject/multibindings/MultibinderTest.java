@@ -18,6 +18,8 @@ package com.google.inject.multibindings;
 
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+
+import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
@@ -41,10 +43,18 @@ import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import junit.framework.TestCase;
@@ -495,5 +505,45 @@ public class MultibinderTest extends TestCase {
     assertEquals(ImmutableSet.of("A", "B", "C", "D", "E", "F"),
         injector.getInstance(Key.get(setOfString)));
 
+  }
+  
+  @BindingAnnotation
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  private static @interface Marker {}
+
+  @Marker
+  public void testMultibinderMatching() throws Exception {
+    Method m = MultibinderTest.class.getDeclaredMethod("testMultibinderMatching");
+    assertNotNull(m);
+    final Annotation marker = m.getAnnotation(Marker.class);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override public void configure() {
+        Multibinder<Integer> mb1 = Multibinder.newSetBinder(binder(), Integer.class, Marker.class);
+        Multibinder<Integer> mb2 = Multibinder.newSetBinder(binder(), Integer.class, marker);
+        mb1.addBinding().toInstance(1);
+        mb2.addBinding().toInstance(2);
+
+        // This assures us that the two binders are equivalent, so we expect the instance added to
+        // each to have been added to one set.
+        assertEquals(mb1, mb2);
+      }
+    });
+    TypeLiteral<Set<Integer>> t = new TypeLiteral<Set<Integer>>() {};
+    Set<Integer> s1 = injector.getInstance(Key.get(t, Marker.class));
+    Set<Integer> s2 = injector.getInstance(Key.get(t, marker));
+
+    // This assures us that the two sets are in fact equal.  They may not be same set (as in Java
+    // object identical), but we shouldn't expect that, since probably Guice creates the set each
+    // time in case the elements are dependent on scope.
+    assertEquals(s1, s2);
+
+    // This ensures that MultiBinder is internally using the correct set name --
+    // making sure that instances of marker annotations have the same set name as
+    // MarkerAnnotation.class.
+    Set<Integer> expected = new HashSet<Integer>();
+    expected.add(1);
+    expected.add(2);
+    assertEquals(expected, s1);
   }  
 }

@@ -37,6 +37,13 @@ import javax.inject.Qualifier;
 public class Annotations {
 
   /**
+   * Returns {@code true} if the given annotation type has no attributes.
+   */
+  public static boolean isMarker(Class<? extends Annotation> annotationType) {
+    return annotationType.getDeclaredMethods().length == 0;
+  }
+
+  /**
    * Returns true if the given annotation is retained at runtime.
    */
   public static boolean isRetainedAtRuntime(Class<? extends Annotation> annotationType) {

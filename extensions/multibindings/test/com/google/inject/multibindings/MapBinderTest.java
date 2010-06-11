@@ -16,8 +16,11 @@
 
 package com.google.inject.multibindings;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.name.Names.named;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
@@ -34,13 +37,19 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ImmutableSet;
 import com.google.inject.internal.Maps;
 import com.google.inject.name.Names;
-import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
+
+import junit.framework.TestCase;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,7 +57,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * @author dpb@google.com (David P. Baker)
@@ -569,4 +577,46 @@ public class MapBinderTest extends TestCase {
   private <V> Set<V> setOf(Object... elements) {
     return new HashSet(Arrays.asList(elements));
   }
+
+  @BindingAnnotation
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  private static @interface Marker {}
+
+  @Marker
+  public void testMapBinderMatching() throws Exception {
+    Method m = MapBinderTest.class.getDeclaredMethod("testMapBinderMatching");
+    assertNotNull(m);
+    final Annotation marker = m.getAnnotation(Marker.class);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override public void configure() {
+        MapBinder<Integer, Integer> mb1 =
+          MapBinder.newMapBinder(binder(), Integer.class, Integer.class, Marker.class);
+        MapBinder<Integer, Integer> mb2 = 
+          MapBinder.newMapBinder(binder(), Integer.class, Integer.class, marker);
+        mb1.addBinding(1).toInstance(1);
+        mb2.addBinding(2).toInstance(2);
+
+        // This assures us that the two binders are equivalent, so we expect the instance added to
+        // each to have been added to one set.
+        assertEquals(mb1, mb2);
+      }
+    });
+    TypeLiteral<Map<Integer, Integer>> t = new TypeLiteral<Map<Integer, Integer>>() {};
+    Map<Integer, Integer> s1 = injector.getInstance(Key.get(t, Marker.class));
+    Map<Integer, Integer> s2 = injector.getInstance(Key.get(t, marker));
+
+    // This assures us that the two sets are in fact equal.  They may not be same set (as in Java
+    // object identical), but we shouldn't expect that, since probably Guice creates the set each
+    // time in case the elements are dependent on scope.
+    assertEquals(s1, s2);
+
+    // This ensures that MultiBinder is internally using the correct set name --
+    // making sure that instances of marker annotations have the same set name as
+    // MarkerAnnotation.class.
+    Map<Integer, Integer> expected = new HashMap<Integer, Integer>();
+    expected.put(1, 1);
+    expected.put(2, 2);
+    assertEquals(expected, s1);
+  }  
 }

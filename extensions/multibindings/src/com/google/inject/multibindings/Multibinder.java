@@ -27,6 +27,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.ImmutableSet;
@@ -103,7 +104,7 @@ public abstract class Multibinder<T> {
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "",
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
         Key.get(Multibinder.<T>setOf(type)));
     binder.install(result);
     return result;
@@ -124,7 +125,7 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(
       Binder binder, TypeLiteral<T> type, Annotation annotation) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, annotation.toString(),
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
         Key.get(Multibinder.<T>setOf(type), annotation));
     binder.install(result);
     return result;
@@ -146,7 +147,7 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type,
       Class<? extends Annotation> annotationType) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, "@" + annotationType.getName(),
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
         Key.get(Multibinder.<T>setOf(type), annotationType));
     binder.install(result);
     return result;
@@ -227,13 +228,31 @@ public abstract class Multibinder<T> {
     /** whether duplicates are allowed. Possibly configured by a different instance */
     private boolean permitDuplicates;
 
-    private RealMultibinder(Binder binder, TypeLiteral<T> elementType,
-        String setName, Key<Set<T>> setKey) {
+    private RealMultibinder(Binder binder, TypeLiteral<T> elementType, Key<Set<T>> setKey) {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
-      this.setName = checkNotNull(setName, "setName");
       this.setKey = checkNotNull(setKey, "setKey");
+      this.setName = nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
+    }
+    
+    /**
+     * Returns the name the set should use.  This is based on the annotation.
+     * If the annotation has an instance and is not a marker annotation,
+     * we ask the annotation for its toString.  If it was a marker annotation
+     * or just an annotation type, we use the annotation's name. Otherwise,
+     * the name is the empty string.
+     */
+    private String nameOf(Key<?> key) {
+      Annotation annotation = setKey.getAnnotation();
+      Class<? extends Annotation> annotationType = setKey.getAnnotationType();      
+      if(annotation != null && !Annotations.isMarker(annotationType)) {
+        return setKey.getAnnotation().toString();
+      } else if(setKey.getAnnotationType() != null) {
+        return "@" + setKey.getAnnotationType().getName();
+      } else {
+        return "";
+      }
     }
 
     @SuppressWarnings("unchecked")

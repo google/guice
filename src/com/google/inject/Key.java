@@ -320,13 +320,6 @@ public class Key<T> {
   }
 
   /**
-   * Returns {@code true} if the given annotation type has no attributes.
-   */
-  static boolean isMarker(Class<? extends Annotation> annotationType) {
-    return annotationType.getDeclaredMethods().length == 0;
-  }
-
-  /**
    * Gets the strategy for an annotation.
    */
   static AnnotationStrategy strategyFor(Annotation annotation) {
@@ -335,7 +328,7 @@ public class Key<T> {
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
 
-    if (isMarker(annotationType)) {
+    if (Annotations.isMarker(annotationType)) {
       return new AnnotationTypeStrategy(annotationType, annotation);
     }
 
