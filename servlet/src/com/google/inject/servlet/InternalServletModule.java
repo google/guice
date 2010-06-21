@@ -2,8 +2,6 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import static com.google.inject.servlet.ServletScopes.REQUEST;
-import static com.google.inject.servlet.ServletScopes.SESSION;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -11,6 +9,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import static com.google.inject.servlet.ServletScopes.REQUEST;
+import static com.google.inject.servlet.ServletScopes.SESSION;
 
 /**
  * This is a left-factoring of all ServletModules installed in the system.
@@ -32,6 +33,7 @@ final class InternalServletModule extends AbstractModule {
     // Unfortunate staticness... =(
     requestStaticInjection(GuiceFilter.class);
 
+    bind(ManagedFilterPipeline.class);
     bind(ManagedServletPipeline.class);
     bind(FilterPipeline.class).to(ManagedFilterPipeline.class).asEagerSingleton();
   }

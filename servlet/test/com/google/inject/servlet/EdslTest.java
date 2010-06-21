@@ -16,8 +16,11 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import java.util.HashMap;
 import junit.framework.TestCase;
@@ -28,6 +31,18 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji gmail com)
  */
 public class EdslTest extends TestCase {
+
+  public final void testExplicitBindingsWorksWithGuiceServlet() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings()
+        .addModules(new ServletModule() {
+          @Override protected void configureServlets() {
+            bind(DummyServlet.class).in(Singleton.class);
+            serve("/*").with(DummyServlet.class);
+          }
+        }).build();
+
+    assertNotNull(injector.getInstance(DummyServlet.class));
+  }
 
   public final void testConfigureServlets() {
 

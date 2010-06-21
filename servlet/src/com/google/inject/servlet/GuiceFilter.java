@@ -75,9 +75,8 @@ public class GuiceFilter implements Filter {
           + " ServletModule in your web application. While you may "
           + "have more than one injector, you should only configure"
           + " guice-servlet in one of them. (Hint: look for legacy "
-          + "ServetModules or multiple calls to Servlets.configure())."
-          + "You typically see this error if are not using."
-          + GuiceServletContextListener.class.getSimpleName()
+          + "ServetModules). You typically see this error if are not"
+          + " using " + GuiceServletContextListener.class.getSimpleName()
           + " as described in the documentation.";
 
   //VisibleForTesting
