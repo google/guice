@@ -236,4 +236,59 @@ public class InjectionPointTest extends TestCase {
     public void a(String s, int i) {}
     void b() {}
   }
+  
+  public void testOverrideBehavior() {
+	  Set<InjectionPoint> points;
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(JsrAnnotated.class);
+	  assertEquals(1, points.size());
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(ExtendsJsrAnnoated.class);
+	  assertEquals(0, points.size());
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(GuiceAnnotated.class);
+	  assertEquals(1, points.size());
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(ExtendsGuiceAnnotated.class);
+	  assertEquals(1, points.size());
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(DoubleGuiceInject.class);
+    assertEquals(1, points.size());	  
+	  
+    points = InjectionPoint.forInstanceMethodsAndFields(GuiceExtendsJsrAnnotated.class);
+	  assertEquals(1, points.size());
+	  
+	  points = InjectionPoint.forInstanceMethodsAndFields(ExtendsGuiceExtendsJsrAnnotated.class);
+	  assertEquals(1, points.size());
+	  
+  }
+  
+  static class JsrAnnotated {
+	  @javax.inject.Inject public void foo() {}
+  }
+  
+  static class ExtendsJsrAnnoated extends JsrAnnotated {
+	  @Override public void foo() {}
+  }
+  
+  static class GuiceAnnotated {
+	  @Inject public void foo() {}
+  }
+  
+  static class ExtendsGuiceAnnotated extends GuiceAnnotated {
+	  @Override public void foo() {}
+  }
+  
+  static class DoubleGuiceInject extends GuiceAnnotated {
+    @Override @Inject public void foo() {}
+  }
+  
+  static class GuiceExtendsJsrAnnotated extends JsrAnnotated {
+	  @Override @Inject public void foo() {}
+  }
+  
+  static class ExtendsGuiceExtendsJsrAnnotated extends GuiceExtendsJsrAnnotated {
+	  public void foo() {}
+  }
+  
 }
