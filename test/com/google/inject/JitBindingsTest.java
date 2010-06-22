@@ -50,6 +50,86 @@ public class JitBindingsTest extends TestCase {
     ensureFails(injector, true,  FooImpl.class);    
   }
   
+  public void testLinkedEagerSingleton() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).to(FooImpl.class).asEagerSingleton();
+      }
+    }).build();
+    // Foo was explicitly bound
+    ensureWorks(injector, Foo.class);
+    // FooImpl was implicitly bound, it is an error to call getInstance or getProvider,
+    // It is OK to call getBinding for introspection, but an error to get the provider
+    // of the binding
+    ensureFails(injector, true, FooImpl.class);
+  }
+  
+  public void testBasicsWithEagerSingleton() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).to(FooImpl.class).asEagerSingleton();
+        bind(Bar.class);
+        bind(FooBar.class);
+      }
+    }).build();
+    // Foo, Bar & FooBar was explicitly bound    
+    ensureWorks(injector, FooBar.class, Bar.class, Foo.class);
+    // FooImpl was implicitly bound, it is an error to call getInstance or getProvider,
+    // It is OK to call getBinding for introspection, but an error to get the provider
+    // of the binding    
+    ensureFails(injector, true,  FooImpl.class);    
+  }  
+  
+  public void testLinkedToScoped() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).to(ScopedFooImpl.class);
+      }
+    }).build();
+    // Foo was explicitly bound
+    ensureWorks(injector, Foo.class);
+    // FooSingletonImpl was implicitly bound, it is an error to call getInstance or getProvider,
+    // It is OK to call getBinding for introspection, but an error to get the provider
+    // of the binding
+    ensureFails(injector, true, ScopedFooImpl.class);    
+  }
+  
+  public void testBasicsWithScoped() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).to(ScopedFooImpl.class);
+        bind(Bar.class);
+        bind(FooBar.class);
+      }
+    }).build();
+    // Foo, Bar & FooBar was explicitly bound    
+    ensureWorks(injector, FooBar.class, Bar.class, Foo.class);
+    // FooSingletonImpl was implicitly bound, it is an error to call getInstance or getProvider,
+    // It is OK to call getBinding for introspection, but an error to get the provider
+    // of the binding    
+    ensureFails(injector, true,  ScopedFooImpl.class);   
+  }
+  
+  public void testFailsIfInjectingScopedDirectlyWhenItIsntBound() {
+    try {
+      new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Foo.class).to(ScopedFooImpl.class);
+          bind(WantsScopedFooImpl.class);
+        }
+      }).build();
+      fail();
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(), "1) " + jitFailed(ScopedFooImpl.class));
+      assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
+    }
+  }
+  
   public void testLinkedProviderBindingWorks() {
     Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
       @Override
@@ -125,6 +205,17 @@ public class JitBindingsTest extends TestCase {
     }).build();
     ensureWorks(injector, ImplBy.class);
     ensureFails(injector, true, ImplByImpl.class);
+  }
+  
+  public void testImplementedBySomethingThatIsAnnotated() {
+    Injector injector = new InjectorBuilder().requireExplicitBindings().addModules(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ImplByScoped.class);
+      }
+    }).build();
+    ensureWorks(injector, ImplByScoped.class);
+    ensureFails(injector, true, ImplByScopedImpl.class);    
   }
   
   public void testProvidedBy() {
@@ -257,10 +348,14 @@ public class JitBindingsTest extends TestCase {
         }
       }
     }
-  }  
+  }
   
   private static interface Foo {}
   private static class FooImpl implements Foo {}
+  @Singleton private static class ScopedFooImpl implements Foo {}
+  private static class WantsScopedFooImpl {
+    @SuppressWarnings("unused") @Inject ScopedFooImpl scopedFoo;
+  }
   private static class Bar {}
   private static class FooBar {
     @SuppressWarnings("unused") @Inject Foo foo;
@@ -279,6 +374,11 @@ public class JitBindingsTest extends TestCase {
   @ImplementedBy(ImplByImpl.class)
   private static interface ImplBy {}
   private static class ImplByImpl implements ImplBy {}
+  
+  @ImplementedBy(ImplByScopedImpl.class)
+  private static interface ImplByScoped {}
+  @Singleton
+  private static class ImplByScopedImpl implements ImplByScoped {}  
 
   @ProvidedBy(ProvByProvider.class)
   private static interface ProvBy {}

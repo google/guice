@@ -40,7 +40,10 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
       T t = injector.callInContext(new ContextualCallable<T>() {
         public T call(InternalContext context) throws ErrorsException {
           Dependency dependency = context.getDependency();
-          return internalFactory.get(errors, context, dependency, false);
+          // Always pretend that we are a linked binding, to support
+          // scoping implicit bindings.  If we are not actually a linked
+          // binding, we'll fail properly elsewhere in the chain.
+          return internalFactory.get(errors, context, dependency, true);
         }
       });
       errors.throwIfNewErrors(0);
