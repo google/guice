@@ -291,6 +291,13 @@ public final class Errors implements Serializable {
     return addMessage("A binding to %s already exists on a child injector.", key);
   }
 
+  public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
+    return addMessage(
+        "A binding to %s was already configured at %s and an error was thrown " 
+      + "while checking duplicate bindings.  Error: %s",
+        key, source, t);
+  }
+
   public Errors errorInjectingMethod(Throwable cause) {
     return errorInUserCode(cause, "Error injecting method, %s", cause);
   }

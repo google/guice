@@ -57,5 +57,21 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
         .add("key", getKey())
         .add("source", getSource())
         .toString();
+  }  
+
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof UntargettedBindingImpl) {
+      UntargettedBindingImpl<?> o = (UntargettedBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping());
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping());
   }
 }

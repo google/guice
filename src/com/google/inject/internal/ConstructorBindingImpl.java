@@ -206,6 +206,23 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
         .add("scope", getScoping())
         .toString();
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof ConstructorBindingImpl) {
+      ConstructorBindingImpl<?> o = (ConstructorBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping())
+        && Objects.equal(constructorInjectionPoint, o.constructorInjectionPoint);
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping(), constructorInjectionPoint);
+  }
 
   private static class Factory<T> implements InternalFactory<T> {
     private final boolean failIfNotLinked;

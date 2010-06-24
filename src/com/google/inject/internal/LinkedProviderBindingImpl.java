@@ -68,4 +68,21 @@ final class LinkedProviderBindingImpl<T>
         .add("provider", providerKey)
         .toString();
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof LinkedProviderBindingImpl) {
+      LinkedProviderBindingImpl<?> o = (LinkedProviderBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping())
+        && Objects.equal(providerKey, o.providerKey);
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping(), providerKey);
+  }
 }

@@ -324,6 +324,23 @@ final class InjectorImpl implements Injector, Lookups {
     public Set<Dependency<?>> getDependencies() {
       return ImmutableSet.<Dependency<?>>of(Dependency.get(getProvidedKey()));
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+      if(obj instanceof ProviderBindingImpl) {
+        ProviderBindingImpl<?> o = (ProviderBindingImpl<?>)obj;
+        return getKey().equals(o.getKey())
+          && getScoping().equals(o.getScoping())
+          && Objects.equal(providedBinding, o.providedBinding);
+      } else {
+        return false;
+      }
+    }
+    
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(getKey(), getScoping(), providedBinding);
+    }
   }
 
   /**
@@ -422,6 +439,23 @@ final class InjectorImpl implements Injector, Lookups {
           .add("sourceKey", getSourceKey())
           .add("value", value)
           .toString();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+      if(obj instanceof ConvertedConstantBindingImpl) {
+        ConvertedConstantBindingImpl<?> o = (ConvertedConstantBindingImpl<?>)obj;
+        return getKey().equals(o.getKey())
+          && getScoping().equals(o.getScoping())
+          && Objects.equal(value, o.value);
+      } else {
+        return false;
+      }
+    }
+    
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(getKey(), getScoping(), value);
     }
   }
 

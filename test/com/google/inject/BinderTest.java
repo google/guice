@@ -105,22 +105,6 @@ public class BinderTest extends TestCase {
     }
   }
 
-  public void testDuplicateBindings() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(JustAClass.class);
-          bind(JustAClass.class);
-        }
-      });
-      fail();
-    } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "A binding to " + JustAClass.class.getName(),
-          " was already configured at " + BinderTest.class.getName(), ".configure(",
-          "at " + BinderTest.class.getName(), ".configure(BinderTest.java:");
-    }
-  }
-
   public void testMissingDependency() {
     try {
       Guice.createInjector(new AbstractModule() {
@@ -261,8 +245,8 @@ public class BinderTest extends TestCase {
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
-          bind(String[].class).toInstance(strings);
-          bind(new TypeLiteral<String[]>() {}).toInstance(strings);
+          bind(String[].class).toInstance(new String[] { "A" });
+          bind(new TypeLiteral<String[]>() {}).toInstance(new String[] { "B" });
         }
       });
       fail();
@@ -272,6 +256,17 @@ public class BinderTest extends TestCase {
           "at " + getClass().getName(), ".configure(BinderTest.java:");
       assertContains(expected.getMessage(), "1 error");
     }
+    
+    // passes because duplicates are ignored
+    injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String[].class).toInstance(strings);
+        bind(new TypeLiteral<String[]>() {}).toInstance(strings);
+      }
+    });
+    assertSame(strings, injector.getInstance(Key.get(new TypeLiteral<String[]>() {})));
+    assertSame(strings, injector.getInstance(new Key<String[]>() {}));
+    assertSame(strings, injector.getInstance(String[].class));
   }
 
   /**

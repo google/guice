@@ -327,7 +327,7 @@ public abstract class MapBinder<K, V> {
       // Binds a Map<K, Provider<V>> from a collection of Map<Entry<K, Provider<V>>.
       final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
           .getProvider(entrySetBinder.getSetKey());
-      binder.bind(providerMapKey).toProvider(new ProviderWithDependencies<Map<K, Provider<V>>>() {
+      binder.bind(providerMapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, Provider<V>>>(mapKey) {
         private Map<K, Provider<V>> providerMap;
 
         @SuppressWarnings("unused")
@@ -355,7 +355,7 @@ public abstract class MapBinder<K, V> {
       });
 
       final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
-      binder.bind(mapKey).toProvider(new ProviderWithDependencies<Map<K, V>>() {
+      binder.bind(mapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, V>>(mapKey) {
         public Map<K, V> get() {
           Map<K, V> map = new LinkedHashMap<K, V>();
           for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
@@ -414,7 +414,7 @@ public abstract class MapBinder<K, V> {
         // Binds a Map<K, Set<Provider<V>>> from a collection of Map<Entry<K, Provider<V>> if
         // permitDuplicates was called.
         binder.bind(providerMultimapKey).toProvider(
-            new ProviderWithDependencies<Map<K, Set<Provider<V>>>>() {
+            new RealMapBinderProviderWithDependencies<Map<K, Set<Provider<V>>>>(multimapKey) {
               private Map<K, Set<Provider<V>>> providerMultimap;
 
               @SuppressWarnings("unused")
@@ -449,7 +449,7 @@ public abstract class MapBinder<K, V> {
 
         final Provider<Map<K, Set<Provider<V>>>> multimapProvider =
             binder.getProvider(providerMultimapKey);
-        binder.bind(multimapKey).toProvider(new ProviderWithDependencies<Map<K, Set<V>>>() {
+        binder.bind(multimapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, Set<V>>>(multimapKey) {
 
           public Map<K, Set<V>> get() {
             ImmutableMap.Builder<K, Set<V>> multimapBuilder = ImmutableMap.builder();
@@ -509,6 +509,25 @@ public abstract class MapBinder<K, V> {
       @Override public String toString() {
         return "MapEntry(" + key + ", " + value + ")";
       }
+    }
+    
+    /**
+     * A base class for ProviderWithDependencies that need equality
+     * based on a specific object.
+     */
+    private static abstract class RealMapBinderProviderWithDependencies<T> implements ProviderWithDependencies<T> {
+      private final Object equality;
+      
+      public RealMapBinderProviderWithDependencies(Object equality) {
+        this.equality = equality;
+      }
+      
+      @Override
+      public boolean equals(Object obj) {
+        return this.getClass() == obj.getClass() &&
+          equality.equals(((RealMapBinderProviderWithDependencies<?>)obj).equality);
+      }
+      
     }
   }
 }

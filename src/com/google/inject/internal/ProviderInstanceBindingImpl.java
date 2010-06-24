@@ -90,4 +90,21 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
         .add("provider", providerInstance)
         .toString();
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof ProviderInstanceBindingImpl) {
+      ProviderInstanceBindingImpl<?> o = (ProviderInstanceBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping())
+        && Objects.equal(providerInstance, o.providerInstance);
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping(), providerInstance);
+  }
 }

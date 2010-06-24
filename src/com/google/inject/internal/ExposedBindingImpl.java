@@ -58,4 +58,7 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
   public void applyTo(Binder binder) {
     throw new UnsupportedOperationException("This element represents a synthetic binding.");
   }
+  
+  // Purposely does not override equals/hashcode, because exposed bindings are only equal to
+  // themselves right now -- that is, there cannot be "duplicate" exposed bindings.
 }

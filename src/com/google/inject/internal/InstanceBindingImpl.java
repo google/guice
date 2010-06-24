@@ -92,4 +92,21 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
         .add("instance", instance)
         .toString();
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof InstanceBindingImpl) {
+      InstanceBindingImpl<?> o = (InstanceBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping())
+        && Objects.equal(instance, o.instance);
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping(), instance);
+  }
 }

@@ -69,6 +69,7 @@ public class AllTests {
     suite.addTestSuite(BoundInstanceInjectionTest.class);
     suite.addTestSuite(BoundProviderTest.class);
     suite.addTestSuite(CircularDependencyTest.class);
+    suite.addTestSuite(DuplicateBindingsTest.class);
     // ErrorHandlingTest.class is not a testcase
     suite.addTestSuite(EagerSingletonTest.class);
     suite.addTestSuite(GenericInjectionTest.class);

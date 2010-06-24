@@ -35,6 +35,7 @@ import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.PrivateElements;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,7 +140,8 @@ public final class Modules {
       return new AbstractModule() {
         @Override
         public void configure() {
-          final List<Element> elements = Elements.getElements(baseModules);
+          final LinkedHashSet<Element> elements =
+            new LinkedHashSet<Element>(Elements.getElements(baseModules));
           final List<Element> overrideElements = Elements.getElements(overrides);
 
           final Set<Key<?>> overriddenKeys = Sets.newHashSet();

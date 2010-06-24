@@ -80,19 +80,19 @@ public class NamedEquivalanceTest extends TestCase {
     assertInjectionsSucceed(JSR330_PROVIDER_METHOD_MODULE);
   }
 
-  public void testBindingDifferentTypesWithSameValueIsAnError() {
-    assertDuplicateBinding(GUICE_BINDING_MODULE, JSR330_BINDING_MODULE);
-    assertDuplicateBinding(JSR330_BINDING_MODULE, GUICE_BINDING_MODULE);
+  public void testBindingDifferentTypesWithSameValueIsIgnored() {
+    assertDuplicateBinding(GUICE_BINDING_MODULE, JSR330_BINDING_MODULE, false);
+    assertDuplicateBinding(JSR330_BINDING_MODULE, GUICE_BINDING_MODULE, false);
   }
 
   public void testBindingDifferentTypesWithSameValueIsAnErrorWithProviderMethods() {
-    assertDuplicateBinding(GUICE_PROVIDER_METHOD_MODULE, JSR330_PROVIDER_METHOD_MODULE);
-    assertDuplicateBinding(JSR330_PROVIDER_METHOD_MODULE, GUICE_PROVIDER_METHOD_MODULE);
+    assertDuplicateBinding(GUICE_PROVIDER_METHOD_MODULE, JSR330_PROVIDER_METHOD_MODULE, true);
+    assertDuplicateBinding(JSR330_PROVIDER_METHOD_MODULE, GUICE_PROVIDER_METHOD_MODULE, true);
   }
 
   public void testBindingDifferentTypesWithSameValueIsAnErrorMixed() {
-    assertDuplicateBinding(GUICE_BINDING_MODULE, JSR330_PROVIDER_METHOD_MODULE);
-    assertDuplicateBinding(JSR330_BINDING_MODULE, GUICE_PROVIDER_METHOD_MODULE);
+    assertDuplicateBinding(GUICE_BINDING_MODULE, JSR330_PROVIDER_METHOD_MODULE, true);
+    assertDuplicateBinding(JSR330_BINDING_MODULE, GUICE_PROVIDER_METHOD_MODULE, true);
   }
 
   public void testMissingBindingForGuiceNamedUsesSameTypeInErrorMessage() {
@@ -123,13 +123,19 @@ public class NamedEquivalanceTest extends TestCase {
     }
   }
 
-  private static void assertDuplicateBinding(Module... modules) {
+  private static void assertDuplicateBinding(Module a, Module b, boolean fails) {
     try {
-      Guice.createInjector(modules);
-      fail("should have thrown CreationException");
+      Guice.createInjector(a, b);
+      if(fails) {
+        fail("should have thrown CreationException");
+      }
     } catch (CreationException e) {
-      assertContains(e.getMessage(),
-          "A binding to java.lang.String annotated with @com.google.inject.name.Named(value=foo) was already configured");
+      if(fails) {
+        assertContains(e.getMessage(),
+            "A binding to java.lang.String annotated with @com.google.inject.name.Named(value=foo) was already configured");
+      } else {
+        throw e;
+      }
     }
   }
 

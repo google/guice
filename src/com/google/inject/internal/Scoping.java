@@ -203,6 +203,22 @@ public abstract class Scoping {
   public Class<? extends Annotation> getScopeAnnotation() {
     return null;
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof Scoping) {
+      Scoping o = (Scoping)obj;
+      return Objects.equal(getScopeAnnotation(), o.getScopeAnnotation())
+        && Objects.equal(getScopeInstance(), o.getScopeInstance());
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getScopeAnnotation(), getScopeInstance());
+  }
 
   public abstract <V> V acceptVisitor(BindingScopingVisitor<V> visitor);
 

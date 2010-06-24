@@ -73,4 +73,21 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
         .add("target", targetKey)
         .toString();
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof LinkedBindingImpl) {
+      LinkedBindingImpl<?> o = (LinkedBindingImpl<?>)obj;
+      return getKey().equals(o.getKey())
+        && getScoping().equals(o.getScoping())
+        && Objects.equal(targetKey, o.targetKey);
+    } else {
+      return false;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getKey(), getScoping(), targetKey);
+  }
 }
