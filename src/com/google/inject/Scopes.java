@@ -124,7 +124,7 @@ public class Scopes {
    * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
    * also true if the target binding is singleton-scoped.
    *
-   * @since 2.1
+   * @since 3.0
    */
   public static boolean isSingleton(Binding<?> binding) {
     do {

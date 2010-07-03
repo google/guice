@@ -37,7 +37,7 @@ import com.google.inject.internal.InternalInjectorCreator;
  *     }
  * </pre>
  * 
- * @since 2.1
+ * @since 3.0
  */
 public class InjectorBuilder {
   

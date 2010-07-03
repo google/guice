@@ -162,6 +162,8 @@ public final class InjectionPoint {
   
   /**
    * Returns true if the element is annotated with {@literal @}{@link Toolable}.
+   * 
+   * @since 3.0
    */
   public boolean isToolable() {
     return ((AnnotatedElement)member).isAnnotationPresent(Toolable.class);
@@ -171,6 +173,8 @@ public final class InjectionPoint {
    * Returns the generic type that defines this injection point. If the member exists on a
    * parameterized type, the result will include more type information than the member's {@link
    * Member#getDeclaringClass() raw declaring class}.
+   * 
+   * @since 3.0
    */
   public TypeLiteral<?> getDeclaringType() {
     return declaringType;
@@ -196,6 +200,8 @@ public final class InjectionPoint {
    * type literal.
    *
    * @param constructor any single constructor present on {@code type}.
+   * 
+   * @since 3.0
    */
   public static <T> InjectionPoint forConstructor(Constructor<T> constructor) {
     return new InjectionPoint(TypeLiteral.get(constructor.getDeclaringClass()), constructor);
@@ -206,6 +212,8 @@ public final class InjectionPoint {
    *
    * @param constructor any single constructor present on {@code type}.
    * @param type the concrete type that defines {@code constructor}.
+   * 
+   * @since 3.0
    */
   public static <T> InjectionPoint forConstructor(
       Constructor<T> constructor, TypeLiteral<? extends T> type) {

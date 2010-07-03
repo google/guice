@@ -22,6 +22,7 @@ import com.google.inject.Stage;
  * com.google.inject.Binder#requestInjection requestInjection}.
  * 
  * @author sberlin@gmail.com (Sam Berlin)
+ * @since 3.0
  */
 @Target({ METHOD })
 @Retention(RUNTIME)
