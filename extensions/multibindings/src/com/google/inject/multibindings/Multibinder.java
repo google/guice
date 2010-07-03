@@ -29,10 +29,11 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Lists;
 import static com.google.inject.name.Names.named;
+
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;

@@ -17,12 +17,14 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.BytecodeGen.Visibility;
+import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Produces construction proxies that invoke the class constructor.
@@ -95,7 +97,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
         return constructor;
       }
       /*if[AOP]*/
-      public ImmutableMap<Method, List<org.aopalliance.intercept.MethodInterceptor>>
+      public ImmutableMap<Method, List<MethodInterceptor>>
           getMethodInterceptors() {
         return ImmutableMap.of();
       }

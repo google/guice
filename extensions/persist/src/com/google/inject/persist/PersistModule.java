@@ -2,7 +2,7 @@ package com.google.inject.persist;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.internal.Preconditions;
+import com.google.inject.internal.util.Preconditions;
 import com.google.inject.persist.jpa.InternalJpaModule;
 import com.google.inject.servlet.ServletModule;
 import java.lang.annotation.Retention;

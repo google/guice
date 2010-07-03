@@ -16,9 +16,10 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.binder.AnnotatedElementBuilder;
+import com.google.inject.internal.util.Preconditions;
 import java.lang.annotation.Annotation;
 
 /**
@@ -42,13 +43,13 @@ public class ExposureBuilder<T> implements AnnotatedElementBuilder {
   }
 
   public void annotatedWith(Class<? extends Annotation> annotationType) {
-    com.google.inject.internal.Preconditions.checkNotNull(annotationType, "annotationType");
+    Preconditions.checkNotNull(annotationType, "annotationType");
     checkNotAnnotated();
     key = Key.get(key.getTypeLiteral(), annotationType);
   }
 
   public void annotatedWith(Annotation annotation) {
-    com.google.inject.internal.Preconditions.checkNotNull(annotation, "annotation");
+    Preconditions.checkNotNull(annotation, "annotation");
     checkNotAnnotated();
     key = Key.get(key.getTypeLiteral(), annotation);
   }

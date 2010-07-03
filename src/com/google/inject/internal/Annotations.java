@@ -20,9 +20,9 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.Classes;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

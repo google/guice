@@ -17,6 +17,8 @@
 package com.google.inject.internal;
 
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;

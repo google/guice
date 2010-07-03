@@ -18,10 +18,10 @@ package com.google.inject.spi;
 
 import com.google.inject.Binder;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.Objects;
-import static com.google.inject.internal.Preconditions.checkNotNull;
-import com.google.inject.internal.SourceProvider;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.Objects;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import com.google.inject.internal.util.SourceProvider;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;

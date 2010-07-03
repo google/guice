@@ -22,16 +22,18 @@ import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.Scope;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Iterables;
+import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
-
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.lang.annotation.Annotation;
 
 /**
  * Builds a tree of injectors. This is a primary injector, plus child injectors needed for each

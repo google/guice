@@ -16,9 +16,9 @@
 
 package com.google.inject;
 
+import com.google.inject.internal.util.Iterables;
 import java.util.List;
 
-import com.google.inject.internal.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import junit.framework.TestCase;

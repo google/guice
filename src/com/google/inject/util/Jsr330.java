@@ -16,7 +16,7 @@
 
 package com.google.inject.util;
 
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import javax.inject.Provider;
 
 /**

@@ -23,7 +23,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;

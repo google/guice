@@ -27,7 +27,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProviderMethod;
-import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.name.Names;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;

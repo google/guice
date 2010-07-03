@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
-import com.google.inject.internal.Iterators;
+import com.google.inject.internal.util.Iterators;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;

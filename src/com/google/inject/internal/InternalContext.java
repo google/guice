@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.util.Maps;
 import com.google.inject.spi.Dependency;
 import java.util.Map;
 

@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.internal.Iterables;
+import com.google.inject.internal.util.Iterables;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import java.lang.annotation.Retention;

@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.ImmutableList;
 import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.canonicalize;
-import static com.google.inject.internal.Preconditions.checkArgument;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.internal.util.ImmutableList;
+import static com.google.inject.internal.util.Preconditions.checkArgument;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.util.Types;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

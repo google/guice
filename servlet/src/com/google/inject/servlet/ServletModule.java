@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.Lists;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;

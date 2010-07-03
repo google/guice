@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.internal.Nullable;
-import com.google.inject.internal.Preconditions;
+import com.google.inject.internal.util.Preconditions;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistenceService;
 import java.util.Properties;

@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ImmutableSet;
-import static com.google.inject.internal.Preconditions.checkState;
+import com.google.inject.internal.util.ImmutableSet;
+import static com.google.inject.internal.util.Preconditions.checkState;
 import com.google.inject.spi.Message;
 import java.util.Collection;
 

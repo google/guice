@@ -24,9 +24,10 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableSet;
-import static com.google.inject.internal.Iterables.getOnlyElement;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.ImmutableSet;
+import static com.google.inject.internal.util.Iterables.getOnlyElement;
+
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import java.io.IOException;

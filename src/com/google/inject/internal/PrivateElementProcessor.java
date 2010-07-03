@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.spi.PrivateElements;
 import java.util.List;
 

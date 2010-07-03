@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
+import com.google.inject.internal.util.Sets;
 import java.util.Set;
 
 /**

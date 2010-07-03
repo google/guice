@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InstanceBinding;

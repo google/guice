@@ -17,10 +17,10 @@
 package com.google.inject.spi;
 
 import com.google.inject.Key;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Lists;
-import com.google.inject.internal.Objects;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Lists;
+import com.google.inject.internal.util.Objects;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Set;
 

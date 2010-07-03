@@ -31,14 +31,14 @@ import static com.google.inject.internal.Annotations.getKey;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableMap;
-import com.google.inject.internal.Iterables;
-import com.google.inject.internal.ToStringBuilder;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.Iterables;
+import com.google.inject.internal.util.ToStringBuilder;
 
-import static com.google.inject.internal.Iterables.getOnlyElement;
-import com.google.inject.internal.Lists;
-import static com.google.inject.internal.Preconditions.checkState;
+import static com.google.inject.internal.util.Iterables.getOnlyElement;
+import com.google.inject.internal.util.Lists;
+import static com.google.inject.internal.util.Preconditions.checkState;
 
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;

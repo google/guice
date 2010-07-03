@@ -25,7 +25,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.name.Names;
 import java.util.List;
 import junit.framework.TestCase;

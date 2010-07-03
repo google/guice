@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.util.MapMaker;
 import java.util.Map;
 
 /**

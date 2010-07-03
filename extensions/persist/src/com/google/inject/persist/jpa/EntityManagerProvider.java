@@ -19,7 +19,7 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Preconditions;
+import com.google.inject.internal.util.Preconditions;
 import com.google.inject.persist.WorkManager;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher.graphviz;
 
-import com.google.inject.internal.ImmutableList;
+import com.google.inject.internal.util.ImmutableList;
 import java.util.List;
 
 /**

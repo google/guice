@@ -16,8 +16,8 @@
 
 package com.google.inject.matcher;
 
-import static com.google.inject.internal.Preconditions.checkArgument;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkArgument;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;

@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Sets;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Sets;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.name.Names.named;
 

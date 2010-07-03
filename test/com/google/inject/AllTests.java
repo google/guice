@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.FinalizableReferenceQueueTest;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Jsr166HashMapTest;
-import com.google.inject.internal.LineNumbersTest;
-import com.google.inject.internal.MapMakerTestSuite;
+import com.google.inject.internal.util.FinalizableReferenceQueueTest;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Jsr166HashMapTest;
+import com.google.inject.internal.util.LineNumbersTest;
+import com.google.inject.internal.util.MapMakerTestSuite;
 import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.ProxyFactoryTest;
 import com.google.inject.internal.UniqueAnnotationsTest;

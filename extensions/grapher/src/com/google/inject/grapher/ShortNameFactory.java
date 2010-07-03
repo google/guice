@@ -18,10 +18,10 @@ package com.google.inject.grapher;
 
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.Join;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.Join;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.ProviderMethod;
-import com.google.inject.internal.StackTraceElements;
+import com.google.inject.internal.util.StackTraceElements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;

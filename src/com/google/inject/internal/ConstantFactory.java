@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.Dependency;
 
 /**

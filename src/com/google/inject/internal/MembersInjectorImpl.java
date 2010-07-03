@@ -17,8 +17,9 @@
 package com.google.inject.internal;
 
 import com.google.inject.MembersInjector;
-import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 

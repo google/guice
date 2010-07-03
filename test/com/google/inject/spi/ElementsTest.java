@@ -35,9 +35,10 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.ImmutableMap;
-import com.google.inject.internal.ImmutableSet;
-import static com.google.inject.internal.Iterables.getOnlyElement;
+import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.ImmutableSet;
+import static com.google.inject.internal.util.Iterables.getOnlyElement;
+
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;

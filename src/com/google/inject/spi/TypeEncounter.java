@@ -16,9 +16,9 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Provider;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;

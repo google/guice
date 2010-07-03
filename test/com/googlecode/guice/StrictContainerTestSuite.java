@@ -17,10 +17,10 @@
 package com.googlecode.guice;
 
 import com.google.inject.AllTests;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.MapMakerTestSuite;
-import com.google.inject.internal.MapMakerTestSuite.ReferenceMapTest;
-import com.google.inject.internal.MapMakerTestSuite.ComputingTest;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.MapMakerTestSuite;
+import com.google.inject.internal.util.MapMakerTestSuite.ReferenceMapTest;
+import com.google.inject.internal.util.MapMakerTestSuite.ComputingTest;
 import java.io.FilePermission;
 import java.security.AccessControlException;
 import java.security.Permission;

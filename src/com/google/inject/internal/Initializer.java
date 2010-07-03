@@ -18,7 +18,9 @@ package com.google.inject.internal;
 
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.internal.util.Lists;
+import com.google.inject.internal.util.Maps;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.spi.InjectionPoint;
 import java.util.Map;
 import java.util.Set;

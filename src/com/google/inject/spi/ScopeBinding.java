@@ -16,9 +16,9 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Scope;
 import com.google.inject.Binder;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.Scope;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 
 /**

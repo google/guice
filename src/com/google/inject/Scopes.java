@@ -16,12 +16,11 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Annotation;
-
 import com.google.inject.internal.CircularDependencyProxy;
 import com.google.inject.internal.InternalInjectorCreator;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
+import java.lang.annotation.Annotation;
 
 /**
  * Built-in scope implementations.

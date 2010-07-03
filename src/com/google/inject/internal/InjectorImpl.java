@@ -31,6 +31,14 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Lists;
+import com.google.inject.internal.util.Maps;
+import com.google.inject.internal.util.Objects;
+import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
@@ -268,7 +276,7 @@ final class InjectorImpl implements Injector, Lookups {
         Initializables.of(membersInjector));
 
 
-    return new InstanceBindingImpl<MembersInjector<T>>(this, key, SourceProvider.UNKNOWN_SOURCE, 
+    return new InstanceBindingImpl<MembersInjector<T>>(this, key, SourceProvider.UNKNOWN_SOURCE,
         factory, ImmutableSet.<InjectionPoint>of(), membersInjector);
   }
 

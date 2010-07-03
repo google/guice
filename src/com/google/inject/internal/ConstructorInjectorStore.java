@@ -16,7 +16,8 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.Iterables.concat;
+import com.google.inject.internal.util.ImmutableList;
+import static com.google.inject.internal.util.Iterables.concat;
 import com.google.inject.spi.InjectionPoint;
 
 /**

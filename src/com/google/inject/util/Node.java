@@ -18,8 +18,8 @@ package com.google.inject.util;
 
 import com.google.inject.Key;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Sets;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Sets;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

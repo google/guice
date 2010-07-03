@@ -19,6 +19,7 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
+import com.google.inject.internal.util.Lists;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -29,7 +30,6 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
-import com.google.inject.internal.Lists;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.util.Providers;

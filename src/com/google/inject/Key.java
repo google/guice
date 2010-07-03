@@ -18,9 +18,8 @@ package com.google.inject;
 
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
-
-import static com.google.inject.internal.Preconditions.checkArgument;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkArgument;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 

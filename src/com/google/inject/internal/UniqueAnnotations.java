@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.BindingAnnotation;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

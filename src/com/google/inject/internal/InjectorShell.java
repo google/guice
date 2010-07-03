@@ -24,10 +24,13 @@ import com.google.inject.Provider;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import static com.google.inject.internal.Preconditions.checkNotNull;
-import static com.google.inject.internal.Preconditions.checkState;
-
 import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Lists;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkState;
+import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;

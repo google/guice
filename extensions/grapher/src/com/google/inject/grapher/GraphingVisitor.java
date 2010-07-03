@@ -20,7 +20,7 @@ import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.Nullable;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;

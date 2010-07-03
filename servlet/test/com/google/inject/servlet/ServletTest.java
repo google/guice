@@ -23,7 +23,7 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.internal.Maps;
+import com.google.inject.internal.util.Maps;
 import static com.google.inject.servlet.ServletScopes.NullObject;
 import com.google.inject.util.Providers;
 import java.io.IOException;

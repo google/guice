@@ -22,8 +22,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.ImmutableSet;
-import com.google.inject.internal.Iterables;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Iterables;
 import java.util.Set;
 import junit.framework.TestCase;
 

@@ -2,8 +2,8 @@ package com.google.inject.lifecycle;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.Lists;
+import com.google.inject.internal.util.ImmutableList;
+import com.google.inject.internal.util.Lists;
 import java.util.List;
 
 /**

@@ -1,9 +1,8 @@
 package com.google.inject;
 
+import com.google.inject.internal.InternalInjectorCreator;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-
-import com.google.inject.internal.InternalInjectorCreator;
 
 /**
  * The advanced entry point to the Guice framework. Creates {@link Injector}s from

@@ -16,7 +16,7 @@
 
 package com.google.inject.name;
 
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 

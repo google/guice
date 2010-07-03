@@ -16,9 +16,9 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.TypeLiteral;
 import com.google.inject.Binder;
-import static com.google.inject.internal.Preconditions.checkNotNull;
+import com.google.inject.TypeLiteral;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 
 /**
