@@ -134,6 +134,11 @@ public final class BytecodeGen {
     if (!CUSTOM_LOADER_ENABLED) {
       return delegate;
     }
+    
+    // java.* types can be seen everywhere
+    if (type.getName().startsWith("java.")) {
+      return GUICE_CLASS_LOADER;
+    }
 
     delegate = canonicalize(delegate);
 
