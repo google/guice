@@ -51,12 +51,10 @@ public final class Guice {
   private Guice() {}
 
   /**
-   * Creates an injector for the given set of modules.
-   * 
-   * To create an Injector with a {@link Stage} or other options, see
-   * {@link InjectorBuilder}.
+   * Creates an injector for the given set of modules. To create an injector
+   * with a {@link Stage} or other options, see {@link InjectorBuilder}.
    *
-   * @throws CreationException if one or more errors occur during Injector
+   * @throws CreationException if one or more errors occur during injector
    *     construction
    */
   public static Injector createInjector(Module... modules) {
@@ -64,12 +62,10 @@ public final class Guice {
   }
 
   /**
-   * Creates an injector for the given set of modules.
-   * 
-   * To create an Injector with a {@link Stage} or other options, see
-   * {@link InjectorBuilder}.
+   * Creates an injector for the given set of modules. To create an injector
+   * with a {@link Stage} or other options, see {@link InjectorBuilder}.
    *
-   * @throws CreationException if one or more errors occur during Injector
+   * @throws CreationException if one or more errors occur during injector
    *     creation
    */
   public static Injector createInjector(Iterable<? extends Module> modules) {
@@ -78,28 +74,22 @@ public final class Guice {
 
   /**
    * Creates an injector for the given set of modules, in a given development
-   * stage.
+   * stage. Use {@link InjectorBuilder} for advanced injector creation.
    *
-   * @throws CreationException if one or more errors occur during Injector
+   * @throws CreationException if one or more errors occur during injector
    *     creation.
-   *     
-   * @deprecated Use {@link InjectorBuilder} for advanced Injector creation.
    */
-  @Deprecated
   public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
   }
 
   /**
    * Creates an injector for the given set of modules, in a given development
-   * stage.
+   * stage. Use {@link InjectorBuilder} for advanced injector creation.
    *
-   * @throws CreationException if one or more errors occur during Injector
+   * @throws CreationException if one or more errors occur during injector
    *     construction
-   *     
-   * @deprecated Use {@link InjectorBuilder} for advanced Injector creation.
    */
-  @Deprecated
   public static Injector createInjector(Stage stage,
       Iterable<? extends Module> modules) {
     return new InjectorBuilder()
