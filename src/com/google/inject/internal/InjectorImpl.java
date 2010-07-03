@@ -540,8 +540,10 @@ final class InjectorImpl implements Injector, Lookups {
   private Set<Dependency<?>> getInternalDependencies(BindingImpl<?> binding) {
     if(binding instanceof ConstructorBindingImpl) {
       return ((ConstructorBindingImpl)binding).getInternalDependencies();
-    } else {
+    } else if(binding instanceof HasDependencies) {
       return ((HasDependencies)binding).getDependencies();
+    } else {
+      return ImmutableSet.of();
     }
   }
 

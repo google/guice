@@ -136,6 +136,10 @@ public class ImplicitBindingTest extends TestCase {
     assertFailure(injector, InvalidLinkedImpl.class);
     assertFailure(injector, InvalidLinked2.class);
     assertFailure(injector, InvalidLinked2Impl.class);
+    assertFailure(injector, InvalidProvidedBy.class);
+    assertFailure(injector, InvalidProvidedByProvider.class);
+    assertFailure(injector, InvalidProvidedBy2.class);
+    assertFailure(injector, InvalidProvidedBy2Provider.class);
     assertFailure(injector, Invalid2.class);
     
     // Validate we didn't do anything to the valid explicit bindings.
@@ -166,6 +170,7 @@ public class ImplicitBindingTest extends TestCase {
   static class Invalid {
     @Inject Valid a;
     @Inject JitValid b;    
+    @Inject InvalidProvidedBy c; 
     @Inject Invalid(InvalidLinked a) {}    
     @Inject void foo(InvalidInterface a) {}
     
@@ -182,6 +187,24 @@ public class ImplicitBindingTest extends TestCase {
   static class InvalidLinked2Impl implements InvalidLinked2 {
     @Inject InvalidLinked2Impl(Invalid2 a) {}
   }
+  
+  @ProvidedBy(InvalidProvidedByProvider.class)
+  static interface InvalidProvidedBy {}
+  static class InvalidProvidedByProvider implements Provider<InvalidProvidedBy> {
+    @Inject InvalidProvidedBy2 a;
+    public InvalidProvidedBy get() {
+      return null;
+    }
+  }
+  
+  @ProvidedBy(InvalidProvidedBy2Provider.class)
+  static interface InvalidProvidedBy2 {}
+  static class InvalidProvidedBy2Provider implements Provider<InvalidProvidedBy2> {
+    @Inject Invalid2 a;
+    public InvalidProvidedBy2 get() {
+      return null;
+    }
+  }  
   
   static class Invalid2 {
     @Inject Invalid a;

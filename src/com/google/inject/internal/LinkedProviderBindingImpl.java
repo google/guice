@@ -16,13 +16,17 @@
 
 package com.google.inject.internal;
 
+import java.util.Set;
+
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderKeyBinding;
 
 final class LinkedProviderBindingImpl<T>
-    extends BindingImpl<T> implements ProviderKeyBinding<T> {
+    extends BindingImpl<T> implements ProviderKeyBinding<T>, HasDependencies {
 
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
 
@@ -46,7 +50,11 @@ final class LinkedProviderBindingImpl<T>
   public Key<? extends javax.inject.Provider<? extends T>> getProviderKey() {
     return providerKey;
   }
-
+  
+  public Set<Dependency<?>> getDependencies() {
+    return ImmutableSet.<Dependency<?>>of(Dependency.get(providerKey));
+  }
+  
   public BindingImpl<T> withScoping(Scoping scoping) {
     return new LinkedProviderBindingImpl<T>(getSource(), getKey(), scoping, providerKey);
   }
