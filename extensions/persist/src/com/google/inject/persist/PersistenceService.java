@@ -46,10 +46,10 @@ public abstract class PersistenceService {
   public abstract void shutdown();
 
   /**
-   * A utility for testing if a given method is a dynamic finder.
+   * Returns true if {@code method} is a dynamic finder.
    *
    * @param method A method you suspect is a Dynamic Finder.
-   * @return Returns true if the method is annotated {@code @Finder}
+   * @return Returns true if the method is annotated with {@code @Finder}
    */
   public static boolean isDynamicFinder(Method method) {
     return method.isAnnotationPresent(Finder.class);

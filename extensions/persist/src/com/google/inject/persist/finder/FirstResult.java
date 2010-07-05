@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  * @since 1.0
- * @see com.google.inject.persist.finder.MaxResults
+ * @see NumResults
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

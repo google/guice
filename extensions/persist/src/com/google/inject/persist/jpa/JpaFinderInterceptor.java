@@ -20,7 +20,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;
-import com.google.inject.persist.finder.MaxResults;
+import com.google.inject.persist.finder.NumResults;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -114,7 +114,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
         hibernateQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof FirstResult) {
         hibernateQuery.setFirstResult((Integer) argument);
-      } else if (annotation instanceof MaxResults) {
+      } else if (annotation instanceof NumResults) {
         hibernateQuery.setMaxResults((Integer) argument);
       }
     }
@@ -132,7 +132,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
         index++;
       } else if (annotation instanceof FirstResult) {
         jpaQuery.setFirstResult((Integer) argument);
-      } else if (annotation instanceof MaxResults) {
+      } else if (annotation instanceof NumResults) {
         jpaQuery.setMaxResults((Integer) argument);
       }
     }
@@ -177,7 +177,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
         } else if (FirstResult.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           break;
-        } else if (MaxResults.class.equals(annotationType)) {
+        } else if (NumResults.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           break;
         }   //leave as null for no binding
@@ -240,7 +240,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
     volatile Class<? extends Collection> returnCollectionType;
     volatile Constructor returnCollectionTypeConstructor;
     volatile Object[] parameterAnnotations;
-        //contract is: null = no bind, @Named = param, @FirstResult/@MaxResults for paging
+        //contract is: null = no bind, @Named = param, @FirstResult/@NumResults for paging
 
     private String query;
     private String name;

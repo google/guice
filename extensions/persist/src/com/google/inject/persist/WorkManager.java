@@ -17,20 +17,21 @@
 package com.google.inject.persist;
 
 /**
- * <p> This interface is used to gain manual control over the unit of work. This is mostly to do
+ * This interface is used to gain manual control over the unit of work. This is mostly to do
  * work in non-request, non-transactional threads. Or where more fine-grained control over the unit
  * of work is required. Starting and ending a unit of work directly corresponds to opening and
- * closing a {@code Session}, {@code EntityManager} or {@code ObjectContainer} respectively. <p> The
+ * closing a {@code Session}, {@code EntityManager} or {@code ObjectContainer} respectively.
+ * <p> The
  * Unit of Work referred to by WorkManager will always be local to the calling thread. Be careful to
  * end() in a finally block. Neither JPA, nor Hibernate supports threadsafe sessions (reasoning
  * behind thread-locality of Unit of Work semantics).
  *
- * <ul> <li>Using WorkManager with the PersistenceFilter inside a request is not recommended.</li>
- *
- * <li>Using WorkManager with session-per-txn strategy is not terribly clever either.</li>
- *
- * <li>Using WorkManager with session-per-request strategy but *outside* a request (i.e. in a
- * background or bootstrap thread) is probably a good use case.</li> </ul>
+ * <ul>
+ *   <li>Using WorkManager with the PersistenceFilter inside a request is not recommended.</li>
+ *   <li>Using WorkManager with session-per-txn strategy is not terribly clever either.</li>
+ *   <li>Using WorkManager with session-per-request strategy but *outside* a request (i.e. in a
+ *       background or bootstrap thread) is probably a good use case.</li>
+ *  </ul>
  *
  * @author Dhanji R. Prasanna (dhanji gmail com)
  */
@@ -49,7 +50,7 @@ public interface WorkManager {
    * Declares an end to the current Unit of Work. Underneath, causes any open session to the data
    * layer to close. If there is no Unit of work open, then the call returns silently. You can
    * safely invoke end() repeatedly.
-   *
+   * <p>
    * Transaction semantics are not affected.
    */
   void end();

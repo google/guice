@@ -125,7 +125,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
     session.getTransaction().commit();
 
-    assertNotNull("a result was not returned! rollback happened anyway (exceptOn failed)!!!",
+    assertNotNull("a result was not returned! rollback happened anyway (ignore failed)!!!",
         result);
   }
 
@@ -176,7 +176,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     }
   }
 
-  @Transactional(rollbackOn = IOException.class, exceptOn = FileNotFoundException.class)
+  @Transactional(rollbackOn = IOException.class, ignore = FileNotFoundException.class)
   public static class TransactionalObject3 {
     @Inject EntityManager session;
 

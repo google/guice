@@ -69,11 +69,6 @@ class PersistenceFilter implements Filter {
 
   public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
       final FilterChain filterChain) throws IOException, ServletException {
-    try {
-      filterChain.doFilter(servletRequest, servletResponse);
-    }
-    catch (IOException e) {
-      throw new ServletException(e);
-    }
+    filterChain.doFilter(servletRequest, servletResponse);
   }
 }

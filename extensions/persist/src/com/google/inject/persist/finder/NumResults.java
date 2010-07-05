@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
  * Annotate any dynamic finder method's integer argument with this to pass in the maximum
  * size of returned results. Used for paging result lists.
  * Complement of {@linkplain com.google.inject.persist.finder.FirstResult}
@@ -31,5 +30,5 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MaxResults {
+public @interface NumResults {
 }
