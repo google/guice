@@ -1,8 +1,11 @@
 package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -22,6 +25,37 @@ import static com.google.inject.servlet.ServletScopes.SESSION;
  */
 final class InternalServletModule extends AbstractModule {
 
+  /**
+   * Special Provider that tries to obtain an injected servlet context, specific
+   * to the current injector, failing which, it falls back to the static singleton
+   * instance that is available in the legacy Guice Servlet.
+   */
+  @Singleton
+  static class BackwardsCompatibleServletContextProvider implements Provider<ServletContext> {
+    private ServletContext injectedServletContext;
+
+    // This setter is called by the GuiceServletContextListener
+    void set(ServletContext injectedServletContext) {
+      this.injectedServletContext = injectedServletContext;
+    }
+
+    public ServletContext get() {
+      if (null != injectedServletContext) {
+        return injectedServletContext;
+      }
+
+      Logger.getLogger(InternalServletModule.class.getName())
+          .warning("You are attempting to use a deprecated API (specifically,"
+          + " attempting to @Inject ServletContext inside an eagerly created"
+          + " singleton. While we allow this for backwards compatibility, be"
+          + " warned that this MAY have unexpected behavior if you have more"
+          + " than one injector (with ServletModule) running in the same JVM."
+          + " Please consult the Guice documentation at"
+          + " http://code.google.com/p/google-guice for more information.");
+      return GuiceFilter.getServletContext();
+    }
+  }
+
   @Override
   protected void configure() {
     bindScope(RequestScoped.class, REQUEST);
@@ -31,11 +65,14 @@ final class InternalServletModule extends AbstractModule {
 
     // inject the pipeline into GuiceFilter so it can route requests correctly
     // Unfortunate staticness... =(
+    // NOTE(dhanji): This is maintained for legacy purposes.
     requestStaticInjection(GuiceFilter.class);
 
     bind(ManagedFilterPipeline.class);
     bind(ManagedServletPipeline.class);
     bind(FilterPipeline.class).to(ManagedFilterPipeline.class).asEagerSingleton();
+
+    bind(ServletContext.class).toProvider(BackwardsCompatibleServletContextProvider.class);
   }
 
   @Provides @RequestScoped HttpServletRequest provideHttpServletRequest() {
@@ -48,10 +85,6 @@ final class InternalServletModule extends AbstractModule {
 
   @Provides HttpSession provideHttpSession() {
     return GuiceFilter.getRequest().getSession();
-  }
-
-  @Provides ServletContext provideServletContext() {
-    return GuiceFilter.getServletContext();
   }
 
   @SuppressWarnings({"unchecked"})

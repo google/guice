@@ -36,11 +36,16 @@ public abstract class GuiceServletContextListener
   static final String INJECTOR_NAME = Injector.class.getName();
 
   public void contextInitialized(ServletContextEvent servletContextEvent) {
-    ServletContext servletContext = servletContextEvent.getServletContext();
+    final ServletContext servletContext = servletContextEvent.getServletContext();
 
     // Set the Servletcontext early for those people who are using this class.
+    // NOTE(dhanji): This use of the servletContext is deprecated.
     GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
-    servletContext.setAttribute(INJECTOR_NAME, getInjector());
+
+    Injector injector = getInjector();
+    injector.getInstance(InternalServletModule.BackwardsCompatibleServletContextProvider.class)
+        .set(servletContext);
+    servletContext.setAttribute(INJECTOR_NAME, injector);
   }
 
   public void contextDestroyed(ServletContextEvent servletContextEvent) {

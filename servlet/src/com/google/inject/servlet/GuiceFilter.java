@@ -18,7 +18,6 @@ package com.google.inject.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.OutOfScopeException;
-import com.google.inject.Stage;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.logging.Logger;
@@ -70,29 +69,22 @@ public class GuiceFilter implements Filter {
   static volatile WeakReference<ServletContext> servletContext =
       new WeakReference<ServletContext>(null);
 
-  private static final String MULTIPLE_INJECTORS_ERROR =
-      "Multiple injectors detected. Please install only one"
-          + " ServletModule in your web application. While you may "
-          + "have more than one injector, you should only configure"
-          + " guice-servlet in one of them. (Hint: look for legacy "
-          + "ServetModules). You typically see this error if are not"
-          + " using " + GuiceServletContextListener.class.getSimpleName()
-          + " as described in the documentation.";
+  private static final String MULTIPLE_INJECTORS_WARNING =
+      "Multiple Servlet injectors detected. This is a warning "
+      + "indicating that you have more than one "
+      + GuiceFilter.class.getSimpleName() + " running "
+      + "in your web application. If this is deliberate, you may safely "
+      + "ignore this message. If this is NOT deliberate however, "
+      + "your application may not work as expected.";
 
   //VisibleForTesting
   @Inject
-  static void setPipeline(FilterPipeline pipeline, Stage stage) {
+  static void setPipeline(FilterPipeline pipeline) {
 
-    // Multiple injectors with Servlet pipelines?!
-    // We don't throw an exception, to allow for legacy
-    // tests that don't have a tearDown that calls GuiceFilter#destroy(),
-    // and so we don't force people to use the static filter pipeline
-    // (e.g. Jetty/OpenGSE filters constructed in Guice, rather than via web.xml)
+    // This can happen if you create many injectors and they all have their own
+    // servlet module. This is legal, caveat a small warning.
     if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
-        Logger.getLogger(GuiceFilter.class.getName()).warning(MULTIPLE_INJECTORS_ERROR);
-
-        // TODO(dhanji): should we return early here and refuse to overwrite
-        // the existing pipleine? That may break some broken apps =)
+        Logger.getLogger(GuiceFilter.class.getName()).warning(MULTIPLE_INJECTORS_WARNING);
     }
 
     // We overwrite the default pipeline
