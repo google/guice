@@ -157,8 +157,7 @@ import java.lang.annotation.Annotation;
  *   install(new FactoryModuleBuilder().build(FruitFactory.class));
  * }</pre>
  *
- * Note that any type returned by the factory in this manner needs to be an implementation class
- * unless the return types can be resolved using your regular injector configuration.
+ * Note that any type returned by the factory in this manner needs to be an implementation class.
  * <p/>
  * To return two different implementations for the same interface from your factory, use binding
  * annotations on your return types:
@@ -173,24 +172,6 @@ import java.lang.annotation.Annotation;
  *       .implement(Car.class, Names.named("fast"), Porsche.class)
  *       .implement(Car.class, Names.named("clean"), Prius.class)
  *       .build(CarFactory.class));
- * }</pre>
- * <p/>
- * All return types in your factory are further resolved using your regular injector configuration.
- * This means that in the following example you'll get a {@code Rooster} instead of a generic
- * chicken:
- *
- * <pre>interface Animal {}
- * public class Chicken implements Animal {}
- * public class Rooster extends Chicken {}
- * interface AnimalFactory {
- *   Animal getAnimal();
- * }
- * ...
- * protected void configure() {
- *   bind(Chicken.class).to(Rooster.class);
- *   install(new FactoryModuleBuilder()
- *       .implement(Animal.class, Chicken.class)
- *       .build(AnimalFactory.class));
  * }</pre>
  *
  * @author schmitt@google.com (Peter Schmitt)

@@ -31,6 +31,7 @@ import static com.google.inject.internal.Annotations.getKey;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.Iterables;
@@ -49,6 +50,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
@@ -186,20 +188,16 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         if(implementation == null) {
           implementation = returnType.getTypeLiteral();
         }
-        InjectionPoint ctorInjectionPoint = findMatchingConstructorInjectionPoint(method, implementation, immutableParamList, errors);
-        Constructor<?> constructor = null;
-        if(ctorInjectionPoint != null) {
-          // There are three reasons this could be null:
-          // 1) The implementation is an interface and is forwarded (explicitly or implicitly)
-          //    to another binding (see FactoryModuleBuildTest.test[Implicit|Explicit]ForwardingAssistedBinding.
-          //    In this case, things are OK and the exception is right to be ignored.
-          // 2) The implementation has something wrong with its constructors (two @injects, invalid ctor, etc..)
-          //    In this case, by having a null constructor we let the proper exception be recreated later on.
-          // 3) findMatchingConstructor added errors to the Errors object and returned null, in which case
-          //    this method will appropriately throw an exception later on.
-          constructor = (Constructor)ctorInjectionPoint.getMember();
+        InjectionPoint ctorInjectionPoint;
+        try {
+          ctorInjectionPoint = 
+            findMatchingConstructorInjectionPoint(method, returnType, implementation, immutableParamList);
+        } catch(ErrorsException ee) {
+          errors.merge(ee.getErrors());
+          continue;
         }
         
+        Constructor<?> constructor = (Constructor)ctorInjectionPoint.getMember();
         List<ThreadLocalProvider> providers = Collections.emptyList();
         boolean optimized = false;
         // Now go through all dependencies of the implementation and see if it is OK to
@@ -258,12 +256,36 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
    * {@link AssistedInject} constructors exist, this will default to looking for an
    * {@literal @}{@link Inject} constructor.
    */
-  private InjectionPoint findMatchingConstructorInjectionPoint(Method method,
-      TypeLiteral<?> implementation, List<Key<?>> paramList, Errors errors) throws ErrorsException {
+  private InjectionPoint findMatchingConstructorInjectionPoint(
+      Method method, Key<?> returnType, TypeLiteral<?> implementation, List<Key<?>> paramList)
+      throws ErrorsException {
+    Errors errors = new Errors(method);
+    if(returnType.getTypeLiteral().equals(implementation)) {
+      errors = errors.withSource(implementation);
+    } else {
+      errors = errors.withSource(returnType).withSource(implementation);
+    }
+    
+    Class<?> rawType = implementation.getRawType();
+    if (Modifier.isInterface(rawType.getModifiers())) {
+      errors.addMessage(
+          "%s is an interface, not a concrete class.  Unable to create AssistedInject factory.",
+          implementation);
+      throw errors.toException();
+    } else if (Modifier.isAbstract(rawType.getModifiers())) {
+      errors.addMessage(
+          "%s is abstract, not a concrete class.  Unable to create AssistedInject factory.",
+          implementation);
+      throw errors.toException();
+    } else if (Classes.isInnerClass(rawType)) {
+      errors.cannotInjectInnerClass(rawType);
+      throw errors.toException();
+    }
+    
     Constructor<?> matchingConstructor = null;
     boolean anyAssistedInjectConstructors = false;
     // Look for AssistedInject constructors...
-    for (Constructor<?> constructor : implementation.getRawType().getDeclaredConstructors()) {
+    for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
       if (constructor.isAnnotationPresent(AssistedInject.class)) {
         anyAssistedInjectConstructors = true;
         if (constructorHasMatchingParams(implementation, constructor, paramList, errors)) {
@@ -273,7 +295,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
                     "%s has more than one constructor annotated with @AssistedInject"
                         + " that matches the parameters in method %s.  Unable to create AssistedInject factory.",
                     implementation, method);
-            return null;
+            throw errors.toException();
           } else {
             matchingConstructor = constructor;
           }
@@ -285,9 +307,9 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
       // If none existed, use @Inject.
       try {
         return InjectionPoint.forConstructorOf(implementation);
-      } catch(ConfigurationException ignored) {
-        // This will be handled later more appropriately (with a good message).
-        return null;
+      } catch(ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
+        throw errors.toException();
       }
     } else {
       // Otherwise, use it or fail with a good error message.
@@ -302,7 +324,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
             "%s has @AssistedInject constructors, but none of them match the"
             + " parameters in method %s.  Unable to create AssistedInject factory.",
             implementation, method);
-        return null;
+        throw errors.toException();
       }
     }
   }
@@ -460,30 +482,17 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
             binder.bind((Key) paramKey).toProvider(data.providers.get(p++));
           }
         }
-
                 
-        Constructor<?> constructor = data.constructor;
-        // If the injector already has a binding for the return type, don't
-        // bother binding to a specific constructor. Otherwise, there could be
-        // bugs where an implicit binding isn't used (or an explicitly forwarded
-        // binding isn't used)
-        if (injector.getExistingBinding(returnType) != null) {
-          constructor = null;
-        }
-        
-        TypeLiteral<?> implementation = collector.getBindings().get(returnType);
-        if (implementation != null) {
-          if(constructor == null) {
-            binder.bind(assistedReturnType).to((TypeLiteral)implementation);
+        Constructor constructor = data.constructor;
+        // Constructor *should* always be non-null here,
+        // but if it isn't, we'll end up throwing a fairly good error
+        // message for the user.
+        if(constructor != null) {
+          TypeLiteral implementation = collector.getBindings().get(returnType);
+          if (implementation != null) {
+            binder.bind(assistedReturnType).toConstructor(constructor, implementation);
           } else {
-            binder.bind(assistedReturnType).toConstructor((Constructor)constructor, (TypeLiteral)implementation);
-          }
-        } else {
-          // no implementation, but need to bind from assisted key to actual key.
-          if(constructor == null) {
-            binder.bind(assistedReturnType).to((Key)returnType);
-          } else {
-            binder.bind(assistedReturnType).toConstructor((Constructor)constructor, (TypeLiteral)returnType.getTypeLiteral());
+            binder.bind(assistedReturnType).toConstructor(constructor, (TypeLiteral) returnType.getTypeLiteral());
           }
         }
       }

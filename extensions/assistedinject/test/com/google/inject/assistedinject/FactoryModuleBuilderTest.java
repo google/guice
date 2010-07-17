@@ -16,13 +16,15 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.AbstractModule;
+import static com.google.inject.Asserts.assertContains;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.name.Named;
@@ -36,30 +38,123 @@ import java.util.Collection;
 
 public class FactoryModuleBuilderTest extends TestCase {
 
-  public void testImplicitForwardingAssistedBinding() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(Car.class).to(Golf.class);
-        install(new FactoryModuleBuilder().build(ColoredCarFactory.class));
-      }
-    });
-
-    ColoredCarFactory factory = injector.getInstance(ColoredCarFactory.class);
-    assertTrue(factory.create(Color.BLUE) instanceof Golf);
+  public void testImplicitForwardingAssistedBindingFailsWithInterface() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Car.class).to(Golf.class);
+          install(new FactoryModuleBuilder().build(ColoredCarFactory.class));
+        }
+      });
+      fail();
+    } catch (CreationException ce) {
+      assertContains(
+          ce.getMessage(), "1) " + Car.class.getName() + " is an interface, not a concrete class.",
+          "Unable to create AssistedInject factory.",
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
+      assertEquals(1, ce.getErrorMessages().size());
+    }
+  }
+  
+  public void testImplicitForwardingAssistedBindingFailsWithAbstractClass() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(AbstractCar.class).to(ArtCar.class);
+          install(new FactoryModuleBuilder().build(ColoredAbstractCarFactory.class));
+        }
+      });
+      fail();
+    } catch (CreationException ce) {
+      assertContains(
+          ce.getMessage(), "1) " + AbstractCar.class.getName() + " is abstract, not a concrete class.",
+          "Unable to create AssistedInject factory.",
+          "while locating " + AbstractCar.class.getName(),
+          "at " + ColoredAbstractCarFactory.class.getName() + ".create(");
+      assertEquals(1, ce.getErrorMessages().size());
+    }
   }
 
-  public void testExplicitForwardingAssistedBinding() {
+  public void testImplicitForwardingAssistedBindingCreatesNewObjects() {
+    final Mustang providedMustang = new Mustang(Color.BLUE);
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {
-        bind(Volkswagen.class).to(Golf.class);
-        install(new FactoryModuleBuilder()
+        install(new FactoryModuleBuilder().build(MustangFactory.class));
+      }
+      @Provides Mustang provide() { return providedMustang; }
+    });
+    assertSame(providedMustang, injector.getInstance(Mustang.class));
+    MustangFactory factory = injector.getInstance(MustangFactory.class);
+    Mustang created = factory.create(Color.GREEN);
+    assertNotSame(providedMustang, created);
+    assertEquals(Color.BLUE, providedMustang.color);
+    assertEquals(Color.GREEN, created.color);
+  }
+
+  public void testExplicitForwardingAssistedBindingFailsWithInterface() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(Volkswagen.class).to(Golf.class);
+          install(new FactoryModuleBuilder()
             .implement(Car.class, Volkswagen.class)
             .build(ColoredCarFactory.class));
-      }
-    });
+        }
+      });
+      fail();
+    } catch (CreationException ce) {
+      assertContains(
+          ce.getMessage(), "1) " + Volkswagen.class.getName() + " is an interface, not a concrete class.",
+          "Unable to create AssistedInject factory.",
+          "while locating " + Volkswagen.class.getName(),
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
+      assertEquals(1, ce.getErrorMessages().size());
+    }
+  }
 
+  public void testExplicitForwardingAssistedBindingFailsWithAbstractClass() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(AbstractCar.class).to(ArtCar.class);
+          install(new FactoryModuleBuilder()
+            .implement(Car.class, AbstractCar.class)
+            .build(ColoredCarFactory.class));
+        }
+      });
+      fail();
+    } catch (CreationException ce) {
+      assertContains(
+          ce.getMessage(), "1) " + AbstractCar.class.getName() + " is abstract, not a concrete class.",
+          "Unable to create AssistedInject factory.",
+          "while locating " + AbstractCar.class.getName(),
+          "while locating " + Car.class.getName(),
+          "at " + ColoredCarFactory.class.getName() + ".create(");
+      assertEquals(1, ce.getErrorMessages().size());
+    }
+  }
+  
+  public void testExplicitForwardingAssistedBindingCreatesNewObjects() {
+    final Mustang providedMustang = new Mustang(Color.BLUE);
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        install(new FactoryModuleBuilder().implement(Car.class, Mustang.class).build(
+            ColoredCarFactory.class));
+      }
+      @Provides Mustang provide() { return providedMustang; }
+    });
+    assertSame(providedMustang, injector.getInstance(Mustang.class));
     ColoredCarFactory factory = injector.getInstance(ColoredCarFactory.class);
-    assertTrue(factory.create(Color.BLUE) instanceof Golf);
+    Mustang created = (Mustang)factory.create(Color.GREEN);
+    assertNotSame(providedMustang, created);
+    assertEquals(Color.BLUE, providedMustang.color);
+    assertEquals(Color.GREEN, created.color);
   }
 
   public void testAnnotatedAndParentBoundReturnValue() {
@@ -241,4 +336,11 @@ public class FactoryModuleBuilderTest extends TestCase {
   public static class Bar {}
   public static class Baz<E> {}
   
+  abstract static class AbstractCar implements Car {}  
+  interface ColoredAbstractCarFactory {
+    AbstractCar create(Color color);
+  }  
+  public static class ArtCar extends AbstractCar {}
+  
+
 }
