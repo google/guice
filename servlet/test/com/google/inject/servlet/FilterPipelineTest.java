@@ -112,7 +112,7 @@ public class FilterPipelineTest extends TestCase {
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
         FilterChain filterChain) throws IOException, ServletException {
-      assert false : "This filter should never have fired";
+      fail("This filter should never have fired");
     }
 
     public void destroy() {

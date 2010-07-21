@@ -73,9 +73,10 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assert inits == 5 && doFilters == 3 && destroys == 5 : "lifecycle states did not"
-          + " fire correct number of times-- inits: " + inits + "; dos: " + doFilters
-          + "; destroys: " + destroys;
+    assertTrue("lifecycle states did not"
+        + " fire correct number of times-- inits: " + inits + "; dos: " + doFilters
+        + "; destroys: " + destroys,
+    		inits == 1 && doFilters == 3 && destroys == 1);
   }
 
   public final void testDispatchThatNoFiltersFire() throws ServletException, IOException {
@@ -108,9 +109,10 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assert inits == 5 && doFilters == 0 && destroys == 5 : "lifecycle states did not "
-          + "fire correct number of times-- inits: " + inits + "; dos: " + doFilters
-          + "; destroys: " + destroys;
+    assertTrue("lifecycle states did not "
+            + "fire correct number of times-- inits: " + inits + "; dos: " + doFilters
+            + "; destroys: " + destroys,
+    		inits == 1 && doFilters == 0 && destroys == 1);
   }
 
   public final void testDispatchFilterPipelineWithRegexMatching() throws ServletException,
@@ -144,9 +146,10 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assert inits == 3 && doFilters == 2 && destroys == 3 : "lifecycle states did not fire "
-        + "correct number of times-- inits: " + inits + "; dos: " + doFilters
-        + "; destroys: " + destroys;
+    assertTrue("lifecycle states did not fire "
+	    + "correct number of times-- inits: " + inits + "; dos: " + doFilters
+	    + "; destroys: " + destroys,
+    		inits == 1 && doFilters == 2 && destroys == 1);
   }
 
   @Singleton

@@ -35,6 +35,7 @@ import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * Ensures servlet spec compliance for CGI-style variables and general
@@ -100,6 +101,8 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
+    
+    verify(injector, binding, request);
 
   }
 
@@ -192,6 +195,7 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     assertTrue("Servlet did not run!", run[0]);
 
+    verify(injector, binding, request);
   }
 
   // Data-driven test.
@@ -286,5 +290,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
+    
+    verify(injector, binding, request);
   }
 }

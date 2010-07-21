@@ -83,9 +83,10 @@ public class MultiModuleDispatchIntegrationTest extends TestCase {
 
     verify(requestMock);
 
-    assert inits == 5 && doFilters == 3 && destroys == 5 : "lifecycle states did not"
+    assertTrue("lifecycle states did not"
           + " fire correct number of times-- inits: " + inits + "; dos: " + doFilters
-          + "; destroys: " + destroys;
+          + "; destroys: " + destroys,
+    		inits == 1 && doFilters == 3 && destroys == 1);
   }
 
   @Singleton

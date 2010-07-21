@@ -34,6 +34,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.verify;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).
@@ -96,5 +97,7 @@ public class ServletDefinitionTest extends TestCase {
       assertTrue(initParams.containsKey(name));
       assertEquals(initParams.get(name), servletConfig.getInitParameter(name));
     }
+    
+    verify(injector, binding, servletContext);
   }
 }

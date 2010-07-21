@@ -60,10 +60,6 @@ public class FilterDefinitionTest extends TestCase {
       put("ahsd124124", "as124124124dasdok");
     }};
 
-    String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), initParams);
-    assert filterDef.getFilter() instanceof MockFilter;
 
     ServletContext servletContext = createMock(ServletContext.class);
     final String contextName = "thing__!@@44";
@@ -71,21 +67,27 @@ public class FilterDefinitionTest extends TestCase {
 
     replay(servletContext);
 
+    String pattern = "/*";
+    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
+    		UriPatternType.get(UriPatternType.SERVLET, pattern), initParams);
     filterDef.init(servletContext, injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
+    assertTrue(filterDef.getFilter() instanceof MockFilter);
     final FilterConfig filterConfig = mockFilter.getConfig();
-    assert null != filterConfig;
-    assert contextName.equals(filterConfig.getServletContext().getServletContextName());
-    assert Key.get(Filter.class).toString().equals(filterConfig.getFilterName());
+    assertTrue(null != filterConfig);
+    assertTrue(contextName.equals(filterConfig.getServletContext().getServletContextName()));
+    assertTrue(Key.get(Filter.class).toString().equals(filterConfig.getFilterName()));
 
     final Enumeration names = filterConfig.getInitParameterNames();
     while (names.hasMoreElements()) {
       String name = (String) names.nextElement();
 
-      assert initParams.containsKey(name);
-      assert initParams.get(name).equals(filterConfig.getInitParameter(name));
+      assertTrue(initParams.containsKey(name));
+      assertTrue(initParams.get(name).equals(filterConfig.getInitParameter(name)));
     }
+    
+    verify(binding, injector, servletContext);
   }
 
   public final void testFilterCreateDispatchDestroy() throws ServletException, IOException {
@@ -110,14 +112,13 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>());
-    assert filterDef.getFilter() instanceof MockFilter;
-
+    		UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>());
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    assertTrue(filterDef.getFilter() instanceof MockFilter);
 
-    assert mockFilter.isInit() : "Init did not fire";
+    assertTrue("Init did not fire", mockFilter.isInit());
 
     final boolean proceed[] = new boolean[1];
     filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
@@ -169,13 +170,13 @@ public class FilterDefinitionTest extends TestCase {
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
         UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>());
-    assert filterDef.getFilter() instanceof MockFilter;
-
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    		Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    assertTrue(filterDef.getFilter() instanceof MockFilter);
 
-    assert mockFilter.isInit() : "Init did not fire";
+
+    assertTrue("init did not fire", mockFilter.isInit());
 
     final boolean proceed[] = new boolean[1];
     filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
@@ -185,10 +186,10 @@ public class FilterDefinitionTest extends TestCase {
       }
     });
 
-    assert !proceed[0] : "Filter did not suppress chain";
+    assertTrue("filter did not suppress chain", !proceed[0]);
 
     filterDef.destroy(Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
-    assert mockFilter.isDestroy() : "Destroy did not fire";
+    assertTrue("destroy did not fire", mockFilter.isDestroy());
 
     verify(injector, request);
 
