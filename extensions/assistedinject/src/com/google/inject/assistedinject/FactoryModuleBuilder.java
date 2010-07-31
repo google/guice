@@ -173,6 +173,10 @@ import java.lang.annotation.Annotation;
  *       .implement(Car.class, Names.named("clean"), Prius.class)
  *       .build(CarFactory.class));
  * }</pre>
+ * 
+ * <h3>Implementation limitations</h3>
+ * As a limitation of the implementation, it is prohibited to declare a factory method that
+ * accepts a {@code Provider} as one of its arguments.
  *
  * @author schmitt@google.com (Peter Schmitt)
  */

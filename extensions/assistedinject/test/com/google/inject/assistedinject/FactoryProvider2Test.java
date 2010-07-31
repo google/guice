@@ -560,6 +560,73 @@ public class FactoryProvider2Test extends TestCase {
     assertNull(subaru.colorProvider.get());
   }
 
+  interface ProviderBasedColoredCarFactory {
+    Car createCar(Provider<Color> colorProvider, Provider<String> stringProvider);
+    Mustang createMustang(@Assisted("color") Provider<Color> colorProvider);
+  }
+
+  public void testAssistedProviderIsDisallowed() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+          @Override protected void configure() {
+            bind(ProviderBasedColoredCarFactory.class).toProvider(
+                FactoryProvider.newFactory(ProviderBasedColoredCarFactory.class, Subaru.class));
+          }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [1] with key"
+            + " [com.google.inject.Provider<java.awt.Color>] on method ["
+            + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
+          "2) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [2] with key"
+            + " [com.google.inject.Provider<java.lang.String>] on method ["
+            + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
+          "3) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [1] with key"
+            + " [com.google.inject.Provider<java.awt.Color>"
+            + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
+            + " on method [" + ProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
+      );
+      
+    }
+  }
+
+  interface JavaxProviderBasedColoredCarFactory {
+    Car createCar(javax.inject.Provider<Color> colorProvider, javax.inject.Provider<String> stringProvider);
+    Mustang createMustang(@Assisted("color") javax.inject.Provider<Color> colorProvider);
+  }
+
+  public void testAssistedJavaxProviderIsDisallowed() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+          @Override protected void configure() {
+            bind(JavaxProviderBasedColoredCarFactory.class).toProvider(
+                FactoryProvider.newFactory(JavaxProviderBasedColoredCarFactory.class, Subaru.class));
+          }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "1) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [1] with key"
+            + " [com.google.inject.Provider<java.awt.Color>] on method ["
+            + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
+          "2) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [2] with key"
+            + " [com.google.inject.Provider<java.lang.String>] on method ["
+            + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
+          "3) A Provider may not be a type in a factory method of an AssistedInject."
+            + "\n  Offending instance is parameter [1] with key"
+            + " [com.google.inject.Provider<java.awt.Color>"
+            + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
+            + " on method [" + JavaxProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
+      );
+    }
+  }
+
   public void testFactoryUseBeforeInitialization() {
     ColoredCarFactory carFactory = FactoryProvider.newFactory(ColoredCarFactory.class, Subaru.class)
         .get();

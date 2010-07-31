@@ -179,6 +179,13 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         List<Key<?>> keys = Lists.newArrayList();
         for (TypeLiteral<?> param : params) {
           Key<?> paramKey = getKey(param, method, paramAnnotations[p++], errors);
+          Class<?> underlylingType = paramKey.getTypeLiteral().getRawType();
+          if (underlylingType.equals(Provider.class)
+              || underlylingType.equals(javax.inject.Provider.class)) {
+            errors.addMessage("A Provider may not be a type in a factory method of an AssistedInject."
+                    + "\n  Offending instance is parameter [%s] with key [%s] on method [%s]",
+                    p, paramKey, method);
+          }
           keys.add(assistKey(method, paramKey, errors));
         }
         ImmutableList<Key<?>> immutableParamList = ImmutableList.copyOf(keys);
@@ -407,7 +414,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     }
     return false;
   }
-  
+
   /**
    * Returns a key similar to {@code key}, but with an {@literal @}Assisted binding annotation.
    * This fails if another binding annotation is clobbered in the process. If the key already has
@@ -466,7 +473,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     final Key<?> assistedReturnType = Key.get(returnType.getTypeLiteral(), Assisted.class);
 
     Module assistedModule = new AbstractModule() {
-      @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
+      @Override @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
       protected void configure() {
         Binder binder = binder().withSource(method);
 
