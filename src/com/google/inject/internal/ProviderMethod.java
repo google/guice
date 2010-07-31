@@ -105,7 +105,7 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
     } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
+      throw Exceptions.throwCleanly(e);
     }
   }
 

@@ -320,7 +320,8 @@ public final class Errors implements Serializable {
   }
 
   public Errors errorInProvider(RuntimeException runtimeException) {
-    return errorInUserCode(runtimeException, "Error in custom provider, %s", runtimeException);
+    Throwable unwrapped = unwrap(runtimeException);
+    return errorInUserCode(unwrapped, "Error in custom provider, %s", unwrapped);
   }
 
   public Errors errorInUserInjector(
@@ -363,6 +364,14 @@ public final class Errors implements Serializable {
     } else {
       return addMessage(cause, messageFormat, arguments);
     }
+  }
+  
+  private Throwable unwrap(RuntimeException runtimeException) {
+   if(runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
+     return runtimeException.getCause();
+   } else {
+     return runtimeException;
+   }
   }
 
   public Errors cannotInjectRawProvider() {
