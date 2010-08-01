@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Function;
 import com.google.inject.internal.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,7 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * provides the surrounding concurrent data structure which implements {@link
  * ConcurrentMap}. Additionally supports implementing maps where {@link
  * Map#get} atomically computes values on demand (see {@link
- * Builder#buildComputingMap(ComputingStrategy, com.google.inject.internal.Function)}).
+ * Builder#buildComputingMap(ComputingStrategy, com.google.inject.internal.util.Function)}).
  *
  * <p>The resulting hash table supports full concurrency of retrievals and
  * adjustable expected concurrency for updates. Even though all operations are

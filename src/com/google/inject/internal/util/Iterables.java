@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Function;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

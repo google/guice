@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Function;
 import com.google.inject.internal.MoreTypes;
 import java.io.IOException;
 import java.lang.reflect.Constructor;

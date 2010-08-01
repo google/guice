@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Function;
 import com.google.inject.internal.util.CustomConcurrentHashMap.ComputingStrategy;
 import com.google.inject.internal.util.CustomConcurrentHashMap.Internals;
 import java.io.IOException;

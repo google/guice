@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Function;
 import com.google.inject.internal.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
