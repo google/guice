@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.google.inject.extensions</groupId>
     <artifactId>extensions-parent</artifactId>
-    <version>2.0</version>
+    <version>3.0-SNAPSHOT</version>
   </parent>
   <artifactId>guice-struts2-plugin</artifactId>
   <packaging>jar</packaging>
-  <name>Google Guice - Extensions: Struts2 Plugin</name>
+  <name>Google Guice - Extension: Struts2 Plugin</name>
   <description>Guice integration with Struts2 as a plugin</description>
   <!-- Note: this pom is for dependency management only.  It will not build the project -->
   <dependencies>

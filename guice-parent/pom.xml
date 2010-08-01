@@ -10,7 +10,7 @@
   <groupId>com.google.inject</groupId>
   <artifactId>guice-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2.0</version>
+  <version>3.0-SNAPSHOT</version>
   <name>Google Guice</name>
   <description>Guice (pronounced 'juice') is a lightweight dependency injection
       framework for Java 5 and above, brought to you by Google.</description>
@@ -62,7 +62,6 @@
             <source>1.5</source>
             <target>1.5</target>
           </configuration>
-          <inherited>true</inherited>
         </plugin>
       </plugins>
     </pluginManagement>

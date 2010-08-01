@@ -5,7 +5,8 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>2.0</version>
+    <version>3.0-SNAPSHOT</version>
+    <relativePath>../guice-parent/pom.xml</relativePath>
   </parent>
   <groupId>com.google.inject.extensions</groupId>
   <artifactId>extensions-parent</artifactId>
@@ -14,6 +15,16 @@
   <description>A collection of extensions to Guice</description>
   <dependencyManagement>
      <dependencies>
+       <dependency>
+         <groupId>com.google.inject.extensions</groupId>
+         <artifactId>guice-assisted-inject</artifactId>
+         <version>${version}</version>
+       </dependency>
+       <dependency>
+         <groupId>com.google.inject.extensions</groupId>
+         <artifactId>guice-multibindings</artifactId>
+         <version>${version}</version>
+       </dependency>
        <dependency>
          <groupId>com.google.inject.extensions</groupId>
          <artifactId>guice-servlet</artifactId>

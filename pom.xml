@@ -5,16 +5,26 @@
   <parent>
     <groupId>com.google.inject</groupId>
     <artifactId>guice-parent</artifactId>
-    <version>2.0</version>
+    <version>3.0-SNAPSHOT</version>
+    <relativePath>guice-parent/pom.xml</relativePath>
   </parent>
   <artifactId>guice</artifactId>
   <packaging>jar</packaging>
+  <name>Google Guice: Core</name>
   <!-- Note: this pom is for dependency management only.  It will not build the project -->
   <dependencies>
     <!-- CGLib is not listed because it has been repackaged with JarJar -->
     <dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
+    </dependency>
+
+    <!-- Not optional, even in pure-Guice, no JSR 330 applications:
+    javax.inject.Provider is referenced in Guice code. -->
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
     </dependency>
   </dependencies>
 </project>

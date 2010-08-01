@@ -7,15 +7,26 @@
     <artifactId>extensions-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>guice-servlet</artifactId>
+  <artifactId>guice-persist</artifactId>
   <packaging>jar</packaging>
-  <name>Google Guice - Extension: Servlet</name>
-  <description>Guice integration with servlets</description>
+  <name>Google Guice - Extension: Persist</name>
+  <description>Tools for integrating with JPA</description>
   <!-- Note: this pom is for dependency management only.  It will not build the project -->
   <dependencies>
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <!-- guice-persist depends on guice-servlet to implement request-scoped units of work. -->
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
