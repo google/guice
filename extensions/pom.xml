@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.google.inject</groupId>
+    <artifactId>guice-parent</artifactId>
+    <version>2.0</version>
+  </parent>
+  <groupId>com.google.inject.extensions</groupId>
+  <artifactId>extensions-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Google Guice - Extensions</name>
+  <description>A collection of extensions to Guice</description>
+  <dependencyManagement>
+     <dependencies>
+       <dependency>
+         <groupId>com.google.inject.extensions</groupId>
+         <artifactId>guice-servlet</artifactId>
+         <version>${version}</version>
+       </dependency>
+       <dependency>
+         <groupId>javax.servlet</groupId>
+         <artifactId>servlet-api</artifactId>
+         <version>2.5</version>
+         <scope>provided</scope>
+       </dependency>
+     </dependencies>
+   </dependencyManagement>
+</project>

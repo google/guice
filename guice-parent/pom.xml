@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.google</groupId>
+    <artifactId>google</artifactId>
+    <version>1</version>
+  </parent>
+  <groupId>com.google.inject</groupId>
+  <artifactId>guice-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>2.0</version>
+  <name>Google Guice</name>
+  <description>Guice (pronounced 'juice') is a lightweight dependency injection
+      framework for Java 5 and above, brought to you by Google.</description>
+  <url>http://code.google.com/p/google-guice/</url>
+  <inceptionYear>2006</inceptionYear>
+  <issueManagement>
+    <system>Google Code</system>
+    <url>http://code.google.com/p/google-guice/issues/</url>
+  </issueManagement>
+  <mailingLists>
+    <mailingList>
+      <name>google-guice</name>
+      <archive>http://groups.google.com/group/google-guice/topics</archive>
+      <subscribe>http://groups.google.com/group/google-guice/subscribe</subscribe>
+      <unsubscribe>http://groups.google.com/group/google-guice/subscribe</unsubscribe>
+      <post>http://groups.google.com/group/google-guice/post</post>
+    </mailingList>
+    <mailingList>
+      <name>google-guice-dev</name>
+      <archive>http://groups.google.com/group/google-guice-dev/topics</archive>
+      <subscribe>http://groups.google.com/group/google-guice-dev/subscribe</subscribe>
+      <unsubscribe>http://groups.google.com/group/google-guice-dev/subscribe</unsubscribe>
+      <post>http://groups.google.com/group/google-guice-dev/post</post>
+    </mailingList>
+  </mailingLists>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${version}</version>
+      </dependency>
+      <dependency>
+        <groupId>aopalliance</groupId>
+        <artifactId>aopalliance</artifactId>
+        <version>1.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <scm>
+    <url>http://code.google.com/p/google-guice/source/browse/</url>
+  </scm>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+          <inherited>true</inherited>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
