@@ -22,8 +22,10 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateBinder;
+import com.google.inject.PrivateModule;
 import com.google.inject.Scope;
 import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Iterables;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Maps;
 import com.google.inject.internal.util.Sets;
@@ -52,6 +54,25 @@ public final class Modules {
   public static final Module EMPTY_MODULE = new Module() {
     public void configure(Binder binder) {}
   };
+  
+  /**
+   * Returns a builder that creates a module that overlays override modules over the given
+   * PrivateModule. This allows private elements in the module to be overridden.  No new keys
+   * may be exposed.  If a key is bound in both sets of modules, only the binding from the override modules
+   * is kept. This can be used to replace the bindings of a production module with test bindings:
+   * <pre>
+   * Module functionalTestModule
+   *     = Modules.override(new PrivateProductionModule()).with(getTestModules());
+   * </pre>
+   *
+   * <p>Prefer to write smaller modules that can be reused and tested without overrides.
+   *
+   * @param modules the modules whose bindings are open to be overridden
+   * @since 3.0
+   */
+  public static PrivateOverriddenModuleBuilder override(PrivateModule privateModule) {
+    return new RealPrivateOverriddenModuleBuilder(privateModule);
+  }
 
   /**
    * Returns a builder that creates a module that overlays override modules over the given
@@ -124,7 +145,53 @@ public final class Modules {
      */
     Module with(Iterable<? extends Module> overrides);
   }
+  
+  /**
+   * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
+   * @since 3.0
+   */
+  public interface PrivateOverriddenModuleBuilder {
 
+    /**
+     * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
+     */
+    PrivateModule with(Module... overrides);
+
+    /**
+     * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
+     */
+    PrivateModule with(Iterable<? extends Module> overrides);
+  }  
+
+  /**
+   * An override builder specifically for private modules.
+   * This allows elements within a PrivateModule to be overridden.
+   */
+  private static final class RealPrivateOverriddenModuleBuilder implements PrivateOverriddenModuleBuilder {
+    private final PrivateModule baseModule;
+
+    private RealPrivateOverriddenModuleBuilder(PrivateModule privateModule) {
+      this.baseModule = privateModule;
+    }
+
+    public PrivateModule with(Module... overrides) {
+      return with(Arrays.asList(overrides));
+    }
+
+    public PrivateModule with(final Iterable<? extends Module> overrides) {
+      return new PrivateModule() {
+        @Override
+        public void configure() {
+          PrivateElements privateElements = (PrivateElements)Iterables.getOnlyElement(Elements.getElements(baseModule));
+          override(Elements.getModule(privateElements.getElements())).with(overrides).configure(binder());
+          for(Key exposed : privateElements.getExposedKeys()) {
+            binder().withSource(privateElements.getExposedSource(exposed)).expose(exposed);
+          }
+        }
+      };
+    }
+  }
+  
   private static final class RealOverriddenModuleBuilder implements OverriddenModuleBuilder {
     private final ImmutableSet<Module> baseModules;
 
