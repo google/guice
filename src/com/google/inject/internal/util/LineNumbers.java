@@ -16,10 +16,14 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.MoreTypes;
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -79,13 +83,40 @@ final class LineNumbers {
   public Integer getLineNumber(Member member) {
     Preconditions.checkArgument(type == member.getDeclaringClass(),
         "Member %s belongs to %s, not %s", member, member.getDeclaringClass(), type);
-    return lines.get(MoreTypes.memberKey(member));
+    return lines.get(memberKey(member));
   }
 
   /** Gets the first line number. */
   public int getFirstLine() {
     return firstLine == Integer.MAX_VALUE ? 1 : firstLine;
   }
+
+  private String memberKey(Member member) {
+    checkNotNull(member, "member");
+
+    /*if[AOP]*/
+    if (member instanceof Field) {
+      return member.getName();
+
+    } else if (member instanceof Method) {
+      return member.getName() + org.objectweb.asm.Type.getMethodDescriptor((Method) member);
+
+    } else if (member instanceof Constructor) {
+      StringBuilder sb = new StringBuilder().append("<init>(");
+      for (Class param : ((Constructor) member).getParameterTypes()) {
+          sb.append(org.objectweb.asm.Type.getDescriptor(param));
+      }
+      return sb.append(")V").toString();
+
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported implementation class for Member, " + member.getClass());
+    }
+    /*end[AOP]*/
+    /*if[NO_AOP]
+    return "<NO_MEMBER_KEY>";
+    end[NO_AOP]*/
+  }  
 
   private class LineNumberReader implements ClassVisitor, MethodVisitor, AnnotationVisitor {
 

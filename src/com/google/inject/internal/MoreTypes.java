@@ -286,33 +286,6 @@ public class MoreTypes {
     }
   }
 
-  public static String memberKey(Member member) {
-    checkNotNull(member, "member");
-
-    /*if[AOP]*/
-    if (member instanceof Field) {
-      return member.getName();
-
-    } else if (member instanceof Method) {
-      return member.getName() + org.objectweb.asm.Type.getMethodDescriptor((Method) member);
-
-    } else if (member instanceof Constructor) {
-      StringBuilder sb = new StringBuilder().append("<init>(");
-      for (Class param : ((Constructor) member).getParameterTypes()) {
-          sb.append(org.objectweb.asm.Type.getDescriptor(param));
-      }
-      return sb.append(")V").toString();
-
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported implementation class for Member, " + member.getClass());
-    }
-    /*end[AOP]*/
-    /*if[NO_AOP]
-    return "<NO_MEMBER_KEY>";
-    end[NO_AOP]*/
-  }
-
   /**
    * Returns the generic supertype for {@code supertype}. For example, given a class {@code
    * IntegerSet}, the result for when supertype is {@code Set.class} is {@code Set<Integer>} and the
