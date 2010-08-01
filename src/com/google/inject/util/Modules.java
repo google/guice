@@ -183,9 +183,10 @@ public final class Modules {
         @Override
         public void configure() {
           PrivateElements privateElements = (PrivateElements)Iterables.getOnlyElement(Elements.getElements(baseModule));
-          override(Elements.getModule(privateElements.getElements())).with(overrides).configure(binder());
+          PrivateBinder binder = binder().withSource(privateElements.getSource());
+          override(Elements.getModule(privateElements.getElements())).with(overrides).configure(binder);
           for(Key exposed : privateElements.getExposedKeys()) {
-            binder().withSource(privateElements.getExposedSource(exposed)).expose(exposed);
+            binder.withSource(privateElements.getExposedSource(exposed)).expose(exposed);
           }
         }
       };

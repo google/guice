@@ -19,6 +19,8 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
+
+import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;
@@ -463,4 +465,48 @@ public class OverrideModuleTest extends TestCase {
       }
     };
   }
+  
+  private static final String RESULT = "RESULT";
+  private static final String PRIVATE_INPUT = "PRIVATE_INPUT";
+  private static final String OVERRIDDEN_INPUT = "FOO";
+  private static final String OVERRIDDEN_RESULT = "Size: 3";
+  private static final Key<String> RESULT_KEY = Key.get(String.class, named(RESULT));
+  private static final Key<String> INPUT_KEY = Key.get(String.class, named(PRIVATE_INPUT));
+
+  public void testExposedBindingOverride() throws Exception {
+    Injector inj = Guice.createInjector(
+        Modules.override(new ExampleModule()).with(
+            new AbstractModule() {
+              @Override protected void configure() {
+                bind(RESULT_KEY).toInstance(OVERRIDDEN_RESULT);
+              }
+            }));
+    assertEquals(inj.getInstance(RESULT_KEY), OVERRIDDEN_RESULT);
+  }
+
+  public void testPrivateBindingOverride() throws Exception {
+    Injector inj = Guice.createInjector(
+        Modules.override(new ExampleModule()).with(
+            new AbstractModule() {
+              @Override protected void configure() {
+                bind(INPUT_KEY).toInstance(OVERRIDDEN_INPUT);
+              }
+            }));
+    assertEquals(inj.getInstance(RESULT_KEY), OVERRIDDEN_RESULT);
+  }
+
+  public static class ExampleModule extends PrivateModule {
+    @Provides @Exposed @Named(RESULT)
+    public String provideResult(@Named(PRIVATE_INPUT) String input) {
+      return "Size: " + input.length();
+    }
+
+    @Provides @Named(PRIVATE_INPUT)
+    public String provideInput() {
+      return "Hello World";
+    }
+
+    @Override protected void configure() {
+    }
+  }  
 }
