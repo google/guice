@@ -54,30 +54,14 @@ public final class Modules {
   public static final Module EMPTY_MODULE = new Module() {
     public void configure(Binder binder) {}
   };
-  
-  /**
-   * Returns a builder that creates a module that overlays override modules over the given
-   * PrivateModule. This allows private elements in the module to be overridden.  No new keys
-   * may be exposed.  If a key is bound in both sets of modules, only the binding from the override modules
-   * is kept. This can be used to replace the bindings of a production module with test bindings:
-   * <pre>
-   * Module functionalTestModule
-   *     = Modules.override(new PrivateProductionModule()).with(getTestModules());
-   * </pre>
-   *
-   * <p>Prefer to write smaller modules that can be reused and tested without overrides.
-   *
-   * @param modules the modules whose bindings are open to be overridden
-   * @since 3.0
-   */
-  public static PrivateOverriddenModuleBuilder override(PrivateModule privateModule) {
-    return new RealPrivateOverriddenModuleBuilder(privateModule);
-  }
 
   /**
    * Returns a builder that creates a module that overlays override modules over the given
    * modules. If a key is bound in both sets of modules, only the binding from the override modules
-   * is kept. This can be used to replace the bindings of a production module with test bindings:
+   * is kept. If a single {@link PrivateModule} is supplied or all elements are from
+   * a single {@link PrivateBinder}, then this will overwrite the private bindings.
+   * Otherwise, private bindings will not be overwritten unless they are exposed. 
+   * This can be used to replace the bindings of a production module with test bindings:
    * <pre>
    * Module functionalTestModule
    *     = Modules.override(new ProductionModule()).with(new TestModule());
@@ -94,7 +78,10 @@ public final class Modules {
   /**
    * Returns a builder that creates a module that overlays override modules over the given
    * modules. If a key is bound in both sets of modules, only the binding from the override modules
-   * is kept. This can be used to replace the bindings of a production module with test bindings:
+   * is kept. If a single {@link PrivateModule} is supplied or all elements are from
+   * a single {@link PrivateBinder}, then this will overwrite the private bindings.
+   * Otherwise, private bindings will not be overwritten unless they are exposed. 
+   * This can be used to replace the bindings of a production module with test bindings:
    * <pre>
    * Module functionalTestModule
    *     = Modules.override(getProductionModules()).with(getTestModules());
@@ -145,54 +132,7 @@ public final class Modules {
      */
     Module with(Iterable<? extends Module> overrides);
   }
-  
-  /**
-   * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
-   * @since 3.0
-   */
-  public interface PrivateOverriddenModuleBuilder {
 
-    /**
-     * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
-     */
-    PrivateModule with(Module... overrides);
-
-    /**
-     * See the EDSL example at {@link Modules#override(PrivateModule) override()}.
-     */
-    PrivateModule with(Iterable<? extends Module> overrides);
-  }  
-
-  /**
-   * An override builder specifically for private modules.
-   * This allows elements within a PrivateModule to be overridden.
-   */
-  private static final class RealPrivateOverriddenModuleBuilder implements PrivateOverriddenModuleBuilder {
-    private final PrivateModule baseModule;
-
-    private RealPrivateOverriddenModuleBuilder(PrivateModule privateModule) {
-      this.baseModule = privateModule;
-    }
-
-    public PrivateModule with(Module... overrides) {
-      return with(Arrays.asList(overrides));
-    }
-
-    public PrivateModule with(final Iterable<? extends Module> overrides) {
-      return new PrivateModule() {
-        @Override
-        public void configure() {
-          PrivateElements privateElements = (PrivateElements)Iterables.getOnlyElement(Elements.getElements(baseModule));
-          PrivateBinder binder = binder().withSource(privateElements.getSource());
-          override(Elements.getModule(privateElements.getElements())).with(overrides).configure(binder);
-          for(Key exposed : privateElements.getExposedKeys()) {
-            binder.withSource(privateElements.getExposedSource(exposed)).expose(exposed);
-          }
-        }
-      };
-    }
-  }
-  
   private static final class RealOverriddenModuleBuilder implements OverriddenModuleBuilder {
     private final ImmutableSet<Module> baseModules;
 
@@ -208,15 +148,34 @@ public final class Modules {
       return new AbstractModule() {
         @Override
         public void configure() {
-          final LinkedHashSet<Element> elements =
-            new LinkedHashSet<Element>(Elements.getElements(baseModules));
+          Binder baseBinder = binder();
+          List<Element> baseElements = Elements.getElements(baseModules);
+
+          // If the sole element was a PrivateElements, we want to override
+          // the private elements within that -- so refocus our elements
+          // and binder.
+          if(baseElements.size() == 1) {
+            Element element = Iterables.getOnlyElement(baseElements);
+            if(element instanceof PrivateElements) {
+              PrivateElements privateElements = (PrivateElements)element;
+              PrivateBinder privateBinder = baseBinder.newPrivateBinder().withSource(privateElements.getSource());
+              for(Key exposed : privateElements.getExposedKeys()) {
+                privateBinder.withSource(privateElements.getExposedSource(exposed)).expose(exposed);
+              }
+              baseBinder = privateBinder;
+              baseElements = privateElements.getElements();
+            }
+          }
+          
+          final Binder binder = baseBinder;
+          final LinkedHashSet<Element> elements = new LinkedHashSet<Element>(baseElements);
           final List<Element> overrideElements = Elements.getElements(overrides);
 
           final Set<Key<?>> overriddenKeys = Sets.newHashSet();
           final Set<Class<? extends Annotation>> overridesScopeAnnotations = Sets.newHashSet();
 
           // execute the overrides module, keeping track of which keys and scopes are bound
-          new ModuleWriter(binder()) {
+          new ModuleWriter(binder) {
             @Override public <T> Void visit(Binding<T> binding) {
               overriddenKeys.add(binding.getKey());
               return super.visit(binding);
@@ -238,7 +197,7 @@ public final class Modules {
           // multiple times.
           final Map<Scope, Object> scopeInstancesInUse = Maps.newHashMap();
           final List<ScopeBinding> scopeBindings = Lists.newArrayList();
-          new ModuleWriter(binder()) {
+          new ModuleWriter(binder) {
             @Override public <T> Void visit(Binding<T> binding) {
               if (!overriddenKeys.remove(binding.getKey())) {
                 super.visit(binding);
@@ -293,14 +252,14 @@ public final class Modules {
 
           // execute the scope bindings, skipping scopes that have been overridden. Any scope that
           // is overridden and in active use will prompt an error
-          new ModuleWriter(binder()) {
+          new ModuleWriter(binder) {
             @Override public Void visit(ScopeBinding scopeBinding) {
               if (!overridesScopeAnnotations.remove(scopeBinding.getAnnotationType())) {
                 super.visit(scopeBinding);
               } else {
                 Object source = scopeInstancesInUse.get(scopeBinding.getScope());
                 if (source != null) {
-                  binder().withSource(source).addError(
+                  binder.withSource(source).addError(
                       "The scope for @%s is bound directly and cannot be overridden.",
                       scopeBinding.getAnnotationType().getSimpleName());
                 }
