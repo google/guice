@@ -75,12 +75,12 @@ public class JpaWorkManagerTest extends TestCase {
       query.setParameter("text", UNIQUE_TEXT_3);
       final Object o = query.getSingleResult();
 
-      assert null != o : "no result!!";
-      assert o instanceof JpaTestEntity : "Unknown type returned " + o.getClass();
+      assertNotNull("no result!!", o);
+      assertTrue("Unknown type returned " + o.getClass(), o instanceof JpaTestEntity);
       JpaTestEntity ent = (JpaTestEntity) o;
 
-      assert UNIQUE_TEXT_3.equals(ent.getText()) :
-          "Incorrect result returned or not persisted properly" + ent.getText();
+      assertEquals("Incorrect result returned or not persisted properly" + ent.getText(),
+          UNIQUE_TEXT_3, ent.getText());
 
     } finally {
       injector.getInstance(EntityManager.class).getTransaction().commit();

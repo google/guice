@@ -109,11 +109,11 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
 
     @Transactional
     public <T> void persist(T t) {
-      assert em.isOpen() : "em is not open!";
-      assert em.getTransaction().isActive() : "no active txn!";
+      assertTrue("em is not open!", em.isOpen());
+      assertTrue("no active txn!", em.getTransaction().isActive());
       em.persist(t);
 
-      assert em.contains(t) : "Persisting object failed";
+      assertTrue("Persisting object failed", em.contains(t));
     }
 
     @Transactional

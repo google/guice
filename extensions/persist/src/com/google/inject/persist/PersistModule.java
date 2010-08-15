@@ -4,14 +4,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.internal.util.Preconditions;
 import com.google.inject.persist.jpa.InternalJpaModule;
-import com.google.inject.servlet.ServletModule;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Properties;
 
 /**
- * Install this module to add guice-persist library support for JPA persistence providers. This
- * module *MUST* be installed before any filters are registered
+ * Install this module to add guice-persist library support for JPA persistence
+ * providers.
  *
  * @author dhanji@google.com (Dhanji R. Prasanna)
  */
@@ -31,16 +30,6 @@ public class PersistModule extends AbstractModule implements PersistenceProvider
         "Must specify the name of a JPA unit in the PersistModule.");
 
     install(new InternalJpaModule(unitOfWork, jpaUnit, properties));
-
-    // Servlet functionality requested.
-    if (UnitOfWork.REQUEST.equals(unitOfWork)) {
-      install(new ServletModule() {
-        @Override
-        protected void configureServlets() {
-          filter("/*").through(PersistenceFilter.class);
-        }
-      });
-    }
   }
 
   protected void configurePersistence() {

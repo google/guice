@@ -76,17 +76,17 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
     //persisted entity should remain in the same em (which should still be open)
     assertTrue("EntityManager  appears to have been closed across txns!",
         injector.getInstance(EntityManager.class).contains(entity));
-    assert em.contains(entity) : "EntityManager  appears to have been closed across txns!";
-    assert em.isOpen() : "EntityManager appears to have been closed across txns!";
+    assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
+    assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
 
     injector.getInstance(WorkManager.class).end();
 
     //try to query them back out
     em = injector.getInstance(EntityManager.class);
-    assert null != em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT).getSingleResult();
-    assert null != em.createQuery("from JpaTestEntity where text = :text")
-        .setParameter("text", UNIQUE_TEXT_2).getSingleResult();
+    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
+        .setParameter("text", UNIQUE_TEXT).getSingleResult());
+    assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
+        .setParameter("text", UNIQUE_TEXT_2).getSingleResult());
     em.close();
   }
 

@@ -66,17 +66,18 @@ public class JoiningLocalTransactionsTest extends TestCase {
         .runOperationInTxn();
 
     EntityManager em = injector.getInstance(EntityManager.class);
-    assert !em.getTransaction().isActive() : "txn was not closed by transactional service";
+    assertFalse("txn was not closed by transactional service",
+        em.getTransaction().isActive());
 
     //test that the data has been stored
     Object result = em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT).getSingleResult();
     injector.getInstance(WorkManager.class).end();
 
-    assert result instanceof JpaTestEntity : "odd result returned fatal";
+    assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
 
-    assert UNIQUE_TEXT.equals(((JpaTestEntity) result).getText()) :
-        "queried entity did not match--did automatic txn fail?";
+    assertEquals("queried entity did not match--did automatic txn fail?", UNIQUE_TEXT,
+        ((JpaTestEntity) result).getText());
   }
 
   public void testSimpleTransactionRollbackOnChecked() {

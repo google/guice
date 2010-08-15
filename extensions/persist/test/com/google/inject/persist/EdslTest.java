@@ -17,7 +17,7 @@ public class EdslTest extends TestCase {
           workAcross(UnitOfWork.REQUEST).usingJpa("myunit");
         }
 
-      }).stage(Stage.TOOL)
+      }).stage(Stage.PRODUCTION)
         .requireExplicitBindings()
         .build();
   }

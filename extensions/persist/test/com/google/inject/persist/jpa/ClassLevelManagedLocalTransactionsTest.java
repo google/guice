@@ -68,8 +68,8 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     injector.getInstance(TransactionalObject.class).runOperationInTxn();
 
     EntityManager session = injector.getInstance(EntityManager.class);
-    assert !session.getTransaction().isActive() :
-        "EntityManager was not closed by transactional service";
+    assertFalse("EntityManager was not closed by transactional service",
+        session.getTransaction().isActive());
 
     //test that the data has been stored
     session.getTransaction().begin();
@@ -137,8 +137,8 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     }
 
     EntityManager session = injector.getInstance(EntityManager.class);
-    assert !session.getTransaction().isActive() :
-        "EntityManager was not closed by transactional service (rollback didnt happen?)";
+    assertFalse("EntityManager was not closed by transactional service (rollback didnt happen?)",
+        session.getTransaction().isActive());
 
     //test that the data has been stored
     session.getTransaction().begin();
@@ -147,7 +147,8 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
     session.getTransaction().commit();
 
-    assert result.isEmpty() : "a result was returned! rollback sure didnt happen!!!";
+    assertTrue("a result was returned! rollback sure didnt happen!!!",
+        result.isEmpty());
   }
 
   @Transactional

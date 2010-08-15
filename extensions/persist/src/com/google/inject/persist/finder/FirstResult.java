@@ -22,14 +22,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>
- * Annotate any dynamic finder method's integer argument with this to pass in the first-result
- * index. Used for paging result lists.
- * </p>
+ * Annotate any dynamic finder method's integer argument with this to pass in
+ * the index of the first result in the result set you are interested in.
+ * Useful for paging result sets. Complemented by {@link NumResults}.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
- * @since 1.0
- * @see NumResults
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

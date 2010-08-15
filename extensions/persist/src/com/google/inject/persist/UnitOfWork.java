@@ -17,25 +17,27 @@
 package com.google.inject.persist;
 
 /**
- * Enumerates all the supported units-of-work (i.e. atomic lifespan of a persistence session).
+ * Enumerates all the supported units-of-work (i.e. atomic lifespan of a
+ * persistence session).
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 public enum UnitOfWork {
   /**
-   * Logical arbitrary unit of work that is managed manually and generally specific to a running
-   * thread.
+   * Logical arbitrary unit of work that is managed manually and generally
+   * specific to a running thread.
    */
   CUSTOM,
 
   /**
-   *  Logical unit of work (ObjectContainer or JPA EntityManager) that spans an HTTP request.
+   * Logical unit of work (ObjectContainer or JPA EntityManager) that spans
+   * an HTTP request.
    */
   REQUEST,
 
   /**
-   * Logical unit of work (Session, ObjectContainer or JPA EntityManager) that spans a transaction
-   * demarcated with {@code @Transactional}.
+   * Logical unit of work (Session, ObjectContainer or JPA EntityManager) that
+   * spans a transaction demarcated with {@code @Transactional}.
    */
   TRANSACTION
 }
