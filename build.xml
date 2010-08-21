@@ -19,9 +19,9 @@
 
   <target name="dist" depends="distjars, javadoc"
        description="Build entire distribution.">
-    <ant antfile="servlet/build.xml" target="distjars" inheritAll="false"/>
-    <ant antfile="spring/build.xml" target="distjars" inheritAll="false"/>
-    <ant antfile="struts2/plugin/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/servlet/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/spring/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/struts2/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/assistedinject/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/jmx/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
@@ -29,13 +29,13 @@
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="spring/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/spring/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="struts2/plugin/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/struts2/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/assistedinject/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -196,9 +196,9 @@
   <target name="clean.all"
       depends="clean"
       description="Remove generated files.">
-    <ant dir="servlet" antfile="build.xml" target="clean"/>
-    <ant dir="spring" antfile="build.xml" target="clean"/>
-    <ant dir="struts2/plugin" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/servlet" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/spring" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/struts2" antfile="build.xml" target="clean"/>
     <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
     <ant dir="extensions/jmx" antfile="build.xml" target="clean"/>
     <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>

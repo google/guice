@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 
-<project name="guice-struts2-plugin" basedir="." default="jar">
+<project name="guice-spring" basedir="." default="jar">
 
   <import file="../../common.xml"/>
   
   <path id="compile.classpath">
     <fileset dir="${lib.dir}" includes="*.jar"/>
+    <fileset dir="${lib.dir}/build" includes="*.jar"/>
     <fileset dir="../../build/dist" includes="*.jar"/>
-    <fileset dir="../../servlet/build" includes="*.jar"/>
   </path>
 
   <target name="jar" depends="jar.withdeps, manifest" description="Build jar.">
