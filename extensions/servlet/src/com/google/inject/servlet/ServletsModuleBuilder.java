@@ -101,30 +101,30 @@ class ServletsModuleBuilder extends AbstractModule {
     }
 
     public void with(Class<? extends HttpServlet> servletKey,
-        Map<String, String> contextParams) {
-      with(Key.get(servletKey), contextParams);
+        Map<String, String> initParams) {
+      with(Key.get(servletKey), initParams);
     }
 
     public void with(Key<? extends HttpServlet> servletKey,
-        Map<String, String> contextParams) {
-      with(servletKey, contextParams, null);
+        Map<String, String> initParams) {
+      with(servletKey, initParams, null);
     }
     
     private void with(Key<? extends HttpServlet> servletKey,
-        Map<String, String> contextParams,
+        Map<String, String> initParams,
         HttpServlet servletInstance) {
       for (String pattern : uriPatterns) {
         servletDefinitions.add(
             new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType, pattern),
-                contextParams, servletInstance));
+                initParams, servletInstance));
       }
     }
 
     public void with(HttpServlet servlet,
-        Map<String, String> contextParams) {
+        Map<String, String> initParams) {
       Key<HttpServlet> servletKey = Key.get(HttpServlet.class, UniqueAnnotations.create());
       servletInstanceEntries.add(new ServletInstanceBindingEntry(servletKey, servlet));
-      with(servletKey, contextParams, servlet);
+      with(servletKey, initParams, servlet);
     }
   }
 }

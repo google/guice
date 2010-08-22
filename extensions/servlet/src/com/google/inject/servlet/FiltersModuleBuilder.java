@@ -91,32 +91,32 @@ class FiltersModuleBuilder extends AbstractModule {
     }
 
     public void through(Class<? extends Filter> filterKey,
-        Map<String, String> contextParams) {
+        Map<String, String> initParams) {
       
       // Careful you don't accidentally make this method recursive, thank you IntelliJ IDEA!
-      through(Key.get(filterKey), contextParams);
+      through(Key.get(filterKey), initParams);
     }
 
     public void through(Key<? extends Filter> filterKey,
-        Map<String, String> contextParams) {
-      through(filterKey, contextParams, null);
+        Map<String, String> initParams) {
+      through(filterKey, initParams, null);
     }
     
     private void through(Key<? extends Filter> filterKey,
-        Map<String, String> contextParams,
+        Map<String, String> initParams,
         Filter filterInstance) {
       for (String pattern : uriPatterns) {
         filterDefinitions.add(
             new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
-                contextParams, filterInstance));
+                initParams, filterInstance));
       }
     }
 
     public void through(Filter filter,
-        Map<String, String> contextParams) {
+        Map<String, String> initParams) {
       Key<Filter> filterKey = Key.get(Filter.class, UniqueAnnotations.create());
       filterInstanceEntries.add(new FilterInstanceBindingEntry(filterKey, filter));
-      through(filterKey, contextParams, filter);
+      through(filterKey, initParams, filter);
     }
   }
 }
