@@ -18,7 +18,6 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -55,8 +54,8 @@ class ManagedFilterPipeline implements FilterPipeline{
 
   //Guards a DCL, so needs to be volatile
   private volatile boolean initialized = false;
-  private static final TypeLiteral<List<FilterDefinition>> FILTER_DEFS =
-      new TypeLiteral<List<FilterDefinition>>() { };
+  private static final TypeLiteral<FilterDefinition> FILTER_DEFS =
+      TypeLiteral.get(FilterDefinition.class);
 
   @Inject
   public ManagedFilterPipeline(Injector injector, ManagedServletPipeline servletPipeline,
@@ -77,11 +76,8 @@ class ManagedFilterPipeline implements FilterPipeline{
    */
   private FilterDefinition[] collectFilterDefinitions(Injector injector) {
     List<FilterDefinition> filterDefinitions = Lists.newArrayList();
-    for (Binding<?> entry : injector.findBindingsByType(FILTER_DEFS)) {
-
-      @SuppressWarnings("unchecked") //guarded by findBindingsByType()
-      Key<List<FilterDefinition>> defsKey = (Key<List<FilterDefinition>>) entry.getKey();
-      filterDefinitions.addAll(injector.getInstance(defsKey));
+    for (Binding<FilterDefinition> entry : injector.findBindingsByType(FILTER_DEFS)) {
+      filterDefinitions.add(entry.getProvider().get());
     }
 
     // Convert to a fixed size array for speed.

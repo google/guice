@@ -69,7 +69,7 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-    		UriPatternType.get(UriPatternType.SERVLET, pattern), initParams);
+    		UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
     filterDef.init(servletContext, injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
@@ -112,7 +112,7 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-    		UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>());
+        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>(), null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
@@ -169,7 +169,7 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>());
+        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>(), null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
     		Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));

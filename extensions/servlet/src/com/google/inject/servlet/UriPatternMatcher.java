@@ -38,4 +38,7 @@ interface UriPatternMatcher {
    *         NOTE(dhanji): This method returns null for the regex pattern matcher.
    */
   String extractPath(String pattern);
+  
+  /** Returns the type of pattern this is. */
+  UriPatternType getPatternType();
 }

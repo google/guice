@@ -19,6 +19,10 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.internal.util.Iterators;
+import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -43,21 +47,49 @@ import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHE
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class ServletDefinition {
+class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinition> {
   private final String pattern;
   private final Key<? extends HttpServlet> servletKey;
   private final UriPatternMatcher patternMatcher;
   private final Map<String, String> initParams;
+  // set only if this was bound using a servlet instance.
+  private final HttpServlet servletInstance;
 
-  //our servlet is always presumed to be a singleton
+  //always set in init, our servlet is always presumed to be a singleton
   private final AtomicReference<HttpServlet> httpServlet = new AtomicReference<HttpServlet>();
 
   public ServletDefinition(String pattern, Key<? extends HttpServlet> servletKey,
-      UriPatternMatcher patternMatcher, Map<String, String> initParams) {
+      UriPatternMatcher patternMatcher, Map<String, String> initParams, HttpServlet servletInstance) {
     this.pattern = pattern;
     this.servletKey = servletKey;
     this.patternMatcher = patternMatcher;
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
+    this.servletInstance = servletInstance;
+  }
+  
+  public ServletDefinition get() {
+    return this;
+  }
+  
+  public <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+      ProviderInstanceBinding<? extends B> binding) {
+    if(visitor instanceof ServletModuleTargetVisitor) {
+      if(servletInstance != null) {
+        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
+            new InstanceServletBindingImpl(initParams,
+                pattern,
+                servletInstance,
+                patternMatcher.getPatternType()));        
+      } else {
+        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
+            new LinkedServletBindingImpl(initParams,
+                pattern,
+                servletKey,
+                patternMatcher.getPatternType()));
+      }
+    } else {
+      return visitor.visit(binding);
+    }
   }
 
   boolean shouldServe(String uri) {

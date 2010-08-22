@@ -19,11 +19,14 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.Maps;
 import com.google.inject.internal.util.Sets;
 import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.util.Providers;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,7 +65,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     String pattern = "blah.html";
     final ServletDefinition servletDefinition = new ServletDefinition(pattern,
         Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>());
+        new HashMap<String, String>(), null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
@@ -94,16 +97,15 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         .andReturn(mockServlet);
 
 
-    final Key<List<ServletDefinition>> servetDefsKey = Key
-        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    final Key<ServletDefinition> servetDefsKey = Key
+        .get(TypeLiteral.get(ServletDefinition.class));
 
-    Binding mockBinding = createMock(Binding.class);
-    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
-
-    expect(injector.getInstance(servetDefsKey))
-        .andReturn(ImmutableList.of(servletDefinition));
+        .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
+    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
+    expect(mockBinding.getProvider())
+        .andReturn(bindingProvider);
 
     replay(injector, binding, requestMock, mockBinding);
 
@@ -127,7 +129,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     String pattern = "blah.html";
     final ServletDefinition servletDefinition = new ServletDefinition(pattern,
         Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>());
+        new HashMap<String, String>(), null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
@@ -166,16 +168,15 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     expect(injector.getInstance(HTTP_SERLVET_KEY))
         .andReturn(mockServlet);
 
-    final Key<List<ServletDefinition>> servetDefsKey = Key
-        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    final Key<ServletDefinition> servetDefsKey = Key
+        .get(TypeLiteral.get(ServletDefinition.class));
 
-    Binding mockBinding = createMock(Binding.class);
-    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
-
-    expect(injector.getInstance(servetDefsKey))
-        .andReturn(ImmutableList.of(servletDefinition));
+        .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
+    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
+    expect(mockBinding.getProvider())
+        .andReturn(bindingProvider);
 
     replay(injector, binding, requestMock, mockResponse, mockBinding);
 
@@ -212,7 +213,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     String pattern = "blah.html";
     final ServletDefinition servletDefinition = new ServletDefinition(pattern,
         Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>());
+        new HashMap<String, String>(), null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
@@ -240,16 +241,15 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         .andReturn(mockServlet);
 
 
-    final Key<List<ServletDefinition>> servetDefsKey = Key
-        .get(new TypeLiteral<List<ServletDefinition>>() {});
+    final Key<ServletDefinition> servetDefsKey = Key
+        .get(TypeLiteral.get(ServletDefinition.class));
 
-    Binding mockBinding = createMock(Binding.class);
-    expect(mockBinding.getKey()).andReturn(servetDefsKey);
+    Binding<ServletDefinition> mockBinding = createMock(Binding.class);
     expect(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .andReturn(ImmutableList.<Binding<List<ServletDefinition>>>of(mockBinding));
-
-    expect(injector.getInstance(servetDefsKey))
-        .andReturn(ImmutableList.of(servletDefinition));
+        .andReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
+    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
+    expect(mockBinding.getProvider())
+        .andReturn(bindingProvider);
 
     replay(injector, binding, mockRequest, mockResponse, mockBinding);
 

@@ -17,7 +17,6 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Sets;
 import com.google.inject.internal.UniqueAnnotations;
@@ -54,14 +53,10 @@ class ServletsModuleBuilder extends AbstractModule {
             + servletDefinition.getPattern());
       }
       else {
+        bind(Key.get(ServletDefinition.class, UniqueAnnotations.create())).toProvider(servletDefinition);
         servletUris.add(servletDefinition.getPattern());
       }
     }
-
-    // Bind these servlet definitions to a unique random key. Doesn't matter what it is,
-    // coz it's never used.
-    bind(Key.get(new TypeLiteral<List<ServletDefinition>>() {}, UniqueAnnotations.create()))
-        .toInstance(servletDefinitions);
   }
 
   //the first level of the EDSL--
@@ -112,11 +107,16 @@ class ServletsModuleBuilder extends AbstractModule {
 
     public void with(Key<? extends HttpServlet> servletKey,
         Map<String, String> contextParams) {
-
+      with(servletKey, contextParams, null);
+    }
+    
+    private void with(Key<? extends HttpServlet> servletKey,
+        Map<String, String> contextParams,
+        HttpServlet servletInstance) {
       for (String pattern : uriPatterns) {
         servletDefinitions.add(
             new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType, pattern),
-                contextParams));
+                contextParams, servletInstance));
       }
     }
 
@@ -124,7 +124,7 @@ class ServletsModuleBuilder extends AbstractModule {
         Map<String, String> contextParams) {
       Key<HttpServlet> servletKey = Key.get(HttpServlet.class, UniqueAnnotations.create());
       servletInstanceEntries.add(new ServletInstanceBindingEntry(servletKey, servlet));
-      with(servletKey, contextParams);
+      with(servletKey, contextParams, servlet);
     }
   }
 }

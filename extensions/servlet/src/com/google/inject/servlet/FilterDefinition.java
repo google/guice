@@ -19,6 +19,10 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.internal.util.Iterators;
+import com.google.inject.spi.BindingTargetVisitor;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -39,20 +43,49 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class FilterDefinition {
+class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition> {
   private final String pattern;
   private final Key<? extends Filter> filterKey;
   private final UriPatternMatcher patternMatcher;
   private final Map<String, String> initParams;
+  // set only if this was bound to an instance of a Filter.
+  private final Filter filterInstance;
 
+  // always set after init is called.
   private final AtomicReference<Filter> filter = new AtomicReference<Filter>();
 
   public FilterDefinition(String pattern, Key<? extends Filter> filterKey,
-      UriPatternMatcher patternMatcher, Map<String, String> initParams) {
+      UriPatternMatcher patternMatcher, Map<String, String> initParams, Filter filterInstance) {
     this.pattern = pattern;
     this.filterKey = filterKey;
     this.patternMatcher = patternMatcher;
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
+    this.filterInstance = filterInstance;
+  }
+  
+  public FilterDefinition get() {
+    return this;
+  }
+  
+  public <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+      ProviderInstanceBinding<? extends B> binding) {
+    if(visitor instanceof ServletModuleTargetVisitor) {
+      if(filterInstance != null) {
+        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
+            new InstanceFilterBindingImpl(initParams,
+                pattern,
+                filterInstance,
+                patternMatcher.getPatternType()));        
+      } else {
+        return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
+            new LinkedFilterBindingImpl(initParams,
+                pattern,
+                filterKey,
+                patternMatcher.getPatternType()));
+      }
+    } else {
+      return visitor.visit(binding);
+    }
   }
 
   private boolean shouldFilter(String uri) {

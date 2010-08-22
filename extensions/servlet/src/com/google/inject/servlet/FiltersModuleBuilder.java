@@ -17,7 +17,6 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.UniqueAnnotations;
 import java.util.HashMap;
@@ -46,8 +45,9 @@ class FiltersModuleBuilder extends AbstractModule {
 
     // Bind these filter definitions to a unique random key. Doesn't matter what it is,
     // coz it's never used.
-    bind(Key.get(new TypeLiteral<List<FilterDefinition>>() {}, UniqueAnnotations.create()))
-        .toInstance(filterDefinitions);
+    for(FilterDefinition fd : filterDefinitions) {
+      bind(FilterDefinition.class).annotatedWith(UniqueAnnotations.create()).toProvider(fd);
+    }
   }
 
   public ServletModule.FilterKeyBindingBuilder filter(List<String> patterns) {
@@ -99,11 +99,16 @@ class FiltersModuleBuilder extends AbstractModule {
 
     public void through(Key<? extends Filter> filterKey,
         Map<String, String> contextParams) {
-
+      through(filterKey, contextParams, null);
+    }
+    
+    private void through(Key<? extends Filter> filterKey,
+        Map<String, String> contextParams,
+        Filter filterInstance) {
       for (String pattern : uriPatterns) {
         filterDefinitions.add(
             new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
-                contextParams));
+                contextParams, filterInstance));
       }
     }
 
@@ -111,7 +116,7 @@ class FiltersModuleBuilder extends AbstractModule {
         Map<String, String> contextParams) {
       Key<Filter> filterKey = Key.get(Filter.class, UniqueAnnotations.create());
       filterInstanceEntries.add(new FilterInstanceBindingEntry(filterKey, filter));
-      through(filterKey, contextParams);
+      through(filterKey, contextParams, filter);
     }
   }
 }

@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 /**
  * An enumeration of the available URI-pattern matching styles
  */
-enum UriPatternType {
+public enum UriPatternType {
   SERVLET, REGEX;
 
-  public static UriPatternMatcher get(UriPatternType type, String pattern) {
+  static UriPatternMatcher get(UriPatternType type, String pattern) {
     switch (type) {
       case SERVLET:
         return new ServletStyleUriPatternMatcher(pattern);
@@ -91,6 +91,10 @@ enum UriPatternType {
       //else treat as literal
       return path;
     }
+    
+    public UriPatternType getPatternType() {
+      return UriPatternType.SERVLET;
+    }
   }
 
   /**
@@ -123,6 +127,10 @@ enum UriPatternType {
         }
       }
       return null;
+    }
+    
+    public UriPatternType getPatternType() {
+      return UriPatternType.REGEX;
     }
   }
 }

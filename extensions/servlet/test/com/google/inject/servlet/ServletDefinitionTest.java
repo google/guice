@@ -73,7 +73,7 @@ public class ServletDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern), initParams);
+        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
 
     ServletContext servletContext = createMock(ServletContext.class);
     final String contextName = "thing__!@@44__SRV" + getClass();

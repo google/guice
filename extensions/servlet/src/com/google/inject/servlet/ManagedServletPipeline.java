@@ -18,7 +18,6 @@ package com.google.inject.servlet;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Lists;
@@ -46,8 +45,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 @Singleton
 class ManagedServletPipeline {
   private final ServletDefinition[] servletDefinitions;
-  private static final TypeLiteral<List<ServletDefinition>> SERVLET_DEFS =
-      new TypeLiteral<List<ServletDefinition>>() {};
+  private static final TypeLiteral<ServletDefinition> SERVLET_DEFS =
+      TypeLiteral.get(ServletDefinition.class);
 
   @Inject
   public ManagedServletPipeline(Injector injector) {
@@ -67,11 +66,8 @@ class ManagedServletPipeline {
    */
   private ServletDefinition[] collectServletDefinitions(Injector injector) {
     List<ServletDefinition> servletDefinitions = Lists.newArrayList();
-    for (Binding<?> entry : injector.findBindingsByType(SERVLET_DEFS)) {
-
-        @SuppressWarnings("unchecked") //guarded by findBindingsByType()
-        Key<List<ServletDefinition>> defsKey = (Key<List<ServletDefinition>>) entry.getKey();
-        servletDefinitions.addAll(injector.getInstance(defsKey));
+    for (Binding<ServletDefinition> entry : injector.findBindingsByType(SERVLET_DEFS)) {
+        servletDefinitions.add(entry.getProvider().get());
     }
 
     // Copy to a fixed size array for speed.
