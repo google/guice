@@ -37,7 +37,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 /**
@@ -342,6 +345,63 @@ public class SpiBindingsTest extends TestCase {
           }
         }
     );
+  }
+  
+  public void testExtensionSpi() {
+    final AtomicBoolean visiting = new AtomicBoolean(false);
+    
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toProvider(new ProviderWithExtensionVisitor<String>() {
+          public <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+              ProviderInstanceBinding<? extends B> binding) {
+            assertSame(this, binding.getProviderInstance());
+            // We can't always check for FailingSpiTargetVisitor,
+            // because constructing the injector visits here, and we need
+            // to process the binding as normal
+            if(visiting.get()) {
+              assertTrue("visitor: " + visitor, visitor instanceof FailingSpiTargetVisitor);
+              return (V)"visited";
+            } else {
+              return visitor.visit(binding);
+            }
+          }
+          
+          public String get() {
+            return "FooBar";
+          }
+        });
+      }
+    });
+    
+    visiting.set(true);
+
+    // Check for Provider<String> binding -- that is still a ProviderBinding.
+    Key<Provider<String>> providerOfStringKey = new Key<Provider<String>>() {};
+    Binding<Provider<String>> providerBinding = injector.getBinding(providerOfStringKey);
+    assertEquals(providerOfStringKey, providerBinding.getKey());
+    assertContains(providerBinding.getSource().toString(), "SpiBindingsTest.java");
+    assertTrue("binding: " + providerBinding, providerBinding instanceof ProviderBinding);
+    providerBinding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
+      @Override public Void visit(ProviderBinding<? extends Provider<String>> binding) {
+        assertEquals(Key.get(String.class), binding.getProvidedKey());
+        return null;
+      }
+    });
+    
+    // Check for String binding -- that one is ProviderInstanceBinding, and gets hooked
+    Binding<String> binding = injector.getBinding(String.class);
+    assertEquals(Key.get(String.class), binding.getKey());
+    assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+    assertTrue(binding instanceof ProviderInstanceBinding);
+    assertEquals("visited", binding.acceptTargetVisitor(new FailingSpiTargetVisitor<String>()));
+  }
+
+  private static class FailingSpiTargetVisitor<T> extends DefaultBindingTargetVisitor<T, String> {
+    @Override
+    protected String visitOther(Binding<? extends T> binding) {
+      throw new AssertionFailedError();
+    }
   }
 
   public void checkInjector(Module module, ElementVisitor<?>... visitors) {

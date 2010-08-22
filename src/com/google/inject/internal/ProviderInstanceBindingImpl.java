@@ -27,6 +27,8 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
+
 import java.util.Set;
 
 final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
@@ -52,7 +54,11 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
-    return visitor.visit(this);
+    if(providerInstance instanceof ProviderWithExtensionVisitor) {
+      return ((ProviderWithExtensionVisitor<? extends T>)providerInstance).acceptExtensionVisitor(visitor, this);
+    } else {
+      return visitor.visit(this);
+    }
   }
 
   public Provider<? extends T> getProviderInstance() {
