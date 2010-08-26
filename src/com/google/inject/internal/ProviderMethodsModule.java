@@ -138,11 +138,7 @@ public final class ProviderMethodsModule implements Module {
   @Override public int hashCode() {
     return delegate.hashCode();
   }
-
-  @Override public String toString() {
-    return ProviderMethodsModule.class.getName() + "forModule(" + delegate + ")";
-  }
-
+  
   /** A provider that returns a logger based on the method name. */
   private static final class LogProvider implements Provider<Logger> {
     private final String name;

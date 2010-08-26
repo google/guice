@@ -22,11 +22,8 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
-import com.google.inject.util.ParallelModule;
 import junit.framework.TestCase;
 
 /**
