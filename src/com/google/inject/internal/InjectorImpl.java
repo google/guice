@@ -211,7 +211,8 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
 
 
-    if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !isProvider(key)) {
+    boolean jitOverride = isProvider(key) || isTypeLiteral(key);
+    if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !jitOverride) {
       throw errors.jitDisabled(key).toException();
     }
     
@@ -226,7 +227,7 @@ final class InjectorImpl implements Injector, Lookups {
         }
       }
       
-      if(options.jitDisabled && jitType != JitLimitation.NEW_OR_EXISTING_JIT && !isProvider(key)) {
+      if(options.jitDisabled && jitType != JitLimitation.NEW_OR_EXISTING_JIT && !jitOverride) {
         throw errors.jitDisabled(key).toException();
       } else {
         return createJustInTimeBindingRecursive(key, errors);
@@ -237,6 +238,10 @@ final class InjectorImpl implements Injector, Lookups {
   /** Returns true if the key type is Provider (but not a subclass of Provider). */
   private static boolean isProvider(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(Provider.class);
+  }
+  
+  private static boolean isTypeLiteral(Key<?> key) {
+    return key.getTypeLiteral().getRawType().equals(TypeLiteral.class);
   }
   
   private static <T> Key<T> getProvidedKey(Key<Provider<T>> key, Errors errors) throws ErrorsException {

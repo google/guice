@@ -1,7 +1,11 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.internal.util.ImmutableSet.of;
+
 import junit.framework.TestCase;
+
+import java.util.Set;
 
 /**
  * Some tests for {@link InjectorBuilder#requireExplicitBindings()}
@@ -303,6 +307,22 @@ public class JitBindingsTest extends TestCase {
     }
   }
   
+  public void testTypeLiteralsCanBeInjected() {
+    Injector injector = new InjectorBuilder()
+      .requireExplicitBindings()
+      .addModules(new AbstractModule() {
+        @Override protected void configure() {
+          bind(new TypeLiteral<WantsTypeLiterals<String>>() {});
+          bind(new TypeLiteral<Set<String>>() {}).toInstance(of("bar"));
+        }
+      })
+      .build();
+
+    WantsTypeLiterals<String> foo = injector.getInstance(new Key<WantsTypeLiterals<String>>() {});
+    assertEquals(foo.literal.getRawType(), String.class);
+    assertEquals(of("bar"), foo.set);
+  }
+  
   private void ensureWorks(Injector injector, Class<?>... classes) {
     for(int i = 0; i < classes.length; i++) {
       injector.getInstance(classes[i]);
@@ -385,6 +405,17 @@ public class JitBindingsTest extends TestCase {
   private static class ProvByProvider implements Provider<ProvBy> {
     public ProvBy get() {
       return new ProvBy() {};
+    }
+  }
+  
+  private static class WantsTypeLiterals<T> {
+    TypeLiteral<T> literal;
+    Set<T> set;
+    
+    @Inject WantsTypeLiterals(TypeLiteral<T> literal, Set<T> set) {
+      this.literal = literal;
+      this.set = set;
+      
     }
   }
 }
