@@ -38,6 +38,23 @@ package com.google.inject.persist;
 public interface WorkManager {
 
   /**
+   * Starts the underlying persistence engine and makes guice-persist ready for
+   * use. For instance, with JPA, it creates an EntityManagerFactory and may
+   * open connection pools. This method must be called by your code prior to
+   * using any guice-persist or JPA artifacts. If already started,
+   * calling this method does nothing, if already stopped, it also does
+   * nothing.
+   */
+  void startPersistence();
+
+  /**
+   * Stops the underlying persistence engine. For instance, with JPA, it
+   * closes the {@code EntityManagerFactory}. If already stopped, calling this
+   * method does nothing. If not yet started, it also does nothing.
+   */
+  void shutdownPersistence();
+
+  /**
    * Starts a Unit Of Work. Underneath, causes a session to the data layer to be opened. If there
    * is already one open, the invocation will do nothing. In this way, you can define arbitrary
    * units-of-work that nest within one another safely.

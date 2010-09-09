@@ -19,10 +19,7 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.persist.PersistModule;
-import com.google.inject.persist.PersistenceService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.WorkManager;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,15 +35,10 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
 
   @Override
   public void setUp() {
-    injector = Guice.createInjector(new PersistModule() {
-
-      protected void configurePersistence() {
-        workAcross(UnitOfWork.REQUEST).usingJpa("testUnit");
-      }
-    });
+    injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(PersistenceService.class).start();
+    injector.getInstance(WorkManager.class).startPersistence();
 
     injector.getInstance(WorkManager.class).begin();
   }

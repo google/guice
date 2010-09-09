@@ -18,9 +18,6 @@ package com.google.inject.persist.jpa;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.persist.PersistModule;
-import com.google.inject.persist.PersistenceService;
-import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.WorkManager;
 import java.util.Properties;
 import javax.persistence.EntityManager;
@@ -35,14 +32,10 @@ public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
 
   @Override
   public void setUp() {
-    injector = Guice.createInjector(new PersistModule() {
+    Properties props = new Properties();
+    props.put("blah", "blah");
 
-      protected void configurePersistence() {
-        Properties props = new Properties();
-        props.put("blah", "blah");
-        workAcross(UnitOfWork.TRANSACTION).usingJpa("testUnit", props);
-      }
-    });
+    injector = Guice.createInjector(new JpaPersistModule("testUnit").properties(props));
   }
 
   @Override
@@ -53,12 +46,12 @@ public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
 
   public void testSessionCreateOnInjection() {
 
-    assertEquals("SINGLETON VIOLATION " + PersistenceService.class.getName(),
-        injector.getInstance(PersistenceService.class),
-        injector.getInstance(PersistenceService.class));
+    assertEquals("SINGLETON VIOLATION " + WorkManager.class.getName(),
+        injector.getInstance(WorkManager.class),
+        injector.getInstance(WorkManager.class));
 
     //startup persistence
-    injector.getInstance(PersistenceService.class).start();
+    injector.getInstance(WorkManager.class).startPersistence();
 
     //obtain em
     assertTrue(injector.getInstance(EntityManager.class).isOpen());

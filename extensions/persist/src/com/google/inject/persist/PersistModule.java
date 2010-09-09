@@ -3,10 +3,12 @@ package com.google.inject.persist;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.internal.util.Preconditions;
-import com.google.inject.persist.jpa.InternalJpaModule;
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.inject.matcher.Matchers.any;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Properties;
+import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Install this module to add guice-persist library support for JPA persistence
@@ -14,40 +16,48 @@ import java.util.Properties;
  *
  * @author dhanji@google.com (Dhanji R. Prasanna)
  */
-public class PersistModule extends AbstractModule implements PersistenceProviderBinder {
-  private UnitOfWork unitOfWork;
-  private String jpaUnit;
-  private Properties properties;
+public abstract class PersistModule extends AbstractModule {
+  private Class<? extends Annotation> unitOfWork;
+  private Class<? extends Annotation> transactional;
 
   @Override
   protected final void configure() {
     configurePersistence();
 
-    // Really post conditions, but whatevah.
+    if (null == unitOfWork) {
+      // We bind this as the "Default" work manager if no custom unit of work is used.
+      bind(WorkManager.class).to(getWorkManager());
+      unitOfWork = UnitOfWork.class;
+    }
+    if (null == transactional) {
+      transactional = Transactional.class;
+    }
+
+    // NOTE(dhanji): Bind work-specific work manager + transaction interceptors.
+    // We permit the default work manager to be bound to both the default work
+    // annotation @UnitOfWork, and without any annotation. Default is defined as
+    // any persistence module without a custom unit of work annotation. In a single
+    // module system, the single module would be the default (most typical apps).
+    bind(WorkManager.class).annotatedWith(unitOfWork).to(getWorkManager());
+    bindInterceptor(any(), annotatedWith(transactional), getTransactionInterceptor());
+  }
+
+  protected abstract void configurePersistence();
+
+  protected abstract Class<? extends WorkManager> getWorkManager();
+
+  protected abstract MethodInterceptor getTransactionInterceptor();
+
+  protected final void setUnitOfWork(Class<? extends Annotation> unitOfWork) {
     Preconditions.checkArgument(null != unitOfWork,
-        "Must specify a unit of work in the PersistModule.");
-    Preconditions.checkArgument(null != jpaUnit,
-        "Must specify the name of a JPA unit in the PersistModule.");
-
-    install(new InternalJpaModule(unitOfWork, jpaUnit, properties));
-  }
-
-  protected void configurePersistence() {
-    // For users to override
-  }
-
-  protected final PersistenceProviderBinder workAcross(UnitOfWork unitOfWork) {
+        "Must specify a non-null unit of work.");
     this.unitOfWork = unitOfWork;
-    return this;
   }
 
-  public void usingJpa(String unitName) {
-    this.jpaUnit = unitName;
-  }
-
-  public void usingJpa(String unitName, Properties properties) {
-    this.jpaUnit = unitName;
-    this.properties = properties;
+  protected final void setTransactional(Class<? extends Annotation> transactional) {
+    Preconditions.checkArgument(null != unitOfWork,
+        "Must specify a non-null transactional annotation.");
+    this.transactional = transactional;
   }
 
   /**

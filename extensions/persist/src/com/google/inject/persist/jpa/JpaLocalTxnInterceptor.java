@@ -17,9 +17,7 @@
 package com.google.inject.persist.jpa;
 
 import com.google.inject.Inject;
-import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.WorkManager;
 import java.lang.reflect.Method;
 import javax.persistence.EntityManager;
@@ -31,8 +29,6 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
-  @Inject @PersistModule.Persist
-  private final UnitOfWork unitOfWork = null;
 
   @Inject // Dirty hack =(
   private final EntityManagerProvider emProvider = null;
@@ -43,23 +39,27 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   @Transactional
   private static class Internal {}
 
+  // Tracks if the unit of work was begun implicitly by this transaction.
+  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<Boolean>();
 
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 
     // Should we start a unit of work?
-    if (!emProvider.isWorking() && UnitOfWork.TRANSACTION.equals(unitOfWork)) {
+    if (!emProvider.isWorking()) {
       emProvider.begin();
+      didWeStartWork.set(true);
     }
 
+    // TODO(dhanji): Should we make this work with other annotations?
+    // TODO(dhanji): Cache this result by method?
     Transactional transactional = readTransactionMetadata(methodInvocation);
     EntityManager em = this.emProvider.get();
 
-    // Allow joining of transactions if there is an enclosing @Transactional method.
+    // Allow 'joining' of transactions if there is an enclosing @Transactional method.
     if (em.getTransaction().isActive()) {
       return methodInvocation.proceed();
     }
 
-    //start txn
     final EntityTransaction txn = em.getTransaction();
     txn.begin();
 
@@ -77,7 +77,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       throw e;
     } finally {
       // Close the em if necessary (guarded so this code doesn't run unless catch fired).
-      if (isUnitOfWorkTransaction() && !txn.isActive()) {
+      if (null != didWeStartWork.get() && !txn.isActive()) {
+        didWeStartWork.remove();
         workManager.end();
       }
     }
@@ -88,7 +89,8 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       txn.commit();
     } finally {
       //close the em if necessary
-      if (isUnitOfWorkTransaction()) {
+      if (null != didWeStartWork.get() ) {
+        didWeStartWork.remove();
         workManager.end();
       }
     }
@@ -97,17 +99,18 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     return result;
   }
 
+  // TODO(dhanji): Cache this method's results.
   private Transactional readTransactionMetadata(MethodInvocation methodInvocation) {
     Transactional transactional;
     Method method = methodInvocation.getMethod();
     Class<?> targetClass = methodInvocation.getThis().getClass();
 
-    if (method.isAnnotationPresent(Transactional.class)) {
-      transactional = method.getAnnotation(Transactional.class);
-    } else if (targetClass.isAnnotationPresent(Transactional.class)) {
+    transactional = method.getAnnotation(Transactional.class);
+    if (null == transactional) {
       // If none on method, try the class.
       transactional = targetClass.getAnnotation(Transactional.class);
-    } else {
+    }
+    if (null == transactional) {
       // If there is no transactional annotation present, use the default
       transactional = Internal.class.getAnnotation(Transactional.class);
     }
@@ -153,9 +156,5 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     }
 
     return commit;
-  }
-
-  private boolean isUnitOfWorkTransaction() {
-    return this.unitOfWork == UnitOfWork.TRANSACTION;
   }
 }

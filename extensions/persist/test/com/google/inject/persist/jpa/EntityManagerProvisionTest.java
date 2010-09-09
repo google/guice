@@ -19,10 +19,9 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.persist.PersistModule;
-import com.google.inject.persist.PersistenceService;
+import com.google.inject.Provider;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
+import com.google.inject.persist.WorkManager;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
@@ -36,15 +35,10 @@ public class EntityManagerProvisionTest extends TestCase {
   private Injector injector;
 
   public void setUp() {
-    injector = Guice.createInjector(new PersistModule() {
-
-      protected void configurePersistence() {
-        workAcross(UnitOfWork.TRANSACTION).usingJpa("testUnit");
-      }
-    });
+    injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(PersistenceService.class).start();
+    injector.getInstance(WorkManager.class).startPersistence();
   }
 
   public final void tearDown() {
@@ -62,7 +56,7 @@ public class EntityManagerProvisionTest extends TestCase {
 
     //im not sure this hack works...
     assertFalse("Duplicate entity managers crossing-scope",
-        JpaDao.em.equals(injector.getInstance(EntityManager.class)));
+        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
@@ -82,7 +76,7 @@ public class EntityManagerProvisionTest extends TestCase {
 
     //im not sure this hack works...
     assertFalse("Duplicate entity managers crossing-scope",
-        JpaDao.em.equals(injector.getInstance(EntityManager.class)));
+        dao.lastEm.equals(injector.getInstance(EntityManager.class)));
 
     //try to start a new em in a new txn
     dao = injector.getInstance(JpaDao.class);
@@ -92,25 +86,30 @@ public class EntityManagerProvisionTest extends TestCase {
   }
 
   public static class JpaDao {
-    static EntityManager em;
+    private final Provider<EntityManager> em;
+    EntityManager lastEm;
 
     @Inject
-    public JpaDao(EntityManager em) {
-      JpaDao.em = em;
+    public JpaDao(Provider<EntityManager> em) {
+     this.em = em;
     }
 
     @Transactional
     public <T> void persist(T t) {
-      assertTrue("em is not open!", em.isOpen());
-      assertTrue("no active txn!", em.getTransaction().isActive());
-      em.persist(t);
+      lastEm = em.get();
+      assertTrue("em is not open!", lastEm.isOpen());
+      assertTrue("no active txn!", lastEm.getTransaction().isActive());
+      lastEm.persist(t);
 
-      assertTrue("Persisting object failed", em.contains(t));
+      assertTrue("Persisting object failed", lastEm.contains(t));
     }
 
     @Transactional
     public <T> boolean contains(T t) {
-      return em.contains(t);
+      if (null == lastEm) {
+        lastEm = em.get();
+      }
+      return lastEm.contains(t);
     }
   }
 }

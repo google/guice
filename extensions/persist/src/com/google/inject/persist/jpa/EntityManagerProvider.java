@@ -19,22 +19,30 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Nullable;
 import com.google.inject.internal.util.Preconditions;
+import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.WorkManager;
+import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Singleton
 class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
-  private final Provider<EntityManagerFactory> emFactoryProvider;
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
+  private final String persistenceUnitName;
+  private final Properties persistenceProperties;
+
   @Inject
-  public EntityManagerProvider(Provider<EntityManagerFactory> emFactoryProvider) {
-    this.emFactoryProvider = emFactoryProvider;
+  public EntityManagerProvider(@PersistModule.Persist String persistenceUnitName,
+      @Nullable @PersistModule.Persist Properties persistenceProperties) {
+    this.persistenceUnitName = persistenceUnitName;
+    this.persistenceProperties = persistenceProperties;
   }
 
   public EntityManager get() {
@@ -59,18 +67,51 @@ class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
         "Work already begun on this thread. Looks like you have called WorkManager.begin() twice"
          + " without a balancing call to end() in between.");
 
-    entityManager.set(emFactoryProvider.get().createEntityManager());
+    entityManager.set(emFactory.createEntityManager());
   }
 
   public void end() {
     EntityManager em = entityManager.get();
 
-    // Let's not penalize users for calling end multiple times.
+    // Let's not penalize users for calling end() multiple times.
     if (null == em) {
       return;
     }
 
     em.close();
     entityManager.remove();
+  }
+
+  private volatile EntityManagerFactory emFactory;
+
+  public synchronized void startPersistence() {
+    Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
+
+    if (null != persistenceProperties) {
+      this.emFactory = Persistence
+          .createEntityManagerFactory(persistenceUnitName, persistenceProperties);
+    } else {
+      this.emFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
+    }
+  }
+
+  public synchronized void shutdownPersistence() {
+    Preconditions.checkState(emFactory.isOpen(), "Persistence service was already shut down.");
+    emFactory.close();
+  }
+
+  @Singleton
+  public static class EntityManagerFactoryProvider implements Provider<EntityManagerFactory> {
+    private final EntityManagerProvider emProvider;
+
+    @Inject
+    public EntityManagerFactoryProvider(EntityManagerProvider emProvider) {
+      this.emProvider = emProvider;
+    }
+
+    public EntityManagerFactory get() {
+      assert null != emProvider.emFactory;
+      return emProvider.emFactory;
+    }
   }
 }

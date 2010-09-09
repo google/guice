@@ -2,6 +2,7 @@ package com.google.inject.persist;
 
 import com.google.inject.InjectorBuilder;
 import com.google.inject.Stage;
+import com.google.inject.persist.jpa.JpaPersistModule;
 import junit.framework.TestCase;
 
 /**
@@ -10,14 +11,9 @@ import junit.framework.TestCase;
 public class EdslTest extends TestCase {
 
   public void testModuleConfig() throws Exception {
-    new InjectorBuilder().addModules(
-      new PersistModule() {
-        @Override
-        protected void configurePersistence() {
-          workAcross(UnitOfWork.REQUEST).usingJpa("myunit");
-        }
-
-      }).stage(Stage.PRODUCTION)
+    new InjectorBuilder()
+        .addModules(new JpaPersistModule("myunit"))
+        .stage(Stage.PRODUCTION)
         .requireExplicitBindings()
         .build();
   }

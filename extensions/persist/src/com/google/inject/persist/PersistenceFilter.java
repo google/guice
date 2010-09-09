@@ -16,6 +16,7 @@
 
 package com.google.inject.persist;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -28,12 +29,12 @@ import javax.servlet.ServletResponse;
 /**
  * Apply this filter to enable the HTTP Request unit of work and to have
  * guice-persist manage the lifecycle of all active (module-installed)
- * {@link PersistenceService} instances. The filter automatically starts and
- * stops all registered {@link PersistenceService} instances upon {@link
+ * {@link WorkManager} instances. The filter automatically starts and
+ * stops all registered {@link WorkManager} instances upon {@link
  * javax.servlet.Filter#init(javax.servlet.FilterConfig)} and {@link
  * javax.servlet.Filter#destroy()}.
  *
- * <p> To be able to use {@link com.google.inject.persist.UnitOfWork#REQUEST},
+ * <p> To be able to use the open session-in-view pattern (i.e. work per request),
  * register this filter <b>once</b> in your Guice {@code ServletModule}. It is
  * important that you register this filter before any other filter.
  *
@@ -53,7 +54,9 @@ import javax.servlet.ServletResponse;
  * <p>
  * This filter will make sure to initialize and shutdown the underlying
  * persistence engine on filter {@code init()} and {@code destroy()}
- * respectively.
+ * respectively. Note that if you have multiple modules, this filter will
+ * only start the "default" module, i.e. the {@code WorkManager} that is not
+ * bound to any annotation.
  * <p>
  * Even though all mutable state is package local, this filter is thread safe.
  * This allows you to create injectors concurrently and deploy multiple
@@ -63,11 +66,19 @@ import javax.servlet.ServletResponse;
  */
 @Singleton
 public final class PersistenceFilter implements Filter {
+  private final WorkManager workManager;
+
+  @Inject
+  public PersistenceFilter(WorkManager workManager) {
+    this.workManager = workManager;
+  }
 
   public void init(FilterConfig filterConfig) throws ServletException {
+    workManager.startPersistence();
   }
 
   public void destroy() {
+    workManager.shutdownPersistence();
   }
 
   public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
