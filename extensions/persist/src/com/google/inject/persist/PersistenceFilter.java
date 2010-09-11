@@ -42,7 +42,6 @@ import javax.servlet.ServletResponse;
  * Example configuration:
  * <pre>{@code
  *  public class MyModule extends ServletModule {
- *   @literal @Override
  *    public void configureServlets() {
  *      filter("/*").through(PersistenceFilter.class);
  *

@@ -27,6 +27,7 @@
     <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="extensions/servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -118,10 +119,11 @@
         <pathelement location="${throwingproviders.src.dir}"/>
         <pathelement location="${multibindings.src.dir}"/>
         <pathelement location="${lifecycle.src.dir}"/>
+        <pathelement location="${persist.src.dir}"/>
       </sourcepath>
       <classpath refid="compile.classpath"/>
       <classpath>
-        <fileset dir="servlet/lib/build" includes="*.jar"/>
+        <fileset dir="extensions/servlet/lib/build" includes="*.jar"/>
       </classpath>
       <link href="http://aopalliance.sourceforge.net/doc"/>
       <link href="http://java.sun.com/javase/6/docs/api"/>
