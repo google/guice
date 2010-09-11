@@ -11,7 +11,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/servlet-api-2.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/jsp-2.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -20,7 +20,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jetty-util-6.1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/jetty-6.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -29,7 +29,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/ant-1.6.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/jetty-util-6.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -38,7 +38,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/struts2-api-2.0.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/xwork-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -47,7 +47,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/struts-2.0.5-lib.zip!/" />
+          <root url="jar://$MODULE_DIR$/lib/freemarker-2.3.8.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -56,7 +56,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/commons-logging-1.0.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/servlet-api-2.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -65,7 +65,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/ognl-2.6.9.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/core-3.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -74,7 +74,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jsp-api-2.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/struts2-api-2.0.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -83,7 +83,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/xwork-2.0.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/ant-1.6.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -92,7 +92,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jsp-2.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/ognl-2.6.9.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -101,7 +101,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/jetty-6.1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/struts2-core-2.0.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -110,7 +110,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/freemarker-2.3.8.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/struts-2.0.5-lib.zip!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -119,7 +119,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/struts2-core-2.0.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/commons-logging-1.0.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -128,7 +128,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/core-3.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/jsp-api-2.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

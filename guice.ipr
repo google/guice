@@ -527,11 +527,10 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/jmx/jmx.iml" filepath="$PROJECT_DIR$/extensions/jmx/jmx.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/jndi/jndi.iml" filepath="$PROJECT_DIR$/extensions/jndi/jndi.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
-      <module fileurl="file://$PROJECT_DIR$/extensions/persist/persist.iml" filepath="$PROJECT_DIR$/extensions/persist/persist.iml" />
-      <module fileurl="file://$PROJECT_DIR$/servlet/servlet.iml" filepath="$PROJECT_DIR$/servlet/servlet.iml" />
-      <module fileurl="file://$PROJECT_DIR$/spring/spring.iml" filepath="$PROJECT_DIR$/spring/spring.iml" />
-      <module fileurl="file://$PROJECT_DIR$/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/struts2/example/struts2-example.iml" />
-      <module fileurl="file://$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" filepath="$PROJECT_DIR$/struts2/plugin/struts2-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/servlet/servlet.iml" filepath="$PROJECT_DIR$/extensions/servlet/servlet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/spring/spring.iml" filepath="$PROJECT_DIR$/extensions/spring/spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/extensions/struts2/example/struts2-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/struts2/struts2-plugin.iml" filepath="$PROJECT_DIR$/extensions/struts2/struts2-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" filepath="$PROJECT_DIR$/extensions/throwingproviders/throwingproviders.iml" />
     </modules>
   </component>
