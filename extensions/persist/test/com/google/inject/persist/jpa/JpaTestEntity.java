@@ -16,45 +16,58 @@
 
 package com.google.inject.persist.jpa;
 
-import com.google.inject.persist.finder.Finder;
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.NamedQuery;
 
-/**
- * Created with IntelliJ IDEA.
- * On: 2/06/2007
- *
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- * @since 1.0
- */
+/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
 @Entity
-@NamedQuery(name = JpaTestEntity.LIST_ALL_QUERY, query = "from JpaTestEntity")
 public class JpaTestEntity {
-    private Long id;
-    private String text;
-    public static final String LIST_ALL_QUERY = "JpaTestEntity.listAll";
+  private Long id;
+  private String text;
 
-    @Id
-    @GeneratedValue
-    public Long getId() {
-        return id;
+  @Id @GeneratedValue
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    JpaTestEntity that = (JpaTestEntity) o;
+
+    if (id != null ? !id.equals(that.id) : that.id != null) {
+      return false;
+    }
+    if (text != null ? !text.equals(that.text) : that.text != null) {
+      return false;
     }
 
-    public String getText() {
-        return text;
-    }
+    return true;
+  }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    @Finder(query = "from JpaTestEntity")
-    public List<JpaTestEntity> listAll() { return null; }
+  @Override
+  public int hashCode() {
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (text != null ? text.hashCode() : 0);
+    return result;
+  }
 }

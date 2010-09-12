@@ -19,19 +19,29 @@ package com.google.inject.persist.finder;
 import java.lang.reflect.Method;
 
 /**
- * Utility that helps you discover metadata about dynamic finder methods.
+ * Utility that helps you introspect dynamic finder methods.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public final class DynamicFinder {
+  private final Method method;
+  private final Finder finder;
+
+  public DynamicFinder(Method method) {
+    this.method = method;
+    this.finder = method.getAnnotation(Finder.class);
+  }
 
   /**
-   * Tests if {@code method} is a dynamic finder method.
+   * Returns some metadata if the method is annotated {@code @Finder} or null.
    *
    * @param method a method you want to test as a dynamic finder
-   * @return {@code true} if the method is annotated {@code @Finder}
    */
-  public static boolean isFinder(Method method) {
-    return method.isAnnotationPresent(Finder.class);
+  public static DynamicFinder from(Method method) {
+    return method.isAnnotationPresent(Finder.class) ? new DynamicFinder(method) : null;
+  }
+
+  public Finder metadata() {
+    return finder;
   }
 }

@@ -16,7 +16,10 @@
 
 package com.google.inject.persist.jpa;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.internal.util.MapMaker;
 import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;
@@ -28,7 +31,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -39,11 +41,12 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+@Singleton
 class JpaFinderProxy implements MethodInterceptor {
-  private final Map<Method, FinderDescriptor> finderCache
-      = new ConcurrentHashMap<Method, FinderDescriptor>();
+  private final Map<Method, FinderDescriptor> finderCache = new MapMaker().weakKeys().makeMap();
   private final Provider<EntityManager> emProvider;
 
+  @Inject
   public JpaFinderProxy(Provider<EntityManager> emProvider) {
     this.emProvider = emProvider;
   }
@@ -99,7 +102,7 @@ class JpaFinderProxy implements MethodInterceptor {
     return collection;
   }
 
-  private void bindQueryNamedParameters(Query hibernateQuery,
+  private void bindQueryNamedParameters(Query jpaQuery,
       JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
     for (int i = 0; i < arguments.length; i++) {
       Object argument = arguments[i];
@@ -111,11 +114,11 @@ class JpaFinderProxy implements MethodInterceptor {
         continue;   //skip param as it's not bindable
       } else if (annotation instanceof Named) {
         Named named = (Named) annotation;
-        hibernateQuery.setParameter(named.value(), argument);
+        jpaQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof FirstResult) {
-        hibernateQuery.setFirstResult((Integer) argument);
+        jpaQuery.setFirstResult((Integer) argument);
       } else if (annotation instanceof MaxResults) {
-        hibernateQuery.setMaxResults((Integer) argument);
+        jpaQuery.setMaxResults((Integer) argument);
       }
     }
   }
@@ -188,7 +191,9 @@ class JpaFinderProxy implements MethodInterceptor {
     finderDescriptor.parameterAnnotations = discoveredAnnotations;
 
     //discover the returned collection implementation if this finder returns a collection
-    if (JpaFinderProxy.ReturnType.COLLECTION.equals(finderDescriptor.returnType)) {
+    if (JpaFinderProxy.ReturnType.COLLECTION.equals(finderDescriptor.returnType)
+        && finderDescriptor.returnClass != Collection.class) {
+      System.out.println("-----" + finderDescriptor.returnClass);
       finderDescriptor.returnCollectionType = finder.returnAs();
       try {
         finderDescriptor.returnCollectionTypeConstructor = finderDescriptor.returnCollectionType
