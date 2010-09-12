@@ -19,8 +19,9 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
@@ -38,14 +39,14 @@ public class EntityManagerPerRequestProvisionTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
 
-    injector.getInstance(WorkManager.class).begin();
+    injector.getInstance(UnitOfWork.class).begin();
   }
 
   @Override
   public final void tearDown() {
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 

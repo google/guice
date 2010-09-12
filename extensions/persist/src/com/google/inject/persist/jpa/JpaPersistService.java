@@ -21,8 +21,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.internal.Nullable;
 import com.google.inject.internal.util.Preconditions;
-import com.google.inject.persist.PersistModule;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.PersistService;
+import com.google.inject.persist.UnitOfWork;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,15 +32,15 @@ import javax.persistence.Persistence;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Singleton
-class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
+class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
   private final String persistenceUnitName;
   private final Properties persistenceProperties;
 
   @Inject
-  public EntityManagerProvider(@PersistModule.Persist String persistenceUnitName,
-      @Nullable @PersistModule.Persist Properties persistenceProperties) {
+  public JpaPersistService(@Jpa String persistenceUnitName,
+      @Nullable @Jpa Properties persistenceProperties) {
     this.persistenceUnitName = persistenceUnitName;
     this.persistenceProperties = persistenceProperties;
   }
@@ -52,7 +52,7 @@ class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
 
     EntityManager em = entityManager.get();
     Preconditions.checkState(null != em, "Requested EntityManager outside work unit. "
-        + "Try calling WorkManager.begin() first, or use a PersistenceFilter if you "
+        + "Try calling UnitOfWork.begin() first, or use a PersistFilter if you "
         + "are inside a servlet environment.");
 
     return em;
@@ -64,7 +64,7 @@ class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
 
   public void begin() {
     Preconditions.checkState(null == entityManager.get(),
-        "Work already begun on this thread. Looks like you have called WorkManager.begin() twice"
+        "Work already begun on this thread. Looks like you have called UnitOfWork.begin() twice"
          + " without a balancing call to end() in between.");
 
     entityManager.set(emFactory.createEntityManager());
@@ -84,7 +84,7 @@ class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
 
   private volatile EntityManagerFactory emFactory;
 
-  public synchronized void startPersistence() {
+  public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
 
     if (null != persistenceProperties) {
@@ -95,17 +95,17 @@ class EntityManagerProvider implements Provider<EntityManager>, WorkManager {
     }
   }
 
-  public synchronized void shutdownPersistence() {
+  public synchronized void stop() {
     Preconditions.checkState(emFactory.isOpen(), "Persistence service was already shut down.");
     emFactory.close();
   }
 
   @Singleton
   public static class EntityManagerFactoryProvider implements Provider<EntityManagerFactory> {
-    private final EntityManagerProvider emProvider;
+    private final JpaPersistService emProvider;
 
     @Inject
-    public EntityManagerFactoryProvider(EntityManagerProvider emProvider) {
+    public EntityManagerFactoryProvider(JpaPersistService emProvider) {
       this.emProvider = emProvider;
     }
 

@@ -10,7 +10,7 @@ import junit.framework.TestCase;
  */
 public class EdslTest extends TestCase {
 
-  public void testModuleConfig() throws Exception {
+  public void testModuleConfigUsingJpa() throws Exception {
     new InjectorBuilder()
         .addModules(new JpaPersistModule("myunit"))
         .stage(Stage.PRODUCTION)

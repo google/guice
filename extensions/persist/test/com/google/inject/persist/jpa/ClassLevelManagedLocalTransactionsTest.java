@@ -19,8 +19,8 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
@@ -47,11 +47,11 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
   }
 
   public void tearDown() {
-    injector.getInstance(WorkManager.class).shutdownPersistence();
+    injector.getInstance(PersistService.class).stop();
     injector = null;
   }
 

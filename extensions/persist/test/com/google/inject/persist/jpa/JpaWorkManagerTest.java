@@ -19,8 +19,9 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -40,7 +41,7 @@ public class JpaWorkManagerTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
   }
 
   @Override
@@ -49,15 +50,15 @@ public class JpaWorkManagerTest extends TestCase {
   }
 
   public void testWorkManagerInSession() {
-    injector.getInstance(WorkManager.class).begin();
+    injector.getInstance(UnitOfWork.class).begin();
     try {
       injector.getInstance(TransactionalObject.class).runOperationInTxn();
     } finally {
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
 
     }
 
-    injector.getInstance(WorkManager.class).begin();
+    injector.getInstance(UnitOfWork.class).begin();
     injector.getInstance(EntityManager.class).getTransaction().begin();
     try {
       final Query query = injector.getInstance(EntityManager.class)
@@ -75,15 +76,15 @@ public class JpaWorkManagerTest extends TestCase {
 
     } finally {
       injector.getInstance(EntityManager.class).getTransaction().commit();
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
     }
   }
 
   public void testCloseMoreThanOnce() {
-    injector.getInstance(WorkManager.class).shutdownPersistence();
+    injector.getInstance(PersistService.class).stop();
 
     try {
-      injector.getInstance(WorkManager.class).shutdownPersistence();
+      injector.getInstance(PersistService.class).stop();
       fail();
     } catch (IllegalStateException e) {
       // Ignored.

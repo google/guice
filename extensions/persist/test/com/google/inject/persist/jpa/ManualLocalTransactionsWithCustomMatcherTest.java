@@ -19,8 +19,9 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -45,7 +46,7 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
   }
 
   @Override
@@ -69,7 +70,7 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
     assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
     assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
 
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     //try to query them back out
     em = injector.getInstance(EntityManager.class);

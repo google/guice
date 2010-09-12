@@ -20,8 +20,9 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.Finder;
 import java.io.IOException;
 import java.util.Date;
@@ -46,7 +47,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
   }
 
   @Override
@@ -63,13 +64,13 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     //test that the data has been stored
     Object result = em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT).getSingleResult();
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
 
     assertEquals("queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT, ((JpaTestEntity) result).getText());
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
   }
 
@@ -90,13 +91,13 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
 
     Object result = em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT_MERGE).getSingleResult();
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     assertTrue(result instanceof JpaTestEntity);
 
     assertEquals("queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT_MERGE, ((JpaTestEntity) result).getText());
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
   }
 
@@ -114,14 +115,14 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     assertTrue("Merge did not store state or did not return persistent copy", em.contains(entity));
 
     Object result = injector.getInstance(TransactionalObject.class).find(UNIQUE_TEXT_MERGE_FORDF);
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     assertNotNull(result);
     assertTrue(result instanceof JpaTestEntity);
 
     assertEquals("queried entity did not match--did automatic txn fail?",
         UNIQUE_TEXT_MERGE_FORDF, ((JpaTestEntity) result).getText());
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
   }
 
@@ -130,7 +131,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingChecked();
     } catch (IOException e) {
       //ignore
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
     }
 
     EntityManager em = injector.getInstance(EntityManager.class);
@@ -142,11 +143,11 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     try {
       Object result = em.createQuery("from JpaTestEntity where text = :text")
           .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
       fail();
     } catch (NoResultException e) {}
 
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
   }
 
   public void testSimpleTransactionRollbackOnUnchecked() {
@@ -154,7 +155,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingUnchecked();
     } catch (RuntimeException re) {
       //ignore
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
     }
 
     EntityManager em = injector.getInstance(EntityManager.class);
@@ -164,11 +165,11 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
     try {
       Object result = em.createQuery("from JpaTestEntity where text = :text")
           .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
       fail();
     } catch (NoResultException e) {}
     
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
   }
 
   public static class TransactionalObject {

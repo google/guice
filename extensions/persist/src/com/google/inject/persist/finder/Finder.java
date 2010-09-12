@@ -24,32 +24,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * <p> Marks a method stub as a dynamic finder. The method is intercepted and replaced with the
- * specified HQL or JPAQL query. Provides result auto-boxing and automatic parameter binding. </p>
+ * Marks a method stub as a dynamic finder. The method is intercepted and replaced with the
+ * specified JPAQL query. Provides result auto-boxing and automatic parameter binding.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Target(ElementType.METHOD) @Retention(RetentionPolicy.RUNTIME)
 public @interface Finder {
   /**
-   * Specify a named query's name here, typically using the {@code @NamedQuery} annotation.
-   *
-   * @return Returns the configured named query's name.
+   * Returns the configured named query's name. Specify a named query's name
+   * here. This name is typically specified in your JPA configuration.
    */
   String namedQuery() default "";
 
   /**
-   * Directly specify a query here, hql or jpaql.
-   *
-   * @return Returns the configured query string.
+   * Returns the configured query string. Directly specify a JPAQL query here.
    */
   String query() default "";
 
   /**
-   * Use this clause to specify a collection impl to autobox result lists into. The impl *must*
+   * Returns the configured autoboxing collection class.
+   * Use this clause to specify a collection impl to autobox result lists into. The impl must
    * have a default no-arg constructor and be a subclass of {@code java.util.Collection}.
-   *
-   * @return Returns the configured autoboxing collection class.
    */
   Class<? extends Collection> returnAs() default ArrayList.class;
 }

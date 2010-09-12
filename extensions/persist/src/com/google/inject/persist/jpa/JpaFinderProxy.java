@@ -20,7 +20,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;
-import com.google.inject.persist.finder.NumResults;
+import com.google.inject.persist.finder.MaxResults;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -39,12 +39,12 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-class JpaFinderInterceptor implements MethodInterceptor {
+class JpaFinderProxy implements MethodInterceptor {
   private final Map<Method, FinderDescriptor> finderCache
       = new ConcurrentHashMap<Method, FinderDescriptor>();
   private final Provider<EntityManager> emProvider;
 
-  public JpaFinderInterceptor(Provider<EntityManager> emProvider) {
+  public JpaFinderProxy(Provider<EntityManager> emProvider) {
     this.emProvider = emProvider;
   }
 
@@ -52,7 +52,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
     EntityManager em = emProvider.get();
 
     //obtain a cached finder descriptor (or create a new one)
-    JpaFinderInterceptor.FinderDescriptor finderDescriptor = getFinderDescriptor(methodInvocation);
+    JpaFinderProxy.FinderDescriptor finderDescriptor = getFinderDescriptor(methodInvocation);
 
     Object result = null;
 
@@ -65,18 +65,18 @@ class JpaFinderInterceptor implements MethodInterceptor {
     }
 
     //depending upon return type, decorate or return the result as is
-    if (JpaFinderInterceptor.ReturnType.PLAIN.equals(finderDescriptor.returnType)) {
+    if (JpaFinderProxy.ReturnType.PLAIN.equals(finderDescriptor.returnType)) {
       result = jpaQuery.getSingleResult();
-    } else if (JpaFinderInterceptor.ReturnType.COLLECTION.equals(finderDescriptor.returnType)) {
+    } else if (JpaFinderProxy.ReturnType.COLLECTION.equals(finderDescriptor.returnType)) {
       result = getAsCollection(finderDescriptor, jpaQuery.getResultList());
-    } else if (JpaFinderInterceptor.ReturnType.ARRAY.equals(finderDescriptor.returnType)) {
+    } else if (JpaFinderProxy.ReturnType.ARRAY.equals(finderDescriptor.returnType)) {
       result = jpaQuery.getResultList().toArray();
     }
 
     return result;
   }
 
-  private Object getAsCollection(JpaFinderInterceptor.FinderDescriptor finderDescriptor,
+  private Object getAsCollection(JpaFinderProxy.FinderDescriptor finderDescriptor,
       List results) {
     Collection<?> collection;
     try {
@@ -100,7 +100,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
   }
 
   private void bindQueryNamedParameters(Query hibernateQuery,
-      JpaFinderInterceptor.FinderDescriptor descriptor, Object[] arguments) {
+      JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
     for (int i = 0; i < arguments.length; i++) {
       Object argument = arguments[i];
       Object annotation = descriptor.parameterAnnotations[i];
@@ -114,14 +114,14 @@ class JpaFinderInterceptor implements MethodInterceptor {
         hibernateQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof FirstResult) {
         hibernateQuery.setFirstResult((Integer) argument);
-      } else if (annotation instanceof NumResults) {
+      } else if (annotation instanceof MaxResults) {
         hibernateQuery.setMaxResults((Integer) argument);
       }
     }
   }
 
   private void bindQueryRawParameters(Query jpaQuery,
-      JpaFinderInterceptor.FinderDescriptor descriptor, Object[] arguments) {
+      JpaFinderProxy.FinderDescriptor descriptor, Object[] arguments) {
     for (int i = 0, index = 1; i < arguments.length; i++) {
       Object argument = arguments[i];
       Object annotation = descriptor.parameterAnnotations[i];
@@ -132,21 +132,21 @@ class JpaFinderInterceptor implements MethodInterceptor {
         index++;
       } else if (annotation instanceof FirstResult) {
         jpaQuery.setFirstResult((Integer) argument);
-      } else if (annotation instanceof NumResults) {
+      } else if (annotation instanceof MaxResults) {
         jpaQuery.setMaxResults((Integer) argument);
       }
     }
   }
 
-  private JpaFinderInterceptor.FinderDescriptor getFinderDescriptor(MethodInvocation invocation) {
+  private JpaFinderProxy.FinderDescriptor getFinderDescriptor(MethodInvocation invocation) {
     Method method = invocation.getMethod();
-    JpaFinderInterceptor.FinderDescriptor finderDescriptor = finderCache.get(method);
+    JpaFinderProxy.FinderDescriptor finderDescriptor = finderCache.get(method);
     if (null != finderDescriptor) {
       return finderDescriptor;
     }
 
     //otherwise reflect and cache finder info...
-    finderDescriptor = new JpaFinderInterceptor.FinderDescriptor();
+    finderDescriptor = new JpaFinderProxy.FinderDescriptor();
 
     //determine return type
     finderDescriptor.returnClass = invocation.getMethod().getReturnType();
@@ -177,7 +177,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
         } else if (FirstResult.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           break;
-        } else if (NumResults.class.equals(annotationType)) {
+        } else if (MaxResults.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           break;
         }   //leave as null for no binding
@@ -188,7 +188,7 @@ class JpaFinderInterceptor implements MethodInterceptor {
     finderDescriptor.parameterAnnotations = discoveredAnnotations;
 
     //discover the returned collection implementation if this finder returns a collection
-    if (JpaFinderInterceptor.ReturnType.COLLECTION.equals(finderDescriptor.returnType)) {
+    if (JpaFinderProxy.ReturnType.COLLECTION.equals(finderDescriptor.returnType)) {
       finderDescriptor.returnCollectionType = finder.returnAs();
       try {
         finderDescriptor.returnCollectionTypeConstructor = finderDescriptor.returnCollectionType
@@ -218,14 +218,14 @@ class JpaFinderInterceptor implements MethodInterceptor {
     finderCache.put(method, finderDescriptor);
   }
 
-  private JpaFinderInterceptor.ReturnType determineReturnType(Class<?> returnClass) {
+  private JpaFinderProxy.ReturnType determineReturnType(Class<?> returnClass) {
     if (Collection.class.isAssignableFrom(returnClass)) {
-      return JpaFinderInterceptor.ReturnType.COLLECTION;
+      return JpaFinderProxy.ReturnType.COLLECTION;
     } else if (returnClass.isArray()) {
-      return JpaFinderInterceptor.ReturnType.ARRAY;
+      return JpaFinderProxy.ReturnType.ARRAY;
     }
 
-    return JpaFinderInterceptor.ReturnType.PLAIN;
+    return JpaFinderProxy.ReturnType.PLAIN;
   }
 
   /**
@@ -235,12 +235,12 @@ class JpaFinderInterceptor implements MethodInterceptor {
     private volatile boolean isKeyedQuery = false;
     volatile boolean isBindAsRawParameters = true;
         //should we treat the query as having ? instead of :named params
-    volatile JpaFinderInterceptor.ReturnType returnType;
+    volatile JpaFinderProxy.ReturnType returnType;
     volatile Class<?> returnClass;
     volatile Class<? extends Collection> returnCollectionType;
     volatile Constructor returnCollectionTypeConstructor;
     volatile Object[] parameterAnnotations;
-        //contract is: null = no bind, @Named = param, @FirstResult/@NumResults for paging
+        //contract is: null = no bind, @Named = param, @FirstResult/@MaxResults for paging
 
     private String query;
     private String name;

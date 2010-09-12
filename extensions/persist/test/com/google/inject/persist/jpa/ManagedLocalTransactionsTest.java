@@ -19,8 +19,9 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import java.io.IOException;
 import java.util.Date;
 import javax.persistence.EntityManager;
@@ -42,12 +43,12 @@ public class ManagedLocalTransactionsTest extends TestCase {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
   }
 
   @Override
   public final void tearDown() {
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
@@ -60,7 +61,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
     //test that the data has been stored
     Object result = em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT).getSingleResult();
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
 
@@ -80,7 +81,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
 
     Object result = em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT_MERGE).getSingleResult();
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
 
     assertTrue(result instanceof JpaTestEntity);
 
@@ -93,7 +94,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingChecked();
     } catch (IOException e) {
       //ignore
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
     }
 
     EntityManager em = injector.getInstance(EntityManager.class);
@@ -105,7 +106,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
     try {
       Object result = em.createQuery("from JpaTestEntity where text = :text")
           .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
       fail("a result was returned! rollback sure didnt happen!!!");
     } catch (NoResultException e) {}
   }
@@ -115,7 +116,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
       injector.getInstance(TransactionalObject.class).runOperationInTxnThrowingUnchecked();
     } catch (RuntimeException re) {
       //ignore
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
     }
 
     EntityManager em = injector.getInstance(EntityManager.class);
@@ -125,7 +126,7 @@ public class ManagedLocalTransactionsTest extends TestCase {
     try {
       Object result = em.createQuery("from JpaTestEntity where text = :text")
           .setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
-      injector.getInstance(WorkManager.class).end();
+      injector.getInstance(UnitOfWork.class).end();
       fail("a result was returned! rollback sure didnt happen!!!");
     } catch (NoResultException e) {}
   }

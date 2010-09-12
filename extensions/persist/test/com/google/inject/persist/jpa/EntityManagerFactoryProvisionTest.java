@@ -18,7 +18,8 @@ package com.google.inject.persist.jpa;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.PersistService;
+import com.google.inject.persist.UnitOfWork;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
@@ -34,18 +35,18 @@ public class EntityManagerFactoryProvisionTest extends TestCase {
   }
 
   public final void tearDown() {
-    injector.getInstance(WorkManager.class).end();
+    injector.getInstance(UnitOfWork.class).end();
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
   public void testSessionCreateOnInjection() {
 
-    assertTrue("SINGLETON VIOLATION " + WorkManager.class.getName(),
-        injector.getInstance(WorkManager.class)
-        .equals(injector.getInstance(WorkManager.class)));
+    assertTrue("SINGLETON VIOLATION " + UnitOfWork.class.getName(),
+        injector.getInstance(UnitOfWork.class)
+        .equals(injector.getInstance(UnitOfWork.class)));
 
     //startup persistence
-    injector.getInstance(WorkManager.class).startPersistence();
+    injector.getInstance(PersistService.class).start();
 
     //obtain em
     assertTrue(injector.getInstance(EntityManager.class).isOpen());

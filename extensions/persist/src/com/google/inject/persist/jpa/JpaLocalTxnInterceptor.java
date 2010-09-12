@@ -18,7 +18,7 @@ package com.google.inject.persist.jpa;
 
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.WorkManager;
+import com.google.inject.persist.UnitOfWork;
 import java.lang.reflect.Method;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -30,11 +30,11 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
-  @Inject // Dirty hack =(
-  private final EntityManagerProvider emProvider = null;
+  @Inject
+  private final JpaPersistService emProvider = null;
 
-  @Inject // Dirty hack =(
-  private final WorkManager workManager = null;
+  @Inject
+  private final UnitOfWork unitOfWork = null;
 
   @Transactional
   private static class Internal {}
@@ -50,8 +50,6 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       didWeStartWork.set(true);
     }
 
-    // TODO(dhanji): Should we make this work with other annotations?
-    // TODO(dhanji): Cache this result by method?
     Transactional transactional = readTransactionMetadata(methodInvocation);
     EntityManager em = this.emProvider.get();
 
@@ -79,7 +77,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       // Close the em if necessary (guarded so this code doesn't run unless catch fired).
       if (null != didWeStartWork.get() && !txn.isActive()) {
         didWeStartWork.remove();
-        workManager.end();
+        unitOfWork.end();
       }
     }
 
@@ -91,7 +89,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       //close the em if necessary
       if (null != didWeStartWork.get() ) {
         didWeStartWork.remove();
-        workManager.end();
+        unitOfWork.end();
       }
     }
 
@@ -119,10 +117,11 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   }
 
   /**
+   * Returns True if rollback DID NOT HAPPEN (i.e. if commit should continue).
+   *
    * @param transactional The metadata annotaiton of the method
    * @param e The exception to test for rollback
    * @param txn A JPA Transaction to issue rollbacks on
-   * @return returns True if rollback DID NOT HAPPEN (i.e. if commit should continue).
    */
   private boolean rollbackIfNecessary(Transactional transactional, Exception e,
       EntityTransaction txn) {
