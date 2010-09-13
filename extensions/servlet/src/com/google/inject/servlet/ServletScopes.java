@@ -17,9 +17,10 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Key;
+import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-
+import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -103,4 +104,53 @@ public class ServletScopes {
       return "ServletScopes.SESSION";
     }
   };
+
+  /**
+   * Wraps the given callable in a contextual callable that "continues" the
+   * HTTP request in another thread. This acts as a way of transporting
+   * request context data from the request processing thread to to worker
+   * threads.
+   * <p>
+   * There are some limitations:
+   * <ul>
+   *   <li>Derived objects (i.e. anything marked @RequestScoped will not be
+   *      transported.</li>
+   *   <li>State changes to the HttpServletRequest after this method is called
+   *      will not be seen in the continued thread.</li>
+   *   <li>Only the HttpServletRequest, ServletContext and request parameter
+   *      map are available in the continued thread. The response and session
+   *      are not available.</li>
+   * </ul>
+   *
+   * @param callable code to be executed in another thread, which depends on
+   *     the request scope.
+   * @return a callable that will invoke the given callable, making the request
+   *     context available to it.
+   * @throws OutOfScopeException if this method is called from a non-request
+   *     thread, or if the request has completed.
+   */
+  public static <T> Callable<T> continueRequest(final Callable<T> callable) {
+    return new Callable<T>() {
+      private HttpServletRequest request =
+          new ContinuingHttpServletRequest(GuiceFilter.getRequest());
+
+      public T call() throws Exception {
+        GuiceFilter.Context context = GuiceFilter.localContext.get();
+        if (null == context) {
+          // Only set up the request continuation if we're running in a
+          // new vanilla thread.
+          GuiceFilter.localContext.set(new GuiceFilter.Context(request, null));
+        }
+        try {
+          return callable.call();
+        } finally {
+
+          // Clear the copied context if we set one up.
+          if (null == context) {
+            GuiceFilter.localContext.remove();
+          }
+        }
+      }
+    };
+  }
 }
