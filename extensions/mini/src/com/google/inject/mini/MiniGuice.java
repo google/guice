@@ -15,7 +15,6 @@
  */
 package com.google.inject.mini;
 
-import com.google.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import javax.inject.Provider;
 
 /**
  * Proof of concept. A tiny injector suitable for tiny applications.
@@ -45,7 +45,7 @@ public final class MiniGuice {
   private MiniGuice() {}
 
   private final Map<Key, Provider<?>> bindings = new HashMap<Key, Provider<?>>();
-  private final Queue<Key> requiredKeys = new ArrayDeque<Key>();
+  private final Queue<RequiredKey> requiredKeys = new ArrayDeque<RequiredKey>();
   private final Set<Key> singletons = new HashSet<Key>();
 
   /**
@@ -80,7 +80,7 @@ public final class MiniGuice {
     for (Object module : modules) {
       miniGuice.install(module);
     }
-    miniGuice.requireKey(key);
+    miniGuice.requireKey(key, "root injection");
     miniGuice.addJitBindings();
     miniGuice.addProviderBindings();
     miniGuice.eagerlyLoadSingletons();
@@ -98,15 +98,13 @@ public final class MiniGuice {
           return value;
         }
       };
-      providerBindings.put(new Key(new ProviderType(com.google.inject.Provider.class, key.type),
-          key.annotation), providerProvider);
       providerBindings.put(new Key(new ProviderType(javax.inject.Provider.class, key.type),
           key.annotation), providerProvider);
     }
     bindings.putAll(providerBindings);
   }
 
-  private void requireKey(Key key) {
+  private void requireKey(Key key, Object requiredBy) {
     if (key.type instanceof ParameterizedType
         && (((ParameterizedType) key.type).getRawType() == Provider.class
         || ((ParameterizedType) key.type).getRawType() == javax.inject.Provider.class)) {
@@ -114,7 +112,7 @@ public final class MiniGuice {
       key = new Key(type, key.annotation);
     }
 
-    requiredKeys.add(key);
+    requiredKeys.add(new RequiredKey(key, requiredBy));
   }
 
   private void eagerlyLoadSingletons() {
@@ -148,6 +146,7 @@ public final class MiniGuice {
   private void addProviderMethodBinding(Key key, final Object instance, final Method method) {
     final Key[] parameterKeys = parametersToKeys(
         method, method.getGenericParameterTypes(), method.getParameterAnnotations());
+    method.setAccessible(true);
     final Provider<Object> unscoped = new Provider<Object>() {
       public Object get() {
         Object[] parameters = keysToValues(parameterKeys);
@@ -161,25 +160,25 @@ public final class MiniGuice {
       }
     };
 
-    boolean singleton = method.getAnnotation(com.google.inject.Singleton.class) != null
-        || method.getAnnotation(javax.inject.Singleton.class) != null;
+    boolean singleton = method.getAnnotation(javax.inject.Singleton.class) != null;
     putBinding(key, unscoped, singleton);
   }
 
   private void addJitBindings() {
-    Key requiredKey;
+    RequiredKey requiredKey;
     while ((requiredKey = requiredKeys.poll()) != null) {
-      if (bindings.containsKey(requiredKey)) {
+      Key key = requiredKey.key;
+      if (bindings.containsKey(key)) {
         continue;
       }
-      if (!(requiredKey.type instanceof Class)) {
-        throw new IllegalArgumentException("No binding for " + requiredKey);
+      if (!(key.type instanceof Class) || key.annotation != null) {
+        throw new IllegalArgumentException("No binding for " + key);
       }
-      addJitBinding(requiredKey);
+      addJitBinding(key, requiredKey.requiredBy);
     }
   }
 
-  private void addJitBinding(Key key) {
+  private void addJitBinding(Key key, Object requiredBy) {
     Class<?> type = (Class<?>) key.type;
 
     /*
@@ -188,15 +187,15 @@ public final class MiniGuice {
     final List<Field> injectedFields = new ArrayList<Field>();
     List<Object> fieldKeysList = new ArrayList<Object>();
     for (Class<?> c = type; c != Object.class; c = c.getSuperclass()) {
-      for (Field field : type.getDeclaredFields()) {
-        if (field.getAnnotation(com.google.inject.Inject.class) == null
-            && field.getAnnotation(javax.inject.Inject.class) == null) {
+      for (Field field : c.getDeclaredFields()) {
+        if (field.getAnnotation(javax.inject.Inject.class) == null) {
           continue;
         }
+        field.setAccessible(true);
         injectedFields.add(field);
         Key fieldKey = key(field, field.getGenericType(), field.getAnnotations());
         fieldKeysList.add(fieldKey);
-        requireKey(fieldKey);
+        requireKey(fieldKey, field);
       }
     }
     final Key[] fieldKeys = fieldKeysList.toArray(new Key[fieldKeysList.size()]);
@@ -207,23 +206,25 @@ public final class MiniGuice {
      */
     Constructor<?> injectedConstructor = null;
     for (Constructor<?> constructor : type.getDeclaredConstructors()) {
-      if (constructor.getAnnotation(com.google.inject.Inject.class) == null
-          && constructor.getAnnotation(javax.inject.Inject.class) == null) {
+      if (constructor.getAnnotation(javax.inject.Inject.class) == null) {
         continue;
       }
       if (injectedConstructor != null) {
         throw new IllegalArgumentException("Too many injectable constructors on " + type);
       }
+      constructor.setAccessible(true);
       injectedConstructor = constructor;
     }
     if (injectedConstructor == null) {
       if (fieldKeys.length == 0) {
-        throw new IllegalArgumentException("No injectable constructor on " + type);
+        throw new IllegalArgumentException("No injectable constructor on "
+            + type + " required by " + requiredBy);
       }
       try {
         injectedConstructor = type.getConstructor();
       } catch (NoSuchMethodException e) {
-        throw new IllegalArgumentException("No injectable constructor on " + type);
+        throw new IllegalArgumentException("No injectable constructor on "
+            + type + " required by " + requiredBy);
       }
     }
 
@@ -253,8 +254,7 @@ public final class MiniGuice {
       }
     };
 
-    boolean singleton = type.getAnnotation(com.google.inject.Singleton.class) != null
-        || type.getAnnotation(javax.inject.Singleton.class) != null;
+    boolean singleton = type.getAnnotation(javax.inject.Singleton.class) != null;
     putBinding(new Key(type, null), unscoped, singleton);
   }
 
@@ -288,8 +288,9 @@ public final class MiniGuice {
   private Key[] parametersToKeys(Member member, Type[] types, Annotation[][] annotations) {
     final Key[] parameterKeys = new Key[types.length];
     for (int i = 0; i < parameterKeys.length; i++) {
-      parameterKeys[i] = key(member + " parameter " + i, types[i], annotations[i]);
-      requireKey(parameterKeys[i]);
+      String name = member + " parameter " + i;
+      parameterKeys[i] = key(name, types[i], annotations[i]);
+      requireKey(parameterKeys[i], name);
     }
     return parameterKeys;
   }
@@ -297,8 +298,7 @@ public final class MiniGuice {
   public Key key(Object subject, Type type, Annotation[] annotations) {
     Annotation bindingAnnotation = null;
     for (Annotation a : annotations) {
-      if (a.annotationType().getAnnotation(javax.inject.Qualifier.class) == null
-          && a.annotationType().getAnnotation(com.google.inject.BindingAnnotation.class) == null) {
+      if (a.annotationType().getAnnotation(javax.inject.Qualifier.class) == null) {
         continue;
       }
       if (bindingAnnotation != null) {
@@ -338,6 +338,16 @@ public final class MiniGuice {
 
     @Override public String toString() {
       return "key[type=" + type + ",annotation=" + annotation + "]";
+    }
+  }
+
+  private class RequiredKey {
+    private final Key key;
+    private final Object requiredBy;
+
+    private RequiredKey(Key key, Object requiredBy) {
+      this.key = key;
+      this.requiredBy = requiredBy;
     }
   }
 

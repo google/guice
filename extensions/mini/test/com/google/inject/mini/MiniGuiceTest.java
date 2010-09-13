@@ -15,12 +15,12 @@
  */
 package com.google.inject.mini;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import junit.framework.TestCase;
 
 public final class MiniGuiceTest extends TestCase {
@@ -190,5 +190,35 @@ public final class MiniGuiceTest extends TestCase {
     @Inject F f1;
     @Inject F f2;
     @Inject Provider<F> fProvider;
+  }
+
+  public void testNoJitBindingsForAnnotations() {
+    try {
+      MiniGuice.inject(O.class);
+      fail();
+    } catch (IllegalArgumentException expected) {
+    }
+  }
+
+  public static class O {
+    @Inject @Named("a") A a;
+  }
+
+  public void testSubclasses() {
+    Q q = MiniGuice.inject(Q.class, new Object() {
+      @Provides F provideF() {
+        return new F();
+      }
+    });
+
+    assertNotNull(q.f);
+  }
+  
+  public static class P {
+    @Inject F f;
+  }
+
+  public static class Q extends P {
+    @Inject Q() {}
   }
 }
