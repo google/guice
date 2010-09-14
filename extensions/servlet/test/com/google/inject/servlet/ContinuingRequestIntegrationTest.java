@@ -43,6 +43,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * Tests continuation of requests
@@ -107,7 +108,6 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
-    expect(request.getRequestURI()).andReturn("/");
     expect(request.getServletPath()).andReturn("/");
     expect(request.getMethod()).andReturn("GET");
 
@@ -124,6 +124,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     executor.awaitTermination(10, TimeUnit.SECONDS);
 
     assertEquals(PARAM_VALUE, injector.getInstance(OffRequestCallable.class).value);
+    verify(request, filterConfig, filterChain);
   }
 
   public final void testRequestContinuesInSameThread()
@@ -155,7 +156,6 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     request.setAttribute(eq("Key[type=javax.servlet.http.HttpServletRequest, annotation=[none]]"),
         anyObject());
 
-    expect(request.getRequestURI()).andReturn("/");
     expect(request.getServletPath()).andReturn("/");
     expect(request.getMethod()).andReturn("GET");
 
@@ -172,6 +172,8 @@ public class ContinuingRequestIntegrationTest extends TestCase {
     executor.awaitTermination(10, TimeUnit.SECONDS);
 
     assertEquals(PARAM_VALUE, injector.getInstance(OffRequestCallable.class).value);
+
+    verify(request, filterConfig, filterChain);
   }
 
   @Singleton
