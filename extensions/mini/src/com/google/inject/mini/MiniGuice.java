@@ -260,6 +260,7 @@ public final class MiniGuice {
 
   private void putBinding(Key key, Provider<Object> provider, boolean singleton) {
     if (singleton) {
+      singletons.add(key);
       final Provider<Object> unscoped = provider;
       provider = new Provider<Object>() {
         private Object onlyInstance = UNINITIALIZED;

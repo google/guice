@@ -16,6 +16,7 @@
 package com.google.inject.mini;
 
 import com.google.inject.Provides;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -221,4 +222,33 @@ public final class MiniGuiceTest extends TestCase {
   public static class Q extends P {
     @Inject Q() {}
   }
+  
+  public void testSingletonsAreEager() {
+    final AtomicBoolean sInjected = new AtomicBoolean();
+
+    R.injected = false;
+    MiniGuice.inject(A.class, new Object() {
+      @Provides F provideF(R r) {
+        return new F();
+      }
+
+      @Provides @Singleton S provideS() {
+        sInjected.set(true);
+        return new S();
+      }
+    });
+
+    assertTrue(R.injected);
+    assertTrue(sInjected.get());
+  }
+
+  @Singleton
+  static class R {
+    static boolean injected = false;
+    @Inject R() {
+      injected = true;
+    }
+  }
+
+  static class S {}
 }
