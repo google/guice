@@ -104,13 +104,10 @@ public class CompositeService {
       final Service.State state) {
     return new FutureTask<Service.State>(new Callable<Service.State>() {
       public Service.State call() {
-        System.out.println("GeT :--- ");
         boolean ok = true;
         for (Future<Service.State> task : tasks) {
           try {
-            System.out.println("GeT : " + task);
             ok = state == task.get();
-            System.out.println("OK : " + task);
           } catch (InterruptedException e) {
             return compositeState = Service.State.FAILED;
           } catch (ExecutionException e) {

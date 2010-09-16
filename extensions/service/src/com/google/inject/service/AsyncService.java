@@ -18,7 +18,6 @@ package com.google.inject.service;
 
 import com.google.inject.internal.util.Preconditions;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -54,16 +53,12 @@ public abstract class AsyncService implements Service {
       return new FutureTask<State>(NOOP, State.STARTED);
     }
 
-    final Future<State> task = executor.submit(new Callable<State>() {
+    return executor.submit(new Callable<State>() {
       public State call() {
         onStart();
         return state = State.STARTED;
       }
     });
-
-    return task;
-    // Wrap it in another future to catch failures.
-//    return new FutureTask<State>(futureGet(task));
   }
 
   /**
@@ -83,18 +78,12 @@ public abstract class AsyncService implements Service {
       return new FutureTask<State>(NOOP, State.STOPPED);
     }
 
-    // TODO Should we bother doing the wrap, or is it enough to return
-    // this future as is?
-    final Future<State> task = executor.submit(new Callable<State>() {
+    return executor.submit(new Callable<State>() {
       public State call() {
         onStop();
         return state = State.STOPPED;
       }
     });
-
-    // Wrap it in another future to catch failures.
-    return task;
-//    return new FutureTask<State>(futureGet(task));
   }
 
   /**
@@ -108,24 +97,5 @@ public abstract class AsyncService implements Service {
 
   public final State state() {
     return state;
-  }
-
-  /**
-   * Returns a runnable that when run will get() the given future and
-   * update {@link #state} to FAILED if there was an exception thrown.
-   */
-  private Callable<State> futureGet(final Future<State> task) {
-    return new Callable<State>() {
-      public State call() {
-        try {
-          System.out.println("FutureGEtting");
-          return task.get();
-        } catch (InterruptedException e) {
-          return state = State.FAILED;
-        } catch (ExecutionException e) {
-          return state = State.FAILED;
-        }
-      }
-    };
   }
 }
