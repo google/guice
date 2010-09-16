@@ -22,7 +22,7 @@ import com.google.inject.Provider;
 /**
  * A Provider that is part of an extension which supports a custom
  * BindingTargetVisitor.
- * 
+ * <p> 
  * When an extension binds a provider instance, the provider can implement this
  * interface to allow users using the
  * {@link Binding#acceptTargetVisitor(BindingTargetVisitor)} method to visit a
@@ -30,9 +30,9 @@ import com.google.inject.Provider;
  * the extension would look like
  * <pre>
  * <code>
- * <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor, ProviderInstanceBinding<? extends B> binding) {
+ * {@literal<}V, B> V acceptExtensionVisitor(BindingTargetVisitor{@literal<}B, V> visitor, ProviderInstanceBinding{@literal<}? extends B> binding) {
  *   if(visitor instanceof MyCustomExtensionVisitor) {
- *     return ((MyCustomExtensionVisitor<B, V>)visitor).visitCustomExtension(customProperties, binding);
+ *     return ((MyCustomExtensionVisitor{@literal<}B, V>)visitor).visitCustomExtension(customProperties, binding);
  *   } else {
  *     return visitor.visit(binding);
  *   }
@@ -53,7 +53,7 @@ public interface ProviderWithExtensionVisitor<T> extends Provider<T> {
    * extension visitor, and if so, visit it using that method. If the visitor is
    * not an instance of the custom extension visitor, this method <b>MUST</b>
    * call visitor.visit(binding).
-   * 
+   * <p> 
    * Due to issues with generics, the type parameters of this method do not
    * relate to the type of the provider. In practice, the 'B' type will always
    * be a supertype of 'T'.

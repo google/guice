@@ -247,7 +247,7 @@ public abstract class Multibinder<T> {
     private String nameOf(Key<?> key) {
       Annotation annotation = setKey.getAnnotation();
       Class<? extends Annotation> annotationType = setKey.getAnnotationType();      
-      if(annotation != null && !Annotations.isMarker(annotationType)) {
+      if (annotation != null && !Annotations.isMarker(annotationType)) {
         return setKey.getAnnotation().toString();
       } else if(setKey.getAnnotationType() != null) {
         return "@" + setKey.getAnnotationType().getName();
