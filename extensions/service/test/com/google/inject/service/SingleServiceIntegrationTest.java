@@ -17,29 +17,34 @@ public class SingleServiceIntegrationTest extends TestCase {
   public final void testAsyncServiceLifecycle() throws InterruptedException {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    final CountDownLatch latch = new CountDownLatch(2);
+    final CountDownLatch startLatch = new CountDownLatch(1);
+    final CountDownLatch stopLatch = new CountDownLatch(1);
     AsyncService service = new AsyncService(executor) {
       @Override protected void onStart() {
-        assertEquals(2, latch.getCount());
+        assertEquals(1, startLatch.getCount());
+        assertEquals(1, stopLatch.getCount());
 
-        latch.countDown();
+        startLatch.countDown();
       }
 
       @Override protected void onStop() {
-        assertEquals(1, latch.getCount());
+        assertEquals(0, startLatch.getCount());
+        assertEquals(1, stopLatch.getCount());
 
-        latch.countDown();
+        stopLatch.countDown();
       }
     };
 
     service.start();
-    latch.await(2, TimeUnit.SECONDS);
+    // This should not pass!
+    assertTrue(startLatch.await(2, TimeUnit.SECONDS));
 
     service.stop();
-    latch.await(2, TimeUnit.SECONDS);
+    assertTrue(stopLatch.await(2, TimeUnit.SECONDS));
 
     executor.shutdown();
-    assertEquals(0, latch.getCount());
+    assertEquals(0, startLatch.getCount());
+    assertEquals(0, stopLatch.getCount());
   }
 
   public final void testAsyncServiceBlockingLifecycle()
