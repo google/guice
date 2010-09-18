@@ -334,7 +334,11 @@ public abstract class Multibinder<T> {
     }
 
     public Set<Dependency<?>> getDependencies() {
-      return dependencies;
+      if (!isInitialized()) {
+        return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
+      } else {
+        return dependencies;
+      }
     }
 
     @Override public boolean equals(Object o) {
