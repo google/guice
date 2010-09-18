@@ -14,12 +14,9 @@
 
 package com.google.inject.servlet;
 
-import java.util.Map;
-
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
 
-import com.google.inject.Key;
 import com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder;
 import com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
