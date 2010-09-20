@@ -20,6 +20,9 @@ import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+import com.google.inject.internal.util.Maps;
+import com.google.inject.internal.util.Preconditions;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -44,7 +47,36 @@ public class ServletScopes {
       final String name = key.toString();
       return new Provider<T>() {
         public T get() {
+          // Should we use the alternate request scope, if no http request
+          // is in progress?
+          if (null == GuiceFilter.localContext.get()) {
+
+            // NOTE(dhanji): We don't need to synchronize on the scope map
+            // unlike the HTTP request because we're the only ones who have
+            // a reference to it, and it is only available via a threadlocal.
+            Map<String, Object> scopeMap = requestScopeContext.get();
+            if (null != scopeMap) {
+              @SuppressWarnings("unchecked")
+              T t = (T) scopeMap.get(name);
+
+              // Accounts for @Nullable providers.
+              if (NullObject.INSTANCE == t) {
+                return null;
+              }
+
+              if (t == null) {
+                t = creator.get();
+                // Store a sentinel for provider-given null values.
+                scopeMap.put(name, t != null ? t : NullObject.INSTANCE);
+              }
+
+              return t;
+            } // else: fall into normal HTTP request scope and out of scope
+              // exception is thrown.
+          }
+
           HttpServletRequest request = GuiceFilter.getRequest();
+
           synchronized (request) {
             Object obj = request.getAttribute(name);
             if (NullObject.INSTANCE == obj) {
@@ -129,26 +161,87 @@ public class ServletScopes {
    * @throws OutOfScopeException if this method is called from a non-request
    *     thread, or if the request has completed.
    */
-  public static <T> Callable<T> continueRequest(final Callable<T> callable) {
+  public static <T> Callable<T> continueRequest(final Callable<T> callable,
+      final Map<Key<?>, Object> seedMap) {
+    Preconditions.checkArgument(null != seedMap,
+        "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
+    
+    // Snapshot the seed map and add all the instances to our continuing HTTP request.
+    final ContinuingHttpServletRequest continuingRequest =
+        new ContinuingHttpServletRequest(GuiceFilter.getRequest());
+    for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
+      continuingRequest.setAttribute(entry.getKey().toString(), entry.getValue());
+    }
+
     return new Callable<T>() {
-      private HttpServletRequest request =
-          new ContinuingHttpServletRequest(GuiceFilter.getRequest());
+      private HttpServletRequest request = continuingRequest;
 
       public T call() throws Exception {
         GuiceFilter.Context context = GuiceFilter.localContext.get();
-        if (null == context) {
-          // Only set up the request continuation if we're running in a
-          // new vanilla thread.
-          GuiceFilter.localContext.set(new GuiceFilter.Context(request, null));
-        }
+        Preconditions.checkState(null == context,
+            "Cannot continue request in the same thread as a HTTP request!");
+
+        // Only set up the request continuation if we're running in a
+        // new vanilla thread.
+        GuiceFilter.localContext.set(new GuiceFilter.Context(request, null));
         try {
           return callable.call();
         } finally {
-
           // Clear the copied context if we set one up.
           if (null == context) {
             GuiceFilter.localContext.remove();
           }
+        }
+      }
+    };
+  }
+
+  /**
+   * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
+   * scope falls back to this scope map if no http request is available, and
+   * requires {@link #scopeRequest} to be called as an alertnative.
+   */
+  private static final ThreadLocal<Map<String, Object>> requestScopeContext
+      = new ThreadLocal<Map<String, Object>>();
+
+  /**
+   * Scopes the given callable inside a request scope. This is not the same
+   * as the HTTP request scope, but is used if no HTTP request scope is in
+   * progress. In this way, keys can be scoped as @RequestScoped and exist
+   * in non-HTTP requests (for example: RPC requests) as well as in HTTP
+   * request threads.
+   *
+   * @param callable code to be executed which depends on the request scope.
+   *     Typically in another thread, but not necessarily so.
+   * @param seedMap the initial set of scoped instances for Guice to seed the
+   *     request scope with.
+   * @return a callable that when called will run inside the a request scope
+   *     that exposes the instances in the {@code seedMap} as scoped keys.
+   */
+  public static <T> Callable<T> scopeRequest(final Callable<T> callable,
+      Map<Key<?>, Object> seedMap) {
+    Preconditions.checkArgument(null != seedMap,
+        "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
+
+    // Copy the seed values into our local scope map.
+    final Map<String, Object> scopeMap = Maps.newHashMap();
+    for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
+      scopeMap.put(entry.getKey().toString(), entry.getValue());
+    }
+
+    return new Callable<T>() {
+      public T call() throws Exception {
+        Preconditions.checkState(null == GuiceFilter.localContext.get(),
+            "An HTTP request is already in progress, cannot scope a new request in this thread.");
+        Preconditions.checkState(null == requestScopeContext.get(),
+            "A request scope is already in progress, cannot scope a new request in this thread.");
+
+        requestScopeContext.set(scopeMap);
+
+        try {
+          return callable.call();
+        } finally {
+          requestScopeContext.remove();
         }
       }
     };
