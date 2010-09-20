@@ -24,7 +24,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
@@ -34,9 +33,12 @@ import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
 import static com.google.inject.name.Names.named;
 
+import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
@@ -212,7 +214,7 @@ public abstract class Multibinder<T> {
    * API.
    */
   static final class RealMultibinder<T> extends Multibinder<T>
-      implements Module, Provider<Set<T>>, HasDependencies {
+      implements Module, ProviderWithExtensionVisitor<Set<T>>, HasDependencies, MultibinderBinding<Set<T>> {
 
     private final TypeLiteral<T> elementType;
     private final String setName;
@@ -222,8 +224,8 @@ public abstract class Multibinder<T> {
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
 
-    /* a provider for each element in the set. null until initialization, non-null afterwards */
-    private List<Provider<T>> providers;
+    /* a binding for each element in the set. null until initialization, non-null afterwards */
+    private ImmutableList<Binding<T>> bindings;
     private Set<Dependency<?>> dependencies;
 
     /** whether duplicates are allowed. Possibly configured by a different instance */
@@ -281,18 +283,18 @@ public abstract class Multibinder<T> {
      * contents are only evaluated when get() is invoked.
      */
     @Toolable @Inject void initialize(Injector injector) {
-      providers = Lists.newArrayList();
+      List<Binding<T>> bindings = Lists.newArrayList();
       List<Dependency<?>> dependencies = Lists.newArrayList();
       for (Binding<?> entry : injector.findBindingsByType(elementType)) {
-
         if (keyMatches(entry.getKey())) {
           @SuppressWarnings("unchecked") // protected by findBindingsByType()
           Binding<T> binding = (Binding<T>) entry;
-          providers.add(binding.getProvider());
+          bindings.add(binding);
           dependencies.add(Dependency.get(binding.getKey()));
         }
       }
 
+      this.bindings = ImmutableList.copyOf(bindings);
       this.dependencies = ImmutableSet.copyOf(dependencies);
       this.permitDuplicates = permitsDuplicates(injector);
       this.binder = null;
@@ -316,21 +318,64 @@ public abstract class Multibinder<T> {
       checkConfiguration(isInitialized(), "Multibinder is not initialized");
 
       Set<T> result = new LinkedHashSet<T>();
-      for (Provider<T> provider : providers) {
-        final T newValue = provider.get();
+      for (Binding<T> binding : bindings) {
+        final T newValue = binding.getProvider().get();
         checkConfiguration(newValue != null, "Set injection failed due to null element");
         checkConfiguration(result.add(newValue) || permitDuplicates,
             "Set injection failed due to duplicated element \"%s\"", newValue);
       }
       return Collections.unmodifiableSet(result);
     }
+    
+    @SuppressWarnings("unchecked")
+    public <V, B> V acceptExtensionVisitor(
+        BindingTargetVisitor<B, V> visitor,
+        ProviderInstanceBinding<? extends B> binding) {
+      if(visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<Set<T>, V>)visitor).visit(this);
+      } else {
+        return visitor.visit(binding);
+      }
+    }
 
     String getSetName() {
       return setName;
     }
+    
+    public TypeLiteral<?> getElementTypeLiteral() {
+      return elementType;
+    }
 
-    Key<Set<T>> getSetKey() {
+    public Key<Set<T>> getSetKey() {
       return setKey;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Binding<?>> getElements() {
+      if(isInitialized()) {
+        return (List)bindings; // safe because bindings is immutable.
+      } else {
+        throw new UnsupportedOperationException("getElements() not supported for module bindings");
+      }
+    }
+    
+    public boolean permitsDuplicates() {
+      if(isInitialized()) {
+        return permitDuplicates;
+      } else {
+        throw new UnsupportedOperationException("permitsDuplicates() not supported for module bindings");   
+      }
+    }
+
+    public boolean containsElement(com.google.inject.spi.Element element) {
+      if(element instanceof Binding) {
+        Binding binding = (Binding)element;
+        return keyMatches(binding.getKey()) 
+            || binding.getKey().equals(permitDuplicatesKey)
+            || binding.getKey().equals(setKey);
+      } else {
+        return false;
+      }
     }
 
     public Set<Dependency<?>> getDependencies() {

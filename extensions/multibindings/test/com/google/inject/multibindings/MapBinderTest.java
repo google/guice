@@ -17,6 +17,11 @@
 package com.google.inject.multibindings;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.multibindings.SpiUtils.assertMapVisitor;
+import static com.google.inject.multibindings.SpiUtils.instance;
+import static com.google.inject.multibindings.SpiUtils.providerInstance;
+import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
+import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -36,6 +41,7 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Maps;
+import com.google.inject.multibindings.SpiUtils.VisitType;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -67,6 +73,10 @@ public class MapBinderTest extends TestCase {
   final TypeLiteral<Map<String, Integer>> mapOfInteger = new TypeLiteral<Map<String, Integer>>() {};
   final TypeLiteral<Map<String, Set<String>>> mapOfSetOfString =
       new TypeLiteral<Map<String, Set<String>>>() {};
+      
+  private final TypeLiteral<String> stringType = TypeLiteral.get(String.class);
+  private final TypeLiteral<Integer> intType = TypeLiteral.get(Integer.class);
+  private final TypeLiteral<Set<String>> stringSetType = new TypeLiteral<Set<String>>() {};
 
   public void testMapBinderAggregatesMultipleModules() {
     Module abc = new AbstractModule() {
@@ -91,10 +101,12 @@ public class MapBinderTest extends TestCase {
     Map<String, String> abcde = injector.getInstance(Key.get(mapOfString));
 
     assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E"), abcde);
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(abc, de), BOTH, false, 0,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"), instance("d", "D"), instance("e", "E"));
   }
 
   public void testMapBinderAggregationForAnnotationInstance() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(
             binder(), String.class, String.class, Names.named("abc"));
@@ -105,14 +117,18 @@ public class MapBinderTest extends TestCase {
             binder(), String.class, String.class, Names.named("abc"));
         multibinder.addBinding("c").toInstance("C");
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
-    Map<String, String> abc = injector.getInstance(Key.get(mapOfString, Names.named("abc")));
+    Key<Map<String, String>> key = Key.get(mapOfString, Names.named("abc"));
+    Map<String, String> abc = injector.getInstance(key);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
+    assertMapVisitor(key, stringType, stringType, setOf(module), BOTH, false, 0,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"));
   }
 
   public void testMapBinderAggregationForAnnotationType() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(
             binder(), String.class, String.class, Abc.class);
@@ -123,14 +139,18 @@ public class MapBinderTest extends TestCase {
             binder(), String.class, String.class, Abc.class);
         multibinder.addBinding("c").toInstance("C");
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
-    Map<String, String> abc = injector.getInstance(Key.get(mapOfString, Abc.class));
+    Key<Map<String, String>> key = Key.get(mapOfString, Abc.class);
+    Map<String, String> abc = injector.getInstance(key);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
+    assertMapVisitor(key, stringType, stringType, setOf(module), BOTH, false, 0,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"));
   }
 
   public void testMapBinderWithMultipleAnnotationValueSets() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder<String, String> abcMapBinder = MapBinder.newMapBinder(
             binder(), String.class, String.class, named("abc"));
@@ -143,16 +163,23 @@ public class MapBinderTest extends TestCase {
         deMapBinder.addBinding("d").toInstance("D");
         deMapBinder.addBinding("e").toInstance("E");
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
-    Map<String, String> abc = injector.getInstance(Key.get(mapOfString, named("abc")));
-    Map<String, String> de = injector.getInstance(Key.get(mapOfString, named("de")));
+    Key<Map<String, String>> abcKey = Key.get(mapOfString, named("abc"));
+    Map<String, String> abc = injector.getInstance(abcKey);
+    Key<Map<String, String>> deKey = Key.get(mapOfString, named("de"));
+    Map<String, String> de = injector.getInstance(deKey);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
     assertEquals(mapOf("d", "D", "e", "E"), de);
+    assertMapVisitor(abcKey, stringType, stringType, setOf(module), BOTH, false, 1,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"));
+    assertMapVisitor(deKey, stringType, stringType, setOf(module), BOTH, false, 1,
+        instance("d", "D"), instance("e", "E"));     
   }
 
   public void testMapBinderWithMultipleAnnotationTypeSets() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder<String, String> abcMapBinder = MapBinder.newMapBinder(
             binder(), String.class, String.class, Abc.class);
@@ -165,37 +192,51 @@ public class MapBinderTest extends TestCase {
         deMapBinder.addBinding("d").toInstance("D");
         deMapBinder.addBinding("e").toInstance("E");
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
-    Map<String, String> abc = injector.getInstance(Key.get(mapOfString, Abc.class));
-    Map<String, String> de = injector.getInstance(Key.get(mapOfString, De.class));
+    Key<Map<String, String>> abcKey = Key.get(mapOfString, Abc.class);
+    Map<String, String> abc = injector.getInstance(abcKey);
+    Key<Map<String, String>> deKey = Key.get(mapOfString, De.class);
+    Map<String, String> de = injector.getInstance(deKey);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
     assertEquals(mapOf("d", "D", "e", "E"), de);
+    assertMapVisitor(abcKey, stringType, stringType, setOf(module), BOTH, false, 1,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"));
+    assertMapVisitor(deKey, stringType, stringType, setOf(module), BOTH, false, 1,
+        instance("d", "D"), instance("e", "E"));
   }
 
   public void testMapBinderWithMultipleTypes() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder.newMapBinder(binder(), String.class, String.class)
             .addBinding("a").toInstance("A");
         MapBinder.newMapBinder(binder(), String.class, Integer.class)
             .addBinding("1").toInstance(1);
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
     assertEquals(mapOf("a", "A"), injector.getInstance(Key.get(mapOfString)));
     assertEquals(mapOf("1", 1), injector.getInstance(Key.get(mapOfInteger)));
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(module), BOTH, false, 1,
+        instance("a", "A"));
+    assertMapVisitor(Key.get(mapOfInteger), stringType, intType, setOf(module), BOTH, false, 1,
+        instance("1", 1));
   }
 
   public void testMapBinderWithEmptyMap() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder.newMapBinder(binder(), String.class, String.class);
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
     Map<String, String> map = injector.getInstance(Key.get(mapOfString));
     assertEquals(Collections.emptyMap(), map);
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(module), BOTH, false, 0);
   }
 
   public void testMapBinderMapIsUnmodifiable() {
@@ -215,7 +256,7 @@ public class MapBinderTest extends TestCase {
   }
 
   public void testMapBinderMapIsLazy() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module module = new AbstractModule() {
       @Override protected void configure() {
         MapBinder.newMapBinder(binder(), String.class, Integer.class)
             .addBinding("num").toProvider(new Provider<Integer>() {
@@ -225,97 +266,108 @@ public class MapBinderTest extends TestCase {
           }
         });
       }
-    });
+    };
+    Injector injector = Guice.createInjector(module);
 
     assertEquals(mapOf("num", 1), injector.getInstance(Key.get(mapOfInteger)));
     assertEquals(mapOf("num", 2), injector.getInstance(Key.get(mapOfInteger)));
     assertEquals(mapOf("num", 3), injector.getInstance(Key.get(mapOfInteger)));
+    assertMapVisitor(Key.get(mapOfInteger), stringType, intType, setOf(module), BOTH, false, 0,
+        providerInstance("num", 1));
   }
 
   public void testMapBinderMapForbidsDuplicateKeys() {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("a").toInstance("B");
+      }
+    };
     try {
-      Guice.createInjector(new AbstractModule() {
-        @Override protected void configure() {
-          MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-              binder(), String.class, String.class);
-          multibinder.addBinding("a").toInstance("A");
-          multibinder.addBinding("a").toInstance("B");
-        }
-      });
+      Guice.createInjector(module);
       fail();
     } catch(CreationException expected) {
       assertContains(expected.getMessage(),
           "Map injection failed due to duplicated key \"a\"");
     }
+    
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(module), MODULE, false, 0,
+        instance("a", "A"), instance("a", "B"));
   }
 
   public void testMapBinderMapPermitDuplicateElements() {
-    Injector injector = Guice.createInjector(
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class);
-            multibinder.addBinding("a").toInstance("A");
-            multibinder.addBinding("b").toInstance("B");
-          }
-        },
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class);
-            multibinder.addBinding("b").toInstance("B");
-            multibinder.addBinding("c").toInstance("C");
-            multibinder.permitDuplicates();
-          }
-        });
+    Module ab = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B");
+      }
+    };
+    Module bc = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        multibinder.addBinding("b").toInstance("B");
+        multibinder.addBinding("c").toInstance("C");
+        multibinder.permitDuplicates();
+      }
+    };
+    Injector injector = Guice.createInjector(ab, bc);
 
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injector.getInstance(Key.get(mapOfString)));
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(ab, bc), BOTH, true, 0,
+        instance("a", "A"), instance("b", "B"), instance("b", "B"), instance("c", "C"));
   }
 
   public void testMapBinderMultimap() {
-    Injector injector = Guice.createInjector(
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class);
-            multibinder.addBinding("a").toInstance("A");
-            multibinder.addBinding("b").toInstance("B1");
-            multibinder.addBinding("c").toInstance("C");
-          }
-        },
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class);
-            multibinder.addBinding("b").toInstance("B2");
-            multibinder.addBinding("c").toInstance("C");
-            multibinder.permitDuplicates();
-          }
-        });
+    AbstractModule ab1c = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B1");
+        multibinder.addBinding("c").toInstance("C");
+      }
+    };
+    AbstractModule b2c = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class);
+        multibinder.addBinding("b").toInstance("B2");
+        multibinder.addBinding("c").toInstance("C");
+        multibinder.permitDuplicates();
+      }
+    };
+    Injector injector = Guice.createInjector(ab1c, b2c);
 
     assertEquals(mapOf("a", setOf("A"), "b", setOf("B1", "B2"), "c", setOf("C")),
         injector.getInstance(Key.get(mapOfSetOfString)));
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(ab1c, b2c), BOTH, true, 0,
+        instance("a", "A"), instance("b", "B1"), instance("b", "B2"), instance("c", "C"), instance("c", "C"));
   }
 
   public void testMapBinderMultimapWithAnotation() {
-    Injector injector = Guice.createInjector(
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class, Abc.class);
-            multibinder.addBinding("a").toInstance("A");
-            multibinder.addBinding("b").toInstance("B1");
-          }
-        },
-        new AbstractModule() {
-          @Override protected void configure() {
-            MapBinder<String, String> multibinder = MapBinder.newMapBinder(
-                binder(), String.class, String.class, Abc.class);
-            multibinder.addBinding("b").toInstance("B2");
-            multibinder.addBinding("c").toInstance("C");
-            multibinder.permitDuplicates();
-          }
-        });
+    AbstractModule ab1 = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class, Abc.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B1");
+      }
+    };
+    AbstractModule b2c = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, String.class, Abc.class);
+        multibinder.addBinding("b").toInstance("B2");
+        multibinder.addBinding("c").toInstance("C");
+        multibinder.permitDuplicates();
+      }
+    };
+    Injector injector = Guice.createInjector(ab1, b2c);
 
     assertEquals(mapOf("a", setOf("A"), "b", setOf("B1", "B2"), "c", setOf("C")),
         injector.getInstance(Key.get(mapOfSetOfString, Abc.class)));
@@ -323,6 +375,9 @@ public class MapBinderTest extends TestCase {
       injector.getInstance(Key.get(mapOfSetOfString));
       fail();
     } catch (ConfigurationException expected) {}
+    
+    assertMapVisitor(Key.get(mapOfString, Abc.class), stringType, stringType, setOf(ab1, b2c), BOTH, true, 0,
+        instance("a", "A"), instance("b", "B1"), instance("b", "B2"), instance("c", "C"));
   }
 
   public void testMapBinderMultimapIsUnmodifiable() {
@@ -519,18 +574,21 @@ public class MapBinderTest extends TestCase {
     Injector injector = Guice.createInjector(abcd, ef);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"),
         injector.getInstance(Key.get(mapOfString)));
-
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(abcd, ef), BOTH, false, 0,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"), instance("d", "D"), instance(
+            "e", "E"), instance("f", "F"));
   }
   
   /**
    * With overrides, we should get the union of all map bindings.
    */
   public void testModuleOverrideAndMapBindingsWithPermitDuplicates() {
-    Module ab = new AbstractModule() {
+    Module abc = new AbstractModule() {
       protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("a").toInstance("A");
         multibinder.addBinding("b").toInstance("B");
+        multibinder.addBinding("c").toInstance("C");
         multibinder.permitDuplicates();
       }
     };
@@ -551,10 +609,13 @@ public class MapBinderTest extends TestCase {
       }
     };
 
-    Module abcd = Modules.override(ab).with(cd);
+    Module abcd = Modules.override(abc).with(cd);
     Injector injector = Guice.createInjector(abcd, ef);
     assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"),
         injector.getInstance(Key.get(mapOfString)));
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(abcd, ef), BOTH, true, 0,
+        instance("a", "A"), instance("b", "B"), instance("c", "C"), instance("c", "C"), instance(
+            "d", "D"), instance("e", "E"), instance("f", "F"));
 
   }  
 
@@ -574,7 +635,7 @@ public class MapBinderTest extends TestCase {
   }
 
   @SuppressWarnings("unchecked")
-  private <V> Set<V> setOf(Object... elements) {
+  private <V> Set<V> setOf(V... elements) {
     return new HashSet(Arrays.asList(elements));
   }
 
