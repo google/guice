@@ -47,8 +47,8 @@ public class ServletScopes {
       final String name = key.toString();
       return new Provider<T>() {
         public T get() {
-          // Should we use the alternate request scope, if no http request
-          // is in progress?
+          // Check if the alternate request scope should be used, if no HTTP
+          // request is in progress.
           if (null == GuiceFilter.localContext.get()) {
 
             // NOTE(dhanji): We don't need to synchronize on the scope map
