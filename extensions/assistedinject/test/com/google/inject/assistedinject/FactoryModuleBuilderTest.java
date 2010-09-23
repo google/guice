@@ -17,24 +17,36 @@
 package com.google.inject.assistedinject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.name.Names.named;
+
+import java.awt.Color;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import junit.framework.TestCase;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
-
-import junit.framework.TestCase;
-
-import java.awt.*;
-import java.util.Collection;
 
 public class FactoryModuleBuilderTest extends TestCase {
 
@@ -341,6 +353,85 @@ public class FactoryModuleBuilderTest extends TestCase {
     AbstractCar create(Color color);
   }  
   public static class ArtCar extends AbstractCar {}
-  
+    
+  public void testFactoryBindingDependencies() {
+    // validate dependencies work in all stages & as a raw element,
+    // and that dependencies work for methods, fields, constructors,
+    // and for @AssistedInject constructors too.
+    Module module = new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Integer.class).toInstance(42);
+        bind(Double.class).toInstance(4.2d);
+        bind(Float.class).toInstance(4.2f);
+        bind(String.class).annotatedWith(named("dog")).toInstance("dog");
+        bind(String.class).annotatedWith(named("cat1")).toInstance("cat1");
+        bind(String.class).annotatedWith(named("cat2")).toInstance("cat2");
+        bind(String.class).annotatedWith(named("cat3")).toInstance("cat3");
+        bind(String.class).annotatedWith(named("arbitrary")).toInstance("fail!");
+        install(new FactoryModuleBuilder()
+                .implement(Animal.class, Dog.class)
+                .build(AnimalHouse.class));
+      }
+    };
 
+    Set<Key<?>> expectedKeys = ImmutableSet.<Key<?>>of(
+        Key.get(Integer.class),
+        Key.get(Double.class),
+        Key.get(Float.class),
+        Key.get(String.class, named("dog")),
+        Key.get(String.class, named("cat1")),
+        Key.get(String.class, named("cat2")),
+        Key.get(String.class, named("cat3"))
+    );
+    
+    Injector injector = Guice.createInjector(module);
+    validateDependencies(expectedKeys, injector.getBinding(AnimalHouse.class));
+    
+    injector = Guice.createInjector(Stage.TOOL, module);
+    validateDependencies(expectedKeys, injector.getBinding(AnimalHouse.class));
+    
+    List<Element> elements = Elements.getElements(module);
+    boolean found = false;
+    for(Element element : elements) {
+      if(element instanceof Binding) {
+        Binding binding = (Binding)element;
+        if(binding.getKey().equals(Key.get(AnimalHouse.class))) {
+          found = true;
+          validateDependencies(expectedKeys, binding);
+          break;
+        }
+      }
+    }
+    assertTrue(found);
+  }
+  
+  private void validateDependencies(Set<Key<?>> expectedKeys, Binding<?> binding) {
+    Set<Dependency<?>> dependencies = ((HasDependencies)binding).getDependencies();
+    Set<Key<?>> actualKeys = new HashSet<Key<?>>();
+    for(Dependency dependency : dependencies) {
+      actualKeys.add(dependency.getKey());
+    }
+    assertEquals(expectedKeys, actualKeys);
+  }
+  
+  interface AnimalHouse {
+    Animal createAnimal(String name);
+    Cat createCat(String name);
+    Cat createCat(int age);
+  }
+  
+  interface Animal {}
+  private static class Dog implements Animal {
+    @Inject int a;
+    @Inject Dog(@Assisted String a, double b) {}
+    @Inject void register(@Named("dog") String a) {}
+  }
+  private static class Cat implements Animal {
+    @Inject float a;
+    @AssistedInject Cat(@Assisted String a, @Named("cat1") String b) {}
+    @AssistedInject Cat(@Assisted int a, @Named("cat2") String b) {}
+    @AssistedInject Cat(@Assisted byte a, @Named("catfail") String b) {} // not a dependency!
+    @Inject void register(@Named("cat3") String a) {}
+  }
 }

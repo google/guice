@@ -34,6 +34,7 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.internal.util.ToStringBuilder;
 
@@ -42,6 +43,7 @@ import com.google.inject.internal.util.Lists;
 import static com.google.inject.internal.util.Preconditions.checkState;
 
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.Toolable;
@@ -55,8 +57,10 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The newer implementation of factory provider. This implementation uses a child injector to
@@ -67,7 +71,7 @@ import java.util.Map;
  * @author schmitt@google.com (Peter Schmitt)
  * @author sameb@google.com (Sam Berlin)
  */
-final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
+final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDependencies {
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION = new Assisted() {
@@ -102,6 +106,9 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     /** the parameters in the factory method associated with this data. */
     final ImmutableList<Key<?>> paramTypes;
     
+    /** All non-assisted dependencies required by this method. */
+    final Set<Dependency<?>> dependencies;
+    
     /** true if {@link #validForOptimizedAssistedInject} returned true. */
     final boolean optimized;
     /** the list of optimized providers, empty if not optimized. */
@@ -111,12 +118,14 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     
     AssistData(Constructor<?> constructor, Key<?> returnType,
         ImmutableList<Key<?>> paramTypes, boolean optimized,
-        List<ThreadLocalProvider> providers) {
+        List<ThreadLocalProvider> providers,
+        Set<Dependency<?>> dependencies) {
       this.constructor = constructor;
       this.returnType = returnType;
       this.paramTypes = paramTypes;
       this.optimized = optimized;
       this.providers = providers;
+      this.dependencies = dependencies;
     }
 
     @Override
@@ -128,6 +137,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         .add("optimized", optimized)
         .add("providers", providers)
         .add("cached binding", cachedBinding)
+        .add("dependencies", dependencies)
         .toString();
       
     }
@@ -206,13 +216,14 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
         
         Constructor<?> constructor = (Constructor)ctorInjectionPoint.getMember();
         List<ThreadLocalProvider> providers = Collections.emptyList();
+        Set<Dependency<?>> deps = getDependencies(ctorInjectionPoint, implementation);
         boolean optimized = false;
         // Now go through all dependencies of the implementation and see if it is OK to
         // use an optimized form of assistedinject2.  The optimized form requires that
         // all injections directly inject the object itself (and not a Provider of the object,
         // or an Injector), because it caches a single child injector and mutates the Provider
         // of the arguments in a ThreadLocal.
-        if(validForOptimizedAssistedInject(ctorInjectionPoint, implementation)) {
+        if(isValidForOptimizedAssistedInject(deps)) {
           ImmutableList.Builder<ThreadLocalProvider> providerListBuilder = ImmutableList.builder();
           for(int i = 0; i < params.size(); i++) {
             providerListBuilder.add(new ThreadLocalProvider());
@@ -220,7 +231,9 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
           providers = providerListBuilder.build();
           optimized = true;
         }
-        assistDataBuilder.put(method, new AssistData(constructor, returnType, immutableParamList, optimized, providers));
+        assistDataBuilder.put(method,
+            new AssistData(constructor, returnType, immutableParamList,
+                optimized, providers, removeAssistedDeps(deps)));
       }
 
       // If we generated any errors (from finding matching constructors, for instance), throw an exception.
@@ -239,6 +252,14 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
 
   public F get() {
     return factory;
+  }
+  
+  public Set<Dependency<?>> getDependencies() {
+    Set<Dependency<?>> combinedDeps = new HashSet<Dependency<?>>();
+    for(AssistData data : assistDataByMethod.values()) {
+      combinedDeps.addAll(data.dependencies);
+    }
+    return ImmutableSet.copyOf(combinedDeps);
   }
 
   /**
@@ -370,30 +391,41 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F> {
     // All @Assisted params match up to the method's parameters.
     return true;
   }
-  
-  /**
-   * Returns true if the implementation & constructor are suitable for an
-   * optimized version of AssistedInject. The optimized version caches the
-   * binding & uses a ThreadLocal Provider, so can only be applied if the
-   * assisted bindings are immediately provided. This looks for hints that the
-   * values may be lazily retrieved, by looking for injections of Injector or a
-   * Provider for the assisted values.
-   */
-  private boolean validForOptimizedAssistedInject(InjectionPoint ctorPoint, TypeLiteral<?> implementation) {
-    if(ctorPoint != null) {
-      for(Dependency<?> dep : ctorPoint.getDependencies()) {
-        if(isInjectorOrAssistedProvider(dep)) {
-          return false;
-        }
+
+  /** Calculates all dependencies required by the implementation and constructor. */
+  private Set<Dependency<?>> getDependencies(InjectionPoint ctorPoint, TypeLiteral<?> implementation) {
+    ImmutableSet.Builder<Dependency<?>> builder = ImmutableSet.builder();
+    builder.addAll(ctorPoint.getDependencies());
+    if (!implementation.getRawType().isInterface()) {
+      for (InjectionPoint ip : InjectionPoint.forInstanceMethodsAndFields(implementation)) {
+        builder.addAll(ip.getDependencies());
       }
     }
-    if(!implementation.getRawType().isInterface()) {
-      for(InjectionPoint ip : InjectionPoint.forInstanceMethodsAndFields(implementation)) {
-        for(Dependency<?> dep : ip.getDependencies()) {
-          if(isInjectorOrAssistedProvider(dep)) {
-            return false;
-          }        
-        }
+    return builder.build();
+  }
+  
+  /** Return all non-assisted dependencies. */
+  private Set<Dependency<?>> removeAssistedDeps(Set<Dependency<?>> deps) {
+    ImmutableSet.Builder<Dependency<?>> builder = ImmutableSet.builder();
+    for(Dependency<?> dep : deps) {
+      Class annotationType = dep.getKey().getAnnotationType();
+      if (annotationType == null || !annotationType.equals(Assisted.class)) {
+        builder.add(dep);
+      }
+    }
+    return builder.build();
+  }
+  
+  /**
+   * Returns true if all dependencies are suitable for the optimized version of AssistedInject. The
+   * optimized version caches the binding & uses a ThreadLocal Provider, so can only be applied if
+   * the assisted bindings are immediately provided. This looks for hints that the values may be
+   * lazily retrieved, by looking for injections of Injector or a Provider for the assisted values.
+   */
+  private boolean isValidForOptimizedAssistedInject(Set<Dependency<?>> dependencies) {
+    for (Dependency<?> dep : dependencies) {
+      if (isInjectorOrAssistedProvider(dep)) {
+        return false;
       }
     }
     return true;
