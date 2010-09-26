@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 
 import com.google.inject.Key;
+import com.google.inject.internal.util.ToStringBuilder;
 
 /**
  * Default implementation of LinkedFilterBinding.
@@ -38,5 +39,14 @@ class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends
   public Key<? extends Filter> getLinkedKey() {
     return getTarget();
   }
-
+  
+  @Override public String toString() {
+    return new ToStringBuilder(LinkedFilterBinding.class)
+      .add("pattern", getPattern())
+      .add("initParams", getInitParams())
+      .add("uriPatternType", getUriPatternType())
+      .add("linkedFilterKey", getLinkedKey())
+      .toString();
+  }
+  
 }

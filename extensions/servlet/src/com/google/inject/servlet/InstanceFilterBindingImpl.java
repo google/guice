@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 
+import com.google.inject.internal.util.ToStringBuilder;
+
 /**
  * Default implementation of InstanceFilterBinding.
  * 
@@ -36,5 +38,13 @@ class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> imp
   public Filter getFilterInstance() {
     return getTarget();
   }
-
+  
+  @Override public String toString() {
+    return new ToStringBuilder(InstanceFilterBinding.class)
+      .add("pattern", getPattern())
+      .add("initParams", getInitParams())
+      .add("uriPatternType", getUriPatternType())
+      .add("filterInstance", getFilterInstance())
+      .toString();
+  }
 }
