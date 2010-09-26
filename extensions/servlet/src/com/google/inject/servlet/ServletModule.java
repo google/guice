@@ -16,6 +16,8 @@
 
 package com.google.inject.servlet;
 
+import static com.google.inject.internal.util.Preconditions.checkState;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.internal.util.Lists;
@@ -39,13 +41,22 @@ public class ServletModule extends AbstractModule {
 
   @Override
   protected final void configure() {
-    // Install common bindings (skipped if already installed).
-    install(new InternalServletModule());
-
-    // Install local filter and servlet bindings.
-    configureServlets();
-    install(filtersModuleBuilder);
-    install(servletsModuleBuilder);
+    checkState(filtersModuleBuilder == null, "Re-entry is not allowed.");
+    checkState(servletsModuleBuilder == null, "Re-entry is not allowed.");
+    filtersModuleBuilder = new FiltersModuleBuilder();
+    servletsModuleBuilder = new ServletsModuleBuilder();
+    try {
+      // Install common bindings (skipped if already installed).
+      install(new InternalServletModule());
+  
+      // Install local filter and servlet bindings.
+      configureServlets();
+      install(filtersModuleBuilder);
+      install(servletsModuleBuilder);
+    } finally {
+      filtersModuleBuilder = null;
+      servletsModuleBuilder = null;
+    }
   }
 
   /**
@@ -219,8 +230,8 @@ public class ServletModule extends AbstractModule {
   }
 
 
-  private final FiltersModuleBuilder filtersModuleBuilder = new FiltersModuleBuilder();
-  private final ServletsModuleBuilder servletsModuleBuilder = new ServletsModuleBuilder();
+  private FiltersModuleBuilder filtersModuleBuilder;
+  private ServletsModuleBuilder servletsModuleBuilder;
 
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.

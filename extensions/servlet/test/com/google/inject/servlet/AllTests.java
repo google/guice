@@ -34,6 +34,7 @@ public class AllTests {
     suite.addTestSuite(FilterPipelineTest.class);
 
     // Servlet + integration tests.
+    suite.addTestSuite(ServletModuleTest.class);
     suite.addTestSuite(ServletTest.class);
     suite.addTestSuite(ServletDefinitionTest.class);
     suite.addTestSuite(ServletDefinitionPathsTest.class);
