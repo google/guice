@@ -1,0 +1,2984 @@
+<api>
+<package name="com.google.inject"
+>
+<class name="AbstractModule"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="com.google.inject.Module">
+</implements>
+<constructor name="AbstractModule"
+ type="com.google.inject.AbstractModule"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="addError"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="arguments" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="t" type="java.lang.Throwable">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.LinkedBindingBuilder&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.AnnotatedBindingBuilder&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.AnnotatedBindingBuilder&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="clazz" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="bindConstant"
+ return="com.google.inject.binder.AnnotatedConstantBindingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="bindInterceptor"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="classMatcher" type="com.google.inject.matcher.Matcher&lt;? super java.lang.Class&lt;?&gt;&gt;">
+</parameter>
+<parameter name="methodMatcher" type="com.google.inject.matcher.Matcher&lt;? super java.lang.reflect.Method&gt;">
+</parameter>
+<parameter name="interceptors" type="MethodInterceptor...">
+</parameter>
+</method>
+<method name="bindScope"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="scopeAnnotation" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+<parameter name="scope" type="com.google.inject.Scope">
+</parameter>
+</method>
+<method name="binder"
+ return="com.google.inject.Binder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="configure"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="true"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="builder" type="com.google.inject.Binder">
+</parameter>
+</method>
+<method name="configure"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="install"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="module" type="com.google.inject.Module">
+</parameter>
+</method>
+<method name="requestStaticInjection"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="types" type="java.lang.Class&lt;?&gt;...">
+</parameter>
+</method>
+</class>
+<interface name="Binder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="addError"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="arguments" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="t" type="java.lang.Throwable">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.LinkedBindingBuilder&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.AnnotatedBindingBuilder&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="bind"
+ return="com.google.inject.binder.AnnotatedBindingBuilder&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="bindConstant"
+ return="com.google.inject.binder.AnnotatedConstantBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="bindInterceptor"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="classMatcher" type="com.google.inject.matcher.Matcher&lt;? super java.lang.Class&lt;?&gt;&gt;">
+</parameter>
+<parameter name="methodMatcher" type="com.google.inject.matcher.Matcher&lt;? super java.lang.reflect.Method&gt;">
+</parameter>
+<parameter name="interceptors" type="MethodInterceptor...">
+</parameter>
+</method>
+<method name="bindScope"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+<parameter name="scope" type="com.google.inject.Scope">
+</parameter>
+</method>
+<method name="currentStage"
+ return="com.google.inject.Stage"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="install"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="module" type="com.google.inject.Module">
+</parameter>
+</method>
+<method name="requestStaticInjection"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="types" type="java.lang.Class&lt;?&gt;...">
+</parameter>
+</method>
+</interface>
+<interface name="Binding"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getKey"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getProvider"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSource"
+ return="java.lang.Object"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+<class name="BindingAnnotation"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="CreationException"
+ extends="java.lang.RuntimeException"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="CreationException"
+ type="com.google.inject.CreationException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="errorMessages" type="java.util.Collection&lt;com.google.inject.spi.Message&gt;">
+</parameter>
+</constructor>
+<method name="getErrorMessages"
+ return="java.util.Collection&lt;com.google.inject.spi.Message&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="Guice"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="createInjector"
+ return="com.google.inject.Injector"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="modules" type="com.google.inject.Module...">
+</parameter>
+</method>
+<method name="createInjector"
+ return="com.google.inject.Injector"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="modules" type="java.lang.Iterable&lt;com.google.inject.Module&gt;">
+</parameter>
+</method>
+<method name="createInjector"
+ return="com.google.inject.Injector"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="stage" type="com.google.inject.Stage">
+</parameter>
+<parameter name="modules" type="com.google.inject.Module...">
+</parameter>
+</method>
+<method name="createInjector"
+ return="com.google.inject.Injector"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="stage" type="com.google.inject.Stage">
+</parameter>
+<parameter name="modules" type="java.lang.Iterable&lt;com.google.inject.Module&gt;">
+</parameter>
+</method>
+</class>
+<class name="ImplementedBy"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="Inject"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<interface name="Injector"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="findBindingsByType"
+ return="java.util.List&lt;com.google.inject.Binding&lt;T&gt;&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="getBinding"
+ return="com.google.inject.Binding&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+</method>
+<method name="getBindings"
+ return="java.util.Map&lt;com.google.inject.Key&lt;?&gt;, com.google.inject.Binding&lt;?&gt;&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getInstance"
+ return="T"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+</method>
+<method name="getInstance"
+ return="T"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="getProvider"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+</method>
+<method name="getProvider"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="injectMembers"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="o" type="java.lang.Object">
+</parameter>
+</method>
+</interface>
+<class name="Key"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Key"
+ type="com.google.inject.Key"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</constructor>
+<constructor name="Key"
+ type="com.google.inject.Key"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</constructor>
+<constructor name="Key"
+ type="com.google.inject.Key"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</constructor>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;?&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.reflect.Type">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;?&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.reflect.Type">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;?&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.reflect.Type">
+</parameter>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+<method name="getAnnotation"
+ return="java.lang.annotation.Annotation"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getAnnotationType"
+ return="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTypeLiteral"
+ return="com.google.inject.TypeLiteral&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="Module"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="configure"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binder" type="com.google.inject.Binder">
+</parameter>
+</method>
+</interface>
+<class name="ProvidedBy"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<interface name="Provider"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="get"
+ return="T"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+<interface name="Scope"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="scope"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="com.google.inject.Key&lt;T&gt;">
+</parameter>
+<parameter name="unscoped" type="com.google.inject.Provider&lt;T&gt;">
+</parameter>
+</method>
+<method name="toString"
+ return="java.lang.String"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+<class name="ScopeAnnotation"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="Scopes"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<field name="SINGLETON"
+ type="com.google.inject.Scope"
+ transient="false"
+ volatile="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+</class>
+<class name="Singleton"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="Stage"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="valueOf"
+ return="com.google.inject.Stage"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="com.google.inject.Stage[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="TypeLiteral"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="TypeLiteral"
+ type="com.google.inject.TypeLiteral"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</constructor>
+<method name="get"
+ return="com.google.inject.TypeLiteral&lt;?&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.reflect.Type">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.TypeLiteral&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="getType"
+ return="java.lang.reflect.Type"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+</package>
+<package name="com.google.inject.binder"
+>
+<interface name="AnnotatedBindingBuilder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="com.google.inject.binder.LinkedBindingBuilder">
+</implements>
+<method name="annotatedWith"
+ return="com.google.inject.binder.LinkedBindingBuilder&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="annotatedWith"
+ return="com.google.inject.binder.LinkedBindingBuilder&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+</interface>
+<interface name="AnnotatedConstantBindingBuilder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="annotatedWith"
+ return="com.google.inject.binder.ConstantBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="annotatedWith"
+ return="com.google.inject.binder.ConstantBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+</interface>
+<interface name="ConstantBindingBuilder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="java.lang.String">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="int">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="long">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="boolean">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="double">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="float">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="short">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="char">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="java.lang.Class&lt;?&gt;">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="E">
+</parameter>
+</method>
+</interface>
+<interface name="LinkedBindingBuilder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="com.google.inject.binder.ScopedBindingBuilder">
+</implements>
+<method name="to"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="implementation" type="java.lang.Class&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="to"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="implementation" type="com.google.inject.TypeLiteral&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="to"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetKey" type="com.google.inject.Key&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="toInstance"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="instance" type="T">
+</parameter>
+</method>
+<method name="toProvider"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="provider" type="com.google.inject.Provider&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="toProvider"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerType" type="java.lang.Class&lt;? extends com.google.inject.Provider&lt;? extends T&gt;&gt;">
+</parameter>
+</method>
+<method name="toProvider"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerKey" type="com.google.inject.Key&lt;? extends com.google.inject.Provider&lt;? extends T&gt;&gt;">
+</parameter>
+</method>
+</interface>
+<interface name="ScopedBindingBuilder"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="asEagerSingleton"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="in"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="scopeAnnotation" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="in"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="scope" type="com.google.inject.Scope">
+</parameter>
+</method>
+</interface>
+</package>
+<package name="com.google.inject.jndi"
+>
+<class name="JndiIntegration"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="fromJndi"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+</class>
+</package>
+<package name="com.google.inject.matcher"
+>
+<class name="AbstractMatcher"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="com.google.inject.matcher.Matcher">
+</implements>
+<constructor name="AbstractMatcher"
+ type="com.google.inject.matcher.AbstractMatcher"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="and"
+ return="com.google.inject.matcher.Matcher&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="com.google.inject.matcher.Matcher&lt;? super T&gt;">
+</parameter>
+</method>
+<method name="or"
+ return="com.google.inject.matcher.Matcher&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="com.google.inject.matcher.Matcher&lt;? super T&gt;">
+</parameter>
+</method>
+</class>
+<interface name="Matcher"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="and"
+ return="com.google.inject.matcher.Matcher&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="com.google.inject.matcher.Matcher&lt;? super T&gt;">
+</parameter>
+</method>
+<method name="matches"
+ return="boolean"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="t" type="T">
+</parameter>
+</method>
+<method name="or"
+ return="com.google.inject.matcher.Matcher&lt;T&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="com.google.inject.matcher.Matcher&lt;? super T&gt;">
+</parameter>
+</method>
+</interface>
+<class name="Matchers"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="annotatedWith"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.reflect.AnnotatedElement&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="annotatedWith"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.reflect.AnnotatedElement&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+<method name="any"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="identicalTo"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="o" type="java.lang.Object">
+</parameter>
+</method>
+<method name="inPackage"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.Class&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="p" type="java.lang.Package">
+</parameter>
+</method>
+<method name="not"
+ return="com.google.inject.matcher.Matcher&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="p" type="com.google.inject.matcher.Matcher&lt;? super T&gt;">
+</parameter>
+</method>
+<method name="only"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="o" type="java.lang.Object">
+</parameter>
+</method>
+<method name="returns"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.reflect.Method&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="returnType" type="com.google.inject.matcher.Matcher&lt;? super java.lang.Class&lt;?&gt;&gt;">
+</parameter>
+</method>
+<method name="subclassesOf"
+ return="com.google.inject.matcher.Matcher&lt;java.lang.Class&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="superclass" type="java.lang.Class&lt;?&gt;">
+</parameter>
+</method>
+</class>
+</package>
+<package name="com.google.inject.name"
+>
+<class name="Named"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="Names"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="bindProperties"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binder" type="com.google.inject.Binder">
+</parameter>
+<parameter name="properties" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
+</parameter>
+</method>
+<method name="bindProperties"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binder" type="com.google.inject.Binder">
+</parameter>
+<parameter name="properties" type="java.util.Properties">
+</parameter>
+</method>
+<method name="named"
+ return="com.google.inject.name.Named"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+</class>
+</package>
+<package name="com.google.inject.servlet"
+>
+<class name="GuiceFilter"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="GuiceFilter"
+ type="com.google.inject.servlet.GuiceFilter"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="destroy"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="doFilter"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="servletRequest" type="ServletRequest">
+</parameter>
+<parameter name="servletResponse" type="ServletResponse">
+</parameter>
+<parameter name="filterChain" type="FilterChain">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+<exception name="ServletException" type="ServletException">
+</exception>
+</method>
+<method name="init"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="filterConfig" type="FilterConfig">
+</parameter>
+<exception name="ServletException" type="ServletException">
+</exception>
+</method>
+</class>
+<class name="RequestParameters"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="RequestScoped"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="ServletModule"
+ extends="com.google.inject.AbstractModule"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="ServletModule"
+ type="com.google.inject.servlet.ServletModule"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="configure"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+</class>
+<class name="ServletScopes"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<field name="REQUEST"
+ type="com.google.inject.Scope"
+ transient="false"
+ volatile="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="SESSION"
+ type="com.google.inject.Scope"
+ transient="false"
+ volatile="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+</class>
+<class name="SessionScoped"
+ extends="java.lang.Object"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+</package>
+<package name="com.google.inject.spi"
+>
+<class name="Message"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Message"
+ type="com.google.inject.spi.Message"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="source" type="java.lang.Object">
+</parameter>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="Message"
+ type="com.google.inject.spi.Message"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<method name="getMessage"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSource"
+ return="java.lang.Object"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSourceString"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="SourceProvider"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="source"
+ return="java.lang.Object"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+<class name="SourceProviders"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="defaultSource"
+ return="java.lang.Object"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSkippedClassNames"
+ return="java.util.Set&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="skip"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="clazz" type="java.lang.Class&lt;?&gt;">
+</parameter>
+</method>
+<method name="withDefault"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="sourceProvider" type="com.google.inject.spi.SourceProvider">
+</parameter>
+<parameter name="r" type="java.lang.Runnable">
+</parameter>
+</method>
+<field name="UNKNOWN_SOURCE"
+ type="java.lang.Object"
+ transient="false"
+ volatile="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+</class>
+</package>
+<package name="com.google.inject.tools.jmx"
+>
+<interface name="ManagedBindingMBean"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getKey"
+ return="java.lang.String"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getProvider"
+ return="java.lang.String"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSource"
+ return="java.lang.String"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+<class name="Manager"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Manager"
+ type="com.google.inject.tools.jmx.Manager"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="main"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="args" type="java.lang.String[]">
+</parameter>
+<exception name="Exception" type="java.lang.Exception">
+</exception>
+</method>
+<method name="manage"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="domain" type="java.lang.String">
+</parameter>
+<parameter name="injector" type="com.google.inject.Injector">
+</parameter>
+</method>
+<method name="manage"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="server" type="javax.management.MBeanServer">
+</parameter>
+<parameter name="domain" type="java.lang.String">
+</parameter>
+<parameter name="injector" type="com.google.inject.Injector">
+</parameter>
+</method>
+</class>
+</package>
+<package name="com.google.inject.util"
+>
+<class name="Annotations"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Annotations"
+ type="com.google.inject.util.Annotations"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="isRetainedAtRuntime"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+</class>
+<class name="FinalizableSoftReference"
+ extends="java.lang.ref.SoftReference"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="FinalizableSoftReference"
+ type="com.google.inject.util.FinalizableSoftReference"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="referent" type="T">
+</parameter>
+</constructor>
+</class>
+<class name="FinalizableWeakReference"
+ extends="java.lang.ref.WeakReference"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="FinalizableWeakReference"
+ type="com.google.inject.util.FinalizableWeakReference"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="referent" type="T">
+</parameter>
+</constructor>
+</class>
+<interface name="Function"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="apply"
+ return="T"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="from" type="F">
+</parameter>
+</method>
+</interface>
+<class name="GuiceFastClass"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="GuiceFastClass"
+ type="com.google.inject.util.GuiceFastClass"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="create"
+ return="FastClass"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class">
+</parameter>
+</method>
+<method name="create"
+ return="FastClass"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="loader" type="java.lang.ClassLoader">
+</parameter>
+<parameter name="type" type="java.lang.Class">
+</parameter>
+</method>
+</class>
+<class name="GuiceNamingPolicy"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="GuiceNamingPolicy"
+ type="com.google.inject.util.GuiceNamingPolicy"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="getClassName"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="prefix" type="java.lang.String">
+</parameter>
+<parameter name="source" type="java.lang.String">
+</parameter>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+<parameter name="names" type="Predicate">
+</parameter>
+</method>
+</class>
+<class name="LineNumbers"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="LineNumbers"
+ type="com.google.inject.util.LineNumbers"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cls" type="java.lang.Class">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</constructor>
+<method name="getFirstLine"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getLineNumber"
+ return="java.lang.Integer"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="member" type="java.lang.reflect.Member">
+</parameter>
+</method>
+<method name="getSource"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="Objects"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Objects"
+ type="com.google.inject.util.Objects"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="assertNoNulls"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="objects" type="java.lang.Object[]">
+</parameter>
+</method>
+<method name="equal"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="a" type="java.lang.Object">
+</parameter>
+<parameter name="b" type="java.lang.Object">
+</parameter>
+</method>
+<method name="nonNull"
+ return="T"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="t" type="T">
+</parameter>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="ReferenceCache"
+ extends="com.google.inject.util.AbstractReferenceCache"
+ abstract="true"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="ReferenceCache"
+ type="com.google.inject.util.ReferenceCache"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="keyReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+<parameter name="valueReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+</constructor>
+<constructor name="ReferenceCache"
+ type="com.google.inject.util.ReferenceCache"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="create"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="key" type="K">
+</parameter>
+</method>
+<method name="of"
+ return="com.google.inject.util.ReferenceCache&lt;K, V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="keyReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+<parameter name="valueReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+<parameter name="function" type="com.google.inject.util.Function&lt;? super K, ? extends V&gt;">
+</parameter>
+</method>
+</class>
+<class name="ReferenceMap"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="ReferenceMap"
+ type="com.google.inject.util.ReferenceMap"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="keyReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+<parameter name="valueReferenceType" type="com.google.inject.util.ReferenceType">
+</parameter>
+</constructor>
+<method name="clear"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="containsKey"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+</method>
+<method name="containsValue"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="java.lang.Object">
+</parameter>
+</method>
+<method name="entrySet"
+ return="java.util.Set&lt;java.util.Map.Entry&lt;K, V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="get"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+</method>
+<method name="getPutStrategy"
+ return="com.google.inject.util.ReferenceMap.PutStrategy"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="isEmpty"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="keySet"
+ return="java.util.Set&lt;K&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="put"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="K">
+</parameter>
+<parameter name="value" type="V">
+</parameter>
+</method>
+<method name="putAll"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="t" type="java.util.Map&lt;? extends K, ? extends V&gt;">
+</parameter>
+</method>
+<method name="putIfAbsent"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="K">
+</parameter>
+<parameter name="value" type="V">
+</parameter>
+</method>
+<method name="putIfAbsentStrategy"
+ return="com.google.inject.util.ReferenceMap.Strategy"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="putStrategy"
+ return="com.google.inject.util.ReferenceMap.Strategy"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="remove"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+</method>
+<method name="remove"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+<parameter name="value" type="java.lang.Object">
+</parameter>
+</method>
+<method name="replace"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="K">
+</parameter>
+<parameter name="oldValue" type="V">
+</parameter>
+<parameter name="newValue" type="V">
+</parameter>
+</method>
+<method name="replace"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="K">
+</parameter>
+<parameter name="value" type="V">
+</parameter>
+</method>
+<method name="replaceStrategy"
+ return="com.google.inject.util.ReferenceMap.Strategy"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="size"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="values"
+ return="java.util.Collection&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="ReferenceMap.PutStrategy"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<implements name="com.google.inject.util.ReferenceMap.Strategy">
+</implements>
+<method name="valueOf"
+ return="com.google.inject.util.ReferenceMap.PutStrategy"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="com.google.inject.util.ReferenceMap.PutStrategy[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="ReferenceMap.Strategy"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<method name="execute"
+ return="java.lang.Object"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="map" type="com.google.inject.util.ReferenceMap">
+</parameter>
+<parameter name="keyReference" type="java.lang.Object">
+</parameter>
+<parameter name="valueReference" type="java.lang.Object">
+</parameter>
+</method>
+</interface>
+<class name="ReferenceType"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="valueOf"
+ return="com.google.inject.util.ReferenceType"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="com.google.inject.util.ReferenceType[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="StackTraceElements"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="StackTraceElements"
+ type="com.google.inject.util.StackTraceElements"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="forMember"
+ return="java.lang.Object"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="member" type="java.lang.reflect.Member">
+</parameter>
+</method>
+<method name="forType"
+ return="java.lang.Object"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="implementation" type="java.lang.Class&lt;?&gt;">
+</parameter>
+</method>
+</class>
+<class name="Stopwatch"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Stopwatch"
+ type="com.google.inject.util.Stopwatch"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="reset"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="resetAndLog"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="logger" type="java.util.logging.Logger">
+</parameter>
+<parameter name="label" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="Strings"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="Strings"
+ type="com.google.inject.util.Strings"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="capitalize"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="s" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="ToStringBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="ToStringBuilder"
+ type="com.google.inject.util.ToStringBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="ToStringBuilder"
+ type="com.google.inject.util.ToStringBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class">
+</parameter>
+</constructor>
+<method name="add"
+ return="com.google.inject.util.ToStringBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+<parameter name="value" type="java.lang.Object">
+</parameter>
+</method>
+</class>
+</package>
+</api>
