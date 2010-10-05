@@ -29,6 +29,19 @@
  deprecated="not deprecated"
  visibility="protected"
 >
+<parameter name="message" type="com.google.inject.spi.Message">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
 <parameter name="message" type="java.lang.String">
 </parameter>
 <parameter name="arguments" type="java.lang.Object...">
@@ -45,19 +58,6 @@
  visibility="protected"
 >
 <parameter name="t" type="java.lang.Throwable">
-</parameter>
-</method>
-<method name="addError"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
-<parameter name="message" type="com.google.inject.spi.Message">
 </parameter>
 </method>
 <method name="bind"
@@ -170,6 +170,17 @@
 </method>
 <method name="configure"
  return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="configure"
+ return="void"
  abstract="false"
  native="false"
  synchronized="true"
@@ -180,17 +191,6 @@
 >
 <parameter name="builder" type="com.google.inject.Binder">
 </parameter>
-</method>
-<method name="configure"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
 </method>
 <method name="convertToTypes"
  return="void"
@@ -228,7 +228,7 @@
  deprecated="not deprecated"
  visibility="protected"
 >
-<parameter name="type" type="java.lang.Class&lt;T&gt;">
+<parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
 </parameter>
 </method>
 <method name="getMembersInjector"
@@ -241,7 +241,7 @@
  deprecated="not deprecated"
  visibility="protected"
 >
-<parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
 </method>
 <method name="getProvider"
@@ -353,6 +353,19 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="message" type="com.google.inject.spi.Message">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <parameter name="message" type="java.lang.String">
 </parameter>
 <parameter name="arguments" type="java.lang.Object...">
@@ -369,19 +382,6 @@
  visibility="public"
 >
 <parameter name="t" type="java.lang.Throwable">
-</parameter>
-</method>
-<method name="addError"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="message" type="com.google.inject.spi.Message">
 </parameter>
 </method>
 <method name="bind"
@@ -717,6 +717,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="ConfigurationException"
  extends="java.lang.RuntimeException"
@@ -810,6 +812,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="Guice"
  extends="java.lang.Object"
@@ -842,19 +846,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
-</parameter>
-</method>
-<method name="createInjector"
- return="com.google.inject.Injector"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="stage" type="com.google.inject.Stage">
 </parameter>
 <parameter name="modules" type="com.google.inject.Module...">
@@ -875,6 +866,19 @@
 <parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
 </parameter>
 </method>
+<method name="createInjector"
+ return="com.google.inject.Injector"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
+</parameter>
+</method>
 </class>
 <class name="ImplementedBy"
  extends="java.lang.Object"
@@ -884,6 +888,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="Inject"
  extends="java.lang.Object"
@@ -893,6 +899,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <interface name="Injector"
  abstract="true"
@@ -911,7 +919,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
+<parameter name="modules" type="com.google.inject.Module...">
 </parameter>
 </method>
 <method name="createChildInjector"
@@ -924,7 +932,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="modules" type="com.google.inject.Module...">
+<parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
 </parameter>
 </method>
 <method name="findBindingsByType"
@@ -1095,6 +1103,14 @@
  deprecated="not deprecated"
  visibility="protected"
 >
+</constructor>
+<constructor name="Key"
+ type="com.google.inject.Key"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
 <parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
 </constructor>
@@ -1107,14 +1123,6 @@
 >
 <parameter name="annotation" type="java.lang.annotation.Annotation">
 </parameter>
-</constructor>
-<constructor name="Key"
- type="com.google.inject.Key"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
 </constructor>
 <method name="equals"
  return="boolean"
@@ -1139,6 +1147,49 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+<parameter name="annotation" type="java.lang.annotation.Annotation">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.Key&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
 </method>
@@ -1211,49 +1262,6 @@
  visibility="public"
 >
 <parameter name="type" type="java.lang.reflect.Type">
-</parameter>
-<parameter name="annotation" type="java.lang.annotation.Annotation">
-</parameter>
-</method>
-<method name="get"
- return="com.google.inject.Key&lt;T&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
-</parameter>
-</method>
-<method name="get"
- return="com.google.inject.Key&lt;T&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
-</parameter>
-<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
-</parameter>
-</method>
-<method name="get"
- return="com.google.inject.Key&lt;T&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="typeLiteral" type="com.google.inject.TypeLiteral&lt;T&gt;">
 </parameter>
 <parameter name="annotation" type="java.lang.annotation.Annotation">
 </parameter>
@@ -1429,7 +1437,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="type" type="java.lang.Class&lt;?&gt;">
+<parameter name="type" type="com.google.inject.TypeLiteral&lt;?&gt;">
 </parameter>
 </method>
 <method name="expose"
@@ -1442,7 +1450,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="type" type="com.google.inject.TypeLiteral&lt;?&gt;">
+<parameter name="type" type="java.lang.Class&lt;?&gt;">
 </parameter>
 </method>
 <method name="skipSources"
@@ -1500,6 +1508,19 @@
  deprecated="not deprecated"
  visibility="protected"
 >
+<parameter name="message" type="com.google.inject.spi.Message">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="protected"
+>
 <parameter name="message" type="java.lang.String">
 </parameter>
 <parameter name="arguments" type="java.lang.Object...">
@@ -1516,19 +1537,6 @@
  visibility="protected"
 >
 <parameter name="t" type="java.lang.Throwable">
-</parameter>
-</method>
-<method name="addError"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="protected"
->
-<parameter name="message" type="com.google.inject.spi.Message">
 </parameter>
 </method>
 <method name="bind"
@@ -1641,6 +1649,17 @@
 </method>
 <method name="configure"
  return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+</method>
+<method name="configure"
+ return="void"
  abstract="false"
  native="false"
  synchronized="true"
@@ -1651,17 +1670,6 @@
 >
 <parameter name="binder" type="com.google.inject.Binder">
 </parameter>
-</method>
-<method name="configure"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
 </method>
 <method name="convertToTypes"
  return="void"
@@ -1712,7 +1720,7 @@
  deprecated="not deprecated"
  visibility="protected"
 >
-<parameter name="type" type="java.lang.Class&lt;?&gt;">
+<parameter name="type" type="com.google.inject.TypeLiteral&lt;?&gt;">
 </parameter>
 </method>
 <method name="expose"
@@ -1725,20 +1733,7 @@
  deprecated="not deprecated"
  visibility="protected"
 >
-<parameter name="type" type="com.google.inject.TypeLiteral&lt;?&gt;">
-</parameter>
-</method>
-<method name="getMembersInjector"
- return="com.google.inject.MembersInjector&lt;T&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
-<parameter name="type" type="java.lang.Class&lt;T&gt;">
+<parameter name="type" type="java.lang.Class&lt;?&gt;">
 </parameter>
 </method>
 <method name="getMembersInjector"
@@ -1752,6 +1747,19 @@
  visibility="protected"
 >
 <parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+</method>
+<method name="getMembersInjector"
+ return="com.google.inject.MembersInjector&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="protected"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
 </method>
 <method name="getProvider"
@@ -1854,6 +1862,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <interface name="Provider"
  abstract="true"
@@ -1882,6 +1892,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="ProvisionException"
  extends="java.lang.RuntimeException"
@@ -1910,8 +1922,6 @@
 >
 <parameter name="message" type="java.lang.String">
 </parameter>
-<parameter name="cause" type="java.lang.Throwable">
-</parameter>
 </constructor>
 <constructor name="ProvisionException"
  type="com.google.inject.ProvisionException"
@@ -1921,6 +1931,8 @@
  visibility="public"
 >
 <parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
 </parameter>
 </constructor>
 <method name="getErrorMessages"
@@ -1977,6 +1989,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="Scopes"
  extends="java.lang.Object"
@@ -2015,6 +2029,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="Stage"
  extends="java.lang.Enum"
@@ -2079,19 +2095,6 @@
 </parameter>
 </method>
 <method name="get"
- return="com.google.inject.TypeLiteral&lt;?&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="type" type="java.lang.reflect.Type">
-</parameter>
-</method>
-<method name="get"
  return="com.google.inject.TypeLiteral&lt;T&gt;"
  abstract="false"
  native="false"
@@ -2102,6 +2105,19 @@
  visibility="public"
 >
 <parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="get"
+ return="com.google.inject.TypeLiteral&lt;?&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.reflect.Type">
 </parameter>
 </method>
 <method name="getExceptionTypes"
@@ -2225,6 +2241,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="AssistedInject"
  extends="java.lang.Object"
@@ -2234,6 +2252,8 @@
  deprecated="deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="FactoryProvider"
  extends="java.lang.Object"
@@ -2279,9 +2299,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="factoryType" type="java.lang.Class&lt;F&gt;">
+<parameter name="factoryType" type="com.google.inject.TypeLiteral&lt;F&gt;">
 </parameter>
-<parameter name="implementationType" type="java.lang.Class&lt;?&gt;">
+<parameter name="implementationType" type="com.google.inject.TypeLiteral&lt;?&gt;">
 </parameter>
 </method>
 <method name="newFactory"
@@ -2294,9 +2314,9 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="factoryType" type="com.google.inject.TypeLiteral&lt;F&gt;">
+<parameter name="factoryType" type="java.lang.Class&lt;F&gt;">
 </parameter>
-<parameter name="implementationType" type="com.google.inject.TypeLiteral&lt;?&gt;">
+<parameter name="implementationType" type="java.lang.Class&lt;?&gt;">
 </parameter>
 </method>
 </class>
@@ -2424,33 +2444,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="value" type="java.lang.String">
-</parameter>
-</method>
-<method name="to"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="int">
-</parameter>
-</method>
-<method name="to"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="long">
+<parameter name="value" type="E">
 </parameter>
 </method>
 <method name="to"
@@ -2464,6 +2458,19 @@
  visibility="public"
 >
 <parameter name="value" type="boolean">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="char">
 </parameter>
 </method>
 <method name="to"
@@ -2502,20 +2509,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="value" type="short">
-</parameter>
-</method>
-<method name="to"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="char">
+<parameter name="value" type="int">
 </parameter>
 </method>
 <method name="to"
@@ -2541,7 +2535,33 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="value" type="E">
+<parameter name="value" type="java.lang.String">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="long">
+</parameter>
+</method>
+<method name="to"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="short">
 </parameter>
 </method>
 </interface>
@@ -2564,7 +2584,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="implementation" type="java.lang.Class&lt;? extends T&gt;">
+<parameter name="targetKey" type="com.google.inject.Key&lt;? extends T&gt;">
 </parameter>
 </method>
 <method name="to"
@@ -2590,7 +2610,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="targetKey" type="com.google.inject.Key&lt;? extends T&gt;">
+<parameter name="implementation" type="java.lang.Class&lt;? extends T&gt;">
 </parameter>
 </method>
 <method name="toInstance"
@@ -2604,6 +2624,19 @@
  visibility="public"
 >
 <parameter name="instance" type="T">
+</parameter>
+</method>
+<method name="toProvider"
+ return="com.google.inject.binder.ScopedBindingBuilder"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerKey" type="com.google.inject.Key&lt;? extends com.google.inject.Provider&lt;? extends T&gt;&gt;">
 </parameter>
 </method>
 <method name="toProvider"
@@ -2630,19 +2663,6 @@
  visibility="public"
 >
 <parameter name="providerType" type="java.lang.Class&lt;? extends com.google.inject.Provider&lt;? extends T&gt;&gt;">
-</parameter>
-</method>
-<method name="toProvider"
- return="com.google.inject.binder.ScopedBindingBuilder"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="providerKey" type="com.google.inject.Key&lt;? extends com.google.inject.Provider&lt;? extends T&gt;&gt;">
 </parameter>
 </method>
 </interface>
@@ -2674,7 +2694,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="scopeAnnotation" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+<parameter name="scope" type="com.google.inject.Scope">
 </parameter>
 </method>
 <method name="in"
@@ -2687,7 +2707,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="scope" type="com.google.inject.Scope">
+<parameter name="scopeAnnotation" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
 </method>
 </interface>
@@ -3003,9 +3023,11 @@
 >
 <parameter name="binder" type="com.google.inject.Binder">
 </parameter>
-<parameter name="keyType" type="java.lang.Class&lt;K&gt;">
+<parameter name="keyType" type="com.google.inject.TypeLiteral&lt;K&gt;">
 </parameter>
-<parameter name="valueType" type="java.lang.Class&lt;V&gt;">
+<parameter name="valueType" type="com.google.inject.TypeLiteral&lt;V&gt;">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
 </method>
 <method name="newMapBinder"
@@ -3043,8 +3065,6 @@
 </parameter>
 <parameter name="valueType" type="java.lang.Class&lt;V&gt;">
 </parameter>
-<parameter name="annotation" type="java.lang.annotation.Annotation">
-</parameter>
 </method>
 <method name="newMapBinder"
  return="com.google.inject.multibindings.MapBinder&lt;K, V&gt;"
@@ -3058,9 +3078,9 @@
 >
 <parameter name="binder" type="com.google.inject.Binder">
 </parameter>
-<parameter name="keyType" type="com.google.inject.TypeLiteral&lt;K&gt;">
+<parameter name="keyType" type="java.lang.Class&lt;K&gt;">
 </parameter>
-<parameter name="valueType" type="com.google.inject.TypeLiteral&lt;V&gt;">
+<parameter name="valueType" type="java.lang.Class&lt;V&gt;">
 </parameter>
 <parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
@@ -3081,7 +3101,7 @@
 </parameter>
 <parameter name="valueType" type="java.lang.Class&lt;V&gt;">
 </parameter>
-<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+<parameter name="annotation" type="java.lang.annotation.Annotation">
 </parameter>
 </method>
 </class>
@@ -3131,7 +3151,9 @@
 >
 <parameter name="binder" type="com.google.inject.Binder">
 </parameter>
-<parameter name="type" type="java.lang.Class&lt;T&gt;">
+<parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
+</parameter>
+<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
 </method>
 <method name="newSetBinder"
@@ -3165,8 +3187,6 @@
 </parameter>
 <parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
-<parameter name="annotation" type="java.lang.annotation.Annotation">
-</parameter>
 </method>
 <method name="newSetBinder"
  return="com.google.inject.multibindings.Multibinder&lt;T&gt;"
@@ -3180,7 +3200,7 @@
 >
 <parameter name="binder" type="com.google.inject.Binder">
 </parameter>
-<parameter name="type" type="com.google.inject.TypeLiteral&lt;T&gt;">
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
 <parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
 </parameter>
@@ -3199,7 +3219,7 @@
 </parameter>
 <parameter name="type" type="java.lang.Class&lt;T&gt;">
 </parameter>
-<parameter name="annotationType" type="java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;">
+<parameter name="annotation" type="java.lang.annotation.Annotation">
 </parameter>
 </method>
 </class>
@@ -3214,6 +3234,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="Names"
  extends="java.lang.Object"
@@ -3396,6 +3418,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="RequestScoped"
  extends="java.lang.Object"
@@ -3405,6 +3429,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 <class name="ServletModule"
  extends="com.google.inject.AbstractModule"
@@ -3522,19 +3548,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="filterKey" type="java.lang.Class&lt;? extends Filter&gt;">
-</parameter>
-</method>
-<method name="through"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="filterKey" type="com.google.inject.Key&lt;? extends Filter&gt;">
 </parameter>
 </method>
@@ -3548,7 +3561,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="dummyFilterClass" type="java.lang.Class&lt;? extends Filter&gt;">
+<parameter name="dummyFilterClass" type="com.google.inject.Key&lt;? extends Filter&gt;">
 </parameter>
 <parameter name="contextParams" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
 </parameter>
@@ -3563,7 +3576,20 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="dummyFilterClass" type="com.google.inject.Key&lt;? extends Filter&gt;">
+<parameter name="filterKey" type="java.lang.Class&lt;? extends Filter&gt;">
+</parameter>
+</method>
+<method name="through"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="dummyFilterClass" type="java.lang.Class&lt;? extends Filter&gt;">
 </parameter>
 <parameter name="contextParams" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
 </parameter>
@@ -3586,19 +3612,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="servletKey" type="java.lang.Class&lt;? extends HttpServlet&gt;">
-</parameter>
-</method>
-<method name="with"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="servletKey" type="com.google.inject.Key&lt;? extends HttpServlet&gt;">
 </parameter>
 </method>
@@ -3612,7 +3625,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="servletKey" type="java.lang.Class&lt;? extends HttpServlet&gt;">
+<parameter name="servletKey" type="com.google.inject.Key&lt;? extends HttpServlet&gt;">
 </parameter>
 <parameter name="contextParams" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
 </parameter>
@@ -3627,7 +3640,20 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="servletKey" type="com.google.inject.Key&lt;? extends HttpServlet&gt;">
+<parameter name="servletKey" type="java.lang.Class&lt;? extends HttpServlet&gt;">
+</parameter>
+</method>
+<method name="with"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="servletKey" type="java.lang.Class&lt;? extends HttpServlet&gt;">
 </parameter>
 <parameter name="contextParams" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
 </parameter>
@@ -3670,6 +3696,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<implements name="java.lang.annotation.Annotation">
+</implements>
 </class>
 </package>
 <package name="com.google.inject.spi"
@@ -3747,7 +3775,72 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="binding" type="com.google.inject.spi.ConstructorBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.ConvertedConstantBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.ExposedBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <parameter name="binding" type="com.google.inject.spi.InstanceBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.LinkedKeyBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.ProviderBinding&lt;? extends T&gt;">
 </parameter>
 </method>
 <method name="visit"
@@ -3786,72 +3879,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="binding" type="com.google.inject.spi.LinkedKeyBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.ExposedBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="binding" type="com.google.inject.spi.UntargettedBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.ConstructorBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.ConvertedConstantBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.ProviderBinding&lt;? extends T&gt;">
 </parameter>
 </method>
 </interface>
@@ -4051,7 +4079,72 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="constructorBinding" type="com.google.inject.spi.ConstructorBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="convertedConstantBinding" type="com.google.inject.spi.ConvertedConstantBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="exposedBinding" type="com.google.inject.spi.ExposedBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <parameter name="instanceBinding" type="com.google.inject.spi.InstanceBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="linkedKeyBinding" type="com.google.inject.spi.LinkedKeyBinding&lt;? extends T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerBinding" type="com.google.inject.spi.ProviderBinding&lt;? extends T&gt;">
 </parameter>
 </method>
 <method name="visit"
@@ -4090,72 +4183,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="linkedKeyBinding" type="com.google.inject.spi.LinkedKeyBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="exposedBinding" type="com.google.inject.spi.ExposedBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="untargettedBinding" type="com.google.inject.spi.UntargettedBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="constructorBinding" type="com.google.inject.spi.ConstructorBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="convertedConstantBinding" type="com.google.inject.spi.ConvertedConstantBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="providerBinding" type="com.google.inject.spi.ProviderBinding&lt;? extends T&gt;">
 </parameter>
 </method>
 <method name="visitOther"
@@ -4200,72 +4228,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="message" type="com.google.inject.spi.Message">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="binding" type="com.google.inject.Binding&lt;T&gt;">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="interceptorBinding" type="com.google.inject.spi.InterceptorBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="scopeBinding" type="com.google.inject.spi.ScopeBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="typeConverterBinding" type="com.google.inject.spi.TypeConverterBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="providerLookup" type="com.google.inject.spi.ProviderLookup&lt;T&gt;">
 </parameter>
 </method>
 <method name="visit"
@@ -4291,7 +4254,33 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="staticInjectionRequest" type="com.google.inject.spi.StaticInjectionRequest">
+<parameter name="interceptorBinding" type="com.google.inject.spi.InterceptorBinding">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="lookup" type="com.google.inject.spi.MembersInjectorLookup&lt;T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="com.google.inject.spi.Message">
 </parameter>
 </method>
 <method name="visit"
@@ -4317,7 +4306,46 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="lookup" type="com.google.inject.spi.MembersInjectorLookup&lt;T&gt;">
+<parameter name="providerLookup" type="com.google.inject.spi.ProviderLookup&lt;T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="scopeBinding" type="com.google.inject.spi.ScopeBinding">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="staticInjectionRequest" type="com.google.inject.spi.StaticInjectionRequest">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="typeConverterBinding" type="com.google.inject.spi.TypeConverterBinding">
 </parameter>
 </method>
 <method name="visit"
@@ -4501,45 +4529,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="binding" type="com.google.inject.spi.InterceptorBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.ScopeBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="binding" type="com.google.inject.spi.TypeConverterBinding">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="request" type="com.google.inject.spi.InjectionRequest">
 </parameter>
 </method>
@@ -4553,20 +4542,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="request" type="com.google.inject.spi.StaticInjectionRequest">
-</parameter>
-</method>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="lookup" type="com.google.inject.spi.ProviderLookup&lt;T&gt;">
+<parameter name="binding" type="com.google.inject.spi.InterceptorBinding">
 </parameter>
 </method>
 <method name="visit"
@@ -4606,6 +4582,58 @@
  visibility="public"
 >
 <parameter name="elements" type="com.google.inject.spi.PrivateElements">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="lookup" type="com.google.inject.spi.ProviderLookup&lt;T&gt;">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.ScopeBinding">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="request" type="com.google.inject.spi.StaticInjectionRequest">
+</parameter>
+</method>
+<method name="visit"
+ return="V"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binding" type="com.google.inject.spi.TypeConverterBinding">
 </parameter>
 </method>
 <method name="visit"
@@ -4676,6 +4704,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="stage" type="com.google.inject.Stage">
+</parameter>
 <parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
 </parameter>
 </method>
@@ -4689,8 +4719,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="stage" type="com.google.inject.Stage">
-</parameter>
 <parameter name="modules" type="java.lang.Iterable&lt;? extends com.google.inject.Module&gt;">
 </parameter>
 </method>
@@ -5260,20 +5288,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="sources" type="java.util.List&lt;java.lang.Object&gt;">
-</parameter>
-<parameter name="message" type="java.lang.String">
-</parameter>
-<parameter name="cause" type="java.lang.Throwable">
-</parameter>
-</constructor>
-<constructor name="Message"
- type="com.google.inject.spi.Message"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="source" type="java.lang.Object">
 </parameter>
 <parameter name="message" type="java.lang.String">
@@ -5287,6 +5301,20 @@
  visibility="public"
 >
 <parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="Message"
+ type="com.google.inject.spi.Message"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="sources" type="java.util.List&lt;java.lang.Object&gt;">
+</parameter>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
 </parameter>
 </constructor>
 <method name="acceptVisitor"
@@ -5862,6 +5890,19 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="message" type="com.google.inject.spi.Message">
+</parameter>
+</method>
+<method name="addError"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <parameter name="message" type="java.lang.String">
 </parameter>
 <parameter name="arguments" type="java.lang.Object...">
@@ -5878,19 +5919,6 @@
  visibility="public"
 >
 <parameter name="t" type="java.lang.Throwable">
-</parameter>
-</method>
-<method name="addError"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="message" type="com.google.inject.spi.Message">
 </parameter>
 </method>
 <method name="bindInterceptor"
@@ -6091,6 +6119,48 @@
 </implements>
 </interface>
 </package>
+<package name="com.google.inject.spring"
+>
+<class name="SpringIntegration"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="bindAll"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="binder" type="com.google.inject.Binder">
+</parameter>
+<parameter name="beanFactory" type="ListableBeanFactory">
+</parameter>
+</method>
+<method name="fromSpring"
+ return="com.google.inject.Provider&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="java.lang.Class&lt;T&gt;">
+</parameter>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+</class>
+</package>
 <package name="com.google.inject.throwingproviders"
 >
 <interface name="ThrowingProvider"
@@ -6220,7 +6290,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="targetType" type="java.lang.Class&lt;? extends P&gt;">
+<parameter name="targetKey" type="com.google.inject.Key&lt;? extends P&gt;">
 </parameter>
 </method>
 <method name="to"
@@ -6233,7 +6303,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="targetKey" type="com.google.inject.Key&lt;? extends P&gt;">
+<parameter name="targetType" type="java.lang.Class&lt;? extends P&gt;">
 </parameter>
 </method>
 </class>
