@@ -122,8 +122,8 @@
 
       <doclet name="com.google.doclava.Doclava">
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
-        <param name="-since"/> <param name="/Users/jessewilson/Projects/guice-revs/versions/guice-1.0.xml"/> <param name="Guice_1.0" />
-        <param name="-since"/> <param name="/Users/jessewilson/Projects/guice-revs/versions/guice-2.0.xml"/> <param name="Guice_2.0" />
+        <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
+        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
         <param name="-apiversion" value="Guice_3.0"/>
         <param name="-assetsdir" value="javadoc/assets"/>
         <!-- TODO: fix doclava federation
