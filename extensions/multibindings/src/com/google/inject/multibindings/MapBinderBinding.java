@@ -28,15 +28,15 @@ import com.google.inject.spi.Elements;
 /**
  * A binding for a MapBinder.
  * <p>
- * Although MapBinders may be injected through a variety of generic types (Map{@literal<}K, V>, Map
- * {@literal<}K, Provider{@literal<}V>>, Map{@literal<}K, Set{@literal<}V>>, Map<K, Set{@literal<}
- * Provider{@literal<}V>>, and even Set{@literal<}Map.Entry{@literal<}K, Provider{@literal<}V>>), a
- * MapBinderBinding exists only on the Binding associated with the Map{@literal<}K, V> key. Other
+ * Although MapBinders may be injected through a variety of generic types (Map&lt;K, V>, Map
+ * &lt;K, Provider&lt;V>>, Map&lt;K, Set&lt;V>>, Map<K, Set&lt;
+ * Provider&lt;V>>, and even Set&lt;Map.Entry&lt;K, Provider&lt;V>>), a
+ * MapBinderBinding exists only on the Binding associated with the Map&lt;K, V> key. Other
  * bindings can be validated to be derived from this MapBinderBinding using
  * {@link #containsElement(Element)}.
  * 
  * @param <T> The fully qualified type of the map, including Map. For example:
- *          <code>MapBinderBinding{@literal<}Map{@literal<}String, Snack>></code>
+ *          <code>MapBinderBinding&lt;Map&lt;String, Snack>></code>
  * 
  * @author sameb@google.com (Sam Berlin)
  */
@@ -49,8 +49,8 @@ public interface MapBinderBinding<T> {
    * Returns the TypeLiteral describing the keys of the map.
    * <p>
    * The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
-   * returns a key of <code>Map{@literal<}String, Snack></code>, then this will always return a
-   * <code>TypeLiteral{@literal<}String></code>.
+   * returns a key of <code>Map&lt;String, Snack></code>, then this will always return a
+   * <code>TypeLiteral&lt;String></code>.
    */
   TypeLiteral<?> getKeyTypeLiteral();
 
@@ -58,8 +58,8 @@ public interface MapBinderBinding<T> {
    * Returns the TypeLiteral describing the values of the map.
    * <p>
    * The TypeLiteral will always match the type Map's generic type. For example, if getMapKey
-   * returns a key of <code>Map{@literal<}String, Snack></code>, then this will always return a
-   * <code>TypeLiteral{@literal<}Snack></code>.
+   * returns a key of <code>Map&lt;String, Snack></code>, then this will always return a
+   * <code>TypeLiteral&lt;Snack></code>.
    */
   TypeLiteral<?> getValueTypeLiteral();
 
@@ -71,8 +71,8 @@ public interface MapBinderBinding<T> {
    * {@link Elements#getElements}.
    * <p>
    * The elements will always match the type Map's generic type. For example, if getMapKey returns a
-   * key of <code>Map{@literal<}String, Snack></code>, then this will always return a list of type
-   * <code>List{@literal<}Map.Entry{@literal<}String, Binding{@literal<}Snack>>></code>.
+   * key of <code>Map&lt;String, Snack></code>, then this will always return a list of type
+   * <code>List&lt;Map.Entry&lt;String, Binding&lt;Snack>>></code>.
    */
   List<Map.Entry<?, Binding<?>>> getEntries();
 

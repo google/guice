@@ -28,7 +28,7 @@ import com.google.inject.spi.Elements;
  * A binding for a Multibinder.
  * 
  * @param <T> The fully qualified type of the set, including Set. For example:
- *          <code>MultibinderBinding{@literal<}Set{@literal<}Boolean>></code>
+ *          <code>MultibinderBinding&lt;Set&lt;Boolean>></code>
  * 
  * @author sameb@google.com (Sam Berlin)
  */
@@ -41,8 +41,8 @@ public interface MultibinderBinding<T> {
    * Returns the TypeLiteral that describes the type of elements in the set.
    * <p>
    * The elements will always match the type Set's generic type. For example, if getSetKey returns a
-   * key of <code>Set{@literal<}String></code>, then this will always return a
-   * <code>TypeLiteral{@literal<}String></code>.
+   * key of <code>Set&lt;String></code>, then this will always return a
+   * <code>TypeLiteral&lt;String></code>.
    */
   TypeLiteral<?> getElementTypeLiteral();
 
@@ -52,8 +52,8 @@ public interface MultibinderBinding<T> {
    * retrieved from {@link Elements#getElements}.
    * <p>
    * The elements will always match the type Set's generic type. For example, if getSetKey returns a
-   * key of <code>Set{@literal<}String></code>, then this will always return a list of type
-   * <code>List{@literal<}Binding{@literal<}String>></code>.
+   * key of <code>Set&lt;String></code>, then this will always return a list of type
+   * <code>List&lt;Binding&lt;String>></code>.
    */
   List<Binding<?>> getElements();
 

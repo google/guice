@@ -28,17 +28,14 @@ import com.google.inject.Provider;
  * {@link Binding#acceptTargetVisitor(BindingTargetVisitor)} method to visit a
  * custom visitor designed for that extension. A typical implementation within
  * the extension would look like
- * <pre>
- * <code>
- * {@literal<}V, B> V acceptExtensionVisitor(BindingTargetVisitor{@literal<}B, V> visitor, ProviderInstanceBinding{@literal<}? extends B> binding) {
+ * <pre> 
+ * &lt;V, B> V acceptExtensionVisitor(BindingTargetVisitor&lt;B, V> visitor, ProviderInstanceBinding&lt;? extends B> binding) {
  *   if(visitor instanceof MyCustomExtensionVisitor) {
- *     return ((MyCustomExtensionVisitor{@literal<}B, V>)visitor).visitCustomExtension(customProperties, binding);
+ *     return ((MyCustomExtensionVisitor&lt;B, V>)visitor).visitCustomExtension(customProperties, binding);
  *   } else {
  *     return visitor.visit(binding);
  *   }
- * }
- * </code>
- * </pre> 
+ * }</pre> 
  * 'MyCustomExtensionVisitor' in the example above would be an interface the
  * extension provides that users can implement in order to be notified of custom
  * extension information. These visitor interfaces must extend from
