@@ -18,15 +18,25 @@ package com.google.inject.throwingproviders;
 
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.Function;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Iterables;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
+
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
 /**
@@ -207,12 +217,59 @@ public class ThrowingProviderBinderTest extends TestCase {
       assertContains(expected.getMessage(), "is not a compliant interface");
     }
   }
+  
+  public void testDependencies() {
+    injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(String.class).toInstance("Foo");
+        bind(Integer.class).toInstance(5);
+        bind(Double.class).toInstance(5d);
+        bind(Long.class).toInstance(5L);
+        ThrowingProviderBinder.create(binder())
+            .bind(RemoteProvider.class, String.class)
+            .to(DependentRemoteProvider.class);
+      }
+    });
+    
+    HasDependencies hasDependencies =
+        (HasDependencies)injector.getBinding(Key.get(remoteProviderOfString));
+    hasDependencies = 
+        (HasDependencies)injector.getBinding(
+            Iterables.getOnlyElement(hasDependencies.getDependencies()).getKey());
+    // Make sure that that is dependent on DependentRemoteProvider.
+    assertEquals(Dependency.get(Key.get(DependentRemoteProvider.class)), 
+        Iterables.getOnlyElement(hasDependencies.getDependencies()));
+    // And make sure DependentRemoteProvider has the proper dependencies.
+    hasDependencies = (HasDependencies)injector.getBinding(DependentRemoteProvider.class);
+    Set<Key<?>> dependencyKeys = ImmutableSet.copyOf(
+        Iterables.transform(hasDependencies.getDependencies(),
+          new Function<Dependency<?>, Key<?>>() {
+            public Key<?> apply(Dependency<?> from) {
+              return from.getKey();
+            }
+          }));
+    assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class), Key.get(Integer.class),
+        Key.get(Long.class), Key.get(Double.class)), dependencyKeys);
+  }
 
   interface RemoteProviderWithExtraMethod<T> extends ThrowingProvider<T, RemoteException> {
     T get(T defaultValue) throws RemoteException;
   }
 
   interface RemoteProvider<T> extends ThrowingProvider<T, RemoteException> { }
+  
+  static class DependentRemoteProvider<T> implements RemoteProvider<T> {
+    @Inject double foo;
+    
+    @Inject public DependentRemoteProvider(String foo, int bar) {
+    }
+    
+    @Inject void initialize(long foo) {}
+    
+    public T get() throws RemoteException {
+      return null;
+    }
+  }
   
   static class MockRemoteProvider<T> implements RemoteProvider<T> {
     Exception nextToThrow;

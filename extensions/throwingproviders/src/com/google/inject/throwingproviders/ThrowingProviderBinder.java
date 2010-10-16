@@ -17,14 +17,15 @@
 package com.google.inject.throwingproviders;
 
 import com.google.inject.Binder;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.internal.UniqueAnnotations;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -33,6 +34,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Set;
 
 /**
  * <p>Builds a binding for a {@link ThrowingProvider} using a fluent API:
@@ -106,36 +108,32 @@ public class ThrowingProviderBinder {
       checkNotNull(targetKey, "targetKey");
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
       final Key<P> key = createKey();
+      final Provider<Result> resultProvider = binder.getProvider(resultKey);
+      final Provider<? extends P> targetProvider = binder.getProvider(targetKey);
 
-      binder.bind(key).toProvider(new Provider<P>() {
-        private P instance;
-
-        @Inject void initialize(final Injector injector) {
-          instance = interfaceType.cast(Proxy.newProxyInstance(
-              interfaceType.getClassLoader(), new Class<?>[] { interfaceType },
-              new InvocationHandler() {
-                public Object invoke(Object proxy, Method method, Object[] args)
-                    throws Throwable {
-                  return injector.getInstance(resultKey).getOrThrow();
-                }
-              }));
-          }
-
+      binder.bind(key).toProvider(new ProviderWithDependencies<P>() {
+        private final P instance = interfaceType.cast(Proxy.newProxyInstance(
+            interfaceType.getClassLoader(), new Class<?>[] { interfaceType },
+            new InvocationHandler() {
+              public Object invoke(Object proxy, Method method, Object[] args)
+                  throws Throwable {
+                return resultProvider.get().getOrThrow();
+              }
+            }));
+          
           public P get() {
             return instance;
           }
+          
+          public Set<Dependency<?>> getDependencies() {
+            return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
+          }
         });
 
-      return binder.bind(resultKey).toProvider(new Provider<Result>() {
-        private Injector injector;
-
-        @Inject void initialize(Injector injector) {
-          this.injector = injector;
-        }
-
+      return binder.bind(resultKey).toProvider(new ProviderWithDependencies<Result>() {
         public Result get() {
           try {
-            return Result.forValue(injector.getInstance(targetKey).get());
+            return Result.forValue(targetProvider.get().get());
           } catch (Exception e) {
             if (exceptionType.isInstance(e)) {
               return Result.forException(e);
@@ -146,6 +144,10 @@ public class ThrowingProviderBinder {
               throw new RuntimeException(e);
             }
           }
+        }
+        
+        public Set<Dependency<?>> getDependencies() {
+          return ImmutableSet.<Dependency<?>>of(Dependency.get(targetKey));
         }
       });
     }
