@@ -328,7 +328,7 @@ public abstract class Multibinder<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public <V, B> V acceptExtensionVisitor(
+    public <B, V> V acceptExtensionVisitor(
         BindingTargetVisitor<B, V> visitor,
         ProviderInstanceBinding<? extends B> binding) {
       if(visitor instanceof MultibindingsTargetVisitor) {

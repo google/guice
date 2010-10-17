@@ -55,6 +55,6 @@ public interface ProviderWithExtensionVisitor<T> extends Provider<T> {
    * relate to the type of the provider. In practice, the 'B' type will always
    * be a supertype of 'T'.
    */
-  <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+  <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding);
 }

@@ -353,7 +353,7 @@ public class SpiBindingsTest extends TestCase {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(String.class).toProvider(new ProviderWithExtensionVisitor<String>() {
-          public <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+          public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
               ProviderInstanceBinding<? extends B> binding) {
             assertSame(this, binding.getProviderInstance());
             // We can't always check for FailingSpiTargetVisitor,

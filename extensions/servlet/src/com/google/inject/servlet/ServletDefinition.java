@@ -71,7 +71,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     return this;
   }
   
-  public <V, B> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+  public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
       if(servletInstance != null) {

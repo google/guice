@@ -303,7 +303,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   }
 
   @SuppressWarnings("unchecked")
-  public <V, T> V acceptExtensionVisitor(BindingTargetVisitor<T, V> visitor,
+  public <T, V> V acceptExtensionVisitor(BindingTargetVisitor<T, V> visitor,
       ProviderInstanceBinding<? extends T> binding) {
     if (visitor instanceof AssistedInjectTargetVisitor) {
       return ((AssistedInjectTargetVisitor<T, V>)visitor).visit((AssistedInjectBinding<T>)this);

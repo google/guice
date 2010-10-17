@@ -394,7 +394,7 @@ public abstract class MapBinder<K, V> {
         }
 
         @SuppressWarnings("unchecked")
-        public <R, B> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
+        public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
             ProviderInstanceBinding<? extends B> binding) {
           if (visitor instanceof MultibindingsTargetVisitor) {
             return ((MultibindingsTargetVisitor<Map<K, V>, R>)visitor).visit(this);
