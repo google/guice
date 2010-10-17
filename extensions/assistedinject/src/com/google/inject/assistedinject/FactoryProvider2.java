@@ -16,6 +16,9 @@
 
 package com.google.inject.assistedinject;
 
+import static com.google.inject.internal.util.Iterables.getOnlyElement;
+import static com.google.inject.internal.util.Preconditions.checkState;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -27,7 +30,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
-import static com.google.inject.internal.Annotations.getKey;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
@@ -36,18 +39,18 @@ import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Iterables;
-import com.google.inject.internal.util.ToStringBuilder;
-
-import static com.google.inject.internal.util.Iterables.getOnlyElement;
 import com.google.inject.internal.util.Lists;
-import static com.google.inject.internal.util.Preconditions.checkState;
-
+import com.google.inject.internal.util.ToStringBuilder;
+import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Providers;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -71,7 +74,8 @@ import java.util.Set;
  * @author schmitt@google.com (Peter Schmitt)
  * @author sameb@google.com (Sam Berlin)
  */
-final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDependencies {
+final class FactoryProvider2 <F> implements InvocationHandler,
+    ProviderWithExtensionVisitor<F>, HasDependencies, AssistedInjectBinding<F> {
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION = new Assisted() {
@@ -96,36 +100,42 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
       return "@" + Assisted.class.getName() + "(value=)";
     }
   };
-  
+
   /** All the data necessary to perform an assisted inject. */
-  private static class AssistData {
+  private static class AssistData implements AssistedMethod {
     /** the constructor the implementation is constructed with. */
     final Constructor<?> constructor;
     /** the return type in the factory method that the constructor is bound to. */
     final Key<?> returnType;
     /** the parameters in the factory method associated with this data. */
     final ImmutableList<Key<?>> paramTypes;
-    
+    /** the type of the implementation constructed */
+    final TypeLiteral<?> implementationType;
+
     /** All non-assisted dependencies required by this method. */
     final Set<Dependency<?>> dependencies;
-    
+    /** The factory method associated with this data*/
+    final Method factoryMethod;
+
     /** true if {@link #validForOptimizedAssistedInject} returned true. */
     final boolean optimized;
     /** the list of optimized providers, empty if not optimized. */
     final List<ThreadLocalProvider> providers;
     /** used to perform optimized factory creations. */
     volatile Binding<?> cachedBinding; // TODO: volatile necessary?
-    
-    AssistData(Constructor<?> constructor, Key<?> returnType,
-        ImmutableList<Key<?>> paramTypes, boolean optimized,
-        List<ThreadLocalProvider> providers,
-        Set<Dependency<?>> dependencies) {
+
+    AssistData(Constructor<?> constructor, Key<?> returnType, ImmutableList<Key<?>> paramTypes,
+        TypeLiteral<?> implementationType, Method factoryMethod,
+        Set<Dependency<?>> dependencies,
+        boolean optimized, List<ThreadLocalProvider> providers) {
       this.constructor = constructor;
       this.returnType = returnType;
       this.paramTypes = paramTypes;
+      this.implementationType = implementationType;
+      this.factoryMethod = factoryMethod;
+      this.dependencies = dependencies;
       this.optimized = optimized;
       this.providers = providers;
-      this.dependencies = dependencies;
     }
 
     @Override
@@ -134,33 +144,53 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
         .add("ctor", constructor)
         .add("return type", returnType)
         .add("param type", paramTypes)
+        .add("implementation type", implementationType)
+        .add("dependencies", dependencies)
+        .add("factory method", factoryMethod)
         .add("optimized", optimized)
         .add("providers", providers)
         .add("cached binding", cachedBinding)
-        .add("dependencies", dependencies)
         .toString();
-      
+    }
+
+    public Set<Dependency<?>> getDependencies() {
+      return dependencies;
+    }
+
+    public Method getFactoryMethod() {
+      return factoryMethod;
+    }
+
+    public Constructor<?> getImplementationConstructor() {
+      return constructor;
+    }
+
+    public TypeLiteral<?> getImplementationType() {
+      return implementationType;
     }
   }
 
-  /** the produced type, or null if all methods return concrete types */
-  private final BindingCollector collector;
-  private final ImmutableMap<Method, AssistData> assistDataByMethod;  
+  /** Mapping from method to the data about how the method will be assisted. */
+  private final ImmutableMap<Method, AssistData> assistDataByMethod;
 
   /** the hosting injector, or null if we haven't been initialized yet */
   private Injector injector;
 
   /** the factory interface, implemented and provided */
   private final F factory;
+  
+  /** The key that this is bound to. */
+  private final Key<F> factoryKey;
 
   /**
    * @param factoryType a Java interface that defines one or more create methods.
    * @param collector binding configuration that maps method return types to
    *    implementation types.
    */
-  FactoryProvider2(TypeLiteral<F> factoryType, BindingCollector collector) {
-    this.collector = collector;
-
+  FactoryProvider2(Key<F> factoryKey, BindingCollector collector) {
+    this.factoryKey = factoryKey;
+    
+    TypeLiteral<F> factoryType = factoryKey.getTypeLiteral();
     Errors errors = new Errors();
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
@@ -173,7 +203,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
         TypeLiteral<?> returnTypeLiteral = factoryType.getReturnType(method);
         Key<?> returnType;
         try {
-          returnType = getKey(returnTypeLiteral, method, method.getAnnotations(), errors);
+          returnType = Annotations.getKey(returnTypeLiteral, method, method.getAnnotations(), errors);
         } catch(ConfigurationException ce) {
           // If this was an error due to returnTypeLiteral not being specified, rephrase
           // it as our factory not being specified, so it makes more sense to users.
@@ -188,7 +218,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
         int p = 0;
         List<Key<?>> keys = Lists.newArrayList();
         for (TypeLiteral<?> param : params) {
-          Key<?> paramKey = getKey(param, method, paramAnnotations[p++], errors);
+          Key<?> paramKey = Annotations.getKey(param, method, paramAnnotations[p++], errors);
           Class<?> underlylingType = paramKey.getTypeLiteral().getRawType();
           if (underlylingType.equals(Provider.class)
               || underlylingType.equals(javax.inject.Provider.class)) {
@@ -199,7 +229,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
           keys.add(assistKey(method, paramKey, errors));
         }
         ImmutableList<Key<?>> immutableParamList = ImmutableList.copyOf(keys);
-        
+
         // try to match up the method to the constructor
         TypeLiteral<?> implementation = collector.getBindings().get(returnType);
         if(implementation == null) {
@@ -207,13 +237,13 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
         }
         InjectionPoint ctorInjectionPoint;
         try {
-          ctorInjectionPoint = 
+          ctorInjectionPoint =
             findMatchingConstructorInjectionPoint(method, returnType, implementation, immutableParamList);
         } catch(ErrorsException ee) {
           errors.merge(ee.getErrors());
           continue;
         }
-        
+
         Constructor<?> constructor = (Constructor)ctorInjectionPoint.getMember();
         List<ThreadLocalProvider> providers = Collections.emptyList();
         Set<Dependency<?>> deps = getDependencies(ctorInjectionPoint, implementation);
@@ -232,8 +262,8 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
           optimized = true;
         }
         assistDataBuilder.put(method,
-            new AssistData(constructor, returnType, immutableParamList,
-                optimized, providers, removeAssistedDeps(deps)));
+            new AssistData(constructor, returnType, immutableParamList, implementation,
+                method, removeAssistedDeps(deps), optimized, providers));
       }
 
       // If we generated any errors (from finding matching constructors, for instance), throw an exception.
@@ -245,7 +275,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
-    
+
     factory = factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
         new Class[] { factoryRawType }, this));
   }
@@ -253,13 +283,32 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
   public F get() {
     return factory;
   }
-  
+
   public Set<Dependency<?>> getDependencies() {
     Set<Dependency<?>> combinedDeps = new HashSet<Dependency<?>>();
     for(AssistData data : assistDataByMethod.values()) {
       combinedDeps.addAll(data.dependencies);
     }
     return ImmutableSet.copyOf(combinedDeps);
+  }
+  
+  public Key<F> getKey() {
+    return factoryKey;
+  }
+
+  // safe cast because values are typed to AssistedData, which is an AssistedMethod
+  @SuppressWarnings("unchecked")
+  public Collection<AssistedMethod> getAssistedMethods() {
+    return (Collection)assistDataByMethod.values();
+  }
+
+  @SuppressWarnings("unchecked")
+  public <V, T> V acceptExtensionVisitor(BindingTargetVisitor<T, V> visitor,
+      ProviderInstanceBinding<? extends T> binding) {
+    if (visitor instanceof AssistedInjectTargetVisitor) {
+      return ((AssistedInjectTargetVisitor<T, V>)visitor).visit((AssistedInjectBinding<T>)this);
+    }
+    return visitor.visit(binding);
   }
 
   /**
@@ -293,7 +342,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     } else {
       errors = errors.withSource(returnType).withSource(implementation);
     }
-    
+
     Class<?> rawType = implementation.getRawType();
     if (Modifier.isInterface(rawType.getModifiers())) {
       errors.addMessage(
@@ -309,7 +358,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
       errors.cannotInjectInnerClass(rawType);
       throw errors.toException();
     }
-    
+
     Constructor<?> matchingConstructor = null;
     boolean anyAssistedInjectConstructors = false;
     // Look for AssistedInject constructors...
@@ -330,7 +379,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
         }
       }
     }
-    
+
     if(!anyAssistedInjectConstructors) {
       // If none existed, use @Inject.
       try {
@@ -371,7 +420,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     int p = 0;
     List<Key<?>> constructorKeys = Lists.newArrayList();
     for (TypeLiteral<?> param : params) {
-      Key<?> paramKey = getKey(param, constructor, paramAnnotations[p++],
+      Key<?> paramKey = Annotations.getKey(param, constructor, paramAnnotations[p++],
           errors);
       constructorKeys.add(paramKey);
     }
@@ -403,7 +452,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     }
     return builder.build();
   }
-  
+
   /** Return all non-assisted dependencies. */
   private Set<Dependency<?>> removeAssistedDeps(Set<Dependency<?>> deps) {
     ImmutableSet.Builder<Dependency<?>> builder = ImmutableSet.builder();
@@ -415,7 +464,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     }
     return builder.build();
   }
-  
+
   /**
    * Returns true if all dependencies are suitable for the optimized version of AssistedInject. The
    * optimized version caches the binding & uses a ThreadLocal Provider, so can only be applied if
@@ -430,7 +479,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     }
     return true;
   }
-  
+
   /**
    * Returns true if the dependency is for {@link Injector} or if the dependency
    * is a {@link Provider} for a parameter that is {@literal @}{@link Assisted}.
@@ -521,18 +570,14 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
             binder.bind((Key) paramKey).toProvider(data.providers.get(p++));
           }
         }
-                
+
         Constructor constructor = data.constructor;
         // Constructor *should* always be non-null here,
         // but if it isn't, we'll end up throwing a fairly good error
         // message for the user.
         if(constructor != null) {
-          TypeLiteral implementation = collector.getBindings().get(returnType);
-          if (implementation != null) {
-            binder.bind(assistedReturnType).toConstructor(constructor, implementation);
-          } else {
-            binder.bind(assistedReturnType).toConstructor(constructor, (TypeLiteral) returnType.getTypeLiteral());
-          }
+          binder.bind(assistedReturnType).toConstructor(
+              constructor, (TypeLiteral)data.implementationType);
         }
       }
     };
@@ -541,7 +586,7 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
     Binding binding = forCreate.getBinding(assistedReturnType);
     // If we have providers cached in data, cache the binding for future optimizations.
     if(data.optimized) {
-      data.cachedBinding = binding; 
+      data.cachedBinding = binding;
     }
     return binding;
   }
@@ -607,9 +652,9 @@ final class FactoryProvider2<F> implements InvocationHandler, Provider<F>, HasDe
 
     return false;
   }
-  
+
   // not <T> because we'll never know and this is easier than suppressing warnings.
-  private static class ThreadLocalProvider extends ThreadLocal<Object> implements Provider<Object> {    
+  private static class ThreadLocalProvider extends ThreadLocal<Object> implements Provider<Object> {
     @Override
     protected Object initialValue() {
       throw new IllegalStateException(

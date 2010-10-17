@@ -192,7 +192,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
         }
       }
 
-      return new FactoryProvider2<F>(factoryType, collector);
+      return new FactoryProvider2<F>(Key.get(factoryType), collector);
     }
   }
 
