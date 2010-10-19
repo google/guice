@@ -10,6 +10,14 @@
       <maximumStackSize value="32" />
       <properties />
     </buildFile>
+    <buildFile url="file://$PROJECT_DIR$/extensions/persist/build.xml">
+      <additionalClassPath />
+      <antReference projectDefault="true" />
+      <customJdkName value="" />
+      <maximumHeapSize value="128" />
+      <maximumStackSize value="2" />
+      <properties />
+    </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
@@ -118,6 +126,15 @@
           <option name="LABEL_INDENT_SIZE" value="0" />
           <option name="LABEL_INDENT_ABSOLUTE" value="false" />
         </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="html">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="java">
           <option name="INDENT_SIZE" value="2" />
           <option name="CONTINUATION_INDENT_SIZE" value="4" />
@@ -128,15 +145,6 @@
           <option name="LABEL_INDENT_ABSOLUTE" value="false" />
         </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="js">
-          <option name="INDENT_SIZE" value="4" />
-          <option name="CONTINUATION_INDENT_SIZE" value="8" />
-          <option name="TAB_SIZE" value="4" />
-          <option name="USE_TAB_CHARACTER" value="false" />
-          <option name="SMART_TABS" value="false" />
-          <option name="LABEL_INDENT_SIZE" value="0" />
-          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="jsp">
           <option name="INDENT_SIZE" value="4" />
           <option name="CONTINUATION_INDENT_SIZE" value="8" />
           <option name="TAB_SIZE" value="4" />
@@ -528,6 +536,7 @@
       <module fileurl="file://$PROJECT_DIR$/extensions/jndi/jndi.iml" filepath="$PROJECT_DIR$/extensions/jndi/jndi.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/multibindings/multibindings.iml" filepath="$PROJECT_DIR$/extensions/multibindings/multibindings.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/persist/persist.iml" filepath="$PROJECT_DIR$/extensions/persist/persist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/extensions/service/service.iml" filepath="$PROJECT_DIR$/extensions/service/service.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/servlet/servlet.iml" filepath="$PROJECT_DIR$/extensions/servlet/servlet.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/spring/spring.iml" filepath="$PROJECT_DIR$/extensions/spring/spring.iml" />
       <module fileurl="file://$PROJECT_DIR$/extensions/struts2/example/struts2-example.iml" filepath="$PROJECT_DIR$/extensions/struts2/example/struts2-example.iml" />

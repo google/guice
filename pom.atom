@@ -1,0 +1,16 @@
+# Maven Atom build file for Google Guice.
+# Author: dhanji@gmail.com (Dhanji R. Prasanna)
+
+repositories << "http://repo1.maven.org/maven2"
+
+project "Google Guice" @ "http://code.google.com/p/google-guice"
+  id: com.google.inject:guice:3.0
+  srcs: [ src: "src" test: "test" ]
+  deps: [ aopalliance:aopalliance:1.0
+          cglib:cglib:2.2
+          javax.inject:javax.inject:1
+          javax.inject:javax.inject-tck:1
+          junit:junit:3.8.2
+          springframework:spring:1.2.6
+          org.osgi:org.osgi.core:4.2.0
+        ]
