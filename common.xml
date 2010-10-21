@@ -105,7 +105,7 @@
       description="Create a .jar file with sources">
     <mkdir dir="${build.dir}"/>
     <zip destfile="${build.dir}/${ant.project.name}-${version}-src.jar">
-      <fileset dir="src"/>
+      <fileset dir="${src.dir}"/>
     </zip>
   </target>
 

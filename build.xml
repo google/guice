@@ -107,7 +107,7 @@
              docletpath="lib/build/doclava.jar"
              bootclasspath="${javahome}/jre/lib/rt.jar"
              maxmemory="512M">
-      <fileset dir="src" defaultexcludes="yes">
+      <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
       </fileset>

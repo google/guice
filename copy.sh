@@ -3,8 +3,8 @@
 
 client=/usr/local/google/clients/collect/google3
 
-srcdir=src/com/google/inject/internal
-testdir=test/com/google/inject/internal
+srcdir=core/src/com/google/inject/internal
+testdir=core/test/com/google/inject/internal
 
 filter() {
   sed 's/com.google.common.base.internal/com.google.inject.internal/' | \
@@ -51,4 +51,4 @@ copy $commonpath/collect/ForwardingSet.java $testdir
 copy $commonpath/collect/ForwardingMap.java $testdir
 copy $commonpath/base/Preconditions.java $testdir
 
-chmod +w -R src test
+chmod +w -R $srcdir $testdir
