@@ -202,9 +202,9 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       @Override
       public String getPathInfo() {
         if (!isPathInfoComputed()) {
-          final int servletPathLength = getServletPath().length();
-          pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/")
-              .substring(servletPathLength);
+          int servletPathLength = getServletPath().length();
+          pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/");
+          pathInfo = pathInfo.length() > servletPathLength ? pathInfo.substring(servletPathLength) : null;
 
           // Corner case: when servlet path and request path match exactly (without trailing '/'),
           // then pathinfo is null
