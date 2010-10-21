@@ -53,7 +53,9 @@ public class OSGiContainerTest
 
   static final String GUICE_JAR = BUILD_DIST_DIR + "/guice-" + VERSION + ".jar";
 
+/*if[AOP]*/
   static final String AOPALLIANCE_JAR = System.getProperty("aopalliance.jar", "lib/aopalliance.jar");
+/*end[AOP]*/
   static final String JAVAX_INJECT_JAR = System.getProperty("javax.inject.jar", "lib/javax.inject.jar");
 
   // dynamically build test bundles
@@ -64,15 +66,19 @@ public class OSGiContainerTest
     assertTrue(failMsg(), new File(BUILD_DIR).isDirectory());
     assertTrue(failMsg(), new File(GUICE_JAR).isFile());
 
+/*if[AOP]*/
     assertTrue(failMsg(), new File(AOPALLIANCE_JAR).isFile());
+/*end[AOP]*/
     assertTrue(failMsg(), new File(JAVAX_INJECT_JAR).isFile());
 
     Properties instructions = new Properties();
 
+/*if[AOP]*/
     // aopalliance is an API bundle --> export the full API
     instructions.setProperty("Export-Package", "org.aopalliance.*");
     buildBundle("aopalliance", instructions, AOPALLIANCE_JAR);
     instructions.clear();
+/*end[AOP]*/
 
     // javax.inject is an API bundle --> export the full API
     instructions.setProperty("Export-Package", "javax.inject.*");
@@ -80,7 +86,10 @@ public class OSGiContainerTest
     instructions.clear();
 
     // strict imports to make sure test bundle only has access to these packages
-    instructions.setProperty("Import-Package", "org.osgi.framework,org.aopalliance.intercept,"
+    instructions.setProperty("Import-Package", "org.osgi.framework,"
+/*if[AOP]*/
+        + "org.aopalliance.intercept,"
+/*end[AOP]*/
         + "com.google.inject(|.binder|.matcher|.name)");
 
     // test bundle should only contain the local test classes, nothing else
@@ -130,7 +139,9 @@ public class OSGiContainerTest
       BundleContext systemContext = framework.getBundleContext();
 
       // load all the necessary bundles and start the OSGi test bundle
+/*if[AOP]*/
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/aopalliance.jar");
+/*end[AOP]*/
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/javax.inject.jar");
       systemContext.installBundle("reference:file:" + GUICE_JAR);
       systemContext.installBundle("reference:file:" + BUILD_TEST_DIR + "/osgitests.jar").start();

@@ -33,8 +33,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
+/*if[AOP]*/
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+/*end[AOP]*/
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -275,6 +277,7 @@ public class BindingTest extends TestCase {
     }
   }
 
+/*if[AOP]*/
   public void testToConstructorAndMethodInterceptors() throws NoSuchMethodException {
     final Constructor<D> constructor = D.class.getConstructor(Stage.class);
     final AtomicInteger count = new AtomicInteger();
@@ -297,6 +300,7 @@ public class BindingTest extends TestCase {
     d.hashCode();
     assertEquals(2, count.get());
   }
+/*end[AOP]*/
 
   public void testInaccessibleConstructor() throws NoSuchMethodException {
     final Constructor<E> constructor = E.class.getDeclaredConstructor(Stage.class);

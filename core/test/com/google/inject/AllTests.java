@@ -22,7 +22,6 @@ import com.google.inject.internal.util.Jsr166HashMapTest;
 import com.google.inject.internal.util.LineNumbersTest;
 import com.google.inject.internal.util.MapMakerTestSuite;
 import com.google.inject.internal.MoreTypesTest;
-import com.google.inject.internal.ProxyFactoryTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamedEquivalanceTest;
@@ -138,7 +137,7 @@ public class AllTests {
     suite.addTestSuite(TypesTest.class);
 
     /*if[AOP]*/
-    suite.addTestSuite(ProxyFactoryTest.class);
+    suite.addTestSuite(com.google.inject.internal.ProxyFactoryTest.class);
     suite.addTestSuite(IntegrationTest.class);
     suite.addTestSuite(MethodInterceptionTest.class);
     suite.addTestSuite(com.googlecode.guice.BytecodeGenTest.class);

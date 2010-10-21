@@ -1127,7 +1127,9 @@ public class ElementsTest extends TestCase {
                 assertEquals(field,
                     getOnlyElement(constructorBinding.getInjectableMembers()).getMember());
                 assertEquals(2, constructorBinding.getDependencies().size());
+/*if[AOP]*/
                 assertEquals(ImmutableMap.of(), constructorBinding.getMethodInterceptors());
+/*end[AOP]*/
                 return null;
               }
             });

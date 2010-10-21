@@ -22,8 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -469,8 +467,8 @@ import com.google.inject.matcher.AbstractMatcher;
           return (methodModifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0;
 
         }
-      }, new MethodInterceptor() {
-        public Object invoke(MethodInvocation mi)
+      }, new org.aopalliance.intercept.MethodInterceptor() {
+        public Object invoke(org.aopalliance.intercept.MethodInvocation mi)
             throws Throwable {
 
           return mi.proceed();

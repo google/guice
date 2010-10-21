@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Produces construction proxies that invoke the class constructor.
@@ -97,7 +96,7 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
         return constructor;
       }
       /*if[AOP]*/
-      public ImmutableMap<Method, List<MethodInterceptor>>
+      public ImmutableMap<Method, List<org.aopalliance.intercept.MethodInterceptor>>
           getMethodInterceptors() {
         return ImmutableMap.of();
       }
