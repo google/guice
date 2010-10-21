@@ -53,6 +53,9 @@
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/multibindings/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/persist/build" includes="*.jar" excludes="*-with-deps.jar"/>
+    </copy>
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
@@ -183,6 +186,7 @@
     <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
   </target>
   
 </project>
