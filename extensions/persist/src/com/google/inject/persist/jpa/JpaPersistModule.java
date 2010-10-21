@@ -46,7 +46,7 @@ public final class JpaPersistModule extends PersistModule {
   private final String jpaUnit;
 
   public JpaPersistModule(String jpaUnit) {
-    Preconditions.checkArgument(null != jpaUnit && !jpaUnit.isEmpty(),
+    Preconditions.checkArgument(null != jpaUnit && jpaUnit.length() > 0,
         "JPA unit name must be a non-empty string.");
     this.jpaUnit = jpaUnit;
   }
