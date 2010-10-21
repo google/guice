@@ -1,21 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>com.google.inject.extensions</groupId>
     <artifactId>extensions-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
   </parent>
-  <artifactId>guice-assisted-inject</artifactId>
-  <packaging>jar</packaging>
-  <name>Google Guice - Extension: Assisted Inject</name>
-  <description>An easier way to help the Guice Injector build objects</description>
-  <!-- Note: this pom is for dependency management only.  It will not build the project -->
-  <dependencies>
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-    </dependency>
-  </dependencies>
+
+  <artifactId>guice-assistedinject</artifactId>
+
+  <name>Google Guice - Extensions - AssistedInject</name>
+
 </project>

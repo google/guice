@@ -1,21 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>com.google.inject.extensions</groupId>
     <artifactId>extensions-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
   </parent>
+
   <artifactId>guice-multibindings</artifactId>
-  <packaging>jar</packaging>
-  <name>Google Guice - Extension: Multibindings</name>
-  <description>Tools injecting collections of bound values</description>
-  <!-- Note: this pom is for dependency management only.  It will not build the project -->
-  <dependencies>
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-    </dependency>
-  </dependencies>
+
+  <name>Google Guice - Extensions - MultiBindings</name>
+
 </project>
