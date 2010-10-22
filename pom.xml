@@ -296,14 +296,20 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <profiles>
     <profile>
       <id>sonatype-grid</id>
+      <properties>
+        <forgeReleaseId>forge-releases</forgeReleaseId>
+        <forgeReleaseUrl>http://repository.sonatype.org:8081/service/local/staging/deploy/maven2</forgeReleaseUrl>
+        <forgeSnapshotId>forge-snapshots</forgeSnapshotId>
+        <forgeSnapshotUrl>http://repository.sonatype.org/content/repositories/snapshots</forgeSnapshotUrl>
+      </properties>
       <distributionManagement>
         <repository>
-          <id>forge-releases</id>
-          <url>http://repository.sonatype.org:8081/service/local/staging/deploy/maven2</url>
+          <id>${forgeReleaseId}</id>
+          <url>${forgeReleaseUrl}</url>
         </repository>
         <snapshotRepository>
-          <id>forge-snapshots</id>
-          <url>http://repository.sonatype.org/content/repositories/snapshots</url>
+          <id>${forgeSnapshotId}</id>
+          <url>${forgeSnapshotUrl}</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>
