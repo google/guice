@@ -71,6 +71,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <url>http://code.google.com/p/google-guice/issues/</url>
   </issueManagement>
 
+  <ciManagement>
+    <system>Hudson</system>
+    <url>https://grid.sonatype.org/ci/job/Google-Guice/</url>
+  </ciManagement>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
