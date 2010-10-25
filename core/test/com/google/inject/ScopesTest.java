@@ -23,6 +23,7 @@ import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+import com.google.inject.spi.PrivateElements;
 import com.google.inject.util.Providers;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -459,6 +460,7 @@ public class ScopesTest extends TestCase {
     final Key<String> f = Key.get(String.class, named("F"));
     final Key<String> g = Key.get(String.class, named("G"));
     final Key<Object> h = Key.get(Object.class, named("H"));
+    final Key<String> i = Key.get(String.class, named("I"));
 
     Module singletonBindings = new AbstractModule() {
       protected void configure() {
@@ -469,6 +471,13 @@ public class ScopesTest extends TestCase {
         bind(e).toProvider(Providers.of("e")).asEagerSingleton();
         bind(f).toProvider(Providers.of("f")).in(Singleton.class);
         bind(h).to(AnnotatedSingleton.class);
+        install(new PrivateModule() {          
+          @Override
+          protected void configure() {
+            bind(i).toProvider(Providers.of("i")).in(Singleton.class);
+            expose(i);
+          }
+        });
       }
 
       @Provides @Named("G") @Singleton String provideG() {
@@ -487,6 +496,7 @@ public class ScopesTest extends TestCase {
     assertTrue(Scopes.isSingleton(map.get(f)));
     assertTrue(Scopes.isSingleton(map.get(g)));
     assertFalse(Scopes.isSingleton(map.get(h))); // annotated classes are not followed by modules
+    assertTrue(Scopes.isSingleton(map.get(i)));
 
     Injector injector = Guice.createInjector(singletonBindings);
     assertTrue(Scopes.isSingleton(injector.getBinding(a)));
@@ -497,6 +507,7 @@ public class ScopesTest extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(f)));
     assertTrue(Scopes.isSingleton(injector.getBinding(g)));
     assertTrue(Scopes.isSingleton(injector.getBinding(h)));
+    assertTrue(Scopes.isSingleton(injector.getBinding(i)));
   }
   
   public void testIsSingletonNegative() {
@@ -505,6 +516,7 @@ public class ScopesTest extends TestCase {
     final Key<String> c = Key.get(String.class, named("C"));
     final Key<String> d = Key.get(String.class, named("D"));
     final Key<String> e = Key.get(String.class, named("E"));
+    final Key<String> f = Key.get(String.class, named("F"));
 
     Module singletonBindings = new AbstractModule() {
       protected void configure() {
@@ -513,6 +525,13 @@ public class ScopesTest extends TestCase {
         bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
         bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
         bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+        install(new PrivateModule() {          
+          @Override
+          protected void configure() {
+            bind(f).toProvider(Providers.of("f")).in(CustomScoped.class);
+            expose(f);
+          }
+        });
       }
 
       @Provides @Named("E") @CustomScoped String provideE() {
@@ -528,6 +547,7 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(map.get(c)));
     assertFalse(Scopes.isSingleton(map.get(d)));
     assertFalse(Scopes.isSingleton(map.get(e)));
+    assertFalse(Scopes.isSingleton(map.get(f)));
 
     Injector injector = Guice.createInjector(singletonBindings);
     assertFalse(Scopes.isSingleton(injector.getBinding(a)));
@@ -535,6 +555,7 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(injector.getBinding(c)));
     assertFalse(Scopes.isSingleton(injector.getBinding(d)));
     assertFalse(Scopes.isSingleton(injector.getBinding(e)));
+    assertFalse(Scopes.isSingleton(injector.getBinding(f)));
   }
 
   ImmutableMap<Key<?>, Binding<?>> indexBindings(Iterable<Element> elements) {
@@ -543,6 +564,12 @@ public class ScopesTest extends TestCase {
       if (element instanceof Binding) {
         Binding<?> binding = (Binding<?>) element;
         builder.put(binding.getKey(), binding);
+      } else if (element instanceof PrivateElements) {
+        PrivateElements privateElements = (PrivateElements)element;
+        Map<Key<?>, Binding<?>> privateBindings = indexBindings(privateElements.getElements());
+        for(Key<?> exposed : privateElements.getExposedKeys()) {
+          builder.put(exposed, privateBindings.get(exposed));
+        }
       }
     }
     return builder.build();

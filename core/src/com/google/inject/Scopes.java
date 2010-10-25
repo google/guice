@@ -20,6 +20,8 @@ import com.google.inject.internal.CircularDependencyProxy;
 import com.google.inject.internal.InternalInjectorCreator;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.ExposedBinding;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -155,6 +157,13 @@ public class Scopes {
         Injector injector = (Injector) linkedBinding.getInjector();
         if (injector != null) {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
+          continue;
+        }
+      } else if(binding instanceof ExposedBinding) {
+        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
+        Injector injector = exposedBinding.getPrivateElements().getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(exposedBinding.getKey());
           continue;
         }
       }
