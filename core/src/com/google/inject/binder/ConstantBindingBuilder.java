@@ -64,6 +64,11 @@ public interface ConstantBindingBuilder {
   /**
    * Binds constant to the given value.
    */
+  void to(byte value);
+
+  /**
+   * Binds constant to the given value.
+   */
   void to(Class<?> value);
 
   /**

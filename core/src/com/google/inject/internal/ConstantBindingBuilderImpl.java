@@ -82,6 +82,10 @@ public final class ConstantBindingBuilderImpl<T>
     toConstant(Character.class, value);
   }
 
+  public void to(final byte value) {
+    toConstant(Byte.class, value);
+  }  
+
   public void to(final Class<?> value) {
     toConstant(Class.class, value);
   }
