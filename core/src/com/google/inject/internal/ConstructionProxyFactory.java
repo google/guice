@@ -26,5 +26,5 @@ interface ConstructionProxyFactory<T> {
   /**
    * Gets a construction proxy for the given constructor.
    */
-  ConstructionProxy<T> create();
+  ConstructionProxy<T> create() throws ErrorsException;
 }

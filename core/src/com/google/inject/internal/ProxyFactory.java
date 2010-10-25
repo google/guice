@@ -23,6 +23,7 @@ import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Maps;
 import com.google.inject.spi.InjectionPoint;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -147,7 +148,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     return interceptors;
   }
 
-  public ConstructionProxy<T> create() {
+  public ConstructionProxy<T> create() throws ErrorsException {
     if (interceptors.isEmpty()) {
       return new DefaultConstructionProxyFactory<T>(injectionPoint).create();
     }
@@ -164,7 +165,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     enhancer.setCallbackTypes(callbackTypes);
     return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
     } catch (Throwable e) {
-      throw new ProvisionException("Unable to method intercept: " + declaringClass, e);
+      throw new Errors().errorEnhancingClass(declaringClass, e).toException();
     }
   }
 

@@ -18,6 +18,7 @@ package com.google.inject;
 
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.Iterables;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.only;
 import com.google.inject.spi.ConstructorBinding;
@@ -102,6 +103,27 @@ public class MethodInterceptionTest extends TestCase {
     assertSame(interceptable, lastTarget.get());
   }
 
+  public void testInterceptingFinalClass() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.any(), new MethodInterceptor() {
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            return methodInvocation.proceed();
+          }
+        });
+      }
+    });
+    try {
+      injector.getInstance(NotInterceptable.class);
+      fail();
+    } catch(ConfigurationException ce) {
+      assertEquals("Unable to method intercept: " + NotInterceptable.class.getName(),
+          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage().toString());
+      assertEquals("Cannot subclass final class class " + NotInterceptable.class.getName(),
+          ce.getCause().getMessage());
+    }
+  }
+
   public void testSpiAccessToInterceptors() throws NoSuchMethodException {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -141,4 +163,6 @@ public class MethodInterceptionTest extends TestCase {
       return new Bar() {};
     }
   }
+  
+  public static final class NotInterceptable {}
 }
