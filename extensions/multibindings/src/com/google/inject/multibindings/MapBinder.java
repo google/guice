@@ -92,6 +92,9 @@ import java.util.Set;
  * that module can order its bindings appropriately. Avoid relying on the
  * iteration order of elements contributed by different modules, since there is
  * no equivalent mechanism to order modules.
+ * 
+ * <p>The map is unmodifiable.  Elements can only be added to the map by
+ * configuring the MapBinder.  Elements can never be removed from the map.
  *
  * <p>Values are resolved at map injection time. If a value is bound to a
  * provider, that provider's get method will be called each time the map is

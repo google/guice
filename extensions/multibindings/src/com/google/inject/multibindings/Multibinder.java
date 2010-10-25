@@ -81,6 +81,9 @@ import java.util.Set;
  * that module can order its bindings appropriately. Avoid relying on the
  * iteration order of elements contributed by different modules, since there is
  * no equivalent mechanism to order modules.
+ * 
+ * <p>The set is unmodifiable.  Elements can only be added to the set by
+ * configuring the multibinder.  Elements can never be removed from the set.
  *
  * <p>Elements are resolved at set injection time. If an element is bound to a
  * provider, that provider's get method will be called each time the set is
