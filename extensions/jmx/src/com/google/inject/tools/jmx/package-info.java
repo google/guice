@@ -15,6 +15,6 @@
  */
 
 /**
- * JMX integration; this extension requires {@code guice-jmx-2.0.jar}.
+ * JMX integration; this extension requires {@code guice-jmx-3.0.jar}.
  */
 package com.google.inject.tools.jmx;
