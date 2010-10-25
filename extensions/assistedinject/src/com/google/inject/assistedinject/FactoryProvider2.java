@@ -197,6 +197,10 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     Class<F> factoryRawType = (Class) factoryType.getRawType();
 
     try {
+      if(!factoryRawType.isInterface()) {
+        throw errors.addMessage("%s must be an interface.", factoryRawType).toException();
+      }
+      
       ImmutableMap.Builder<Method, AssistData> assistDataBuilder = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
       for (Method method : factoryRawType.getMethods()) {
@@ -213,6 +217,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
             throw ce;
           }
         }
+        validateFactoryReturnType(errors, returnType.getTypeLiteral().getRawType(), factoryRawType);
         List<TypeLiteral<?>> params = factoryType.getParameterTypes(method);
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
         int p = 0;
@@ -309,6 +314,16 @@ final class FactoryProvider2 <F> implements InvocationHandler,
       return ((AssistedInjectTargetVisitor<T, V>)visitor).visit((AssistedInjectBinding<T>)this);
     }
     return visitor.visit(binding);
+  }
+  
+  private void validateFactoryReturnType(Errors errors, Class<?> returnType, Class<?> factoryType) {
+    if (Modifier.isPublic(factoryType.getModifiers())
+        && !Modifier.isPublic(returnType.getModifiers())) {
+      errors.addMessage("%s is public, but has a method that returns a non-public type: %s. "
+          + "Due to limitations with java.lang.reflect.Proxy, this is not allowed. "
+          + "Please either make the factory non-public or the return type public.",
+          factoryType, returnType);
+    }
   }
 
   /**

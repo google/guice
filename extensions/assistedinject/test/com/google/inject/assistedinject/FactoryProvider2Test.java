@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@SuppressWarnings("deprecation")
 public class FactoryProvider2Test extends TestCase {
 
   public void testAssistedFactory() {
@@ -86,7 +87,7 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(250, redCamaro.horsePower);
   }
 
-  interface Car {}
+  public interface Car {}
 
   interface ColoredCarFactory {
     Car create(Color color);
@@ -338,7 +339,6 @@ public class FactoryProvider2Test extends TestCase {
   }
 
   public static class Prius implements Car {
-    @SuppressWarnings("unused")
     final Color color;
 
     @Inject
@@ -446,9 +446,7 @@ public class FactoryProvider2Test extends TestCase {
   public static class SteeringWheel {}
 
   public static class Fiat implements Car {
-    @SuppressWarnings("unused")
     private final SteeringWheel steeringWheel;
-    @SuppressWarnings("unused")
     private final Color color;
 
     @Inject

@@ -434,4 +434,28 @@ public class FactoryModuleBuilderTest extends TestCase {
     @AssistedInject Cat(@Assisted byte a, @Named("catfail") String b) {} // not a dependency!
     @Inject void register(@Named("cat3") String a) {}
   }
+  
+  public void testFactoryPublicAndReturnTypeNotPublic() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          install(new FactoryModuleBuilder()
+              .implement(Hidden.class, HiddenImpl.class)
+              .build(NotHidden.class));
+        }
+      });
+    } catch(CreationException ce) {
+      assertEquals(NotHidden.class.getName() + " is public, but has a method that returns a non-public type: "
+          + Hidden.class.getName() + ". Due to limitations with java.lang.reflect.Proxy, this is not allowed. "
+          + "Please either make the factory non-public or the return type public.",           
+          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+    }
+  }
+  
+  interface Hidden {}
+  public static class HiddenImpl implements Hidden {}
+  public interface NotHidden {
+    Hidden create();
+  }
 }
