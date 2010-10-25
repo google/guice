@@ -189,6 +189,7 @@ public class ElementsTest extends TestCase {
             bindConstant().annotatedWith(Names.named("float")).to(6.0f);
             bindConstant().annotatedWith(Names.named("short")).to((short) 7);
             bindConstant().annotatedWith(Names.named("char")).to('h');
+            bindConstant().annotatedWith(Names.named("byte")).to((byte) 8);
             bindConstant().annotatedWith(Names.named("Class")).to(Iterator.class);
             bindConstant().annotatedWith(Names.named("Enum")).to(CoinSide.TAILS);
           }
@@ -262,6 +263,15 @@ public class ElementsTest extends TestCase {
             assertTrue(command instanceof InstanceBinding);
             assertEquals(Key.get(Character.class, Names.named("char")), command.getKey());
             assertEquals('h', getInstance(command));
+            return null;
+          }
+        },
+        
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> command) {
+            assertTrue(command instanceof InstanceBinding);
+            assertEquals(Key.get(Byte.class, Names.named("byte")), command.getKey());
+            assertEquals((byte) 8, getInstance(command));
             return null;
           }
         },
