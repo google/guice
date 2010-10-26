@@ -105,10 +105,11 @@
   </target>
   
   <target name="javadoc">
+  	<echo message="${javahome}"/>
     <javadoc packagenames="com.google.*"
              destdir="build/docs"
-             docletpath="lib/build/doclava.jar"
-             bootclasspath="${javahome}/jre/lib/rt.jar"
+    	     docletpath="lib/build/doclava.jar"
+             bootclasspath="${java.home}/lib/rt.jar"
              maxmemory="512M">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
