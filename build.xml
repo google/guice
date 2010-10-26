@@ -105,7 +105,6 @@
   </target>
   
   <target name="javadoc">
-  	<echo message="${javahome}"/>
     <javadoc packagenames="com.google.*"
              destdir="build/docs"
     	     docletpath="lib/build/doclava.jar"
