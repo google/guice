@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Nullable;
 import com.google.inject.internal.util.ComputationException;
 import com.google.inject.internal.util.CustomConcurrentHashMap.Impl;
 import com.google.inject.internal.util.ExpirationTimer;

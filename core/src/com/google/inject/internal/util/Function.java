@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Nullable;
 
 /**
  * A transformation from one object to another. For example, a

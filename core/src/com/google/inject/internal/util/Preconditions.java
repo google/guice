@@ -50,7 +50,7 @@ import java.util.NoSuchElementException;
  * in their specifications to do so even when given perfectly valid input. That
  * is, {@code null} is a valid parameter to the method {@link
  * #checkNotNull(Object)} -- and technically this parameter could be even marked
- * as {@link com.google.inject.internal.Nullable} -- yet the method will still throw an exception anyway,
+ * as {@link com.google.inject.internal.util.Nullable} -- yet the method will still throw an exception anyway,
  * because that's what its contract says to do.
  * 
  * <p>This class may be used with the Google Web Toolkit (GWT).

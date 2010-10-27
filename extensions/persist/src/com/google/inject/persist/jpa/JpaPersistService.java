@@ -19,7 +19,7 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Nullable;
+import com.google.inject.internal.util.Nullable;
 import com.google.inject.internal.util.Preconditions;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;

@@ -36,6 +36,7 @@ import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Maps;
+import com.google.inject.internal.util.Nullable;
 import com.google.inject.internal.util.Objects;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.ToStringBuilder;

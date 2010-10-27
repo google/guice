@@ -19,6 +19,8 @@ package com.google.inject.internal;
 import com.google.inject.internal.util.Function;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.MapMaker;
+import com.google.inject.internal.util.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;

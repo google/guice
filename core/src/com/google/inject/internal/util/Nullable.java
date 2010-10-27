@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.internal.util;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

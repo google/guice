@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
