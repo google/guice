@@ -7,7 +7,7 @@
   <path id="compile.classpath">
     <fileset dir="${lib.dir}" includes="*.jar"/>
   	<fileset dir="${ext.lib.dir}" includes="*.jar"/>
-    <fileset dir="../../build/dist" includes="*.jar"/>
+    <pathelement path="../../build/classes"/>
     <fileset dir="../servlet/build" includes="*.jar"/>
   </path>
 

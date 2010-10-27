@@ -9,7 +9,7 @@
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
   	<fileset dir="${ext.lib.dir}" includes="*.jar"/>
     <fileset dir="${ext.lib.dir}/build" includes="*.jar"/>
-    <fileset dir="../../build/dist" includes="*.jar"/>
+    <pathelement path="../../build/classes"/>
   </path>
 
   <target name="jar" depends="jar.withdeps, manifest" description="Build jar.">

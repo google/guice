@@ -76,14 +76,14 @@
   </target>
   
   <target name="test.dist"
-      depends="jar, test.compile"
+      depends="jar, test.compile-with-deps"
       description="Execute JUnit tests against distribution jar.">
     <java fork="true" 
         classname="junit.textui.TestRunner"
         failonerror="true"
         taskname="junit">
       <classpath>
-        <pathelement location="${build.dir}/test"/>
+        <pathelement location="${build.dir}/guice-${version}-tests.jar"/>
         <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
         <pathelement location="lib/build/junit.jar"/>

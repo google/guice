@@ -140,7 +140,7 @@ public class FinalizableReferenceQueueTest extends TestCase {
   }
 
   public void testGetFinalizerUrl() {
-    assertNotNull(getClass().getResource("Finalizer.class"));
+    assertNotNull(getClass().getResource(Finalizer.class.getSimpleName() + ".class"));
   }
 }
 
