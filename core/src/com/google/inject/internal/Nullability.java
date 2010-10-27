@@ -22,7 +22,9 @@ public class Nullability {
 
   public static boolean allowsNull(Annotation[] annotations) {
     for(Annotation a : annotations) {
-      if ("Nullable".equals(a.annotationType().getSimpleName())) {
+      String name = a.annotationType().getSimpleName();
+      // Check for $Nullable also because jarjar renames it.
+      if ("Nullable".equals(name) || "$Nullable".equals(name)) {
         return true;
       }
     }

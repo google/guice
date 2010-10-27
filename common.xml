@@ -118,7 +118,7 @@
   	<mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-1.0rc8.jar"/>
+        classpath="${common.basedir}/lib/build/jarjar-snapshot.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-${version}-tests.jar">
       <fileset dir="${build.dir}/test"/>
       <rule pattern="com.google.inject.internal.util.*" result="com.google.inject.internal.util.$@1"/>    	
@@ -133,7 +133,7 @@
     <mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-1.0rc8.jar"/>
+        classpath="${common.basedir}/lib/build/jarjar-snapshot.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-2.2.1-snapshot.jar"/>
