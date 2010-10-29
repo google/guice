@@ -323,6 +323,25 @@ public class JitBindingsTest extends TestCase {
     assertEquals(of("bar"), foo.set);
   }
   
+  public void testMembersInjectorsCanBeInjected() {
+    Injector injector = new InjectorBuilder()
+    .requireExplicitBindings()
+    .addModules(new AbstractModule() {
+      @Override protected void configure() {
+      }
+      
+      @Provides String data(MembersInjector<String> mi) {
+        String data = "foo";
+        mi.injectMembers(data);
+        return data;
+      }
+    })
+    .build();
+
+    String data = injector.getInstance(String.class);
+    assertEquals("foo", data);
+  }
+  
   private void ensureWorks(Injector injector, Class<?>... classes) {
     for(int i = 0; i < classes.length; i++) {
       injector.getInstance(classes[i]);

@@ -212,7 +212,7 @@ final class InjectorImpl implements Injector, Lookups {
       throws ErrorsException {
 
 
-    boolean jitOverride = isProvider(key) || isTypeLiteral(key);
+    boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
     if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !jitOverride) {
       throw errors.jitDisabled(key).toException();
     }
