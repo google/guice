@@ -2,6 +2,13 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import com.google.inject.internal.util.Nullable;
 
 import junit.framework.TestCase;
@@ -72,6 +79,24 @@ public class NullableInjectionPointTest extends TestCase {
         = createInjector().getInstance(NullableFooField.class);
     assertNull(nff.foo);
   }
+  
+  public void testInjectNullIntoCustomNullableConstructor() {
+    CustomNullableFooConstructor nfc
+        = createInjector().getInstance(CustomNullableFooConstructor.class);
+    assertNull(nfc.foo);
+  }
+
+  public void testInjectNullIntoCustomNullableMethod() {
+    CustomNullableFooMethod nfm
+        = createInjector().getInstance(CustomNullableFooMethod.class);
+    assertNull(nfm.foo);
+  }
+
+  public void testInjectNullIntoCustomNullableField() {
+    CustomNullableFooField nff
+        = createInjector().getInstance(CustomNullableFooField.class);
+    assertNull(nff.foo);
+  }  
 
   private Injector createInjector() {
     return Guice.createInjector(
@@ -115,6 +140,7 @@ public class NullableInjectionPointTest extends TestCase {
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
+    assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 
     try {
       injector.getInstance(FooField.class);
@@ -135,6 +161,7 @@ public class NullableInjectionPointTest extends TestCase {
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
+    assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 
     try {
       injector.getInstance(FooField.class);
@@ -155,6 +182,7 @@ public class NullableInjectionPointTest extends TestCase {
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
+    assertNull(injector.getInstance(CustomNullableFooField.class).foo);
 
     try {
       injector.getInstance(FooField.class);
@@ -192,5 +220,29 @@ public class NullableInjectionPointTest extends TestCase {
     @Inject void setFoo(@Nullable Foo foo) {
       this.foo = foo;
     }
+  }
+  
+  static class CustomNullableFooConstructor {
+    Foo foo;
+    @Inject CustomNullableFooConstructor(@Namespace.Nullable Foo foo) {
+      this.foo = foo;
+    }
+  }
+  
+  static class CustomNullableFooField {
+    @Inject @Namespace.Nullable Foo foo;
+  }
+  static class CustomNullableFooMethod {
+    Foo foo;
+    @Inject void setFoo(@Namespace.Nullable Foo foo) {
+      this.foo = foo;
+    }
+  }
+  
+  static interface Namespace {
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    @interface Nullable { }
   }
 }
