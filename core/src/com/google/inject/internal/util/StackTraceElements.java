@@ -16,7 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import com.google.inject.internal.MoreTypes;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -61,7 +60,7 @@ public class StackTraceElements {
     int lineNumber = -1;
     end[NO_AOP]*/
 
-    Class<? extends Member> memberType = MoreTypes.memberType(member);
+    Class<? extends Member> memberType = Classes.memberType(member);
     String memberName = memberType == Constructor.class ? "<init>" : member.getName();
     return new StackTraceElement(declaringClass.getName(), memberName, fileName, lineNumber);
   }

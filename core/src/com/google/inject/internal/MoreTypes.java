@@ -26,12 +26,8 @@ import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -245,45 +241,6 @@ public class MoreTypes {
 
   public static String typeToString(Type type) {
     return type instanceof Class ? ((Class) type).getName() : type.toString();
-  }
-
-  /**
-   * Returns {@code Field.class}, {@code Method.class} or {@code Constructor.class}.
-   */
-  public static Class<? extends Member> memberType(Member member) {
-    checkNotNull(member, "member");
-
-    if (member instanceof Field) {
-      return Field.class;
-
-    } else if (member instanceof Method) {
-      return Method.class;
-
-    } else if (member instanceof Constructor) {
-      return Constructor.class;
-
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported implementation class for Member, " + member.getClass());
-    }
-  }
-
-  /**
-   * Formats a member as concise string, such as {@code java.util.ArrayList.size},
-   * {@code java.util.ArrayList<init>()} or {@code java.util.List.remove()}.
-   */
-  public static String toString(Member member) {
-    Class<? extends Member> memberType = memberType(member);
-
-    if (memberType == Method.class) {
-      return member.getDeclaringClass().getName() + "." + member.getName() + "()";
-    } else if (memberType == Field.class) {
-      return member.getDeclaringClass().getName() + "." + member.getName();
-    } else if (memberType == Constructor.class) {
-      return member.getDeclaringClass().getName() + ".<init>()";
-    } else {
-      throw new AssertionError();
-    }
   }
 
   /**

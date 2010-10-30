@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
@@ -626,7 +627,7 @@ public final class Errors implements Serializable {
       },
       new Converter<Member>(Member.class) {
         public String toString(Member member) {
-          return MoreTypes.toString(member);
+          return Classes.toString(member);
         }
       },
       new Converter<Key>(Key.class) {
@@ -683,7 +684,7 @@ public final class Errors implements Serializable {
   public static void formatInjectionPoint(Formatter formatter, Dependency<?> dependency,
       InjectionPoint injectionPoint) {
     Member member = injectionPoint.getMember();
-    Class<? extends Member> memberType = MoreTypes.memberType(member);
+    Class<? extends Member> memberType = Classes.memberType(member);
 
     if (memberType == Field.class) {
       dependency = injectionPoint.getDependencies().get(0);

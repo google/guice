@@ -23,9 +23,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.MoreTypes;
 import static com.google.inject.internal.MoreTypes.getRawType;
 import com.google.inject.internal.Nullability;
+import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
@@ -191,7 +191,7 @@ public final class InjectionPoint {
   }
 
   @Override public String toString() {
-    return MoreTypes.toString(member);
+    return Classes.toString(member);
   }
 
   /**

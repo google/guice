@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.MoreTypes;
+import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.Function;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableSet;
@@ -729,7 +729,7 @@ public class ThrowingProviderBinderTest extends TestCase {
       fail();
     } catch(CreationException ce) {
       assertEquals(OneNoneGetMethod.class.getName() 
-          + " may not declare any new methods, but declared " + MoreTypes.toString(OneNoneGetMethod.class.getDeclaredMethods()[0]),
+          + " may not declare any new methods, but declared " + Classes.toString(OneNoneGetMethod.class.getDeclaredMethods()[0]),
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
     }
   }
