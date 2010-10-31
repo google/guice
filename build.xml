@@ -103,13 +103,20 @@
       </syspropertyset>
     </java>
   </target>
-  
-  <target name="javadoc">
+	
+  <property name="old.api" value="2.0"/>
+  <property name="new.api" value="3.0"/>
+  <target name="jdiff">
+  	<property name="jdiff.home" value="lib/build/jdiff"/>
+  	<property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
+  	<delete dir="${jdiff.tmp}"/>
+  	<mkdir dir="${jdiff.tmp}"/>
+  	
+  	<!-- Generate API for current version. -->
     <javadoc packagenames="com.google.*"
-             destdir="build/docs"
-    	     docletpath="lib/build/doclava.jar"
-             bootclasspath="${java.home}/lib/rt.jar"
-             maxmemory="512M">
+	         docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+             maxmemory="512M"
+    	     classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -122,13 +129,64 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
+      <fileset dir="${struts2.src.dir}"/>
+
+      <doclet name="jdiff.JDiff"
+              path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
+        <param name="-apidir" value="${jdiff.tmp}" />
+        <param name="-apiname" value="${new.api}" />
+      </doclet>
+    </javadoc>
+
+  	<!-- Do a diff against the previous version. -->
+	<javadoc packagenames="com.google.*"
+	         destdir="${jdiff.tmp}"
+		     docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+	         maxmemory="512M"
+		     sourcefiles="${jdiff.home}/Null.java"
+  	         classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+	  <doclet name="jdiff.JDiff">
+	  	<param name="-oldapi" value="${old.api}"/>
+	  	<param name="-oldapidir" value="latest-api-diffs"/>	  	
+	  	<param name="-javadocold" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${old.api}/javadoc/"/>
+	  	<param name="-newapi" value="${new.api}"/>
+	    <param name="-newapidir" value="${jdiff.tmp}"/>
+	  	<param name="-javadocnew" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${new.api}/javadoc/"/>
+	  	<param name="-stats"/>
+	  	<param name="-docchanges"/>
+	  </doclet>
+	</javadoc>
+  </target>
+  
+  <target name="javadoc">
+    <javadoc packagenames="com.google.*"
+             destdir="build/docs"
+    	     docletpath="lib/build/doclava.jar"
+             bootclasspath="${java.home}/lib/rt.jar"
+             maxmemory="512M"
+    	     classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+      <fileset dir="${src.dir}" defaultexcludes="yes">
+        <include name="com/google/**"/>
+        <exclude name="com/google/inject/internal/**"/>
+      </fileset>
+      <fileset dir="${servlet.src.dir}"/>
+      <fileset dir="${spring.src.dir}"/>
+      <fileset dir="${assistedinject.src.dir}"/>
+      <fileset dir="${jmx.src.dir}"/>
+      <fileset dir="${jndi.src.dir}"/>
+      <fileset dir="${throwingproviders.src.dir}"/>
+      <fileset dir="${multibindings.src.dir}"/>
+      <fileset dir="${persist.src.dir}"/>
+      <!-- TODO: this breaks Doclava for some reason 
+      <fileset dir="${struts2.src.dir}"/> -->
 
       <doclet name="com.google.doclava.Doclava">
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
         <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
-        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
-        <param name="-apiversion" value="Guice_3.0"/>
+        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" /> 
+        <param name="-apiversion" value="Guice_${new.api}"/>
         <param name="-assetsdir" value="javadoc/assets"/>
+      	<param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
         <!-- TODO: fix doclava federation
           http://aopalliance.sourceforge.net/doc
           http://www.springframework.org/docs/api/
