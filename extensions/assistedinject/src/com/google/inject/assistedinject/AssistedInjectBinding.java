@@ -25,6 +25,7 @@ import java.util.Collection;
  * 
  * @param <T> The fully qualified type of the factory.
  *  
+ * @since 3.0
  * @author ramakrishna@google.com (Ramakrishna Rajanna)
  */
 public interface AssistedInjectBinding<T> {

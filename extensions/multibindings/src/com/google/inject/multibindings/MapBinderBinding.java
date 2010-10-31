@@ -38,6 +38,7 @@ import com.google.inject.spi.Elements;
  * @param <T> The fully qualified type of the map, including Map. For example:
  *          <code>MapBinderBinding&lt;Map&lt;String, Snack>></code>
  * 
+ * @since 3.0
  * @author sameb@google.com (Sam Berlin)
  */
 public interface MapBinderBinding<T> {

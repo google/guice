@@ -160,6 +160,8 @@ public class ServletScopes {
    *     context available to it.
    * @throws OutOfScopeException if this method is called from a non-request
    *     thread, or if the request has completed.
+   * 
+   * @since 3.0
    */
   public static <T> Callable<T> continueRequest(final Callable<T> callable,
       final Map<Key<?>, Object> seedMap) {
@@ -217,6 +219,7 @@ public class ServletScopes {
    *     request scope with.
    * @return a callable that when called will run inside the a request scope
    *     that exposes the instances in the {@code seedMap} as scoped keys.
+   * @since 3.0
    */
   public static <T> Callable<T> scopeRequest(final Callable<T> callable,
       Map<Key<?>, Object> seedMap) {

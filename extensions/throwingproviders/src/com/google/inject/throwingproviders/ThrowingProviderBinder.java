@@ -78,6 +78,11 @@ public class ThrowingProviderBinder {
         ThrowingProviderBinder.SecondaryBinder.class));
   }
   
+  /**
+   * Installs {@literal @}{@link ThrowingProvides} methods.
+   * 
+   * @since 3.0
+   */
   public static void install(Module module, Binder binder) {
     binder.install(ThrowingProviderMethodsModule.forModule(module));
   }

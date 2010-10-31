@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 
 /**
  * An enumeration of the available URI-pattern matching styles
+ * 
+ * @since 3.0
  */
 public enum UriPatternType {
   SERVLET, REGEX;

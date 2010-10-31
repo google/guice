@@ -63,6 +63,8 @@ public interface ConstantBindingBuilder {
 
   /**
    * Binds constant to the given value.
+   * 
+   * @since 3.0
    */
   void to(byte value);
 

@@ -178,6 +178,7 @@ import java.lang.annotation.Annotation;
  * As a limitation of the implementation, it is prohibited to declare a factory method that
  * accepts a {@code Provider} as one of its arguments.
  *
+ * @since 3.0
  * @author schmitt@google.com (Peter Schmitt)
  */
 public class FactoryModuleBuilder {

@@ -26,6 +26,7 @@ import java.util.Set;
 /**
  * Details about how a method in an assisted inject factory will be assisted.
  * 
+ * @since 3.0
  * @author ramakrishna@google.com (Ramakrishna Rajanna)
  */
 public interface AssistedMethod {

@@ -246,6 +246,7 @@ public abstract class MapBinder<K, V> {
    * option impacts all of them.
    *
    * @return this map binder
+   * @since 3.0
    */
   public abstract MapBinder<K, V> permitDuplicates();
 

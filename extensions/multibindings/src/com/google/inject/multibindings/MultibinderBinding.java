@@ -30,6 +30,7 @@ import com.google.inject.spi.Elements;
  * @param <T> The fully qualified type of the set, including Set. For example:
  *          <code>MultibinderBinding&lt;Set&lt;Boolean>></code>
  * 
+ * @since 3.0
  * @author sameb@google.com (Sam Berlin)
  */
 public interface MultibinderBinding<T> {

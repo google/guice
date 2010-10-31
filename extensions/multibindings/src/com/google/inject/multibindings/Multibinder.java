@@ -180,6 +180,7 @@ public abstract class Multibinder<T> {
    * the set, this configuration option impacts all of them.
    *
    * @return this multibinder
+   * @since 3.0
    */
   public abstract Multibinder<T> permitDuplicates();
 

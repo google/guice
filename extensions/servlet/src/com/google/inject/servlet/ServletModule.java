@@ -283,9 +283,11 @@ public class ServletModule extends AbstractModule {
   public static interface FilterKeyBindingBuilder {
     void through(Class<? extends Filter> filterKey);
     void through(Key<? extends Filter> filterKey);
+    /** @since 3.0 */
     void through(Filter filter);
     void through(Class<? extends Filter> filterKey, Map<String, String> initParams);
     void through(Key<? extends Filter> filterKey, Map<String, String> initParams);
+    /** @since 3.0 */
     void through(Filter filter, Map<String, String> initParams);
   }
 
@@ -297,9 +299,11 @@ public class ServletModule extends AbstractModule {
   public static interface ServletKeyBindingBuilder {
     void with(Class<? extends HttpServlet> servletKey);
     void with(Key<? extends HttpServlet> servletKey);
+    /** @since 3.0 */
     void with(HttpServlet servlet);
     void with(Class<? extends HttpServlet> servletKey, Map<String, String> initParams);
     void with(Key<? extends HttpServlet> servletKey, Map<String, String> initParams);
+    /** @since 3.0 */
     void with(HttpServlet servlet, Map<String, String> initParams);
   }
 }
