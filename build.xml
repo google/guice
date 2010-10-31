@@ -71,7 +71,7 @@
     </zip>
     <zip destfile="${build.dir}/guice-${version}-src.zip">
       <zipfileset dir="." prefix="guice-${version}-src"
-          excludes="build/**/*,build,.svn,.svn/**/*,**/.svn,classes,classes/**/*"/>
+          excludes="build/**,**/.svn/**,classes/**,.settings/**,bin/**,latest-api-diffs/**,latest-javadoc/**,.classpath,.project"/>
     </zip>
   </target>
   
