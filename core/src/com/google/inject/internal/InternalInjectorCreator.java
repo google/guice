@@ -25,6 +25,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.internal.util.Stopwatch;
@@ -201,7 +202,7 @@ public final class InternalInjectorCreator {
    */
   void loadEagerSingletons(InjectorImpl injector, Stage stage, final Errors errors) {
     @SuppressWarnings("unchecked") // casting Collection<Binding> to Collection<BindingImpl> is safe
-    Set<BindingImpl<?>> candidateBindings = ImmutableSet.copyOf(Iterables.concat(
+    Iterable<BindingImpl<?>> candidateBindings = ImmutableList.copyOf(Iterables.concat(
         (Collection) injector.state.getExplicitBindingsThisLevel().values(),
         injector.jitBindings.values()));
     for (final BindingImpl<?> binding : candidateBindings) {
