@@ -26,7 +26,6 @@ import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
@@ -34,7 +33,6 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Builds a tree of injectors. This is a primary injector, plus child injectors needed for each
