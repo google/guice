@@ -20,6 +20,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
 
+import com.google.inject.internal.util.Objects;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 import static java.lang.annotation.ElementType.TYPE;
@@ -509,4 +510,103 @@ public class OverrideModuleTest extends TestCase {
     @Override protected void configure() {
     }
   }  
+  
+  public void testEqualsNotCalledByDefaultOnInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnEquals = true;
+    Guice.createInjector(Modules.override(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(HashEqualsTester.class).toInstance(a);
+      }
+    }).with());
+  }
+  
+  public void testEqualsNotCalledByDefaultOnProvider() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnEquals = true;
+    Guice.createInjector(Modules.override(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(Object.class).toProvider(a);
+      }
+    }).with());
+  }
+  
+  public void testHashcodeNeverCalledOnInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnHashcode = true;
+    a.equality = "test";
+    
+    final HashEqualsTester b = new HashEqualsTester();
+    b.throwOnHashcode = true;
+    b.equality = "test";
+    Guice.createInjector(Modules.override(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(HashEqualsTester.class).toInstance(a);
+       bind(HashEqualsTester.class).toInstance(b);
+      }
+    }).with());
+  }
+  
+  public void testHashcodeNeverCalledOnProviderInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnHashcode = true;
+    a.equality = "test";
+    
+    final HashEqualsTester b = new HashEqualsTester();
+    b.throwOnHashcode = true;
+    b.equality = "test";
+    Guice.createInjector(Modules.override(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(Object.class).toProvider(a);
+       bind(Object.class).toProvider(b);
+      }
+    }).with());
+  }
+  
+  private static class HashEqualsTester implements Provider<Object> {
+    private String equality;
+    private boolean throwOnEquals;
+    private boolean throwOnHashcode;
+    
+    @Override
+    public boolean equals(Object obj) {
+      if (throwOnEquals) {
+        throw new RuntimeException();
+      } else if (obj instanceof HashEqualsTester) {
+        HashEqualsTester o = (HashEqualsTester)obj;
+        if(o.throwOnEquals) {
+          throw new RuntimeException();
+        }
+        if(equality == null && o.equality == null) {
+          return this == o;
+        } else {
+          return Objects.equal(equality, o.equality);
+        }
+      } else {
+        return false;
+      }
+    }
+    
+    @Override
+    public int hashCode() {
+      if(throwOnHashcode) {
+        throw new RuntimeException();
+      } else {
+        return super.hashCode();
+      }
+    }
+    
+    public Object get() {
+      return new Object();
+    }
+  }
+    
 }

@@ -114,6 +114,6 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping(), providerInstance);
+    return Objects.hashCode(getKey(), getScoping());
   }
 }

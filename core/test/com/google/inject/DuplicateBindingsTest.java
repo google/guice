@@ -20,6 +20,8 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
 import com.google.inject.internal.util.Lists;
+import com.google.inject.internal.util.Objects;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -234,6 +236,66 @@ public class DuplicateBindingsTest extends TestCase {
     });
   }
   
+  public void testEqualsNotCalledByDefaultOnInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnEquals = true;
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(HashEqualsTester.class).toInstance(a);
+      }
+    });
+  }
+  
+  public void testEqualsNotCalledByDefaultOnProvider() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnEquals = true;
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(Object.class).toProvider(a);
+      }
+    });
+  }
+  
+  public void testHashcodeNeverCalledOnInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnHashcode = true;
+    a.equality = "test";
+    
+    final HashEqualsTester b = new HashEqualsTester();
+    b.throwOnHashcode = true;
+    b.equality = "test";
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(HashEqualsTester.class).toInstance(a);
+       bind(HashEqualsTester.class).toInstance(b);
+      }
+    });
+  }
+  
+  public void testHashcodeNeverCalledOnProviderInstance() {
+    final HashEqualsTester a = new HashEqualsTester();
+    a.throwOnHashcode = true;
+    a.equality = "test";
+    
+    final HashEqualsTester b = new HashEqualsTester();
+    b.throwOnHashcode = true;
+    b.equality = "test";
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+       bind(String.class);
+       bind(Object.class).toProvider(a);
+       bind(Object.class).toProvider(b);
+      }
+    });
+  }
+  
   private static class RealA extends A {}
   @ImplementedBy(RealA.class) private static class A {}
   
@@ -417,6 +479,44 @@ public class DuplicateBindingsTest extends TestCase {
     public Foo get() {
       return new Bar();
     }
-  }  
+  }
+  
+  private static class HashEqualsTester implements Provider<Object> {
+    private String equality;
+    private boolean throwOnEquals;
+    private boolean throwOnHashcode;
+    
+    @Override
+    public boolean equals(Object obj) {
+      if (throwOnEquals) {
+        throw new RuntimeException();
+      } else if (obj instanceof HashEqualsTester) {
+        HashEqualsTester o = (HashEqualsTester)obj;
+        if(o.throwOnEquals) {
+          throw new RuntimeException();
+        }
+        if(equality == null && o.equality == null) {
+          return this == o;
+        } else {
+          return Objects.equal(equality, o.equality);
+        }
+      } else {
+        return false;
+      }
+    }
+    
+    @Override
+    public int hashCode() {
+      if(throwOnHashcode) {
+        throw new RuntimeException();
+      } else {
+        return super.hashCode();
+      }
+    }
+    
+    public Object get() {
+      return new Object();
+    }
+  }
   
 }

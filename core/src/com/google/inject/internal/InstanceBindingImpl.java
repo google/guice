@@ -110,6 +110,6 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
   
   @Override
   public int hashCode() {
-    return Objects.hashCode(getKey(), getScoping(), instance);
+    return Objects.hashCode(getKey(), getScoping());
   }
 }
