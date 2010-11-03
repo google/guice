@@ -38,7 +38,7 @@ import java.util.Arrays;
  * 
  * @since 3.0
  */
-public class InjectorBuilder {
+public final class InjectorBuilder {
   
   private final InternalInjectorCreator creator = new InternalInjectorCreator();
   

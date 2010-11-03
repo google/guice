@@ -26,7 +26,7 @@ import javax.inject.Provider;
  * @author jessewilson@google.com (Jesse Wilson) 
  * @since 3.0
  */
-public class Jsr330 {
+public final class Jsr330 {
 
   private Jsr330() {}
 

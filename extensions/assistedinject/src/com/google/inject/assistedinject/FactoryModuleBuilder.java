@@ -181,7 +181,7 @@ import java.lang.annotation.Annotation;
  * @since 3.0
  * @author schmitt@google.com (Peter Schmitt)
  */
-public class FactoryModuleBuilder {
+public final class FactoryModuleBuilder {
 
   private final BindingCollector bindings = new BindingCollector();
 
