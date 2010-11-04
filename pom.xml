@@ -90,19 +90,34 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </modules>
 
   <properties>
+    <!--
+     | The spec version of the public Guice API
+    -->
     <guice.api.version>1.3</guice.api.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!--
+     | Use "-Dguice.with.jarjar=false" to build without jarjar
+    -->
     <guice.with.jarjar>true</guice.with.jarjar>
+    <!--
+     | Use "-Dguice.with.noaop=false" to skip the no-AOP variant
+    -->
     <guice.with.noaop>true</guice.with.noaop>
   </properties>
 
   <dependencies>
+    <!--
+     | Replace with official CGLIB artifact when it's released
+    -->
     <dependency>
       <groupId>org.sonatype.sisu.inject</groupId>
       <artifactId>cglib</artifactId>
       <version>2.2.1</version>
       <optional>${guice.with.jarjar}</optional>
     </dependency>
+    <!--
+     | Run tests with TestNG
+    -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -113,6 +128,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </dependencies>
 
   <build>
+    <!--
+     | Ant-style directories
+    -->
     <sourceDirectory>${project.basedir}/src</sourceDirectory>
     <resources>
       <resource>
@@ -139,6 +157,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
         </plugin>
+        <!--
+         | Make sure we only use Java5 methods
+        -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -160,6 +181,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
             </execution>
           </executions>
         </plugin>
+        <!--
+         | Shared JarJar configuration
+        -->
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>jarjar-maven-plugin</artifactId>
@@ -198,6 +222,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
               </keep>
             </rules>
           </configuration>
+          <!--
+           | JarJar all classes before running tests
+          -->
           <executions>
             <execution>
               <id>jarjar-classes</id>
@@ -228,6 +255,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
           </configuration>
         </plugin>
+        <!--
+         | Shared OSGi manifest configuration
+        -->
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
@@ -265,6 +295,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
             </execution>
           </executions>
         </plugin>
+        <!--
+         | Package OSGi manifest in final JAR, also create a JAR of the test classes
+        -->
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>2.3.1</version>
@@ -307,6 +340,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <profiles>
     <profile>
+      <!--
+       | Deployment profile for the Sonatype Grid
+      -->
       <id>sonatype-grid</id>
       <properties>
         <forgeReleaseId>forge-releases</forgeReleaseId>

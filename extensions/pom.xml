@@ -28,17 +28,25 @@
     <module>struts2</module>
     <module>throwingproviders</module>
 <!--
+ |  not yet promoted...
+- -
     <module>mini</module>
     <module>service</module>
 -->
   </modules>
 
   <dependencies>
+    <!--
+     | All extensions depend on the core
+    -->
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!--
+     | Some extension tests depend on the core tests
+    -->
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
@@ -50,10 +58,16 @@
 
   <build>
     <plugins>
+      <!--
+       | Enable Java5 conformance checks
+      -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
       </plugin>
+      <!--
+       | Add OSGi manifest: extensions are fragments that attach to the core
+      -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -68,6 +82,9 @@
 
   <profiles>
     <profile>
+      <!--
+       | JarJar build profile: re-package ASM and CGLIB references under the Guice namespace
+      -->
       <id>guice.with.jarjar</id>
       <activation>
         <property>
@@ -76,6 +93,10 @@
         </property>
       </activation>
       <dependencies>
+        <!--
+         | Extensions compile first against the non-JarJar'd core - and are then JarJar'd themselves
+         | (optional dependency so it doesn't leak to client projects that depend on Guice artifacts)
+        -->
         <dependency>
           <groupId>com.google.inject</groupId>
           <artifactId>guice</artifactId>

@@ -52,6 +52,9 @@
 
   <build>
     <plugins>
+      <!--
+       | Enable Java5 conformance checks
+      -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -59,14 +62,19 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!--
+           | Temporarily excluded tests
+          -->
           <excludes>
-            <exclude>**/BytecodeGenTest*</exclude>
             <exclude>**/OSGiContainerTest*</exclude>
             <exclude>**/ScopesTest*</exclude>
             <exclude>**/TypeConversionTest*</exclude>
           </excludes>
         </configuration>
       </plugin>
+      <!--
+       | Add OSGi manifest
+      -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -76,6 +84,9 @@
 
   <profiles>
     <profile>
+      <!--
+       | No-AOP profile: repeat the build lifecycle with munged no-AOP source
+      -->
       <id>guice.with.noaop</id>
       <activation>
         <property>
@@ -113,6 +124,9 @@
               </execution>
             </executions>
           </plugin>
+          <!--
+           | Package the no-AOP build with its own OSGi manifest and attach using "noaop" classifier
+          -->
           <plugin>
             <artifactId>maven-jar-plugin</artifactId>
             <executions>
@@ -136,6 +150,9 @@
       </build>
     </profile>
     <profile>
+      <!--
+       | JarJar build profile: re-package ASM and CGLIB classes under the Guice namespace
+      -->
       <id>guice.with.jarjar</id>
       <activation>
         <property>
@@ -156,6 +173,9 @@
             </configuration>
           </plugin>
           <plugin>
+            <!--
+             | Package the original non-JarJar'd classes so extensions can compile against them
+            -->
             <artifactId>maven-jar-plugin</artifactId>
             <executions>
               <execution>
