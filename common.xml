@@ -37,8 +37,9 @@
     <property name="Bundle-Description" value="Guice is a lightweight dependency injection framework for Java 5 and above"/>
     <property name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
     <property name="Bundle-Copyright" value="Copyright (C) 2006 Google Inc."/>
-    <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0"/>
-    <property name="Bundle-Vendor" value="Google Inc."/>
+    <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
+    <property name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5,JavaSE-1.6"/>
+    <property name="Bundle-Vendor" value="Google, Inc."/>
 
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
 

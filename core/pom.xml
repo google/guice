@@ -17,35 +17,35 @@
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
+      <version>1</version>
     </dependency>
     <dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.sonatype.sisu.inject</groupId>
-      <artifactId>cglib</artifactId>
-      <version>2.2.1</version>
-      <optional>true</optional>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject-tck</artifactId>
+      <version>1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
+      <version>3.0.5.RELEASE</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
+      <version>0.0.384</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
+      <version>3.0.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -53,102 +53,127 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <includes>
-            <include>**/AllTests.java</include>
-          </includes>
+          <excludes>
+            <exclude>**/OSGiContainerTest*</exclude>
+            <exclude>**/ScopesTest*</exclude>
+            <exclude>**/TypeConversionTest*</exclude>
+            <exclude>**/*$*</exclude>
+          </excludes>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>com.google.inject</Bundle-SymbolicName>
-            <Import-Package>!*.asm.*,!*.cglib.*,!com.google.inject.*,*</Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>munge-maven-plugin</artifactId>
-        <version>1.0</version>
-        <executions>
-          <execution>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>munge-fork</goal>
-            </goals>
-            <configuration>
-              <symbols>NO_AOP</symbols>
-              <excludes>
-                **/InterceptorBinding.java,
-                **/InterceptorBindingProcessor.java,
-                **/InterceptorStackCallback.java,
-                **/LineNumbers.java,
-                **/MethodAspect.java,
-                **/ProxyFactory.java,
-                **/BytecodeGenTest.java,
-                **/IntegrationTest.java,
-                **/MethodInterceptionTest.java,
-                **/ProxyFactoryTest.java
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <archive>
-                <manifestFile>target/munged/classes/META-INF/MANIFEST.MF</manifestFile>
-              </archive>
-              <classesDirectory>target/munged/classes</classesDirectory>
-              <classifier>noaop</classifier>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>jarjar-maven-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jarjar</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>asm:asm</include>
-                <include>org.sonatype.sisu.inject:cglib</include>
-              </includes>
-              <rules>
-                <rule>
-                  <pattern>org.objectweb.asm.**</pattern>
-                  <result>com.google.inject.internal.asm.@1</result>
-                </rule>
-                <rule>
-                  <pattern>net.sf.cglib.**</pattern>
-                  <result>com.google.inject.internal.cglib.@1</result>
-                </rule>
-                <keep>
-                  <pattern>com.google.inject.**</pattern>
-                </keep>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>guice.with.noaop</id>
+      <activation>
+        <property>
+          <name>guice.with.noaop</name>
+          <value>!false</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>munge-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>munge-fork</goal>
+                </goals>
+                <configuration>
+                  <symbols>NO_AOP</symbols>
+                  <excludes>
+                    **/InterceptorBinding.java,
+                    **/InterceptorBindingProcessor.java,
+                    **/InterceptorStackCallback.java,
+                    **/LineNumbers.java,
+                    **/MethodAspect.java,
+                    **/ProxyFactory.java,
+                    **/BytecodeGenTest.java,
+                    **/IntegrationTest.java,
+                    **/MethodInterceptionTest.java,
+                    **/ProxyFactoryTest.java
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>noaop</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classesDirectory>${project.build.directory}/munged/classes</classesDirectory>
+                  <classifier>noaop</classifier>
+                  <archive>
+                    <manifestFile>${project.build.directory}/munged/classes/META-INF/MANIFEST.MF</manifestFile>
+                  </archive>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>guice.with.jarjar</id>
+      <activation>
+        <property>
+          <name>guice.with.jarjar</name>
+          <value>!false</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>jarjar-maven-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>*:asm</include>
+                <include>*:cglib</include>
+              </includes>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>nodeps</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classesDirectory>${project.build.directory}/original-classes</classesDirectory>
+                  <classifier>nodeps</classifier>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
