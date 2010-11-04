@@ -104,9 +104,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <optional>${guice.with.jarjar}</optional>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.11</version>
+      <classifier>jdk15</classifier>
       <scope>test</scope>
     </dependency>
   </dependencies>
