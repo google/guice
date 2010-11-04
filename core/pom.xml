@@ -60,6 +60,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
+            <exclude>**/BytecodeGenTest*</exclude>
             <exclude>**/OSGiContainerTest*</exclude>
             <exclude>**/ScopesTest*</exclude>
             <exclude>**/TypeConversionTest*</exclude>
