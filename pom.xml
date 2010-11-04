@@ -192,6 +192,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <keep>
                 <pattern>com.google.inject.**</pattern>
               </keep>
+              <keep>
+                <pattern>com.googlecode.**</pattern>
+              </keep>
             </rules>
           </configuration>
           <executions>
