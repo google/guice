@@ -125,7 +125,7 @@
       <rule pattern="com.google.inject.internal.util.*" result="com.google.inject.internal.util.$@1"/>    	
       <rule pattern="com.google.inject.internal.util.**.*" result="com.google.inject.internal.util.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
-      <keep pattern="com.googlecode.inject.**"/>
+      <keep pattern="com.googlecode.**"/>
     </jarjar>
   </target>  	
 
