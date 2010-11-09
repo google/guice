@@ -30,6 +30,8 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.sf.cglib.core.Predicate;
+
 /**
  * Utility methods for runtime code generation and class loading. We use this stuff for {@link
  * net.sf.cglib.reflect.FastClass faster reflection}, {@link net.sf.cglib.proxy.Enhancer method
@@ -79,10 +81,36 @@ public final class BytecodeGen {
   static final String CGLIB_PACKAGE
       = net.sf.cglib.proxy.Enhancer.class.getName().replaceFirst("\\.cglib\\..*$", ".cglib");
 
-  static final net.sf.cglib.core.NamingPolicy NAMING_POLICY
+  static final net.sf.cglib.core.NamingPolicy FASTCLASS_NAMING_POLICY
       = new net.sf.cglib.core.DefaultNamingPolicy() {
     @Override protected String getTag() {
       return "ByGuice";
+    }
+    
+    @Override
+    public String getClassName(String prefix, String source, Object key, Predicate names) {
+      // we explicitly set the source here to "FastClass" so that our jarjar renaming
+      // to $FastClass doesn't leak into the class names.  if we did not do this,
+      // classes would end up looking like $$$FastClassByGuice$$, with the extra $
+      // at the front.
+      return super.getClassName(prefix, "FastClass", key, names);
+    }
+  };
+  
+  static final net.sf.cglib.core.NamingPolicy ENHANCER_NAMING_POLICY
+      = new net.sf.cglib.core.DefaultNamingPolicy() {
+    @Override
+    protected String getTag() {
+      return "ByGuice";
+    }
+
+    @Override
+    public String getClassName(String prefix, String source, Object key, Predicate names) {
+      // we explicitly set the source here to "Enhancer" so that our jarjar renaming
+      // to $Enhancer doesn't leak into the class names.  if we did not do this,
+      // classes would end up looking like $$$EnhancerByGuice$$, with the extra $
+      // at the front.
+      return super.getClassName(prefix, "Enhancer", key, names);
     }
   };
   /*end[AOP]*/
@@ -174,7 +202,7 @@ public final class BytecodeGen {
     if (visibility == Visibility.PUBLIC) {
       generator.setClassLoader(getClassLoader(type));
     }
-    generator.setNamingPolicy(NAMING_POLICY);
+    generator.setNamingPolicy(FASTCLASS_NAMING_POLICY);
     logger.fine("Loading " + type + " FastClass with " + generator.getClassLoader());
     return generator.create();
   }
@@ -186,7 +214,7 @@ public final class BytecodeGen {
     if (visibility == Visibility.PUBLIC) {
       enhancer.setClassLoader(getClassLoader(type));
     }
-    enhancer.setNamingPolicy(NAMING_POLICY);
+    enhancer.setNamingPolicy(ENHANCER_NAMING_POLICY);
     logger.fine("Loading " + type + " Enhancer with " + enhancer.getClassLoader());
     return enhancer;
   }
