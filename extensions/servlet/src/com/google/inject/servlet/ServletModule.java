@@ -269,7 +269,7 @@ public class ServletModule extends AbstractModule {
    * This method only works if you are using the {@linkplain GuiceServletContextListener} to
    * create your injector. Otherwise, it returns null.
    * @return The current servlet context.
-   * @since 2.1
+   * @since 3.0
    */
   protected final ServletContext getServletContext() {
     return GuiceFilter.getServletContext();
