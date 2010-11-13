@@ -72,22 +72,22 @@ class ServletSpiVisitor
   }
   
   public Integer visit(InstanceFilterBinding binding) {
-    actual.add(new Params(binding.getPattern(), binding.getFilterInstance(), binding.getInitParams(), binding.getUriPatternType()));
+    actual.add(new Params(binding, binding.getFilterInstance()));
     return currentCount++;
   }
   
   public Integer visit(InstanceServletBinding binding) {
-    actual.add(new Params(binding.getPattern(), binding.getServletInstance(), binding.getInitParams(), binding.getUriPatternType()));
+    actual.add(new Params(binding, binding.getServletInstance()));
     return currentCount++;
   }
   
   public Integer visit(LinkedFilterBinding binding) {
-    actual.add(new Params(binding.getPattern(), binding.getLinkedKey(), binding.getInitParams(), binding.getUriPatternType()));
+    actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;
   }
   
   public Integer visit(LinkedServletBinding binding) {
-    actual.add(new Params(binding.getPattern(), binding.getLinkedKey(), binding.getInitParams(), binding.getUriPatternType()));
+    actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;
   }
 
@@ -104,7 +104,14 @@ class ServletSpiVisitor
     private final String pattern;
     private final Object keyOrInstance;
     private final Map<String, String> params;
-    private UriPatternType patternType;
+    private final UriPatternType patternType;
+    
+    Params(ServletModuleBinding binding, Object keyOrInstance) {
+      this.pattern = binding.getPattern();
+      this.keyOrInstance = keyOrInstance;
+      this.params = binding.getInitParams();
+      this.patternType = binding.getUriPatternType();
+    }
     
     Params(String pattern, Object keyOrInstance, Map params, UriPatternType patternType) {
       this.pattern = pattern;
@@ -125,7 +132,7 @@ class ServletSpiVisitor
         return false;
       }
     }
-    
+
     @Override
     public int hashCode() {
       return Objects.hashCode(pattern, keyOrInstance, params, patternType);
