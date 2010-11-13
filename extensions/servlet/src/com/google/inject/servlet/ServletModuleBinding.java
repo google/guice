@@ -22,6 +22,7 @@ import java.util.Map;
  * A binding created by {@link ServletModule}.
  * 
  * @author sameb@google.com (Sam Berlin)
+ * @since 3.0
  */
 public interface ServletModuleBinding {
 
