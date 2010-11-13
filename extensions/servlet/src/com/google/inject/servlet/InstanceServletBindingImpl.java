@@ -31,8 +31,8 @@ class InstanceServletBindingImpl extends AbstractServletModuleBinding<HttpServle
     InstanceServletBinding {
 
   InstanceServletBindingImpl(Map<String, String> initParams, String pattern,
-      HttpServlet target, UriPatternType patternType) {
-    super(initParams, pattern, target, patternType);
+      HttpServlet target, UriPatternMatcher patternMatcher) {
+    super(initParams, pattern, target, patternMatcher);
   }
 
   public HttpServlet getServletInstance() {

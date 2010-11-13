@@ -75,13 +75,13 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
             new InstanceFilterBindingImpl(initParams,
                 pattern,
                 filterInstance,
-                patternMatcher.getPatternType()));        
+                patternMatcher));        
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedFilterBindingImpl(initParams,
                 pattern,
                 filterKey,
-                patternMatcher.getPatternType()));
+                patternMatcher));
       }
     } else {
       return visitor.visit(binding);

@@ -16,8 +16,6 @@
 
 package com.google.inject.servlet;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServlet;
 
 import com.google.inject.Key;
@@ -28,22 +26,7 @@ import com.google.inject.Key;
  * @author sameb@google.com
  * @since 3.0
  */
-public interface LinkedServletBinding {
-  
-  /**
-   * Returns the pattern type that this servlet binding was created with.
-   * This will be {@link UriPatternType#REGEX} if the binding was created with
-   * {@link ServletModule#serveRegex(String, String...)}, and
-   * {@link UriPatternType#SERVLET} if it was created with
-   * {@link ServletModule#serve(String, String...)}.
-   */
-  UriPatternType getUriPatternType();
-
-  /** Returns the pattern used to match against the servlet. */
-  String getPattern();
-
-  /** Returns any init params supplied when creating the binding. */
-  Map<String, String> getInitParams();
+public interface LinkedServletBinding extends ServletModuleBinding {
 
   /** Returns the key used to lookup the servlet instance. */
   Key<? extends HttpServlet> getLinkedKey();

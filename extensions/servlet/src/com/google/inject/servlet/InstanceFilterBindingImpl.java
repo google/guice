@@ -31,8 +31,8 @@ class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> imp
     InstanceFilterBinding {
 
   InstanceFilterBindingImpl(Map<String, String> initParams, String pattern,
-      Filter target, UriPatternType patternType) {
-    super(initParams, pattern, target, patternType);
+      Filter target, UriPatternMatcher patternMatcher) {
+    super(initParams, pattern, target, patternMatcher);
   }
 
   public Filter getFilterInstance() {

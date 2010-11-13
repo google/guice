@@ -16,17 +16,24 @@
 
 package com.google.inject.servlet;
 
-import javax.servlet.http.HttpServlet;
+import java.util.Map;
 
 /**
- * A binding to a single instance of a servlet. 
- *
- * @author sameb@google.com
- * @since 3.0
+ * A binding created by {@link ServletModule}.
+ * 
+ * @author sameb@google.com (Sam Berlin)
  */
-public interface InstanceServletBinding extends ServletModuleBinding {
+public interface ServletModuleBinding {
 
-  /** Returns the servlet instance that will be used. */
-  HttpServlet getServletInstance();
+  /** Returns the pattern type that this binding was created with. */
+  UriPatternType getUriPatternType();
 
+  /** Returns the pattern used to match against the binding. */
+  String getPattern();
+
+  /** Returns any context params supplied when creating the binding. */
+  Map<String, String> getInitParams();
+  
+  /** Returns true if the given URI will match this binding. */
+  boolean matchesUri(String uri);
 }

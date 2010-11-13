@@ -79,13 +79,13 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             new InstanceServletBindingImpl(initParams,
                 pattern,
                 servletInstance,
-                patternMatcher.getPatternType()));        
+                patternMatcher));        
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedServletBindingImpl(initParams,
                 pattern,
                 servletKey,
-                patternMatcher.getPatternType()));
+                patternMatcher));
       }
     } else {
       return visitor.visit(binding);

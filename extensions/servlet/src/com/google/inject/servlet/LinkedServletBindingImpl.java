@@ -32,8 +32,8 @@ class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extend
     implements LinkedServletBinding {
 
   LinkedServletBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends HttpServlet> target, UriPatternType patternType) {
-    super(initParams, pattern, target, patternType);
+      Key<? extends HttpServlet> target, UriPatternMatcher patternMatcher) {
+    super(initParams, pattern, target, patternMatcher);
   }
 
   public Key<? extends HttpServlet> getLinkedKey() {

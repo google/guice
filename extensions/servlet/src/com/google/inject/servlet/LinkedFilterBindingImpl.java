@@ -32,8 +32,8 @@ class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends
     implements LinkedFilterBinding {
 
   LinkedFilterBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends Filter> target, UriPatternType patternType) {
-    super(initParams, pattern, target, patternType);
+      Key<? extends Filter> target, UriPatternMatcher patternMatcher) {
+    super(initParams, pattern, target, patternMatcher);
   }
 
   public Key<? extends Filter> getLinkedKey() {

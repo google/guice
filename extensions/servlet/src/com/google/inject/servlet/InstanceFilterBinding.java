@@ -16,8 +16,6 @@
 
 package com.google.inject.servlet;
 
-import java.util.Map;
-
 import javax.servlet.Filter;
 
 /**
@@ -26,22 +24,7 @@ import javax.servlet.Filter;
  * @author sameb@google.com
  * @since 3.0
  */
-public interface InstanceFilterBinding {
-
-  /**
-   * Returns the pattern type that this filter binding was created with.
-   * This will be {@link UriPatternType#REGEX} if the binding was created with
-   * {@link ServletModule#filterRegex(String, String...)}, and
-   * {@link UriPatternType#SERVLET} if it was created with
-   * {@link ServletModule#filter(String, String...)}.
-   */
-  UriPatternType getUriPatternType();
-
-  /** Returns the pattern used to match against the filter. */
-  String getPattern();
-
-  /** Returns any context params supplied when creating the binding. */
-  Map<String, String> getInitParams();
+public interface InstanceFilterBinding extends ServletModuleBinding {
 
   /** Returns the filter instance that will be used. */
   Filter getFilterInstance();
