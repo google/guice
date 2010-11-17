@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Creates bindings to methods annotated with {@literal @}{@link ThrowingProvides}. Use the scope
+ * Creates bindings to methods annotated with {@literal @}{@link CheckedProvides}. Use the scope
  * and binding annotations on the provider method to configure the binding.
  * 
  * @author sameb@google.com (Sam Berlin)
@@ -73,10 +73,10 @@ final class ThrowingProviderMethodsModule implements Module {
     List<ThrowingProviderMethod<?>> result = Lists.newArrayList();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
-        ThrowingProvides throwingProvides =
-          (ThrowingProvides)method.getAnnotation(ThrowingProvides.class);
-        if(throwingProvides != null) {
-          result.add(createProviderMethod(binder, method, throwingProvides.value()));
+        CheckedProvides checkedProvides =
+          (CheckedProvides)method.getAnnotation(CheckedProvides.class);
+        if(checkedProvides != null) {
+          result.add(createProviderMethod(binder, method, checkedProvides.value()));
         }
       }
     }
@@ -84,7 +84,7 @@ final class ThrowingProviderMethodsModule implements Module {
   }
 
   <T> ThrowingProviderMethod<T> createProviderMethod(Binder binder, final Method method,
-      Class<? extends ThrowingProvider> throwingProvider) {
+      Class<? extends CheckedProvider> throwingProvider) {
     binder = binder.withSource(method);
     Errors errors = new Errors(method);
 

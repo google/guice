@@ -24,10 +24,14 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.internal.UniqueAnnotations;
+import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
+
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -36,10 +40,11 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
- * <p>Builds a binding for a {@link ThrowingProvider}.
+ * <p>Builds a binding for a {@link CheckedProvider}.
  * 
  * <p>You can use a fluent API and custom providers:
  * <pre><code>ThrowingProviderBinder.create(binder())
@@ -53,7 +58,7 @@ import java.util.Set;
  *     ThrowingProviderBinder.install(this, binder());
  *   }
  *   
- *   {@literal @}ThrowingProvides(RemoteProvider.class)
+ *   {@literal @}CheckedProvides(RemoteProvider.class)
  *   {@literal @}RequestScope
  *   Customer provideCustomer(FlakyCustomerCreator creator) throws RemoteException {
  *     return creator.getCustomerOrThrow();
@@ -79,41 +84,41 @@ public class ThrowingProviderBinder {
   }
   
   /**
-   * Installs {@literal @}{@link ThrowingProvides} methods.
+   * Returns a module that installs {@literal @}{@link CheckedProvides} methods.
    * 
    * @since 3.0
    */
-  public static void install(Module module, Binder binder) {
-    binder.install(ThrowingProviderMethodsModule.forModule(module));
+  public static Module forModule(Module module) {
+    return ThrowingProviderMethodsModule.forModule(module);
   }
 
-  public <P extends ThrowingProvider> SecondaryBinder<P> 
+  public <P extends CheckedProvider> SecondaryBinder<P> 
       bind(final Class<P> interfaceType, final Type valueType) {
     return new SecondaryBinder<P>(interfaceType, valueType);
   }
 
-  public class SecondaryBinder<P extends ThrowingProvider> {
+  public class SecondaryBinder<P extends CheckedProvider> {
     private final Class<P> interfaceType;
     private final Type valueType;
     private Class<? extends Annotation> annotationType;
     private Annotation annotation;
-    private final Class<? extends Exception> exceptionType;
+    private final List<Class<? extends Throwable>> exceptionTypes;
     private final boolean valid;
 
     public SecondaryBinder(Class<P> interfaceType, Type valueType) {
       this.interfaceType = checkNotNull(interfaceType, "interfaceType");
       this.valueType = checkNotNull(valueType, "valueType");
       if(checkInterface()) {
-        this.exceptionType = getExceptionType(interfaceType);
+        this.exceptionTypes = getExceptionType(interfaceType);
         valid = true;
       } else {
         valid = false;
-        this.exceptionType = null;
+        this.exceptionTypes = ImmutableList.of();
       }
     }
     
-    Class<? extends Exception> getExceptionType() {
-      return exceptionType;
+    List<Class<? extends Throwable>> getExceptionTypes() {
+      return exceptionTypes;
     }
 
     public SecondaryBinder<P> annotatedWith(Class<? extends Annotation> annotationType) {
@@ -155,11 +160,11 @@ public class ThrowingProviderBinder {
       return toInternal(targetKey);
     }
     
-    private ScopedBindingBuilder toInternal(final Key<? extends ThrowingProvider> targetKey) {
+    private ScopedBindingBuilder toInternal(final Key<? extends CheckedProvider> targetKey) {
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
       final Key<P> key = createKey();      
       final Provider<Result> resultProvider = binder.getProvider(resultKey);
-      final Provider<? extends ThrowingProvider> targetProvider = binder.getProvider(targetKey);
+      final Provider<? extends CheckedProvider> targetProvider = binder.getProvider(targetKey);
 
       // don't bother binding the proxy type if this is in an invalid state.
       if(valid) {
@@ -188,9 +193,13 @@ public class ThrowingProviderBinder {
           try {
             return Result.forValue(targetProvider.get().get());
           } catch (Exception e) {
-            if (exceptionType.isInstance(e)) {
-              return Result.forException(e);
-            } else if (e instanceof RuntimeException) {
+            for(Class<? extends Throwable> exceptionType : exceptionTypes) {
+              if (exceptionType.isInstance(e)) {
+                return Result.forException(e);
+              }
+            }
+            
+            if (e instanceof RuntimeException) {
               throw (RuntimeException) e;
             } else {
               // this should never happen
@@ -210,10 +219,21 @@ public class ThrowingProviderBinder {
      * {@code interfaceType}.
      */
     @SuppressWarnings({"unchecked"})
-    private Class<? extends Exception> getExceptionType(Class<P> interfaceType) {
-      ParameterizedType genericUnreliableProvider
-          = (ParameterizedType) interfaceType.getGenericInterfaces()[0];
-      return (Class<? extends Exception>) genericUnreliableProvider.getActualTypeArguments()[1];
+    private List<Class<? extends Throwable>> getExceptionType(Class<P> interfaceType) {
+      try {
+        Method getMethod = interfaceType.getMethod("get");
+        List<TypeLiteral<?>> exceptionLiterals =
+            TypeLiteral.get(interfaceType).getExceptionTypes(getMethod);
+        List<Class<? extends Throwable>> results = Lists.newArrayList();
+        for (TypeLiteral<?> exLiteral : exceptionLiterals) {
+          results.add(exLiteral.getRawType().asSubclass(Throwable.class));
+        }
+        return results;
+      } catch (SecurityException e) {
+        throw new IllegalStateException("Not allowed to inspect exception types", e);
+      } catch (NoSuchMethodException e) {
+        throw new IllegalStateException("No 'get'method available", e);
+      }
     }
 
     private boolean checkInterface() {
@@ -222,14 +242,18 @@ public class ThrowingProviderBinder {
         return false;
       }
       if(!checkArgument(interfaceType.getGenericInterfaces().length == 1,
-          "%s must extend ThrowingProvider (and only ThrowingProvider)",
+          "%s must extend CheckedProvider (and only CheckedProvider)",
           interfaceType)) {
         return false;
       }
-      if(!checkArgument(interfaceType.getInterfaces()[0] == ThrowingProvider.class,
-          "%s must extend ThrowingProvider (and only ThrowingProvider)",
-          interfaceType)) {
-        return false;
+      
+      boolean tpMode = interfaceType.getInterfaces()[0] == ThrowingProvider.class;      
+      if(!tpMode) {
+        if(!checkArgument(interfaceType.getInterfaces()[0] == CheckedProvider.class,
+            "%s must extend CheckedProvider (and only CheckedProvider)",
+            interfaceType)) {
+          return false;
+        }
       }
 
       // Ensure that T is parameterized and unconstrained.
@@ -239,12 +263,12 @@ public class ThrowingProviderBinder {
         String returnTypeName = interfaceType.getTypeParameters()[0].getName();
         Type returnType = genericThrowingProvider.getActualTypeArguments()[0];
         if(!checkArgument(returnType instanceof TypeVariable,
-            "%s does not properly extend ThrowingProvider, the first type parameter of ThrowingProvider (%s) is not a generic type",
+            "%s does not properly extend CheckedProvider, the first type parameter of CheckedProvider (%s) is not a generic type",
             interfaceType, returnType)) {
           return false;
         }
         if(!checkArgument(returnTypeName.equals(((TypeVariable) returnType).getName()),
-            "The generic type (%s) of %s does not match the generic type of ThrowingProvider (%s)",
+            "The generic type (%s) of %s does not match the generic type of CheckedProvider (%s)",
             returnTypeName, interfaceType, ((TypeVariable)returnType).getName())) {
           return false;
         }
@@ -261,11 +285,13 @@ public class ThrowingProviderBinder {
         }
       }
 
-      Type exceptionType = genericThrowingProvider.getActualTypeArguments()[1];
-      if(!checkArgument(exceptionType instanceof Class,
-          "%s has the wrong Exception generic type (%s) when extending ThrowingProvider",
-          interfaceType, exceptionType)) {
-        return false;
+      if(tpMode) { // only validate exception in ThrowingProvider mode.
+        Type exceptionType = genericThrowingProvider.getActualTypeArguments()[1];
+        if(!checkArgument(exceptionType instanceof Class,
+            "%s has the wrong Exception generic type (%s) when extending CheckedProvider",
+            interfaceType, exceptionType)) {
+          return false;
+        }
       }
       
       if (interfaceType.getDeclaredMethods().length == 1) {
@@ -326,9 +352,9 @@ public class ThrowingProviderBinder {
 
   /**
    * Represents the returned value from a call to {@link
-   * ThrowingProvider#get()}. This is the value that will be scoped by Guice.
+   * CheckedProvider#get()}. This is the value that will be scoped by Guice.
    */
-  private static class Result {
+  static class Result implements Serializable {
     private final Object value;
     private final Exception exception;
 
@@ -352,5 +378,8 @@ public class ThrowingProviderBinder {
         return value;
       }
     }
+    
+    @SuppressWarnings("unused")
+    private static long serialVersionUID = 0L;
   }
 }

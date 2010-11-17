@@ -40,7 +40,7 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinde
  *
  * @author sameb@google.com (Sam Berlin)
  */
-class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDependencies {
+class ThrowingProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   private final Key<T> key;
   private final Class<? extends Annotation> scopeAnnotation;
   private final Object instance;
@@ -48,7 +48,7 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
   private final ImmutableSet<Dependency<?>> dependencies;
   private final List<Provider<?>> parameterProviders;
   private final boolean exposed;
-  private final Class<? extends ThrowingProvider> throwingProvider;
+  private final Class<? extends CheckedProvider> checkedProvider;
   private final List<TypeLiteral<?>> exceptionTypes;
 
   ThrowingProviderMethod(
@@ -58,7 +58,7 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
       ImmutableSet<Dependency<?>> dependencies,
       List<Provider<?>> parameterProviders,
       Class<? extends Annotation> scopeAnnotation,
-      Class<? extends ThrowingProvider> throwingProvider,
+      Class<? extends CheckedProvider> checkedProvider,
       List<TypeLiteral<?>> exceptionTypes) {
     this.key = key;
     this.scopeAnnotation = scopeAnnotation;
@@ -67,7 +67,7 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
     this.method = method;
     this.parameterProviders = parameterProviders;
     this.exposed = method.isAnnotationPresent(Exposed.class);
-    this.throwingProvider = throwingProvider;
+    this.checkedProvider = checkedProvider;
     this.exceptionTypes = exceptionTypes;
 
     method.setAccessible(true);
@@ -86,7 +86,7 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
 
     SecondaryBinder<?> sbinder = 
       ThrowingProviderBinder.create(binder)
-        .bind(throwingProvider, key.getTypeLiteral().getType());
+        .bind(checkedProvider, key.getTypeLiteral().getType());
     if(key.getAnnotation() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotation());
     } else if(key.getAnnotationType() != null) {
@@ -104,19 +104,25 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
     }
 
     // Validate the exceptions in the method match the exceptions
-    // in the ThrowingProvider.
+    // in the CheckedProvider.
     for(TypeLiteral<?> exType : exceptionTypes) {
-      // Ignore runtime exceptions.
-      if(RuntimeException.class.isAssignableFrom(exType.getRawType())) {
+      Class<?> exActual = exType.getRawType();
+      // Ignore runtime exceptions & errors.
+      if(RuntimeException.class.isAssignableFrom(exActual) || Error.class.isAssignableFrom(exActual)) {
         continue;
       }
       
-      if(sbinder.getExceptionType() != null) {
-        if (!sbinder.getExceptionType().isAssignableFrom(exType.getRawType())) {
-          binder.addError(
-              "%s is not compatible with the exception (%s) declared in the ThrowingProvider interface (%s)",
-              exType.getRawType(), sbinder.getExceptionType(), throwingProvider);
+      boolean notAssignable = true;
+      for(Class<? extends Throwable> exExpected : sbinder.getExceptionTypes()) {
+        if (exExpected.isAssignableFrom(exActual)) {
+          notAssignable = false;
+          break;
         }
+      }
+      if(notAssignable) {
+        binder.addError(
+            "%s is not compatible with the exceptions (%s) declared in the CheckedProvider interface (%s)",
+            exActual, sbinder.getExceptionTypes(), checkedProvider);
       }
     }
   }
@@ -151,6 +157,6 @@ class ThrowingProviderMethod<T> implements ThrowingProvider<T, Exception>, HasDe
   }
 
   @Override public String toString() {
-    return "@ThrowingProvides " + StackTraceElements.forMember(method).toString();
+    return "@CheckedProvides " + StackTraceElements.forMember(method).toString();
   }
 }

@@ -21,20 +21,17 @@ package com.google.inject.throwingproviders;
  * a checked Exception. Users may not inject {@code T} directly.
  *
  * <p>This interface must be extended to use application-specific exception types.
- * Such subinterfaces may not define new methods:
+ * Such subinterfaces may not define new methods, but may narrow the exception type.
  * <pre>
- * public interface RemoteProvider&lt;T&gt; extends ThrowingProvider&lt;T, RemoteException&gt; { }
+ * public interface RemoteProvider&lt;T&gt; extends CheckedProvider&lt;T&gt; { 
+ *   T get() throws CustomExceptionOne, CustomExceptionTwo;
+ * }
  * </pre>
  *
  * <p>When this type is bound using {@link ThrowingProviderBinder}, the value returned
  * or exception thrown by {@link #get} will be scoped. As a consequence, {@link #get}
  * will invoked at most once within each scope.
- *
- * @author jmourits@google.com (Jerome Mourits)
- * @author jessewilson@google.com (Jesse Wilson)
- * @deprecated use {@link CheckedProvider} instead.
  */
-@Deprecated
-public interface ThrowingProvider<T,E extends Exception> extends CheckedProvider<T> {
-  T get() throws E;
+public interface CheckedProvider<T> {
+  T get() throws Exception;
 }

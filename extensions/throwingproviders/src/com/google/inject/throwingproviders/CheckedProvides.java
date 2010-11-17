@@ -31,11 +31,11 @@ import java.lang.annotation.Target;
  * @since 3.0
  */
 @Documented @Target(METHOD) @Retention(RUNTIME)
-public @interface ThrowingProvides {
+public @interface CheckedProvides {
   
   /**
-   * The interface that provides this value, a subinterface of ThrowingProvider.
+   * The interface that provides this value, a subinterface of {@link CheckedProvider}.
    */
-  Class<? extends ThrowingProvider> value();
+  Class<? extends CheckedProvider> value();
   
 }
