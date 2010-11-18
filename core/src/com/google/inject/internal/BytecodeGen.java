@@ -258,9 +258,17 @@ public final class BytecodeGen {
         return SAME_PACKAGE;
       }
 
-      Class[] parameterTypes = member instanceof Constructor
-          ? ((Constructor) member).getParameterTypes()
-          : ((Method) member).getParameterTypes();
+      Class[] parameterTypes;
+      if (member instanceof Constructor) {
+        parameterTypes = ((Constructor) member).getParameterTypes();
+      } else {
+        Method method = (Method) member;
+        if (forType(method.getReturnType()) == SAME_PACKAGE) {
+          return SAME_PACKAGE;
+        }
+        parameterTypes = method.getParameterTypes();
+      }
+
       for (Class<?> type : parameterTypes) {
         if (forType(type) == SAME_PACKAGE) {
           return SAME_PACKAGE;

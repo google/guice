@@ -26,6 +26,7 @@ import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePriva
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,6 +56,17 @@ public class BytecodeGenTest extends TestCase {
     }
   };
 
+  private final Module noopInterceptorModule = new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(any(), any(), new MethodInterceptor() {
+          public Object invoke(MethodInvocation chain)
+              throws Throwable {
+            return chain.proceed();
+          }
+        });
+      }
+    };
+
   public void testPackageVisibility() {
     Injector injector = Guice.createInjector(new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
@@ -80,8 +92,12 @@ public class BytecodeGenTest extends TestCase {
   static class TestVisibilityClassLoader
       extends URLClassLoader {
 
-    public TestVisibilityClassLoader() {
+    boolean hideInternals;
+
+    public TestVisibilityClassLoader(boolean hideInternals) {
       super(new URL[0]);
+
+      this.hideInternals = hideInternals;
 
       final String[] classpath = System.getProperty("java.class.path").split(File.pathSeparator);
       for (final String element : classpath) {
@@ -137,7 +153,10 @@ public class BytecodeGenTest extends TestCase {
       }
 
       // hide internal non-test classes
-      throw new ClassNotFoundException();
+      if (hideInternals) {
+        throw new ClassNotFoundException();
+      }
+      return super.loadClass(name, resolve);
     }
   }
 
@@ -150,7 +169,7 @@ public class BytecodeGenTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    ClassLoader testClassLoader = new TestVisibilityClassLoader();
+    ClassLoader testClassLoader = new TestVisibilityClassLoader(true);
     proxyTestClass = (Class<ProxyTest>) testClassLoader.loadClass(ProxyTest.class.getName());
     realClass = (Class<ProxyTestImpl>) testClassLoader.loadClass(ProxyTestImpl.class.getName());
 
@@ -267,5 +286,41 @@ public class BytecodeGenTest extends TestCase {
     protected String sayHi() {
       return "HI";
     }
+  }
+
+  static class Hidden {
+  }
+
+  public static class HiddenMethodReturn {
+    public Hidden method() {
+      return new Hidden();
+    }
+  }
+
+  public static class HiddenMethodParameter {
+    public void method(Hidden h) {
+    }
+  }
+
+  public void testClassLoaderBridging() throws Exception {
+    ClassLoader testClassLoader = new TestVisibilityClassLoader(false);
+
+    Class hiddenMethodReturnClass = testClassLoader.loadClass(HiddenMethodReturn.class.getName());
+    Class hiddenMethodParameterClass = testClassLoader.loadClass(HiddenMethodParameter.class.getName());
+
+    Injector injector = Guice.createInjector(noopInterceptorModule);
+
+    Class hiddenClass = testClassLoader.loadClass(Hidden.class.getName());
+    Constructor ctor = hiddenClass.getDeclaredConstructor();
+
+    ctor.setAccessible(true);
+
+    // don't use bridging for proxies with private parameters
+    Object o1 = injector.getInstance(hiddenMethodParameterClass);
+    o1.getClass().getDeclaredMethod("method", hiddenClass).invoke(o1, ctor.newInstance());
+
+    // don't use bridging for proxies with private return types
+    Object o2 = injector.getInstance(hiddenMethodReturnClass);
+    o2.getClass().getDeclaredMethod("method").invoke(o2);
   }
 }
