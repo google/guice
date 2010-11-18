@@ -102,7 +102,8 @@ public class StrictContainerTestSuiteBuilder {
           || name.startsWith("javax.")
           || name.startsWith("junit.")
           || name.startsWith("sun.")
-          || name.startsWith("com.sun.")) {
+          || name.startsWith("com.sun.")
+          || name.contains("cglib")) {
         return super.loadClass(name, resolve);
       }
 
