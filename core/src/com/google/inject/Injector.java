@@ -252,8 +252,8 @@ public interface Injector {
   Map<Class<? extends Annotation>, Scope> getScopeBindings();
 
   /**
-   * Returns a list containing all type converter bindings in the injector. The returned list
-   * is immutable.
+   * Returns a set containing all type converter bindings in the injector. The returned set is
+   * immutable.
    *
    * <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
    * 
