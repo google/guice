@@ -71,8 +71,8 @@ interface State {
       throw new UnsupportedOperationException();
     }
 
-    public List<TypeConverterBinding> getConvertersThisLevel() {
-      return ImmutableList.of();
+    public Iterable<TypeConverterBinding> getConvertersThisLevel() {
+      return ImmutableSet.of();
     }
 
     /*if[AOP]*/
@@ -131,7 +131,7 @@ interface State {
       String stringValue, TypeLiteral<?> type, Errors errors, Object source);
 
   /** Returns all converters at this level only. */
-  List<TypeConverterBinding> getConvertersThisLevel();
+  Iterable<TypeConverterBinding> getConvertersThisLevel();
 
   /*if[AOP]*/
   void addMethodAspect(MethodAspect methodAspect);

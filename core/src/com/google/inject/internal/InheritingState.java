@@ -84,7 +84,7 @@ final class InheritingState implements State {
     scopes.put(annotationType, scope);
   }
 
-  public List<TypeConverterBinding> getConvertersThisLevel() {
+  public Iterable<TypeConverterBinding> getConvertersThisLevel() {
     return converters;
   }
 
