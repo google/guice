@@ -31,6 +31,8 @@ package com.google.inject.throwingproviders;
  * <p>When this type is bound using {@link ThrowingProviderBinder}, the value returned
  * or exception thrown by {@link #get} will be scoped. As a consequence, {@link #get}
  * will invoked at most once within each scope.
+ * 
+ * @since 3.0
  */
 public interface CheckedProvider<T> {
   T get() throws Exception;

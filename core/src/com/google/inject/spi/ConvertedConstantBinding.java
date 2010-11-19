@@ -36,6 +36,8 @@ public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies
 
   /**
    * Returns the type converter binding used to convert the constant.
+   * 
+   * @since 3.0
    */
   TypeConverterBinding getTypeConverterBinding();
 

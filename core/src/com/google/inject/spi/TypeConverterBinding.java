@@ -36,6 +36,7 @@ public final class TypeConverterBinding implements Element {
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;
 
+  /** @since 3.0 */
   public TypeConverterBinding(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     this.source = checkNotNull(source, "source");
