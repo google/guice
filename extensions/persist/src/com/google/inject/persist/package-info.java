@@ -15,7 +15,7 @@
  */
 
 /**
- * Guice Persist: a lightweight persistence library for Guice. This extension requires {@code
+ * Guice Persist: a lightweight persistence library for Guice; this extension requires {@code
  * guice-persist-3.0.jar}.
  */
 package com.google.inject.persist;
