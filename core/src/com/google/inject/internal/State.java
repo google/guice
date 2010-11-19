@@ -23,6 +23,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -61,17 +62,17 @@ interface State {
       throw new UnsupportedOperationException();
     }
 
-    public void addConverter(MatcherAndConverter matcherAndConverter) {
+    public void addConverter(TypeConverterBinding typeConverterBinding) {
       throw new UnsupportedOperationException();
     }
 
-    public MatcherAndConverter getConverter(String stringValue, TypeLiteral<?> type, Errors errors,
+    public TypeConverterBinding getConverter(String stringValue, TypeLiteral<?> type, Errors errors,
         Object source) {
       throw new UnsupportedOperationException();
     }
 
-    public Iterable<MatcherAndConverter> getConvertersThisLevel() {
-      return ImmutableSet.of();
+    public List<TypeConverterBinding> getConvertersThisLevel() {
+      return ImmutableList.of();
     }
 
     /*if[AOP]*/
@@ -123,14 +124,14 @@ interface State {
 
   void putAnnotation(Class<? extends Annotation> annotationType, Scope scope);
 
-  void addConverter(MatcherAndConverter matcherAndConverter);
+  void addConverter(TypeConverterBinding typeConverterBinding);
 
   /** Returns the matching converter for {@code type}, or null if none match. */
-  MatcherAndConverter getConverter(
+  TypeConverterBinding getConverter(
       String stringValue, TypeLiteral<?> type, Errors errors, Object source);
 
   /** Returns all converters at this level only. */
-  Iterable<MatcherAndConverter> getConvertersThisLevel();
+  List<TypeConverterBinding> getConvertersThisLevel();
 
   /*if[AOP]*/
   void addMethodAspect(MethodAspect methodAspect);

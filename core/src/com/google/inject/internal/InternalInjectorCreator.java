@@ -29,10 +29,12 @@ import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builds a tree of injectors. This is a primary injector, plus child injectors needed for each
@@ -285,6 +287,9 @@ public final class InternalInjectorCreator {
     }
     public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
       return delegateInjector.getScopeBindings();
+    }
+    public Set<TypeConverterBinding> getTypeConverterBindings() {
+      return delegateInjector.getTypeConverterBindings();
     }
     public <T> Provider<T> getProvider(Key<T> key) {
       throw new UnsupportedOperationException(

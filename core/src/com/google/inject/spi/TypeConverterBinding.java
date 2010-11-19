@@ -36,7 +36,7 @@ public final class TypeConverterBinding implements Element {
   private final Matcher<? super TypeLiteral<?>> typeMatcher;
   private final TypeConverter typeConverter;
 
-  TypeConverterBinding(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
+  public TypeConverterBinding(Object source, Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter typeConverter) {
     this.source = checkNotNull(source, "source");
     this.typeMatcher = checkNotNull(typeMatcher, "typeMatcher");
@@ -61,5 +61,10 @@ public final class TypeConverterBinding implements Element {
 
   public void applyTo(Binder binder) {
     binder.withSource(getSource()).convertToTypes(typeMatcher, typeConverter);
+  }
+
+  @Override public String toString() {
+    return typeConverter + " which matches " + typeMatcher
+        + " (bound at " + source + ")";
   }
 }

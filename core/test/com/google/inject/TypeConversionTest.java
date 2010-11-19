@@ -19,7 +19,9 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.TypeConverter;
+import com.google.inject.spi.TypeConverterBinding;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.Date;
@@ -209,6 +211,14 @@ public class TypeConversionTest extends TestCase {
     });
 
     assertSame(result, injector.getInstance(DateHolder.class).date);
+
+    Binding<Date> binding = injector.getBinding(Key.get(Date.class, NumericValue.class));
+    assertTrue(binding instanceof ConvertedConstantBinding<?>);
+
+    TypeConverterBinding converterBinding = ((ConvertedConstantBinding<?>)binding).getTypeConverterBinding();
+    assertEquals("CustomConverter", converterBinding.getTypeConverter().toString());
+
+    assertTrue(injector.getTypeConverterBindings().contains(converterBinding));
   }
 
   public void testInvalidCustomValue() throws CreationException {

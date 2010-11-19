@@ -161,12 +161,12 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
   private void internalConvertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
     injector.state.addConverter(
-        new MatcherAndConverter(typeMatcher, converter, SourceProvider.UNKNOWN_SOURCE));
+        new TypeConverterBinding(SourceProvider.UNKNOWN_SOURCE, typeMatcher, converter));
   }
 
   @Override public Boolean visit(TypeConverterBinding command) {
-    injector.state.addConverter(new MatcherAndConverter(
-        command.getTypeMatcher(), command.getTypeConverter(), command.getSource()));
+    injector.state.addConverter(new TypeConverterBinding(
+        command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
     return true;
   }
 }

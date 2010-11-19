@@ -24,6 +24,7 @@ import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Maps;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ final class InheritingState implements State {
   private final Map<Key<?>, Binding<?>> explicitBindings
       = Collections.unmodifiableMap(explicitBindingsMutable);
   private final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
-  private final List<MatcherAndConverter> converters = Lists.newArrayList();
+  private final List<TypeConverterBinding> converters = Lists.newArrayList();
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   /*end[AOP]*/
@@ -83,19 +84,19 @@ final class InheritingState implements State {
     scopes.put(annotationType, scope);
   }
 
-  public Iterable<MatcherAndConverter> getConvertersThisLevel() {
+  public List<TypeConverterBinding> getConvertersThisLevel() {
     return converters;
   }
 
-  public void addConverter(MatcherAndConverter matcherAndConverter) {
-    converters.add(matcherAndConverter);
+  public void addConverter(TypeConverterBinding typeConverterBinding) {
+    converters.add(typeConverterBinding);
   }
 
-  public MatcherAndConverter getConverter(
+  public TypeConverterBinding getConverter(
       String stringValue, TypeLiteral<?> type, Errors errors, Object source) {
-    MatcherAndConverter matchingConverter = null;
+    TypeConverterBinding matchingConverter = null;
     for (State s = this; s != State.NONE; s = s.parent()) {
-      for (MatcherAndConverter converter : s.getConvertersThisLevel()) {
+      for (TypeConverterBinding converter : s.getConvertersThisLevel()) {
         if (converter.getTypeMatcher().matches(type)) {
           if (matchingConverter != null) {
             errors.ambiguousTypeConversion(stringValue, source, type, matchingConverter, converter);

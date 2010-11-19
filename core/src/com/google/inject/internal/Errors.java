@@ -34,6 +34,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -52,7 +53,7 @@ import java.util.List;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
- * considered to have executed succesfully only if new errors were not added to this collection.
+ * considered to have executed successfully only if new errors were not added to this collection.
  *
  * <p>Errors can be chained to provide additional context. To add context, call {@link #withSource}
  * to create a new Errors instance that contains additional context. All messages added to the
@@ -136,30 +137,30 @@ public final class Errors implements Serializable {
   }
 
   public Errors converterReturnedNull(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter matchingConverter) {
+      TypeLiteral<?> type, TypeConverterBinding typeConverterBinding) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
         + " using %s.",
-        stringValue, convert(source), type, matchingConverter);
+        stringValue, convert(source), type, typeConverterBinding);
   }
 
   public Errors conversionTypeError(String stringValue, Object source, TypeLiteral<?> type,
-      MatcherAndConverter matchingConverter, Object converted) {
+      TypeConverterBinding typeConverterBinding, Object converted) {
     return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Converter returned %s.",
-        stringValue, convert(source), type, matchingConverter, converted);
+        stringValue, convert(source), type, typeConverterBinding, converted);
   }
 
   public Errors conversionError(String stringValue, Object source,
-      TypeLiteral<?> type, MatcherAndConverter matchingConverter, RuntimeException cause) {
+      TypeLiteral<?> type, TypeConverterBinding typeConverterBinding, RuntimeException cause) {
     return errorInUserCode(cause, "Error converting '%s' (bound at %s) to %s%n"
         + " using %s.%n"
         + " Reason: %s",
-        stringValue, convert(source), type, matchingConverter, cause);
+        stringValue, convert(source), type, typeConverterBinding, cause);
   }
 
   public Errors ambiguousTypeConversion(String stringValue, Object source, TypeLiteral<?> type,
-      MatcherAndConverter a, MatcherAndConverter b) {
+      TypeConverterBinding a, TypeConverterBinding b) {
     return addMessage("Multiple converters can convert '%s' (bound at %s) to %s:%n"
         + " %s and%n"
         + " %s.%n"
@@ -609,7 +610,7 @@ public final class Errors implements Serializable {
     }
 
     boolean appliesTo(Object o) {
-      return type.isAssignableFrom(o.getClass());
+      return o != null && type.isAssignableFrom(o.getClass());
     }
 
     String convert(Object o) {

@@ -46,6 +46,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderBinding;
+import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
@@ -377,9 +378,9 @@ final class InjectorImpl implements Injector, Lookups {
 
     // Find a matching type converter.
     TypeLiteral<T> type = key.getTypeLiteral();
-    MatcherAndConverter matchingConverter = state.getConverter(stringValue, type, errors, source);
+    TypeConverterBinding typeConverterBinding = state.getConverter(stringValue, type, errors, source);
 
-    if (matchingConverter == null) {
+    if (typeConverterBinding == null) {
       // No converter can handle the given type.
       return null;
     }
@@ -387,23 +388,24 @@ final class InjectorImpl implements Injector, Lookups {
     // Try to convert the string. A failed conversion results in an error.
     try {
       @SuppressWarnings("unchecked") // This cast is safe because we double check below.
-      T converted = (T) matchingConverter.getTypeConverter().convert(stringValue, type);
+      T converted = (T) typeConverterBinding.getTypeConverter().convert(stringValue, type);
 
       if (converted == null) {
-        throw errors.converterReturnedNull(stringValue, source, type, matchingConverter)
+        throw errors.converterReturnedNull(stringValue, source, type, typeConverterBinding)
             .toException();
       }
 
       if (!type.getRawType().isInstance(converted)) {
-        throw errors.conversionTypeError(stringValue, source, type, matchingConverter, converted)
+        throw errors.conversionTypeError(stringValue, source, type, typeConverterBinding, converted)
             .toException();
       }
 
-      return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding);
+      return new ConvertedConstantBindingImpl<T>(this, key, converted, stringBinding,
+          typeConverterBinding);
     } catch (ErrorsException e) {
       throw e;
     } catch (RuntimeException e) {
-      throw errors.conversionError(stringValue, source, type, matchingConverter, e)
+      throw errors.conversionError(stringValue, source, type, typeConverterBinding, e)
           .toException();
     }
   }
@@ -413,14 +415,17 @@ final class InjectorImpl implements Injector, Lookups {
     final T value;
     final Provider<T> provider;
     final Binding<String> originalBinding;
+    final TypeConverterBinding typeConverterBinding;
 
     ConvertedConstantBindingImpl(
-        InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding) {
+        InjectorImpl injector, Key<T> key, T value, Binding<String> originalBinding,
+        TypeConverterBinding typeConverterBinding) {
       super(injector, key, originalBinding.getSource(),
           new ConstantFactory<T>(Initializables.of(value)), Scoping.UNSCOPED);
       this.value = value;
       provider = Providers.of(value);
       this.originalBinding = originalBinding;
+      this.typeConverterBinding = typeConverterBinding;
     }
 
     @Override public Provider<T> getProvider() {
@@ -433,6 +438,10 @@ final class InjectorImpl implements Injector, Lookups {
 
     public T getValue() {
       return value;
+    }
+
+    public TypeConverterBinding getTypeConverterBinding() {
+      return typeConverterBinding;
     }
 
     public Key<String> getSourceKey() {
@@ -829,7 +838,11 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   public Map<Class<? extends Annotation>, Scope> getScopeBindings() {
-    return state.getScopes();
+    return ImmutableMap.copyOf(state.getScopes());
+  }
+
+  public Set<TypeConverterBinding> getTypeConverterBindings() {
+    return ImmutableSet.copyOf(state.getConvertersThisLevel());
   }
 
   private static class BindingsMultimap {
