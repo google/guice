@@ -25,7 +25,6 @@
     <module>persist</module>
     <module>servlet</module>
     <module>spring</module>
-    <module>struts2</module>
     <module>throwingproviders</module>
 <!--
  |  not yet promoted...
