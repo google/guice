@@ -20,12 +20,17 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
 import com.google.inject.internal.util.ImmutableMap;
+import com.google.inject.internal.util.Maps;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -80,6 +85,52 @@ public class ScopeRequestIntegrationTest extends TestCase {
     executor.shutdown();
     executor.awaitTermination(2, TimeUnit.SECONDS);
   }
+  
+  public final void testWrongValueClasses() throws Exception {
+    Injector injector = Guice.createInjector(new ServletModule() {
+      @Override protected void configureServlets() {
+        bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
+        bind(SomeObject.class).in(RequestScoped.class);
+      }
+    });
+    
+    OffRequestCallable offRequestCallable = injector.getInstance(OffRequestCallable.class);
+    try {
+      ServletScopes.scopeRequest(offRequestCallable,
+        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), "Boo!"));
+      fail();
+    } catch(IllegalArgumentException iae) {
+      assertEquals("Value[Boo!] of type[java.lang.String] is not compatible with key[" + Key.get(SomeObject.class) + "]", iae.getMessage());
+    }
+  }
+  
+  public final void testNullReplacement() throws Exception {
+    Injector injector = Guice.createInjector(new ServletModule() {
+      @Override protected void configureServlets() {
+        bindConstant().annotatedWith(Names.named(SomeObject.INVALID)).to(SHOULDNEVERBESEEN);
+        bind(SomeObject.class).in(RequestScoped.class);
+      }
+    });
+    
+    Callable<SomeObject> callable = injector.getInstance(Caller.class);
+    try {
+      assertNotNull(callable.call());
+      fail();
+    } catch(ProvisionException pe) {
+      assertTrue(pe.getCause() instanceof OutOfScopeException);
+    }
+    
+    // First validate that an actual null entry gets replaced with the null sentinel.
+    Map<Key<?>, Object> map = Maps.newHashMap();
+    map.put(Key.get(SomeObject.class), null);
+    callable = ServletScopes.scopeRequest(injector.getInstance(Caller.class), map);
+    assertNull(callable.call());
+    
+    // Then validate that our nullObject entry also gets replaced.
+    callable = ServletScopes.scopeRequest(injector.getInstance(Caller.class), 
+        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), ServletScopes.nullObject()));
+    assertNull(callable.call());
+  }
 
   @RequestScoped
   public static class SomeObject {
@@ -106,6 +157,14 @@ public class ScopeRequestIntegrationTest extends TestCase {
       assertFalse(SHOULDNEVERBESEEN.equals(value));
 
       return value;
+    }
+  }
+  
+  private static class Caller implements Callable<SomeObject> {
+    @Inject Provider<SomeObject> someObject;
+    
+    public SomeObject call() throws Exception {
+      return someObject.get();
     }
   }
 }

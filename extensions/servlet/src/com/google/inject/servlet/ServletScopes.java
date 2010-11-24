@@ -156,6 +156,9 @@ public class ServletScopes {
    *
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
+   * @param seedMap the initial set of scoped instances for Guice to seed the
+   *     request scope with.  To seed with null, use either a null
+   *     value or a value of {@link #nullObject()}.
    * @return a callable that will invoke the given callable, making the request
    *     context available to it.
    * @throws OutOfScopeException if this method is called from a non-request
@@ -172,7 +175,8 @@ public class ServletScopes {
     final ContinuingHttpServletRequest continuingRequest =
         new ContinuingHttpServletRequest(GuiceFilter.getRequest());
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
-      continuingRequest.setAttribute(entry.getKey().toString(), entry.getValue());
+      Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
+      continuingRequest.setAttribute(entry.getKey().toString(), value);
     }
 
     return new Callable<T>() {
@@ -216,7 +220,8 @@ public class ServletScopes {
    * @param callable code to be executed which depends on the request scope.
    *     Typically in another thread, but not necessarily so.
    * @param seedMap the initial set of scoped instances for Guice to seed the
-   *     request scope with.
+   *     request scope with.  To seed with null, use either a null
+   *     value or a value of {@link #nullObject()}.
    * @return a callable that when called will run inside the a request scope
    *     that exposes the instances in the {@code seedMap} as scoped keys.
    * @since 3.0
@@ -229,7 +234,8 @@ public class ServletScopes {
     // Copy the seed values into our local scope map.
     final Map<String, Object> scopeMap = Maps.newHashMap();
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
-      scopeMap.put(entry.getKey().toString(), entry.getValue());
+      Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
+      scopeMap.put(entry.getKey().toString(), value);
     }
 
     return new Callable<T>() {
@@ -248,5 +254,33 @@ public class ServletScopes {
         }
       }
     };
+  }
+
+  /**
+   * Returns an object that may be used in the seedMap of
+   * {@link #continueRequest} and {@link #scopeRequest} to indicate the value
+   * should remain null and not attempt to be created.
+   * 
+   * @since 3.0
+   */
+  public static Object nullObject() {
+    return NullObject.INSTANCE;
+  }
+
+  /**
+   * Validates the key and object, ensuring the value matches the key type, and
+   * canonicalizing null objects to the null sentinel.
+   */
+  private static Object validateAndCanonicalizeValue(Key<?> key, Object object) {
+    if (object == null || object == NullObject.INSTANCE) {
+      return NullObject.INSTANCE;
+    }
+
+    if (!key.getTypeLiteral().getRawType().isInstance(object)) {
+      throw new IllegalArgumentException("Value[" + object + "] of type["
+          + object.getClass().getName() + "] is not compatible with key[" + key + "]");
+    }
+
+    return object;
   }
 }
