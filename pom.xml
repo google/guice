@@ -89,6 +89,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <module>extensions</module>
   </modules>
 
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
   <properties>
     <!--
      | The spec version of the public Guice API
@@ -106,15 +110,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </properties>
 
   <dependencies>
-    <!--
-     | Replace with official CGLIB artifact when it's released
-    -->
-    <dependency>
-      <groupId>org.sonatype.sisu.inject</groupId>
-      <artifactId>cglib</artifactId>
-      <version>2.2.1</version>
-      <optional>${guice.with.jarjar}</optional>
-    </dependency>
     <!--
      | Run tests with TestNG
     -->
