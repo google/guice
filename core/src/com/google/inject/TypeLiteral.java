@@ -45,12 +45,6 @@ import java.util.List;
  * <p>
  * {@code TypeLiteral<List<String>> list = new TypeLiteral<List<String>>() {};}
  *
- * <p>This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@code Class<?>} or {@code List<? extends CharSequence>}.
- * Such type literals must be constructed programatically, either by {@link
- * Method#getGenericReturnType extracting types from members} or by using the
- * {@link Types} factory class.
- *
  * <p>Along with modeling generic types, this class can resolve type parameters.
  * For example, to figure out what type {@code keySet()} returns on a {@code
  * Map<Integer, String>}, use this code:<pre>   {@code

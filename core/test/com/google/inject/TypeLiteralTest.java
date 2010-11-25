@@ -61,11 +61,15 @@ public class TypeLiteralTest extends TestCase {
   public void testWithWildcardType() throws NoSuchFieldException, IOException {
     TypeLiteral<?> a = TypeLiteral.get(getClass().getField("wildcardExtends").getGenericType());
     TypeLiteral<?> b = TypeLiteral.get(Types.listOf(Types.subtypeOf(CharSequence.class)));
+    TypeLiteral<?> c = new TypeLiteral<List<? extends CharSequence>>() {};
     assertEqualsBothWays(a, b);
+    assertEqualsBothWays(b, c);
     assertEquals("java.util.List<? extends java.lang.CharSequence>", a.toString());
     assertEquals("java.util.List<? extends java.lang.CharSequence>", b.toString());
+    assertEquals("java.util.List<? extends java.lang.CharSequence>", c.toString());
     assertNotSerializable(a);
     assertNotSerializable(b);
+    assertNotSerializable(c);
   }
 
   public void testMissingTypeParameter() {
