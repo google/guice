@@ -23,9 +23,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to create a provider method binding that can throw
- * exceptions. The method's return type is bound to it's returned value. Guice will pass
- * dependencies to the method as parameters.
+ * Annotates methods of a {@link Module} to create a {@link CheckedProvider}
+ * method binding that can throw exceptions. The method's return type is bound
+ * to a {@link CheckedProvider} that can be injected. Guice will pass
+ * dependencies to the method as parameters. Install {@literal @}CheckedProvides
+ * methods by using
+ * {@link ThrowingProviderBinder#forModule(com.google.inject.Module)} on the
+ * module where the methods are declared.
  * 
  * @author sameb@google.com (Sam Berlin)
  * @since 3.0

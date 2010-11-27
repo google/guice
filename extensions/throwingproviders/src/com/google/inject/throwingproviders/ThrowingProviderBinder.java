@@ -89,7 +89,7 @@ public class ThrowingProviderBinder {
    * @since 3.0
    */
   public static Module forModule(Module module) {
-    return ThrowingProviderMethodsModule.forModule(module);
+    return CheckedProviderMethodsModule.forModule(module);
   }
 
   public <P extends CheckedProvider> SecondaryBinder<P> 
@@ -100,10 +100,12 @@ public class ThrowingProviderBinder {
   public class SecondaryBinder<P extends CheckedProvider> {
     private final Class<P> interfaceType;
     private final Type valueType;
-    private Class<? extends Annotation> annotationType;
-    private Annotation annotation;
     private final List<Class<? extends Throwable>> exceptionTypes;
     private final boolean valid;
+
+    private Class<? extends Annotation> annotationType;
+    private Annotation annotation;
+    private Key<P> interfaceKey;
 
     public SecondaryBinder(Class<P> interfaceType, Type valueType) {
       this.interfaceType = checkNotNull(interfaceType, "interfaceType");
@@ -114,11 +116,15 @@ public class ThrowingProviderBinder {
       } else {
         valid = false;
         this.exceptionTypes = ImmutableList.of();
-      }
+      }      
     }
     
     List<Class<? extends Throwable>> getExceptionTypes() {
       return exceptionTypes;
+    }
+    
+    Key<P> getKey() {
+    	return interfaceKey;
     }
 
     public SecondaryBinder<P> annotatedWith(Class<? extends Annotation> annotationType) {
@@ -147,9 +153,9 @@ public class ThrowingProviderBinder {
       return to(Key.get(targetType));
     }
     
-    ScopedBindingBuilder toProviderMethod(ThrowingProviderMethod<?> target) {
-      Key<ThrowingProviderMethod> targetKey =
-        Key.get(ThrowingProviderMethod.class, UniqueAnnotations.create());
+    ScopedBindingBuilder toProviderMethod(CheckedProviderMethod<?> target) {
+      Key<CheckedProviderMethod> targetKey =
+        Key.get(CheckedProviderMethod.class, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
       
       return toInternal(targetKey);
@@ -162,13 +168,13 @@ public class ThrowingProviderBinder {
     
     private ScopedBindingBuilder toInternal(final Key<? extends CheckedProvider> targetKey) {
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
-      final Key<P> key = createKey();      
       final Provider<Result> resultProvider = binder.getProvider(resultKey);
       final Provider<? extends CheckedProvider> targetProvider = binder.getProvider(targetKey);
+      interfaceKey = createKey();
 
       // don't bother binding the proxy type if this is in an invalid state.
       if(valid) {
-        binder.bind(key).toProvider(new ProviderWithDependencies<P>() {
+        binder.bind(interfaceKey).toProvider(new ProviderWithDependencies<P>() {
           private final P instance = interfaceType.cast(Proxy.newProxyInstance(
               interfaceType.getClassLoader(), new Class<?>[] { interfaceType },
               new InvocationHandler() {
@@ -218,7 +224,6 @@ public class ThrowingProviderBinder {
      * Returns the exception type declared to be thrown by the get method of
      * {@code interfaceType}.
      */
-    @SuppressWarnings({"unchecked"})
     private List<Class<? extends Throwable>> getExceptionType(Class<P> interfaceType) {
       try {
         Method getMethod = interfaceType.getMethod("get");
@@ -379,7 +384,6 @@ public class ThrowingProviderBinder {
       }
     }
     
-    @SuppressWarnings("unused")
-    private static long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
   }
 }

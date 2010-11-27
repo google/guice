@@ -40,7 +40,7 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinde
  *
  * @author sameb@google.com (Sam Berlin)
  */
-class ThrowingProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
+class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   private final Key<T> key;
   private final Class<? extends Annotation> scopeAnnotation;
   private final Object instance;
@@ -51,7 +51,7 @@ class ThrowingProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   private final Class<? extends CheckedProvider> checkedProvider;
   private final List<TypeLiteral<?>> exceptionTypes;
 
-  ThrowingProviderMethod(
+  CheckedProviderMethod(
       Key<T> key,
       Method method,
       Object instance,
@@ -73,15 +73,7 @@ class ThrowingProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     method.setAccessible(true);
   }
 
-  public Key<T> getKey() {
-    return key;
-  }
-
-  public Method getMethod() {
-    return method;
-  }
-
-  public void configure(Binder binder) {
+  void configure(Binder binder) {
     binder = binder.withSource(method);
 
     SecondaryBinder<?> sbinder = 
@@ -100,7 +92,7 @@ class ThrowingProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     if (exposed) {
       // the cast is safe 'cause the only binder we have implements PrivateBinder. If there's a
       // misplaced @Exposed, calling this will add an error to the binder's error queue
-      ((PrivateBinder) binder).expose(key);
+      ((PrivateBinder) binder).expose(sbinder.getKey());
     }
 
     // Validate the exceptions in the method match the exceptions

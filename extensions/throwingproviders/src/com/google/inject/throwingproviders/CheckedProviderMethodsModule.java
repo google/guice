@@ -42,11 +42,11 @@ import java.util.logging.Logger;
  * 
  * @author sameb@google.com (Sam Berlin)
  */
-final class ThrowingProviderMethodsModule implements Module {
+final class CheckedProviderMethodsModule implements Module {
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
 
-  private ThrowingProviderMethodsModule(Object delegate) {
+  private CheckedProviderMethodsModule(Object delegate) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
   }
@@ -56,21 +56,21 @@ final class ThrowingProviderMethodsModule implements Module {
    */
   static Module forModule(Module module) {
     // avoid infinite recursion, since installing a module always installs itself
-    if (module instanceof ThrowingProviderMethodsModule) {
+    if (module instanceof CheckedProviderMethodsModule) {
       return Modules.EMPTY_MODULE;
     }
 
-    return new ThrowingProviderMethodsModule(module);
+    return new CheckedProviderMethodsModule(module);
   }
   
   public synchronized void configure(Binder binder) {
-    for (ThrowingProviderMethod<?> throwingProviderMethod : getProviderMethods(binder)) {
+    for (CheckedProviderMethod<?> throwingProviderMethod : getProviderMethods(binder)) {
       throwingProviderMethod.configure(binder);
     }
   }
 
-  List<ThrowingProviderMethod<?>> getProviderMethods(Binder binder) {
-    List<ThrowingProviderMethod<?>> result = Lists.newArrayList();
+  List<CheckedProviderMethod<?>> getProviderMethods(Binder binder) {
+    List<CheckedProviderMethod<?>> result = Lists.newArrayList();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
         CheckedProvides checkedProvides =
@@ -83,7 +83,7 @@ final class ThrowingProviderMethodsModule implements Module {
     return result;
   }
 
-  <T> ThrowingProviderMethod<T> createProviderMethod(Binder binder, final Method method,
+  <T> CheckedProviderMethod<T> createProviderMethod(Binder binder, final Method method,
       Class<? extends CheckedProvider> throwingProvider) {
     binder = binder.withSource(method);
     Errors errors = new Errors(method);
@@ -119,7 +119,7 @@ final class ThrowingProviderMethodsModule implements Module {
       binder.addError(message);
     }
 
-    return new ThrowingProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
+    return new CheckedProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
         parameterProviders, scopeAnnotation, throwingProvider, exceptionTypes);
   }
 
@@ -129,8 +129,8 @@ final class ThrowingProviderMethodsModule implements Module {
   }
 
   @Override public boolean equals(Object o) {
-    return o instanceof ThrowingProviderMethodsModule
-        && ((ThrowingProviderMethodsModule) o).delegate == delegate;
+    return o instanceof CheckedProviderMethodsModule
+        && ((CheckedProviderMethodsModule) o).delegate == delegate;
   }
 
   @Override public int hashCode() {
