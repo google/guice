@@ -157,8 +157,8 @@ public class ServletScopes {
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
    * @param seedMap the initial set of scoped instances for Guice to seed the
-   *     request scope with.  To seed with null, use either a null
-   *     value or a value of {@link #nullObject()}.
+   *     request scope with.  To seed a key with null, use {@code null} as
+   *     the value.
    * @return a callable that will invoke the given callable, making the request
    *     context available to it.
    * @throws OutOfScopeException if this method is called from a non-request
@@ -220,8 +220,8 @@ public class ServletScopes {
    * @param callable code to be executed which depends on the request scope.
    *     Typically in another thread, but not necessarily so.
    * @param seedMap the initial set of scoped instances for Guice to seed the
-   *     request scope with.  To seed with null, use either a null
-   *     value or a value of {@link #nullObject()}.
+   *     request scope with.  To seed a key with null, use {@code null} as
+   *     the value.
    * @return a callable that when called will run inside the a request scope
    *     that exposes the instances in the {@code seedMap} as scoped keys.
    * @since 3.0
@@ -254,17 +254,6 @@ public class ServletScopes {
         }
       }
     };
-  }
-
-  /**
-   * Returns an object that may be used in the seedMap of
-   * {@link #continueRequest} and {@link #scopeRequest} to indicate the value
-   * should remain null and not attempt to be created.
-   * 
-   * @since 3.0
-   */
-  public static Object nullObject() {
-    return NullObject.INSTANCE;
   }
 
   /**

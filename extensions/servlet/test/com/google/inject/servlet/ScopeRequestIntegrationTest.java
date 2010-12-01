@@ -120,15 +120,10 @@ public class ScopeRequestIntegrationTest extends TestCase {
       assertTrue(pe.getCause() instanceof OutOfScopeException);
     }
     
-    // First validate that an actual null entry gets replaced with the null sentinel.
+    // Validate that an actual null entry in the map results in a null injected object.
     Map<Key<?>, Object> map = Maps.newHashMap();
     map.put(Key.get(SomeObject.class), null);
     callable = ServletScopes.scopeRequest(injector.getInstance(Caller.class), map);
-    assertNull(callable.call());
-    
-    // Then validate that our nullObject entry also gets replaced.
-    callable = ServletScopes.scopeRequest(injector.getInstance(Caller.class), 
-        ImmutableMap.<Key<?>, Object>of(Key.get(SomeObject.class), ServletScopes.nullObject()));
     assertNull(callable.call());
   }
 
