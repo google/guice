@@ -21,6 +21,7 @@
        description="Build entire distribution.">
     <ant antfile="extensions/servlet/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/spring/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/struts2/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/assistedinject/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/jmx/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
@@ -33,6 +34,9 @@
     </copy>
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="extensions/spring/build" includes="*.jar" excludes="*-with-deps.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/struts2/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/assistedinject/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -125,6 +129,7 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
+      <fileset dir="${struts2.src.dir}"/>
 
       <doclet name="jdiff.JDiff"
               path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
@@ -172,6 +177,8 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
+      <!-- TODO: this breaks Doclava for some reason
+      <fileset dir="${struts2.src.dir}"/> -->
 
       <doclet name="com.google.doclava.Doclava">
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
@@ -231,6 +238,7 @@
       description="Remove generated files.">
     <ant dir="extensions/servlet" antfile="build.xml" target="clean"/>
     <ant dir="extensions/spring" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/struts2" antfile="build.xml" target="clean"/>
     <ant dir="extensions/assistedinject" antfile="build.xml" target="clean"/>
     <ant dir="extensions/jmx" antfile="build.xml" target="clean"/>
     <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>

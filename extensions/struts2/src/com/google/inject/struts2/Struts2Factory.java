@@ -45,7 +45,7 @@ import com.opensymphony.xwork2.interceptor.Interceptor;
 public class Struts2Factory extends ObjectFactory {
 
   private static final long serialVersionUID = 1L;
-  private static final Logger logger = Logger.getLogger(Struts2FactoryTest.class.getName());
+  private static final Logger logger = Logger.getLogger(Struts2Factory.class.getName());
   private static final String ERROR_NO_INJECTOR =
       "Cannot find a Guice injector.  Are you sure you registered a GuiceServletContextListener "
     + "that uses the Struts2GuicePluginModule in your application's web.xml?";
