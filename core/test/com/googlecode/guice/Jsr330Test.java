@@ -18,6 +18,8 @@ package com.googlecode.guice;
 
 import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+
+import com.google.inject.Binding;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -27,10 +29,15 @@ import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
+import java.util.Iterator;
+import java.util.Set;
+
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -264,6 +271,63 @@ public class Jsr330Test extends TestCase {
 
     // when you guicify the Guice-friendly, it's a no-op
     assertSame(guicified, Providers.guicify(guicified));
+    
+    assertFalse(guicified instanceof HasDependencies);
+  }
+  
+  public void testGuicifyWithDependencies() {
+    Provider<String> jsr330Provider = new Provider<String>() {
+      @Inject double d;
+      int i;
+      @Inject void injectMe(int i) {
+        this.i = i;
+      }
+      
+      public String get() {
+        return  d + "-" + i;
+      }
+    };
+    
+    final com.google.inject.Provider<String> guicified =
+        Providers.guicify(jsr330Provider);
+    assertTrue(guicified instanceof HasDependencies);
+    Set<Dependency<?>> actual = ((HasDependencies)guicified).getDependencies();
+    validateDependencies(actual, jsr330Provider.getClass());
+    
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(String.class).toProvider(guicified);
+        bind(int.class).toInstance(1);
+        bind(double.class).toInstance(2.0d);
+      }
+    });
+    
+    Binding<String> binding = injector.getBinding(String.class);
+    assertEquals("2.0-1", binding.getProvider().get());
+    validateDependencies(actual, jsr330Provider.getClass());
+  }
+  
+  private void validateDependencies(Set<Dependency<?>> actual, Class<?> owner) {
+    assertEquals(actual.toString(), 2, actual.size());
+    Dependency<?> dDep = null;
+    Dependency<?> iDep = null;
+    for(Dependency<?> dep : actual) {
+      if(dep.getKey().equals(Key.get(Double.class))) {
+        dDep = dep;
+      } else if(dep.getKey().equals(Key.get(Integer.class))) {
+        iDep = dep;
+      }
+    }
+    assertNotNull(dDep);
+    assertNotNull(iDep);
+    assertEquals(TypeLiteral.get(owner), dDep.getInjectionPoint().getDeclaringType());
+    assertEquals("d", dDep.getInjectionPoint().getMember().getName());
+    assertEquals(-1, dDep.getParameterIndex());
+    
+    assertEquals(TypeLiteral.get(owner), iDep.getInjectionPoint().getDeclaringType());
+    assertEquals("injectMe", iDep.getInjectionPoint().getMember().getName());
+    assertEquals(0, iDep.getParameterIndex());
   }
 
   static class A {

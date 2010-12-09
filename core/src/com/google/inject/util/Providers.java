@@ -18,7 +18,16 @@ package com.google.inject.util;
 
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 
+import java.util.Set;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Sets;
+import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.ProviderWithDependencies;
 
 /**
  * Static utility methods for creating and working with instances of
@@ -65,14 +74,45 @@ public final class Providers {
     }
   
     final javax.inject.Provider<T> delegate = checkNotNull(provider, "provider");
-    return new Provider<T>() {
-      public T get() {
-        return delegate.get();
+    
+    // Ensure that we inject all injection points from the delegate provider.
+    Set<InjectionPoint> injectionPoints =
+        InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
+    if(injectionPoints.isEmpty()) {
+      return new Provider<T>() {
+        public T get() {
+          return delegate.get();
+        }
+    
+        @Override public String toString() {
+          return "guicified(" + delegate + ")";
+        }
+      };
+    } else {
+      Set<Dependency<?>> mutableDeps = Sets.newHashSet();
+      for(InjectionPoint ip : injectionPoints) {
+        mutableDeps.addAll(ip.getDependencies());
       }
-  
-      @Override public String toString() {
-        return "guicified(" + delegate + ")";
-      }
-    };
+      final Set<Dependency<?>> dependencies = ImmutableSet.copyOf(mutableDeps);
+      return new ProviderWithDependencies<T>() {
+        @SuppressWarnings("unused")
+        @Inject
+        void initialize(Injector injector) {
+          injector.injectMembers(delegate);
+        }
+        
+        public Set<Dependency<?>> getDependencies() {
+          return dependencies;
+        }
+        
+        public T get() {
+          return delegate.get();
+        }
+    
+        @Override public String toString() {
+          return "guicified(" + delegate + ")";
+        }
+      };
+    }
   }
 }
