@@ -30,8 +30,6 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import net.sf.cglib.core.Predicate;
-
 /**
  * Utility methods for runtime code generation and class loading. We use this stuff for {@link
  * net.sf.cglib.reflect.FastClass faster reflection}, {@link net.sf.cglib.proxy.Enhancer method
@@ -88,7 +86,8 @@ public final class BytecodeGen {
     }
     
     @Override
-    public String getClassName(String prefix, String source, Object key, Predicate names) {
+    public String getClassName(String prefix, String source, Object key,
+        net.sf.cglib.core.Predicate names) {
       // we explicitly set the source here to "FastClass" so that our jarjar renaming
       // to $FastClass doesn't leak into the class names.  if we did not do this,
       // classes would end up looking like $$$FastClassByGuice$$, with the extra $
@@ -105,7 +104,8 @@ public final class BytecodeGen {
     }
 
     @Override
-    public String getClassName(String prefix, String source, Object key, Predicate names) {
+    public String getClassName(String prefix, String source, Object key,
+        net.sf.cglib.core.Predicate names) {
       // we explicitly set the source here to "Enhancer" so that our jarjar renaming
       // to $Enhancer doesn't leak into the class names.  if we did not do this,
       // classes would end up looking like $$$EnhancerByGuice$$, with the extra $
