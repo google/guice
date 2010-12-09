@@ -27,7 +27,8 @@ import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import com.google.inject.util.Jsr330;
+import com.google.inject.util.Providers;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -257,12 +258,12 @@ public class Jsr330Test extends TestCase {
       }
     };
 
-    com.google.inject.Provider<String> guicified = Jsr330.guicify(jsr330Provider);
+    com.google.inject.Provider<String> guicified = Providers.guicify(jsr330Provider);
     assertEquals("guicified(jsr330Provider)", guicified.toString());
     assertEquals("A", guicified.get());
 
     // when you guicify the Guice-friendly, it's a no-op
-    assertSame(guicified, Jsr330.guicify(guicified));
+    assertSame(guicified, Providers.guicify(guicified));
   }
 
   static class A {

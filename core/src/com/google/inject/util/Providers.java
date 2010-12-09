@@ -16,6 +16,8 @@
 
 package com.google.inject.util;
 
+import static com.google.inject.internal.util.Preconditions.checkNotNull;
+
 import com.google.inject.Provider;
 
 /**
@@ -46,6 +48,28 @@ public final class Providers {
 
       @Override public String toString() {
         return "of(" + instance + ")";
+      }
+    };
+  }
+
+  /**
+   * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
+   * JSR-330 {@code javax.inject.Provider}. The converse method is unnecessary,
+   * since Guice providers directly implement the JSR-330 interface.
+   */
+  public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
+    if (provider instanceof Provider) {
+      return (Provider<T>) provider;
+    }
+  
+    final javax.inject.Provider<T> delegate = checkNotNull(provider, "provider");
+    return new Provider<T>() {
+      public T get() {
+        return delegate.get();
+      }
+  
+      @Override public String toString() {
+        return "guicified(" + delegate + ")";
       }
     };
   }
