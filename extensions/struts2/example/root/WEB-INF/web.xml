@@ -5,7 +5,7 @@
 <web-app>
 
   <listener>
-      <listener-class>com.google.inject.struts2.example.ExampleListenerAndModule</listener-class>
+      <listener-class>com.google.inject.struts2.example.ExampleListener</listener-class>
   </listener>  
 
   <filter>

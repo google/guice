@@ -4,7 +4,7 @@
 
 <struts>
 <constant name="struts.devMode" value="true"></constant>
-  <!-- No need to specify a module here. See ExampleListenerAndModule. -->
+  <!-- No need to specify a module here. See ExampleListener. -->
 
   <!-- Register some actions, these get injected for you by Guice -->
   <package name="default" extends="struts-default">
