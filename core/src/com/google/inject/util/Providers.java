@@ -56,6 +56,8 @@ public final class Providers {
    * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
    * JSR-330 {@code javax.inject.Provider}. The converse method is unnecessary,
    * since Guice providers directly implement the JSR-330 interface.
+   * 
+   * @since 3.0
    */
   public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
     if (provider instanceof Provider) {
