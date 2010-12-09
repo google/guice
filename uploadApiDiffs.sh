@@ -17,4 +17,4 @@ cp -r build/docs/javadoc latest-api-diffs/$CV/javadoc
 
 # commit changes
 svn add latest-api-diffs/$CV
-svn ci -m "Added updated $CV api diffs." latest-api-diffs/$CV
+svn ci -m "Added updated $CV api diffs." latest-api-diffs/$CV latest-api-diffs/$CV.xml
