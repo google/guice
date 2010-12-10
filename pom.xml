@@ -329,43 +329,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
         </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <profiles>
-    <profile>
-      <!--
-       | Release profile: capture source and javadoc
-      -->
-      <id>release-sign-artifacts</id>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <!--
        | Deployment profile for the Sonatype Grid
