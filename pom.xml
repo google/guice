@@ -338,7 +338,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <!--
        | Release profile: capture source and javadoc
       -->
-      <id>release</id>
+      <id>release-sign-artifacts</id>
       <build>
         <plugins>
           <plugin>
