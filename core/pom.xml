@@ -99,10 +99,10 @@
       <!--
        | No-AOP profile: repeat the build lifecycle with munged no-AOP source
       -->
-      <id>guice.with.noaop</id>
+      <id>guice.with.no_aop</id>
       <activation>
         <property>
-          <name>guice.with.noaop</name>
+          <name>guice.with.no_aop</name>
           <value>!false</value>
         </property>
       </activation>
@@ -137,20 +137,20 @@
             </executions>
           </plugin>
           <!--
-           | Package the no-AOP build with its own OSGi manifest and attach using "noaop" classifier
+           | Package the no-AOP build with its own OSGi manifest and attach using "no_aop" classifier
           -->
           <plugin>
             <artifactId>maven-jar-plugin</artifactId>
             <executions>
               <execution>
-                <id>noaop</id>
+                <id>no_aop</id>
                 <phase>package</phase>
                 <goals>
                   <goal>jar</goal>
                 </goals>
                 <configuration>
                   <classesDirectory>${project.build.directory}/munged/classes</classesDirectory>
-                  <classifier>noaop</classifier>
+                  <classifier>no_aop</classifier>
                   <archive>
                     <manifestFile>${project.build.directory}/munged/classes/META-INF/MANIFEST.MF</manifestFile>
                   </archive>
@@ -202,14 +202,14 @@
             <artifactId>maven-jar-plugin</artifactId>
             <executions>
               <execution>
-                <id>nodeps</id>
+                <id>no_deps</id>
                 <phase>package</phase>
                 <goals>
                   <goal>jar</goal>
                 </goals>
                 <configuration>
                   <classesDirectory>${project.build.directory}/original-classes</classesDirectory>
-                  <classifier>nodeps</classifier>
+                  <classifier>no_deps</classifier>
                 </configuration>
               </execution>
             </executions>

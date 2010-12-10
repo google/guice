@@ -101,7 +101,7 @@
           <groupId>com.google.inject</groupId>
           <artifactId>guice</artifactId>
           <version>${project.version}</version>
-          <classifier>nodeps</classifier>
+          <classifier>no_deps</classifier>
           <optional>true</optional>
         </dependency>
       </dependencies>
