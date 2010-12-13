@@ -300,6 +300,14 @@ public final class Elements {
       elements.add(privateElements);
       return new RecordingBinder(this, privateElements);
     }
+    
+    public void disableCircularProxies() {
+      elements.add(new DisableCircularProxiesOption(getSource()));
+    }
+    
+    public void requireExplicitBindings() {
+      elements.add(new RequireExplicitBindingsOption(getSource()));     
+    }
 
     public void expose(Key<?> key) {
       exposeInternal(key);

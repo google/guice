@@ -16,18 +16,8 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Binding;
+import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
-import com.google.inject.spi.ElementVisitor;
-import com.google.inject.spi.InjectionRequest;
-import com.google.inject.spi.MembersInjectorLookup;
-import com.google.inject.spi.Message;
-import com.google.inject.spi.PrivateElements;
-import com.google.inject.spi.ProviderLookup;
-import com.google.inject.spi.ScopeBinding;
-import com.google.inject.spi.StaticInjectionRequest;
-import com.google.inject.spi.TypeConverterBinding;
-import com.google.inject.spi.TypeListenerBinding;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,7 +30,7 @@ import java.util.List;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-abstract class AbstractProcessor implements ElementVisitor<Boolean> {
+abstract class AbstractProcessor extends DefaultElementVisitor<Boolean> {
 
   protected Errors errors;
   protected InjectorImpl injector;
@@ -72,51 +62,9 @@ abstract class AbstractProcessor implements ElementVisitor<Boolean> {
       this.injector = null;
     }
   }
-
-  public Boolean visit(Message message) {
-    return false;
-  }
-
-  /*if[AOP]*/
-  public Boolean visit(
-      com.google.inject.spi.InterceptorBinding interceptorBinding) {
-    return false;
-  }
-  /*end[AOP]*/
-
-  public Boolean visit(ScopeBinding scopeBinding) {
-    return false;
-  }
-
-  public Boolean visit(InjectionRequest<?> injectionRequest) {
-    return false;
-  }
-
-  public Boolean visit(StaticInjectionRequest staticInjectionRequest) {
-    return false;
-  }
-
-  public Boolean visit(TypeConverterBinding typeConverterBinding) {
-    return false;
-  }
-
-  public <T> Boolean visit(Binding<T> binding) {
-    return false;
-  }
-
-  public <T> Boolean visit(ProviderLookup<T> providerLookup) {
-    return false;
-  }
-
-  public Boolean visit(PrivateElements privateElements) {
-    return false;
-  }
-
-  public <T> Boolean visit(MembersInjectorLookup<T> lookup) {
-    return false;
-  }
-
-  public Boolean visit(TypeListenerBinding binding) {
+  
+  @Override
+  protected Boolean visitOther(Element element) {
     return false;
   }
 }

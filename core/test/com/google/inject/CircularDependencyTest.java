@@ -106,14 +106,13 @@ public class CircularDependencyTest extends TestCase {
   }
   
   public void testDisablingCircularProxies() {
-    Injector injector = new InjectorBuilder()
-      .disableCircularProxies()
-      .addModules(new AbstractModule() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
+        binder().disableCircularProxies();
         binder.bind(A.class).to(E.class);
         binder.bind(B.class).to(E.class);
       }
-    }).build();
+    });
     
     try {
       injector.getInstance(A.class);

@@ -21,7 +21,6 @@ import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Injector;
-import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
@@ -29,8 +28,8 @@ import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.ImmutableSet;
@@ -63,10 +62,31 @@ import java.util.Set;
  * Default {@link Injector} implementation.
  *
  * @author crazybob@google.com (Bob Lee)
- * @see InjectorBuilder
  */
 final class InjectorImpl implements Injector, Lookups {
   public static final TypeLiteral<String> STRING_TYPE = TypeLiteral.get(String.class);
+  
+  /** Options that control how the injector behaves. */
+  static class InjectorOptions {
+    final Stage stage;
+    final boolean jitDisabled;
+    final boolean disableCircularProxies;
+    
+    InjectorOptions(Stage stage, boolean jitDisabled, boolean disableCircularProxies) {
+      this.stage = stage;
+      this.jitDisabled = jitDisabled;
+      this.disableCircularProxies = disableCircularProxies;
+    }
+    
+    @Override
+    public String toString() {
+      return new ToStringBuilder(getClass())
+          .add("stage", stage)
+          .add("jitDisabled", jitDisabled)
+          .add("disableCircularProxies", disableCircularProxies)
+          .toString();
+    }
+  }
   
   /** some limitations on what just in time bindings are allowed. */
   enum JitLimitation { 
@@ -211,7 +231,6 @@ final class InjectorImpl implements Injector, Lookups {
    */
   private <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors, JitLimitation jitType)
       throws ErrorsException {
-
 
     boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
     if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !jitOverride) {

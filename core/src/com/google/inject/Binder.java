@@ -25,6 +25,7 @@ import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -407,4 +408,49 @@ public interface Binder {
    * @since 2.0
    */
   PrivateBinder newPrivateBinder();
+
+  /**
+   * Instructs the Injector that bindings must be listed in a Module in order to
+   * be injected. Classes that are not explicitly bound in a module cannot be
+   * injected. Bindings created through a linked binding (
+   * <code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
+   * implicit binding (<code>FooImpl</code>) cannot be directly injected unless
+   * it is also explicitly bound (<code>bind(FooImpl.class</code>).
+   * <p>
+   * Tools can still retrieve bindings for implicit bindings (bindings created
+   * through a linked binding) if explicit bindings are required, however
+   * {@link Binding#getProvider} will fail.
+   * <p>
+   * By default, explicit bindings are not required.
+   * <p>
+   * If a parent injector requires explicit bindings, then all child injectors
+   * (and private modules within that injector) also require explicit bindings.
+   * If a parent does not require explicit bindings, a child injector or private
+   * module may optionally declare itself as requiring explicit bindings. If it
+   * does, the behavior is limited only to that child or any grandchildren. No
+   * siblings of the child will require explicit bindings.
+   * <p>
+   * If the parent did not require explicit bindings but the child does, it is
+   * possible that a linked binding in the child may add a JIT binding to the
+   * parent. The child will not be allowed to reference the target binding
+   * directly, but the parent and other children of the parent may be able to.
+   * 
+   * @since 3.0
+   */
+  void requireExplicitBindings();
+  
+  /**
+   * Prevents Guice from constructing a {@link Proxy} when a circular dependency
+   * is found.  By default, circular proxies are not disabled.
+   * <p>
+   * If a parent injector disables circular proxies, then all child injectors
+   * (and private modules within that injector) also disable circular proxies.
+   * If a parent does not disable circular proxies, a child injector or private
+   * module may optionally declare itself as disabling circular proxies. If it
+   * does, the behavior is limited only to that child or any grandchildren. No
+   * siblings of the child will disable circular proxies.
+   * 
+   * @since 3.0
+   */
+  void disableCircularProxies();
 }

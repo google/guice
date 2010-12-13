@@ -32,7 +32,6 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -41,7 +40,6 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Maps;
-import com.google.inject.multibindings.SpiUtils.VisitType;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -488,9 +486,7 @@ public class MapBinderTest extends TestCase {
 
   /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
   public void testMultibinderDependenciesInToolStage() {
-    Injector injector = new InjectorBuilder()
-      .stage(Stage.TOOL)
-      .addModules(new AbstractModule() {
+    Injector injector = Guice.createInjector(Stage.TOOL, new AbstractModule() {
         protected void configure() {
           MapBinder<Integer, String> mapBinder
               = MapBinder.newMapBinder(binder(), Integer.class, String.class);
@@ -498,8 +494,7 @@ public class MapBinderTest extends TestCase {
           mapBinder.addBinding(2).to(Key.get(String.class, Names.named("b")));
   
           bindConstant().annotatedWith(Names.named("b")).to("B");
-        }})
-      .build();
+        }});
 
     Binding<Map<Integer, String>> binding = injector.getBinding(new Key<Map<Integer, String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;

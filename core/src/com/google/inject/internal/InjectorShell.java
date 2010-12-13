@@ -24,7 +24,7 @@ import com.google.inject.Provider;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.google.inject.internal.InternalInjectorCreator.InjectorOptions;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
@@ -41,9 +41,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * A partially-initialized injector. See {@link InjectorBuilder}, which uses this to build a tree
- * of injectors in batch.
- *
+ * A partially-initialized injector. See {@link InternalInjectorCreator}, which
+ * uses this to build a tree of injectors in batch.
+ * 
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class InjectorShell {
@@ -75,19 +75,21 @@ final class InjectorShell {
 
     private InjectorImpl parent;
     private InjectorOptions options;
+    private Stage stage;
 
     /** null unless this exists in a {@link Binder#newPrivateBinder private environment} */
     private PrivateElementsImpl privateElements;
+    
+    Builder stage(Stage stage) {
+      this.stage = stage;
+      return this;
+    }
 
     Builder parent(InjectorImpl parent) {
       this.parent = parent;
       this.state = new InheritingState(parent.state);
       this.options = parent.options;
-      return this;
-    }
-    
-    Builder setInjectorOptions(InjectorOptions options) {
-      this.options = options;
+      this.stage = options.stage;
       return this;
     }
 
@@ -103,8 +105,8 @@ final class InjectorShell {
       }
     }
     
-    InjectorOptions getInjectorOptions() {
-      return options;
+    Stage getStage() {
+      return options.stage;
     }
 
     /** Synchronize on this before calling {@link #build}. */
@@ -119,23 +121,31 @@ final class InjectorShell {
      */
     List<InjectorShell> build(BindingProcessor bindingProcessor,
         Stopwatch stopwatch, Errors errors) {
-      checkState(options != null, "Options not initialized");
-      checkState(options.stage != null, "Stage not initialized");
+      checkState(stage != null, "Stage not initialized");
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
 
+      // bind Stage and Singleton if this is a top-level injector
+      if (parent == null) {
+        modules.add(0, new RootModule(stage));
+      }
+      elements.addAll(Elements.getElements(stage, modules));
+      
+      // Look for injector-changing options
+      InjectorOptionsProcessor optionsProcessor = new InjectorOptionsProcessor(errors);
+      optionsProcessor.process(null, elements);
+      options = optionsProcessor.getOptions(stage, options);
+      
       InjectorImpl injector = new InjectorImpl(parent, state, options);
       if (privateElements != null) {
         privateElements.initInjector(injector);
       }
 
-      // bind Stage and Singleton if this is a top-level injector
+      // add default type converters if this is a top-level injector
       if (parent == null) {
-        modules.add(0, new RootModule(options.stage));
         new TypeConverterBindingProcessor(errors).prepareBuiltInConverters(injector);
       }
 
-      elements.addAll(Elements.getElements(options.stage, modules));
       stopwatch.resetAndLog("Module execution");
 
       new MessageProcessor(errors).process(injector, elements);
@@ -166,7 +176,7 @@ final class InjectorShell {
       injectorShells.add(new InjectorShell(this, elements, injector));
 
       // recursively build child shells
-      PrivateElementProcessor processor = new PrivateElementProcessor(errors, options);
+      PrivateElementProcessor processor = new PrivateElementProcessor(errors);
       processor.process(injector, elements);
       for (Builder builder : processor.getInjectorShellBuilders()) {
         injectorShells.addAll(builder.build(bindingProcessor, stopwatch, errors));

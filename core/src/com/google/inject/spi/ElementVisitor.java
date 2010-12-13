@@ -86,4 +86,18 @@ public interface ElementVisitor<V> {
    * Visit an injectable type listener binding.
    */
   V visit(TypeListenerBinding binding);
+  
+  /**
+   * Visit a require explicit bindings command.
+   * 
+   * @since 3.0
+   */
+  V visit(RequireExplicitBindingsOption option);
+  
+  /**
+   * Visit a disable circular proxies command.
+   * 
+   * @since 3.0
+   */
+  V visit(DisableCircularProxiesOption option);
 }

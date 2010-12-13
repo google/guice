@@ -45,7 +45,6 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.InjectorBuilder;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -400,17 +399,14 @@ public class MultibinderTest extends TestCase {
    * really care about the underlying structure of those bindings, which are implementation details.
    */
   public void testMultibinderDependenciesInToolStage() {
-    Injector injector = new InjectorBuilder()
-      .stage(Stage.TOOL)
-      .addModules(new AbstractModule() {
+    Injector injector = Guice.createInjector(Stage.TOOL, new AbstractModule() {
         protected void configure() {
           Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
           multibinder.addBinding().toInstance("A");
           multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
   
           bindConstant().annotatedWith(Names.named("b")).to("B");
-        }})
-      .build();
+        }});
 
     Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;

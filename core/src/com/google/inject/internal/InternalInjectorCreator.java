@@ -67,36 +67,23 @@ public final class InternalInjectorCreator {
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
   private List<InjectorShell> shells;
   
-  public static class InjectorOptions {
-    final Stage stage;
-    final boolean jitDisabled;
-    final boolean allowCircularProxy;
-    
-    public InjectorOptions(Stage stage, boolean jitDisabled, boolean allowCircularProxy) {
-      this.stage = stage;
-      this.jitDisabled = jitDisabled;
-      this.allowCircularProxy = allowCircularProxy;
-    }
-  }
-
   public InternalInjectorCreator() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
     bindingProcesor = new BindingProcessor(errors, initializer);
   }
   
-  public InternalInjectorCreator injectorOptions(InjectorOptions options) {
-    shellBuilder.setInjectorOptions(options);
+  public InternalInjectorCreator stage(Stage stage) {
+    shellBuilder.stage(stage);
     return this;
-  }  
+  }
 
   /**
-   * Sets the parent of the injector to-be-constructed.As a side effect, this sets this injector's
+   * Sets the parent of the injector to-be-constructed. As a side effect, this sets this injector's
    * stage to the stage of {@code parent} and sets {@link #requireExplicitBindings()} if the parent
    * injector also required them.
    */
   public InternalInjectorCreator parentInjector(InjectorImpl parent) {
     shellBuilder.parent(parent);
-    shellBuilder.setInjectorOptions(parent.options);
     return this;
   }
 
@@ -121,7 +108,7 @@ public final class InternalInjectorCreator {
 
     injectDynamically();
 
-    if (shellBuilder.getInjectorOptions().stage == Stage.TOOL) {
+    if (shellBuilder.getStage() == Stage.TOOL) {
       // wrap the primaryInjector in a ToolStageInjector
       // to prevent non-tool-friendy methods from being called.
       return new ToolStageInjector(primaryInjector());
@@ -187,9 +174,9 @@ public final class InternalInjectorCreator {
     stopwatch.resetAndLog("Instance injection");
     errors.throwCreationExceptionIfErrorsExist();
 
-    if(shellBuilder.getInjectorOptions().stage != Stage.TOOL) {
+    if(shellBuilder.getStage() != Stage.TOOL) {
       for (InjectorShell shell : shells) {
-        loadEagerSingletons(shell.getInjector(), shellBuilder.getInjectorOptions().stage, errors);
+        loadEagerSingletons(shell.getInjector(), shellBuilder.getStage(), errors);
       }
       stopwatch.resetAndLog("Preloading singletons");
     }
