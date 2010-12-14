@@ -415,7 +415,7 @@ public interface Binder {
    * injected. Bindings created through a linked binding (
    * <code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
    * implicit binding (<code>FooImpl</code>) cannot be directly injected unless
-   * it is also explicitly bound (<code>bind(FooImpl.class</code>).
+   * it is also explicitly bound (<code>bind(FooImpl.class)</code>).
    * <p>
    * Tools can still retrieve bindings for implicit bindings (bindings created
    * through a linked binding) if explicit bindings are required, however
