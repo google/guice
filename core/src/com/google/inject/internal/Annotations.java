@@ -21,12 +21,17 @@ import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
+import com.google.inject.internal.util.Function;
+import com.google.inject.internal.util.MapMaker;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Member;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import javax.inject.Qualifier;
 
 /**
@@ -75,9 +80,48 @@ public class Annotations {
     return found;
   }
 
+  /**
+   * Checks for the presence of annotations. Caches results because Android doesn't.
+   */
+  static class AnnotationChecker {
+    private final Collection<Class<? extends Annotation>> annotationTypes;
+
+    /** Returns true if the given class has one of the desired annotations. */
+    private Function<Class<? extends Annotation>, Boolean> hasAnnotations =
+        new Function<Class<? extends Annotation>, Boolean>() {
+      public Boolean apply(Class<? extends Annotation> annotationType) {
+        for (Annotation annotation : annotationType.getAnnotations()) {
+          if (annotationTypes.contains(annotation.annotationType())) {
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+
+    final Map<Class<? extends Annotation>, Boolean> cache = new MapMaker().weakKeys()
+        .makeComputingMap(hasAnnotations);
+
+    /**
+     * Constructs a new checker that looks for annotations of the given types.
+     */
+    AnnotationChecker(Collection<Class<? extends Annotation>> annotationTypes) {
+      this.annotationTypes = annotationTypes;
+    }
+
+    /**
+     * Returns true if the given type has one of the desired annotations.
+     */
+    boolean hasAnnotations(Class<? extends Annotation> annotated) {
+      return cache.get(annotated);
+    }
+  }
+
+  private static final AnnotationChecker scopeChecker = new AnnotationChecker(
+      Arrays.asList(ScopeAnnotation.class, javax.inject.Scope.class));
+
   public static boolean isScopeAnnotation(Class<? extends Annotation> annotationType) {
-    return annotationType.isAnnotationPresent(ScopeAnnotation.class) 
-        || annotationType.isAnnotationPresent(javax.inject.Scope.class);
+    return scopeChecker.hasAnnotations(annotationType);
   }
 
   /**
@@ -126,12 +170,14 @@ public class Annotations {
     return found;
   }
 
+  private static final AnnotationChecker bindingAnnotationChecker = new AnnotationChecker(
+      Arrays.asList(BindingAnnotation.class, Qualifier.class));
+
   /**
    * Returns true if annotations of the specified type are binding annotations.
    */
   public static boolean isBindingAnnotation(Class<? extends Annotation> annotationType) {
-    return annotationType.isAnnotationPresent(BindingAnnotation.class) 
-          || annotationType.isAnnotationPresent(Qualifier.class);
+    return bindingAnnotationChecker.hasAnnotations(annotationType);
   }
 
   /**
