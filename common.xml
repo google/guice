@@ -15,6 +15,7 @@
          debug="on"
          destdir="${build.dir}/classes"
          source="1.5" target="1.5" includeantruntime="false">
+      <compilerarg value="-Xlint:all,-serial"/>
       <classpath refid="compile.classpath"/>
     </javac>
     <copy toDir="${build.dir}/classes">
