@@ -197,6 +197,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T> implements Construc
         null, key, getSource(), factory, getScoping(), factory, constructorInjectionPoint);
   }
 
+  @SuppressWarnings("unchecked") // the raw constructor member and declaring type always agree
   public void applyTo(Binder binder) {
     InjectionPoint constructor = getConstructor();
     getScoping().applyTo(binder.withSource(getSource()).bind(getKey()).toConstructor(

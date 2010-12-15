@@ -53,9 +53,11 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
     this.providerInstance = providerInstance;
   }
 
+  @SuppressWarnings("unchecked") // the extension type is always consistent with the provider type
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     if(providerInstance instanceof ProviderWithExtensionVisitor) {
-      return ((ProviderWithExtensionVisitor<? extends T>)providerInstance).acceptExtensionVisitor(visitor, this);
+      return ((ProviderWithExtensionVisitor<? extends T>) providerInstance)
+          .acceptExtensionVisitor(visitor, this);
     } else {
       return visitor.visit(this);
     }

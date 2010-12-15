@@ -248,7 +248,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     }
 
     @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
-    public T newInstance(Object[] arguments) throws InvocationTargetException {
+    public T newInstance(Object... arguments) throws InvocationTargetException {
       Enhancer.registerCallbacks(enhanced, callbacks);
       try {
         return (T) fastConstructor.newInstance(arguments);
