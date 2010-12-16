@@ -22,6 +22,7 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.internal.util.Objects;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
@@ -126,5 +127,13 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
     } else {
       return false;
     }
+  }
+  
+  @Override
+  public int hashCode() {
+    // Avoid calling hashCode on 'instance', which is a user-object
+    // that might not be expecting it.
+    // (We need to call equals, so we do.  But we can avoid hashCode.)
+    return Objects.hashCode(method);
   }
 }
