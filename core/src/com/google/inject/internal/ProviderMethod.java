@@ -22,7 +22,6 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Objects;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderWithDependencies;
@@ -121,7 +120,9 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof ProviderMethod) {
-      return method.equals(((ProviderMethod)obj).method);
+      ProviderMethod o = (ProviderMethod)obj;
+      return method.equals(o.method)
+         && instance.equals(o.instance);
     } else {
       return false;
     }

@@ -80,6 +80,18 @@ public class DuplicateBindingsTest extends TestCase {
     assertEquals(7, new LinkedHashSet<Element>(elements).size());
   }
   
+  public void testProviderMethodsFailIfInstancesDiffer() {
+    try {
+      Guice.createInjector(new FailingProviderModule(), new FailingProviderModule());
+      fail("should have failed");
+    } catch(CreationException ce) {
+      assertContains(ce.getMessage(),
+          "A binding to " + Foo.class.getName() + " was already configured at " + FailingProviderModule.class.getName(),
+          "at " + FailingProviderModule.class.getName()
+          );
+    }
+  }
+  
   public void testSameScopeInstanceIgnored() {
     Guice.createInjector(
         new ScopedModule(Scopes.SINGLETON, foo, pFoo, pclFoo, clFoo, cFoo),
@@ -189,8 +201,8 @@ public class DuplicateBindingsTest extends TestCase {
           "at " + SimpleModule.class.getName(),
           "A binding to " + Foo.class.getName() + " annotated with " + named("constructor") + " was already configured at " + SimpleModule.class.getName(),
           "at " + SimpleModule.class.getName(),
-          "A binding to " + Foo.class.getName() + " annotated with " + named("providerMethod") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName()
+          "A binding to " + Foo.class.getName() + " annotated with " + named("providerMethod") + " was already configured at " + SimpleProviderModule.class.getName(),
+          "at " + SimpleProviderModule.class.getName()
           );
     } 
     
@@ -302,7 +314,7 @@ public class DuplicateBindingsTest extends TestCase {
       }
     });
   }
-  
+
   private static class RealA extends A {}
   @ImplementedBy(RealA.class) private static class A {}
   
@@ -367,6 +379,27 @@ public class DuplicateBindingsTest extends TestCase {
     @Provides Foo foo() {
       return null;
     }
+  }
+  
+  private static class FailingProviderModule extends AbstractModule {
+    @Override protected void configure() {}
+
+    @Provides Foo foo() {
+      return null;
+    }
+  }
+
+  private static class SimpleProviderModule extends AbstractModule {
+    @Override protected void configure() {}
+
+    @Provides @Named("providerMethod") Foo foo() {
+      return null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return obj.getClass() == getClass();
+    }
   }  
   
   private static class SimpleModule extends FooModule {
@@ -393,10 +426,11 @@ public class DuplicateBindingsTest extends TestCase {
       
       // ConstructorBinding
       bind(Foo.class).annotatedWith(named("constructor")).toConstructor(cFoo);
-    }
-    
-    @Provides @Named("providerMethod") Foo foo() {
-      return null;
+
+      // ProviderMethod
+      // (reconstructed from an Element to ensure it doesn't get filtered out
+      //  by deduplicating Modules)
+      install(Elements.getModule(Elements.getElements(new SimpleProviderModule())));
     }
   }
   
