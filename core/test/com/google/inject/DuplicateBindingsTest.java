@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Objects;
+import com.google.inject.name.Named;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -65,6 +66,7 @@ public class DuplicateBindingsTest extends TestCase {
     assertTrue(bindings.remove(Key.get(FooImpl.class)));
     assertTrue(bindings.remove(Key.get(Foo.class, named("constructor"))));
     assertTrue(bindings.remove(Key.get(FooProvider.class))); // JIT binding
+    assertTrue(bindings.remove(Key.get(Foo.class, named("providerMethod"))));
     
     assertEquals(bindings.toString(), 0, bindings.size());
   }
@@ -74,8 +76,8 @@ public class DuplicateBindingsTest extends TestCase {
         new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo),
         new SimpleModule(foo, pFoo, pclFoo, clFoo, cFoo)
     );
-    assertEquals(12, elements.size());
-    assertEquals(6, new LinkedHashSet<Element>(elements).size());
+    assertEquals(14, elements.size());
+    assertEquals(7, new LinkedHashSet<Element>(elements).size());
   }
   
   public void testSameScopeInstanceIgnored() {
@@ -186,8 +188,13 @@ public class DuplicateBindingsTest extends TestCase {
           "A binding to " + Foo.class.getName() + " annotated with " + named("linkedKey") + " was already configured at " + SimpleModule.class.getName(),
           "at " + SimpleModule.class.getName(),
           "A binding to " + Foo.class.getName() + " annotated with " + named("constructor") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + SimpleModule.class.getName());
+          "at " + SimpleModule.class.getName(),
+          "A binding to " + Foo.class.getName() + " annotated with " + named("providerMethod") + " was already configured at " + SimpleModule.class.getName(),
+          "at " + SimpleModule.class.getName()
+          );
     } 
+    
+    
   }
   
   public void testDuplicatesSolelyInChildIgnored() {
@@ -356,6 +363,10 @@ public class DuplicateBindingsTest extends TestCase {
       // ConstructorBinding
       bind(Foo.class).toConstructor(cFoo);
     }
+    
+    @Provides Foo foo() {
+      return null;
+    }
   }  
   
   private static class SimpleModule extends FooModule {
@@ -382,6 +393,10 @@ public class DuplicateBindingsTest extends TestCase {
       
       // ConstructorBinding
       bind(Foo.class).annotatedWith(named("constructor")).toConstructor(cFoo);
+    }
+    
+    @Provides @Named("providerMethod") Foo foo() {
+      return null;
     }
   }
   
