@@ -28,6 +28,7 @@
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
+  	<ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="extensions/servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -56,6 +57,9 @@
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/persist/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
+  	<copy toDir="${build.dir}/dist">
+  	  <fileset dir="extensions/grapher/build" includes="*.jar" excludes="*-with-deps.jar"/>
+  	</copy>    	
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
@@ -130,6 +134,7 @@
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
+    	<fileset dir="${grapher.src.dir}"/>
 
       <doclet name="jdiff.JDiff"
               path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
@@ -177,6 +182,7 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
+    	<fileset dir="${grapher.src.dir}"/>
       <!-- TODO: this breaks Doclava for some reason
       <fileset dir="${struts2.src.dir}"/> -->
 
@@ -245,6 +251,7 @@
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
     <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>
   </target>
   
 </project>
