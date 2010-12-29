@@ -115,6 +115,9 @@ class JpaFinderProxy implements MethodInterceptor {
       } else if (annotation instanceof Named) {
         Named named = (Named) annotation;
         jpaQuery.setParameter(named.value(), argument);
+      } else if (annotation instanceof javax.inject.Named) {
+        javax.inject.Named named = (javax.inject.Named) annotation;
+        jpaQuery.setParameter(named.value(), argument);
       } else if (annotation instanceof FirstResult) {
         jpaQuery.setFirstResult((Integer) argument);
       } else if (annotation instanceof MaxResults) {
@@ -173,7 +176,7 @@ class JpaFinderProxy implements MethodInterceptor {
       for (Annotation annotation : annotations) {
         //discover the named, first or max annotations then break out
         Class<? extends Annotation> annotationType = annotation.annotationType();
-        if (Named.class.equals(annotationType)) {
+        if (Named.class.equals(annotationType) || javax.inject.Named.class.equals(annotationType)) {
           discoveredAnnotations[i] = annotation;
           finderDescriptor.isBindAsRawParameters = false;
           break;
@@ -193,7 +196,6 @@ class JpaFinderProxy implements MethodInterceptor {
     //discover the returned collection implementation if this finder returns a collection
     if (JpaFinderProxy.ReturnType.COLLECTION.equals(finderDescriptor.returnType)
         && finderDescriptor.returnClass != Collection.class) {
-      System.out.println("-----" + finderDescriptor.returnClass);
       finderDescriptor.returnCollectionType = finder.returnAs();
       try {
         finderDescriptor.returnCollectionTypeConstructor = finderDescriptor.returnCollectionType
