@@ -59,6 +59,12 @@
   <build>
     <plugins>
       <!--
+       | Add standard LICENSE and NOTICE files
+      -->
+      <plugin>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+      </plugin>
+      <!--
        | Enable Java5 conformance checks
       -->
       <plugin>

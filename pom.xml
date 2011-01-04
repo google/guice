@@ -148,13 +148,32 @@ See the Apache License Version 2.0 for the specific language governing permissio
     </testResources>
     <pluginManagement>
       <plugins>
+        <!--
+         | Standard LICENSE and NOTICE files
+        -->
         <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3.2</version>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <version>1.1</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>process</goal>
+              </goals>
+              <configuration>
+                <resourceBundles>
+                  <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
+                </resourceBundles>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <!--
          | Make sure we only use Java5 methods
         -->
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3.2</version>
+        </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
