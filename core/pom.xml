@@ -14,7 +14,7 @@
   <name>Google Guice - Core Library</name>
 
   <properties>
-    <cglib.version>2.2.1</cglib.version>
+    <cglib.version>2.2.1-GUICE</cglib.version>
   </properties>
 
   <dependencies>
