@@ -16,9 +16,13 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.util.Lists;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.sf.cglib.proxy.MethodProxy;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -29,6 +33,10 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author crazybob@google.com (Bob Lee)
  */
 final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterceptor {
+  private static final Set<String> AOP_INTERNAL_CLASSES = new HashSet<String>(Arrays.asList(
+      InterceptorStackCallback.class.getName(),
+      InterceptedMethodInvocation.class.getName(),
+      MethodProxy.class.getName()));
 
   final MethodInterceptor[] interceptors;
   final Method method;
@@ -64,8 +72,10 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
         return index == interceptors.length
             ? methodProxy.invokeSuper(proxy, arguments)
             : interceptors[index].invoke(this);
-      }
-      finally {
+      } catch (Throwable t) {
+        pruneStacktrace(t);
+        throw t;
+      } finally {
         index--;
       }
     }
@@ -85,5 +95,21 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
     public AccessibleObject getStaticPart() {
       return getMethod();
     }
+  }
+
+  /**
+   * Removes stacktrace elements related to AOP internal mechanics from the
+   * throwable's stack trace.
+   */
+  private void pruneStacktrace(Throwable throwable) {
+    StackTraceElement[] stackTrace = throwable.getStackTrace();
+    List<StackTraceElement> pruned = Lists.newArrayList();
+    for (StackTraceElement element : stackTrace) {
+      String className = element.getClassName();
+      if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("$EnhancerByGuice$")) {
+        pruned.add(element);
+      }
+    }
+    throwable.setStackTrace(pruned.toArray(new StackTraceElement[pruned.size()]));
   }
 }

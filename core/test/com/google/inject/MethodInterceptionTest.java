@@ -37,24 +37,24 @@ public class MethodInterceptionTest extends TestCase {
 
   private AtomicInteger count = new AtomicInteger();
 
-  private final MethodInterceptor countingInterceptor = new MethodInterceptor() {
+  private final class CountingInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       count.incrementAndGet();
       return methodInvocation.proceed();
     }
-  };
+  }
 
-  private final MethodInterceptor returnNullInterceptor = new MethodInterceptor() {
+  private final class ReturnNullInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
       return null;
     }
-  };
+  }
 
   public void testSharedProxyClasses() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class)),
-            returnNullInterceptor);
+            new ReturnNullInterceptor());
       }
     });
 
@@ -72,18 +72,18 @@ public class MethodInterceptionTest extends TestCase {
       protected void configure() {
         bind(Interceptable.class);
         bindInterceptor(Matchers.any(), Matchers.returns(only(Bar.class)),
-            returnNullInterceptor);
+            new ReturnNullInterceptor());
       }
     });
 
     Interceptable bothNull = nullFoosAndBarsInjector.getInstance(Interceptable.class);
     assertNull(bothNull.bar());
     assertNull(bothNull.foo());
-    
+
     assertSame("Child injectors should share proxy classes, otherwise memory leaks!",
         nullFoos.getClass(), bothNull.getClass());
   }
-  
+
   public void testGetThis() {
     final AtomicReference<Object> lastTarget = new AtomicReference<Object>();
 
@@ -125,9 +125,11 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   public void testSpiAccessToInterceptors() throws NoSuchMethodException {
+    final MethodInterceptor countingInterceptor = new CountingInterceptor();
+    final MethodInterceptor returnNullInterceptor = new ReturnNullInterceptor();
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class)),
+        bindInterceptor(Matchers.any(),Matchers.returns(only(Foo.class)),
             countingInterceptor);
         bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class).or(only(Bar.class))),
             returnNullInterceptor);
@@ -152,6 +154,27 @@ public class MethodInterceptionTest extends TestCase {
     assertEquals("expected counting interceptor to be invoked first", 1, count.get());
   }
 
+  public void testInterceptedMethodThrows() throws Exception {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.any(), new CountingInterceptor());
+        bindInterceptor(Matchers.any(), Matchers.any(), new CountingInterceptor());
+      }
+    });
+
+    Interceptable interceptable = injector.getInstance(Interceptable.class);
+    try {
+      interceptable.explode();
+      fail();
+    } catch (Exception e) {
+      StackTraceElement[] stackTraceElement = e.getStackTrace();
+      assertEquals("explode", stackTraceElement[0].getMethodName());
+      assertEquals("invoke", stackTraceElement[1].getMethodName());
+      assertEquals("invoke", stackTraceElement[2].getMethodName());
+      assertEquals("testInterceptedMethodThrows", stackTraceElement[3].getMethodName());
+    }
+  }
+
   static class Foo {}
   static class Bar {}
 
@@ -162,7 +185,10 @@ public class MethodInterceptionTest extends TestCase {
     public Bar bar() {
       return new Bar() {};
     }
+    public String explode() throws Exception {
+      throw new Exception("kaboom!");
+    }
   }
-  
+
   public static final class NotInterceptable {}
 }
