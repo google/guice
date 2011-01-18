@@ -46,15 +46,6 @@ import org.aopalliance.intercept.MethodInterceptor;
  */
 final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
 
-  private static final net.sf.cglib.proxy.MethodInterceptor NO_OP_METHOD_INTERCEPTOR
-      = new net.sf.cglib.proxy.MethodInterceptor() {
-    public Object intercept(
-        Object proxy, Method method, Object[] arguments, MethodProxy methodProxy)
-        throws Throwable {
-      return methodProxy.invokeSuper(proxy, arguments);
-    }
-  };
-
   private final InjectionPoint injectionPoint;
   private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
   private final Class<T> declaringClass;
@@ -124,7 +115,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       MethodInterceptorsPair pair = methodInterceptorsPairs.get(i);
 
       if (!pair.hasInterceptors()) {
-        callbacks[i] = NO_OP_METHOD_INTERCEPTOR;
+        callbacks[i] = net.sf.cglib.proxy.NoOp.INSTANCE;
         continue;
       }
 
@@ -154,8 +145,14 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     }
 
     @SuppressWarnings("unchecked")
-    Class<? extends Callback>[] callbackTypes = new Class[methods.size()];
-    Arrays.fill(callbackTypes, net.sf.cglib.proxy.MethodInterceptor.class);
+    Class<? extends Callback>[] callbackTypes = new Class[callbacks.length];
+    for (int i = 0; i < callbacks.length; i++) {
+      if (callbacks[i] == net.sf.cglib.proxy.NoOp.INSTANCE) {
+        callbackTypes[i] = net.sf.cglib.proxy.NoOp.class;
+      } else {
+        callbackTypes[i] = net.sf.cglib.proxy.MethodInterceptor.class;
+      }
+    }
 
     // Create the proxied class. We're careful to ensure that all enhancer state is not-specific
     // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
