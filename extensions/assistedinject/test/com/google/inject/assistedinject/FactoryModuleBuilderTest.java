@@ -36,6 +36,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableSet;
@@ -458,4 +459,29 @@ public class FactoryModuleBuilderTest extends TestCase {
   public interface NotHidden {
     Hidden create();
   }
+  
+  public void testSingletonScopeOnAssistedClassIsIgnored() {
+    // production stage is important, because it will trigger eager singleton creation
+    Injector injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
+      @Override
+      protected void configure() {
+        install(new FactoryModuleBuilder().build(SingletonFactory.class));
+      }
+    });
+    
+    SingletonFactory factory = injector.getInstance(SingletonFactory.class);
+    assertNotSame(factory.create("foo"), factory.create("bar"));
+  }
+  
+  interface SingletonFactory {
+    AssistedSingleton create(String string);
+  }
+  
+  @Singleton
+  static class AssistedSingleton {
+    @Inject
+    public AssistedSingleton(@Assisted String string) {      
+    }
+  }
+  
 }

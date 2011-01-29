@@ -29,6 +29,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen;
@@ -591,8 +592,9 @@ final class FactoryProvider2 <F> implements InvocationHandler,
         // but if it isn't, we'll end up throwing a fairly good error
         // message for the user.
         if(constructor != null) {
-          binder.bind(assistedReturnType).toConstructor(
-              constructor, (TypeLiteral)data.implementationType);
+          binder.bind(assistedReturnType)
+              .toConstructor(constructor, (TypeLiteral)data.implementationType)
+              .in(Scopes.NO_SCOPE); // make sure we erase any scope on the implementation type
         }
       }
     };
