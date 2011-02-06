@@ -34,7 +34,7 @@ public final class ProvisionException extends RuntimeException {
 
   private final ImmutableSet<Message> messages;
 
-  /** Creates a ConfigurationException containing {@code messages}. */
+  /** Creates a ProvisionException containing {@code messages}. */
   public ProvisionException(Iterable<Message> messages) {
     this.messages = ImmutableSet.copyOf(messages);
     checkArgument(!this.messages.isEmpty());

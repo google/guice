@@ -97,6 +97,26 @@ import java.lang.annotation.Annotation;
  *
  * As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
  * factory cannot be used until the injector has been initialized.
+ * 
+ * <h3>Configuring complex factories</h3>
+ * Factories can create an arbitrary number of objects, one per each method.  Each factory
+ * method can be configured using <code>.implement</code>.
+ *
+ * <pre>public interface OrderFactory {
+ *    Payment create(Date startDate, Money amount);
+ *    Shipment create(Customer customer, Item item);
+ *    Receipt create(Payment payment, Shipment shipment);
+ * }
+ * 
+ * [...]
+ * 
+ * install(new FactoryModuleBuilder()
+ *     .implement(Payment.class, RealPayment.class)
+ *     // excluding .implement for Shipment means the implementation class
+ *     // will be 'Shipment' itself, which is legal if it's not an interface.
+ *     .implement(Receipt.class, RealReceipt.class)
+ *     .build(OrderFactory.class);</pre>
+ * </pre>
  *
  * <h3>Using the factory</h3>
  * Inject your factory into your application classes. When you use the factory, your arguments
