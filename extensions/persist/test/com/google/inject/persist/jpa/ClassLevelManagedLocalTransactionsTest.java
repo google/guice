@@ -75,7 +75,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         UNIQUE_TEXT, (((JpaTestEntity) result).getText()));
   }
 
-  public void disabled_testSimpleTransactionRollbackOnChecked() {
+  public void testSimpleTransactionRollbackOnChecked() {
     try {
       injector.getInstance(TransactionalObject2.class).runOperationInTxnThrowingChecked();
     } catch (IOException e) {
@@ -120,7 +120,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
         result);
   }
 
-  public void disabled_testSimpleTransactionRollbackOnUnchecked() {
+  public void testSimpleTransactionRollbackOnUnchecked() {
     try {
       injector.getInstance(TransactionalObject4.class).runOperationInTxnThrowingUnchecked();
     } catch (RuntimeException re) {
@@ -147,6 +147,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     @Inject EntityManager session;
 
     public void runOperationInTxn() {
+      assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT);
       session.persist(entity);
@@ -160,6 +161,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
 
     @Transactional
     public void runOperationInTxnThrowingUnchecked() {
+      assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
       session.persist(entity);
@@ -173,6 +175,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     @Inject EntityManager session;
 
     public void runOperationInTxnThrowingCheckedExcepting() throws IOException {
+      assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(UNIQUE_TEXT_2);
       session.persist(entity);
@@ -186,6 +189,7 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     @Inject EntityManager session;
 
     public void runOperationInTxnThrowingChecked() throws IOException {
+      assertTrue(session.getTransaction().isActive());
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(TRANSIENT_UNIQUE_TEXT);
       session.persist(entity);
