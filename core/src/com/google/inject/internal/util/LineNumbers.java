@@ -58,8 +58,9 @@ final class LineNumbers {
 
     if (!type.isArray()) {
       InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
-      Preconditions.checkArgument(in != null, "Cannot find bytecode for %s", type);
-      new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+      if (in != null) {
+        new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+      }
     }
   }
 
