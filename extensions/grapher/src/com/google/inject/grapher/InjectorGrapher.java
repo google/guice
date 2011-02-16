@@ -37,8 +37,9 @@ import java.util.logging.Logger;
  * {@link Renderer}.
  * <p>
  * By default, this will graph the entire {@link Injector}. Use
- * {@link #rootedAt(Class...)} to specify an initial set of {@link Class}es to
- * use, and this will graph their transitive bindings and dependencies.
+ * {@link #rootedAt(Class...)} or {@link #rootedAt(Key...)} to specify an
+ * initial set of {@link Class}es or {@link Key}s to use, and this will graph
+ * their transitive bindings and dependencies.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
@@ -80,6 +81,21 @@ public class InjectorGrapher {
       this.root.add(Key.get(clazz));
     }
     
+    return this;
+  }
+
+  /**
+   * Sets an initial group of {@link Key}s to use as the starting point for
+   * the graph. The graph will be of these keys and their transitive
+   * dependencies and bindings.
+   */
+  public InjectorGrapher rootedAt(Key<?>... keys) {
+    this.root = Sets.newHashSet();
+
+    for (Key<?> key : keys) {
+      this.root.add(key);
+    }
+
     return this;
   }
 
