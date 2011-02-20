@@ -605,7 +605,6 @@ public class TypeListenerTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      expected.printStackTrace();
       assertContains(expected.getMessage(),
           "1) There was an error on com.google.inject.Stage",
           "2) An exception was caught and reported. Message: whoops!",
