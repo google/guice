@@ -213,7 +213,9 @@ public interface Injector {
    *
    * <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
    * whenever possible. This allows for scoped instances to be shared between injectors. Use
-   * explicit bindings to prevent bindings from being shared with the parent injector.
+   * explicit bindings to prevent bindings from being shared with the parent injector.  Optional
+   * injections in just-in-time bindings (created in the parent injector) may be silently
+   * ignored if the optional dependencies are from the child injector.
    *
    * <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
    * bindings. The lone exception is the key for {@code Injector.class}, which is bound by each
