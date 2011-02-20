@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.ProvisionException;
 import static com.google.inject.internal.BytecodeGen.newFastClass;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
@@ -27,13 +26,14 @@ import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -45,6 +45,8 @@ import org.aopalliance.intercept.MethodInterceptor;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
+  
+  private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private final InjectionPoint injectionPoint;
   private final ImmutableMap<Method, List<MethodInterceptor>> interceptors;
@@ -95,6 +97,13 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     for (MethodAspect methodAspect : applicableAspects) {
       for (MethodInterceptorsPair pair : methodInterceptorsPairs) {
         if (methodAspect.matches(pair.method)) {
+          if(pair.method.isSynthetic()) {
+            logger.log(Level.WARNING,
+                "Method [{0}] is synthetic and is being intercepted by {1}."
+              + " This could indicate a bug.  The method may be intercepted twice,"
+              + " or may not be intercepted at all.",
+                new Object[] { pair.method, methodAspect.interceptors() });
+          }
           visibility = visibility.and(BytecodeGen.Visibility.forMember(pair.method));
           pair.addAll(methodAspect.interceptors());
           anyMatched = true;
