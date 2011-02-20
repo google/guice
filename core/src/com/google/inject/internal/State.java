@@ -93,11 +93,15 @@ interface State {
       return ImmutableList.of();
     }
 
-    public void blacklist(Key<?> key) {
+    public void blacklist(Key<?> key, Object source) {
     }
 
     public boolean isBlacklisted(Key<?> key) {
       return true;
+    }
+    
+    public Object getSourceForBlacklistedKey(Key<?> key) {
+      throw new UnsupportedOperationException();
     }
 
     public Object lock() {
@@ -148,13 +152,16 @@ interface State {
    * blacklist their bound keys on their parent injectors to prevent just-in-time bindings on the
    * parent injector that would conflict.
    */
-  void blacklist(Key<?> key);
+  void blacklist(Key<?> key, Object source);
 
   /**
    * Returns true if {@code key} is forbidden from being bound in this injector. This indicates that
    * one of this injector's descendent's has bound the key.
    */
   boolean isBlacklisted(Key<?> key);
+  
+  /** Returns the source of a blacklisted key. */
+  Object getSourceForBlacklistedKey(Key<?> key);
 
   /**
    * Returns the shared lock for all injector data. This is a low-granularity, high-contention lock

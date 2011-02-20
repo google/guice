@@ -17,6 +17,11 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -445,5 +450,34 @@ public class PrivateModuleTest extends TestCase {
         PrivateModuleTest.class.getName(), ".configure(PrivateModuleTest.java:");
     Injector privateInjector = privateElements.getInjector();
     assertEquals("private", privateInjector.getInstance(Key.get(String.class, Names.named("a"))));
+  }
+  
+  public void testParentBindsSomethingInPrivate() {
+    try {
+      Guice.createInjector(new FailingModule());
+      fail();
+    } catch(CreationException expected) {
+      assertEquals(1, expected.getErrorMessages().size());
+      assertContains(expected.toString(),
+          "A binding to java.util.List was already configured at",
+          FailingPrivateModule.class.getName() + ".configure(",
+          "(If it was in a PrivateModule, did you forget to expose the binding?)",
+          "at " + FailingModule.class.getName() + ".configure(");
+    }
+  }
+  
+  private static class FailingModule extends AbstractModule {
+    @Override
+    protected void configure() {
+      bind(Collection.class).to(List.class);
+      install(new FailingPrivateModule());
+    }
+  }
+  
+  private static class FailingPrivateModule extends PrivateModule {
+    @Override
+    protected void configure() {
+      bind(List.class).toInstance(new ArrayList());
+    }
   }
 }

@@ -134,13 +134,17 @@ final class InheritingState implements State {
     return result;
   }
 
-  public void blacklist(Key<?> key) {
-    parent.blacklist(key);
-    blacklistedKeys.add(key);
+  public void blacklist(Key<?> key, Object source) {
+    parent.blacklist(key, source);
+    blacklistedKeys.add(key, source);
   }
 
   public boolean isBlacklisted(Key<?> key) {
     return blacklistedKeys.contains(key);
+  }
+  
+  public Object getSourceForBlacklistedKey(Key<?> key) {
+    return blacklistedKeys.getSource(key);
   }
 
   public Object lock() {

@@ -294,15 +294,18 @@ public final class Errors implements Serializable {
     return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
 
-  public Errors childBindingAlreadySet(Key<?> key) {
-    return addMessage("A binding to %s already exists on a child injector.", key);
+  public Errors childBindingAlreadySet(Key<?> key, Object source) {
+    return addMessage(
+        "A binding to %s was already configured at %s.%n"
+      + " (If it was in a PrivateModule, did you forget to expose the binding?)",
+        key, convert(source));
   }
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
     return addMessage(
         "A binding to %s was already configured at %s and an error was thrown " 
       + "while checking duplicate bindings.  Error: %s",
-        key, source, t);
+        key, convert(source), t);
   }
 
   public Errors errorInjectingMethod(Throwable cause) {

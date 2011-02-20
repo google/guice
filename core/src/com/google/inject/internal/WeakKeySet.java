@@ -17,8 +17,9 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.internal.util.Sets;
-import java.util.Set;
+import com.google.inject.internal.util.Maps;
+
+import java.util.Map;
 
 /**
  * Minimal set that doesn't hold strong references to the contained keys.
@@ -34,18 +35,22 @@ final class WeakKeySet {
    * keys whose class names are equal but class loaders are different. This shouldn't be an issue
    * in practice.
    */
-  private Set<String> backingSet;
+  private Map<String, Object> backingSet;
 
-  public boolean add(Key<?> key) {
+  public void add(Key<?> key, Object source) {
     if (backingSet == null) {
-      backingSet = Sets.newHashSet();
+      backingSet = Maps.newHashMap();
     }
-    return backingSet.add(key.toString());
+    backingSet.put(key.toString(), source);
   }
 
-  public boolean contains(Object o) {
+  public boolean contains(Key<?> key) {
     // avoid calling key.toString() if the backing set is empty. toString is expensive in aggregate,
     // and most WeakKeySets are empty in practice (because they're used by top-level injectors)
-    return backingSet != null && o instanceof Key && backingSet.contains(o.toString());
+    return backingSet != null && backingSet.containsKey(key.toString());
+  }
+
+  public Object getSource(Key<?> key) {
+    return backingSet.get(key.toString());
   }
 }

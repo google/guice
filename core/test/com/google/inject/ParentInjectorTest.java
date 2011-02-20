@@ -52,8 +52,8 @@ public class ParentInjectorTest extends TestCase {
       parent.getInstance(A.class);
       fail("Created a just-in-time binding on the parent that's the same as a child's binding");
     } catch (ConfigurationException e) {
-      assertContains(e.getMessage(), "A binding to ", A.class.getName(),
-          " already exists on a child injector.");
+      assertContains(e.getMessage(),
+          "A binding to " + A.class.getName() + " was already configured at " + bindsA.getClass().getName());
     }
   }
 
