@@ -598,17 +598,20 @@ public class TypeListenerTest extends TestCase {
               encounter.addError("There was an error on %s", type);
               encounter.addError(new IllegalArgumentException("whoops!"));
               encounter.addError(new Message("And another problem"));
+              encounter.addError(new IllegalStateException());
             }
           });
         }
       });
       fail();
     } catch (CreationException expected) {
+      expected.printStackTrace();
       assertContains(expected.getMessage(),
           "1) There was an error on com.google.inject.Stage",
           "2) An exception was caught and reported. Message: whoops!",
           "3) And another problem",
-          "3 errors");
+          "4) An exception was caught and reported. Message: null",
+          "4 errors");
     }
   }
 
