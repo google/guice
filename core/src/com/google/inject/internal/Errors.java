@@ -293,6 +293,10 @@ public final class Errors implements Serializable {
   public Errors bindingAlreadySet(Key<?> key, Object source) {
     return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
+  
+  public Errors jitBindingAlreadySet(Key<?> key) {
+    return addMessage("A just-in-time binding to %s was already configured on a parent injector.", key);
+  }
 
   public Errors childBindingAlreadySet(Key<?> key, Object source) {
     return addMessage(
