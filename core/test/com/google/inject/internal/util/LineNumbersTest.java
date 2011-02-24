@@ -25,10 +25,6 @@ import com.google.inject.Injector;
 import com.google.inject.matcher.Matchers;
 import java.lang.reflect.Modifier;
 import junit.framework.TestCase;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -50,6 +46,11 @@ public class LineNumbersTest extends TestCase {
           "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
     }
   }
+
+  static class A {
+    @Inject A(B b) {}
+  }
+  public interface B {}
 
   /*if[AOP]*/
   public void testCanHandleLineNumbersForGuiceGeneratedClasses() {
@@ -74,12 +75,6 @@ public class LineNumbersTest extends TestCase {
           "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
     }
   }
-  /*end[AOP]*/
-
-  static class A {
-    @Inject A(B b) {}
-  }
-  public interface B {}
 
   static class GeneratingClassLoader extends ClassLoader {
     static String name = "__generated";
@@ -89,18 +84,22 @@ public class LineNumbersTest extends TestCase {
     }
 
     Class<?> generate() {
-      ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-      cw.visit(Opcodes.V1_5, Modifier.PUBLIC, name, null, Type.getInternalName(Object.class), null);
+      org.objectweb.asm.ClassWriter cw =
+          new org.objectweb.asm.ClassWriter(org.objectweb.asm.ClassWriter.COMPUTE_MAXS);
+      cw.visit(org.objectweb.asm.Opcodes.V1_5,
+          Modifier.PUBLIC, name, null,
+          org.objectweb.asm.Type.getInternalName(Object.class), null);
 
-      String sig = "("+Type.getDescriptor(B.class)+")V";
+      String sig = "("+org.objectweb.asm.Type.getDescriptor(B.class)+")V";
 
-      MethodVisitor mv = cw.visitMethod(Modifier.PUBLIC, "<init>", sig, null, null);
+      org.objectweb.asm.MethodVisitor mv = cw.visitMethod(Modifier.PUBLIC, "<init>", sig, null, null);
 
-      mv.visitAnnotation(Type.getDescriptor(Inject.class), true);
+      mv.visitAnnotation(org.objectweb.asm.Type.getDescriptor(Inject.class), true);
       mv.visitCode();
-      mv.visitVarInsn(Opcodes.ALOAD, 0);
-      mv.visitMethodInsn( Opcodes.INVOKESPECIAL, Type.getInternalName(Object.class), "<init>", "()V" );
-      mv.visitInsn(Opcodes.RETURN);
+      mv.visitVarInsn(org.objectweb.asm.Opcodes.ALOAD, 0);
+      mv.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKESPECIAL,
+          org.objectweb.asm.Type.getInternalName(Object.class), "<init>", "()V" );
+      mv.visitInsn(org.objectweb.asm.Opcodes.RETURN);
       mv.visitMaxs(0, 0);
       mv.visitEnd();
       cw.visitEnd();
@@ -138,4 +137,5 @@ public class LineNumbersTest extends TestCase {
     Object instance = injector.getInstance(generated);
     assertEquals(instance.getClass(), generated);
   }
+  /*end[AOP]*/
 }
