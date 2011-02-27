@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -298,11 +299,22 @@ public final class Errors implements Serializable {
     return addMessage("A just-in-time binding to %s was already configured on a parent injector.", key);
   }
 
-  public Errors childBindingAlreadySet(Key<?> key, Object source) {
-    return addMessage(
-        "A binding to %s was already configured at %s.%n"
-      + " (If it was in a PrivateModule, did you forget to expose the binding?)",
-        key, convert(source));
+  public Errors childBindingAlreadySet(Key<?> key, Set<Object> sources) {
+    Formatter allSources = new Formatter();
+    for (Object source : sources) {
+      if (source == null) {
+        allSources.format("%n    (bound by a just-in-time binding)");
+      } else {
+        allSources.format("%n    bound at %s", source);
+      }
+    }
+    Errors errors = addMessage(
+        "Unable to create binding for %s."
+      + " It was already configured on one or more child injectors or private modules"
+      + "%s%n"
+      + "  If it was in a PrivateModule, did you forget to expose the binding?",
+        key, allSources.out());
+    return errors;
   }
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {

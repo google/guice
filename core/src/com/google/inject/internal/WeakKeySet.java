@@ -18,8 +18,11 @@ package com.google.inject.internal;
 
 import com.google.inject.Key;
 import com.google.inject.internal.util.Maps;
+import com.google.inject.internal.util.Sets;
+import com.google.inject.internal.util.SourceProvider;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Minimal set that doesn't hold strong references to the contained keys.
@@ -35,13 +38,24 @@ final class WeakKeySet {
    * keys whose class names are equal but class loaders are different. This shouldn't be an issue
    * in practice.
    */
-  private Map<String, Object> backingSet;
+  private Map<String, Set<Object>> backingSet;
 
   public void add(Key<?> key, Object source) {
     if (backingSet == null) {
       backingSet = Maps.newHashMap();
     }
-    backingSet.put(key.toString(), source);
+    // if it's an instanceof Class, it was a JIT binding, which we don't
+    // want to retain.
+    if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
+      source = null;
+    }
+    String k = key.toString();
+    Set<Object> sources = backingSet.get(k);
+    if (sources == null) {
+      sources = Sets.newLinkedHashSet();
+      backingSet.put(k, sources);
+    }
+    sources.add(Errors.convert(source));
   }
 
   public boolean contains(Key<?> key) {
@@ -50,7 +64,7 @@ final class WeakKeySet {
     return backingSet != null && backingSet.containsKey(key.toString());
   }
 
-  public Object getSource(Key<?> key) {
+  public Set<Object> getSources(Key<?> key) {
     return backingSet.get(key.toString());
   }
 }

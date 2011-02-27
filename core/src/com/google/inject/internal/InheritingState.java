@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -143,8 +144,8 @@ final class InheritingState implements State {
     return blacklistedKeys.contains(key);
   }
   
-  public Object getSourceForBlacklistedKey(Key<?> key) {
-    return blacklistedKeys.getSource(key);
+  public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
+    return blacklistedKeys.getSources(key);
   }
 
   public Object lock() {

@@ -763,8 +763,8 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     if (state.isBlacklisted(key)) {
-      Object source = state.getSourceForBlacklistedKey(key);
-      throw errors.childBindingAlreadySet(key, source).toException();
+      Set<Object> sources = state.getSourcesForBlacklistedKey(key);
+      throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
     BindingImpl<T> binding = createJustInTimeBinding(key, errors);
@@ -791,8 +791,8 @@ final class InjectorImpl implements Injector, Lookups {
     int numErrorsBefore = errors.size();
 
     if (state.isBlacklisted(key)) {
-      Object source = state.getSourceForBlacklistedKey(key);
-      throw errors.childBindingAlreadySet(key, source).toException();
+      Set<Object> sources = state.getSourcesForBlacklistedKey(key);
+      throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
     // Handle cases where T is a Provider<?>.

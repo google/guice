@@ -17,6 +17,7 @@ limitations under the License.
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.Iterables;
 import com.google.inject.matcher.Matchers;
@@ -54,7 +55,11 @@ public class ParentInjectorTest extends TestCase {
       fail("Created a just-in-time binding on the parent that's the same as a child's binding");
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(),
-          "A binding to " + A.class.getName() + " was already configured at " + bindsA.getClass().getName());
+          "Unable to create binding for " + A.class.getName(),
+          "It was already configured on one or more child injectors or private modules",
+          "bound at " + bindsA.getClass().getName() + ".configure(",
+          "If it was in a PrivateModule, did you forget to expose the binding?",
+          "while locating " + A.class.getName());
     }
   }
   

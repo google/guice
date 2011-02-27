@@ -29,6 +29,8 @@ import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
+import com.google.inject.util.Types;
+
 import junit.framework.TestCase;
 
 /**
@@ -459,10 +461,45 @@ public class PrivateModuleTest extends TestCase {
     } catch(CreationException expected) {
       assertEquals(1, expected.getErrorMessages().size());
       assertContains(expected.toString(),
-          "A binding to java.util.List was already configured at",
-          FailingPrivateModule.class.getName() + ".configure(",
-          "(If it was in a PrivateModule, did you forget to expose the binding?)",
+          "Unable to create binding for java.util.List.",
+          "It was already configured on one or more child injectors or private modules",
+          "bound at " + FailingPrivateModule.class.getName() + ".configure(",
+          "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
+          "If it was in a PrivateModule, did you forget to expose the binding?",
           "at " + FailingModule.class.getName() + ".configure(");
+    }
+  }
+  
+  public void testParentBindingToPrivateLinkedJitBinding() {
+    Injector injector = Guice.createInjector(new ManyPrivateModules());
+    try {
+      injector.getBinding(Key.get(Types.providerOf(List.class)));
+      fail();
+    } catch(ConfigurationException expected) {
+      assertEquals(1, expected.getErrorMessages().size());
+      assertContains(expected.toString(),
+          "Unable to create binding for com.google.inject.Provider<java.util.List>.",
+          "It was already configured on one or more child injectors or private modules",
+          "bound at " + FailingPrivateModule.class.getName() + ".configure(",
+          "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
+          "If it was in a PrivateModule, did you forget to expose the binding?",
+          "while locating com.google.inject.Provider<java.util.List>");
+    }
+  }
+  
+  public void testParentBindingToPrivateJitBinding() {
+    Injector injector = Guice.createInjector(new ManyPrivateModules());
+    try {
+      injector.getBinding(PrivateFoo.class);
+      fail();
+    } catch(ConfigurationException expected) {
+      assertEquals(1, expected.getErrorMessages().size());
+      assertContains(expected.toString(),
+          "Unable to create binding for " + PrivateFoo.class.getName(),
+          "It was already configured on one or more child injectors or private modules",
+          "(bound by a just-in-time binding)",
+          "If it was in a PrivateModule, did you forget to expose the binding?",
+          "while locating " + PrivateFoo.class.getName());
     }
   }
   
@@ -470,14 +507,55 @@ public class PrivateModuleTest extends TestCase {
     @Override
     protected void configure() {
       bind(Collection.class).to(List.class);
-      install(new FailingPrivateModule());
+      install(new ManyPrivateModules());
     }
   }
-  
+
+  private static class ManyPrivateModules extends AbstractModule {
+    @Override
+    protected void configure() {
+      // make sure duplicate sources are collapsed
+      install(new FailingPrivateModule());
+      install(new FailingPrivateModule());
+      // but additional sources are listed
+      install(new SecondFailingPrivateModule());
+    }
+  }
+
   private static class FailingPrivateModule extends PrivateModule {
     @Override
     protected void configure() {
       bind(List.class).toInstance(new ArrayList());
+      
+      // Add the Provider<List> binding, created just-in-time,
+      // to make sure our linked JIT bindings have the correct source.
+      getProvider(Key.get(Types.providerOf(List.class)));
+      
+      // Request a JIT binding for PrivateFoo, which can only
+      // be created in the private module because it depends
+      // on List.
+      getProvider(PrivateFoo.class);
     }
   }
+  
+  /** A second class, so we can see another name in the source list. */
+  private static class SecondFailingPrivateModule extends PrivateModule {
+    @Override
+    protected void configure() {
+      bind(List.class).toInstance(new ArrayList());
+      
+      // Add the Provider<List> binding, created just-in-time,
+      // to make sure our linked JIT bindings have the correct source.
+      getProvider(Key.get(Types.providerOf(List.class)));
+      
+      // Request a JIT binding for PrivateFoo, which can only
+      // be created in the private module because it depends
+      // on List.
+      getProvider(PrivateFoo.class);
+    }
+  }
+  
+  private static class PrivateFoo {
+    @Inject List list;
+  } 
 }

@@ -28,6 +28,7 @@ import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The inheritable data within an injector. This class is intended to allow parent and local
@@ -100,7 +101,7 @@ interface State {
       return true;
     }
     
-    public Object getSourceForBlacklistedKey(Key<?> key) {
+    public Set<Object> getSourcesForBlacklistedKey(Key<?> key) {
       throw new UnsupportedOperationException();
     }
 
@@ -161,7 +162,7 @@ interface State {
   boolean isBlacklisted(Key<?> key);
   
   /** Returns the source of a blacklisted key. */
-  Object getSourceForBlacklistedKey(Key<?> key);
+  Set<Object> getSourcesForBlacklistedKey(Key<?> key);
 
   /**
    * Returns the shared lock for all injector data. This is a low-granularity, high-contention lock
