@@ -99,17 +99,19 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
 
   /**
    * Removes stacktrace elements related to AOP internal mechanics from the
-   * throwable's stack trace.
+   * throwable's stack trace and any causes it may have.
    */
   private void pruneStacktrace(Throwable throwable) {
-    StackTraceElement[] stackTrace = throwable.getStackTrace();
-    List<StackTraceElement> pruned = Lists.newArrayList();
-    for (StackTraceElement element : stackTrace) {
-      String className = element.getClassName();
-      if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("$EnhancerByGuice$")) {
-        pruned.add(element);
+    for(Throwable t = throwable; t != null; t = t.getCause()) {
+      StackTraceElement[] stackTrace = t.getStackTrace();
+      List<StackTraceElement> pruned = Lists.newArrayList();
+      for (StackTraceElement element : stackTrace) {
+        String className = element.getClassName();
+        if (!AOP_INTERNAL_CLASSES.contains(className) && !className.contains("$EnhancerByGuice$")) {
+          pruned.add(element);
+        }
       }
+      t.setStackTrace(pruned.toArray(new StackTraceElement[pruned.size()]));
     }
-    throwable.setStackTrace(pruned.toArray(new StackTraceElement[pruned.size()]));
   }
 }

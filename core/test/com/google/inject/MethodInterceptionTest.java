@@ -171,11 +171,14 @@ public class MethodInterceptionTest extends TestCase {
       interceptable.explode();
       fail();
     } catch (Exception e) {
-      StackTraceElement[] stackTraceElement = e.getStackTrace();
-      assertEquals("explode", stackTraceElement[0].getMethodName());
-      assertEquals("invoke", stackTraceElement[1].getMethodName());
-      assertEquals("invoke", stackTraceElement[2].getMethodName());
-      assertEquals("testInterceptedMethodThrows", stackTraceElement[3].getMethodName());
+      // validate all causes.
+      for (Throwable t = e; t != null; t = e.getCause()) {
+        StackTraceElement[] stackTraceElement = t.getStackTrace();
+        assertEquals("explode", stackTraceElement[0].getMethodName());
+        assertEquals("invoke", stackTraceElement[1].getMethodName());
+        assertEquals("invoke", stackTraceElement[2].getMethodName());
+        assertEquals("testInterceptedMethodThrows", stackTraceElement[3].getMethodName());
+      }
     }
   }
   
@@ -226,7 +229,7 @@ public class MethodInterceptionTest extends TestCase {
     }
     public String explode() throws Exception {
       lastElements = Thread.currentThread().getStackTrace();
-      throw new Exception("kaboom!");
+      throw new Exception("kaboom!", new RuntimeException("boom!"));
     }
   }
 
