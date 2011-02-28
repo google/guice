@@ -172,7 +172,7 @@ public class MethodInterceptionTest extends TestCase {
       fail();
     } catch (Exception e) {
       // validate all causes.
-      for (Throwable t = e; t != null; t = e.getCause()) {
+      for (Throwable t = e; t != null; t = t.getCause()) {
         StackTraceElement[] stackTraceElement = t.getStackTrace();
         assertEquals("explode", stackTraceElement[0].getMethodName());
         assertEquals("invoke", stackTraceElement[1].getMethodName());
