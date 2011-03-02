@@ -41,6 +41,12 @@ public class JitBindingsTest extends TestCase {
     return "Explicit bindings are required and " + clazz + " is not explicitly bound.";
   }
   
+  private String inChildMessage(Class<?> clazz) {
+    return "Unable to create binding for "
+        + clazz.getName()
+        + ". It was already configured on one or more child injectors or private modules";
+  }
+  
   public void testLinkedBindingWorks() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -317,7 +323,7 @@ public class JitBindingsTest extends TestCase {
     });
     ensureWorks(child, Foo.class, Bar.class);
     ensureFails(child, ALLOW_BINDING, FooImpl.class);
-    ensureFails(parent, FAIL_ALL, FooImpl.class, FooBar.class, Foo.class); // parent still doesn't have these
+    ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);
     
     Injector grandchild = child.createChildInjector(new AbstractModule() {
       @Override
@@ -328,7 +334,7 @@ public class JitBindingsTest extends TestCase {
     ensureWorks(grandchild, FooBar.class, Foo.class, Bar.class);
     ensureFails(grandchild, ALLOW_BINDING, FooImpl.class);
     ensureFails(child, ALLOW_BINDING, FooImpl.class);
-    ensureFails(parent, FAIL_ALL, FooImpl.class, FooBar.class, Foo.class); // parent still doesn't have these    
+    ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);    
   }
   
   public void testChildInjectorAddsOption() {
@@ -418,6 +424,20 @@ public class JitBindingsTest extends TestCase {
       assertContains(expected.getMessage(), "1) " + jitFailed(Bar.class));
       assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
     }
+    
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        binder().requireExplicitBindings();
+
+        install(new PrivateModule() {
+          public void configure() {
+            bind(Foo.class).to(FooImpl.class);
+            expose(Foo.class);
+          }
+        });
+      }
+    });
+    ensureInChild(injector, FooImpl.class);
   }
   
   public void testPrivateModuleAddsOption() {
@@ -549,6 +569,34 @@ public class JitBindingsTest extends TestCase {
           assertContains(expected.getMessage(), "1) " + jitFailed(classes[i]));
           assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
         }
+      }
+    }
+  }
+  
+  private void ensureInChild(Injector injector, Class<?>... classes) {
+    for(int i = 0; i < classes.length; i++) {      
+      try { 
+        injector.getInstance(classes[i]);
+        fail("should have failed tring to retrieve class: " + classes[i]);
+      } catch(ConfigurationException expected) {
+        assertContains(expected.getMessage(), "1) " + inChildMessage(classes[i]));
+        assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
+      }
+      
+      try { 
+        injector.getProvider(classes[i]);
+        fail("should have failed tring to retrieve class: " + classes[i]);
+      } catch(ConfigurationException expected) {
+        assertContains(expected.getMessage(), "1) " + inChildMessage(classes[i]));
+        assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
+      }
+      
+      try {
+        injector.getBinding(classes[i]);
+        fail("should have failed tring to retrieve class: " + classes[i]);          
+      } catch(ConfigurationException expected) {
+        assertContains(expected.getMessage(), "1) " + inChildMessage(classes[i]));
+        assertTrue(expected.getMessage(), !expected.getMessage().contains("2) "));
       }
     }
   }

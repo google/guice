@@ -114,6 +114,39 @@ public class TypeConversionTest extends TestCase {
     assertEquals(Bar.TEE, foo.enumField);
     assertEquals(Foo.class, foo.classField);
   }
+  
+  public void testConstantInjectionWithExplicitBindingsRequired() throws CreationException {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        binder().requireExplicitBindings();
+        bind(Foo.class);
+        bindConstant().annotatedWith(NumericValue.class).to("5");
+        bindConstant().annotatedWith(BooleanValue.class).to("true");
+        bindConstant().annotatedWith(EnumValue.class).to("TEE");
+        bindConstant().annotatedWith(ClassName.class).to(Foo.class.getName());
+      }
+    });
+
+    Foo foo = injector.getInstance(Foo.class);
+
+    checkNumbers(
+      foo.integerField,
+      foo.primitiveIntField,
+      foo.longField,
+      foo.primitiveLongField,
+      foo.byteField,
+      foo.primitiveByteField,
+      foo.shortField,
+      foo.primitiveShortField,
+      foo.floatField,
+      foo.primitiveFloatField,
+      foo.doubleField,
+      foo.primitiveDoubleField
+    );
+
+    assertEquals(Bar.TEE, foo.enumField);
+    assertEquals(Foo.class, foo.classField);
+  }
 
   void checkNumbers(Number... ns) {
     for (Number n : ns) {

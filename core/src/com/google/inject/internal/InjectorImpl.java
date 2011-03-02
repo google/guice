@@ -232,11 +232,7 @@ final class InjectorImpl implements Injector, Lookups {
   private <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors, JitLimitation jitType)
       throws ErrorsException {
 
-    boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
-    if(options.jitDisabled && jitType == JitLimitation.NO_JIT && !jitOverride) {
-      throw errors.jitDisabled(key).toException();
-    }
-    
+    boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);    
     synchronized (state.lock()) {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
@@ -244,15 +240,20 @@ final class InjectorImpl implements Injector, Lookups {
         BindingImpl<T> binding = (BindingImpl<T>) injector.jitBindings.get(key);
 
         if (binding != null) {
-          return binding;
+          // If we found a JIT binding and we don't allow them,
+          // fail.  (But allow bindings created through TypeConverters.)
+          if (options.jitDisabled
+              && jitType == JitLimitation.NO_JIT
+              && !jitOverride
+              && !(binding instanceof ConvertedConstantBindingImpl)) {
+            throw errors.jitDisabled(key).toException();
+          } else {
+            return binding;
+          }
         }
       }
       
-      if(options.jitDisabled && jitType != JitLimitation.NEW_OR_EXISTING_JIT && !jitOverride) {
-        throw errors.jitDisabled(key).toException();
-      } else {
-        return createJustInTimeBindingRecursive(key, errors);
-      }
+      return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
     }
   }
 
@@ -752,12 +753,13 @@ final class InjectorImpl implements Injector, Lookups {
    * Attempts to create a just-in-time binding for {@code key} in the root injector, falling back to
    * other ancestor injectors until this injector is tried.
    */
-  private <T> BindingImpl<T> createJustInTimeBindingRecursive(Key<T> key, Errors errors)
-      throws ErrorsException {
+  private <T> BindingImpl<T> createJustInTimeBindingRecursive(Key<T> key, Errors errors,
+      boolean jitDisabled, JitLimitation jitType) throws ErrorsException {
     // ask the parent to create the JIT binding
-    if (parent != null && !parent.options.jitDisabled) {
+    if (parent != null) {
       try {
-        return parent.createJustInTimeBindingRecursive(key, new Errors());
+        return parent.createJustInTimeBindingRecursive(key, new Errors(), jitDisabled,
+            parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
       } catch (ErrorsException ignored) {
       }
     }
@@ -767,7 +769,7 @@ final class InjectorImpl implements Injector, Lookups {
       throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
-    BindingImpl<T> binding = createJustInTimeBinding(key, errors);
+    BindingImpl<T> binding = createJustInTimeBinding(key, errors, jitDisabled, jitType);
     state.parent().blacklist(key, binding.getSource());
     jitBindings.put(key, binding);
     return binding;
@@ -786,8 +788,8 @@ final class InjectorImpl implements Injector, Lookups {
    *
    * @throws com.google.inject.internal.ErrorsException if the binding cannot be created.
    */
-  private <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors)
-      throws ErrorsException {
+  private <T> BindingImpl<T> createJustInTimeBinding(Key<T> key, Errors errors,
+      boolean jitDisabled, JitLimitation jitType) throws ErrorsException {
     int numErrorsBefore = errors.size();
 
     if (state.isBlacklisted(key)) {
@@ -817,6 +819,12 @@ final class InjectorImpl implements Injector, Lookups {
     BindingImpl<T> convertedBinding = convertConstantStringBinding(key, errors);
     if (convertedBinding != null) {
       return convertedBinding;
+    }
+    
+    if (!isTypeLiteral(key) 
+        && jitDisabled
+        && jitType != JitLimitation.NEW_OR_EXISTING_JIT) {
+      throw errors.jitDisabled(key).toException();
     }
 
     // If the key has an annotation...
