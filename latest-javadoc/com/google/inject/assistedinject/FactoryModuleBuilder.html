@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>
+
+  FactoryModuleBuilder
+
+
+| Guice
+
+</title>
+<link href="../../../../../javadoc/assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../javadoc/assets/customizations.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../javadoc/assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../", "../../../../../javadoc/assets/");
+</script>
+<script src="../../../../../javadoc/assets/android-developer-reference.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/navtree_data.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/customizations.js" type="text/javascript"></script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+<body class="Guice_3.0">
+
+<div id="header">
+    <div id="headerLeft">
+    
+      <span id="masthead-title">Guice</span>
+    
+    </div>
+    <div id="headerRight">
+      
+  <div id="search" >
+      <div id="searchForm">
+          <form accept-charset="utf-8" class="gsc-search-box" 
+                onsubmit="return submit_search()">
+            <table class="gsc-search-box" cellpadding="0" cellspacing="0"><tbody>
+                <tr>
+                  <td class="gsc-input">
+                    <input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+                      title="search developer docs" name="q"
+                      value="search developer docs"
+                      onFocus="search_focus_changed(this, true)"
+                      onBlur="search_focus_changed(this, false)"
+                      onkeydown="return search_changed(event, true, '../../../../')"
+                      onkeyup="return search_changed(event, false, '../../../../')" />
+                  <div id="search_filtered_div" class="no-display">
+                      <table id="search_filtered" cellspacing=0>
+                      </table>
+                  </div>
+                  </td>
+                  <td class="gsc-search-button">
+                    <input type="submit" value="Search" title="search" id="search-button" class="gsc-search-button" />
+                  </td>
+                  <td class="gsc-clear-button">
+                    <div title="clear results" class="gsc-clear-button">&nbsp;</div>
+                  </td>
+                </tr></tbody>
+              </table>
+          </form>
+      </div><!-- searchForm -->
+  </div><!-- search -->
+      
+        
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+      
+    </div>
+</div><!-- header -->
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links"><nobr>
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a></nobr>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/package-summary.html">com.google.inject</a></li>
+    <li class="selected api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/binder/package-summary.html">com.google.inject.binder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/jndi/package-summary.html">com.google.inject.jndi</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/matcher/package-summary.html">com.google.inject.matcher</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/name/package-summary.html">com.google.inject.name</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/package-summary.html">com.google.inject.persist</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/finder/package-summary.html">com.google.inject.persist.finder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/jpa/package-summary.html">com.google.inject.persist.jpa</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/tools/jmx/package-summary.html">com.google.inject.tools.jmx</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/util/package-summary.html">com.google.inject.util</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/assistedinject/AssistedInjectBinding.html">AssistedInjectBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/assistedinject/AssistedInjectTargetVisitor.html">AssistedInjectTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/assistedinject/AssistedMethod.html">AssistedMethod</a></li>
+      </ul>
+    </li>
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="selected api apilevel-Guice_3.0"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/assistedinject/FactoryProvider.html">FactoryProvider</a>&lt;F&gt;</li>
+      </ul>
+    </li>
+              
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/assistedinject/Assisted.html">Assisted</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/assistedinject/AssistedInject.html">AssistedInject</a></li>
+      </ul>
+    </li>
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links"><nobr>
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a></nobr>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+      if (!isMobile) {
+        $("<a href='#' id='nav-swap' onclick='swapNav();return false;' style='font-size:10px;line-height:9px;margin-left:1em;text-decoration:none;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>").appendTo("#side-nav");
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../../");
+        } else {
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        }
+        $("#swapper").css({borderBottom:"2px solid #aaa"});
+      } else {
+        swapNav(); // tree view should be used on mobile
+      }
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+  
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+    final 
+    
+    class
+<h1>FactoryModuleBuilder</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Guice_3.0">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.assistedinject.FactoryModuleBuilder</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>Provides a factory that combines the caller's arguments with injector-supplied values to
+ construct objects.
+
+ <h3>Defining a factory</h3>
+ Create an interface whose methods return the constructed type, or any of its supertypes. The
+ method's parameters are the arguments required to build the constructed type.
+
+ <pre>public interface PaymentFactory {
+   Payment create(Date startDate, Money amount);
+ }</pre>
+
+ You can name your factory methods whatever you like, such as <i>create</i>, <i>createPayment</i>
+ or <i>newPayment</i>.
+
+ <h3>Creating a type that accepts factory parameters</h3>
+ <code>constructedType</code> is a concrete class with an @<code><a href="../../../../com/google/inject/Inject.html">Inject</a></code>-annotated constructor. In addition to injector-supplied parameters, the constructor
+ should have parameters that match each of the factory method's parameters. Each factory-supplied
+ parameter requires an @<code><a href="../../../../com/google/inject/assistedinject/Assisted.html">Assisted</a></code> annotation. This serves to document that the
+ parameter is not bound by your application's modules.
+
+ <pre>public class RealPayment implements Payment {
+   @Inject
+   public RealPayment(
+      CreditService creditService,
+      AuthService authService,
+      <strong>@Assisted Date startDate</strong>,
+      <strong>@Assisted Money amount</strong>) {
+     ...
+   }
+ }</pre>
+ 
+ <h3>Multiple factory methods for the same type</h3>
+ If the factory contains many methods that return the same type, you can create multiple
+ constructors in your concrete class, each constructor marked with with
+ @<code><a href="../../../../com/google/inject/assistedinject/AssistedInject.html">AssistedInject</a></code>, in order to match the different parameters types of the
+ factory methods. 
+ 
+ <pre>public interface PaymentFactory {
+    Payment create(Date startDate, Money amount);
+    Payment createWithoutDate(Money amount);
+ }
+ 
+ public class RealPayment implements Payment {
+  @AssistedInject
+   public RealPayment(
+      CreditService creditService,
+      AuthService authService,
+     <strong>@Assisted Date startDate</strong>,
+     <strong>@Assisted Money amount</strong>) {
+     ...
+   }
+   
+  @AssistedInject
+   public RealPayment(
+      CreditService creditService,
+      AuthService authService,
+     <strong>@Assisted Money amount</strong>) {
+     ...
+   }   
+ }</pre> 
+
+ <h3>Configuring simple factories</h3>
+ In your <code><a href="../../../../com/google/inject/Module.html">module</a></code>, install a <code>FactoryModuleBuilder</code> that creates the
+ factory:
+
+ <pre>install(new FactoryModuleBuilder()
+     .implement(Payment.class, RealPayment.class)
+     .build(PaymentFactory.class);</pre>
+
+ As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
+ factory cannot be used until the injector has been initialized.
+ 
+ <h3>Configuring complex factories</h3>
+ Factories can create an arbitrary number of objects, one per each method.  Each factory
+ method can be configured using <code>.implement</code>.
+
+ <pre>public interface OrderFactory {
+    Payment create(Date startDate, Money amount);
+    Shipment create(Customer customer, Item item);
+    Receipt create(Payment payment, Shipment shipment);
+ }
+ 
+ [...]
+ 
+ install(new FactoryModuleBuilder()
+     .implement(Payment.class, RealPayment.class)
+     // excluding .implement for Shipment means the implementation class
+     // will be 'Shipment' itself, which is legal if it's not an interface.
+     .implement(Receipt.class, RealReceipt.class)
+     .build(OrderFactory.class);</pre>
+ </pre>
+
+ <h3>Using the factory</h3>
+ Inject your factory into your application classes. When you use the factory, your arguments
+ will be combined with values from the injector to construct an instance.
+
+ <pre>public class PaymentAction {
+   @Inject private PaymentFactory paymentFactory;
+
+   public void doPayment(Money amount) {
+     Payment payment = paymentFactory.create(new Date(), amount);
+     payment.apply();
+   }
+ }</pre>
+
+ <h3>Making parameter types distinct</h3>
+ The types of the factory method's parameters must be distinct. To use multiple parameters of
+ the same type, use a named @<code><a href="../../../../com/google/inject/assistedinject/Assisted.html">Assisted</a></code> annotation to disambiguate the
+ parameters. The names must be applied to the factory method's parameters:
+
+ <pre>public interface PaymentFactory {
+   Payment create(
+       <strong>@Assisted("startDate")</strong> Date startDate,
+       <strong>@Assisted("dueDate")</strong> Date dueDate,
+       Money amount);
+ } </pre>
+
+ ...and to the concrete type's constructor parameters:
+
+ <pre>public class RealPayment implements Payment {
+   @Inject
+   public RealPayment(
+      CreditService creditService,
+      AuthService authService,
+      <strong>@Assisted("startDate")</strong> Date startDate,
+      <strong>@Assisted("dueDate")</strong> Date dueDate,
+      <strong>@Assisted</strong> Money amount) {
+     ...
+   }
+ }</pre>
+
+ <h3>Values are created by Guice</h3>
+ Returned factories use child injectors to create values. The values are eligible for method
+ interception. In addition, @Inject members will be injected before they are
+ returned.
+
+ <h3>More configuration options</h3>
+ In addition to simply specifying an implementation class for any returned type, factories' return
+ values can be automatic or can be configured to use annotations:
+ <p/>
+ If you just want to return the types specified in the factory, do not configure any
+ implementations:
+
+ <pre>public interface FruitFactory {
+   Apple getApple(Color color);
+ }
+ ...
+ protected void configure() {
+   install(new FactoryModuleBuilder().build(FruitFactory.class));
+ }</pre>
+
+ Note that any type returned by the factory in this manner needs to be an implementation class.
+ <p/>
+ To return two different implementations for the same interface from your factory, use binding
+ annotations on your return types:
+
+ <pre>interface CarFactory {
+   @Named("fast") Car getFastCar(Color color);
+   @Named("clean") Car getCleanCar(Color color);
+ }
+ ...
+ protected void configure() {
+   install(new FactoryModuleBuilder()
+       .implement(Car.class, Names.named("fast"), Porsche.class)
+       .implement(Car.class, Names.named("clean"), Prius.class)
+       .build(CarFactory.class));
+ }</pre>
+ 
+ <h3>Implementation limitations</h3>
+ As a limitation of the implementation, it is prohibited to declare a factory method that
+ accepts a <code>Provider</code> as one of its arguments.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#FactoryModuleBuilder()">FactoryModuleBuilder</a></span>()</nobr>
+        
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;F&gt;
+            <a href="../../../../com/google/inject/Module.html">Module</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#build(com.google.inject.Key<F>)">build</a></span>(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;F&gt; factoryInterface)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;F&gt;
+            <a href="../../../../com/google/inject/Module.html">Module</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#build(com.google.inject.TypeLiteral<F>)">build</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;F&gt; factoryInterface)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;F&gt;
+            <a href="../../../../com/google/inject/Module.html">Module</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#build(java.lang.Class<F>)">build</a></span>(Class&lt;F&gt; factoryInterface)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.Key<T>, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.Key<T>, java.lang.Class<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, java.lang.Class<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, java.lang.annotation.Annotation, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Annotation annotation, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(com.google.inject.TypeLiteral<T>, java.lang.annotation.Annotation, java.lang.Class<? extends T>)">implement</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Annotation annotation, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(Class&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, java.lang.Class<? extends T>)">implement</a></span>(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, java.lang.Class<? extends T>)">implement</a></span>(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, java.lang.annotation.Annotation, com.google.inject.TypeLiteral<? extends T>)">implement</a></span>(Class&lt;T&gt; source, Annotation annotation, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html#implement(java.lang.Class<T>, java.lang.annotation.Annotation, java.lang.Class<? extends T>)">implement</a></span>(Class&lt;T&gt; source, Annotation annotation, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</nobr>
+        
+        <div class="jd-descrdiv">See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../javadoc/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="FactoryModuleBuilder()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">FactoryModuleBuilder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="build(com.google.inject.Key<F>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/Module.html">Module</a>
+      </span>
+      <span class="sympad">build</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;F&gt; factoryInterface)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="build(com.google.inject.TypeLiteral<F>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/Module.html">Module</a>
+      </span>
+      <span class="sympad">build</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;F&gt; factoryInterface)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="build(java.lang.Class<F>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/Module.html">Module</a>
+      </span>
+      <span class="sympad">build</span>
+      <span class="normal">(Class&lt;F&gt; factoryInterface)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.Key<T>, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.Key<T>, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, java.lang.annotation.Annotation, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Annotation annotation, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(com.google.inject.TypeLiteral<T>, java.lang.annotation.Annotation, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; source, Annotation annotation, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, java.lang.Class<? extends java.lang.annotation.Annotation>, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, java.lang.annotation.Annotation, com.google.inject.TypeLiteral<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, Annotation annotation, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="implement(java.lang.Class<T>, java.lang.annotation.Annotation, java.lang.Class<? extends T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a>
+      </span>
+      <span class="sympad">implement</span>
+      <span class="normal">(Class&lt;T&gt; source, Annotation annotation, Class&lt;?&nbsp;extends&nbsp;T&gt; target)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See the factory configuration examples at <code><a href="../../../../com/google/inject/assistedinject/FactoryModuleBuilder.html">FactoryModuleBuilder</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer">
+Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize android-developer-docs.js */
+</script>
+
+</body>
+</html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>
+
+  ProviderBinding
+
+
+| Guice
+
+</title>
+<link href="../../../../../javadoc/assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../javadoc/assets/customizations.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../javadoc/assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../", "../../../../../javadoc/assets/");
+</script>
+<script src="../../../../../javadoc/assets/android-developer-reference.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/navtree_data.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/customizations.js" type="text/javascript"></script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+<body class="Guice_2.0">
+
+<div id="header">
+    <div id="headerLeft">
+    
+      <span id="masthead-title">Guice</span>
+    
+    </div>
+    <div id="headerRight">
+      
+  <div id="search" >
+      <div id="searchForm">
+          <form accept-charset="utf-8" class="gsc-search-box" 
+                onsubmit="return submit_search()">
+            <table class="gsc-search-box" cellpadding="0" cellspacing="0"><tbody>
+                <tr>
+                  <td class="gsc-input">
+                    <input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+                      title="search developer docs" name="q"
+                      value="search developer docs"
+                      onFocus="search_focus_changed(this, true)"
+                      onBlur="search_focus_changed(this, false)"
+                      onkeydown="return search_changed(event, true, '../../../../')"
+                      onkeyup="return search_changed(event, false, '../../../../')" />
+                  <div id="search_filtered_div" class="no-display">
+                      <table id="search_filtered" cellspacing=0>
+                      </table>
+                  </div>
+                  </td>
+                  <td class="gsc-search-button">
+                    <input type="submit" value="Search" title="search" id="search-button" class="gsc-search-button" />
+                  </td>
+                  <td class="gsc-clear-button">
+                    <div title="clear results" class="gsc-clear-button">&nbsp;</div>
+                  </td>
+                </tr></tbody>
+              </table>
+          </form>
+      </div><!-- searchForm -->
+  </div><!-- search -->
+      
+        
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+      
+    </div>
+</div><!-- header -->
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links"><nobr>
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a></nobr>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/package-summary.html">com.google.inject</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/binder/package-summary.html">com.google.inject.binder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/jndi/package-summary.html">com.google.inject.jndi</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/matcher/package-summary.html">com.google.inject.matcher</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/name/package-summary.html">com.google.inject.name</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/package-summary.html">com.google.inject.persist</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/finder/package-summary.html">com.google.inject.persist.finder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/jpa/package-summary.html">com.google.inject.persist.jpa</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></li>
+    <li class="selected api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/tools/jmx/package-summary.html">com.google.inject.tools.jmx</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/util/package-summary.html">com.google.inject.util</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/BindingScopingVisitor.html">BindingScopingVisitor</a>&lt;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">BindingTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ConstructorBinding.html">ConstructorBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html">ConvertedConstantBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/Element.html">Element</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ElementVisitor.html">ElementVisitor</a>&lt;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ExposedBinding.html">ExposedBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/HasDependencies.html">HasDependencies</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InjectionListener.html">InjectionListener</a>&lt;I&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InstanceBinding.html">InstanceBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/LinkedKeyBinding.html">LinkedKeyBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/PrivateElements.html">PrivateElements</a></li>
+          <li class="selected api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderBinding.html">ProviderBinding</a>&lt;T&nbsp;extends&nbsp;<a href="../../../../com/google/inject/Provider.html">Provider</a>&lt;?&gt;&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html">ProviderInstanceBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderKeyBinding.html">ProviderKeyBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderWithDependencies.html">ProviderWithDependencies</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/ProviderWithExtensionVisitor.html">ProviderWithExtensionVisitor</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeConverter.html">TypeConverter</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeEncounter.html">TypeEncounter</a>&lt;I&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeListener.html">TypeListener</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/UntargettedBinding.html">UntargettedBinding</a>&lt;T&gt;</li>
+      </ul>
+    </li>
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/DefaultBindingScopingVisitor.html">DefaultBindingScopingVisitor</a>&lt;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/DefaultBindingTargetVisitor.html">DefaultBindingTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/DefaultElementVisitor.html">DefaultElementVisitor</a>&lt;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/Dependency.html">Dependency</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/DisableCircularProxiesOption.html">DisableCircularProxiesOption</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/Elements.html">Elements</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InjectionPoint.html">InjectionPoint</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InjectionRequest.html">InjectionRequest</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InterceptorBinding.html">InterceptorBinding</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/MembersInjectorLookup.html">MembersInjectorLookup</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../../com/google/inject/spi/Message.html">Message</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderLookup.html">ProviderLookup</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/RequireExplicitBindingsOption.html">RequireExplicitBindingsOption</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ScopeBinding.html">ScopeBinding</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html">StaticInjectionRequest</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeConverterBinding.html">TypeConverterBinding</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeListenerBinding.html">TypeListenerBinding</a></li>
+      </ul>
+    </li>
+              
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/Toolable.html">Toolable</a></li>
+      </ul>
+    </li>
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links"><nobr>
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a></nobr>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+      if (!isMobile) {
+        $("<a href='#' id='nav-swap' onclick='swapNav();return false;' style='font-size:10px;line-height:9px;margin-left:1em;text-decoration:none;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>").appendTo("#side-nav");
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../../");
+        } else {
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        }
+        $("#swapper").css({borderBottom:"2px solid #aaa"});
+      } else {
+        swapNav(); // tree view should be used on mobile
+      }
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+     
+    
+    interface
+<h1>ProviderBinding</h1>
+
+
+
+  
+  
+      implements 
+      
+        <a href="../../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt; 
+      
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Guice_2.0">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.spi.ProviderBinding&lt;T&nbsp;extends&nbsp;<a href="../../../../com/google/inject/Provider.html">com.google.inject.Provider</a>&lt;?&gt;&gt;</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>A binding to a <code><a href="../../../../com/google/inject/Provider.html">Provider</a></code> that delegates to the binding for the provided type. This binding
+ is used whenever a <code>Provider&lt;T&gt;</code> is injected (as opposed to injecting <code>T</code> directly).</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/Key.html">Key</a>&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/ProviderBinding.html#getProvidedKey()">getProvidedKey</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the key whose binding is used to <code><a href="../../../../com/google/inject/Provider.html#get()">provide instances</a></code>.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.inject.Binding" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.inject.Binding-trigger"
+          src="../../../../../javadoc/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="../../../../com/google/inject/Binding.html">com.google.inject.Binding</a>
+
+<div id="inherited-methods-com.google.inject.Binding">
+  <div id="inherited-methods-com.google.inject.Binding-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.inject.Binding-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;V&gt;
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#acceptScopingVisitor(com.google.inject.spi.BindingScopingVisitor<V>)">acceptScopingVisitor</a></span>(<a href="../../../../com/google/inject/spi/BindingScopingVisitor.html">BindingScopingVisitor</a>&lt;V&gt; visitor)</nobr>
+        
+        <div class="jd-descrdiv">Accepts a scoping visitor.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;V&gt;
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#acceptTargetVisitor(com.google.inject.spi.BindingTargetVisitor<? super T, V>)">acceptTargetVisitor</a></span>(<a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">BindingTargetVisitor</a>&lt;?&nbsp;super&nbsp;T,&nbsp;V&gt; visitor)</nobr>
+        
+        <div class="jd-descrdiv">Accepts a target visitor.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#getKey()">getKey</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the key for this binding.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#getProvider()">getProvider</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the scoped provider guice uses to fulfill requests for this
+ binding.</div>
+  
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.inject.spi.Element" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.inject.spi.Element-trigger"
+          src="../../../../../javadoc/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="../../../../com/google/inject/spi/Element.html">com.google.inject.spi.Element</a>
+
+<div id="inherited-methods-com.google.inject.spi.Element">
+  <div id="inherited-methods-com.google.inject.spi.Element-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.inject.spi.Element-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#acceptVisitor(com.google.inject.spi.ElementVisitor<T>)">acceptVisitor</a></span>(<a href="../../../../com/google/inject/spi/ElementVisitor.html">ElementVisitor</a>&lt;T&gt; visitor)</nobr>
+        
+        <div class="jd-descrdiv">Accepts an element visitor.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#applyTo(com.google.inject.Binder)">applyTo</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder)</nobr>
+        
+        <div class="jd-descrdiv">Writes this module element to the given binder (optional operation).</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#getSource()">getSource</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns an arbitrary object containing information about the "place" where this element was
+ configured.</div>
+  
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="getProvidedKey()"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../../com/google/inject/Key.html">Key</a>&lt;?&gt;
+      </span>
+      <span class="sympad">getProvidedKey</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the key whose binding is used to <code><a href="../../../../com/google/inject/Provider.html#get()">provide instances</a></code>. That binding
+ can be retrieved from an injector using <code><a href="../../../../com/google/inject/Injector.html#getBinding(com.google.inject.Key<T>)">Injector.getBinding(providedKey)</a></code>
+</p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer">
+Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize android-developer-docs.js */
+</script>
+
+</body>
+</html>
