@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>
+
+  MapBinder
+
+
+| Guice
+
+</title>
+<link href="../../../../../javadoc/assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../javadoc/assets/customizations.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../javadoc/assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../", "../../../../../javadoc/assets/");
+</script>
+<script src="../../../../../javadoc/assets/android-developer-reference.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/navtree_data.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/customizations.js" type="text/javascript"></script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+<body class="Guice_2.0">
+
+<div id="header">
+    <div id="headerLeft">
+    
+      <span id="masthead-title">Guice</span>
+    
+    </div>
+    <div id="headerRight">
+      
+  <div id="search" >
+      <div id="searchForm">
+          <form accept-charset="utf-8" class="gsc-search-box" 
+                onsubmit="return submit_search()">
+            <table class="gsc-search-box" cellpadding="0" cellspacing="0"><tbody>
+                <tr>
+                  <td class="gsc-input">
+                    <input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+                      title="search developer docs" name="q"
+                      value="search developer docs"
+                      onFocus="search_focus_changed(this, true)"
+                      onBlur="search_focus_changed(this, false)"
+                      onkeydown="return search_changed(event, true, '../../../../')"
+                      onkeyup="return search_changed(event, false, '../../../../')" />
+                  <div id="search_filtered_div" class="no-display">
+                      <table id="search_filtered" cellspacing=0>
+                      </table>
+                  </div>
+                  </td>
+                  <td class="gsc-search-button">
+                    <input type="submit" value="Search" title="search" id="search-button" class="gsc-search-button" />
+                  </td>
+                  <td class="gsc-clear-button">
+                    <div title="clear results" class="gsc-clear-button">&nbsp;</div>
+                  </td>
+                </tr></tbody>
+              </table>
+          </form>
+      </div><!-- searchForm -->
+  </div><!-- search -->
+      
+        
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+      
+    </div>
+</div><!-- header -->
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links"><nobr>
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a></nobr>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/package-summary.html">com.google.inject</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/binder/package-summary.html">com.google.inject.binder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/jndi/package-summary.html">com.google.inject.jndi</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/matcher/package-summary.html">com.google.inject.matcher</a></li>
+    <li class="selected api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/name/package-summary.html">com.google.inject.name</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/package-summary.html">com.google.inject.persist</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/finder/package-summary.html">com.google.inject.persist.finder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/jpa/package-summary.html">com.google.inject.persist.jpa</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/tools/jmx/package-summary.html">com.google.inject.tools.jmx</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/util/package-summary.html">com.google.inject.util</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html">MapBinderBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html">MultibinderBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibindingsTargetVisitor.html">MultibindingsTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+      </ul>
+    </li>
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="selected api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/Multibinder.html">Multibinder</a>&lt;T&gt;</li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links"><nobr>
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a></nobr>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+      if (!isMobile) {
+        $("<a href='#' id='nav-swap' onclick='swapNav();return false;' style='font-size:10px;line-height:9px;margin-left:1em;text-decoration:none;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>").appendTo("#side-nav");
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../../");
+        } else {
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        }
+        $("#swapper").css({borderBottom:"2px solid #aaa"});
+      } else {
+        swapNav(); // tree view should be used on mobile
+      }
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+     
+    abstract
+    class
+<h1>MapBinder</h1>
+
+
+
+  
+    extends Object<br/>
+  
+  
+  
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Guice_2.0">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.multibindings.MapBinder&lt;K,&nbsp;V&gt;</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>An API to bind multiple map entries separately, only to later inject them as
+ a complete map. MapBinder is intended for use in your application's module:
+ <pre><code>
+ public class SnacksModule extends AbstractModule {
+   protected void configure() {
+     MapBinder&lt;String, Snack&gt; mapbinder
+         = MapBinder.newMapBinder(binder(), String.class, Snack.class);
+     mapbinder.addBinding("twix").toInstance(new Twix());
+     mapbinder.addBinding("snickers").toProvider(SnickersProvider.class);
+     mapbinder.addBinding("skittles").to(Skittles.class);
+   }
+ }</code></pre>
+
+ <p>With this binding, a Map<code>&lt;String, Snack&gt;</code> can now be
+ injected:
+ <pre><code>
+ class SnackMachine {
+   @Inject
+   public SnackMachine(Map&lt;String, Snack&gt; snacks) { ... }
+ }</code></pre>
+
+ <p>In addition to binding <code>Map&lt;K, V&gt;</code>, a mapbinder will also bind
+ <code>Map&lt;K, Provider&lt;V&gt;&gt;</code> for lazy value provision:
+ <pre><code>
+ class SnackMachine {
+   @Inject
+   public SnackMachine(Map&lt;String, Provider&lt;Snack&gt;&gt; snackProviders) { ... }
+ }</code></pre>
+
+ <p>Contributing mapbindings from different modules is supported. For example,
+ it is okay to have both <code>CandyModule</code> and <code>ChipsModule</code> both
+ create their own <code>MapBinder&lt;String, Snack&gt;</code>, and to each contribute
+ bindings to the snacks map. When that map is injected, it will contain
+ entries from both modules.
+
+ <p>The map's iteration order is consistent with the binding order. This is
+ convenient when multiple elements are contributed by the same module because
+ that module can order its bindings appropriately. Avoid relying on the
+ iteration order of elements contributed by different modules, since there is
+ no equivalent mechanism to order modules.
+ 
+ <p>The map is unmodifiable.  Elements can only be added to the map by
+ configuring the MapBinder.  Elements can never be removed from the map.
+
+ <p>Values are resolved at map injection time. If a value is bound to a
+ provider, that provider's get method will be called each time the map is
+ injected (unless the binding is also scoped, or a map of providers is injected).
+
+ <p>Annotations are used to create different maps of the same key/value
+ type. Each distinct annotation gets its own independent map.
+
+ <p><strong>Keys must be distinct.</strong> If the same key is bound more than
+ once, map injection will fail. However, use <code><a href="../../../../com/google/inject/multibindings/MapBinder.html#permitDuplicates()">permitDuplicates()</a></code> in
+ order to allow duplicate keys; extra bindings to <code>Map&lt;K, Set&lt;V&gt;&gt;</code> and
+ <code>Map&lt;K, Set&lt;Provider&lt;V&gt;&gt;</code> will be added.
+
+ <p><strong>Keys must be non-null.</strong> <code>addBinding(null)</code> will
+ throw an unchecked exception.
+
+ <p><strong>Values must be non-null to use map injection.</strong> If any
+ value is null, map injection will fail (although injecting a map of providers
+ will not).</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html">LinkedBindingBuilder</a>&lt;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#addBinding(K)">addBinding</a></span>(K key)</nobr>
+        
+        <div class="jd-descrdiv">Returns a binding builder used to add a new entry in the map.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with no binding annotation.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>, java.lang.Class<? extends java.lang.annotation.Annotation>)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotationType</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>, java.lang.annotation.Annotation)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType, Annotation annotation)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotation</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with no binding annotation.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>, java.lang.Class<? extends java.lang.annotation.Annotation>)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotationType</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            &lt;K,&nbsp;V&gt;
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>, java.lang.annotation.Annotation)">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType, Annotation annotation)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotation</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MapBinder.html#permitDuplicates()">permitDuplicates</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Configures the <code>MapBinder</code> to handle duplicate entries.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../javadoc/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="addBinding(K)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html">LinkedBindingBuilder</a>&lt;V&gt;
+      </span>
+      <span class="sympad">addBinding</span>
+      <span class="normal">(K key)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a binding builder used to add a new entry in the map. Each
+ key must be distinct (and non-null). Bound providers will be evaluated each
+ time the map is injected.
+
+ <p>It is an error to call this method without also calling one of the
+ <code>to</code> methods on the returned binding builder.
+
+ <p>Scoping elements independently is supported. Use the <code>in</code> method
+ to specify a binding scope.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with no binding annotation.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>, java.lang.Class<? extends java.lang.annotation.Annotation>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotationType</code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<K>, com.google.inject.TypeLiteral<V>, java.lang.annotation.Annotation)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;K&gt; keyType, <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;V&gt; valueType, Annotation annotation)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotation</code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with no binding annotation.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>, java.lang.Class<? extends java.lang.annotation.Annotation>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType, Class&lt;?&nbsp;extends&nbsp;Annotation&gt; annotationType)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotationType</code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="newMapBinder(com.google.inject.Binder, java.lang.Class<K>, java.lang.Class<V>, java.lang.annotation.Annotation)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">newMapBinder</span>
+      <span class="normal">(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder, Class&lt;K&gt; keyType, Class&lt;V&gt; valueType, Annotation annotation)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new mapbinder that collects entries of <code>keyType</code>/<code>valueType</code> in a
+ Map that is itself bound with <code>annotation</code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="permitDuplicates()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;
+      </span>
+      <span class="sympad">permitDuplicates</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Configures the <code>MapBinder</code> to handle duplicate entries.
+ <p>When multiple equal keys are bound, the value that gets included in the map is
+ arbitrary.
+ <p>In addition to the <code>Map&lt;K, V&gt;</code> and <code>Map&lt;K, Provider&lt;V&gt;&gt;</code>
+ maps that are normally bound, a <code>Map&lt;K, Set&lt;V&gt;&gt;</code> and
+ <code>Map&lt;K, Set&lt;Provider&lt;V&gt;&gt;&gt;</code> are <em>also</em> bound, which contain
+ all values bound to each key.
+ <p>
+ When multiple modules contribute elements to the map, this configuration
+ option impacts all of them.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this map binder</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer">
+Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize android-developer-docs.js */
+</script>
+
+</body>
+</html>
