@@ -24,7 +24,7 @@ import com.google.inject.spi.PrivateElements;
  * This factory exists in a parent injector. When invoked, it retrieves its value from a child
  * injector.
  */
-final class ExposedKeyFactory<T> implements InternalFactory<T>, BindingProcessor.CreationListener {
+final class ExposedKeyFactory<T> implements InternalFactory<T>, CreationListener {
   private final Key<T> key;
   private final PrivateElements privateElements;
   private BindingImpl<T> delegate;

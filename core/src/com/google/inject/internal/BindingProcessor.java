@@ -16,19 +16,10 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
-import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.MembersInjector;
-import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.Scope;
-import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.ExposedBinding;
@@ -40,7 +31,6 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,28 +39,18 @@ import java.util.Set;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-final class BindingProcessor extends AbstractProcessor {
+final class BindingProcessor extends AbstractBindingProcessor {
 
-  private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Initializer initializer;
-  private final List<Runnable> uninitializedBindings = Lists.newArrayList();
-  
-  enum Phase { PASS_ONE, PASS_TWO; }
-  private Phase phase;
 
-  BindingProcessor(Errors errors, Initializer initializer) {
-    super(errors);
+  BindingProcessor(Errors errors, Initializer initializer, ProcessedBindingData bindingData) {
+    super(errors, bindingData);
     this.initializer = initializer;
-  }
-  
-  void setPhase(Phase phase) {
-    this.phase = phase;
   }
 
   @Override public <T> Boolean visit(Binding<T> command) {
-    final Object source = command.getSource();
-
-    if (Void.class.equals(command.getKey().getTypeLiteral().getRawType())) {
+    Class<?> rawType = command.getKey().getTypeLiteral().getRawType();
+    if (Void.class.equals(rawType)) {
       if (command instanceof ProviderInstanceBinding
           && ((ProviderInstanceBinding) command).getProviderInstance() instanceof ProviderMethod) {
         errors.voidProviderMethod();
@@ -79,22 +59,15 @@ final class BindingProcessor extends AbstractProcessor {
       }
       return true;
     }
-
-    final Key<T> key = command.getKey();
-    Class<? super T> rawType = key.getTypeLiteral().getRawType();
-
+    
     if (rawType == Provider.class) {
       errors.bindingToProvider();
       return true;
     }
-
-    validateKey(command.getSource(), command.getKey());
-
-    final Scoping scoping = Scoping.makeInjectable(
-        ((BindingImpl<?>) command).getScoping(), injector, errors);
-
-    return command.acceptTargetVisitor(new BindingTargetVisitor<T, Boolean>() {
+    
+    return command.acceptTargetVisitor(new Processor<T, Boolean>((BindingImpl<T>)command) {
       public Boolean visit(ConstructorBinding<? extends T> binding) {
+        prepareBinding();
         try {
           ConstructorBindingImpl<T> onInjector = ConstructorBindingImpl.create(injector, key, 
               binding.getConstructor(), source, scoping, errors, false);
@@ -108,6 +81,7 @@ final class BindingProcessor extends AbstractProcessor {
       }
 
       public Boolean visit(InstanceBinding<? extends T> binding) {
+        prepareBinding();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         T instance = binding.getInstance();
         Initializable<T> ref = initializer.requestInjection(
@@ -121,6 +95,7 @@ final class BindingProcessor extends AbstractProcessor {
       }
 
       public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
+        prepareBinding();
         Provider<? extends T> provider = binding.getProviderInstance();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<Provider<? extends T>> initializable = initializer
@@ -134,10 +109,11 @@ final class BindingProcessor extends AbstractProcessor {
       }
 
       public Boolean visit(ProviderKeyBinding<? extends T> binding) {
+        prepareBinding();
         Key<? extends javax.inject.Provider<? extends T>> providerKey = binding.getProviderKey();
         BoundProviderFactory<T> boundProviderFactory
             = new BoundProviderFactory<T>(injector, providerKey, source);
-        creationListeners.add(boundProviderFactory);
+        bindingData.addCreationListener(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);
         putBinding(new LinkedProviderBindingImpl<T>(
@@ -146,13 +122,14 @@ final class BindingProcessor extends AbstractProcessor {
       }
 
       public Boolean visit(LinkedKeyBinding<? extends T> binding) {
+        prepareBinding();
         Key<? extends T> linkedKey = binding.getLinkedKey();
         if (key.equals(linkedKey)) {
           errors.recursiveBinding();
         }
 
         FactoryProxy<T> factory = new FactoryProxy<T>(injector, key, linkedKey, source);
-        creationListeners.add(factory);
+        bindingData.addCreationListener(factory);
         InternalFactory<? extends T> scopedFactory
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(
@@ -160,34 +137,8 @@ final class BindingProcessor extends AbstractProcessor {
         return true;
       }
 
-      public Boolean visit(UntargettedBinding<? extends T> untargetted) {        
-        // Error: Missing implementation.
-        // Example: bind(Date.class).annotatedWith(Red.class);
-        // We can't assume abstract types aren't injectable. They may have an
-        // @ImplementedBy annotation or something.
-        if (key.getAnnotationType() != null) {
-          errors.missingImplementation(key);
-          putBinding(invalidBinding(injector, key, source));
-          return true;
-        }
-
-        // We want to do UntargettedBindings in the second pass.
-        if (phase == Phase.PASS_ONE) {
-          return false;
-        }
-
-        // This cast is safe after the preceeding check.
-        try {
-          BindingImpl<T> binding = injector.createUninitializedBinding(
-              key, scoping, source, errors, false);
-          scheduleInitialization(binding);
-          putBinding(binding);
-        } catch (ErrorsException e) {
-          errors.merge(e.getErrors());
-          putBinding(invalidBinding(injector, key, source));
-        }
-
-        return true;
+      public Boolean visit(UntargettedBinding<? extends T> untargetted) {
+        return false;
       }
 
       public Boolean visit(ExposedBinding<? extends T> binding) {
@@ -201,28 +152,15 @@ final class BindingProcessor extends AbstractProcessor {
       public Boolean visit(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
-
-      private void scheduleInitialization(final BindingImpl<?> binding) {
-        uninitializedBindings.add(new Runnable() {
-          public void run() {
-            try {
-              binding.getInjector().initializeBinding(binding, errors.withSource(source));
-            } catch (ErrorsException e) {
-              errors.merge(e.getErrors());
-            }
-          }
-        });
+      
+      @Override
+      protected Boolean visitOther(Binding<? extends T> binding) {
+        throw new IllegalStateException("BindingProcessor should override all visitations");
       }
     });
   }
 
   @Override public Boolean visit(PrivateElements privateElements) {
-    // Because we do two passes, we have to ignore the PrivateElements in the second
-    // pass.  Otherwise we end up calling bindExposed twice for each one.
-    if (phase == Phase.PASS_TWO) {
-      return false;
-    }
-    
     for (Key<?> key : privateElements.getExposedKeys()) {
       bindExposed(privateElements, key);
     }
@@ -231,108 +169,8 @@ final class BindingProcessor extends AbstractProcessor {
 
   private <T> void bindExposed(PrivateElements privateElements, Key<T> key) {
     ExposedKeyFactory<T> exposedKeyFactory = new ExposedKeyFactory<T>(key, privateElements);
-    creationListeners.add(exposedKeyFactory);
+    bindingData.addCreationListener(exposedKeyFactory);
     putBinding(new ExposedBindingImpl<T>(
         injector, privateElements.getExposedSource(key), key, exposedKeyFactory, privateElements));
-  }
-
-  private <T> void validateKey(Object source, Key<T> key) {
-    Annotations.checkForMisplacedScopeAnnotations(
-        key.getTypeLiteral().getRawType(), source, errors);
-  }
-
-  <T> UntargettedBindingImpl<T> invalidBinding(InjectorImpl injector, Key<T> key, Object source) {
-    return new UntargettedBindingImpl<T>(injector, key, source);
-  }
-
-  public void initializeBindings() {
-    for (Runnable initializer : uninitializedBindings) {
-      initializer.run();
-    }
-  }
-
-  public void runCreationListeners() {
-    for (CreationListener creationListener : creationListeners) {
-      creationListener.notify(errors);
-    }
-  }
-
-  private void putBinding(BindingImpl<?> binding) {
-    Key<?> key = binding.getKey();
-
-    Class<?> rawType = key.getTypeLiteral().getRawType();
-    if (FORBIDDEN_TYPES.contains(rawType)) {
-      errors.cannotBindToGuiceType(rawType.getSimpleName());
-      return;
-    }
-
-    BindingImpl<?> original = injector.getExistingBinding(key);
-    if (original != null) {
-      // If it failed because of an explicit duplicate binding...
-      if (injector.state.getExplicitBinding(key) != null) {
-        try {
-          if(!isOkayDuplicate(original, binding, injector.state)) {
-            errors.bindingAlreadySet(key, original.getSource());
-            return;
-          }
-        } catch(Throwable t) {
-          errors.errorCheckingDuplicateBinding(key, original.getSource(), t);
-          return;
-        }
-      } else {
-        // Otherwise, it failed because of a duplicate JIT binding
-        // in the parent
-        errors.jitBindingAlreadySet(key);
-        return;
-      }
-    }
-
-    // prevent the parent from creating a JIT binding for this key
-    injector.state.parent().blacklist(key, binding.getSource());
-    injector.state.putBinding(key, binding);
-  }
-
-  /**
-   * We tolerate duplicate bindings if one exposes the other or if the two bindings
-   * are considered duplicates (see {@link Bindings#areDuplicates(BindingImpl, BindingImpl)}.
-   *
-   * @param original the binding in the parent injector (candidate for an exposing binding)
-   * @param binding the binding to check (candidate for the exposed binding)
-   */
-  private boolean isOkayDuplicate(BindingImpl<?> original, BindingImpl<?> binding, State state) {
-    if (original instanceof ExposedBindingImpl) {
-      ExposedBindingImpl exposed = (ExposedBindingImpl) original;
-      InjectorImpl exposedFrom = (InjectorImpl) exposed.getPrivateElements().getInjector();
-      return (exposedFrom == binding.getInjector());
-    } else {
-      original = (BindingImpl<?>)state.getExplicitBindingsThisLevel().get(binding.getKey());
-      // If no original at this level, the original was on a parent, and we don't
-      // allow deduplication between parents & children.
-      if(original == null) {
-        return false;
-      } else {
-        return original.equals(binding);
-      }
-    }
-  }
-
-  // It's unfortunate that we have to maintain a blacklist of specific
-  // classes, but we can't easily block the whole package because of
-  // all our unit tests.
-  private static final Set<Class<?>> FORBIDDEN_TYPES = ImmutableSet.<Class<?>>of(
-      AbstractModule.class,
-      Binder.class,
-      Binding.class,
-      Injector.class,
-      Key.class,
-      MembersInjector.class,
-      Module.class,
-      Provider.class,
-      Scope.class,
-      TypeLiteral.class);
-  // TODO(jessewilson): fix BuiltInModule, then add Stage
-
-  interface CreationListener {
-    void notify(Errors errors);
   }
 }

@@ -61,7 +61,7 @@ public final class InternalInjectorCreator {
   private final Errors errors = new Errors();
 
   private final Initializer initializer = new Initializer();
-  private final BindingProcessor bindingProcesor;
+  private final ProcessedBindingData bindingData;
   private final InjectionRequestProcessor injectionRequestProcessor;
 
   private final InjectorShell.Builder shellBuilder = new InjectorShell.Builder();
@@ -69,7 +69,7 @@ public final class InternalInjectorCreator {
   
   public InternalInjectorCreator() {
     injectionRequestProcessor = new InjectionRequestProcessor(errors, initializer);
-    bindingProcesor = new BindingProcessor(errors, initializer);
+    bindingData = new ProcessedBindingData();
   }
   
   public InternalInjectorCreator stage(Stage stage) {
@@ -100,7 +100,7 @@ public final class InternalInjectorCreator {
     // Synchronize while we're building up the bindings and other injector state. This ensures that
     // the JIT bindings in the parent injector don't change while we're being built
     synchronized (shellBuilder.lock()) {
-      shells = shellBuilder.build(bindingProcesor, stopwatch, errors);
+      shells = shellBuilder.build(initializer, bindingData, stopwatch, errors);
       stopwatch.resetAndLog("Injector construction");
 
       initializeStatically();
@@ -119,7 +119,7 @@ public final class InternalInjectorCreator {
 
   /** Initialize and validate everything. */
   private void initializeStatically() {
-    bindingProcesor.initializeBindings();
+    bindingData.initializeBindings();
     stopwatch.resetAndLog("Binding initialization");
 
     for (InjectorShell shell : shells) {
@@ -130,7 +130,7 @@ public final class InternalInjectorCreator {
     injectionRequestProcessor.process(shells);
     stopwatch.resetAndLog("Collecting injection requests");
 
-    bindingProcesor.runCreationListeners();
+    bindingData.runCreationListeners(errors);
     stopwatch.resetAndLog("Binding validation");
 
     injectionRequestProcessor.validate();

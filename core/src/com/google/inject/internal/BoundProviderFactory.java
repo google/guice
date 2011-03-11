@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.internal.BindingProcessor.CreationListener;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 
