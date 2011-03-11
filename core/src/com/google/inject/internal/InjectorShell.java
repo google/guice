@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.google.inject.internal.BindingProcessor.Phase;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Lists;
@@ -169,6 +170,14 @@ final class InjectorShell {
 
       bindInjector(injector);
       bindLogger(injector);
+      
+      // Do two passes over our bindings -- first to get all non UntargettedBindings,
+      // then to get the only UntargettedBindings.  This is necessary because
+      // UntargettedBindings can create JIT bindings and need all their other
+      // dependencies set up ahead of time.
+      bindingProcessor.setPhase(Phase.PASS_ONE);
+      bindingProcessor.process(injector, elements);
+      bindingProcessor.setPhase(Phase.PASS_TWO);
       bindingProcessor.process(injector, elements);
       stopwatch.resetAndLog("Binding creation");
 

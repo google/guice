@@ -54,10 +54,17 @@ final class BindingProcessor extends AbstractProcessor {
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final Initializer initializer;
   private final List<Runnable> uninitializedBindings = Lists.newArrayList();
+  
+  enum Phase { PASS_ONE, PASS_TWO; }
+  private Phase phase;
 
   BindingProcessor(Errors errors, Initializer initializer) {
     super(errors);
     this.initializer = initializer;
+  }
+  
+  void setPhase(Phase phase) {
+    this.phase = phase;
   }
 
   @Override public <T> Boolean visit(Binding<T> command) {
@@ -86,8 +93,8 @@ final class BindingProcessor extends AbstractProcessor {
     final Scoping scoping = Scoping.makeInjectable(
         ((BindingImpl<?>) command).getScoping(), injector, errors);
 
-    command.acceptTargetVisitor(new BindingTargetVisitor<T, Void>() {
-      public Void visit(ConstructorBinding<? extends T> binding) {
+    return command.acceptTargetVisitor(new BindingTargetVisitor<T, Boolean>() {
+      public Boolean visit(ConstructorBinding<? extends T> binding) {
         try {
           ConstructorBindingImpl<T> onInjector = ConstructorBindingImpl.create(injector, key, 
               binding.getConstructor(), source, scoping, errors, false);
@@ -97,10 +104,10 @@ final class BindingProcessor extends AbstractProcessor {
           errors.merge(e.getErrors());
           putBinding(invalidBinding(injector, key, source));
         }
-        return null;
+        return true;
       }
 
-      public Void visit(InstanceBinding<? extends T> binding) {
+      public Boolean visit(InstanceBinding<? extends T> binding) {
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         T instance = binding.getInstance();
         Initializable<T> ref = initializer.requestInjection(
@@ -110,10 +117,10 @@ final class BindingProcessor extends AbstractProcessor {
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new InstanceBindingImpl<T>(injector, key, source, scopedFactory, injectionPoints,
             instance));
-        return null;
+        return true;
       }
 
-      public Void visit(ProviderInstanceBinding<? extends T> binding) {
+      public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
         Provider<? extends T> provider = binding.getProviderInstance();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<Provider<? extends T>> initializable = initializer
@@ -123,10 +130,10 @@ final class BindingProcessor extends AbstractProcessor {
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scoping,
             provider, injectionPoints));
-        return null;
+        return true;
       }
 
-      public Void visit(ProviderKeyBinding<? extends T> binding) {
+      public Boolean visit(ProviderKeyBinding<? extends T> binding) {
         Key<? extends javax.inject.Provider<? extends T>> providerKey = binding.getProviderKey();
         BoundProviderFactory<T> boundProviderFactory
             = new BoundProviderFactory<T>(injector, providerKey, source);
@@ -135,10 +142,10 @@ final class BindingProcessor extends AbstractProcessor {
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);
         putBinding(new LinkedProviderBindingImpl<T>(
             injector, key, source, scopedFactory, scoping, providerKey));
-        return null;
+        return true;
       }
 
-      public Void visit(LinkedKeyBinding<? extends T> binding) {
+      public Boolean visit(LinkedKeyBinding<? extends T> binding) {
         Key<? extends T> linkedKey = binding.getLinkedKey();
         if (key.equals(linkedKey)) {
           errors.recursiveBinding();
@@ -150,10 +157,10 @@ final class BindingProcessor extends AbstractProcessor {
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(
             new LinkedBindingImpl<T>(injector, key, source, scopedFactory, scoping, linkedKey));
-        return null;
+        return true;
       }
 
-      public Void visit(UntargettedBinding<? extends T> untargetted) {
+      public Boolean visit(UntargettedBinding<? extends T> untargetted) {        
         // Error: Missing implementation.
         // Example: bind(Date.class).annotatedWith(Red.class);
         // We can't assume abstract types aren't injectable. They may have an
@@ -161,7 +168,12 @@ final class BindingProcessor extends AbstractProcessor {
         if (key.getAnnotationType() != null) {
           errors.missingImplementation(key);
           putBinding(invalidBinding(injector, key, source));
-          return null;
+          return true;
+        }
+
+        // We want to do UntargettedBindings in the second pass.
+        if (phase == Phase.PASS_ONE) {
+          return false;
         }
 
         // This cast is safe after the preceeding check.
@@ -175,18 +187,18 @@ final class BindingProcessor extends AbstractProcessor {
           putBinding(invalidBinding(injector, key, source));
         }
 
-        return null;
+        return true;
       }
 
-      public Void visit(ExposedBinding<? extends T> binding) {
+      public Boolean visit(ExposedBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visit(ConvertedConstantBinding<? extends T> binding) {
+      public Boolean visit(ConvertedConstantBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
-      public Void visit(ProviderBinding<? extends T> binding) {
+      public Boolean visit(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
 
@@ -202,11 +214,15 @@ final class BindingProcessor extends AbstractProcessor {
         });
       }
     });
-
-    return true;
   }
 
   @Override public Boolean visit(PrivateElements privateElements) {
+    // Because we do two passes, we have to ignore the PrivateElements in the second
+    // pass.  Otherwise we end up calling bindExposed twice for each one.
+    if (phase == Phase.PASS_TWO) {
+      return false;
+    }
+    
     for (Key<?> key : privateElements.getExposedKeys()) {
       bindExposed(privateElements, key);
     }

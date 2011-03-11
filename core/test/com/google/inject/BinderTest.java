@@ -268,7 +268,82 @@ public class BinderTest extends TestCase {
     assertSame(strings, injector.getInstance(new Key<String[]>() {}));
     assertSame(strings, injector.getInstance(String[].class));
   }
+  
+  /**
+   * Binding something to two different things should give an error.
+   */
+  public void testSettingBindingTwice() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(String.class).toInstance("foo");
+          bind(String.class).toInstance("bar");
+        }
+      });
+      fail();
+    } catch(CreationException expected) {
+      assertContains(expected.getMessage(),
+        "1) A binding to java.lang.String was already configured at " + getClass().getName(),
+        "at " + getClass().getName(), ".configure(BinderTest.java:");
+      assertContains(expected.getMessage(), "1 error");
+    }
+  }
+  
+  /**
+   * Binding an @ImplementedBy thing to something else should also fail.
+   */
+  public void testSettingAtImplementedByTwice() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(HasImplementedBy1.class);
+          bind(HasImplementedBy1.class).toInstance(new HasImplementedBy1() {});
+        }
+      });
+      fail();
+    } catch(CreationException expected) {
+      expected.printStackTrace();
+      assertContains(expected.getMessage(),
+        "1) A binding to " + HasImplementedBy1.class.getName()
+        + " was already configured at " + getClass().getName(),
+        "at " + getClass().getName(), ".configure(BinderTest.java:");
+      assertContains(expected.getMessage(), "1 error");
+    }
+  }
 
+  /**
+   * See issue 614, Problem One
+   * http://code.google.com/p/google-guice/issues/detail?id=614
+   */
+  public void testJitDependencyDoesntBlockOtherExplicitBindings() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(HasImplementedByThatNeedsAnotherImplementedBy.class);
+        bind(HasImplementedBy1.class).toInstance(new HasImplementedBy1() {});
+      }
+    });
+    injector.getAllBindings(); // just validate it doesn't throw.
+    // Also validate that we're using the explicit (and not @ImplementedBy) implementation
+    assertFalse(injector.getInstance(HasImplementedBy1.class) instanceof ImplementsHasImplementedBy1);
+  }
+  
+  /**
+   * See issue 614, Problem Two
+   * http://code.google.com/p/google-guice/issues/detail?id=614
+   */
+  public void testJitDependencyCanUseExplicitDependencies() {
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(HasImplementedByThatWantsExplicit.class);
+        bind(JustAnInterface.class).toInstance(new JustAnInterface() {});
+      }
+    });
+  }
+  
   /**
    * Untargetted bindings should follow @ImplementedBy and @ProvidedBy
    * annotations if they exist. Otherwise the class should be constructed
@@ -423,6 +498,28 @@ public class BinderTest extends TestCase {
   static class ExtendsHasImplementedBy2 extends HasImplementedBy2 {}
 
   static class JustAClass {}
+  
+  @ImplementedBy(ImplementsHasImplementedByThatNeedsAnotherImplementedBy.class)
+  static interface HasImplementedByThatNeedsAnotherImplementedBy {
+  }
+  
+  static class ImplementsHasImplementedByThatNeedsAnotherImplementedBy
+    implements HasImplementedByThatNeedsAnotherImplementedBy {
+    @Inject 
+    ImplementsHasImplementedByThatNeedsAnotherImplementedBy(
+        HasImplementedBy1 h1n1) {}                             
+  }
+  
+  @ImplementedBy(ImplementsHasImplementedByThatWantsExplicit.class)
+  static interface HasImplementedByThatWantsExplicit {    
+  }
+  
+  static class ImplementsHasImplementedByThatWantsExplicit
+      implements HasImplementedByThatWantsExplicit {
+    @Inject ImplementsHasImplementedByThatWantsExplicit(JustAnInterface jai) {}
+  }
+  
+  static interface JustAnInterface {}
 
 
 //  public void testBindInterfaceWithoutImplementation() {
