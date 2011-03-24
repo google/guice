@@ -118,7 +118,10 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
-    expect(request.getServletPath()).andReturn("/");
+    expect(request.getRequestURI()).andReturn("/");
+    expect(request.getContextPath())
+        .andReturn("")
+        .anyTimes();
     expect(request.getMethod()).andReturn("GET");
 
     FilterChain filterChain = createMock(FilterChain.class);
@@ -157,7 +160,11 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
-    expect(request.getServletPath()).andReturn("/");
+    expect(request.getRequestURI()).andReturn("/");
+    expect(request.getContextPath())
+        .andReturn("")
+        .anyTimes();
+
     expect(request.getMethod()).andReturn("GET");
     FilterChain filterChain = createMock(FilterChain.class);
     

@@ -156,7 +156,8 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
       ServletResponse servletResponse, FilterChainInvocation filterChainInvocation)
       throws IOException, ServletException {
 
-    final String path = ((HttpServletRequest) servletRequest).getServletPath();
+    final HttpServletRequest request = (HttpServletRequest) servletRequest;
+    final String path = request.getRequestURI().substring(request.getContextPath().length());
 
     if (shouldFilter(path)) {
       filter.get()

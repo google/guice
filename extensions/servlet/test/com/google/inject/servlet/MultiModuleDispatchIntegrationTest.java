@@ -72,9 +72,12 @@ public class MultiModuleDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
             .andReturn("/index.html")
             .anyTimes();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //dispatch request
     replay(requestMock);

@@ -85,8 +85,11 @@ public class InjectedFilterPipelineTest extends TestCase {
         .andReturn(servletContext)
         .once();
 
-    expect(request.getServletPath())
+    expect(request.getRequestURI())
         .andReturn("/non-jsp/login.html") // use a path that will fail in injector2
+        .anyTimes();
+    expect(request.getContextPath())
+        .andReturn("")
         .anyTimes();
 
     //at the end, proceed down webapp's normal filter chain
@@ -109,7 +112,7 @@ public class InjectedFilterPipelineTest extends TestCase {
 
 
 
-    
+
     // reset mocks and run them against the other injector
     reset(filterConfig, servletContext, request, proceedingFilterChain);
 
@@ -121,14 +124,17 @@ public class InjectedFilterPipelineTest extends TestCase {
     expect(filterConfig.getServletContext())
         .andReturn(servletContext)
         .once();
-    expect(request.getServletPath())
+    expect(request.getRequestURI())
             .andReturn("/public/login/login.jsp") // use a path that will fail in injector1
             .anyTimes();
+    expect(request.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //at the end, proceed down webapp's normal filter chain
     proceedingFilterChain2.doFilter(isA(HttpServletRequest.class), (ServletResponse) isNull());
     expectLastCall().once();
-    
+
     // Never fire on this pipeline
     replay(filterConfig, servletContext, request, proceedingFilterChain2, proceedingFilterChain);
 

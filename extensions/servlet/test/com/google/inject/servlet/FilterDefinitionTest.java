@@ -106,7 +106,10 @@ public class FilterDefinitionTest extends TestCase {
         .andReturn(mockFilter)
         .anyTimes();
 
-    expect(request.getServletPath()).andReturn("/index.html");
+    expect(request.getRequestURI()).andReturn("/index.html");
+    expect(request.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     replay(injector, binding, request);
 
@@ -163,7 +166,10 @@ public class FilterDefinitionTest extends TestCase {
         .andReturn(mockFilter)
         .anyTimes();
 
-    expect(request.getServletPath()).andReturn("/index.html");
+    expect(request.getRequestURI()).andReturn("/index.html");
+    expect(request.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     replay(injector, binding, request);
 

@@ -70,8 +70,11 @@ public class FilterPipelineTest extends TestCase {
         .andReturn(servletContext)
         .once();
 
-    expect(request.getServletPath())
+    expect(request.getRequestURI())
         .andReturn("/public/login.jsp")
+        .anyTimes();
+    expect(request.getContextPath())
+        .andReturn("")
         .anyTimes();
 
     //at the end, proceed down webapp's normal filter chain

@@ -72,12 +72,12 @@ public class FilterDispatchIntegrationTest extends TestCase {
     // create ourselves a mock request with test URI
     HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
-            .andReturn("/index.html")
-            .anyTimes();
     expect(requestMock.getRequestURI())
             .andReturn("/index.html")
             .anyTimes();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     requestMock.setAttribute(REQUEST_DISPATCHER_REQUEST, true);
     requestMock.removeAttribute(REQUEST_DISPATCHER_REQUEST);
@@ -128,9 +128,12 @@ public class FilterDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
             .andReturn("/index.xhtml")
             .anyTimes();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //dispatch request
     FilterChain filterChain = control.createMock(FilterChain.class);
@@ -166,9 +169,12 @@ public class FilterDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
             .andReturn("/index")
             .anyTimes();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     // dispatch request
     FilterChain filterChain = control.createMock(FilterChain.class);
@@ -211,7 +217,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
         throws ServletException, IOException {
       String requestUri = httpServletRequest.getRequestURI();
       processedUris.add(requestUri);
-      
+
       // If the client is requesting /index.html then we forward to /forwarded.html
       if (FORWARD_FROM.equals(requestUri)) {
         httpServletRequest.getRequestDispatcher(FORWARD_TO)

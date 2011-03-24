@@ -75,9 +75,12 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
         .andReturn("/index.html")
         .times(1);
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //dispatch request
     replay(requestMock);
@@ -112,9 +115,12 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
         .andReturn("/index.html")
         .times(3);
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //dispatch request
     replay(requestMock);
@@ -152,9 +158,12 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
     //create ourselves a mock request with test URI
     HttpServletRequest requestMock = createMock(HttpServletRequest.class);
 
-    expect(requestMock.getServletPath())
+    expect(requestMock.getRequestURI())
         .andReturn("/index.html")
         .times(2);
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
 
     //dispatch request
     replay(requestMock);
