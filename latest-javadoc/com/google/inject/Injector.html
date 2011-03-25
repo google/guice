@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../favicon.ico" />
+<title>
+
+  Injector
+
+
+| Guice
+
+</title>
+<link href="../../../../javadoc/assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../javadoc/assets/customizations.css" rel="stylesheet" type="text/css" />
+<script src="../../../../javadoc/assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../javadoc/assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../javadoc/assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../javadoc/assets/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../", "../../../../javadoc/assets/");
+</script>
+<script src="../../../../javadoc/assets/android-developer-reference.js" type="text/javascript"></script>
+<script src="../../../../javadoc/assets/navtree_data.js" type="text/javascript"></script>
+<script src="../../../../javadoc/assets/customizations.js" type="text/javascript"></script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+<body class="Guice_1.0">
+
+<div id="header">
+    <div id="headerLeft">
+    
+      <span id="masthead-title">Guice</span>
+    
+    </div>
+    <div id="headerRight">
+      
+  <div id="search" >
+      <div id="searchForm">
+          <form accept-charset="utf-8" class="gsc-search-box" 
+                onsubmit="return submit_search()">
+            <table class="gsc-search-box" cellpadding="0" cellspacing="0"><tbody>
+                <tr>
+                  <td class="gsc-input">
+                    <input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+                      title="search developer docs" name="q"
+                      value="search developer docs"
+                      onFocus="search_focus_changed(this, true)"
+                      onBlur="search_focus_changed(this, false)"
+                      onkeydown="return search_changed(event, true, '../../../')"
+                      onkeyup="return search_changed(event, false, '../../../')" />
+                  <div id="search_filtered_div" class="no-display">
+                      <table id="search_filtered" cellspacing=0>
+                      </table>
+                  </div>
+                  </td>
+                  <td class="gsc-search-button">
+                    <input type="submit" value="Search" title="search" id="search-button" class="gsc-search-button" />
+                  </td>
+                  <td class="gsc-clear-button">
+                    <div title="clear results" class="gsc-clear-button">&nbsp;</div>
+                  </td>
+                </tr></tbody>
+              </table>
+          </form>
+      </div><!-- searchForm -->
+  </div><!-- search -->
+      
+        
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+      
+    </div>
+</div><!-- header -->
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links"><nobr>
+                <a href="../../../packages.html"  >Package Index</a> | 
+                <a href="../../../classes.html" >Class Index</a></nobr>
+              </div>
+              <ul>
+                
+    <li class="selected api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/package-summary.html">com.google.inject</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/binder/package-summary.html">com.google.inject.binder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/jndi/package-summary.html">com.google.inject.jndi</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/matcher/package-summary.html">com.google.inject.matcher</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/name/package-summary.html">com.google.inject.name</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../com/google/inject/persist/package-summary.html">com.google.inject.persist</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../com/google/inject/persist/finder/package-summary.html">com.google.inject.persist.finder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../com/google/inject/persist/jpa/package-summary.html">com.google.inject.persist.jpa</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../com/google/inject/tools/jmx/package-summary.html">com.google.inject.tools.jmx</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../com/google/inject/util/package-summary.html">com.google.inject.util</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Binder.html">Binder</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;</li>
+          <li class="selected api apilevel-Guice_1.0"><a href="../../../com/google/inject/Injector.html">Injector</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/MembersInjector.html">MembersInjector</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Module.html">Module</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/PrivateBinder.html">PrivateBinder</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Scope.html">Scope</a></li>
+      </ul>
+    </li>
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/AbstractModule.html">AbstractModule</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Guice.html">Guice</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/PrivateModule.html">PrivateModule</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Scopes.html">Scopes</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt;</li>
+      </ul>
+    </li>
+              
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/BindingAnnotation.html">BindingAnnotation</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/Exposed.html">Exposed</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/ImplementedBy.html">ImplementedBy</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Inject.html">Inject</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/ProvidedBy.html">ProvidedBy</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/Provides.html">Provides</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/ScopeAnnotation.html">ScopeAnnotation</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Singleton.html">Singleton</a></li>
+      </ul>
+    </li>
+              
+    <li><h2>Enums</h2>
+      <ul>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/Stage.html">Stage</a></li>
+      </ul>
+    </li>
+              
+    <li><h2>Exceptions</h2>
+      <ul>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></li>
+          <li class="api apilevel-Guice_1.0"><a href="../../../com/google/inject/CreationException.html">CreationException</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/OutOfScopeException.html">OutOfScopeException</a></li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../com/google/inject/ProvisionException.html">ProvisionException</a></li>
+      </ul>
+    </li>
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links"><nobr>
+            <a href="../../../packages.html"  >Package Index</a> | 
+            <a href="../../../classes.html" >Class Index</a></nobr>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+      if (!isMobile) {
+        $("<a href='#' id='nav-swap' onclick='swapNav();return false;' style='font-size:10px;line-height:9px;margin-left:1em;text-decoration:none;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>").appendTo("#side-nav");
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../");
+        } else {
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        }
+        $("#swapper").css({borderBottom:"2px solid #aaa"});
+      } else {
+        swapNav(); // tree view should be used on mobile
+      }
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+
+<div class="sum-details-links">
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+     
+    
+    interface
+<h1>Injector</h1>
+
+
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Guice_1.0">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.Injector</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>Builds the graphs of objects that make up your application. The injector tracks the dependencies
+ for each type and uses bindings to inject them. This is the core of Guice, although you rarely
+ interact with it directly. This "behind-the-scenes" operation is what distinguishes dependency
+ injection from its cousin, the service locator pattern.
+
+ <p>Contains several default bindings:
+
+ <ul>
+ <li>This <code><a href="../../../com/google/inject/Injector.html">Injector</a></code> instance itself
+ <li>A <code>Provider&lt;T&gt;</code> for each binding of type <code>T</code>
+ <li>The java.util.logging.Logger for the class being injected
+ <li>The <code><a href="../../../com/google/inject/Stage.html">Stage</a></code> in which the Injector was created
+ </ul>
+
+ Injectors are created using the facade class <code><a href="../../../com/google/inject/Guice.html">Guice</a></code>.
+
+ <p>An injector can also <code><a href="../../../com/google/inject/Injector.html#injectMembers(java.lang.Object)">inject the dependencies</a></code> of
+ already-constructed instances. This can be used to interoperate with objects created by other
+ frameworks or services.
+
+ <p>Injectors can be <code><a href="../../../com/google/inject/Injector.html#createChildInjector(java.lang.Iterable<? extends com.google.inject.Module>)">hierarchical</a></code>. Child injectors inherit
+ the configuration of their parent injectors, but the converse does not hold.
+
+ <p>The injector's <code><a href="../../../com/google/inject/Injector.html#getBindings()">internal bindings</a></code> are available for introspection. This
+ enables tools and extensions to operate on an injector reflectively.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../com/google/inject/Injector.html">Injector</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#createChildInjector(com.google.inject.Module...)">createChildInjector</a></span>(<a href="../../../com/google/inject/Module.html">Module...</a> modules)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new injector that inherits all state from this injector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../com/google/inject/Injector.html">Injector</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#createChildInjector(java.lang.Iterable<? extends com.google.inject.Module>)">createChildInjector</a></span>(Iterable&lt;?&nbsp;extends&nbsp;<a href="../../../com/google/inject/Module.html">Module</a>&gt; modules)</nobr>
+        
+        <div class="jd-descrdiv">Returns a new injector that inherits all state from this injector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            List&lt;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#findBindingsByType(com.google.inject.TypeLiteral<T>)">findBindingsByType</a></span>(<a href="../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; type)</nobr>
+        
+        <div class="jd-descrdiv">Returns all explicit bindings for <code>type</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Map&lt;<a href="../../../com/google/inject/Key.html">Key</a>&lt;?&gt;,&nbsp;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getAllBindings()">getAllBindings</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns a snapshot of this injector's bindings, <strong>both explicit and
+ just-in-time</strong>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getBinding(com.google.inject.Key<T>)">getBinding</a></span>(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</nobr>
+        
+        <div class="jd-descrdiv">Returns the binding for the given injection key.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getBinding(java.lang.Class<T>)">getBinding</a></span>(Class&lt;T&gt; type)</nobr>
+        
+        <div class="jd-descrdiv">Returns the binding for the given type.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Map&lt;<a href="../../../com/google/inject/Key.html">Key</a>&lt;?&gt;,&nbsp;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getBindings()">getBindings</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns this injector's <strong>explicit</strong> bindings.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getExistingBinding(com.google.inject.Key<T>)">getExistingBinding</a></span>(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</nobr>
+        
+        <div class="jd-descrdiv">Returns the binding if it already exists, or null if does not exist.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getInstance(com.google.inject.Key<T>)">getInstance</a></span>(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</nobr>
+        
+        <div class="jd-descrdiv">Returns the appropriate instance for the given injection key; equivalent to <code>getProvider(key).get()</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getInstance(java.lang.Class<T>)">getInstance</a></span>(Class&lt;T&gt; type)</nobr>
+        
+        <div class="jd-descrdiv">Returns the appropriate instance for the given injection type; equivalent to <code>getProvider(type).get()</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/MembersInjector.html">MembersInjector</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getMembersInjector(com.google.inject.TypeLiteral<T>)">getMembersInjector</a></span>(<a href="../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; typeLiteral)</nobr>
+        
+        <div class="jd-descrdiv">Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type <code>T</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/MembersInjector.html">MembersInjector</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getMembersInjector(java.lang.Class<T>)">getMembersInjector</a></span>(Class&lt;T&gt; type)</nobr>
+        
+        <div class="jd-descrdiv">Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type <code>T</code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../com/google/inject/Injector.html">Injector</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getParent()">getParent</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns this injector's parent, or <code>null</code> if this is a top-level injector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getProvider(com.google.inject.Key<T>)">getProvider</a></span>(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</nobr>
+        
+        <div class="jd-descrdiv">Returns the provider used to obtain instances for the given injection key.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            &lt;T&gt;
+            <a href="../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getProvider(java.lang.Class<T>)">getProvider</a></span>(Class&lt;T&gt; type)</nobr>
+        
+        <div class="jd-descrdiv">Returns the provider used to obtain instances for the given type.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Map&lt;Class&lt;?&nbsp;extends&nbsp;Annotation&gt;,&nbsp;<a href="../../../com/google/inject/Scope.html">Scope</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getScopeBindings()">getScopeBindings</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns a map containing all scopes in the injector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Set&lt;<a href="../../../com/google/inject/spi/TypeConverterBinding.html">TypeConverterBinding</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#getTypeConverterBindings()">getTypeConverterBindings</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns a set containing all type converter bindings in the injector.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_1.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../com/google/inject/Injector.html#injectMembers(java.lang.Object)">injectMembers</a></span>(Object instance)</nobr>
+        
+        <div class="jd-descrdiv">Injects dependencies into the fields and methods of <code>instance</code>.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="createChildInjector(com.google.inject.Module...)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Injector.html">Injector</a>
+      </span>
+      <span class="sympad">createChildInjector</span>
+      <span class="normal">(<a href="../../../com/google/inject/Module.html">Module...</a> modules)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new injector that inherits all state from this injector. All bindings, scopes,
+ interceptors and type converters are inherited -- they are visible to the child injector.
+ Elements of the child injector are not visible to its parent.
+
+ <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
+ whenever possible. This allows for scoped instances to be shared between injectors. Use
+ explicit bindings to prevent bindings from being shared with the parent injector.
+
+ <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
+ bindings. The lone exception is the key for <code>Injector.class</code>, which is bound by each
+ injector to itself.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="createChildInjector(java.lang.Iterable<? extends com.google.inject.Module>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Injector.html">Injector</a>
+      </span>
+      <span class="sympad">createChildInjector</span>
+      <span class="normal">(Iterable&lt;?&nbsp;extends&nbsp;<a href="../../../com/google/inject/Module.html">Module</a>&gt; modules)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a new injector that inherits all state from this injector. All bindings, scopes,
+ interceptors and type converters are inherited -- they are visible to the child injector.
+ Elements of the child injector are not visible to its parent.
+
+ <p>Just-in-time bindings created for child injectors will be created in an ancestor injector
+ whenever possible. This allows for scoped instances to be shared between injectors. Use
+ explicit bindings to prevent bindings from being shared with the parent injector.  Optional
+ injections in just-in-time bindings (created in the parent injector) may be silently
+ ignored if the optional dependencies are from the child injector.
+
+ <p>No key may be bound by both an injector and one of its ancestors. This includes just-in-time
+ bindings. The lone exception is the key for <code>Injector.class</code>, which is bound by each
+ injector to itself.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="findBindingsByType(com.google.inject.TypeLiteral<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        List&lt;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;&gt;
+      </span>
+      <span class="sympad">findBindingsByType</span>
+      <span class="normal">(<a href="../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; type)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns all explicit bindings for <code>type</code>.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getAllBindings()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Map&lt;<a href="../../../com/google/inject/Key.html">Key</a>&lt;?&gt;,&nbsp;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;
+      </span>
+      <span class="sympad">getAllBindings</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a snapshot of this injector's bindings, <strong>both explicit and
+ just-in-time</strong>. The returned map is immutable; it contains only the bindings that were
+ present when <code>getAllBindings()</code> was invoked. Subsequent calls may return a map with
+ additional just-in-time bindings.
+
+ <p>The returned map does not include bindings inherited from a <code><a href="../../../com/google/inject/Injector.html#getParent()">parent
+ injector</a></code>, should one exist.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getBinding(com.google.inject.Key<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getBinding</span>
+      <span class="normal">(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the binding for the given injection key. This will be an explicit bindings if the key
+ was bound explicitly by a module, or an implicit binding otherwise. The implicit binding will
+ be created if necessary.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the binding.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBinding(java.lang.Class<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getBinding</span>
+      <span class="normal">(Class&lt;T&gt; type)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the binding for the given type. This will be an explicit bindings if the injection key
+ was bound explicitly by a module, or an implicit binding otherwise. The implicit binding will
+ be created if necessary.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the binding.</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getBindings()"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Map&lt;<a href="../../../com/google/inject/Key.html">Key</a>&lt;?&gt;,&nbsp;<a href="../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;
+      </span>
+      <span class="sympad">getBindings</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns this injector's <strong>explicit</strong> bindings.
+
+ <p>The returned map does not include bindings inherited from a <code><a href="../../../com/google/inject/Injector.html#getParent()">parent
+ injector</a></code>, should one exist. The returned map is guaranteed to iterate (for example, with
+ its <code><a href="null#entrySet()">entrySet()</a></code> iterator) in the order of insertion. In other words, the order in
+ which bindings appear in user Modules.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getExistingBinding(com.google.inject.Key<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getExistingBinding</span>
+      <span class="normal">(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the binding if it already exists, or null if does not exist. Unlike
+ <code><a href="../../../com/google/inject/Injector.html#getBinding(com.google.inject.Key<T>)">getBinding(Key)</a></code>, this does not attempt to create just-in-time bindings
+ for keys that aren't bound.
+ 
+ <p> This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance(com.google.inject.Key<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        T
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the appropriate instance for the given injection key; equivalent to <code>getProvider(key).get()</code>. When feasible, avoid using this method, in favor of having Guice
+ inject your dependencies ahead of time.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the provider.</td>
+        </tr>  
+        <tr>
+            <th><a href="../../../com/google/inject/ProvisionException.html">ProvisionException</a></td>
+            <td>if there was a runtime failure while providing an instance.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance(java.lang.Class<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        T
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">(Class&lt;T&gt; type)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the appropriate instance for the given injection type; equivalent to <code>getProvider(type).get()</code>. When feasible, avoid using this method, in favor of having Guice
+ inject your dependencies ahead of time.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the provider.</td>
+        </tr>  
+        <tr>
+            <th><a href="../../../com/google/inject/ProvisionException.html">ProvisionException</a></td>
+            <td>if there was a runtime failure while providing an instance.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getMembersInjector(com.google.inject.TypeLiteral<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/MembersInjector.html">MembersInjector</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getMembersInjector</span>
+      <span class="normal">(<a href="../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;T&gt; typeLiteral)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type <code>T</code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>typeLiteral</td>
+          <td>type to get members injector for</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../com/google/inject/Binder.html#getMembersInjector(com.google.inject.TypeLiteral<T>)">for an alternative that offers up front error
+  detection</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getMembersInjector(java.lang.Class<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/MembersInjector.html">MembersInjector</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getMembersInjector</span>
+      <span class="normal">(Class&lt;T&gt; type)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type <code>T</code>. When feasible, use <code><a href="../../../com/google/inject/Binder.html#getMembersInjector(com.google.inject.TypeLiteral<T>)">getMembersInjector(TypeLiteral)</a></code>
+ instead to get increased up front error detection.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>type</td>
+          <td>type to get members injector for</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../com/google/inject/Binder.html#getMembersInjector(java.lang.Class<T>)">for an alternative that offers up front error
+  detection</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getParent()"></A>
+
+<div class="jd-details api apilevel-Guice_2.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Injector.html">Injector</a>
+      </span>
+      <span class="sympad">getParent</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns this injector's parent, or <code>null</code> if this is a top-level injector.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getProvider(com.google.inject.Key<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getProvider</span>
+      <span class="normal">(<a href="../../../com/google/inject/Key.html">Key</a>&lt;T&gt; key)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the provider used to obtain instances for the given injection key. When feasible, avoid
+ using this method, in favor of having Guice inject your dependencies ahead of time.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the provider.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../com/google/inject/Binder.html#getProvider(com.google.inject.Key<T>)">for an alternative that offers up front error detection
+</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getProvider(java.lang.Class<T>)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getProvider</span>
+      <span class="normal">(Class&lt;T&gt; type)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the provider used to obtain instances for the given type. When feasible, avoid
+ using this method, in favor of having Guice inject your dependencies ahead of time.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="../../../com/google/inject/ConfigurationException.html">ConfigurationException</a></td>
+            <td>if this injector cannot find or create the provider.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../com/google/inject/Binder.html#getProvider(java.lang.Class<T>)">for an alternative that offers up front error detection
+</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getScopeBindings()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Map&lt;Class&lt;?&nbsp;extends&nbsp;Annotation&gt;,&nbsp;<a href="../../../com/google/inject/Scope.html">Scope</a>&gt;
+      </span>
+      <span class="sympad">getScopeBindings</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a map containing all scopes in the injector. The maps keys are scoping annotations
+ like <code>Singleton.class</code>, and the values are scope instances, such as <code>Scopes.SINGLETON</code>. The returned map is immutable.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getTypeConverterBindings()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Set&lt;<a href="../../../com/google/inject/spi/TypeConverterBinding.html">TypeConverterBinding</a>&gt;
+      </span>
+      <span class="sympad">getTypeConverterBindings</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a set containing all type converter bindings in the injector. The returned set is
+ immutable.
+
+ <p>This method is part of the Guice SPI and is intended for use by tools and extensions.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="injectMembers(java.lang.Object)"></A>
+
+<div class="jd-details api apilevel-Guice_1.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">injectMembers</span>
+      <span class="normal">(Object instance)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../guide/appendix/api-levels.html#levelGuice_1.0">API Level Guice_1.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Injects dependencies into the fields and methods of <code>instance</code>. Ignores the presence or
+ absence of an injectable constructor.
+
+ <p>Whenever Guice creates an instance, it performs this injection automatically (after first
+ performing constructor injection), so if you're able to let Guice create all your objects for
+ you, you'll never need to use this method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>instance</td>
+          <td>to inject members on</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../com/google/inject/Binder.html#getMembersInjector(java.lang.Class<T>)">for a preferred alternative that supports checks before
+  run time
+</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer">
+Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize android-developer-docs.js */
+</script>
+
+</body>
+</html>
