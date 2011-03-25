@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
+<title>
+
+  MultibinderBinding
+
+
+| Guice
+
+</title>
+<link href="../../../../../javadoc/assets/android-developer-docs.css" rel="stylesheet" type="text/css" />
+<link href="../../../../../javadoc/assets/customizations.css" rel="stylesheet" type="text/css" />
+<script src="../../../../../javadoc/assets/search_autocomplete.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/jquery-resizable.min.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/android-developer-docs.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/prettify.js" type="text/javascript"></script>
+<script type="text/javascript">
+  setToRoot("../../../../", "../../../../../javadoc/assets/");
+</script>
+<script src="../../../../../javadoc/assets/android-developer-reference.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/navtree_data.js" type="text/javascript"></script>
+<script src="../../../../../javadoc/assets/customizations.js" type="text/javascript"></script>
+<noscript>
+  <style type="text/css">
+    html,body{overflow:auto;}
+    #body-content{position:relative; top:0;}
+    #doc-content{overflow:visible;border-left:3px solid #666;}
+    #side-nav{padding:0;}
+    #side-nav .toggle-list ul {display:block;}
+    #resize-packages-nav{border-bottom:3px solid #666;}
+  </style>
+</noscript>
+</head>
+
+<body class="Guice_3.0">
+
+<div id="header">
+    <div id="headerLeft">
+    
+      <span id="masthead-title">Guice</span>
+    
+    </div>
+    <div id="headerRight">
+      
+  <div id="search" >
+      <div id="searchForm">
+          <form accept-charset="utf-8" class="gsc-search-box" 
+                onsubmit="return submit_search()">
+            <table class="gsc-search-box" cellpadding="0" cellspacing="0"><tbody>
+                <tr>
+                  <td class="gsc-input">
+                    <input id="search_autocomplete" class="gsc-input" type="text" size="33" autocomplete="off"
+                      title="search developer docs" name="q"
+                      value="search developer docs"
+                      onFocus="search_focus_changed(this, true)"
+                      onBlur="search_focus_changed(this, false)"
+                      onkeydown="return search_changed(event, true, '../../../../')"
+                      onkeyup="return search_changed(event, false, '../../../../')" />
+                  <div id="search_filtered_div" class="no-display">
+                      <table id="search_filtered" cellspacing=0>
+                      </table>
+                  </div>
+                  </td>
+                  <td class="gsc-search-button">
+                    <input type="submit" value="Search" title="search" id="search-button" class="gsc-search-button" />
+                  </td>
+                  <td class="gsc-clear-button">
+                    <div title="clear results" class="gsc-clear-button">&nbsp;</div>
+                  </td>
+                </tr></tbody>
+              </table>
+          </form>
+      </div><!-- searchForm -->
+  </div><!-- search -->
+      
+        
+  <div id="api-level-toggle">
+    <input type="checkbox" id="apiLevelCheckbox" onclick="toggleApiLevelSelector(this)" />
+    <label for="apiLevelCheckbox" class="disabled">Filter by API Level: </label>
+    <select id="apiLevelSelector">
+      <!-- option elements added by buildApiLevelSelector() -->
+    </select>
+  </div>
+  <script>
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0' ];
+    buildApiLevelSelector();
+    addLoadEvent(changeApiLevel);
+  </script>
+
+
+      
+    </div>
+</div><!-- header -->
+
+
+  <div class="g-section g-tpl-240" id="body-content">
+    <div class="g-unit g-first side-nav-resizable" id="side-nav">
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav">
+              <div id="index-links"><nobr>
+                <a href="../../../../packages.html"  >Package Index</a> | 
+                <a href="../../../../classes.html" >Class Index</a></nobr>
+              </div>
+              <ul>
+                
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/package-summary.html">com.google.inject</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/binder/package-summary.html">com.google.inject.binder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/jndi/package-summary.html">com.google.inject.jndi</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/matcher/package-summary.html">com.google.inject.matcher</a></li>
+    <li class="selected api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/name/package-summary.html">com.google.inject.name</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/package-summary.html">com.google.inject.persist</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/finder/package-summary.html">com.google.inject.persist.finder</a></li>
+    <li class="api apilevel-Guice_3.0">
+  <a href="../../../../com/google/inject/persist/jpa/package-summary.html">com.google.inject.persist.jpa</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
+    <li class="api apilevel-Guice_1.0">
+  <a href="../../../../com/google/inject/tools/jmx/package-summary.html">com.google.inject.tools.jmx</a></li>
+    <li class="api apilevel-Guice_2.0">
+  <a href="../../../../com/google/inject/util/package-summary.html">com.google.inject.util</a></li>
+              </ul><br/>
+            </div> <!-- end packages -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav">
+            <ul>
+              
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html">MapBinderBinding</a>&lt;T&gt;</li>
+          <li class="selected api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html">MultibinderBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibindingsTargetVisitor.html">MultibindingsTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+      </ul>
+    </li>
+              
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/Multibinder.html">Multibinder</a>&lt;T&gt;</li>
+      </ul>
+    </li>
+              
+              
+              
+              
+            </ul><br/>
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none">
+          <div id="index-links"><nobr>
+            <a href="../../../../packages.html"  >Package Index</a> | 
+            <a href="../../../../classes.html" >Class Index</a></nobr>
+          </div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+    </div> <!-- end side-nav -->
+    <script>
+      if (!isMobile) {
+        $("<a href='#' id='nav-swap' onclick='swapNav();return false;' style='font-size:10px;line-height:9px;margin-left:1em;text-decoration:none;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>").appendTo("#side-nav");
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../../");
+        } else {
+          addLoadEvent(function() {
+            scrollIntoView("packages-nav");
+            scrollIntoView("classes-nav");
+          });
+        }
+        $("#swapper").css({borderBottom:"2px solid #aaa"});
+      } else {
+        swapNav(); // tree view should be used on mobile
+      }
+    </script>
+
+
+
+<div class="g-unit" id="doc-content">
+
+<div id="api-info-block">
+
+
+
+
+<div class="sum-details-links">
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+  
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+
+  
+  
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+     
+     
+    
+    interface
+<h1>MultibinderBinding</h1>
+
+
+
+  
+  
+  
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-Guice_3.0">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.multibindings.MultibinderBinding&lt;T&gt;</td>
+    </tr>
+    
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p>A binding for a Multibinder.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#containsElement(com.google.inject.spi.Element)">containsElement</a></span>(<a href="../../../../com/google/inject/spi/Element.html">Element</a> element)</nobr>
+        
+        <div class="jd-descrdiv">Returns true if this Multibinder uses the given Element.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getElementTypeLiteral()">getElementTypeLiteral</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the TypeLiteral that describes the type of elements in the set.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            List&lt;<a href="../../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getElements()">getElements</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns all bindings that make up the set.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getSetKey()">getSetKey</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns the key for the set.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_3.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#permitsDuplicates()">permitsDuplicates</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Returns true if the multibinder permits duplicates.</div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="containsElement(com.google.inject.spi.Element)"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        boolean
+      </span>
+      <span class="sympad">containsElement</span>
+      <span class="normal">(<a href="../../../../com/google/inject/spi/Element.html">Element</a> element)</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if this Multibinder uses the given Element. This will be true for bindings that
+ derive the elements of the set and other bindings that Multibinder uses internally. This will
+ work for MultibinderBindings retrieved from an injector and <code><a href="../../../../com/google/inject/spi/Elements.html#getElements(com.google.inject.Module...)">getElements(Module...)</a></code>.
+ Usually this is only necessary if you are working with elements retrieved from modules (without
+ an Injector), otherwise <code><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getElements()">getElements()</a></code> and <code><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#permitsDuplicates()">permitsDuplicates()</a></code> are better options.
+ <p>
+ If you need to introspect the details of the set, such as the values or if it permits
+ duplicates, it is necessary to pass the elements through an Injector and use
+ <code><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#getElements()">getElements()</a></code> and <code><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html#permitsDuplicates()">permitsDuplicates()</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getElementTypeLiteral()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../../com/google/inject/TypeLiteral.html">TypeLiteral</a>&lt;?&gt;
+      </span>
+      <span class="sympad">getElementTypeLiteral</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the TypeLiteral that describes the type of elements in the set.
+ <p>
+ The elements will always match the type Set's generic type. For example, if getSetKey returns a
+ key of <code>Set&lt;String></code>, then this will always return a
+ <code>TypeLiteral&lt;String></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getElements()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        List&lt;<a href="../../../../com/google/inject/Binding.html">Binding</a>&lt;?&gt;&gt;
+      </span>
+      <span class="sympad">getElements</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns all bindings that make up the set. This is only supported on bindings returned from an
+ injector. This will throw UnsupportedOperationException if it is called on an element
+ retrieved from <code><a href="../../../../com/google/inject/spi/Elements.html#getElements(com.google.inject.Module...)">getElements(Module...)</a></code>.
+ <p>
+ The elements will always match the type Set's generic type. For example, if getSetKey returns a
+ key of <code>Set&lt;String></code>, then this will always return a list of type
+ <code>List&lt;Binding&lt;String>></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getSetKey()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt;
+      </span>
+      <span class="sympad">getSetKey</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the key for the set. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="permitsDuplicates()"></A>
+
+<div class="jd-details api apilevel-Guice_3.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        boolean
+      </span>
+      <span class="sympad">permitsDuplicates</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_3.0">API Level Guice_3.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the multibinder permits duplicates. This is only supported on bindings returned
+ from an injector. This will throw UnsupportedOperationException if it is called on a
+ MultibinderBinding retrieved from <code><a href="../../../../com/google/inject/spi/Elements.html#getElements(com.google.inject.Module...)">getElements(Module...)</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer">
+Generated by <a href="http://code.google.com/p/doclava/">Doclava</a>.
+</div> <!-- end footer -->
+
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
+
+<script type="text/javascript">
+init(); /* initialize android-developer-docs.js */
+</script>
+
+</body>
+</html>
