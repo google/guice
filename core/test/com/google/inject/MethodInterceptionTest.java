@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.Iterables;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.only;
 import com.google.inject.spi.ConstructorBinding;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -234,4 +236,33 @@ public class MethodInterceptionTest extends TestCase {
   }
 
   public static final class NotInterceptable {}
+  
+  public void testInterceptingNonBridgeWorks() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Interface.class).to(Impl.class);
+        bindInterceptor(Matchers.any(), new AbstractMatcher<Method>() {
+          public boolean matches(Method t) {
+            return !t.isBridge() && t.getDeclaringClass() != Object.class;
+          }
+        }, new CountingInterceptor());
+      }
+    });
+    Interface intf = injector.getInstance(Interface.class);
+    assertEquals(0, count.get());
+    intf.aMethod(null);
+    assertEquals(1, count.get());
+  }
+  
+  static class ErasedType {}
+  static class RetType extends ErasedType {}  
+  static abstract class Superclass<T extends ErasedType> {
+      public T aMethod(T t) { return null; }
+  }
+  public interface Interface {
+      RetType aMethod(RetType obj);
+  }
+  public static class Impl extends Superclass<RetType> implements Interface {
+  }  
 }
