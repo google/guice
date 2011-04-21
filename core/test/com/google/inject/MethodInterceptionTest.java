@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.Iterables;
+import com.google.inject.internal.util.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.only;
@@ -264,5 +265,38 @@ public class MethodInterceptionTest extends TestCase {
       RetType aMethod(RetType obj);
   }
   public static class Impl extends Superclass<RetType> implements Interface {
-  }  
+  }
+  
+  public void testInterceptionOrder() {
+    final List<String> callList = Lists.newArrayList();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.any(), 
+          new NamedInterceptor("a", callList),
+          new NamedInterceptor("b", callList),
+          new NamedInterceptor("c", callList));
+      }
+    });
+
+    Interceptable interceptable = injector.getInstance(Interceptable.class);
+    assertEquals(0, callList.size());
+    interceptable.foo();
+    assertEquals(Arrays.asList("a", "b", "c"), callList);
+  }
+  
+  private final class NamedInterceptor implements MethodInterceptor {
+    private final String name;
+    final List<String> called;
+    
+    NamedInterceptor(String name, List<String> callList) {
+      this.name = name;
+      this.called = callList;
+    }
+    
+    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+      called.add(name);
+      return methodInvocation.proceed();
+    }
+  }
+  
 }

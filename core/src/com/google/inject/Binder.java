@@ -216,7 +216,8 @@ public interface Binder {
    *     example: {@code only(Runnable.class)}.
    * @param methodMatcher matches methods the interceptor should apply to. For
    *     example: {@code annotatedWith(Transactional.class)}.
-   * @param interceptors to bind
+   * @param interceptors to bind.  The interceptors are called in the order they
+   *     are given.
    */
   void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
