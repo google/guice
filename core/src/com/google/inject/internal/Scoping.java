@@ -239,8 +239,7 @@ public abstract class Scoping {
 
     Provider<T> scoped
         = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
-    return new InternalFactoryToProviderAdapter<T>(
-        Initializables.<Provider<? extends T>>of(scoped), source);
+    return new InternalFactoryToProviderAdapter<T>(scoped, source);
   }
 
   /**

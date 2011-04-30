@@ -100,7 +100,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<Provider<? extends T>> initializable = initializer
             .<Provider<? extends T>>requestInjection(injector, provider, source, injectionPoints);
-        InternalFactory<T> factory = new InternalFactoryToProviderAdapter<T>(initializable, source);
+        InternalFactory<T> factory = new InternalFactoryToInitializableAdapter<T>(
+            initializable, source, !injector.options.disableCircularProxies);
         InternalFactory<? extends T> scopedFactory
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scoping,
@@ -111,8 +112,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
       public Boolean visit(ProviderKeyBinding<? extends T> binding) {
         prepareBinding();
         Key<? extends javax.inject.Provider<? extends T>> providerKey = binding.getProviderKey();
-        BoundProviderFactory<T> boundProviderFactory
-            = new BoundProviderFactory<T>(injector, providerKey, source);
+        BoundProviderFactory<T> boundProviderFactory = new BoundProviderFactory<T>(
+            injector, providerKey, source, !injector.options.disableCircularProxies);
         bindingData.addCreationListener(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);

@@ -34,6 +34,9 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
     }
 
     try {
+      // TODO: method.setAccessible(true); ?
+      // this would fix visibility errors when we proxy a
+      // non-public interface.
       return method.invoke(delegate, args);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);

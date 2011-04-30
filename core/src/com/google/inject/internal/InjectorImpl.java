@@ -677,14 +677,16 @@ final class InjectorImpl implements Injector, Lookups {
     final BindingImpl<? extends Provider<?>> providerBinding
         = getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
 
-    InternalFactory<T> internalFactory = new InternalFactory<T>() {
+    InternalFactory<T> internalFactory =
+        new ProviderInternalFactory<T>(providerKey, !options.disableCircularProxies) {
       public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
           throws ErrorsException {
         errors = errors.withSource(providerKey);
-        Provider<?> provider = providerBinding.getInternalFactory().get(
+        Provider provider = providerBinding.getInternalFactory().get(
             errors, context, dependency, true);
         try {
-          Object o = provider.get();
+          @SuppressWarnings("unchecked") // type is not checked within circularGet
+          Object o = circularGet(provider, errors, context, dependency, linked);
           if (o != null && !rawType.isInstance(o)) {
             throw errors.subtypeNotProvided(providerType, rawType).toException();
           }

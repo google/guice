@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,34 @@ package com.google.inject.internal;
 import com.google.inject.Provider;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ProviderInstanceBinding;
 
 /**
- * @author crazybob@google.com (Bob Lee)
+ * Adapts {@link ProviderInstanceBinding} providers, ensuring circular proxies
+ * fail (or proxy) properly.
+ * 
+ * @author sameb@google.com (Sam Berlin)
 */
-final class InternalFactoryToProviderAdapter<T> implements InternalFactory<T> {
+final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
 
-  private final Provider<? extends T> provider;
-  private final Object source;
+  private final Initializable<Provider<? extends T>> initializable;
 
-  public InternalFactoryToProviderAdapter(Provider<? extends T> provider, Object source) {
-    this.provider = checkNotNull(provider, "provider");
-    this.source = checkNotNull(source, "source");
+  public InternalFactoryToInitializableAdapter(
+      Initializable<Provider<? extends T>> initializable, Object source, boolean allowProxy) {
+    super(source, allowProxy);
+    this.initializable = checkNotNull(initializable, "provider");
   }
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
     try {
-      return errors.checkForNull(provider.get(), source, dependency);
-    } catch (RuntimeException userException) {
+      return circularGet(initializable.get(errors), errors, context, dependency, linked);
+    } catch(RuntimeException userException) {
       throw errors.withSource(source).errorInProvider(userException).toException();
     }
   }
 
   @Override public String toString() {
-    return provider.toString();
+    return initializable.toString();
   }
 }
