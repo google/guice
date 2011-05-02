@@ -88,21 +88,11 @@ public class CircularDependencyTest extends TestCase {
     assertCircularDependencies(injector);
   }
   
-  // TODO: This creates two As because circular dependencies between @ProvidedBy
-  // Providers aren't handled well right now.  When we bind A, it looks for its
-  // Provider, which goes into InjectorImpl.createProvidedByBinding, which
-  // goes into getBindingOrThrow for AutoAP.  That creates a ConstructorBinding
-  // for AutoAP and looks up its dependency for Provider<B>, which ends up
-  // in creativeProvidedByBinding for BP, which creates a ConstructorBinding
-  // for BP and looks up the dependency for Provider<A>.  That ends up creating
-  // another providedByBinding for AutoAP, because the first one hasn't been stored
-  // anywhere yet.  The solution is to initialize the dependency early, similar
-  // to what's done with ConstructorBindings.
-//  public void testCircularlyDependentConstructorsWithProvidedBy()
-//      throws CreationException {
-//    Injector injector = Guice.createInjector();
-//    assertCircularDependencies(injector);
-//  }
+  public void testCircularlyDependentConstructorsWithProvidedBy()
+      throws CreationException {
+    Injector injector = Guice.createInjector();
+    assertCircularDependencies(injector);
+  }
   
   private void assertCircularDependencies(Injector injector) {
     A a = injector.getInstance(A.class);
@@ -238,9 +228,7 @@ public class CircularDependencyTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          // TODO: this should fail at C2, but because of strangeness with @ProvidedBy,
-          // it fails in the wrong place right now.
-          "Tried proxying " + D2.class.getName() + " to support a circular dependency, ",
+          "Tried proxying " + C2.class.getName() + " to support a circular dependency, ",
           "but it is not an interface.");
     }
   }
@@ -336,9 +324,7 @@ public class CircularDependencyTest extends TestCase {
       fail();
     } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          // TODO: this should fail at C2, but because of strangeness with @ProvidedBy,
-          // it fails in the wrong place right now.
-          "Tried proxying " + D2.class.getName() + " to support a circular dependency, ",
+          "Tried proxying " + C2.class.getName() + " to support a circular dependency, ",
           "but circular proxies are disabled.");
     }
   }

@@ -503,22 +503,22 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   <T> void initializeBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
-    if (binding instanceof ConstructorBindingImpl<?>) {
-      ((ConstructorBindingImpl) binding).initialize(this, errors);
+    if (binding instanceof DelayedInitialize) {
+      ((DelayedInitialize) binding).initialize(this, errors);
     }
   }
 
   <T> void initializeJitBinding(BindingImpl<T> binding, Errors errors) throws ErrorsException {
     // Put the partially constructed binding in the map a little early. This enables us to handle
     // circular dependencies. Example: FooImpl -> BarImpl -> FooImpl.
-    // Note: We don't need to synchronize on state.lock() during injector creation.
-    if (binding instanceof ConstructorBindingImpl<?>) {
+    // Note: We don't need to synchronize on state.lock() during injector creation.    
+    if (binding instanceof DelayedInitialize) {
       Key<T> key = binding.getKey();
       jitBindings.put(key, binding);
       boolean successful = false;
-      ConstructorBindingImpl cb = (ConstructorBindingImpl)binding;
+      DelayedInitialize delayed = (DelayedInitialize)binding;
       try {
-        cb.initialize(this, errors);
+        delayed.initialize(this, errors);
         successful = true;
       } finally {
         if (!successful) {
@@ -662,8 +662,8 @@ final class InjectorImpl implements Injector, Lookups {
   /** Creates a binding for a type annotated with @ProvidedBy. */
   <T> BindingImpl<T> createProvidedByBinding(Key<T> key, Scoping scoping,
       ProvidedBy providedBy, Errors errors) throws ErrorsException {
-    final Class<?> rawType = key.getTypeLiteral().getRawType();
-    final Class<? extends Provider<?>> providerType = providedBy.value();
+    Class<?> rawType = key.getTypeLiteral().getRawType();
+    Class<? extends Provider<?>> providerType = providedBy.value();
 
     // Make sure it's not the same type. TODO: Can we check for deeper loops?
     if (providerType == rawType) {
@@ -672,41 +672,20 @@ final class InjectorImpl implements Injector, Lookups {
 
     // Assume the provider provides an appropriate type. We double check at runtime.
     @SuppressWarnings("unchecked")
-    final Key<? extends Provider<T>> providerKey
-        = (Key<? extends Provider<T>>) Key.get(providerType);
-    final BindingImpl<? extends Provider<?>> providerBinding
-        = getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
-
-    InternalFactory<T> internalFactory =
-        new ProviderInternalFactory<T>(providerKey, !options.disableCircularProxies) {
-      public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
-          throws ErrorsException {
-        errors = errors.withSource(providerKey);
-        Provider provider = providerBinding.getInternalFactory().get(
-            errors, context, dependency, true);
-        try {
-          @SuppressWarnings("unchecked") // type is not checked within circularGet
-          Object o = circularGet(provider, errors, context, dependency, linked);
-          if (o != null && !rawType.isInstance(o)) {
-            throw errors.subtypeNotProvided(providerType, rawType).toException();
-          }
-          @SuppressWarnings("unchecked") // protected by isInstance() check above
-          T t = (T) o;
-          return t;
-        } catch (RuntimeException e) {
-          throw errors.errorInProvider(e).toException();
-        }
-      }
-    };
+    Key<? extends Provider<T>> providerKey = (Key<? extends Provider<T>>) Key.get(providerType);
+    ProvidedByInternalFactory<T> internalFactory =
+        new ProvidedByInternalFactory<T>(rawType, providerType,
+            providerKey, !options.disableCircularProxies);
 
     Object source = rawType;
-    return new LinkedProviderBindingImpl<T>(
+    return LinkedProviderBindingImpl.createWithInitializer(
         this,
         key,
         source,
         Scoping.<T>scope(key, this, internalFactory, source, scoping),
         scoping,
-        providerKey);
+        providerKey,
+        internalFactory);
   }
 
   /** Creates a binding for a type annotated with @ImplementedBy. */

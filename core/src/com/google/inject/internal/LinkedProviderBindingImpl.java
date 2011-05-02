@@ -28,21 +28,39 @@ import com.google.inject.spi.ProviderKeyBinding;
 import java.util.Set;
 
 final class LinkedProviderBindingImpl<T>
-    extends BindingImpl<T> implements ProviderKeyBinding<T>, HasDependencies {
+    extends BindingImpl<T> implements ProviderKeyBinding<T>, HasDependencies, DelayedInitialize {
 
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
+  final DelayedInitialize delayedInitializer;
+  
+  private LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
+      InternalFactory<? extends T> internalFactory, Scoping scoping,
+      Key<? extends javax.inject.Provider<? extends T>> providerKey,
+      DelayedInitialize delayedInitializer) {
+    super(injector, key, source, internalFactory, scoping);
+    this.providerKey = providerKey;
+    this.delayedInitializer = delayedInitializer;
+  }
 
   public LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
-    super(injector, key, source, internalFactory, scoping);
-    this.providerKey = providerKey;
+    this(injector, key, source, internalFactory, scoping, providerKey, null);
   }
 
   LinkedProviderBindingImpl(Object source, Key<T> key, Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey) {
     super(source, key, scoping);
     this.providerKey = providerKey;
+    this.delayedInitializer = null;
+  }
+  
+  static <T> LinkedProviderBindingImpl<T> createWithInitializer(InjectorImpl injector, Key<T> key,
+      Object source, InternalFactory<? extends T> internalFactory, Scoping scoping,
+      Key<? extends javax.inject.Provider<? extends T>> providerKey,
+      DelayedInitialize delayedInitializer) {
+    return new LinkedProviderBindingImpl<T>(injector, key, source, internalFactory, scoping,
+        providerKey, delayedInitializer);
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
@@ -51,6 +69,12 @@ final class LinkedProviderBindingImpl<T>
 
   public Key<? extends javax.inject.Provider<? extends T>> getProviderKey() {
     return providerKey;
+  }
+  
+  public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+    if (delayedInitializer != null) {
+      delayedInitializer.initialize(injector, errors);
+    }
   }
   
   public Set<Dependency<?>> getDependencies() {
