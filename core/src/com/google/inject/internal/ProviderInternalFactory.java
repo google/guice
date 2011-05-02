@@ -21,7 +21,6 @@ import static com.google.inject.internal.util.Preconditions.checkNotNull;
 
 import javax.inject.Provider;
 
-import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
 
 /**
@@ -32,12 +31,10 @@ import com.google.inject.spi.Dependency;
  */
 abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   
-  private final Key<T> key;
   protected final Object source;
   private final boolean allowProxy;
   
-  ProviderInternalFactory(Key<T> key, Object source, boolean allowProxy) {
-    this.key = key;
+  ProviderInternalFactory(Object source, boolean allowProxy) {
     this.source = checkNotNull(source, "source");
     this.allowProxy = allowProxy;
   }
@@ -46,13 +43,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {    
     Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-    
-    // Use the Key we are providing for as a unique key to locate the context.
-    // We cannot use dependency.getKey() because that is the Key of the type
-    // we are trying to fulfill (which may be different among different
-    // calls to us).  We also cannot use 'this', because the factory can
-    // be recreated different times during @ProvidedBy creations.
-    ConstructionContext<T> constructionContext = context.getConstructionContext(key);
+    ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {

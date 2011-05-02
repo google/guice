@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Key;
 import com.google.inject.Provider;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import com.google.inject.spi.Dependency;
@@ -33,9 +32,9 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
   private final Initializable<Provider<? extends T>> initializable;
 
   public InternalFactoryToInitializableAdapter(
-      Key<T> key, Initializable<Provider<? extends T>> initializable,
+      Initializable<Provider<? extends T>> initializable,
       Object source, boolean allowProxy) {
-    super(key, source, allowProxy);
+    super(source, allowProxy);
     this.initializable = checkNotNull(initializable, "provider");
   }
 
