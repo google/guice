@@ -16,6 +16,9 @@
 
 package com.google.inject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 import static com.google.inject.Asserts.assertContains;
 
@@ -403,6 +406,37 @@ public class CircularDependencyTest extends TestCase {
 
     @Override public String toString() {
       return "G";
+    }
+  }
+  
+  /**
+   * Tests that ProviderInternalFactory can detect circular dependencies
+   * before it gets to Scopes.SINGLETON.  This is especially important
+   * because the failure in Scopes.SINGLETON doesn't have enough context to
+   * provide a decent error message.
+   */
+  public void testCircularDependenciesDetectedEarlyWhenDependenciesHaveDifferentTypes() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Number.class).to(Integer.class);
+      }
+      
+      @Provides @Singleton Integer provideInteger(List list) { 
+        return new Integer(2);
+      }
+      
+      @Provides List provideList(Integer integer) {
+        return new ArrayList();
+      }
+    });
+    try {
+      injector.getInstance(Number.class);
+      fail();
+    } catch(ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "Tried proxying " + Integer.class.getName() + " to support a circular dependency, ",
+          "but it is not an interface.");      
     }
   }
 }

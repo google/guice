@@ -678,7 +678,7 @@ final class InjectorImpl implements Injector, Lookups {
         = getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
 
     InternalFactory<T> internalFactory =
-        new ProviderInternalFactory<T>(providerKey, !options.disableCircularProxies) {
+        new ProviderInternalFactory<T>(key, providerKey, !options.disableCircularProxies) {
       public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
           throws ErrorsException {
         errors = errors.withSource(providerKey);

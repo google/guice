@@ -30,11 +30,12 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
   private InternalFactory<? extends javax.inject.Provider<? extends T>> providerFactory;
 
   BoundProviderFactory(
+      Key<T> key,
       InjectorImpl injector,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
       Object source,
       boolean allowProxy) {
-    super(source, allowProxy);
+    super(key, source, allowProxy);
     this.injector = injector;
     this.providerKey = providerKey;
   }
