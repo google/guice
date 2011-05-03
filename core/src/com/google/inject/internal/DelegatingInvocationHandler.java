@@ -28,7 +28,7 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
       throws Throwable {
     if (delegate == null) {
       throw new IllegalStateException("This is a proxy used to support"
-          + " circular references involving constructors. The object we're"
+          + " circular references. The object we're"
           + " proxying is not constructed yet. Please wait until after"
           + " injection has completed to use this object.");
     }
