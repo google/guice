@@ -28,11 +28,8 @@
       <artifactId>aopalliance</artifactId>
       <version>1.0</version>
     </dependency>
-    <!--
-     | Replace with official CGLIB artifact when it's released
-    -->
     <dependency>
-      <groupId>org.sonatype.sisu.inject</groupId>
+      <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
       <version>${cglib.version}</version>
     </dependency>
@@ -195,7 +192,7 @@
          | Mark as optional: embedded by JarJar
         -->
         <dependency>
-          <groupId>org.sonatype.sisu.inject</groupId>
+          <groupId>cglib</groupId>
           <artifactId>cglib</artifactId>
           <version>${cglib.version}</version>
           <optional>true</optional>
