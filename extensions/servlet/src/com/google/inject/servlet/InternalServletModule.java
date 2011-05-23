@@ -15,21 +15,23 @@
  */
 package com.google.inject.servlet;
 
+import static com.google.inject.servlet.ServletScopes.REQUEST;
+import static com.google.inject.servlet.ServletScopes.SESSION;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import static com.google.inject.servlet.ServletScopes.REQUEST;
-import static com.google.inject.servlet.ServletScopes.SESSION;
 
 /**
  * This is a left-factoring of all ServletModules installed in the system.
@@ -103,9 +105,10 @@ final class InternalServletModule extends AbstractModule {
     return GuiceFilter.getRequest().getSession();
   }
 
-  @SuppressWarnings({"unchecked"})
-  @Provides @RequestScoped @RequestParameters Map<String, String[]> provideRequestParameters() {
-    return GuiceFilter.getRequest().getParameterMap();
+  @SuppressWarnings("unchecked") // defined by getParameterMap()
+  @Provides @RequestScoped @RequestParameters Map<String, String[]> provideRequestParameters(
+      ServletRequest req) {
+    return req.getParameterMap();
   }
 
   @Override

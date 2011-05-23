@@ -16,35 +16,12 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.reserialize;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.CreationException;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.internal.util.Maps;
 import static com.google.inject.servlet.ServletScopes.NullObject;
-import com.google.inject.util.Providers;
-import java.io.IOException;
-import java.io.Serializable;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Map;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import junit.framework.TestCase;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -52,10 +29,44 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.internal.util.Maps;
+import com.google.inject.servlet.RequestParameters;
+import com.google.inject.util.Providers;
+
+import junit.framework.TestCase;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Map;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ServletTest extends TestCase {
+  private static final Key<HttpServletRequest> HTTP_REQ_KEY = Key.get(HttpServletRequest.class);
+  private static final Key<HttpServletResponse> HTTP_RESP_KEY = Key.get(HttpServletResponse.class);
+  private static final Key<Map<String, String[]>> REQ_PARAMS_KEY
+      = new Key<Map<String, String[]>>(RequestParameters.class) {};
+
   private static final Key<InRequest> IN_REQUEST_KEY = Key.get(InRequest.class);
   private static final Key<InRequest> IN_REQUEST_NULL_KEY = Key.get(InRequest.class, Null.class);
   private static final Key<InSession> IN_SESSION_KEY = Key.get(InSession.class);
@@ -65,6 +76,52 @@ public class ServletTest extends TestCase {
   public void setUp() {
     //we need to clear the reference to the pipeline every test =(
     GuiceFilter.reset();
+  }
+
+  public void testRequestAndResponseBindings() throws Exception {
+    final Injector injector = createInjector();
+    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletResponse response = createMock(HttpServletResponse.class);
+    final Map<String, String[]> params = Maps.newHashMap();
+    String httpReqKey = HTTP_REQ_KEY.toString();
+    expect(request.getAttribute(httpReqKey)).andReturn(null);
+    request.setAttribute(httpReqKey, request);
+    expect(request.getAttribute(httpReqKey)).andReturn(request).anyTimes();
+
+    String httpRespKey = HTTP_RESP_KEY.toString();
+    expect(request.getAttribute(httpRespKey)).andReturn(null);
+    request.setAttribute(httpRespKey, response);
+    expect(request.getAttribute(httpRespKey)).andReturn(response).anyTimes();
+
+    String reqParamsKey = REQ_PARAMS_KEY.toString();
+    expect(request.getAttribute(reqParamsKey)).andReturn(null);
+    expect(request.getParameterMap()).andStubReturn(params);
+    request.setAttribute(reqParamsKey, params);
+    expect(request.getAttribute(reqParamsKey)).andReturn(params).anyTimes();
+    replay(request, response);
+
+    final boolean[] invoked = new boolean[1];
+    GuiceFilter filter = new GuiceFilter();
+    FilterChain filterChain = new FilterChain() {
+      @Override public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        invoked[0] = true;
+        assertSame(request, servletRequest);
+        assertSame(request, injector.getInstance(ServletRequest.class));
+        assertSame(request, injector.getInstance(HTTP_REQ_KEY));
+
+        assertSame(response, servletResponse);
+        assertSame(response, injector.getInstance(ServletResponse.class));
+        assertSame(response, injector.getInstance(HTTP_RESP_KEY));
+
+        assertSame(params, servletRequest.getParameterMap());
+        assertSame(params, injector.getInstance(REQ_PARAMS_KEY));
+      }
+    };
+    filter.doFilter(request, response, filterChain);
+
+    assertTrue(invoked[0]);
+    verify(request, response);
   }
 
   public void testNewRequestObject()
@@ -88,7 +145,6 @@ public class ServletTest extends TestCase {
       public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
-//        assertSame(request, servletRequest);
         assertNotNull(injector.getInstance(InRequest.class));
         assertNull(injector.getInstance(IN_REQUEST_NULL_KEY));
       }
@@ -163,7 +219,6 @@ public class ServletTest extends TestCase {
       public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
-//        assertSame(request, servletRequest);
         assertNotNull(injector.getInstance(InSession.class));
         assertNull(injector.getInstance(IN_SESSION_NULL_KEY));
       }
@@ -200,7 +255,6 @@ public class ServletTest extends TestCase {
       public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
-//        assertSame(request, servletRequest);
 
         assertSame(inSession, injector.getInstance(InSession.class));
         assertSame(inSession, injector.getInstance(InSession.class));
