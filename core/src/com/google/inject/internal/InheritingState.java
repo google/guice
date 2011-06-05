@@ -24,6 +24,8 @@ import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Maps;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
+
+import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
@@ -49,7 +51,8 @@ final class InheritingState implements State {
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   /*end[AOP]*/
-  private final List<TypeListenerBinding> listenerBindings = Lists.newArrayList();
+  private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
+  private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList(); 
   private final WeakKeySet blacklistedKeys = new WeakKeySet();
   private final Object lock;
 
@@ -123,7 +126,7 @@ final class InheritingState implements State {
   /*end[AOP]*/
 
   public void addTypeListener(TypeListenerBinding listenerBinding) {
-    listenerBindings.add(listenerBinding);
+    typeListenerBindings.add(listenerBinding);
   }
 
   public List<TypeListenerBinding> getTypeListenerBindings() {
@@ -131,7 +134,20 @@ final class InheritingState implements State {
     List<TypeListenerBinding> result
         = new ArrayList<TypeListenerBinding>(parentBindings.size() + 1);
     result.addAll(parentBindings);
-    result.addAll(listenerBindings);
+    result.addAll(typeListenerBindings);
+    return result;
+  }
+  
+  public void addProvisionListener(ProvisionListenerBinding listenerBinding) {
+    provisionListenerBindings.add(listenerBinding);
+  }
+
+  public List<ProvisionListenerBinding> getProvisionListenerBindings() {
+    List<ProvisionListenerBinding> parentBindings = parent.getProvisionListenerBindings();
+    List<ProvisionListenerBinding> result
+        = new ArrayList<ProvisionListenerBinding>(parentBindings.size() + 1);
+    result.addAll(parentBindings);
+    result.addAll(provisionListenerBindings);
     return result;
   }
 

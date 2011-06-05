@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Rethrows user-code exceptions in wrapped exceptions so that Errors can target the correct
@@ -27,21 +26,27 @@ import java.lang.reflect.InvocationTargetException;
 class Exceptions {
 
   /**
-   * Rethrows the exception (or it's cause) directly if possible. If it was a checked exception,
-   * this wraps the exception in a stack trace with no frames, so that the exception is shown
-   * immediately with no frames above it.
+   * Rethrows the exception (or it's cause, if it has one) directly if possible.
+   * If it was a checked exception, this wraps the exception in a stack trace
+   * with no frames, so that the exception is shown immediately with no frames
+   * above it.
    */
-  public static RuntimeException throwCleanly(InvocationTargetException exception) {
-    Throwable cause = exception;      
+  public static RuntimeException rethrowCause(Throwable throwable) {
+    Throwable cause = throwable;
     if(cause.getCause() != null) {
       cause = cause.getCause();
     }
-    if(cause instanceof RuntimeException) {
-      throw (RuntimeException)cause;
-    } else if(cause instanceof Error) {
-      throw (Error)cause;
+    return rethrow(cause);
+  }
+  
+  /** Rethrows the exception. */
+  public static RuntimeException rethrow(Throwable throwable) {    
+    if(throwable instanceof RuntimeException) {
+      throw (RuntimeException)throwable;
+    } else if(throwable instanceof Error) {
+      throw (Error)throwable;
     } else {
-      throw new UnhandledCheckedUserException(cause);
+      throw new UnhandledCheckedUserException(throwable);
     }
   }
 

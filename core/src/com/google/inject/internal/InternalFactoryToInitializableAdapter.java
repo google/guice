@@ -33,15 +33,22 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
 
   public InternalFactoryToInitializableAdapter(
       Initializable<Provider<? extends T>> initializable,
-      Object source, boolean allowProxy) {
-    super(source, allowProxy);
+      Object source, boolean allowProxy,
+      ProvisionListenerStackCallback<T> provisionCallback) {
+    super(source, allowProxy, provisionCallback);
     this.initializable = checkNotNull(initializable, "provider");
   }
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
+    return circularGet(initializable.get(errors), errors, context, dependency, linked);
+  }
+  
+  @Override
+  protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,
+      Dependency<?> dependency, ConstructionContext<T> constructionContext) throws ErrorsException {
     try {
-      return circularGet(initializable.get(errors), errors, context, dependency, linked);
+      return super.provision(provider, errors, dependency, constructionContext);
     } catch(RuntimeException userException) {
       throw errors.withSource(source).errorInProvider(userException).toException();
     }

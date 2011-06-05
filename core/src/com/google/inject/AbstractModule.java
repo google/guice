@@ -23,6 +23,7 @@ import static com.google.inject.internal.util.Preconditions.checkNotNull;
 import static com.google.inject.internal.util.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
@@ -249,5 +250,14 @@ public abstract class AbstractModule implements Module {
   protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeListener listener) {
     binder.bindListener(typeMatcher, listener);
+  }
+  
+  /**
+   * @see Binder#bindListener(Matcher, ProvisionListener)
+   * @since 4.0
+   */
+  protected void bindListener(Matcher<? super Key<?>> keyMatcher,
+      ProvisionListener... listener) {
+    binder.bindListener(keyMatcher, listener);
   }
 }

@@ -573,6 +573,7 @@ final class InjectorImpl implements Injector, Lookups {
   private void removeFailedJitBinding(Key<?> key, InjectionPoint ip) {
     jitBindings.remove(key);
     membersInjectorStore.remove(key.getTypeLiteral());
+    provisionListenerStore.remove(key);
     if(ip != null) {
       constructors.remove(ip);
     }
@@ -675,8 +676,8 @@ final class InjectorImpl implements Injector, Lookups {
     Key<? extends Provider<T>> providerKey = (Key<? extends Provider<T>>) Key.get(providerType);
     ProvidedByInternalFactory<T> internalFactory =
         new ProvidedByInternalFactory<T>(rawType, providerType,
-            providerKey, !options.disableCircularProxies);
-
+            providerKey, !options.disableCircularProxies,
+            provisionListenerStore.get(key));
     Object source = rawType;
     return LinkedProviderBindingImpl.createWithInitializer(
         this,
@@ -918,6 +919,9 @@ final class InjectorImpl implements Injector, Lookups {
 
   /** Cached field and method injectors for each type. */
   MembersInjectorStore membersInjectorStore;
+  
+  /** Cached provision listener callbacks for each key. */
+  ProvisionListenerCallbackStore provisionListenerStore;
 
   @SuppressWarnings("unchecked") // the members injector type is consistent with instance's type
   public void injectMembers(Object instance) {

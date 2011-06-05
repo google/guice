@@ -36,6 +36,7 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.PrivateElements;
+import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.util.List;
 import java.util.logging.Logger;
@@ -152,15 +153,18 @@ final class InjectorShell {
       new MessageProcessor(errors).process(injector, elements);
 
       /*if[AOP]*/
-      InterceptorBindingProcessor interceptors = new InterceptorBindingProcessor(errors);
-      interceptors.process(injector, elements);
+      new InterceptorBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Interceptors creation");
       /*end[AOP]*/
 
-      new TypeListenerBindingProcessor(errors).process(injector, elements);
-      List<TypeListenerBinding> listenerBindings = injector.state.getTypeListenerBindings();
-      injector.membersInjectorStore = new MembersInjectorStore(injector, listenerBindings);
-      stopwatch.resetAndLog("TypeListeners creation");
+      new ListenerBindingProcessor(errors).process(injector, elements);
+      List<TypeListenerBinding> typeListenerBindings = injector.state.getTypeListenerBindings();
+      injector.membersInjectorStore = new MembersInjectorStore(injector, typeListenerBindings);
+      List<ProvisionListenerBinding> provisionListenerBindings =
+          injector.state.getProvisionListenerBindings();
+      injector.provisionListenerStore =
+          new ProvisionListenerCallbackStore(provisionListenerBindings);
+      stopwatch.resetAndLog("TypeListeners & ProvisionListener creation");
 
       new ScopeBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Scopes creation");

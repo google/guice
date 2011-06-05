@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
@@ -56,9 +57,11 @@ final class ConstructorInjector<T> {
    * Construct an instance. Returns {@code Object} instead of {@code T} because
    * it may return a proxy.
    */
-  Object construct(Errors errors, InternalContext context, Class<?> expectedType, boolean allowProxy)
+  Object construct(final Errors errors, final InternalContext context,
+      Class<?> expectedType, boolean allowProxy,
+      ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {
-    ConstructionContext<T> constructionContext = context.getConstructionContext(this);
+    final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
@@ -78,8 +81,27 @@ final class ConstructorInjector<T> {
     }
 
     try {
-      // First time through...
+      // Optimization: Don't go through the callback stack if we have no listeners.
+      if (!provisionCallback.hasListeners()) {
+        return provision(errors, context, constructionContext);        
+      } else {
+        return provisionCallback.provision(errors, new ProvisionCallback<T>() {
+          public T call() throws ErrorsException {
+            return provision(errors, context, constructionContext);
+          }
+        });
+      }
+    } finally {
+      constructionContext.removeCurrentReference();
+    }
+  }
+
+  /** Provisions a new T. */
+  private T provision(Errors errors, InternalContext context,
+      ConstructionContext<T> constructionContext) throws ErrorsException {
+    try {
       constructionContext.startConstruction();
+      T t;
       try {
         Object[] parameters = SingleParameterInjector.getAll(errors, context, parameterInjectors);
         t = constructionProxy.newInstance(parameters);
@@ -87,13 +109,13 @@ final class ConstructorInjector<T> {
       } finally {
         constructionContext.finishConstruction();
       }
-
+  
       // Store reference. If an injector re-enters this factory, they'll get the same reference.
       constructionContext.setCurrentReference(t);
-
+  
       membersInjector.injectMembers(t, errors, context, false);
       membersInjector.notifyListeners(t, errors);
-
+  
       return t;
     } catch (InvocationTargetException userException) {
       Throwable cause = userException.getCause() != null
@@ -101,8 +123,6 @@ final class ConstructorInjector<T> {
           : userException;
       throw errors.withSource(constructionProxy.getInjectionPoint())
           .errorInjectingConstructor(cause).toException();
-    } finally {
-      constructionContext.removeCurrentReference();
     }
   }
 }

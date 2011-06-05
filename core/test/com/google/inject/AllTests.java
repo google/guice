@@ -90,6 +90,7 @@ public class AllTests {
     suite.addTestSuite(PrivateModuleTest.class);
     suite.addTestSuite(ProviderInjectionTest.class);
     suite.addTestSuite(ProvisionExceptionTest.class);
+    suite.addTestSuite(ProvisionListenerTest.class);
     // ProxyFactoryTest is AOP-only
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(RequestInjectionTest.class);

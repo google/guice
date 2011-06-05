@@ -23,6 +23,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableList;
 import com.google.inject.internal.util.ImmutableMap;
 import com.google.inject.internal.util.ImmutableSet;
+import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.annotation.Annotation;
@@ -93,6 +94,14 @@ interface State {
     public List<TypeListenerBinding> getTypeListenerBindings() {
       return ImmutableList.of();
     }
+    
+    public void addProvisionListener(ProvisionListenerBinding provisionListenerBinding) {
+      throw new UnsupportedOperationException();
+    }
+    
+    public List<ProvisionListenerBinding> getProvisionListenerBindings() {
+      return ImmutableList.of();
+    }
 
     public void blacklist(Key<?> key, Object source) {
     }
@@ -145,8 +154,12 @@ interface State {
   /*end[AOP]*/
 
   void addTypeListener(TypeListenerBinding typeListenerBinding);
-
+  
   List<TypeListenerBinding> getTypeListenerBindings();
+  
+  void addProvisionListener(ProvisionListenerBinding provisionListenerBinding);
+  
+  List<ProvisionListenerBinding> getProvisionListenerBindings();
 
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors

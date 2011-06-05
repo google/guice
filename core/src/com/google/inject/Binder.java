@@ -21,6 +21,7 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 import java.lang.annotation.Annotation;
@@ -373,6 +374,20 @@ public interface Binder {
    */
   void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeListener listener);
+
+  /**
+   * Registers listeners for provisioned objects. Guice will notify the
+   * listeners just before and after the object is provisioned. Provisioned
+   * objects that are also injectable (everything except objects provided
+   * through Providers) can also be notified through TypeListeners registered in
+   * {@link #bindListener}.
+   * 
+   * @param keyMatcher that matches keys of provisioned objects the listener
+   *          should be notified of
+   * @param listeners for provisioned objects matched by keyMatcher   * 
+   * @since 4.0
+   */
+  <T> void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

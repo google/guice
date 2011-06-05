@@ -88,6 +88,11 @@ public interface ElementVisitor<V> {
   V visit(TypeListenerBinding binding);
   
   /**
+   * Visit a provision listener binding.
+   */
+  V visit(ProvisionListenerBinding binding);
+  
+  /**
    * Visit a require explicit bindings command.
    * 
    * @since 3.0

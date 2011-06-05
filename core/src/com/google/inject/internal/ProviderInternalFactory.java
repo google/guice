@@ -20,6 +20,7 @@ package com.google.inject.internal;
 import static com.google.inject.internal.util.Preconditions.checkNotNull;
 
 import javax.inject.Provider;
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 
 import com.google.inject.spi.Dependency;
 
@@ -31,19 +32,22 @@ import com.google.inject.spi.Dependency;
  */
 abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   
-  protected final Object source;
+  private final ProvisionListenerStackCallback<T> provisionCallback;
   private final boolean allowProxy;
+  protected final Object source;
   
-  ProviderInternalFactory(Object source, boolean allowProxy) {
+  ProviderInternalFactory(Object source, boolean allowProxy,
+      ProvisionListenerStackCallback<T> provisionCallback) {
+    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
     this.source = checkNotNull(source, "source");
     this.allowProxy = allowProxy;
   }
   
-  protected T circularGet(Provider<? extends T> provider, Errors errors,
-      InternalContext context, Dependency<?> dependency, boolean linked)
+  protected T circularGet(final Provider<? extends T> provider, final Errors errors,
+      InternalContext context, final Dependency<?> dependency, boolean linked)
       throws ErrorsException {    
     Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
-    ConstructionContext<T> constructionContext = context.getConstructionContext(this);
+    final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
     
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
@@ -56,7 +60,25 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
         return proxyType;
       }
     }
-    // First time through...
+
+    // Optimization: Don't go through the callback stack if no one's listening.
+    if (!provisionCallback.hasListeners()) {
+      return provision(provider, errors, dependency, constructionContext);
+    } else {
+      return provisionCallback.provision(errors, new ProvisionCallback<T>() {
+        public T call() throws ErrorsException {
+          return provision(provider, errors, dependency, constructionContext);
+        }
+      });
+    }
+  }
+
+  /**
+   * Provisions a new instance. Subclasses should override this to catch
+   * exceptions & rethrow as ErrorsExceptions.
+   */
+  protected T provision(Provider<? extends T> provider, Errors errors, Dependency<?> dependency,
+      ConstructionContext<T> constructionContext) throws ErrorsException {
     constructionContext.startConstruction();
     try {
       T t = errors.checkForNull(provider.get(), source, dependency);
@@ -66,5 +88,4 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       constructionContext.finishConstruction();
     }
   }
-
 }

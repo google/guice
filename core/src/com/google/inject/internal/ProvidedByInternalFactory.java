@@ -42,8 +42,9 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
       Class<?> rawType,
       Class<? extends Provider<?>> providerType,
       Key<? extends Provider<T>> providerKey,
-      boolean allowProxy) {
-    super(providerKey, allowProxy);
+      boolean allowProxy,
+      ProvisionListenerStackCallback<T> provisionCallback) {
+    super(providerKey, allowProxy, provisionCallback);
     this.rawType = rawType;
     this.providerType = providerType; 
     this.providerKey = providerKey;
@@ -54,6 +55,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
         injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT); 
   }
   
+  @SuppressWarnings("unchecked")// 
   public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
     checkState(providerBinding != null, "not initialized");
@@ -61,9 +63,14 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     errors = errors.withSource(providerKey);
     Provider provider = providerBinding.getInternalFactory().get(
         errors, context, dependency, true);
+    return circularGet(provider, errors, context, dependency, linked);
+  }
+  
+  protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,
+      Dependency<?> dependency, ConstructionContext<T> constructionContext)
+      throws ErrorsException {
     try {
-      @SuppressWarnings("unchecked") // type is not checked within circularGet
-      Object o = circularGet(provider, errors, context, dependency, linked);
+      Object o = super.provision(provider, errors, dependency, constructionContext);
       if (o != null && !rawType.isInstance(o)) {
         throw errors.subtypeNotProvided(providerType, rawType).toException();
       }

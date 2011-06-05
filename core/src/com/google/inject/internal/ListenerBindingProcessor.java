@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
 
 /**
@@ -23,14 +24,19 @@ import com.google.inject.spi.TypeListenerBinding;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-final class TypeListenerBindingProcessor extends AbstractProcessor {
+final class ListenerBindingProcessor extends AbstractProcessor {
 
-  TypeListenerBindingProcessor(Errors errors) {
+  ListenerBindingProcessor(Errors errors) {
     super(errors);
   }
 
   @Override public Boolean visit(TypeListenerBinding binding) {
     injector.state.addTypeListener(binding);
+    return true;
+  }
+  
+  @Override public Boolean visit(ProvisionListenerBinding binding) {
+    injector.state.addProvisionListener(binding);
     return true;
   }
 }

@@ -30,7 +30,6 @@ final class ConstructorInjectorStore {
 
   private final FailableCache<InjectionPoint, ConstructorInjector<?>>  cache
       = new FailableCache<InjectionPoint, ConstructorInjector<?>> () {
-    @SuppressWarnings("unchecked")
     protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
         throws ErrorsException {
       return createConstructor(constructorInjector, errors);

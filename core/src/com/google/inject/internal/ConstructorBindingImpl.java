@@ -123,8 +123,10 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
   @SuppressWarnings("unchecked") // the result type always agrees with the ConstructorInjector type
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     factory.allowCircularProxy = !injector.options.disableCircularProxies;
-    factory.constructorInjector
-        = (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
+    factory.constructorInjector =
+        (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
+    factory.provisionCallback =
+      injector.provisionListenerStore.get(getKey());
   }
   
   /** True if this binding has been initialized and is ready for use. */
@@ -235,6 +237,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     private final Key<?> key;
     private boolean allowCircularProxy;
     private ConstructorInjector<T> constructorInjector;
+    private ProvisionListenerStackCallback<T> provisionCallback;
     
     Factory(boolean failIfNotLinked, Key<?> key) {
       this.failIfNotLinked = failIfNotLinked;
@@ -253,7 +256,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
       return (T) constructorInjector.construct(errors, context,
-          dependency.getKey().getTypeLiteral().getRawType(), allowCircularProxy);
+          dependency.getKey().getTypeLiteral().getRawType(), allowCircularProxy, provisionCallback);
     }
   }
 }

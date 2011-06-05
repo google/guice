@@ -83,6 +83,10 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
     return visitOther(binding);
   }
   
+  public V visit(ProvisionListenerBinding binding) {
+    return visitOther(binding);
+  }
+  
   public V visit(DisableCircularProxiesOption option) {
     return visitOther(option);
   }
