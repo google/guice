@@ -103,7 +103,7 @@ public class ServletTest extends TestCase {
     final boolean[] invoked = new boolean[1];
     GuiceFilter filter = new GuiceFilter();
     FilterChain filterChain = new FilterChain() {
-      @Override public void doFilter(ServletRequest servletRequest,
+      public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
         assertSame(request, servletRequest);
