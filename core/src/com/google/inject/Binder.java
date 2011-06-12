@@ -387,7 +387,7 @@ public interface Binder {
    * @param listeners for provisioned objects matched by keyMatcher   * 
    * @since 4.0
    */
-  <T> void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners);
+  void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

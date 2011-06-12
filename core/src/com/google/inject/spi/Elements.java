@@ -206,7 +206,7 @@ public final class Elements {
       elements.add(new TypeListenerBinding(getSource(), listener, typeMatcher));
     }
     
-    public <T> void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners) {
+    public void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners) {
       elements.add(new ProvisionListenerBinding(getSource(), keyMatcher, listeners));
     }
 
