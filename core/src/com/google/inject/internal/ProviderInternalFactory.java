@@ -65,7 +65,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
     if (!provisionCallback.hasListeners()) {
       return provision(provider, errors, dependency, constructionContext);
     } else {
-      return provisionCallback.provision(errors, new ProvisionCallback<T>() {
+      return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
         public T call() throws ErrorsException {
           return provision(provider, errors, dependency, constructionContext);
         }

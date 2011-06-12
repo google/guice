@@ -60,10 +60,15 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
       throws ErrorsException {
     checkState(providerBinding != null, "not initialized");
     
-    errors = errors.withSource(providerKey);
-    Provider provider = providerBinding.getInternalFactory().get(
-        errors, context, dependency, true);
-    return circularGet(provider, errors, context, dependency, linked);
+    context.pushState(providerKey, providerBinding.getSource());
+    try {
+      errors = errors.withSource(providerKey);
+      Provider provider = providerBinding.getInternalFactory().get(
+          errors, context, dependency, true);
+      return circularGet(provider, errors, context, dependency, linked);
+    } finally {
+      context.popState();
+    }
   }
   
   protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,

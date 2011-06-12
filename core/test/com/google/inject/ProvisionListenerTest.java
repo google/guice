@@ -21,6 +21,7 @@ import static com.google.inject.internal.util.ImmutableList.of;
 import static com.google.inject.name.Names.named;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.TestCase;
 
@@ -29,6 +30,7 @@ import com.google.inject.internal.util.Lists;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
+import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
 
 /**
@@ -314,7 +316,7 @@ public class ProvisionListenerTest extends TestCase {
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       keys.add(provision.getKey());
       T provisioned = provision.provision();
-      assertEquals(provision.getKey().getTypeLiteral().getRawType(), provisioned.getClass());
+      assertEquals(provision.getKey().getRawType(), provisioned.getClass());
     }
     
     List<Key> getAndClear() {
@@ -350,4 +352,179 @@ public class ProvisionListenerTest extends TestCase {
       provision.provision();
     }
   }
+  
+  private static class ChainAsserter implements ProvisionListener {
+    private final List<Class<?>> provisionList;
+    private final List<Class<?>> expected;
+    
+    public ChainAsserter(List<Class<?>> provisionList, Iterable<Class<?>> expected) {
+      this.provisionList = provisionList;
+      this.expected = ImmutableList.copyOf(expected);
+    }
+    
+    public <T> void onProvision(ProvisionInvocation<T> provision) {
+      List<Class<?>> actual = Lists.newArrayList();
+      for (DependencyAndSource dep : provision.getDependencyChain()) {
+        actual.add(dep.getDependency().getKey().getRawType());
+      }
+      assertEquals(expected, actual);
+      provisionList.add(provision.getKey().getRawType());
+    }
+  }
+  
+  private static Matcher<Object> keyMatcher(Class<?> clazz) {
+    return Matchers.only(Key.get(clazz));
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void testDependencyChain() {
+    final List<Class<?>> pList = Lists.newArrayList();
+    final List<Class<?>> totalList = Lists.newArrayList();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Instance.class).toInstance(new Instance());
+        bind(B.class).to(BImpl.class);
+        bind(D.class).toProvider(DP.class);
+        
+        bindListener(Matchers.any(), new ProvisionListener() {
+          public <T> void onProvision(ProvisionInvocation<T> provision) {
+            totalList.add(provision.getKey().getRawType());
+          }
+        });
+        
+        // Build up a list of asserters for our dependency chains.
+        ImmutableList.Builder<Class<?>> chain = ImmutableList.builder();
+        
+        chain.add(Instance.class).add(A.class);
+        bindListener(keyMatcher(A.class), new ChainAsserter(pList, chain.build()));
+        
+        chain.add(B.class).add(BImpl.class);
+        bindListener(keyMatcher(BImpl.class), new ChainAsserter(pList, chain.build()));
+        
+        chain.add(C.class);
+        bindListener(keyMatcher(C.class), new ChainAsserter(pList, chain.build()));
+        
+        // the chain has D before DP even though DP is provisioned & notified first
+        // because we do DP because of D, and need DP to provision D.
+        chain.add(D.class).add(DP.class);
+        bindListener(keyMatcher(D.class), new ChainAsserter(pList, chain.build()));
+        bindListener(keyMatcher(DP.class), new ChainAsserter(pList, chain.build()));
+        
+        chain.add(E.class);
+        bindListener(keyMatcher(E.class), new ChainAsserter(pList, chain.build()));
+        
+        chain.add(F.class);
+        bindListener(keyMatcher(F.class), new ChainAsserter(pList, chain.build()));
+      }
+      @Provides C c(D d) {
+        return new C() {};
+      }
+    });
+    Instance instance = injector.getInstance(Instance.class);
+    // make sure we're checking all of the chain asserters..
+    assertEquals(of(A.class, BImpl.class, C.class, DP.class, D.class, E.class, F.class),
+        pList);
+    // and make sure that nothing else was notified that we didn't expect.
+    assertEquals(totalList, pList);
+  }
+  
+  public void testModuleRequestInjection() {
+    final AtomicBoolean notified = new AtomicBoolean();    
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        requestInjection(new Object() {
+          @Inject Foo foo;
+        });
+        bindListener(Matchers.any(),
+            new SpecialChecker(Foo.class, getClass().getName() + ".configure(", notified));
+      }
+    });
+    assertTrue(notified.get());
+  }
+  
+  public void testToProviderInstance() {
+    final AtomicBoolean notified = new AtomicBoolean();    
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Object.class).toProvider(new Provider<Object>() {
+          @Inject Foo foo;
+          public Object get() {
+            return null;
+          }
+        });
+        bindListener(Matchers.any(),
+            new SpecialChecker(Foo.class, getClass().getName() + ".configure(", notified));
+      }
+    });
+    assertTrue(notified.get());
+  }
+  
+  public void testInjectorInjectMembers() {
+    final Object object = new Object() {
+      @Inject Foo foo;
+    };
+    final AtomicBoolean notified = new AtomicBoolean();    
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(Matchers.any(),
+            new SpecialChecker(Foo.class, object.getClass().getName(), notified));
+      }
+    }).injectMembers(object);
+    assertTrue(notified.get());
+  }
+  
+  private static class SpecialChecker implements ProvisionListener {
+    private final Class<?> notifyType;
+    private final String firstSource;
+    private final AtomicBoolean notified;
+    
+    public SpecialChecker(Class<?> notifyType, String firstSource, AtomicBoolean notified) {
+      this.notifyType = notifyType;
+      this.firstSource = firstSource;
+      this.notified = notified;
+    }
+    
+    public <T> void onProvision(ProvisionInvocation<T> provision) {
+      notified.set(true);
+      assertEquals(notifyType, provision.getKey().getRawType());            
+      assertEquals(2, provision.getDependencyChain().size());
+      
+      assertEquals(null, provision.getDependencyChain().get(0).getDependency());
+      assertContains(provision.getDependencyChain().get(0).getBindingSource(), firstSource);
+      
+      assertEquals(notifyType,
+          provision.getDependencyChain().get(1).getDependency().getKey().getRawType());
+      assertContains(provision.getDependencyChain().get(1).getBindingSource(),
+          notifyType.getName() + ".class(");
+    }
+  }
+  
+  private static class Instance {
+    @Inject A a;
+  }
+  private static class A {
+    @Inject A(B b) {}
+  }
+  private interface B {}
+  private static class BImpl implements B {
+    @Inject void inject(C c) {}
+  }
+  private interface C {}
+  private interface D {}
+  private static class DP implements Provider<D> {
+    @Inject Provider<E> ep;
+    public D get() {
+      ep.get();
+      return new D() {};
+    }
+  }
+  private static class E {
+    @SuppressWarnings("unused")
+    @Inject F f;
+  }
+  private static class F {}
 }

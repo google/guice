@@ -716,8 +716,13 @@ final class InjectorImpl implements Injector, Lookups {
     InternalFactory<T> internalFactory = new InternalFactory<T>() {
       public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
           throws ErrorsException {
-        return targetBinding.getInternalFactory().get(
-            errors.withSource(targetKey), context, dependency, true);
+        context.pushState(targetKey, targetBinding.getSource());
+        try {
+          return targetBinding.getInternalFactory().get(
+              errors.withSource(targetKey), context, dependency, true);
+        } finally {
+          context.popState();
+        }
       }
     };
 
@@ -904,8 +909,8 @@ final class InjectorImpl implements Injector, Lookups {
 
   <T> SingleParameterInjector<T> createParameterInjector(final Dependency<T> dependency,
       final Errors errors) throws ErrorsException {
-    InternalFactory<? extends T> factory = getInternalFactory(dependency.getKey(), errors, JitLimitation.NO_JIT);
-    return new SingleParameterInjector<T>(dependency, factory);
+    BindingImpl<? extends T> binding = getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
+    return new SingleParameterInjector<T>(dependency, binding);
   }
 
   /** Invokes a method. */
@@ -947,9 +952,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors) throws ErrorsException {
-    
-    
-    final InternalFactory<? extends T> factory = getInternalFactory(key, errors, JitLimitation.NO_JIT);
+    final BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
     final Dependency<T> dependency = Dependency.get(key);
 
     return new Provider<T>() {
@@ -958,11 +961,11 @@ final class InjectorImpl implements Injector, Lookups {
         try {
           T t = callInContext(new ContextualCallable<T>() {
             public T call(InternalContext context) throws ErrorsException {
-              Dependency previous = context.setDependency(dependency);
+              Dependency previous = context.pushDependency(dependency, binding.getSource());
               try {
-                return factory.get(errors, context, dependency, false);
+                return binding.getInternalFactory().get(errors, context, dependency, false);
               } finally {
-                context.setDependency(previous);
+                context.popStateAndSetDependency(previous);
               }
             }
           });
@@ -974,7 +977,7 @@ final class InjectorImpl implements Injector, Lookups {
       }
 
       @Override public String toString() {
-        return factory.toString();
+        return binding.getInternalFactory().toString();
       }
     };
   }

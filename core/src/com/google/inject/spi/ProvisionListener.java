@@ -16,6 +16,8 @@
 
 package com.google.inject.spi;
 
+import java.util.List;
+
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -53,5 +55,8 @@ public interface ProvisionListener {
 
     /** Performs the provision, returning the object provisioned. */
     public abstract T provision();
+    
+    /** Returns the dependency chain that led to this object being provisioned. */
+    public abstract List<DependencyAndSource> getDependencyChain();
   }
 }

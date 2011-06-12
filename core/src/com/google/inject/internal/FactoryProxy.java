@@ -51,7 +51,12 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
+    context.pushState(targetKey, source);
+    try {
+      return targetFactory.get(errors.withSource(targetKey), context, dependency, true);
+    } finally {
+      context.popState();
+    }
   }
 
   @Override public String toString() {

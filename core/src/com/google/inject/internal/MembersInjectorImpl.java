@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableList;
@@ -57,7 +58,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   public void injectMembers(T instance) {
     Errors errors = new Errors(typeLiteral);
     try {
-      injectAndNotify(instance, errors, false);
+      injectAndNotify(instance, errors, null, typeLiteral, false);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -65,14 +66,21 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwProvisionExceptionIfErrorsExist();
   }
 
-  void injectAndNotify(final T instance, final Errors errors, final boolean toolableOnly) throws ErrorsException {
+  void injectAndNotify(final T instance, final Errors errors,
+      final Key<T> key, final Object source, final boolean toolableOnly)
+      throws ErrorsException {
     if (instance == null) {
       return;
     }
 
     injector.callInContext(new ContextualCallable<Void>() {
       public Void call(InternalContext context) throws ErrorsException {
-        injectMembers(instance, errors, context, toolableOnly);
+        context.pushState(key, source);
+        try {
+          injectMembers(instance, errors, context, toolableOnly);
+        } finally {
+          context.popState();
+        }
         return null;
       }
     });

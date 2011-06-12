@@ -52,9 +52,14 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    errors = errors.withSource(providerKey);
-    javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency, true);
-    return circularGet(provider, errors, context, dependency, linked);
+    context.pushState(providerKey, source);
+    try {
+      errors = errors.withSource(providerKey);
+      javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency, true);
+      return circularGet(provider, errors, context, dependency, linked);
+    } finally {
+      context.popState();
+    }
   }
   
   @Override

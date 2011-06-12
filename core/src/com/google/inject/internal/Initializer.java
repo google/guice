@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Lists;
@@ -48,10 +49,11 @@ final class Initializer {
    *
    * @param instance an instance that optionally has members to be injected (each annotated with
    *      @Inject).
+   * @param key a key to use for keeping the state of the dependency chain
    * @param source the source location that this injection was requested
    */
-  <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Object source,
-      Set<InjectionPoint> injectionPoints) {
+  <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Key<T> key,
+      Object source, Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
 
     // short circuit if the object has no injections
@@ -60,7 +62,7 @@ final class Initializer {
       return Initializables.of(instance);
     }
 
-    InjectableReference<T> initializable = new InjectableReference<T>(injector, instance, source);
+    InjectableReference<T> initializable = new InjectableReference<T>(injector, instance, key, source);
     pendingInjection.put(instance, initializable);
     return initializable;
   }
@@ -106,10 +108,12 @@ final class Initializer {
     private final InjectorImpl injector;
     private final T instance;
     private final Object source;
+    private final Key<T> key;
     private MembersInjectorImpl<T> membersInjector;
 
-    public InjectableReference(InjectorImpl injector, T instance, Object source) {
+    public InjectableReference(InjectorImpl injector, T instance, Key<T> key, Object source) {
       this.injector = injector;
+      this.key = key; // possibly null!
       this.instance = checkNotNull(instance, "instance");
       this.source = checkNotNull(source, "source");
     }
@@ -144,7 +148,8 @@ final class Initializer {
       if (pendingInjection.remove(instance) != null) {
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
-        membersInjector.injectAndNotify(instance, errors.withSource(source), injector.options.stage == Stage.TOOL);
+        membersInjector.injectAndNotify(instance, errors.withSource(source), key, source, 
+            injector.options.stage == Stage.TOOL);
       }
 
       return instance;

@@ -198,14 +198,14 @@ public final class InternalInjectorCreator {
           injector.callInContext(new ContextualCallable<Void>() {
             Dependency<?> dependency = Dependency.get(binding.getKey());
             public Void call(InternalContext context) {
-              Dependency previous = context.setDependency(dependency);
+              Dependency previous = context.pushDependency(dependency, binding.getSource());
               Errors errorsForBinding = errors.withSource(dependency);
               try {
                 binding.getInternalFactory().get(errorsForBinding, context, dependency, false);
               } catch (ErrorsException e) {
                 errorsForBinding.merge(e.getErrors());
               } finally {
-                context.setDependency(previous);
+                context.popStateAndSetDependency(previous);
               }
 
               return null;

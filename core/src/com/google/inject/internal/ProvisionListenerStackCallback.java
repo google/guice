@@ -21,6 +21,7 @@ import java.util.List;
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.ProvisionListener;
+import com.google.inject.spi.DependencyAndSource;
 
 /**
  * Intercepts provisions with a stack of listeners.
@@ -46,8 +47,9 @@ final class ProvisionListenerStackCallback<T> {
     return listeners.length > 0;
   }
 
-  public T provision(Errors errors, ProvisionCallback<T> callable) throws ErrorsException {
-    Provision provision = new Provision(errors, callable);
+  public T provision(Errors errors, InternalContext context, ProvisionCallback<T> callable)
+      throws ErrorsException {
+    Provision provision = new Provision(errors, context, callable);
     RuntimeException caught = null;
     try {
       provision.provision();
@@ -77,14 +79,16 @@ final class ProvisionListenerStackCallback<T> {
   private class Provision extends ProvisionListener.ProvisionInvocation<T> {
 
     final Errors errors;
+    final InternalContext context;
     final ProvisionCallback<T> callable;
     int index = -1;
     T result;
     ErrorsException exceptionDuringProvision;
     ProvisionListener erredListener;
 
-    public Provision(Errors errors, ProvisionCallback<T> callable) {
+    public Provision(Errors errors, InternalContext context, ProvisionCallback<T> callable) {
       this.callable = callable;
+      this.context = context;
       this.errors = errors;
     }
 
@@ -119,6 +123,11 @@ final class ProvisionListenerStackCallback<T> {
     @Override
     public Key<T> getKey() {
       return key;
+    }
+    
+    @Override
+    public List<DependencyAndSource> getDependencyChain() {
+      return context.getDependencyChain();
     }
   }
 }

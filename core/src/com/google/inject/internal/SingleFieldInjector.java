@@ -28,7 +28,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
   final Field field;
   final InjectionPoint injectionPoint;
   final Dependency<?> dependency;
-  final InternalFactory<?> factory;
+  final BindingImpl<?> binding;
 
   public SingleFieldInjector(InjectorImpl injector, InjectionPoint injectionPoint, Errors errors)
       throws ErrorsException {
@@ -38,7 +38,7 @@ final class SingleFieldInjector implements SingleMemberInjector {
 
     // Ewwwww...
     field.setAccessible(true);
-    factory = injector.getInternalFactory(dependency.getKey(), errors, JitLimitation.NO_JIT);
+    binding = injector.getBindingOrThrow(dependency.getKey(), errors, JitLimitation.NO_JIT);
   }
 
   public InjectionPoint getInjectionPoint() {
@@ -48,16 +48,16 @@ final class SingleFieldInjector implements SingleMemberInjector {
   public void inject(Errors errors, InternalContext context, Object o) {
     errors = errors.withSource(dependency);
 
-    Dependency previous = context.setDependency(dependency);
+    Dependency previous = context.pushDependency(dependency, binding.getSource());
     try {
-      Object value = factory.get(errors, context, dependency, false);
+      Object value = binding.getInternalFactory().get(errors, context, dependency, false);
       field.set(o, value);
     } catch (ErrorsException e) {
       errors.withSource(injectionPoint).merge(e.getErrors());
     } catch (IllegalAccessException e) {
       throw new AssertionError(e); // a security manager is blocking us, we're hosed
     } finally {
-      context.setDependency(previous);
+      context.popStateAndSetDependency(previous);
     }
   }
 }

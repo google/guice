@@ -58,7 +58,7 @@ final class InjectionRequestProcessor extends AbstractProcessor {
     }
 
     initializer.requestInjection(
-        injector, request.getInstance(), request.getSource(), injectionPoints);
+        injector, request.getInstance(), null, request.getSource(), injectionPoints);
     return true;
   }
 

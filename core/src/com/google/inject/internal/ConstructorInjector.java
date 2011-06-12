@@ -85,7 +85,7 @@ final class ConstructorInjector<T> {
       if (!provisionCallback.hasListeners()) {
         return provision(errors, context, constructionContext);        
       } else {
-        return provisionCallback.provision(errors, new ProvisionCallback<T>() {
+        return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
           public T call() throws ErrorsException {
             return provision(errors, context, constructionContext);
           }
