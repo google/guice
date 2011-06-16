@@ -44,7 +44,6 @@ import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
