@@ -41,6 +41,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.Maps;
 import com.google.inject.name.Names;
+import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Modules;
@@ -302,6 +305,7 @@ public class MapBinderTest extends TestCase {
             binder(), String.class, String.class);
         multibinder.addBinding("a").toInstance("A");
         multibinder.addBinding("b").toInstance("B");
+        multibinder.permitDuplicates();
       }
     };
     Module bc = new AbstractModule() {
@@ -313,6 +317,17 @@ public class MapBinderTest extends TestCase {
         multibinder.permitDuplicates();
       }
     };
+    final Set<Key<?>> allBindings = new HashSet<Key<?>>();
+    for (Element element : Elements.getElements(ab, bc)) {
+      element.acceptVisitor(new DefaultElementVisitor<Void>() {
+            @Override public <T> Void visit(Binding<T> binding) {
+              Key<?> key = binding.getKey();
+              assertTrue(String.format("Duplicate binding for %s", key),
+                  allBindings.add(binding.getKey()));
+              return null;
+            }
+          });
+    }
     Injector injector = Guice.createInjector(ab, bc);
 
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injector.getInstance(Key.get(mapOfString)));
