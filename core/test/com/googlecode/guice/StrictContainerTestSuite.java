@@ -16,7 +16,7 @@
 
 package com.googlecode.guice;
 
-import com.google.inject.AllTests;
+import com.google.inject.SuiteUtils;
 import com.google.inject.internal.util.ImmutableSet;
 import com.google.inject.internal.util.MapMakerTestSuite;
 import com.google.inject.internal.util.MapMakerTestSuite.ReferenceMapTest;
@@ -84,6 +84,6 @@ public class StrictContainerTestSuite {
     /*end[AOP]*/
     builder.addSuite(MapMakerTestSuite.class.getName());
 
-    return AllTests.removeSuppressedTests(builder.build(), SUPPRESSED_TEST_NAMES);
+    return SuiteUtils.removeSuppressedTests(builder.build(), SUPPRESSED_TEST_NAMES);
   }
 }
