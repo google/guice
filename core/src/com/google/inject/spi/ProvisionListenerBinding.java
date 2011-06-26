@@ -20,7 +20,7 @@ import java.util.List;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.matcher.Matcher;
 
 /**

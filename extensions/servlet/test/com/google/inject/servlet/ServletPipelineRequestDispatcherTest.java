@@ -21,9 +21,9 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Maps;
-import com.google.inject.internal.util.Sets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.util.Providers;
 

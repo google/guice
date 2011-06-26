@@ -22,7 +22,7 @@ import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
 
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.Lists;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

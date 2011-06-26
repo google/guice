@@ -221,12 +221,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
                 <result>com.google.inject.internal.asm.@1.$@2</result>
               </rule>
               <rule>
-                <pattern>com.google.inject.internal.util.*</pattern>
-                <result>com.google.inject.internal.util.$@1</result>
+                <pattern>com.google.common.*</pattern>
+                <result>com.google.inject.internal.guava.$@1</result>
               </rule>
               <rule>
-                <pattern>com.google.inject.internal.util.**.*</pattern>
-                <result>com.google.inject.internal.util.@1.$@2</result>
+                <pattern>com.google.common.**.*</pattern>
+                <result>com.google.inject.internal.guava.@1.$@2</result>
               </rule>
               <keep>
                 <pattern>com.google.inject.**</pattern>

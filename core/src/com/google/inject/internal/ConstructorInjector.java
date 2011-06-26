@@ -17,7 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
-import com.google.inject.internal.util.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;

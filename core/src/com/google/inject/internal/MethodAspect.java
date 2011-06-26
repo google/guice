@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.Arrays;

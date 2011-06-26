@@ -24,9 +24,9 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableSet;
-import static com.google.inject.internal.util.Iterables.getOnlyElement;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import static com.google.common.collect.Iterables.getOnlyElement;
 
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;

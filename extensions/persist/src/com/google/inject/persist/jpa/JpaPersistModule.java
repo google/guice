@@ -18,8 +18,8 @@ package com.google.inject.persist.jpa;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.base.Preconditions;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;

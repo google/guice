@@ -17,7 +17,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;

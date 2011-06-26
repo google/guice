@@ -17,7 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.OutOfScopeException;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.ServletInputStream;

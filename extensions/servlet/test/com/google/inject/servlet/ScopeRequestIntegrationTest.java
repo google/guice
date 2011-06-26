@@ -24,8 +24,8 @@ import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 

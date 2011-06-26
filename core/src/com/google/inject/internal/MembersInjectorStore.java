@@ -18,8 +18,8 @@ package com.google.inject.internal;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeListenerBinding;
 import java.lang.reflect.Field;

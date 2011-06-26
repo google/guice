@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Element;

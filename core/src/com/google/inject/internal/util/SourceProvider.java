@@ -16,8 +16,11 @@
 
 package com.google.inject.internal.util;
 
-import static com.google.inject.internal.util.Iterables.concat;
+import static com.google.common.collect.Iterables.concat;
 import java.util.List;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 /**
  * Provides access to the calling line of code.

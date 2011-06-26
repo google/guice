@@ -18,7 +18,7 @@ package com.google.inject.internal;
 
 import java.util.List;
 
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.Lists;
 
 /**
  * Keeps track of creation listeners & uninitialized bindings,

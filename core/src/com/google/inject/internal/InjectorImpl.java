@@ -30,15 +30,13 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Maps;
-import com.google.inject.internal.util.Nullable;
-import com.google.inject.internal.util.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.base.Objects;
 import com.google.inject.internal.util.SourceProvider;
-import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
@@ -80,7 +78,7 @@ final class InjectorImpl implements Injector, Lookups {
     
     @Override
     public String toString() {
-      return new ToStringBuilder(getClass())
+      return Objects.toStringHelper(getClass())
           .add("stage", stage)
           .add("jitDisabled", jitDisabled)
           .add("disableCircularProxies", disableCircularProxies)
@@ -108,7 +106,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   Lookups lookups = new DeferredLookups(this);
 
-  InjectorImpl(@Nullable InjectorImpl parent, State state, InjectorOptions injectorOptions) {
+  InjectorImpl(InjectorImpl parent, State state, InjectorOptions injectorOptions) {
     this.parent = parent;
     this.state = state;
     this.options = injectorOptions;
@@ -350,7 +348,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     @Override public String toString() {
-      return new ToStringBuilder(ProviderBinding.class)
+      return Objects.toStringHelper(ProviderBinding.class)
           .add("key", getKey())
           .add("providedKey", getProvidedKey())
           .toString();
@@ -477,7 +475,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     @Override public String toString() {
-      return new ToStringBuilder(ConvertedConstantBinding.class)
+      return Objects.toStringHelper(ConvertedConstantBinding.class)
           .add("key", getKey())
           .add("sourceKey", getSourceKey())
           .add("value", value)
@@ -1021,7 +1019,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   public String toString() {
-    return new ToStringBuilder(Injector.class)
+    return Objects.toStringHelper(Injector.class)
         .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
   }

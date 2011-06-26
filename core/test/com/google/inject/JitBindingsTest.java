@@ -20,7 +20,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING_PROVIDER;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
-import static com.google.inject.internal.util.ImmutableSet.of;
+import static com.google.common.collect.ImmutableSet.of;
 
 import junit.framework.TestCase;
 

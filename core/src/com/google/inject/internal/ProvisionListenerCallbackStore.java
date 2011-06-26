@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Key;
-import com.google.inject.internal.util.Function;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.MapMaker;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
 

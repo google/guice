@@ -20,7 +20,7 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
-import com.google.inject.internal.util.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.annotation.Annotation;

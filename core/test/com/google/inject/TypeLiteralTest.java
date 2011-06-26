@@ -18,7 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
-import com.google.inject.internal.util.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Types;
 import java.io.IOException;
 import java.lang.reflect.Type;

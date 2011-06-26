@@ -17,7 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binder;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A request to disable circular proxies.

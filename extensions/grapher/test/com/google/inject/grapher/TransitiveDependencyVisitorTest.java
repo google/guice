@@ -24,7 +24,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Names;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;

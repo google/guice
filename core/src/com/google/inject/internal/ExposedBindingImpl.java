@@ -19,8 +19,8 @@ package com.google.inject.internal;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
@@ -50,7 +50,7 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(ExposedBinding.class)
+    return Objects.toStringHelper(ExposedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("privateElements", privateElements)

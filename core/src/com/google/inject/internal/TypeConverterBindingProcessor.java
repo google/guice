@@ -18,7 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
-import com.google.inject.internal.util.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
@@ -111,7 +111,7 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
   private <T> void convertToPrimitiveType(Class<T> primitiveType, final Class<T> wrapperType) {
     try {
       final Method parser = wrapperType.getMethod(
-          "parse" + Strings.capitalize(primitiveType.getName()), String.class);
+          "parse" + capitalize(primitiveType.getName()), String.class);
 
       TypeConverter typeConverter = new TypeConverter() {
         @SuppressWarnings("unchecked")
@@ -169,4 +169,16 @@ final class TypeConverterBindingProcessor extends AbstractProcessor {
         command.getSource(), command.getTypeMatcher(), command.getTypeConverter()));
     return true;
   }
+  
+  private static String capitalize(String s) {
+    if (s.length() == 0) {
+      return s;
+    }
+    char first = s.charAt(0);
+    char capitalized = Character.toUpperCase(first);
+    return (first == capitalized)
+        ? s
+        : capitalized + s.substring(1);
+  }
+
 }

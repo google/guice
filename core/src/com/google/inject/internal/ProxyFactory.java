@@ -17,10 +17,10 @@
 package com.google.inject.internal;
 
 import static com.google.inject.internal.BytecodeGen.newFastClass;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.spi.InjectionPoint;
 
 import java.lang.reflect.Constructor;

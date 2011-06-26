@@ -20,14 +20,14 @@ import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Maps;
-import static com.google.inject.internal.util.Preconditions.checkArgument;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
-import static com.google.inject.internal.util.Preconditions.checkState;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.PrivateElements;
@@ -130,7 +130,7 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(PrivateElements.class)
+    return Objects.toStringHelper(PrivateElements.class)
         .add("exposedKeys", getExposedKeys())
         .add("source", getSource())
         .toString();

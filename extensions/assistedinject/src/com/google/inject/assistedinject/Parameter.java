@@ -21,7 +21,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.Annotations;
-import static com.google.inject.internal.util.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkArgument;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

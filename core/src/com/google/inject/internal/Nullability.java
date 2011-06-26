@@ -2,8 +2,6 @@ package com.google.inject.internal;
 
 import java.lang.annotation.Annotation;
 
-import com.google.inject.internal.util.Nullable;
-
 /**
  * Whether a member supports null values injected.
  *
@@ -25,10 +23,7 @@ public class Nullability {
   public static boolean allowsNull(Annotation[] annotations) {
     for(Annotation a : annotations) {
       Class<? extends Annotation> type = a.annotationType();
-      // Check for Nullable.class because our c.g.i.internal.util.Nullable
-      // gets jarjar'd into $Nullable, and we want extensions that reference
-      // it to continue working.
-      if ("Nullable".equals(type.getSimpleName()) || type == Nullable.class) {
+      if ("Nullable".equals(type.getSimpleName())) {
         return true;
       }
     }

@@ -16,8 +16,8 @@
 
 package com.google.inject.assistedinject;
 
-import static com.google.inject.internal.util.Iterables.getOnlyElement;
-import static com.google.inject.internal.util.Preconditions.checkState;
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -36,12 +36,12 @@ import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.util.Classes;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Iterables;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -141,7 +141,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
 
     @Override
     public String toString() {
-      return new ToStringBuilder(getClass())
+      return Objects.toStringHelper(getClass())
         .add("ctor", constructor)
         .add("return type", returnType)
         .add("param type", paramTypes)

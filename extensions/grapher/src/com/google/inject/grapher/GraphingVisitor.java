@@ -20,8 +20,7 @@ import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Nullable;
+import com.google.common.collect.Lists;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
@@ -216,7 +215,7 @@ implements BindingTargetVisitor<Object, Void> {
    * @return The newly-created and added {@link DependencyEdge}.
    */
   protected D newDependencyEdge(K nodeId,
-      @Nullable InjectionPoint injectionPoint, Dependency<?> dependency) {
+      InjectionPoint injectionPoint, Dependency<?> dependency) {
     K toId = idFactory.getClassNodeId(dependency.getKey());
     return dependencyEdgeFactory.newDependencyEdge(nodeId, injectionPoint, toId);
   }

@@ -21,6 +21,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.util.Map;
 
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
+
 /**
  * Creates stack trace elements for members.
  *

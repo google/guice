@@ -18,8 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.internal.util.Objects;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.base.Objects;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.UntargettedBinding;
@@ -55,7 +54,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(UntargettedBinding.class)
+    return Objects.toStringHelper(UntargettedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .toString();

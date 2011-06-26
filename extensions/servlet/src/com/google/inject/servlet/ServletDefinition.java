@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scopes;
-import com.google.inject.internal.util.Iterators;
+import com.google.common.collect.Iterators;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;

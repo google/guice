@@ -16,9 +16,9 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
-import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.Dependency;
 
 /**
@@ -60,7 +60,7 @@ final class FactoryProxy<T> implements InternalFactory<T>, CreationListener {
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(FactoryProxy.class)
+    return Objects.toStringHelper(FactoryProxy.class)
         .add("key", key)
         .add("provider", targetFactory)
         .toString();

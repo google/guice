@@ -20,10 +20,10 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Maps;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeConverterBinding;

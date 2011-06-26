@@ -17,7 +17,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.util.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.Key;
 import com.google.inject.ProvidedBy;

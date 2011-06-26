@@ -16,10 +16,10 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.internal.util.ToStringBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.InstanceBinding;
@@ -106,7 +106,7 @@ public abstract class BindingImpl<T> implements Binding<T> {
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(Binding.class)
+    return Objects.toStringHelper(Binding.class)
         .add("key", key)
         .add("scope", scoping)
         .add("source", source)

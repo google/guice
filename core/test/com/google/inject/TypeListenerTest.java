@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import static com.google.inject.matcher.Matchers.any;

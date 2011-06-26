@@ -19,8 +19,8 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Objects;
+import com.google.common.collect.Lists;
+import com.google.common.base.Objects;
 import com.google.inject.name.Named;
 
 import java.lang.annotation.Annotation;

@@ -16,9 +16,9 @@
 
 package com.google.inject.grapher.graphviz;
 
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 

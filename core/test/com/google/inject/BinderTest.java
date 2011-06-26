@@ -18,9 +18,9 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Iterables;
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;

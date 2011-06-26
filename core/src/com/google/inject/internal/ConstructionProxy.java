@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.util.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.spi.InjectionPoint;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

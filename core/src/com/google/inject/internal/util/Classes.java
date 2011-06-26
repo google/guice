@@ -16,7 +16,7 @@
 
 package com.google.inject.internal.util;
 
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

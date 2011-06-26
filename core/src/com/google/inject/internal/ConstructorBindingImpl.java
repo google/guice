@@ -22,10 +22,9 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.internal.util.Classes;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Objects;
-import static com.google.inject.internal.util.Preconditions.checkState;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
@@ -208,7 +207,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(ConstructorBinding.class)
+    return Objects.toStringHelper(ConstructorBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("scope", getScoping())

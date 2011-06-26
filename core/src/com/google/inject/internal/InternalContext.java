@@ -17,8 +17,8 @@
 package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.Maps;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 

@@ -16,8 +16,8 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
-import static com.google.inject.internal.util.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;

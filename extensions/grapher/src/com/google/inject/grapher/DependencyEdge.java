@@ -16,7 +16,6 @@
 
 package com.google.inject.grapher;
 
-import com.google.inject.internal.util.Nullable;
 import com.google.inject.spi.InjectionPoint;
 
 /**
@@ -45,6 +44,6 @@ public interface DependencyEdge<K> {
      *     {@literal @}{@link Inject}ed. 
      * @param toId The ID for the interface node that satisfies the dependency.
      */
-    T newDependencyEdge(K fromId, @Nullable InjectionPoint fromPoint, K toId);
+    T newDependencyEdge(K fromId, InjectionPoint fromPoint, K toId);
   }
 }

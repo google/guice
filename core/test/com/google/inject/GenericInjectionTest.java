@@ -16,8 +16,8 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.util.Modules;
 import java.util.Arrays;
 import java.util.Collection;

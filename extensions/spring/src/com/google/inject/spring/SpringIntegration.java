@@ -19,7 +19,7 @@ package com.google.inject.spring;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.name.Names;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;

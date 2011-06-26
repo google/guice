@@ -16,7 +16,7 @@
 
 package com.google.inject.service;
 
-import com.google.inject.internal.util.Preconditions;
+import com.google.common.base.Preconditions;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;

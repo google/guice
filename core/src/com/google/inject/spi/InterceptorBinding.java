@@ -17,8 +17,8 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binder;
-import com.google.inject.internal.util.ImmutableList;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.matcher.Matcher;
 import java.lang.reflect.Method;
 import java.util.List;

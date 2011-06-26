@@ -19,10 +19,10 @@ package com.google.inject.internal;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.Objects;
-import static com.google.inject.internal.util.Preconditions.checkArgument;
-import static com.google.inject.internal.util.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.reflect.Array;

@@ -29,7 +29,7 @@ import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.util.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;

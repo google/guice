@@ -18,9 +18,8 @@ package com.google.inject.internal;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Objects;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Objects;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -95,7 +94,7 @@ final class LinkedProviderBindingImpl<T>
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(ProviderKeyBinding.class)
+    return Objects.toStringHelper(ProviderKeyBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("scope", getScoping())

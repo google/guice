@@ -20,8 +20,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 
+import com.google.common.base.Objects;
 import com.google.inject.Key;
-import com.google.inject.internal.util.ToStringBuilder;
 
 /**
  * Default implementation of LinkedServletBinding.
@@ -41,7 +41,7 @@ class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extend
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(LinkedServletBinding.class)
+    return Objects.toStringHelper(LinkedServletBinding.class)
       .add("pattern", getPattern())
       .add("initParams", getInitParams())
       .add("uriPatternType", getUriPatternType())

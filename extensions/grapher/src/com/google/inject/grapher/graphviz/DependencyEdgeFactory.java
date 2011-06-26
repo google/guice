@@ -18,7 +18,7 @@ package com.google.inject.grapher.graphviz;
 
 import com.google.inject.Inject;
 import com.google.inject.grapher.DependencyEdge;
-import com.google.inject.internal.util.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.spi.InjectionPoint;
 
 /**

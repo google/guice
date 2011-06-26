@@ -16,10 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.util.Function;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.MapMaker;
-import com.google.inject.internal.util.Nullable;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MapMaker;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -132,7 +131,7 @@ public final class BytecodeGen {
     if (CUSTOM_LOADER_ENABLED) {
       CLASS_LOADER_CACHE = new MapMaker().weakKeys().weakValues().makeComputingMap(
           new Function<ClassLoader, ClassLoader>() {
-            public ClassLoader apply(final @Nullable ClassLoader typeClassLoader) {
+            public ClassLoader apply(final ClassLoader typeClassLoader) {
               logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
               return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
                 public ClassLoader run() {

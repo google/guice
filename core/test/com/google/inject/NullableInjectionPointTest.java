@@ -2,14 +2,11 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import com.google.inject.internal.util.Nullable;
 
 import junit.framework.TestCase;
 
@@ -238,6 +235,11 @@ public class NullableInjectionPointTest extends TestCase {
       this.foo = foo;
     }
   }
+
+  @Documented
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.PARAMETER, ElementType.FIELD})
+  @interface Nullable { }
   
   static interface Namespace {
     @Documented

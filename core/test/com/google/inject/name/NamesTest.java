@@ -23,7 +23,7 @@ import static com.google.inject.Asserts.assertEqualsBothWays;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;

@@ -20,7 +20,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import static com.google.inject.internal.util.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;

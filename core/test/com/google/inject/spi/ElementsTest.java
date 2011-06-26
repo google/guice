@@ -35,9 +35,9 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.util.ImmutableMap;
-import com.google.inject.internal.util.ImmutableSet;
-import static com.google.inject.internal.util.Iterables.getOnlyElement;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import static com.google.common.collect.Iterables.getOnlyElement;
 
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;

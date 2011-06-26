@@ -17,8 +17,8 @@ package com.google.inject.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Sets;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.internal.UniqueAnnotations;
 import java.util.HashMap;
 import java.util.List;

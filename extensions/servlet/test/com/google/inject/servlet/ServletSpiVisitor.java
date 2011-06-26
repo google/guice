@@ -35,10 +35,9 @@ import junit.framework.AssertionFailedError;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Objects;
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.base.Objects;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
 /**
@@ -140,7 +139,7 @@ class ServletSpiVisitor
     
     @Override
     public String toString() {
-      return new ToStringBuilder(Params.class)
+      return Objects.toStringHelper(Params.class)
         .add("pattern", pattern)
         .add("keyOrInstance", keyOrInstance)
         .add("initParams", params)

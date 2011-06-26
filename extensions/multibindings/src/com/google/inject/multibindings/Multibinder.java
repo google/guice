@@ -28,9 +28,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.util.ImmutableList;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import static com.google.inject.name.Names.named;
 
 import com.google.inject.spi.BindingTargetVisitor;

@@ -20,7 +20,7 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
 
-import com.google.inject.internal.util.Objects;
+import com.google.common.base.Objects;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 import static java.lang.annotation.ElementType.TYPE;

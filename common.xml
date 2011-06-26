@@ -120,15 +120,17 @@
   	<mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-snapshot.jar"/>
+        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-${version}-tests.jar">
       <fileset dir="${build.dir}/test"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
       <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <rule pattern="com.google.inject.internal.util.*" result="com.google.inject.internal.util.$@1"/>    	
-      <rule pattern="com.google.inject.internal.util.**.*" result="com.google.inject.internal.util.@1.$@2"/>
+      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
+      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
+      <rule pattern="javax.annotation.*.class" result="com.google.inject.internal.jsr305.$@1"/>
+      <rule pattern="javax.annotation.**.*.class" result="com.google.inject.internal.jsr305.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
       <keep pattern="com.googlecode.**"/>
     </jarjar>
@@ -139,17 +141,40 @@
     <mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-snapshot.jar"/>
+        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-2.2.2.jar"/>
       <zipfileset src="${common.basedir}/lib/build/asm-3.3.1.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/guava-r09.jar"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
       <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <rule pattern="com.google.inject.internal.util.*" result="com.google.inject.internal.util.$@1"/>    	
-      <rule pattern="com.google.inject.internal.util.**.*" result="com.google.inject.internal.util.@1.$@2"/>
+      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
+      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
+      <keep pattern="com.google.inject.**"/>
+    </jarjar>
+  </target>
+
+  <target name="jar.withrenameddeps" depends="compile"
+	      description="Build jar with dependencies embedded.">
+    <mkdir dir="${build.dir}/dist"/>
+    <dirname property="common.basedir" file="${ant.file.common}"/>
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
+        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
+    <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
+      <zipfileset src="${common.basedir}/lib/build/cglib-2.2.2.jar">
+      	<include name="LICENSE"/>
+      	<include name="NOTICE"/>
+      </zipfileset>
+      <fileset dir="${build.dir}/classes"/>
+      <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
+      <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
+      <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
+      <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
+      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
+      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
     </jarjar>
   </target>

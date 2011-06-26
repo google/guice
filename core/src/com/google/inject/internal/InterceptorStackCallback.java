@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.Lists;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.Arrays;

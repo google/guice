@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
-import static com.google.inject.internal.util.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.ImmutableList;
 import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
@@ -238,7 +238,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filter(String urlPattern, String... morePatterns) {
-    return filtersModuleBuilder.filter(Lists.newArrayList(urlPattern, morePatterns));
+    return filtersModuleBuilder.filter(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
   }
 
   /**
@@ -246,7 +246,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
-    return filtersModuleBuilder.filterRegex(Lists.newArrayList(regex, regexes));
+    return filtersModuleBuilder.filterRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
   }
 
   /**
@@ -254,7 +254,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serve(String urlPattern, String... morePatterns) {
-    return servletsModuleBuilder.serve(Lists.newArrayList(urlPattern, morePatterns));
+    return servletsModuleBuilder.serve(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
   }
 
   /**
@@ -262,7 +262,7 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
-    return servletsModuleBuilder.serveRegex(Lists.newArrayList(regex, regexes));
+    return servletsModuleBuilder.serveRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
   }
 
   /**

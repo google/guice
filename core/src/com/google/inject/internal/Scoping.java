@@ -23,7 +23,7 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.internal.util.Objects;
+import com.google.common.base.Objects;
 import com.google.inject.spi.BindingScopingVisitor;
 import java.lang.annotation.Annotation;
 

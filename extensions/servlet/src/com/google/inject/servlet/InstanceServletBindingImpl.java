@@ -20,7 +20,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 
-import com.google.inject.internal.util.ToStringBuilder;
+import com.google.common.base.Objects;
 
 /**
  * Default implementation of InstanceServletBinding.
@@ -40,7 +40,7 @@ class InstanceServletBindingImpl extends AbstractServletModuleBinding<HttpServle
   }
 
   @Override public String toString() {
-    return new ToStringBuilder(InstanceServletBinding.class)
+    return Objects.toStringHelper(InstanceServletBinding.class)
       .add("pattern", getPattern())
       .add("initParams", getInitParams())
       .add("uriPatternType", getUriPatternType())

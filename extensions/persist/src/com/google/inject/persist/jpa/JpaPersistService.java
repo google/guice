@@ -19,10 +19,15 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.util.Nullable;
-import com.google.inject.internal.util.Preconditions;
+import com.google.common.base.Preconditions;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -114,4 +119,10 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
       return emProvider.emFactory;
     }
   }
+  
+  @Documented
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.PARAMETER)
+  private @interface Nullable { }
+
 }

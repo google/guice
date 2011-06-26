@@ -16,9 +16,8 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.util.Function;
-import com.google.inject.internal.util.MapMaker;
-import com.google.inject.internal.util.Nullable;
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 import java.util.Map;
 
@@ -32,7 +31,7 @@ public abstract class FailableCache<K, V> {
   
   private final Map<K, Object> delegate = new MapMaker().makeComputingMap(
       new Function<K, Object>() {
-        public Object apply(@Nullable K key) {
+        public Object apply(K key) {
           Errors errors = new Errors();
           V result = null;
           try {

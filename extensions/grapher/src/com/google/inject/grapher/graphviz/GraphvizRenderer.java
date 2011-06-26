@@ -19,9 +19,9 @@ package com.google.inject.grapher.graphviz;
 import com.google.inject.grapher.ImplementationNode;
 import com.google.inject.grapher.NodeAliasFactory;
 import com.google.inject.grapher.Renderer;
-import com.google.inject.internal.util.Join;
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Maps;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +140,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
     html.append("<tr>").append("<td align=\"left\" port=\"header\" ");
     html.append("bgcolor=\"" + node.getHeaderBackgroundColor() + "\">");
     
-    String subtitle = Join.join("<br align=\"left\"/>", node.getSubtitles());
+    String subtitle = Joiner.on("<br align=\"left\"/>").join(node.getSubtitles());
     if (subtitle.length() != 0) {
       html.append("<font color=\"").append(node.getHeaderTextColor());
       html.append("\" point-size=\"10\">");
@@ -196,7 +196,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
       }
     }
     
-    return "[" + Join.join(", ", attrList) + "]";
+    return "[" + Joiner.on(", ").join(attrList) + "]";
   }
 
   /**
@@ -205,7 +205,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
    * them.
    */
   protected String getArrowString(List<ArrowType> arrows) {
-    return Join.join("", arrows);
+    return Joiner.on("").join(arrows);
   }
 
   protected String getEdgeEndPoint(String nodeId, String portId, CompassPoint compassPoint) {
@@ -219,7 +219,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
       portStrings.add(compassPoint.toString());
     }
     
-    return Join.join(":", portStrings);
+    return Joiner.on(":").join(portStrings);
   }
 
   protected String htmlEscape(String str) {

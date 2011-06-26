@@ -19,7 +19,7 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.util.MapMaker;
+import com.google.common.collect.MapMaker;
 import com.google.inject.name.Named;
 import com.google.inject.persist.finder.Finder;
 import com.google.inject.persist.finder.FirstResult;

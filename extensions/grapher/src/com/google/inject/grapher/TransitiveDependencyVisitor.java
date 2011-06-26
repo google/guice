@@ -17,8 +17,8 @@
 package com.google.inject.grapher;
 
 import com.google.inject.Key;
-import com.google.inject.internal.util.ImmutableSet;
-import com.google.inject.internal.util.Sets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;

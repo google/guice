@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.util.Iterables;
+import com.google.common.collect.Iterables;
 import java.util.List;
 
 import com.google.inject.name.Named;
