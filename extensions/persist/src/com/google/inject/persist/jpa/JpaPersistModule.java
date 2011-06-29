@@ -87,7 +87,7 @@ public final class JpaPersistModule extends PersistModule {
 
   /**
    * Configures the JPA persistence provider with a set of properties.
-   *
+   * 
    * @param properties A set of name value pairs that configure a JPA persistence
    * provider as per the specification.
    */
@@ -121,8 +121,8 @@ public final class JpaPersistModule extends PersistModule {
 
         // Don't intercept non-finder methods like equals and hashcode.
         if (!method.isAnnotationPresent(Finder.class)) {
-          // NOTE(user): This is not ideal, we are using the invocation handler's equals
-          // and hashcode as a proxy (!) for the proxy's equals and hashcode.
+          // NOTE(dhanji): This is not ideal, we are using the invocation handler's equals
+          // and hashcode as a proxy (!) for the proxy's equals and hashcode. 
           return method.invoke(this, args);
         }
 
@@ -132,7 +132,7 @@ public final class JpaPersistModule extends PersistModule {
           }
 
           public Object[] getArguments() {
-            return null == args ? new Object[0] : args;
+            return null == args ? new Object[0] : args; 
           }
 
           public Object proceed() throws Throwable {

@@ -66,11 +66,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
     this.servletInstance = servletInstance;
   }
-
+  
   public ServletDefinition get() {
     return this;
   }
-
+  
   public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
@@ -79,7 +79,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             new InstanceServletBindingImpl(initParams,
                 pattern,
                 servletInstance,
-                patternMatcher));
+                patternMatcher));        
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedServletBindingImpl(initParams,
@@ -161,7 +161,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
    *
    * @return Returns true if this servlet triggered for the given request. Or false if
    *          guice-servlet should continue dispatching down the servlet pipeline.
-   *
+   * 
    * @throws IOException If thrown by underlying servlet
    * @throws ServletException If thrown by underlying servlet
    */
@@ -220,7 +220,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
         return pathInfo;
       }
 
-      // NOTE(user): These two are a bit of a hack to help ensure that request dipatcher-sent
+      // NOTE(dhanji): These two are a bit of a hack to help ensure that request dipatcher-sent
       // requests don't use the same path info that was memoized for the original request.
       private boolean isPathInfoComputed() {
         return pathInfoComputed

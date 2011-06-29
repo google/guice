@@ -97,7 +97,7 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
     return result;
   }
 
-  // TODO(user): Cache this method's results.
+  // TODO(dhanji): Cache this method's results.
   private Transactional readTransactionMetadata(MethodInvocation methodInvocation) {
     Transactional transactional;
     Method method = methodInvocation.getMethod();

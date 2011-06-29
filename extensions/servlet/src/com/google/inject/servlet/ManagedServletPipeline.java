@@ -112,7 +112,7 @@ class ManagedServletPipeline {
   RequestDispatcher getRequestDispatcher(String path) {
     final String newRequestUri = path;
 
-    // TODO(user): check servlet spec to see if the following is legal or not.
+    // TODO(dhanji): check servlet spec to see if the following is legal or not.
     // Need to strip query string if requested...
 
     for (final ServletDefinition servletDefinition : servletDefinitions) {

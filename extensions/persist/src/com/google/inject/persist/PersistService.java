@@ -19,7 +19,7 @@ package com.google.inject.persist;
  * Persistence provider service. Use this to manage the overall
  * startup and stop of the persistence module(s).
  *
- * TODO(user): Integrate with Service API when appropriate.
+ * TODO(dhanji): Integrate with Service API when appropriate.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */

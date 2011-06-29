@@ -26,7 +26,7 @@ import javax.servlet.ServletContextListener;
  * As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener}
  * class as a logical place to create and configure your injector. This will ensure the injector
  * is created when the web application is deployed.
- *
+ * 
  * @author Kevin Bourrillion (kevinb@google.com)
  * @since 2.0
  */
@@ -39,7 +39,7 @@ public abstract class GuiceServletContextListener
     final ServletContext servletContext = servletContextEvent.getServletContext();
 
     // Set the Servletcontext early for those people who are using this class.
-    // NOTE(user): This use of the servletContext is deprecated.
+    // NOTE(dhanji): This use of the servletContext is deprecated.
     GuiceFilter.servletContext = new WeakReference<ServletContext>(servletContext);
 
     Injector injector = getInjector();

@@ -35,10 +35,10 @@ interface UriPatternMatcher {
    *         {@code /home/*} then the path extracted will be {@code /home}. Each pattern matcher
    *         implementation must decide and publish what a canonical path represents.
    *
-   *         NOTE(user): This method returns null for the regex pattern matcher.
+   *         NOTE(dhanji): This method returns null for the regex pattern matcher.
    */
   String extractPath(String pattern);
-
+  
   /** Returns the type of pattern this is. */
   UriPatternType getPatternType();
 }
