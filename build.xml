@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 
 <project name="guice" default="compile">
-  <!-- build file for guice -->
-
   <import file="common.xml"/>
 
   <path id="compile.classpath">
