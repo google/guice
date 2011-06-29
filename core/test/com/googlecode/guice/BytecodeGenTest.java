@@ -76,15 +76,15 @@ public class BytecodeGenTest extends TestCase {
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
   }
-  
+
   public void testEnhancerNaming() {
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     PublicUserOfPackagePrivate pupp = injector.getInstance(PublicUserOfPackagePrivate.class);
     assertTrue(pupp.getClass().getName().startsWith(
         PublicUserOfPackagePrivate.class.getName() + "$$EnhancerByGuice$$"));
   }
-  
-  // TODO(sameb): Figure out how to test FastClass naming tests.
+
+  // TODO(user): Figure out how to test FastClass naming tests.
 
   /**
    * Custom URL classloader with basic visibility rules
@@ -188,7 +188,7 @@ public class BytecodeGenTest extends TestCase {
    * Note: this class must be marked as public or protected so that the Guice
    * custom classloader will intercept it. Private and implementation classes
    * are not intercepted by the custom classloader.
-   * 
+   *
    * @see com.google.inject.internal.BytecodeGen.Visibility
    */
   public static class ProxyTestImpl implements ProxyTest {
@@ -224,7 +224,7 @@ public class BytecodeGenTest extends TestCase {
       assertNotSame(testProxy.getClass().getClassLoader(), systemClassLoader);
     }
   }
-  
+
   public void testProxyClassUnloading() {
     Object testObject = Guice.createInjector(interceptorModule, testModule)
         .getInstance(proxyTestClass);

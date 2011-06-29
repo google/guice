@@ -30,7 +30,7 @@ import com.google.inject.spi.DependencyAndSource;
  */
 final class ProvisionListenerStackCallback<T> {
 
-  private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0]; 
+  private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0];
   private final ProvisionListener[] listeners;
   private final Key<T> key;
 
@@ -42,7 +42,7 @@ final class ProvisionListenerStackCallback<T> {
       this.listeners = listeners.toArray(new ProvisionListener[listeners.size()]);
     }
   }
-  
+
   public boolean hasListeners() {
     return listeners.length > 0;
   }
@@ -56,7 +56,7 @@ final class ProvisionListenerStackCallback<T> {
     } catch(RuntimeException t) {
       caught = t;
     }
-    
+
     if (provision.exceptionDuringProvision != null) {
       throw provision.exceptionDuringProvision;
     } else if (caught != null) {
@@ -71,7 +71,7 @@ final class ProvisionListenerStackCallback<T> {
     }
   }
 
-  // TODO(sameb): Can this be more InternalFactory-like?
+  // TODO(user): Can this be more InternalFactory-like?
   public interface ProvisionCallback<T> {
     public T call() throws ErrorsException;
   }
@@ -119,12 +119,12 @@ final class ProvisionListenerStackCallback<T> {
       }
       return result;
     }
-    
+
     @Override
     public Key<T> getKey() {
       return key;
     }
-    
+
     @Override
     public List<DependencyAndSource> getDependencyChain() {
       return context.getDependencyChain();

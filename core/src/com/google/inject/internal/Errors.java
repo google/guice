@@ -69,6 +69,7 @@ import java.util.Set;
  */
 public final class Errors implements Serializable {
 
+
   /**
    * The root errors object. Used to access the list of error messages.
    */
@@ -132,7 +133,7 @@ public final class Errors implements Serializable {
   public Errors missingImplementation(Key key) {
     return addMessage("No implementation for %s was bound.", key);
   }
-  
+
   public Errors jitDisabled(Key key) {
     return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
   }
@@ -294,7 +295,7 @@ public final class Errors implements Serializable {
   public Errors bindingAlreadySet(Key<?> key, Object source) {
     return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
-  
+
   public Errors jitBindingAlreadySet(Key<?> key) {
     return addMessage("A just-in-time binding to %s was already configured on a parent injector.", key);
   }
@@ -319,7 +320,7 @@ public final class Errors implements Serializable {
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
     return addMessage(
-        "A binding to %s was already configured at %s and an error was thrown " 
+        "A binding to %s was already configured at %s and an error was thrown "
       + "while checking duplicate bindings.  Error: %s",
         key, convert(source), t);
   }
@@ -360,11 +361,11 @@ public final class Errors implements Serializable {
   public Errors exposedButNotBound(Key<?> key) {
     return addMessage("Could not expose() %s, it must be explicitly bound.", key);
   }
-  
+
   public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
     return addMessage("%s cannot be used as a key; It is not fully specified.", typeLiteral);
   }
-  
+
   public Errors errorEnhancingClass(Class<?> clazz, Throwable cause) {
     return errorInUserCode(cause, "Unable to method intercept: %s", clazz);
   }
@@ -390,7 +391,7 @@ public final class Errors implements Serializable {
       return addMessage(cause, messageFormat, arguments);
     }
   }
-  
+
   private Throwable unwrap(RuntimeException runtimeException) {
    if(runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
      return runtimeException.getCause();
@@ -420,7 +421,7 @@ public final class Errors implements Serializable {
         "Tried proxying %s to support a circular dependency, but it is not an interface.",
         expectedType);
   }
-  
+
   public Errors circularProxiesDisabled(Class<?> expectedType) {
     return addMessage(
         "Tried proxying %s to support a circular dependency, but circular proxies are disabled.",
@@ -580,7 +581,7 @@ public final class Errors implements Serializable {
    */
   public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
       throws ErrorsException {
-    if (value != null || dependency.isNullable()) {
+    if (value != null || dependency.isNullable() ) {
       return value;
     }
 

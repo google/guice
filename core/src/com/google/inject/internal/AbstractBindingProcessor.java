@@ -33,7 +33,7 @@ import com.google.inject.spi.DefaultBindingTargetVisitor;
 
 /**
  * Guarantees that processing of Binding elements happens in a sane way.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 abstract class AbstractBindingProcessor extends AbstractProcessor {
@@ -52,10 +52,10 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       Provider.class,
       Scope.class,
       TypeLiteral.class);
-  // TODO(jessewilson): fix BuiltInModule, then add Stage
-  
+  // TODO(user): fix BuiltInModule, then add Stage
+
   protected final ProcessedBindingData bindingData;
-  
+
   AbstractBindingProcessor(Errors errors, ProcessedBindingData bindingData) {
     super(errors);
     this.bindingData = bindingData;
@@ -65,7 +65,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       InjectorImpl injector, Key<T> key, Object source) {
     return new UntargettedBindingImpl<T>(injector, key, source);
   }
-  
+
   protected void putBinding(BindingImpl<?> binding) {
     Key<?> key = binding.getKey();
 
@@ -124,13 +124,13 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       }
     }
   }
-  
+
   private <T> void validateKey(Object source, Key<T> key) {
     Annotations.checkForMisplacedScopeAnnotations(
         key.getTypeLiteral().getRawType(), source, errors);
   }
-  
-  /** 
+
+  /**
    * Processor for visiting bindings.  Each overriden method that wants to
    * actually process the binding should call prepareBinding first.
    */
@@ -139,15 +139,15 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
     final Key<T> key;
     final Class<? super T> rawType;
     Scoping scoping;
-    
+
     Processor(BindingImpl<T> binding) {
       source = binding.getSource();
       key = binding.getKey();
       rawType = key.getTypeLiteral().getRawType();
       scoping = binding.getScoping();
     }
-    
-    protected void prepareBinding() {      
+
+    protected void prepareBinding() {
       validateKey(source, key);
       scoping = Scoping.makeInjectable(scoping, injector, errors);
     }

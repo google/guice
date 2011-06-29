@@ -36,7 +36,7 @@ import java.io.PrintWriter;
  */
 public class InjectorGrapherDemo {
   public static void main(String[] args) throws Exception {
-    // TODO(phopkins): Switch to Stage.TOOL when issue 297 is fixed.
+    // TODO(user): Switch to Stage.TOOL when issue 297 is fixed.
     Injector demoInjector = Guice.createInjector(Stage.DEVELOPMENT,
         new BackToTheFutureModule(), new MultibinderModule());
     PrintWriter out = new PrintWriter(new File(args[0]), "UTF-8");

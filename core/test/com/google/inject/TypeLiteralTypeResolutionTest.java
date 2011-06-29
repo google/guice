@@ -98,7 +98,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
     assertEquals(ImmutableList.<TypeLiteral<?>>of(TypeLiteral.get(String.class)),
         resolver.getParameterTypes(Collection.class.getMethod("add", Object.class)));
   }
-  
+
   public void testGenericSupertype() {
     TypeLiteral<?> resolver = TypeLiteral.get(arrayListOfString);
     assertEquals(newParameterizedType(Collection.class, String.class),
@@ -123,7 +123,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
       return value - o.value;
     }
   }
-  
+
   public void testFields() {
     TypeLiteral<?> resolver = TypeLiteral.get(hasGenericFieldsOfShort);
     assertEquals(listOf(Short.class), resolver.getFieldType(list).getType());
@@ -315,7 +315,7 @@ public class TypeLiteralTypeResolutionTest extends TestCase {
     public List<? super T> superT;
   }
 
-  // TODO(jessewilson): tests for tricky bounded types like <T extends Collection, Serializable>
+  // TODO(user): tests for tricky bounded types like <T extends Collection, Serializable>
 
   public void testEqualsAndHashCode() throws IOException {
     TypeLiteral<?> a1 = TypeLiteral.get(arrayListOfString);

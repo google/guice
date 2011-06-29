@@ -68,7 +68,7 @@ public class InterfaceNodeFactory implements InterfaceNode.Factory<String, Inter
     }
 
     public void setSource(Object source) {
-      // TODO(phopkins): Show the Module on the graph, which comes from the
+      // TODO(user): Show the Module on the graph, which comes from the
       // class name when source is a StackTraceElement.
     }
   }

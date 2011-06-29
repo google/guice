@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.Errors;
-import com.google.common.collect.ImmutableSet;
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.Message;
 import java.util.Collection;
 
@@ -36,7 +36,7 @@ public final class ConfigurationException extends RuntimeException {
 
   /** Creates a ConfigurationException containing {@code messages}. */
   public ConfigurationException(Iterable<Message> messages) {
-    this.messages = ImmutableSet.copyOf(messages);
+    this.messages = ImmutableSet.copyOf(messages); 
     initCause(Errors.getOnlyCause(this.messages));
   }
 

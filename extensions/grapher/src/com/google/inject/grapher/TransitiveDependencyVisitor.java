@@ -47,14 +47,14 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
 
   private Collection<Key<?>> visitHasDependencies(HasDependencies hasDependencies) {
     Set<Key<?>> dependencies = Sets.newHashSet();
-    
+
     for (Dependency<?> dependency : hasDependencies.getDependencies()) {
       dependencies.add(dependency.getKey());
     }
 
     return dependencies;
   }
-  
+
   public Collection<Key<?>> visit(ConstructorBinding<?> binding) {
     return visitHasDependencies(binding);
   }
@@ -64,7 +64,7 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
   }
 
   public Collection<Key<?>> visit(ExposedBinding<?> binding) {
-    // TODO(phopkins): Figure out if this is needed for graphing.
+    // TODO(user): Figure out if this is needed for graphing.
     return ImmutableSet.of();
   }
 
@@ -89,7 +89,7 @@ implements BindingTargetVisitor<Object, Collection<Key<?>>> {
   }
 
   public Collection<Key<?>> visit(UntargettedBinding<?> binding) {
-    // TODO(phopkins): Figure out if this is needed for graphing.
+    // TODO(user): Figure out if this is needed for graphing.
     return null;
   }
 }

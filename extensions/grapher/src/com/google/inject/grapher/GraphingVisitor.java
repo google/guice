@@ -46,7 +46,7 @@ import java.util.List;
  * ({@link InterfaceNode}, {@link ImplementationNode}, {@link BindingEdge}, and
  * {@link DependencyEdge}) so that you can extend those interfaces and also
  * extend this class, and the helper methods will all return your new types.
- * 
+ *
  * @author phopkins@gmail.com (Pete Hopkins)
  *
  * @param <K> The type for node IDs.
@@ -60,7 +60,7 @@ public class GraphingVisitor<K, N extends InterfaceNode<K>, M extends Implementa
 implements BindingTargetVisitor<Object, Void> {
 
   private final NodeIdFactory<K> idFactory;
- 
+
   private final InterfaceNode.Factory<K, N> interfaceNodeFactory;
   private final ImplementationNode.Factory<K, M> implementationNodeFactory;
   private final BindingEdge.Factory<K, B> bindingEdgeFactory;
@@ -85,7 +85,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Helper method to return the standard node ID for the {@link Binding}'s
    * {@link Key}.
-   * 
+   *
    * @see NodeIdFactory#getClassNodeId(Key)
    */
   protected final K getClassNodeId(Binding<?> binding) {
@@ -95,7 +95,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Helper method to return the instance node ID for the {@link Binding}'s
    * {@link Key}.
-   * 
+   *
    * @see NodeIdFactory#getInstanceNodeId(Key)
    */
   protected final K getInstanceNodeId(Binding<?> binding) {
@@ -173,7 +173,7 @@ implements BindingTargetVisitor<Object, Void> {
    * will start at the {@link Member}.
    *
    * @see #newDependencyEdge(Object, InjectionPoint, Dependency)
-   * 
+   *
    * @param nodeId ID of the node that should be the tail of the
    *     {@link DependencyEdge}s.
    * @param node An {@link ImplementationNode} to add {@link Member}s to.
@@ -248,7 +248,7 @@ implements BindingTargetVisitor<Object, Void> {
    * {@link BindingEdge} to the source {@link Key}. That will then be rendered
    * by {@link #visit(InstanceBinding)} as an {@link InterfaceNode}
    * with a {@link BindingEdge} to the {@link String} instance.
-   * 
+   *
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
@@ -264,7 +264,7 @@ implements BindingTargetVisitor<Object, Void> {
    * Currently not displayed on the graph.
    */
   public Void visit(ExposedBinding<?> binding) {
-    // TODO(phopkins): Decide if this is needed for graphing.
+    // TODO(user): Decide if this is needed for graphing.
     return null;
   }
 
@@ -278,7 +278,7 @@ implements BindingTargetVisitor<Object, Void> {
    * which come either from {@link InjectionPoint}s (method and field) on the
    * instance, or on {@link Dependency}s the instance declares through the
    * {@link HasDependencies} interface.
-   * 
+   *
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    * @see #newInstanceImplementationNode(Binding, Object)
@@ -300,13 +300,13 @@ implements BindingTargetVisitor<Object, Void> {
    * you get from binding an interface class to an implementation class. We
    * create an {@link InterfaceNode}, then draw a {@link BindingEdge} to the
    * node of the implementing class.
-   * 
+   *
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
   public Void visit(LinkedKeyBinding<?> binding) {
     newInterfaceNode(binding);
-    newBindingEdge(getClassNodeId(binding), idFactory.getClassNodeId(binding.getLinkedKey()), 
+    newBindingEdge(getClassNodeId(binding), idFactory.getClassNodeId(binding.getLinkedKey()),
         BindingEdge.Type.NORMAL);
 
     return null;
@@ -319,7 +319,7 @@ implements BindingTargetVisitor<Object, Void> {
    * on the graph, and instead let the {@link DependencyEdge} go straight from
    * the {@link InjectionPoint} to the node specified by
    * {@link ProviderBinding#getProvidedKey()}.
-   * 
+   *
    * @see NodeAliasFactory#newAlias(Object, Object)
    */
   public Void visit(ProviderBinding<?> binding) {
@@ -332,7 +332,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Same as {@link #visit(InstanceBinding)}, but the
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
-   * 
+   *
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    * @see #newInstanceImplementationNode(Binding, Object)
@@ -351,7 +351,7 @@ implements BindingTargetVisitor<Object, Void> {
   /**
    * Same as {@link #visit(LinkedKeyBinding)}, but the
    * {@link BindingEdge} is {@link BindingEdge.Type#PROVIDER}.
-   * 
+   *
    * @see #newInterfaceNode(Binding)
    * @see #newBindingEdge(Object, Object, com.google.inject.grapher.BindingEdge.Type)
    */
@@ -367,7 +367,7 @@ implements BindingTargetVisitor<Object, Void> {
    * Currently not displayed on the graph.
    */
   public Void visit(UntargettedBinding<?> binding) {
-    // TODO(phopkins): Decide if this is needed for graphing.
+    // TODO(user): Decide if this is needed for graphing.
     return null;
   }
 }

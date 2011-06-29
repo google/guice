@@ -51,7 +51,7 @@ public class ServletScopes {
           // request is in progress.
           if (null == GuiceFilter.localContext.get()) {
 
-            // NOTE(dhanji): We don't need to synchronize on the scope map
+            // NOTE(user): We don't need to synchronize on the scope map
             // unlike the HTTP request because we're the only ones who have
             // a reference to it, and it is only available via a threadlocal.
             Map<String, Object> scopeMap = requestScopeContext.get();
@@ -163,14 +163,14 @@ public class ServletScopes {
    *     context available to it.
    * @throws OutOfScopeException if this method is called from a non-request
    *     thread, or if the request has completed.
-   * 
+   *
    * @since 3.0
    */
   public static <T> Callable<T> continueRequest(final Callable<T> callable,
       final Map<Key<?>, Object> seedMap) {
     Preconditions.checkArgument(null != seedMap,
         "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
-    
+
     // Snapshot the seed map and add all the instances to our continuing HTTP request.
     final ContinuingHttpServletRequest continuingRequest =
         new ContinuingHttpServletRequest(GuiceFilter.getRequest());
