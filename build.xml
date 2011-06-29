@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <project name="guice" default="compile">
+  <!-- common definitions are stored in common.xml. -->
   <import file="common.xml"/>
 
   <path id="compile.classpath">
