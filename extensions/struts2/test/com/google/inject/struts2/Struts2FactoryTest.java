@@ -39,22 +39,22 @@ import com.google.inject.servlet.ServletModule;
 public class Struts2FactoryTest extends TestCase {
 
   private static final Date TODAY = new Date();
-  
+
   public static class TestListener extends GuiceServletContextListener {
 
     private final Module module;
-    
+
     public TestListener(Module module) {
       this.module = module;
     }
-    
+
     @Override
     protected Injector getInjector() {
       return Guice.createInjector(
           new Struts2GuicePluginModule(),
           new ServletModule() {
             @Override
-            protected void configureServlets() {      
+            protected void configureServlets() {
               // Struts 2 setup
               bind(StrutsPrepareAndExecuteFilter.class).in(Singleton.class);
               filter("/*").through(StrutsPrepareAndExecuteFilter.class);
@@ -63,9 +63,9 @@ public class Struts2FactoryTest extends TestCase {
           module
       );
     }
-    
+
   }
-  
+
   public void testStruts2Factory() {
     Struts2Factory s2Factory = new Struts2Factory();
     TestListener testListener = new TestListener(new AbstractModule() {

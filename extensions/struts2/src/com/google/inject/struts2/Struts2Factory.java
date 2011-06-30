@@ -97,7 +97,7 @@ public class Struts2Factory extends ObjectFactory {
   }
 
   @Override @SuppressWarnings("unchecked")
-  public Object buildBean(Class clazz, Map<String, Object> extraContext) {
+  public Object buildBean(Class clazz, Map<String, Object>extraContext) {
     if (strutsInjector == null) {
       synchronized (this) {
         if (strutsInjector == null) {
