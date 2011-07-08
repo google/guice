@@ -27,6 +27,7 @@ import com.google.inject.persist.jpa.ManagedLocalTransactionsAcrossRequestTest;
 import com.google.inject.persist.jpa.ManagedLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsTest;
 import com.google.inject.persist.jpa.ManualLocalTransactionsWithCustomMatcherTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

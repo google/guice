@@ -184,12 +184,12 @@ public class CheckedProviderMethodsModuleTest extends TestCase {
   }
   
   private static class Pair<A, B> {
-	A first;
-	B second;
-	
-	Pair(A a, B b) {
-	 this.first= a;
-	 this.second = b;
-	}
+    A first;
+    B second;
+
+    Pair(A a, B b) {
+      this.first= a;
+      this.second = b;
+    }
   }
 }

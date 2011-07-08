@@ -16,6 +16,16 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.inject.Binding;
+import com.google.inject.Injector;
+import com.google.inject.Stage;
+import com.google.inject.spi.DefaultBindingTargetVisitor;
+
+import junit.framework.AssertionFailedError;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,16 +39,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import junit.framework.AssertionFailedError;
-
-import com.google.inject.Binding;
-import com.google.inject.Injector;
-import com.google.inject.Stage;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.base.Objects;
-import com.google.inject.spi.DefaultBindingTargetVisitor;
 
 /**
  * A visitor for testing the servlet SPI extension.

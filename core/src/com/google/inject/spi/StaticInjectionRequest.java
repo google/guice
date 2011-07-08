@@ -16,9 +16,11 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
-import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Set;
 
 /**

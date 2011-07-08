@@ -17,14 +17,22 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.name.Names.named;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.matcher.Matchers;
-import static com.google.inject.name.Names.named;
-
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+
+import junit.framework.TestCase;
+
+/*if[AOP]*/
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+/*end[AOP]*/
+
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
@@ -32,11 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
-/*if[AOP]*/
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-/*end[AOP]*/
 
 /**
  * @author crazybob@google.com (Bob Lee)

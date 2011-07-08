@@ -19,14 +19,8 @@ package com.google.inject.assistedinject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
-import java.awt.Color;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.CreationException;
@@ -39,8 +33,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
@@ -49,7 +41,16 @@ import com.google.inject.spi.Elements;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
 
+import junit.framework.TestCase;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class FactoryModuleBuilderTest extends TestCase {
+  
+  private enum Color { BLUE, GREEN, RED, GRAY, BLACK }
 
   public void testImplicitForwardingAssistedBindingFailsWithInterface() {
     try {

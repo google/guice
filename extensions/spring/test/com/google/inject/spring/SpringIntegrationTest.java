@@ -16,14 +16,17 @@
 
 package com.google.inject.spring;
 
+import static com.google.inject.spring.SpringIntegration.fromSpring;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
-import static com.google.inject.spring.SpringIntegration.fromSpring;
+
 import junit.framework.TestCase;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;

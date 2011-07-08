@@ -20,13 +20,16 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class EntityManagerFactoryProvisionTest extends TestCase {
   private Injector injector;
 

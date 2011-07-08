@@ -16,12 +16,12 @@
 
 package com.google.inject.spi;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.common.collect.ImmutableList;
 import com.google.inject.matcher.Matcher;
+
+import java.util.List;
 
 /**
  * Binds keys (picked using a Matcher) to a provision listener. Listeners are created explicitly in

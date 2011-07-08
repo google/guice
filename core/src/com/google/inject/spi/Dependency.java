@@ -16,11 +16,13 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Key;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.base.Objects;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Key;
+
 import java.util.List;
 import java.util.Set;
 

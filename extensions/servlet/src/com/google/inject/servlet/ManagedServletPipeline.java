@@ -15,18 +15,20 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

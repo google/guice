@@ -18,12 +18,6 @@ package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertContains;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -33,6 +27,12 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+
+import junit.framework.TestCase;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.Properties;
 
 /**
  * Tests that {@code javax.inject.Named} and {@code com.google.inject.name.Named} are completely

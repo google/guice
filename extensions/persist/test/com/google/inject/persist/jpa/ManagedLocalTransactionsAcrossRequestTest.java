@@ -24,16 +24,20 @@ import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.Finder;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import junit.framework.TestCase;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();
@@ -168,7 +172,7 @@ public class ManagedLocalTransactionsAcrossRequestTest extends TestCase {
       injector.getInstance(UnitOfWork.class).end();
       fail();
     } catch (NoResultException e) {}
-    
+
     injector.getInstance(UnitOfWork.class).end();
   }
 

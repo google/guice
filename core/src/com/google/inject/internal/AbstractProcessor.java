@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
+
 import java.util.Iterator;
 import java.util.List;
 

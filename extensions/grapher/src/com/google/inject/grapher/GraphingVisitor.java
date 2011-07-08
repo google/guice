@@ -16,11 +16,11 @@
 
 package com.google.inject.grapher;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.common.collect.Lists;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.ConvertedConstantBinding;
@@ -34,6 +34,7 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
+
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.List;

@@ -1,7 +1,5 @@
 package com.google.inject.spi;
 
-import java.util.Map;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -12,6 +10,8 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
 import junit.framework.TestCase;
+
+import java.util.Map;
 
 /**
  * @author sberlin@gmail.com (Sam Berlin)

@@ -18,11 +18,13 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

@@ -16,13 +16,16 @@
 package com.google.inject.mini;
 
 import com.google.inject.Provides;
+
+import junit.framework.TestCase;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import junit.framework.TestCase;
 
 public final class MiniGuiceTest extends TestCase {
 

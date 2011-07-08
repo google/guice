@@ -16,10 +16,12 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.TypeLiteral;
-import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Set;
 
 /**

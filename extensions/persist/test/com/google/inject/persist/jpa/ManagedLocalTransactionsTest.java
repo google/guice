@@ -22,16 +22,20 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import junit.framework.TestCase;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class ManagedLocalTransactionsTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();

@@ -2,13 +2,13 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
+import junit.framework.TestCase;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

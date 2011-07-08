@@ -17,29 +17,32 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.binder.AnnotatedBindingBuilder;
-import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
-import com.google.inject.util.Providers;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.name.Named;
+import com.google.inject.util.Providers;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class BinderTestSuite {
+public class BinderTestSuite extends TestCase {
 
   public static Test suite() {
     TestSuite suite = new TestSuite();

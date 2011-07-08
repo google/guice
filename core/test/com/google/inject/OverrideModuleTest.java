@@ -19,17 +19,19 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Objects;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
-import static java.lang.annotation.ElementType.TYPE;
+
+import junit.framework.TestCase;
+
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
 
 /**
  * @author sberlin@gmail.com (Sam Berlin)

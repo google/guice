@@ -19,8 +19,10 @@ package com.googlecode.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
-import javax.inject.Named;
+
 import junit.framework.Test;
+import junit.framework.TestCase;
+
 import org.atinject.tck.Tck;
 import org.atinject.tck.auto.Car;
 import org.atinject.tck.auto.Convertible;
@@ -34,7 +36,9 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.Cupholder;
 import org.atinject.tck.auto.accessories.SpareTire;
 
-public class GuiceTck {
+import javax.inject.Named;
+
+public class GuiceTck extends TestCase {
 
   public static Test suite() {
     return Tck.testsFor(Guice.createInjector(new AbstractModule() {

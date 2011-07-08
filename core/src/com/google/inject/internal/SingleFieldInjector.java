@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+
 import java.lang.reflect.Field;
 
 /**

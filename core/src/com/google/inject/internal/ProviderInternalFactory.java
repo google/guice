@@ -19,10 +19,10 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
-
 import com.google.inject.spi.Dependency;
+
+import javax.inject.Provider;
 
 /**
  * Base class for InternalFactories that are used by Providers, to handle

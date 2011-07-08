@@ -16,15 +16,16 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +33,7 @@ import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
 import javax.inject.Qualifier;
 
 /**

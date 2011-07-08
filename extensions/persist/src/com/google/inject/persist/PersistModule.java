@@ -16,9 +16,11 @@
 
 package com.google.inject.persist;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
+
+import com.google.inject.AbstractModule;
+
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**

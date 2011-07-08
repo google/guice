@@ -16,9 +16,10 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+
+import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -34,7 +35,6 @@ import com.google.inject.name.Names;
 
 import junit.framework.TestCase;
 
-import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("deprecation")
 public class FactoryProvider2Test extends TestCase {
 
+  private enum Color { BLUE, GREEN, RED, GRAY, BLACK, ORANGE, PINK }
+  
   public void testAssistedFactory() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -576,7 +578,7 @@ public class FactoryProvider2Test extends TestCase {
       assertContains(expected.getMessage(),
           "1) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<java.awt.Color>] on method ["
+            + " [com.google.inject.Provider<" + Color.class.getName() + ">] on method ["
             + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
           "2) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [2] with key"
@@ -584,7 +586,7 @@ public class FactoryProvider2Test extends TestCase {
             + ProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
           "3) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<java.awt.Color>"
+            + " [com.google.inject.Provider<" + Color.class.getName() + ">"
             + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
             + " on method [" + ProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
       );
@@ -610,7 +612,7 @@ public class FactoryProvider2Test extends TestCase {
       assertContains(expected.getMessage(),
           "1) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<java.awt.Color>] on method ["
+            + " [com.google.inject.Provider<" + Color.class.getName() + ">] on method ["
             + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
           "2) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [2] with key"
@@ -618,7 +620,7 @@ public class FactoryProvider2Test extends TestCase {
             + JavaxProviderBasedColoredCarFactory.class.getName() + ".createCar()]",
           "3) A Provider may not be a type in a factory method of an AssistedInject."
             + "\n  Offending instance is parameter [1] with key"
-            + " [com.google.inject.Provider<java.awt.Color>"
+            + " [com.google.inject.Provider<" + Color.class.getName() + ">"
             + " annotated with @com.google.inject.assistedinject.Assisted(value=color)]"
             + " on method [" + JavaxProviderBasedColoredCarFactory.class.getName() + ".createMustang()]"
       );
@@ -726,7 +728,7 @@ public class FactoryProvider2Test extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "A binding to java.awt.Color annotated with @"
+      assertContains(expected.getMessage(), "A binding to " + Color.class.getName() + " annotated with @"
           + Assisted.class.getName() + "(value=paint) was already configured at");
     }
   }

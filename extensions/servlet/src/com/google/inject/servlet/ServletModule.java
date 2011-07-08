@@ -18,10 +18,12 @@ package com.google.inject.servlet;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.common.collect.ImmutableList;
+
 import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;

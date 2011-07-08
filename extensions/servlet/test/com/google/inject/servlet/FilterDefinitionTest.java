@@ -1,15 +1,25 @@
 package com.google.inject.servlet;
 
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.spi.BindingScopingVisitor;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,12 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
@@ -69,7 +73,7 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-    		UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
+        UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
     filterDef.init(servletContext, injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
 
@@ -178,7 +182,7 @@ public class FilterDefinitionTest extends TestCase {
         UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>(), null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
-    		Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
     assertTrue(filterDef.getFilter() instanceof MockFilter);
 
 

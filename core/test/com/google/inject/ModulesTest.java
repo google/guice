@@ -17,8 +17,10 @@
 package com.google.inject;
 
 import com.google.inject.util.Modules;
-import java.util.Arrays;
+
 import junit.framework.TestCase;
+
+import java.util.Arrays;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

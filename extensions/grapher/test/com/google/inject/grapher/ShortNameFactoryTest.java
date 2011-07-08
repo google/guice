@@ -32,12 +32,12 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;
 
+import junit.framework.TestCase;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Member;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for {@link ShortNameFactory}.

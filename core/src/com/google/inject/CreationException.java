@@ -16,10 +16,12 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Errors;
-import com.google.common.collect.ImmutableSet;
 import static com.google.common.base.Preconditions.checkArgument;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
+
 import java.util.Collection;
 
 /**

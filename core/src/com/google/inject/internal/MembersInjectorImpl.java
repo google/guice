@@ -16,11 +16,11 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 

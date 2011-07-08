@@ -1,16 +1,19 @@
 package com.google.inject.servlet;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
 
 /**
  *
@@ -79,7 +81,7 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     assertTrue("lifecycle states did not"
         + " fire correct number of times-- inits: " + inits + "; dos: " + doFilters
         + "; destroys: " + destroys,
-    		inits == 1 && doFilters == 3 && destroys == 1);
+        inits == 1 && doFilters == 3 && destroys == 1);
   }
 
   public final void testDispatchThatNoFiltersFire() throws ServletException, IOException {
@@ -116,9 +118,9 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     verify(requestMock);
 
     assertTrue("lifecycle states did not "
-            + "fire correct number of times-- inits: " + inits + "; dos: " + doFilters
-            + "; destroys: " + destroys,
-    		inits == 1 && doFilters == 0 && destroys == 1);
+        + "fire correct number of times-- inits: " + inits + "; dos: " + doFilters
+        + "; destroys: " + destroys,
+        inits == 1 && doFilters == 0 && destroys == 1);
   }
 
   public final void testDispatchFilterPipelineWithRegexMatching() throws ServletException,
@@ -156,9 +158,9 @@ public class VarargsFilterDispatchIntegrationTest extends TestCase {
     verify(requestMock);
 
     assertTrue("lifecycle states did not fire "
-	    + "correct number of times-- inits: " + inits + "; dos: " + doFilters
-	    + "; destroys: " + destroys,
-    		inits == 1 && doFilters == 2 && destroys == 1);
+        + "correct number of times-- inits: " + inits + "; dos: " + doFilters
+        + "; destroys: " + destroys,
+        inits == 1 && doFilters == 2 && destroys == 1);
   }
 
   @Singleton

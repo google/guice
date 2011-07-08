@@ -1,5 +1,8 @@
 package com.google.inject.service;
 
+
+import junit.framework.TestCase;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -7,13 +10,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.TestCase;
 
 /**
  * Tests using Async Service.
  */
+
 public class SingleServiceIntegrationTest extends TestCase {
-  
+
   public final void testAsyncServiceLifecycle() throws InterruptedException {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 

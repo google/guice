@@ -27,18 +27,22 @@ import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.matcher.Matchers.returns;
 import static com.google.inject.matcher.Matchers.subclassesOf;
+
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.AbstractList;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
+
 public class MatcherTest extends TestCase {
 
   public void testAny() {
@@ -143,7 +147,7 @@ public class MatcherTest extends TestCase {
     assertEqualsBothWays(predicate, returns(only(String.class)));
     assertFalse(predicate.equals(returns(only(Integer.class))));
   }
-  
+
   public void testSerialization() throws IOException {
     assertEqualWhenReserialized(any());
     assertEqualWhenReserialized(not(any()));
@@ -160,7 +164,7 @@ public class MatcherTest extends TestCase {
   }
 
   static abstract class MyRunnable implements Runnable {}
-  
+
   @Retention(RetentionPolicy.RUNTIME)
   @interface Foo {}
 

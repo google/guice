@@ -16,20 +16,25 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
+import static com.google.inject.name.Names.named;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import static com.google.common.collect.Iterables.getOnlyElement;
-
 import com.google.inject.name.Named;
-import static com.google.inject.name.Names.named;
+import com.google.inject.spi.InjectionPoint.Signature;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -38,9 +43,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.Assert;
-import junit.framework.TestCase;
-import com.google.inject.spi.InjectionPoint.Signature;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -239,14 +241,14 @@ public class InjectionPointTest extends TestCase {
   }
   
   public void testOverrideBehavior() {
-	  Set<InjectionPoint> points;
-	  
-	  points = InjectionPoint.forInstanceMethodsAndFields(Super.class);
-	  assertEquals(points.toString(), 6, points.size());
-	  assertPoints(points, Super.class, "atInject", "gInject", "privateAtAndPublicG",
-	      "privateGAndPublicAt", "atFirstThenG", "gFirstThenAt");
-	  
-	  points = InjectionPoint.forInstanceMethodsAndFields(Sub.class);
+    Set<InjectionPoint> points;
+
+    points = InjectionPoint.forInstanceMethodsAndFields(Super.class);
+    assertEquals(points.toString(), 6, points.size());
+    assertPoints(points, Super.class, "atInject", "gInject", "privateAtAndPublicG",
+        "privateGAndPublicAt", "atFirstThenG", "gFirstThenAt");
+
+    points = InjectionPoint.forInstanceMethodsAndFields(Sub.class);
     assertEquals(points.toString(), 7, points.size());
     // Superclass will always have is private members injected,
     // and 'gInject' was last @Injected in Super, so that remains the owner
@@ -278,13 +280,13 @@ public class InjectionPointTest extends TestCase {
   }
   
   static class Super {
-	  @javax.inject.Inject public void atInject() {}
-	  @com.google.inject.Inject public void gInject() {}
-	  
-	  @javax.inject.Inject private void privateAtAndPublicG() {}
-	  @com.google.inject.Inject private void privateGAndPublicAt() {}
-	  
-	  @javax.inject.Inject public void atFirstThenG() {}
+    @javax.inject.Inject public void atInject() {}
+    @com.google.inject.Inject public void gInject() {}
+
+    @javax.inject.Inject private void privateAtAndPublicG() {}
+    @com.google.inject.Inject private void privateGAndPublicAt() {}
+
+    @javax.inject.Inject public void atFirstThenG() {}
     @com.google.inject.Inject public void gFirstThenAt() {}
   }
   

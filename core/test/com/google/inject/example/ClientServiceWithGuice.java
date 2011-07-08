@@ -16,13 +16,14 @@
 
 package com.google.inject.example;
 
+import static junit.framework.Assert.assertTrue;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
-import static junit.framework.Assert.assertTrue;
 
 /**
  * @author crazybob@google.com (Bob Lee)

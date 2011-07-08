@@ -22,6 +22,7 @@ import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.MoreTypes.GenericArrayTypeImpl;
 import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
 import com.google.inject.internal.MoreTypes.WildcardTypeImpl;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

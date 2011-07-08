@@ -16,6 +16,17 @@
 
 package com.googlecode.guice;
 
+
+import aQute.bnd.main.bnd;
+
+import com.googlecode.guice.bundle.OSGiTestActivator;
+
+import junit.framework.TestCase;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,19 +37,9 @@ import java.util.Properties;
 
 import javax.imageio.spi.ServiceRegistry;
 
-import junit.framework.TestCase;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
-
-import aQute.bnd.main.bnd;
-
-import com.googlecode.guice.bundle.OSGiTestActivator;
-
 /**
  * Run various tests inside one or more OSGi containers.
- * 
+ *
  * @author mcculls@gmail.com (Stuart McCulloch)
  */
 public class OSGiContainerTest
@@ -112,7 +113,7 @@ public class OSGiContainerTest
     // assemble bundle, use -failok switch to avoid early exit
     bnd.main(new String[]{"-failok", "build", "-classpath", classpath, bndFileName});
   }
-  
+
   private String failMsg() {
     return "This test may fail if it is not run from ant, or if it is not run after ant has "
          + "compiled & built jars. This is because the test is validating that the Guice jar "

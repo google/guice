@@ -18,9 +18,11 @@ package com.google.inject.servlet;
 
 import com.google.inject.Inject;
 import com.google.inject.OutOfScopeException;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.logging.Logger;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;

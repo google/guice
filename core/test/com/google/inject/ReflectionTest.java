@@ -18,9 +18,9 @@ package com.google.inject;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.lang.annotation.Retention;
-
 import junit.framework.TestCase;
+
+import java.lang.annotation.Retention;
 
 /**
  * @author crazybob@google.com (Bob Lee)

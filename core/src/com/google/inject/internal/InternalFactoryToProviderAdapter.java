@@ -16,8 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Provider;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 
 /**

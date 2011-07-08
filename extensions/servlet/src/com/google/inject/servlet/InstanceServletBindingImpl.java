@@ -16,11 +16,11 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.Objects;
+
 import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
-
-import com.google.common.base.Objects;
 
 /**
  * Default implementation of InstanceServletBinding.

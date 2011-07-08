@@ -18,6 +18,7 @@ package com.google.inject.spi;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import junit.framework.TestCase;
 
 /**

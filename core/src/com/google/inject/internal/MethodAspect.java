@@ -17,11 +17,14 @@
 package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.matcher.Matcher;
+
+import org.aopalliance.intercept.MethodInterceptor;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Ties a matcher to a method interceptor.

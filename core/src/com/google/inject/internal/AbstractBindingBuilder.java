@@ -16,12 +16,14 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Scope;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.InstanceBinding;
+
 import java.lang.annotation.Annotation;
 import java.util.List;
 

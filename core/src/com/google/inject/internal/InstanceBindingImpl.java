@@ -16,17 +16,18 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.base.Objects;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.util.Providers;
+
 import java.util.Set;
 
 final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBinding<T> {

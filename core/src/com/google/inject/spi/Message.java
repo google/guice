@@ -16,12 +16,14 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import com.google.inject.internal.Errors;
-import com.google.common.collect.ImmutableList;
-import com.google.common.base.Objects;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.inject.internal.util.SourceProvider;
+
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;

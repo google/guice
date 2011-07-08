@@ -17,10 +17,13 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import com.google.inject.util.Types;
 import static com.google.inject.util.Types.listOf;
-import java.util.List;
+
+import com.google.inject.util.Types;
+
 import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * Demonstrates type reification.

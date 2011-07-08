@@ -16,11 +16,12 @@
 
 package com.google.inject;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.google.inject.Asserts.assertContains;
 
 import junit.framework.TestCase;
-import static com.google.inject.Asserts.assertContains;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)

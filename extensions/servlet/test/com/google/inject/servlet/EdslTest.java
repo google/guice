@@ -22,8 +22,10 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import java.util.HashMap;
+
 import junit.framework.TestCase;
+
+import java.util.HashMap;
 
 /**
  * Sanity checks the EDSL and resultant bound module(s).

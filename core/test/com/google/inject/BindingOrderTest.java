@@ -16,13 +16,16 @@
 
 package com.google.inject;
 
+
+import junit.framework.TestCase;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
+
 public class BindingOrderTest extends TestCase {
 
   public void testBindingOutOfOrder() {
@@ -76,7 +79,7 @@ public class BindingOrderTest extends TestCase {
         }
       }
     };
-    
+
     Guice.createInjector(new AbstractModule() {
       protected void configure() {
         requestInjection(createsAThread);

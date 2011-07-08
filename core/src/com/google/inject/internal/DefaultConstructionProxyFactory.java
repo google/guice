@@ -16,9 +16,10 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.spi.InjectionPoint;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -25,11 +27,10 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.TypeConverterBinding;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;

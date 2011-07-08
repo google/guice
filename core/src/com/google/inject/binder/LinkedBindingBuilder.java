@@ -19,6 +19,7 @@ package com.google.inject.binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+
 import java.lang.reflect.Constructor;
 
 /**

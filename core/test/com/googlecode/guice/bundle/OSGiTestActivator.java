@@ -18,21 +18,21 @@ package com.googlecode.guice.bundle;
 
 import static com.google.inject.name.Names.named;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Random;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.matcher.AbstractMatcher;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Random;
 
 /**
  * Test Guice from inside an OSGi bundle activator.

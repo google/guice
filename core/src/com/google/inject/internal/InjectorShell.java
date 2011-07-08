@@ -16,19 +16,20 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.inject.Scopes.SINGLETON;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import static com.google.inject.Scopes.SINGLETON;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.Stopwatch;
 import com.google.inject.spi.Dependency;
@@ -38,6 +39,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
+
 import java.util.List;
 import java.util.logging.Logger;
 

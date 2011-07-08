@@ -18,15 +18,17 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.reserialize;
-import java.io.IOException;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
+
 import junit.framework.TestCase;
+
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

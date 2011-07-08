@@ -16,13 +16,20 @@
 
 package com.googlecode.guice;
 
+import static com.google.inject.matcher.Matchers.any;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import static com.google.inject.matcher.Matchers.any;
 import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
+
+import junit.framework.TestCase;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -31,9 +38,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import junit.framework.TestCase;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * This test is in a separate package so we can test package-level visibility

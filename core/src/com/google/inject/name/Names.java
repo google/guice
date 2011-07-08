@@ -18,6 +18,7 @@ package com.google.inject.name;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
+
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;

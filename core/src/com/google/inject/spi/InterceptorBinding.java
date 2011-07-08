@@ -16,13 +16,16 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Binder;
-import com.google.common.collect.ImmutableList;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Binder;
 import com.google.inject.matcher.Matcher;
+
+import org.aopalliance.intercept.MethodInterceptor;
+
 import java.lang.reflect.Method;
 import java.util.List;
-import org.aopalliance.intercept.MethodInterceptor;
 
 /**
  * Registration of interceptors for matching methods of matching classes. Instances are created

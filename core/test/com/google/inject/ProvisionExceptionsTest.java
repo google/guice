@@ -16,13 +16,13 @@
 
 package com.google.inject;
 
-import java.io.IOException;
-
-import junit.framework.TestCase;
-
 import com.google.inject.internal.Errors;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
+import junit.framework.TestCase;
+
+import java.io.IOException;
 
 /**
  * Tests that ProvisionExceptions are readable and clearly indicate to the user what went wrong with

@@ -16,12 +16,7 @@
 
 package com.google.inject.throwingproviders;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Exposed;
 import com.google.inject.Key;
@@ -29,11 +24,16 @@ import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A provider that invokes a method and returns its result.

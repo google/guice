@@ -17,7 +17,9 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Injector;
+
 import java.lang.ref.WeakReference;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

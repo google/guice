@@ -16,11 +16,12 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.inject.Binder;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A lookup of the members injector for a type. Lookups are created explicitly in a module using

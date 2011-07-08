@@ -1,12 +1,5 @@
 package com.google.inject.spi;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.CreationException;
@@ -17,6 +10,13 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.google.inject.spi.Toolable;
+
+import junit.framework.TestCase;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ToolStageInjectorTest extends TestCase {
 

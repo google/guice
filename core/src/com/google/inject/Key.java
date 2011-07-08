@@ -16,10 +16,12 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.Annotations;
-import com.google.inject.internal.MoreTypes;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.inject.internal.Annotations;
+import com.google.inject.internal.MoreTypes;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 

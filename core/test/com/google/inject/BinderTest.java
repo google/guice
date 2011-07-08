@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -25,6 +26,9 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
@@ -33,7 +37,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

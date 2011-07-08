@@ -19,6 +19,18 @@ package com.google.inject.servlet;
 import static org.easymock.EasyMock.createControl;
 import static org.easymock.EasyMock.expect;
 
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Scopes;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+
+import junit.framework.TestCase;
+
+import org.easymock.IMocksControl;
+
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -30,18 +42,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.TestCase;
-
-import org.easymock.IMocksControl;
-
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Scopes;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 
 /** Tests to make sure that servlets with a context path are handled right. */
 public class ContextPathTest extends TestCase {

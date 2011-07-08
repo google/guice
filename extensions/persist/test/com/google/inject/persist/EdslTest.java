@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Stage;
 import com.google.inject.persist.jpa.JpaPersistModule;
+
 import junit.framework.TestCase;
 
 /**

@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -23,8 +24,8 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.common.base.Objects;
 import com.google.inject.spi.BindingScopingVisitor;
+
 import java.lang.annotation.Annotation;
 
 /**

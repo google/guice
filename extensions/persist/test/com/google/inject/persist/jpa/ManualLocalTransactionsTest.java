@@ -22,10 +22,13 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
+
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
 
 /**
  * For instance, a session-per-request strategy will control the opening and closing of the EM at
@@ -33,6 +36,7 @@ import junit.framework.TestCase;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class ManualLocalTransactionsTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();

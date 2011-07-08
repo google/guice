@@ -16,16 +16,16 @@
 
 package com.google.inject.internal;
 
-import java.util.List;
-import java.util.Map;
-
-import com.google.inject.Key;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+import com.google.inject.Key;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@link ProvisionListenerStackCallback} for each key.

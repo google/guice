@@ -14,12 +14,12 @@
 
 package com.google.inject.servlet;
 
-import javax.servlet.Filter;
-import javax.servlet.http.HttpServlet;
-
 import com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder;
 import com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder;
 import com.google.inject.spi.BindingTargetVisitor;
+
+import javax.servlet.Filter;
+import javax.servlet.http.HttpServlet;
 
 /**
  * A visitor for the servlet extension.

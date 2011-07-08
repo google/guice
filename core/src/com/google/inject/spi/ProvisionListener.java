@@ -16,11 +16,11 @@
 
 package com.google.inject.spi;
 
-import java.util.List;
-
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+
+import java.util.List;
 
 /**
  * Listens for provisioning of objects. Useful for gathering timing information

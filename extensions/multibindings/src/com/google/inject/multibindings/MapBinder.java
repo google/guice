@@ -16,6 +16,15 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.multibindings.Multibinder.checkConfiguration;
+import static com.google.inject.multibindings.Multibinder.checkNotNull;
+import static com.google.inject.multibindings.Multibinder.setOf;
+import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -25,15 +34,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
-import static com.google.inject.multibindings.Multibinder.checkConfiguration;
-import static com.google.inject.multibindings.Multibinder.checkNotNull;
-import static com.google.inject.multibindings.Multibinder.setOf;
-
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderInstanceBinding;
@@ -42,7 +43,7 @@ import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
-import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
+
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.LinkedHashMap;

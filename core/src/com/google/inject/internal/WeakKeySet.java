@@ -16,9 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Key;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Key;
 import com.google.inject.internal.util.SourceProvider;
 
 import java.util.Map;

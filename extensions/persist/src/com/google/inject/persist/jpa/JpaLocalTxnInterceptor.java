@@ -19,11 +19,14 @@ package com.google.inject.persist.jpa;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
-import java.lang.reflect.Method;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import java.lang.reflect.Method;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)

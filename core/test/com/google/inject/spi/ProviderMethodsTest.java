@@ -16,8 +16,12 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
@@ -29,23 +33,21 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Types;
+
+import junit.framework.TestCase;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
-
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

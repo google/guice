@@ -16,12 +16,14 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.MoreTypes;
-import static com.google.inject.internal.MoreTypes.canonicalize;
-import com.google.common.collect.ImmutableList;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.inject.internal.MoreTypes.canonicalize;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.internal.MoreTypes;
 import com.google.inject.util.Types;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;

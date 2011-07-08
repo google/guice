@@ -17,21 +17,21 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.util.Types;
 
 import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

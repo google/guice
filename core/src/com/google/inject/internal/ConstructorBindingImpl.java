@@ -16,19 +16,21 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.inject.internal.Annotations.findScopeAnnotation;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import static com.google.inject.internal.Annotations.findScopeAnnotation;
 import com.google.inject.internal.util.Classes;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.base.Objects;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ConstructorBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

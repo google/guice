@@ -16,13 +16,15 @@
 
 package com.google.inject.tools.jmx;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author crazybob@google.com (Bob Lee)

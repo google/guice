@@ -17,11 +17,12 @@
 package com.google.inject.assistedinject;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
 
 import com.google.inject.Inject;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * <p>

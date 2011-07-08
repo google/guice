@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.common.collect.Lists;
 import com.google.inject.spi.PrivateElements;
+
 import java.util.List;
 
 /**

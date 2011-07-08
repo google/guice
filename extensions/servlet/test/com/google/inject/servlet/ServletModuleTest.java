@@ -16,16 +16,16 @@
 
 package com.google.inject.servlet;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
+import com.google.common.collect.Lists;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.common.collect.Lists;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Elements;
+
+import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * Tests for ServletModule, to ensure it captures bindings correctly.

@@ -18,20 +18,24 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
+
 public class InjectorTest extends TestCase {
 
   @Retention(RUNTIME)

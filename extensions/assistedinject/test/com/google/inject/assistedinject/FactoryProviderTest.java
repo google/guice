@@ -16,8 +16,10 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertContains;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -27,22 +29,24 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
-import java.awt.Color;
+
+import junit.framework.TestCase;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class FactoryProviderTest extends TestCase {
+  
+  private enum Color { BLUE, GREEN, RED, GRAY, BLACK, ORANGE, PINK }
 
   public void testAssistedFactory() {
     Injector injector = Guice.createInjector(new AbstractModule() {

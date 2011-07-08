@@ -16,12 +16,14 @@
 package com.google.inject.servlet;
 
 import com.google.inject.ImplementedBy;
+
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.io.IOException;
 
 /**
  * An internal dispatcher for guice-servlet registered servlets and filters.

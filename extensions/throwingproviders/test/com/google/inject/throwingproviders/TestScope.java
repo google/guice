@@ -16,12 +16,14 @@
 
 package com.google.inject.throwingproviders;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
+
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.util.HashMap;
 import java.util.Map;
 

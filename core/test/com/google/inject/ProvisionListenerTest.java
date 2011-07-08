@@ -16,14 +16,9 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.assertContains;
 import static com.google.common.collect.ImmutableList.of;
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import junit.framework.TestCase;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -32,6 +27,11 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
+
+import junit.framework.TestCase;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for {@link Binder#bindListener(Matcher, ProvisionListener...)}

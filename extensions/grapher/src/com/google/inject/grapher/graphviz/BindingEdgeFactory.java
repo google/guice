@@ -16,9 +16,9 @@
 
 package com.google.inject.grapher.graphviz;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.grapher.BindingEdge;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Graphviz-specific implementation of {@link BindingEdge.Factory}. Uses a

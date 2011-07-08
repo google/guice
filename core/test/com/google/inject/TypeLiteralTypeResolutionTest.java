@@ -18,13 +18,17 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.util.Types;
 import static com.google.inject.util.Types.arrayOf;
 import static com.google.inject.util.Types.listOf;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 import static com.google.inject.util.Types.setOf;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.util.Types;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -39,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * This test checks that TypeLiteral can perform type resolution on its members.

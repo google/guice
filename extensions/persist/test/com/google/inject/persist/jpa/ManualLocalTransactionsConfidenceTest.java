@@ -21,14 +21,18 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+
+import junit.framework.TestCase;
+
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-import junit.framework.TestCase;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class ManualLocalTransactionsConfidenceTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT_3 =

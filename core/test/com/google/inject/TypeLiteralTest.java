@@ -18,13 +18,16 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertEqualsBothWays;
 import static com.google.inject.Asserts.assertNotSerializable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.inject.util.Types;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)

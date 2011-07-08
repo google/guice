@@ -16,25 +16,29 @@
 
 package com.google.inject.servlet;
 
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.spi.BindingScopingVisitor;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+
+import junit.framework.TestCase;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import junit.framework.TestCase;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.verify;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).

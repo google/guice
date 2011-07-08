@@ -16,13 +16,13 @@
 
 package com.google.inject.assistedinject;
 
-import junit.framework.TestCase;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import junit.framework.TestCase;
 
 /**
  * @author sameb@google.com (Sam Berlin)

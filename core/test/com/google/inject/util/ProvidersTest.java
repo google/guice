@@ -17,6 +17,7 @@
 package com.google.inject.util;
 
 import com.google.inject.Provider;
+
 import junit.framework.TestCase;
 
 /**

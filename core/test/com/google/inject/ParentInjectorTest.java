@@ -17,18 +17,20 @@ limitations under the License.
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.spi.TypeConverter;
-import static java.lang.annotation.ElementType.TYPE;
+
+import junit.framework.TestCase;
+
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.List;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

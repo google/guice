@@ -16,8 +16,7 @@
 
 package com.google.inject.internal;
 
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -28,8 +27,9 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
+
+import java.util.Set;
 
 /**
  * Guarantees that processing of Binding elements happens in a sane way.

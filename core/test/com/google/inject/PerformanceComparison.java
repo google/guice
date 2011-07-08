@@ -16,17 +16,19 @@
 
 package com.google.inject;
 
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.text.DecimalFormat;
-import java.util.concurrent.Callable;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+
+import java.lang.annotation.Retention;
+import java.text.DecimalFormat;
+import java.util.concurrent.Callable;
 
 /**
  * A semi-useless microbenchmark. Spring and Guice constuct the same object

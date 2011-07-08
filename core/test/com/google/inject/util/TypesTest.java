@@ -20,10 +20,15 @@ package com.google.inject.util;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
-import com.google.inject.TypeLiteral;
-import com.google.inject.internal.MoreTypes;
 import static com.google.inject.util.Types.subtypeOf;
 import static com.google.inject.util.Types.supertypeOf;
+
+import com.google.inject.TypeLiteral;
+import com.google.inject.internal.MoreTypes;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -32,8 +37,6 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.Assert;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

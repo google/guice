@@ -17,16 +17,19 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.common.collect.Iterables;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeConverterBinding;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.util.Date;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+
+import java.lang.annotation.Retention;
+import java.util.Date;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -114,7 +117,7 @@ public class TypeConversionTest extends TestCase {
     assertEquals(Bar.TEE, foo.enumField);
     assertEquals(Foo.class, foo.classField);
   }
-  
+
   public void testConstantInjectionWithExplicitBindingsRequired() throws CreationException {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
@@ -224,7 +227,7 @@ public class TypeConversionTest extends TestCase {
         bind(LongHolder.class);
       }
     });
-    
+
     assertEquals(5L, (long) injector.getInstance(LongHolder.class).foo);
   }
 
@@ -323,7 +326,7 @@ public class TypeConversionTest extends TestCase {
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
   }
-  
+
   public void testStringIsConvertedOnlyOnce() {
     final TypeConverter converter = new TypeConverter() {
       boolean converted = false;

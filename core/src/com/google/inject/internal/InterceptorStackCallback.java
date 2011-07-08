@@ -17,15 +17,18 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.Lists;
+
+import net.sf.cglib.proxy.MethodProxy;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.sf.cglib.proxy.MethodProxy;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Intercepts a method with a stack of interceptors.

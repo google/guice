@@ -2,14 +2,14 @@
 
 package com.google.inject.grapher;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provides;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -22,9 +22,11 @@ import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.UntargettedBinding;
+
+import junit.framework.TestCase;
+
 import java.util.Collection;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * Tests for {@link InjectorGrapher}.

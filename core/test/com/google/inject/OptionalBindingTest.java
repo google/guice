@@ -18,8 +18,10 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
 import junit.framework.TestCase;
 
 /**

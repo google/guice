@@ -16,7 +16,9 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Singleton;
+
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

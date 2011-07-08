@@ -23,18 +23,22 @@ import com.google.inject.Provider;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.finder.Finder;
+
+import junit.framework.TestCase;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
 import javax.persistence.EntityManager;
-import junit.framework.TestCase;
 
 /**
  * A test around providing sessions (starting, closing etc.)
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class DynamicFinderTest extends TestCase {
   private Injector injector;
 

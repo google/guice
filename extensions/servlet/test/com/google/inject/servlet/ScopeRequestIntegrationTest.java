@@ -16,6 +16,8 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,10 +26,10 @@ import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,12 +38,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import javax.servlet.ServletException;
-import junit.framework.TestCase;
 
 /**
  * Tests continuation of requests
  */
+
 public class ScopeRequestIntegrationTest extends TestCase {
   private static final String A_VALUE = "thereaoskdao";
   private static final String A_DIFFERENT_VALUE = "hiaoskd";
@@ -85,7 +88,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
     executor.shutdown();
     executor.awaitTermination(2, TimeUnit.SECONDS);
   }
-  
+
   public final void testWrongValueClasses() throws Exception {
     Injector injector = Guice.createInjector(new ServletModule() {
       @Override protected void configureServlets() {
@@ -93,7 +96,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
         bind(SomeObject.class).in(RequestScoped.class);
       }
     });
-    
+
     OffRequestCallable offRequestCallable = injector.getInstance(OffRequestCallable.class);
     try {
       ServletScopes.scopeRequest(offRequestCallable,
@@ -103,7 +106,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
       assertEquals("Value[Boo!] of type[java.lang.String] is not compatible with key[" + Key.get(SomeObject.class) + "]", iae.getMessage());
     }
   }
-  
+
   public final void testNullReplacement() throws Exception {
     Injector injector = Guice.createInjector(new ServletModule() {
       @Override protected void configureServlets() {
@@ -111,7 +114,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
         bind(SomeObject.class).in(RequestScoped.class);
       }
     });
-    
+
     Callable<SomeObject> callable = injector.getInstance(Caller.class);
     try {
       assertNotNull(callable.call());
@@ -119,7 +122,7 @@ public class ScopeRequestIntegrationTest extends TestCase {
     } catch(ProvisionException pe) {
       assertTrue(pe.getCause() instanceof OutOfScopeException);
     }
-    
+
     // Validate that an actual null entry in the map results in a null injected object.
     Map<Key<?>, Object> map = Maps.newHashMap();
     map.put(Key.get(SomeObject.class), null);
@@ -154,10 +157,10 @@ public class ScopeRequestIntegrationTest extends TestCase {
       return value;
     }
   }
-  
+
   private static class Caller implements Callable<SomeObject> {
     @Inject Provider<SomeObject> someObject;
-    
+
     public SomeObject call() throws Exception {
       return someObject.get();
     }

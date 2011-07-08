@@ -16,8 +16,11 @@
 
 package com.google.inject.throwingproviders;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
-
 import com.google.inject.Asserts;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -26,16 +29,14 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
 import com.google.inject.throwingproviders.ThrowingProviderBinder.Result;
+
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -45,8 +46,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TooManyListenersException;
-
-import junit.framework.TestCase;
 
 /**
  * @author jmourits@google.com (Jerome Mourits)

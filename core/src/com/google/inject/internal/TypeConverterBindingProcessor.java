@@ -18,12 +18,12 @@ package com.google.inject.internal;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.SourceProvider;
-import com.google.common.base.Strings;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeConverterBinding;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

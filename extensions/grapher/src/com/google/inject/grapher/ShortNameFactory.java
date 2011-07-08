@@ -16,12 +16,13 @@
 
 package com.google.inject.grapher;
 
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;

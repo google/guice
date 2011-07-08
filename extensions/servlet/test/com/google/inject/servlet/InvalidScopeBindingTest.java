@@ -1,13 +1,16 @@
 package com.google.inject.servlet;
 
+import static org.easymock.EasyMock.createMock;
+
 import com.google.inject.Guice;
-import com.google.inject.Singleton;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
+
+import junit.framework.TestCase;
+
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import junit.framework.TestCase;
-import static org.easymock.EasyMock.createMock;
 
 /**
  * Ensures that an error is thrown if a Servlet or Filter is bound

@@ -22,15 +22,18 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
 
 /**
  * A test around providing sessions (starting, closing etc.)
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class EntityManagerPerRequestProvisionTest extends TestCase {
   private Injector injector;
 

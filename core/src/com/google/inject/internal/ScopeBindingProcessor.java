@@ -16,9 +16,11 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Scope;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.inject.Scope;
 import com.google.inject.spi.ScopeBinding;
+
 import java.lang.annotation.Annotation;
 
 /**

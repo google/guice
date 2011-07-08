@@ -17,9 +17,9 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.util.LineNumbersTest;
 import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
+import com.google.inject.internal.util.LineNumbersTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamedEquivalanceTest;
 import com.google.inject.name.NamesTest;
@@ -36,11 +36,13 @@ import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-import com.googlecode.guice.Jsr330Test;
 import com.googlecode.guice.GuiceTck;
-import java.util.Set;
+import com.googlecode.guice.Jsr330Test;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import java.util.Set;
 
 /**
  * @author crazybob@google.com (Bob Lee)

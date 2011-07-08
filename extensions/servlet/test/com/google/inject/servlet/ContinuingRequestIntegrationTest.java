@@ -16,14 +16,22 @@
 
 package com.google.inject.servlet;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -33,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -40,15 +49,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import junit.framework.TestCase;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 
 /**
  * Tests continuation of requests
  */
+
 public class ContinuingRequestIntegrationTest extends TestCase {
   private static final String PARAM_VALUE = "there";
   private static final String PARAM_NAME = "hi";
@@ -113,7 +118,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     FilterConfig filterConfig = createMock(FilterConfig.class);
     expect(filterConfig.getServletContext()).andReturn(createMock(ServletContext.class));
-    
+
     GuiceFilter guiceFilter = injector.getInstance(GuiceFilter.class);
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
@@ -167,7 +172,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     expect(request.getMethod()).andReturn("GET");
     FilterChain filterChain = createMock(FilterChain.class);
-    
+
     replay(request, filterConfig, filterChain);
 
     guiceFilter.init(filterConfig);

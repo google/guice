@@ -17,6 +17,7 @@
 package com.google.inject.binder;
 
 import com.google.inject.Scope;
+
 import java.lang.annotation.Annotation;
 
 /**

@@ -21,12 +21,15 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+
+import junit.framework.TestCase;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
-import junit.framework.TestCase;
 
 /**
  * This test asserts class level @Transactional annotation behavior.
@@ -36,6 +39,7 @@ import junit.framework.TestCase;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+
 public class ClassLevelManagedLocalTransactionsTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT = "JPAsome unique text88888" + new Date();

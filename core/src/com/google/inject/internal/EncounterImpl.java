@@ -16,18 +16,20 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
+
 import java.lang.reflect.Method;
 import java.util.List;
 

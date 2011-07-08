@@ -16,9 +16,10 @@
 
 package com.google.inject.assistedinject;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.Lists;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

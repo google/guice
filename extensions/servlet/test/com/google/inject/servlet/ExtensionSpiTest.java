@@ -19,21 +19,21 @@ package com.google.inject.servlet;
 import static com.google.inject.servlet.UriPatternType.REGEX;
 import static com.google.inject.servlet.UriPatternType.SERVLET;
 
-import java.util.Iterator;
-import java.util.List;
-
-import junit.framework.TestCase;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletSpiVisitor.Params;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+
+import junit.framework.TestCase;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A very basic test that servletmodule works with bindings.

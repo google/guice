@@ -17,9 +17,11 @@
 package com.google.inject.internal;
 
 import com.google.inject.TypeLiteral;
+
+import junit.framework.TestCase;
+
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
 
 /**
  * @author schmitt@google.com (Peter Schmitt)

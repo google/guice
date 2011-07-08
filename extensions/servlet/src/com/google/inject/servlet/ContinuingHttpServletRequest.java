@@ -16,10 +16,12 @@
 
 package com.google.inject.servlet;
 
-import com.google.inject.OutOfScopeException;
 import com.google.common.collect.Maps;
+import com.google.inject.OutOfScopeException;
+
 import java.io.IOException;
 import java.util.Map;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;

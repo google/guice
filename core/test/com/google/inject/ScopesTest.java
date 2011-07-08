@@ -17,25 +17,28 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.name.Names.named;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
-import static com.google.inject.name.Names.named;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.util.Providers;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -240,7 +243,7 @@ public class ScopesTest extends TestCase {
 
   public void testUnscopedProviderWorksOutsideOfRequestedScope() {
     final RememberProviderScope scope = new RememberProviderScope();
-    
+
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bindScope(CustomScoped.class, scope);
@@ -471,7 +474,7 @@ public class ScopesTest extends TestCase {
         bind(e).toProvider(Providers.of("e")).asEagerSingleton();
         bind(f).toProvider(Providers.of("f")).in(Singleton.class);
         bind(h).to(AnnotatedSingleton.class);
-        install(new PrivateModule() {          
+        install(new PrivateModule() {
           @Override
           protected void configure() {
             bind(i).toProvider(Providers.of("i")).in(Singleton.class);
@@ -509,7 +512,7 @@ public class ScopesTest extends TestCase {
     assertTrue(Scopes.isSingleton(injector.getBinding(h)));
     assertTrue(Scopes.isSingleton(injector.getBinding(i)));
   }
-  
+
   public void testIsSingletonNegative() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
@@ -525,7 +528,7 @@ public class ScopesTest extends TestCase {
         bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
         bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
         bindScope(CustomScoped.class, Scopes.NO_SCOPE);
-        install(new PrivateModule() {          
+        install(new PrivateModule() {
           @Override
           protected void configure() {
             bind(f).toProvider(Providers.of("f")).in(CustomScoped.class);

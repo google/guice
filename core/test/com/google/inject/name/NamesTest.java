@@ -17,17 +17,20 @@
 
 package com.google.inject.name;
 
-import com.google.inject.AbstractModule;
 import static com.google.inject.Asserts.assertEqualWhenReserialized;
 import static com.google.inject.Asserts.assertEqualsBothWays;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.common.collect.ImmutableMap;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

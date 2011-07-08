@@ -1,9 +1,12 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+
 import com.google.inject.name.Names;
-import java.util.logging.Logger;
+
 import junit.framework.TestCase;
+
+import java.util.logging.Logger;
 
 /**
  * Test built-in injection of loggers.

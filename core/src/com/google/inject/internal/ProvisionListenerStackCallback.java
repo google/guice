@@ -16,12 +16,12 @@
 
 package com.google.inject.internal;
 
-import java.util.List;
-
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
-import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.DependencyAndSource;
+import com.google.inject.spi.ProvisionListener;
+
+import java.util.List;
 
 /**
  * Intercepts provisions with a stack of listeners.

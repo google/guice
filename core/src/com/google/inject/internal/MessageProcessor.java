@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import com.google.inject.Guice;
 import com.google.inject.spi.Message;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

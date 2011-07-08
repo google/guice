@@ -22,10 +22,13 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
+
 import java.util.Date;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import junit.framework.TestCase;
 
 /**
  * Created with IntelliJ IDEA. On: 2/06/2007
@@ -36,6 +39,7 @@ import junit.framework.TestCase;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  * @since 1.0
  */
+
 public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
   private Injector injector;
   private static final String UNIQUE_TEXT = "some unique text" + new Date();

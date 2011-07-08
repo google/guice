@@ -15,13 +15,6 @@
  */
 package com.google.inject.servlet;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.http.HttpServlet;
-import junit.framework.TestCase;
-
 import static com.google.inject.servlet.GuiceServletContextListener.INJECTOR_NAME;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -29,6 +22,15 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import junit.framework.TestCase;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.http.HttpServlet;
 
 /**
  * This gorgeous test asserts that multiple servlet pipelines can

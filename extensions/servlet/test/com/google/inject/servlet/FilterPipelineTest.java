@@ -1,9 +1,5 @@
 package com.google.inject.servlet;
 
-import com.google.inject.Guice;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
@@ -12,7 +8,14 @@ import static org.easymock.EasyMock.isNull;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.inject.Guice;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -21,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import junit.framework.TestCase;
 
 /**
  * This is a basic whitebox test that verifies the glue between

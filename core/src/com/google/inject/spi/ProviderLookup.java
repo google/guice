@@ -16,11 +16,12 @@
 
 package com.google.inject.spi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A lookup of the provider for a type. Lookups are created explicitly in a module using

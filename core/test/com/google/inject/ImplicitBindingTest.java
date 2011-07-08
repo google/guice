@@ -17,11 +17,12 @@
 package com.google.inject;
 
 import com.google.common.collect.Iterables;
-import java.util.List;
-
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+
 import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * @author crazybob@google.com (Bob Lee)

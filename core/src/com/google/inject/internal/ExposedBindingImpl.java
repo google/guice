@@ -16,15 +16,16 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ExposedBinding;
 import com.google.inject.spi.PrivateElements;
+
 import java.util.Set;
 
 public final class ExposedBindingImpl<T> extends BindingImpl<T> implements ExposedBinding<T> {

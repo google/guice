@@ -17,10 +17,11 @@
 
 package com.google.inject.multibindings;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.inject.BindingAnnotation;
 
 import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * An internal binding annotation applied to each element in a multibinding.

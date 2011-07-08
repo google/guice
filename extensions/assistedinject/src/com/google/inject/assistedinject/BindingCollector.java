@@ -15,12 +15,13 @@
  */
 package com.google.inject.assistedinject;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.spi.Message;
+
 import java.util.Collections;
 import java.util.Map;
 

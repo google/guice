@@ -16,10 +16,10 @@
 
 package com.google.inject.spi;
 
-import java.lang.reflect.Member;
-
 import com.google.inject.Binding;
 import com.google.inject.internal.util.StackTraceElements;
+
+import java.lang.reflect.Member;
 
 /**
  * A combination of a {@link Dependency} and the {@link Binding#getSource()

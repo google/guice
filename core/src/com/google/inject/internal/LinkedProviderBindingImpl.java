@@ -16,14 +16,15 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.base.Objects;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderKeyBinding;
+
 import java.util.Set;
 
 final class LinkedProviderBindingImpl<T>

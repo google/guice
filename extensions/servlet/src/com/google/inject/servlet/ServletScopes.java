@@ -16,14 +16,16 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-import com.google.common.collect.Maps;
-import com.google.common.base.Preconditions;
+
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 

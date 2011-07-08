@@ -16,11 +16,11 @@
 
 package com.google.inject.internal;
 
-import javax.inject.Provider;
-
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+
+import javax.inject.Provider;
 
 /**
  * Delegates to a custom factory which is also bound in the injector.

@@ -17,14 +17,16 @@
 package com.google.inject.multibindings;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
+import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.multibindings.SpiUtils.assertMapVisitor;
 import static com.google.inject.multibindings.SpiUtils.instance;
 import static com.google.inject.multibindings.SpiUtils.providerInstance;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -38,13 +40,11 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.name.Names;
 import com.google.inject.spi.DefaultElementVisitor;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
-import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;

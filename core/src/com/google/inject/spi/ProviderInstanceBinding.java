@@ -18,6 +18,7 @@ package com.google.inject.spi;
 
 import com.google.inject.Binding;
 import com.google.inject.Provider;
+
 import java.util.Set;
 
 /**

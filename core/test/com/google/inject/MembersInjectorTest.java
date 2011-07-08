@@ -17,11 +17,14 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
-import java.util.concurrent.atomic.AtomicReference;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

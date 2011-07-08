@@ -16,6 +16,7 @@
 package com.google.inject.servlet;
 
 import com.google.inject.Singleton;
+
 import javax.servlet.http.HttpServlet;
 
 /**

@@ -17,6 +17,7 @@
 package com.google.inject.persist.jpa;
 
 import com.google.inject.BindingAnnotation;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

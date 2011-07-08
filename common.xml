@@ -165,8 +165,8 @@
         classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <zipfileset src="${common.basedir}/lib/build/cglib-2.2.2.jar">
-      	<include name="LICENSE"/>
-      	<include name="NOTICE"/>
+        <include name="LICENSE"/>
+        <include name="NOTICE"/>
       </zipfileset>
       <fileset dir="${build.dir}/classes"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>

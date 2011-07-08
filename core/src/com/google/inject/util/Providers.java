@@ -18,16 +18,16 @@ package com.google.inject.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderWithDependencies;
+
+import java.util.Set;
 
 /**
  * Static utility methods for creating and working with instances of

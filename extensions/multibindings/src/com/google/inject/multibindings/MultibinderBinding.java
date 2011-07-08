@@ -16,13 +16,13 @@
 
 package com.google.inject.multibindings;
 
-import java.util.List;
-
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
+
+import java.util.List;
 
 /**
  * A binding for a Multibinder.

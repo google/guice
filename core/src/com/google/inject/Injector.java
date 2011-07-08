@@ -16,12 +16,12 @@
 
 package com.google.inject;
 
+import com.google.inject.spi.TypeConverterBinding;
+
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.inject.spi.TypeConverterBinding;
 
 /**
  * Builds the graphs of objects that make up your application. The injector tracks the dependencies

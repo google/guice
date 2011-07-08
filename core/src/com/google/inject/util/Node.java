@@ -16,10 +16,11 @@
 
 package com.google.inject.util;
 
-import com.google.inject.Key;
-import com.google.inject.internal.Errors;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Key;
+import com.google.inject.internal.Errors;
+
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

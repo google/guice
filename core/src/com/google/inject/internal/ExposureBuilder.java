@@ -16,10 +16,11 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.binder.AnnotatedElementBuilder;
-import com.google.common.base.Preconditions;
+
 import java.lang.annotation.Annotation;
 
 /**

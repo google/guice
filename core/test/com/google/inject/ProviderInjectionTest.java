@@ -16,8 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.name.Named;
 import static com.google.inject.name.Names.named;
+
+import com.google.inject.name.Named;
+
 import junit.framework.TestCase;
 
 import java.util.Arrays;

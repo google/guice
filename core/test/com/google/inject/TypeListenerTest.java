@@ -17,21 +17,24 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.only;
+import static com.google.inject.name.Names.named;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
-import static com.google.inject.matcher.Matchers.any;
-import static com.google.inject.matcher.Matchers.only;
-import static com.google.inject.name.Names.named;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+
+import junit.framework.TestCase;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

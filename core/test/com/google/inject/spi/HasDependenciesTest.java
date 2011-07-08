@@ -16,16 +16,18 @@
 
 package com.google.inject.spi;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import java.util.Set;
+
 import junit.framework.TestCase;
+
+import java.util.Set;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

@@ -16,11 +16,11 @@
 
 package com.google.inject;
 
-import java.util.Enumeration;
-import java.util.Set;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import java.util.Enumeration;
+import java.util.Set;
 
 public class SuiteUtils {
 
