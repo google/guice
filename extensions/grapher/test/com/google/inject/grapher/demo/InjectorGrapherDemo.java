@@ -19,10 +19,8 @@ package com.google.inject.grapher.demo;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.google.inject.grapher.GrapherModule;
-import com.google.inject.grapher.InjectorGrapher;
+import com.google.inject.grapher.graphviz.GraphvizGrapher;
 import com.google.inject.grapher.graphviz.GraphvizModule;
-import com.google.inject.grapher.graphviz.GraphvizRenderer;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -38,15 +36,13 @@ public class InjectorGrapherDemo {
   public static void main(String[] args) throws Exception {
     // TODO(phopkins): Switch to Stage.TOOL when issue 297 is fixed.
     Injector demoInjector = Guice.createInjector(Stage.DEVELOPMENT,
-        new BackToTheFutureModule(), new MultibinderModule());
+        new BackToTheFutureModule(), new MultibinderModule(), new PrivateTestModule());
     PrintWriter out = new PrintWriter(new File(args[0]), "UTF-8");
 
-    Injector injector = Guice.createInjector(new GrapherModule(), new GraphvizModule());
-    GraphvizRenderer renderer = injector.getInstance(GraphvizRenderer.class);
-    renderer.setOut(out).setRankdir("TB");
-
-    injector.getInstance(InjectorGrapher.class)
-        .of(demoInjector)
-        .graph();
+    Injector injector = Guice.createInjector(new GraphvizModule());
+    GraphvizGrapher grapher = injector.getInstance(GraphvizGrapher.class);
+    grapher.setOut(out);
+    grapher.setRankdir("TB");
+    grapher.graph(demoInjector);
   }
 }

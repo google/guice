@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.inject.grapher;
+package com.google.inject.grapher.demo;
+
+import com.google.inject.PrivateModule;
 
 /**
- * Factory for aliasing one node ID to another. Used when we don't want to
- * render {@link Key}s from {@link Binding}s that are not interesting.
- * 
- * @author phopkins@gmail.com (Pete Hopkins)
+ * Module to test private modules and exposed bindings.
+ *
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public interface NodeAliasFactory<K> {
-  /**
-   * Makes edges that would point to {@code fromId} point to
-   * {@code toId} instead.
-   */
-  void newAlias(K fromId, K toId);
+public class PrivateTestModule extends PrivateModule {
+  interface Exposed {}
+  static class Hidden implements Exposed {}
+
+  @Override protected void configure() {
+    bind(Exposed.class).to(Hidden.class);
+    expose(Exposed.class);
+  }
 }

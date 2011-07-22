@@ -17,68 +17,66 @@
 package com.google.inject.grapher.graphviz;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.grapher.AbstractInjectorGrapher;
+import com.google.inject.grapher.BindingEdge;
+import com.google.inject.grapher.DependencyEdge;
 import com.google.inject.grapher.ImplementationNode;
-import com.google.inject.grapher.NodeAliasFactory;
-import com.google.inject.grapher.Renderer;
-
+import com.google.inject.grapher.InstanceNode;
+import com.google.inject.grapher.InterfaceNode;
+import com.google.inject.grapher.NameFactory;
+import com.google.inject.grapher.NodeId;
+import com.google.inject.spi.InjectionPoint;
 import java.io.PrintWriter;
+import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * {@link Renderer} implementation that writes out a Graphviz DOT file of the
- * graph. Bound in {@link GraphvizModule}.
+ * {@link InjectorGrapher} implementation that writes out a Graphviz DOT file of the graph.
+ * Dependencies are bound in {@link GraphvizModule}.
  * <p>
- * Specify the {@link PrintWriter} to output to with
- * {@link #setOut(PrintWriter)}.
+ * Specify the {@link PrintWriter} to output to with {@link #setOut(PrintWriter)}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */
-public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
-  private final List<GraphvizNode> nodes = Lists.newArrayList();
+public class GraphvizGrapher extends AbstractInjectorGrapher {
+  private final Map<NodeId, GraphvizNode> nodes = Maps.newHashMap();
   private final List<GraphvizEdge> edges = Lists.newArrayList();
-  private final Map<String, String> aliases = Maps.newHashMap();
-  
+  private final NameFactory nameFactory;
+  private final PortIdFactory portIdFactory;
+
   private PrintWriter out;
   private String rankdir = "TB";
 
-  public GraphvizRenderer setOut(PrintWriter out) {
+  @Inject GraphvizGrapher(@Graphviz NameFactory nameFactory,
+      @Graphviz PortIdFactory portIdFactory) {
+    this.nameFactory = nameFactory;
+    this.portIdFactory = portIdFactory;
+  }
+
+  @Override protected void reset() {
+    nodes.clear();
+    edges.clear();
+  }
+
+  public void setOut(PrintWriter out) {
     this.out = out;
-    return this;
   }
 
-  public GraphvizRenderer setRankdir(String rankdir) {
+  public void setRankdir(String rankdir) {
     this.rankdir = rankdir;
-    return this;
   }
 
-  public void addNode(GraphvizNode node) {
-    nodes.add(node);
-  }
-  
-  public void addEdge(GraphvizEdge edge) {
-    edges.add(edge);
-  }
-
-  public void newAlias(String fromId, String toId) {
-    aliases.put(fromId, toId);
-  }
-
-  protected String resolveAlias(String id) {
-    while (aliases.containsKey(id)) {
-      id = aliases.get(id);
-    }
-    
-    return id;
-  }
-  
-  public void render() {
+  @Override protected void postProcess() {
     start();
     
-    for (GraphvizNode node : nodes) {
+    for (GraphvizNode node : nodes.values()) {
       renderNode(node);
     }
 
@@ -110,7 +108,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
 
   protected void renderNode(GraphvizNode node) {
     Map<String, String> attrs = getNodeAttributes(node);
-    out.println(node.getNodeId() + " " + getAttrString(attrs));       
+    out.println(node.getIdentifier() + " " + getAttrString(attrs));
   }
   
   protected Map<String, String> getNodeAttributes(GraphvizNode node) {
@@ -154,7 +152,7 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
 
     for (Map.Entry<String, String> field : node.getFields().entrySet()) {
       html.append("<tr>");
-      html.append("<td align=\"left\" port=\"").append(field.getKey()).append("\">");
+      html.append("<td align=\"left\" port=\"").append(htmlEscape(field.getKey())).append("\">");
       html.append(htmlEscape(field.getValue()));
       html.append("</td>").append("</tr>");
     }
@@ -167,11 +165,11 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
   protected void renderEdge(GraphvizEdge edge) {
     Map<String, String> attrs = getEdgeAttributes(edge);
     
-    String tailId = getEdgeEndPoint(resolveAlias(edge.getTailNodeId()), edge.getTailPortId(),
-        edge.getTailCompassPoint());
+    String tailId = getEdgeEndPoint(nodes.get(edge.getTailNodeId()).getIdentifier(),
+        edge.getTailPortId(), edge.getTailCompassPoint());
 
-    String headId = getEdgeEndPoint(resolveAlias(edge.getHeadNodeId()), edge.getHeadPortId(),
-        edge.getHeadCompassPoint());
+    String headId = getEdgeEndPoint(nodes.get(edge.getHeadNodeId()).getIdentifier(),
+        edge.getHeadPortId(), edge.getHeadCompassPoint());
     
     out.println(tailId + " -> " + headId + " " + getAttrString(attrs));
   }
@@ -225,5 +223,103 @@ public class GraphvizRenderer implements Renderer, NodeAliasFactory<String> {
 
   protected String htmlEscape(String str) {
     return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+  }
+
+  protected List<String> htmlEscape(List<String> elements) {
+    List<String> escaped = Lists.newArrayList();
+    for (String element : elements) {
+      escaped.add(htmlEscape(element));
+    }
+    return escaped;
+  }
+
+  @Override protected void newInterfaceNode(InterfaceNode node) {
+    // TODO(phopkins): Show the Module on the graph, which comes from the
+    // class name when source is a StackTraceElement.
+
+    NodeId nodeId = node.getId();
+    GraphvizNode gnode = new GraphvizNode(nodeId);
+    gnode.setStyle(NodeStyle.DASHED);
+    Key<?> key = nodeId.getKey();
+    gnode.setTitle(nameFactory.getClassName(key));
+    gnode.addSubtitle(0, nameFactory.getAnnotationName(key));
+    addNode(gnode);
+  }
+
+  @Override protected void newImplementationNode(ImplementationNode node) {
+    NodeId nodeId = node.getId();
+    GraphvizNode gnode = new GraphvizNode(nodeId);
+    gnode.setStyle(NodeStyle.INVISIBLE);
+
+    gnode.setHeaderBackgroundColor("#000000");
+    gnode.setHeaderTextColor("#ffffff");
+    gnode.setTitle(nameFactory.getClassName(nodeId.getKey()));
+
+    for (Member member : node.getMembers()) {
+      gnode.addField(portIdFactory.getPortId(member), nameFactory.getMemberName(member));
+    }
+
+    addNode(gnode);
+  }
+
+  @Override protected void newInstanceNode(InstanceNode node) {
+    NodeId nodeId = node.getId();
+    GraphvizNode gnode = new GraphvizNode(nodeId);
+    gnode.setStyle(NodeStyle.INVISIBLE);
+
+    gnode.setHeaderBackgroundColor("#000000");
+    gnode.setHeaderTextColor("#ffffff");
+    gnode.setTitle(nameFactory.getClassName(nodeId.getKey()));
+
+    gnode.addSubtitle(0, nameFactory.getSourceName(node.getSource()));
+
+    gnode.setHeaderBackgroundColor("#aaaaaa");
+    gnode.setHeaderTextColor("#ffffff");
+    gnode.setTitle(nameFactory.getInstanceName(node.getInstance()));
+
+    for (Member member : node.getMembers()) {
+      gnode.addField(portIdFactory.getPortId(member), nameFactory.getMemberName(member));
+    }
+
+    addNode(gnode);
+  }
+
+  @Override protected void newDependencyEdge(DependencyEdge edge) {
+    GraphvizEdge gedge = new GraphvizEdge(edge.getFromId(), edge.getToId());
+    InjectionPoint fromPoint = edge.getInjectionPoint();
+    if (fromPoint == null) {
+      gedge.setTailPortId("header");
+    } else {
+      gedge.setTailPortId(portIdFactory.getPortId(fromPoint.getMember()));
+    }
+    gedge.setArrowHead(ImmutableList.of(ArrowType.NORMAL));
+    gedge.setTailCompassPoint(CompassPoint.EAST);
+
+    edges.add(gedge);
+  }
+
+  @Override protected void newBindingEdge(BindingEdge edge) {
+    GraphvizEdge gedge = new GraphvizEdge(edge.getFromId(), edge.getToId());
+    gedge.setStyle(EdgeStyle.DASHED);
+    switch (edge.getType()) {
+      case NORMAL:
+        gedge.setArrowHead(ImmutableList.of(ArrowType.NORMAL_OPEN));
+        break;
+
+      case PROVIDER:
+        gedge.setArrowHead(ImmutableList.of(ArrowType.NORMAL_OPEN, ArrowType.NORMAL_OPEN));
+        break;
+
+      case CONVERTED_CONSTANT:
+        gedge.setArrowHead(ImmutableList.of(ArrowType.NORMAL_OPEN, ArrowType.DOT_OPEN));
+        break;
+    }
+
+    edges.add(gedge);
+  }
+
+  private void addNode(GraphvizNode node) {
+    node.setIdentifier("x" + nodes.size());
+    nodes.put(node.getNodeId(), node);
   }
 }

@@ -19,6 +19,7 @@ package com.google.inject.grapher.graphviz;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.inject.grapher.NodeId;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ import java.util.Map;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class GraphvizNode {
-  private final String nodeId;
+  private final NodeId nodeId;
 
   private NodeStyle style = NodeStyle.SOLID;
   private NodeShape shape = NodeShape.BOX;
@@ -41,14 +42,16 @@ public class GraphvizNode {
   private String headerTextColor = "#000000";
   private String headerBackgroundColor = "#ffffff";
 
+  private String identifier;
+
   /** {@link Map} from port ID to field title */
   private Map<String, String> fields = Maps.newLinkedHashMap();
 
-  public GraphvizNode(String nodeId) {
+  public GraphvizNode(NodeId nodeId) {
     this.nodeId = nodeId;
   }
   
-  public String getNodeId() {
+  public NodeId getNodeId() {
     return nodeId;
   }
 
@@ -106,5 +109,13 @@ public class GraphvizNode {
 
   public Map<String, String> getFields() {
     return ImmutableMap.copyOf(fields);
+  }
+
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
   }
 }

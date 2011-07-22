@@ -16,19 +16,18 @@
 
 package com.google.inject.grapher;
 
+import com.google.common.base.Objects;
+
 /**
- * Interface for an edge that connects an interface to the type or instance
- * that is bound to implement it.
+ * Edge that connects an interface to the type or instance that is bound to implement it.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
- *
- * @param <K> The type for node IDs.
  */
-public interface BindingEdge<K> {
+public class BindingEdge extends Edge {
   /**
    * Classification for what kind of binding this edge represents.
    */
-  enum Type {
+  public enum Type {
     /** Binding is to an instance or class of the binding's same type. */
     NORMAL,
     /** Binding is to an instance or class that provides the binding's type. */
@@ -37,23 +36,34 @@ public interface BindingEdge<K> {
     CONVERTED_CONSTANT
   }
 
-  void setType(Type type);
+  private final Type type;
 
-  /**
-   * Factory interface for {@link BindingEdge}s. Renderer implementations will
-   * need to provide an implementation for this.
-   *
-   * @param <K> The type for node IDs.
-   * @param <T> The {@link BindingEdge} sub-type that this factory provides.
-   */
-  interface Factory<K, T extends BindingEdge<K>> {
-    /**
-     * Creates a new {@link BindingEdge} instance and adds it to the graph.
-     *
-     * @param fromId Node ID for the interface node.
-     * @param toId Node ID for the implementation (class or instance) node.
-     * @return The newly created and added {@link BindingEdge}.
-     */
-    T newBindingEdge(K fromId, K toId);
+  public BindingEdge(NodeId fromId, NodeId toId, Type type) {
+    super(fromId, toId);
+    this.type = type;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  @Override public boolean equals(Object obj) {
+    if (!(obj instanceof BindingEdge)) {
+      return false;
+    }
+    BindingEdge other = (BindingEdge) obj;
+    return super.equals(other) && Objects.equal(type, other.type);
+  }
+
+  @Override public int hashCode() {
+    return 31 * super.hashCode() + Objects.hashCode(type);
+  }
+
+  @Override public String toString() {
+    return "BindingEdge{fromId=" + getFromId() + " toId=" + getToId() + " type=" + type + "}";
+  }
+
+  @Override public Edge copy(NodeId fromId, NodeId toId) {
+    return new BindingEdge(fromId, toId, type);
   }
 }

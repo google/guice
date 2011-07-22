@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,16 @@
 
 package com.google.inject.grapher;
 
-import com.google.inject.Key;
+import com.google.inject.Binding;
 
 /**
- * {@link IdFactory} implementation that for {@link String} node IDs. The IDs
- * are comprised of letters, numbers and underscores.
+ * Creator of graph edges to render. All edges will be rendered on the graph after node aliasing is
+ * performed.
  *
- * @author phopkins@gmail.com (Pete Hopkins)
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public class StringNodeIdFactory implements NodeIdFactory<String> {
-  public String getClassNodeId(Key<?> key) {
-    return "k_" + Integer.toHexString(key.hashCode());
-  }
+public interface EdgeCreator {
 
-  public String getInstanceNodeId(Key<?> key) {
-    return "i_" + Integer.toHexString(key.hashCode());
-  }
+  /** Returns edges for the given dependency graph. */
+  Iterable<Edge> getEdges(Iterable<Binding<?>> bindings);
 }

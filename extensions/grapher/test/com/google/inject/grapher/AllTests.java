@@ -26,7 +26,7 @@ public class AllTests {
 
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    suite.addTestSuite(GraphingVisitorTest.class);
+    suite.addTestSuite(AbstractInjectorGrapherTest.class);
     suite.addTestSuite(ShortNameFactoryTest.class);
     suite.addTestSuite(TransitiveDependencyVisitorTest.class);
     return suite;

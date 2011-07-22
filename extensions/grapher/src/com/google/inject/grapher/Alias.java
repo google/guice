@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,25 @@
 package com.google.inject.grapher;
 
 /**
- * Node for an interface type that has been bound to an implementation class or instance.
+ * Alias between two nodes. Causes the 'from' node to be aliased with the 'to' node, which means
+ * that the 'from' node is not rendered and all edges going to it instead go to the 'to' node.
  *
- * @see BindingEdge
- *
- * @author phopkins@gmail.com (Pete Hopkins)
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public class InterfaceNode extends Node {
-  public InterfaceNode(NodeId id, Object source) {
-    super(id, source);
+public final class Alias {
+  private final NodeId fromId;
+  private final NodeId toId;
+
+  public Alias(NodeId fromId, NodeId toId) {
+    this.fromId = fromId;
+    this.toId = toId;
   }
 
-  @Override public Node copy(NodeId id) {
-    return new InterfaceNode(id, getSource());
+  public NodeId getFromId() {
+    return fromId;
   }
 
-  @Override public boolean equals(Object obj) {
-    return (obj instanceof InterfaceNode) && super.equals(obj);
-  }
-
-  @Override public String toString() {
-    return "InterfaceNode{id=" + getId() + " source=" + getSource() + "}";
+  public NodeId getToId() {
+    return toId;
   }
 }

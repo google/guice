@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.inject.grapher.demo;
+package com.google.inject.grapher.graphviz;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.BindingAnnotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Module to add {@link AssistedInject}-based elements to the demo
- * {@link Injector}.
+ * Annotation for types used by the graphviz grapher.
  *
- * @author phopkins@gmail.com (Pete Hopkins)
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public class AssistedInjectModule extends AbstractModule {
-  @Override
-  protected void configure() {
-    install(new FactoryModuleBuilder()
-        .implement(DanceParty.class, DancePartyImpl.class)
-        .build(DancePartyFactory.class));
-  }
-}
+@BindingAnnotation
+@Retention(RetentionPolicy.RUNTIME)
+@interface Graphviz {}

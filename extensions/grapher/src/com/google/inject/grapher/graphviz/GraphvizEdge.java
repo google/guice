@@ -17,6 +17,7 @@
 package com.google.inject.grapher.graphviz;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.grapher.NodeId;
 
 import java.util.List;
 
@@ -27,24 +28,24 @@ import java.util.List;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class GraphvizEdge {
-  private final String headNodeId;
+  private final NodeId headNodeId;
   private String headPortId;
   private CompassPoint headCompassPoint;
   private List<ArrowType> arrowHead = ImmutableList.of(ArrowType.NORMAL);
   
-  private final String tailNodeId;
+  private final NodeId tailNodeId;
   private String tailPortId;
   private CompassPoint tailCompassPoint;
   private List<ArrowType> arrowTail = ImmutableList.of(ArrowType.NONE);
 
   private EdgeStyle style = EdgeStyle.SOLID;
 
-  public GraphvizEdge(String tailNodeId, String headNodeId) {
+  public GraphvizEdge(NodeId tailNodeId, NodeId headNodeId) {
     this.tailNodeId = tailNodeId;
     this.headNodeId = headNodeId;
   }
 
-  public String getHeadNodeId() {
+  public NodeId getHeadNodeId() {
     return headNodeId;
   }
 
@@ -72,7 +73,7 @@ public class GraphvizEdge {
     this.arrowHead = ImmutableList.copyOf(arrowHead);
   }
 
-  public String getTailNodeId() {
+  public NodeId getTailNodeId() {
     return tailNodeId;
   }
 

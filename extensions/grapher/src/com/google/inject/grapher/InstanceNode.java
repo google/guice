@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,46 +18,49 @@ package com.google.inject.grapher;
 
 import com.google.common.base.Objects;
 import java.lang.reflect.Member;
-import java.util.Collection;
 
 /**
- * Node for types that have {@link Dependency}s and are bound to {@link InterfaceNode}s. These
- * nodes will often have fields for {@link Member}s that are {@link InjectionPoint}s.
+ * Node for instances. Used when a type is bound to an instance.
  *
- * @see DependencyEdge
- *
- * @author phopkins@gmail.com (Pete Hopkins)
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public class ImplementationNode extends Node {
-  private final Collection<Member> members;
+public class InstanceNode extends Node {
+  private final Object instance;
+  private final Iterable<Member> members;
 
-  public ImplementationNode(NodeId id, Object source, Collection<Member> members) {
+  public InstanceNode(NodeId id, Object source, Object instance, Iterable<Member> members) {
     super(id, source);
+    this.instance = instance;
     this.members = members;
   }
 
-  public Collection<Member> getMembers() {
+  public Object getInstance() {
+    return instance;
+  }
+
+  public Iterable<Member> getMembers() {
     return members;
   }
 
   @Override public boolean equals(Object obj) {
-    if (!(obj instanceof ImplementationNode)) {
+    if (!(obj instanceof InstanceNode)) {
       return false;
     }
-    ImplementationNode other = (ImplementationNode) obj;
-    return super.equals(other) && Objects.equal(members, other.members);
+    InstanceNode other = (InstanceNode) obj;
+    return super.equals(other) && Objects.equal(instance, other.instance)
+        && Objects.equal(members, other.members);
   }
 
   @Override public int hashCode() {
-    return 31 * super.hashCode() + Objects.hashCode(members);
+    return 31 * super.hashCode() + Objects.hashCode(instance, members);
   }
 
   @Override public String toString() {
-    return "ImplementationNode{id=" + getId() + " source=" + getSource()
+    return "InstanceNode{id=" + getId() + " source=" + getSource() + " instance=" + instance
         + " members=" + members + "}";
   }
 
   @Override public Node copy(NodeId id) {
-    return new ImplementationNode(id, getSource(), getMembers());
+    return new InstanceNode(id, getSource(), getInstance(), getMembers());
   }
 }

@@ -24,6 +24,7 @@ class DeLorian {
   // between a Provider<T> and just @Injecting T. 
   @Inject @Driver Provider<Person> driver;
   @Inject FluxCapacitor fluxCapacitor;
+  @Inject PrivateTestModule.Exposed exposed;
   
   @Inject
   public void setEnergySource(EnergySource energySource) {}

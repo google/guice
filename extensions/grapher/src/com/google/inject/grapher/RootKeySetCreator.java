@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,18 @@
 
 package com.google.inject.grapher;
 
+import com.google.inject.Injector;
 import com.google.inject.Key;
+import java.util.Set;
 
 /**
- * Factory for abstract identifiers for elements on the graph. Most graph nodes
- * will correspond directly to {@link Key}s, but we do this for additional
- * flexibility and because instances do not have separate {@link Key}s from the
- * interfaces they are bound to.
- * <p>
- * Node IDs are treated as opaque values by {@link GraphingVisitor} and the
- * other classes in this package.
+ * Creator of the default starting set of keys to graph. These keys and their transitive
+ * dependencies will be graphed.
  *
- * @author phopkins@gmail.com (Pete Hopkins)
- * 
- * @param <K> The type for node IDs.
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public interface NodeIdFactory<K> {
-  K getClassNodeId(Key<?> key);
-  K getInstanceNodeId(Key<?> key);
+public interface RootKeySetCreator {
+
+  /** Returns the set of starting keys to graph. */
+  Set<Key<?>> getRootKeys(Injector injector);
 }

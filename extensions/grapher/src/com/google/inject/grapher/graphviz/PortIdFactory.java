@@ -16,14 +16,11 @@
 
 package com.google.inject.grapher.graphviz;
 
-import com.google.inject.grapher.StringNodeIdFactory;
-
 import java.lang.reflect.Member;
 
 /**
  * Interface for a service that returns Graphviz port IDs, used for naming the
  * rows in {@link ImplementationNode}-displaying {@link GraphvizNode}s.
- * Implemented by {@link StringNodeIdFactory}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */

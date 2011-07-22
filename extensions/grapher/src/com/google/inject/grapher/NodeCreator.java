@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package com.google.inject.grapher;
 
-import java.io.IOException;
+import com.google.inject.Binding;
 
 /**
- * Interface for the service that renders the graph. It is assumed that the
- * implementations for {@link BindingEdge.Factory},
- * {@link ImplementationNode.Factory}, etc. will have direct access to the
- * internals of the {@link Renderer} implementation, so the only external
- * interface needed is the {@link #render()} call that {@link InjectorGrapher}
- * calls when it's done.
+ * Creator of graph nodes.
  *
- * @author phopkins@gmail.com (Pete Hopkins)
+ * @author bojand@google.com (Bojan Djordjevic)
  */
-public interface Renderer {
-  void render() throws IOException;
+public interface NodeCreator {
+
+  /** Returns nodes for the given dependency graph. */
+  Iterable<Node> getNodes(Iterable<Binding<?>> bindings);
 }

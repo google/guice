@@ -16,34 +16,49 @@
 
 package com.google.inject.grapher;
 
+import com.google.common.base.Objects;
 import com.google.inject.spi.InjectionPoint;
 
 /**
- * Interface for an edge from a class or {@link InjectionPoint} to the
- * interface node that will satisfy the dependency.
+ * Edge from a class or {@link InjectionPoint} to the interface node that will satisfy the
+ * dependency.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
- *
- * @param <K> The type for node IDs.
  */
-public interface DependencyEdge<K> {
+public class DependencyEdge extends Edge {
   /**
-   * Factory interface for {@link DependencyEdge}s. Renderer implementations
-   * will need to provide an implementation for this.
-   *
-   * @param <K> The type for node IDs.
-   * @param <T> The {@link DependencyEdge} sub-type that this factory provides.
+   * Injection point to which this dependency belongs, or null if the dependency isn't attached to a
+   * particular injection point.
    */
-  interface Factory<K, T extends DependencyEdge<K>> {
-    /**
-     * Creates a new {@link DependencyEdge} and adds it to the graph.
-     *
-     * @param fromId The ID for the class or instance node that has the
-     *     dependency.
-     * @param fromPoint The point where the dependency will be
-     *     {@literal @}{@link Inject}ed. 
-     * @param toId The ID for the interface node that satisfies the dependency.
-     */
-    T newDependencyEdge(K fromId, InjectionPoint fromPoint, K toId);
+  private final InjectionPoint injectionPoint;
+
+  public DependencyEdge(NodeId fromId, NodeId toId, InjectionPoint injectionPoint) {
+    super(fromId, toId);
+    this.injectionPoint = injectionPoint;
+  }
+
+  public InjectionPoint getInjectionPoint() {
+    return injectionPoint;
+  }
+
+  @Override public boolean equals(Object obj) {
+    if (!(obj instanceof DependencyEdge)) {
+      return false;
+    }
+    DependencyEdge other = (DependencyEdge) obj;
+    return super.equals(other) && Objects.equal(injectionPoint, other.injectionPoint);
+  }
+
+  @Override public int hashCode() {
+    return 31 * super.hashCode() + Objects.hashCode(injectionPoint);
+  }
+
+  @Override public String toString() {
+    return "DependencyEdge{fromId=" + getFromId() + " toId=" + getToId()
+        + " injectionPoint=" + injectionPoint + "}";
+  }
+
+  @Override public Edge copy(NodeId fromId, NodeId toId) {
+    return new DependencyEdge(fromId, toId, injectionPoint);
   }
 }
