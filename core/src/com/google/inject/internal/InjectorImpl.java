@@ -220,7 +220,7 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   public Injector createChildInjector(Module... modules) {
-    return createChildInjector(ImmutableList.of(modules));
+    return createChildInjector(ImmutableList.copyOf(modules));
   }
 
   /**

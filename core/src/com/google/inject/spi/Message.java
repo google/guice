@@ -126,7 +126,7 @@ public final class Message implements Serializable, Element {
     for (int i = 0; i < sourcesAsStrings.length; i++) {
       sourcesAsStrings[i] = Errors.convert(sourcesAsStrings[i]).toString();
     }
-    return new Message(ImmutableList.of(sourcesAsStrings), message, cause);
+    return new Message(ImmutableList.copyOf(sourcesAsStrings), message, cause);
   }
 
   private static final long serialVersionUID = 0;

@@ -41,7 +41,7 @@ public final class ProvisionListenerBinding implements Element {
       ProvisionListener[] listeners) {
     this.source = source;
     this.keyMatcher = typeMatcher;
-    this.listeners = ImmutableList.of(listeners);
+    this.listeners = ImmutableList.copyOf(listeners);
   }
 
   /** Returns the registered listeners. */

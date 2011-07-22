@@ -171,7 +171,7 @@ public class TypeLiteral<T> {
     for (int t = 0; t < types.length; t++) {
       result[t] = resolve(types[t]);
     }
-    return ImmutableList.of(result);
+    return ImmutableList.copyOf(result);
   }
 
   /**
