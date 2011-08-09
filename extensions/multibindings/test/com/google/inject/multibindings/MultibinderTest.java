@@ -351,7 +351,7 @@ public class MultibinderTest extends TestCase {
       injector.getInstance(Key.get(setOfString));
       fail();
     } catch(ProvisionException expected) {
-      assertContains(expected.getMessage(), 
+      assertContains(expected.getMessage(),
           "1) Set injection failed due to null element");
     }
   }
@@ -365,7 +365,7 @@ public class MultibinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.Integer", 
+      assertContains(expected.getMessage(), "No implementation for java.lang.Integer",
           "at " + getClass().getName());
     }
   }
@@ -393,7 +393,7 @@ public class MultibinderTest extends TestCase {
     }
     assertEquals(ImmutableSet.of("A", "B"), elements);
   }
-  
+
   /**
    * We just want to make sure that multibinder's binding depends on each of its values. We don't
    * really care about the underlying structure of those bindings, which are implementation details.
@@ -404,7 +404,7 @@ public class MultibinderTest extends TestCase {
           Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
           multibinder.addBinding().toInstance("A");
           multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
-  
+
           bindConstant().annotatedWith(Names.named("b")).to("B");
         }});
 
@@ -416,8 +416,8 @@ public class MultibinderTest extends TestCase {
     // the right values are returned -- in tool stage we can't do that.  It's also a
     // little difficult to validate the dependencies & bindings, because they're
     // bindings created internally within Multibinder.
-    // To workaround this, we just validate that the dependencies lookup to a single 
-    // InstanceBinding whose value is "A" and another LinkedBinding whose target is 
+    // To workaround this, we just validate that the dependencies lookup to a single
+    // InstanceBinding whose value is "A" and another LinkedBinding whose target is
     // the Key of @Named("b") String=B
     for (Dependency<?> dependency : withDependencies.getDependencies()) {
       Binding<?> b = injector.getBinding(dependency.getKey());
@@ -437,10 +437,10 @@ public class MultibinderTest extends TestCase {
         fail("Unexpected dependency of: " + dependency);
       }
     }
-    
+
     assertNotNull(instanceBinding);
     assertNotNull(linkedBinding);
-    
+
     assertEquals("A", instanceBinding.getInstance());
     assertEquals(Key.get(String.class, Names.named("b")), linkedBinding.getLinkedKey());
   }
@@ -598,5 +598,19 @@ public class MultibinderTest extends TestCase {
     expected.add(1);
     expected.add(2);
     assertEquals(expected, s1);
+  }
+
+  public void testSetAndMapValueConflict() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder.newSetBinder(binder(), String.class)
+            .addBinding().toInstance("A");
+
+        MapBinder.newMapBinder(binder(), String.class, String.class)
+            .addBinding("B").toInstance("b");
+      }
+    });
+
+    assertEquals(ImmutableSet.<String>of("A"), injector.getInstance(Key.get(setOfString)));
   }
 }
