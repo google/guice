@@ -156,7 +156,7 @@ public class TypeLiteralTest extends TestCase {
     TypeVariable<?> aTv = (TypeVariable) aTl.getType();
     assertEquals(HasTypeParameters.class, aTv.getGenericDeclaration());
     assertEquals("A", aTv.getName());
-    assertEquals(ImmutableList.<Type>of(Object.class), ImmutableList.of(aTv.getBounds()));
+    assertEquals(ImmutableList.<Type>of(Object.class), ImmutableList.copyOf(aTv.getBounds()));
     assertEquals("A", aTv.toString());
     assertEqualsBothWays(aTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
   }
@@ -171,7 +171,7 @@ public class TypeLiteralTest extends TestCase {
     TypeVariable<?> cTv = (TypeVariable) cTl.getType();
     assertEquals(HasTypeParameters.class, cTv.getGenericDeclaration());
     assertEquals("C", cTv.getName());
-    assertEquals(ImmutableList.<Type>of(Runnable.class), ImmutableList.of(cTv.getBounds()));
+    assertEquals(ImmutableList.<Type>of(Runnable.class), ImmutableList.copyOf(cTv.getBounds()));
     assertEquals("C", cTv.toString());
     assertEqualsBothWays(cTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[2]));
   }
@@ -187,7 +187,7 @@ public class TypeLiteralTest extends TestCase {
     assertEquals(HasTypeParameters.class, bTv.getGenericDeclaration());
     assertEquals("B", bTv.getName());
     assertEquals(ImmutableList.<Type>of(Types.listOf(typeVariables[0]), Runnable.class),
-        ImmutableList.of(bTv.getBounds()));
+        ImmutableList.copyOf(bTv.getBounds()));
     assertEquals("B", bTv.toString());
     assertEqualsBothWays(bTl, TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[1]));
   }
