@@ -22,13 +22,8 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -36,7 +31,6 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.servlet.RequestParameters;
 import com.google.inject.util.Providers;
 
 import junit.framework.TestCase;
@@ -55,6 +49,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -80,25 +75,9 @@ public class ServletTest extends TestCase {
 
   public void testRequestAndResponseBindings() throws Exception {
     final Injector injector = createInjector();
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpServletResponse response = createMock(HttpServletResponse.class);
+    final HttpServletRequest request = newFakeHttpServletRequest();
+    final HttpServletResponse response = newFakeHttpServletResponse();
     final Map<String, String[]> params = Maps.newHashMap();
-    String httpReqKey = HTTP_REQ_KEY.toString();
-    expect(request.getAttribute(httpReqKey)).andReturn(null);
-    request.setAttribute(httpReqKey, request);
-    expect(request.getAttribute(httpReqKey)).andReturn(request).anyTimes();
-
-    String httpRespKey = HTTP_RESP_KEY.toString();
-    expect(request.getAttribute(httpRespKey)).andReturn(null);
-    request.setAttribute(httpRespKey, response);
-    expect(request.getAttribute(httpRespKey)).andReturn(response).anyTimes();
-
-    String reqParamsKey = REQ_PARAMS_KEY.toString();
-    expect(request.getAttribute(reqParamsKey)).andReturn(null);
-    expect(request.getParameterMap()).andStubReturn(params);
-    request.setAttribute(reqParamsKey, params);
-    expect(request.getAttribute(reqParamsKey)).andReturn(params).anyTimes();
-    replay(request, response);
 
     final boolean[] invoked = new boolean[1];
     GuiceFilter filter = new GuiceFilter();
@@ -114,32 +93,20 @@ public class ServletTest extends TestCase {
         assertSame(response, injector.getInstance(ServletResponse.class));
         assertSame(response, injector.getInstance(HTTP_RESP_KEY));
 
-        assertSame(params, servletRequest.getParameterMap());
-        assertSame(params, injector.getInstance(REQ_PARAMS_KEY));
+        assertSame(servletRequest.getParameterMap(), injector.getInstance(REQ_PARAMS_KEY));
       }
     };
     filter.doFilter(request, response, filterChain);
 
     assertTrue(invoked[0]);
-    verify(request, response);
   }
 
   public void testNewRequestObject()
       throws CreationException, IOException, ServletException {
     final Injector injector = createInjector();
+    final HttpServletRequest request = newFakeHttpServletRequest();
 
     GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-
-    String inRequestKey = IN_REQUEST_KEY.toString();
-    expect(request.getAttribute(inRequestKey)).andReturn(null);
-    request.setAttribute(eq(inRequestKey), isA(InRequest.class));
-    
-    String inRequestNullKey = IN_REQUEST_NULL_KEY.toString();
-    expect(request.getAttribute(inRequestNullKey)).andReturn(null);
-    request.setAttribute(eq(inRequestNullKey), eq(NullObject.INSTANCE));
-
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
       public void doFilter(ServletRequest servletRequest,
@@ -150,36 +117,24 @@ public class ServletTest extends TestCase {
       }
     };
 
-    replay(request);
-
     filter.doFilter(request, null, filterChain);
 
-    verify(request);
     assertTrue(invoked[0]);
   }
 
   public void testExistingRequestObject()
       throws CreationException, IOException, ServletException {
     final Injector injector = createInjector();
+    final HttpServletRequest request = newFakeHttpServletRequest();
 
     GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-
-    final InRequest inRequest = new InRequest();
-    String inRequestKey = IN_REQUEST_KEY.toString();
-    expect(request.getAttribute(inRequestKey)).andReturn(inRequest).times(2);
-    
-    String inRequestNullKey = IN_REQUEST_NULL_KEY.toString();
-    expect(request.getAttribute(inRequestNullKey)).andReturn(NullObject.INSTANCE).times(2);
-
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
       public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
-        
-        assertSame(inRequest, injector.getInstance(InRequest.class));
+
+        InRequest inRequest = injector.getInstance(InRequest.class);
         assertSame(inRequest, injector.getInstance(InRequest.class));
 
         assertNull(injector.getInstance(IN_REQUEST_NULL_KEY));
@@ -187,33 +142,17 @@ public class ServletTest extends TestCase {
       }
     };
 
-    replay(request);
-
     filter.doFilter(request, null, filterChain);
 
-    verify(request);
     assertTrue(invoked[0]);
   }
 
   public void testNewSessionObject()
       throws CreationException, IOException, ServletException {
     final Injector injector = createInjector();
+    final HttpServletRequest request = newFakeHttpServletRequest();
 
     GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpSession session = createMock(HttpSession.class);
-
-    String inSessionKey = IN_SESSION_KEY.toString();
-    String inSessionNullKey = IN_SESSION_NULL_KEY.toString();
-
-    expect(request.getSession()).andReturn(session).times(2);
-    expect(session.getAttribute(inSessionKey)).andReturn(null);
-    session.setAttribute(eq(inSessionKey), isA(InSession.class));
-
-    expect(session.getAttribute(inSessionNullKey)).andReturn(null);
-    session.setAttribute(eq(inSessionNullKey), eq(NullObject.INSTANCE));
-
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
       public void doFilter(ServletRequest servletRequest,
@@ -224,39 +163,24 @@ public class ServletTest extends TestCase {
       }
     };
 
-    replay(request, session);
-
     filter.doFilter(request, null, filterChain);
 
-    verify(request, session);
     assertTrue(invoked[0]);
   }
 
   public void testExistingSessionObject()
       throws CreationException, IOException, ServletException {
     final Injector injector = createInjector();
+    final HttpServletRequest request = newFakeHttpServletRequest();
 
     GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpSession session = createMock(HttpSession.class);
-
-    String inSessionKey = IN_SESSION_KEY.toString();
-    String inSessionNullKey = IN_SESSION_NULL_KEY.toString();
-
-    final InSession inSession = new InSession();
-    expect(request.getSession()).andReturn(session).times(4);
-    expect(session.getAttribute(inSessionKey)).andReturn(inSession).times(2);
-    
-    expect(session.getAttribute(inSessionNullKey)).andReturn(NullObject.INSTANCE).times(2);
-
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
       public void doFilter(ServletRequest servletRequest,
           ServletResponse servletResponse) {
         invoked[0] = true;
 
-        assertSame(inSession, injector.getInstance(InSession.class));
+        InSession inSession = injector.getInstance(InSession.class);
         assertSame(inSession, injector.getInstance(InSession.class));
 
         assertNull(injector.getInstance(IN_SESSION_NULL_KEY));
@@ -264,28 +188,18 @@ public class ServletTest extends TestCase {
       }
     };
 
-    replay(request, session);
-
     filter.doFilter(request, null, filterChain);
 
-    verify(request, session);
     assertTrue(invoked[0]);
   }
 
   public void testHttpSessionIsSerializable()
       throws IOException, ClassNotFoundException, ServletException {
     final Injector injector = createInjector();
+    final HttpServletRequest request = newFakeHttpServletRequest();
+    final HttpSession session = request.getSession();
 
     GuiceFilter filter = new GuiceFilter();
-
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
-    final HttpSession session = newFakeHttpSession();
-
-    String inSessionKey = IN_SESSION_KEY.toString();
-    String inSessionNullKey = IN_SESSION_NULL_KEY.toString();
-
-    expect(request.getSession()).andReturn(session).times(2);
-
     final boolean[] invoked = new boolean[1];
     FilterChain filterChain = new FilterChain() {
       public void doFilter(ServletRequest servletRequest,
@@ -296,19 +210,72 @@ public class ServletTest extends TestCase {
       }
     };
 
-    replay(request);
-
     filter.doFilter(request, null, filterChain);
 
-    verify(request);
     assertTrue(invoked[0]);
 
     HttpSession deserializedSession = reserialize(session);
 
+    String inSessionKey = IN_SESSION_KEY.toString();
+    String inSessionNullKey = IN_SESSION_NULL_KEY.toString();
     assertTrue(deserializedSession.getAttribute(inSessionKey) instanceof InSession);
     assertEquals(NullObject.INSTANCE, deserializedSession.getAttribute(inSessionNullKey));
   }
 
+  private static class ThrowingInvocationHandler implements InvocationHandler {
+    @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      throw new UnsupportedOperationException("No methods are supported on this object");
+    }
+  }
+  
+  /**
+   * Returns a fake, HttpServletRequest which stores attributes in a HashMap.
+   */
+  private HttpServletRequest newFakeHttpServletRequest() {
+    HttpServletRequest delegate = (HttpServletRequest) Proxy.newProxyInstance(
+        HttpServletRequest.class.getClassLoader(),
+        new Class[] { HttpServletRequest.class }, new ThrowingInvocationHandler());
+    
+    return new HttpServletRequestWrapper(delegate) {
+      final Map<String, Object> attributes = Maps.newHashMap(); 
+      final HttpSession session = newFakeHttpSession();
+
+      @Override public Object getAttribute(String name) {
+        return attributes.get(name);
+      }
+      
+      @Override public void setAttribute(String name, Object value) {
+        attributes.put(name, value);
+      }
+      
+      @Override public Map getParameterMap() {
+        return ImmutableMap.of();
+      }
+      
+      @Override public String getRequestURI() {
+        return "/";
+      }
+      
+      @Override public String getContextPath() {
+        return "";
+      }
+      
+      @Override public HttpSession getSession() {
+        return session;
+      }
+    };
+  }
+  
+  /**
+   * Returns a fake, HttpServletResponse which throws an exception if any of its
+   * methods are called.
+   */
+  private HttpServletResponse newFakeHttpServletResponse() {
+    return (HttpServletResponse) Proxy.newProxyInstance(
+        HttpServletResponse.class.getClassLoader(),
+        new Class[] { HttpServletResponse.class }, new ThrowingInvocationHandler());
+  }  
+  
   private static class FakeHttpSessionHandler implements InvocationHandler, Serializable {
     final Map<String, Object> attributes = Maps.newHashMap();
 
@@ -334,9 +301,7 @@ public class ServletTest extends TestCase {
   }
 
   private Injector createInjector() throws CreationException {
-
     return Guice.createInjector(new AbstractModule() {
-
       @Override
       protected void configure() {
         install(new ServletModule());
