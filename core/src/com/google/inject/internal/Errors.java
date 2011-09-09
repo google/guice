@@ -268,6 +268,10 @@ public final class Errors implements Serializable {
         + "%s and %s", member, a, b);
   }
 
+  public Errors staticInjectionOnInterface(Class<?> clazz) {
+    return addMessage("%s is an interface, but interfaces have no static injection points.", clazz);
+  }
+
   public Errors cannotInjectFinalField(Field field) {
     return addMessage("Injected field %s cannot be final.", field);
   }

@@ -215,6 +215,27 @@ public class InjectorTest extends TestCase {
     assertEquals(5, Static.i);
   }
 
+  public void testInjectStaticInterface() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        protected void configure() {
+          requestStaticInjection(Interface.class);
+        }
+      });
+      fail();
+    } catch(CreationException ce) {
+      assertEquals(1, ce.getErrorMessages().size());
+      Asserts.assertContains(
+          ce.getMessage(),
+          "1) " + Interface.class.getName()
+              + " is an interface, but interfaces have no static injection points.",
+          "at " + InjectorTest.class.getName(),
+          "configure");
+    }
+  }
+
+  private static interface Interface {}
+
   static class Static {
 
     @Inject @I static int i;

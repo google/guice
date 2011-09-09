@@ -99,11 +99,17 @@ final class InjectionRequestProcessor extends AbstractProcessor {
       try {
         injectionPoints = request.getInjectionPoints();
       } catch (ConfigurationException e) {
-        errors.merge(e.getErrorMessages());
+        errorsForMember.merge(e.getErrorMessages());
         injectionPoints = e.getPartialValue();
       }
-      memberInjectors = injector.membersInjectorStore.getInjectors(
-          injectionPoints, errorsForMember);
+      if (injectionPoints != null) {
+        memberInjectors = injector.membersInjectorStore.getInjectors(
+            injectionPoints, errorsForMember);
+      } else {
+        memberInjectors = ImmutableList.of();
+      }
+      
+      errors.merge(errorsForMember);
     }
 
     void injectMembers() {

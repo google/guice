@@ -319,8 +319,16 @@ public final class InjectionPoint {
    */
   public static Set<InjectionPoint> forStaticMethodsAndFields(TypeLiteral<?> type) {
     Errors errors = new Errors();
-
-    Set<InjectionPoint> result = getInjectionPoints(type, true, errors);
+    
+    Set<InjectionPoint> result;
+    
+    if (type.getRawType().isInterface()) {
+      errors.staticInjectionOnInterface(type.getRawType());
+      result = null;
+    } else {
+      result = getInjectionPoints(type, true, errors);
+    }
+    
     if (errors.hasErrors()) {
       throw new ConfigurationException(errors.getMessages()).withPartialValue(result);
     }
