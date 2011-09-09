@@ -276,7 +276,7 @@ public class InjectionPointTest extends TestCase {
         methods.add(point.getMember().getName());
       }
     }
-    assertEquals(points.toString(), ImmutableSet.of(methodNames), methods);
+    assertEquals(points.toString(), ImmutableSet.copyOf(methodNames), methods);
   }
   
   static class Super {
