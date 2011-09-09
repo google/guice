@@ -42,49 +42,50 @@ import javax.servlet.http.HttpSession;
 
 /**
  * A visitor for testing the servlet SPI extension.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 class ServletSpiVisitor
     extends DefaultBindingTargetVisitor<Object, Integer>
     implements ServletModuleTargetVisitor<Object, Integer> {
-  
+
   int otherCount = 0;
   int currentCount = 0;
   List<Params> actual = Lists.newArrayList();
-  
+
   /* The set of classes that are allowed to be "other" bindings. */
   Set<Class> allowedClasses;
-  
+
   ServletSpiVisitor(boolean forInjector) {
     ImmutableSet.Builder<Class> builder = ImmutableSet.builder();
     // always ignore these things...
     builder.add(ServletRequest.class,
         ServletResponse.class, ManagedFilterPipeline.class, ManagedServletPipeline.class,
         FilterPipeline.class, ServletContext.class, HttpServletRequest.class, Filter.class,
-        HttpServletResponse.class, HttpSession.class, Map.class, HttpServlet.class);
+        HttpServletResponse.class, HttpSession.class, Map.class, HttpServlet.class,
+        InternalServletModule.BackwardsCompatibleServletContextProvider.class);
     if(forInjector) {
       // only ignore these if this is for the live injector, any other time it'd be an error!
       builder.add(Injector.class, Stage.class, Logger.class);
     }
     this.allowedClasses = builder.build();
   }
-  
+
   public Integer visit(InstanceFilterBinding binding) {
     actual.add(new Params(binding, binding.getFilterInstance()));
     return currentCount++;
   }
-  
+
   public Integer visit(InstanceServletBinding binding) {
     actual.add(new Params(binding, binding.getServletInstance()));
     return currentCount++;
   }
-  
+
   public Integer visit(LinkedFilterBinding binding) {
     actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;
   }
-  
+
   public Integer visit(LinkedServletBinding binding) {
     actual.add(new Params(binding, binding.getLinkedKey()));
     return currentCount++;
@@ -98,27 +99,27 @@ class ServletSpiVisitor
     otherCount++;
     return currentCount++;
   }
-  
+
   static class Params {
     private final String pattern;
     private final Object keyOrInstance;
     private final Map<String, String> params;
     private final UriPatternType patternType;
-    
+
     Params(ServletModuleBinding binding, Object keyOrInstance) {
       this.pattern = binding.getPattern();
       this.keyOrInstance = keyOrInstance;
       this.params = binding.getInitParams();
       this.patternType = binding.getUriPatternType();
     }
-    
+
     Params(String pattern, Object keyOrInstance, Map params, UriPatternType patternType) {
       this.pattern = pattern;
       this.keyOrInstance = keyOrInstance;
       this.params = params;
       this.patternType = patternType;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
       if(obj instanceof Params) {
@@ -136,7 +137,7 @@ class ServletSpiVisitor
     public int hashCode() {
       return Objects.hashCode(pattern, keyOrInstance, params, patternType);
     }
-    
+
     @Override
     public String toString() {
       return Objects.toStringHelper(Params.class)

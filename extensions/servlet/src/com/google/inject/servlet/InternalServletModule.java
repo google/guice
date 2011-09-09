@@ -91,6 +91,7 @@ final class InternalServletModule extends AbstractModule {
     bind(FilterPipeline.class).to(ManagedFilterPipeline.class).asEagerSingleton();
 
     bind(ServletContext.class).toProvider(BackwardsCompatibleServletContextProvider.class);
+    bind(BackwardsCompatibleServletContextProvider.class);
   }
 
   @Provides @RequestScoped HttpServletRequest provideHttpServletRequest() {

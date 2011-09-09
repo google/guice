@@ -37,22 +37,22 @@ import java.util.List;
 
 /**
  * A very basic test that servletmodule works with bindings.
- * 
+ *
  * @author sameb@google.com (Sam Berlin)
  */
 public class ExtensionSpiTest extends TestCase {
-  
+
   private DummyFilterImpl dummyFilter1 = new DummyFilterImpl();
   private DummyFilterImpl dummyFilter2 = new DummyFilterImpl();
   private DummyFilterImpl dummyFilter3 = new DummyFilterImpl();
   private DummyFilterImpl dummyFilter4 = new DummyFilterImpl();
-  
+
   private DummyServlet dummyServlet1 = new DummyServlet();
   private DummyServlet dummyServlet2 = new DummyServlet();
   private DummyServlet dummyServlet3 = new DummyServlet();
   private DummyServlet dummyServlet4 = new DummyServlet();
-  
-  public final void testSpiOnElements() {    
+
+  public final void testSpiOnElements() {
     ServletSpiVisitor visitor = new ServletSpiVisitor(false);
     int count = 0;
     for(Element element : Elements.getElements(new Module())) {
@@ -62,7 +62,7 @@ public class ExtensionSpiTest extends TestCase {
     }
     validateVisitor(visitor);
   }
-  
+
   public final void testSpiOnInjector() {
     ServletSpiVisitor visitor = new ServletSpiVisitor(true);
     int count = 0;
@@ -72,10 +72,10 @@ public class ExtensionSpiTest extends TestCase {
     }
     validateVisitor(visitor);
   }
-  
+
   private void validateVisitor(ServletSpiVisitor visitor) {
     assertEquals(48, visitor.currentCount - visitor.otherCount);
-    
+
     // This is the expected param list, in order..
     List<Params> expected = ImmutableList.of(
         new Params("/class", Key.get(DummyFilterImpl.class), ImmutableMap.of(), SERVLET),
@@ -90,7 +90,7 @@ public class ExtensionSpiTest extends TestCase {
         new Params("/key/keyvalues/2", Key.get(DummyFilterImpl.class, Names.named("foo")), ImmutableMap.of("key", "value"), SERVLET),
         new Params("/instance/keyvalues", dummyFilter2, ImmutableMap.of("key", "value"), SERVLET),
         new Params("/instance/keyvalues/2", dummyFilter2, ImmutableMap.of("key", "value"), SERVLET),
-        
+
         new Params("/class[0-9]", Key.get(DummyFilterImpl.class), ImmutableMap.of(), REGEX),
         new Params("/class[0-9]/2", Key.get(DummyFilterImpl.class), ImmutableMap.of(), REGEX),
         new Params("/key[0-9]", Key.get(DummyFilterImpl.class, Names.named("foo")), ImmutableMap.of(), REGEX),
@@ -103,7 +103,7 @@ public class ExtensionSpiTest extends TestCase {
         new Params("/key[0-9]/keyvalues/2", Key.get(DummyFilterImpl.class, Names.named("foo")), ImmutableMap.of("key", "value"), REGEX),
         new Params("/instance[0-9]/keyvalues", dummyFilter4, ImmutableMap.of("key", "value"), REGEX),
         new Params("/instance[0-9]/keyvalues/2", dummyFilter4, ImmutableMap.of("key", "value"), REGEX),
-        
+
         new Params("/class", Key.get(DummyServlet.class), ImmutableMap.of(), SERVLET),
         new Params("/class/2", Key.get(DummyServlet.class), ImmutableMap.of(), SERVLET),
         new Params("/key", Key.get(DummyServlet.class, Names.named("foo")), ImmutableMap.of(), SERVLET),
@@ -116,7 +116,7 @@ public class ExtensionSpiTest extends TestCase {
         new Params("/key/keyvalues/2", Key.get(DummyServlet.class, Names.named("foo")), ImmutableMap.of("key", "value"), SERVLET),
         new Params("/instance/keyvalues", dummyServlet2, ImmutableMap.of("key", "value"), SERVLET),
         new Params("/instance/keyvalues/2", dummyServlet2, ImmutableMap.of("key", "value"), SERVLET),
-        
+
         new Params("/class[0-9]", Key.get(DummyServlet.class), ImmutableMap.of(), REGEX),
         new Params("/class[0-9]/2", Key.get(DummyServlet.class), ImmutableMap.of(), REGEX),
         new Params("/key[0-9]", Key.get(DummyServlet.class, Names.named("foo")), ImmutableMap.of(), REGEX),
@@ -130,7 +130,7 @@ public class ExtensionSpiTest extends TestCase {
         new Params("/instance[0-9]/keyvalues", dummyServlet4, ImmutableMap.of("key", "value"), REGEX),
         new Params("/instance[0-9]/keyvalues/2", dummyServlet4, ImmutableMap.of("key", "value"), REGEX)
     );
-    
+
     assertEquals(expected.size(), visitor.actual.size());
     Iterator<Params> actualIterator = visitor.actual.iterator();
     int i = 0;
@@ -142,6 +142,8 @@ public class ExtensionSpiTest extends TestCase {
   private class Module extends ServletModule {
     @Override
     protected void configureServlets() {
+      binder().requireExplicitBindings();
+
       filter("/class", "/class/2").through(DummyFilterImpl.class);
       filter("/key", "/key/2").through(
           Key.get(DummyFilterImpl.class, Names.named("foo")));
@@ -186,6 +188,5 @@ public class ExtensionSpiTest extends TestCase {
       serveRegex("/instance[0-9]/keyvalues", "/instance[0-9]/keyvalues/2").with(
           dummyServlet4, ImmutableMap.of("key", "value"));
     }
-  };
-  
+  }
 }
