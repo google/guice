@@ -47,11 +47,13 @@ public class BinderTest extends TestCase {
 
   private final List<LogRecord> logRecords = Lists.newArrayList();
   private final Handler fakeHandler = new Handler() {
+    @Override
     public void publish(LogRecord logRecord) {
       logRecords.add(logRecord);
     }
-
+    @Override
     public void flush() {}
+    @Override
     public void close() throws SecurityException {}
   };
 
@@ -86,6 +88,7 @@ public class BinderTest extends TestCase {
   public void testMissingBindings() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         public void configure() {
           getProvider(Runnable.class);
           bind(Comparator.class);
@@ -111,6 +114,7 @@ public class BinderTest extends TestCase {
   public void testMissingDependency() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         public void configure() {
           bind(NeedsRunnable.class);
         }
@@ -232,6 +236,7 @@ public class BinderTest extends TestCase {
     final Integer[] integers = new Integer[] { 1 };
     
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(String[].class).toInstance(strings);
         bind(new TypeLiteral<Integer[]>() {}).toInstance(integers);
@@ -247,6 +252,7 @@ public class BinderTest extends TestCase {
 
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           bind(String[].class).toInstance(new String[] { "A" });
           bind(new TypeLiteral<String[]>() {}).toInstance(new String[] { "B" });
@@ -262,6 +268,7 @@ public class BinderTest extends TestCase {
     
     // passes because duplicates are ignored
     injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(String[].class).toInstance(strings);
         bind(new TypeLiteral<String[]>() {}).toInstance(strings);
@@ -354,6 +361,7 @@ public class BinderTest extends TestCase {
    */
   public void testUntargettedBinding() {
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(HasProvidedBy1.class);
         bind(HasImplementedBy1.class);
@@ -388,6 +396,7 @@ public class BinderTest extends TestCase {
     final Message message = new Message(getClass(), "Whoops!");
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           addError(message);
         }
@@ -401,6 +410,7 @@ public class BinderTest extends TestCase {
   public void testUserReportedErrorsAreAlsoLogged() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           addError(new Message(ImmutableList.of(), "Whoops!", new IllegalArgumentException()));
         }
@@ -417,6 +427,7 @@ public class BinderTest extends TestCase {
   public void testBindingToProvider() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           bind(new TypeLiteral<Provider<String>>() {}).toInstance(Providers.of("A"));
         }
@@ -434,6 +445,7 @@ public class BinderTest extends TestCase {
 
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           bind(AbstractModule.class).annotatedWith(red)
               .toProvider(Providers.<AbstractModule>of(null));

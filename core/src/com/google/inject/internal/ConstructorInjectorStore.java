@@ -31,6 +31,7 @@ final class ConstructorInjectorStore {
 
   private final FailableCache<InjectionPoint, ConstructorInjector<?>>  cache
       = new FailableCache<InjectionPoint, ConstructorInjector<?>> () {
+    @Override
     protected ConstructorInjector<?> create(InjectionPoint constructorInjector, Errors errors)
         throws ErrorsException {
       return createConstructor(constructorInjector, errors);

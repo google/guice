@@ -19,6 +19,7 @@ package com.google.inject;
 import com.google.common.collect.Iterables;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.spi.Message;
 
 import junit.framework.TestCase;
 
@@ -74,6 +75,7 @@ public class ImplicitBindingTest extends TestCase {
 
   public void testBindingOverridesImplementedBy() {
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(I.class).to(AlternateImpl.class);
       }
@@ -158,7 +160,10 @@ public class ImplicitBindingTest extends TestCase {
       injector.getBinding(clazz);
       fail("Shouldn't have been able to get binding of: " + clazz);
     } catch(ConfigurationException expected) {
-      List<Object> sources = Iterables.getOnlyElement(expected.getErrorMessages()).getSources();
+      Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
+      assertEquals("No implementation for " + InvalidInterface.class.getName() + " was bound.",
+          msg.getMessage());
+      List<Object> sources = msg.getSources();
       // Assert that the first item in the sources if the key for the class we're looking up,
       // ensuring that each lookup is "new".
       assertEquals(Key.get(clazz).toString(), sources.get(0).toString());
@@ -281,6 +286,62 @@ public class ImplicitBindingTest extends TestCase {
       
       return providedStringValue;
     }
-  }  
+  }
 
+  /**
+   * Ensure that when we cleanup failed JIT bindings, we don't break.
+   * The test here requires a sequence of JIT bindings:
+   *   A-> B 
+   *   B -> C, A
+   *   C -> A, D
+   *   D not JITable
+   * The problem was that C cleaned up A's binding and then handed control back to B,
+   * which tried to continue processing A.. but A was removed from the jitBindings Map,
+   * so it attempts to create a new JIT binding for A, but we haven't yet finished
+   * constructing the first JIT binding for A, so we get a recursive
+   * computation exception from ComputingConcurrentHashMap.
+   * 
+   * We also throw in a valid JIT binding, E, to guarantee that if
+   * something fails in this flow, it can be recreated later if it's
+   * not from a failed sequence.
+   */
+  public void testRecursiveJitBindingsCleanupCorrectly() throws Exception {
+    Injector injector = Guice.createInjector();
+    try {
+      injector.getInstance(A.class);
+      fail("Expected failure");
+    } catch(ConfigurationException expected) {
+      Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
+      Asserts.assertContains(msg.getMessage(),
+          "Could not find a suitable constructor in " + D.class.getName());
+    }
+    // Assert that we've removed all the bindings.
+    assertNull(injector.getExistingBinding(Key.get(A.class)));
+    assertNull(injector.getExistingBinding(Key.get(B.class)));
+    assertNull(injector.getExistingBinding(Key.get(C.class)));
+    assertNull(injector.getExistingBinding(Key.get(D.class)));
+    
+    // Confirm that we didn't prevent 'E' from working.
+    assertNotNull(injector.getBinding(Key.get(E.class)));
+  }
+
+  static class A {
+    @Inject public A(B b) {}
+  }
+
+  static class B {
+    @Inject public B(C c, A a) {}
+  }
+
+  static class C {
+    @Inject public C(A a, D d, E e) {}
+  }
+
+  static class D {
+    public D(int i) {}
+  }
+  
+  // Valid JITable binding
+  static class E { }
+  
 }

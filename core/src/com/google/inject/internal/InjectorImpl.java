@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
@@ -104,6 +105,11 @@ final class InjectorImpl implements Injector, Lookups {
 
   /** Just-in-time binding cache. Guarded by state.lock() */
   final Map<Key<?>, BindingImpl<?>> jitBindings = Maps.newHashMap();
+  /**
+   * Cache of Keys that we were unable to create JIT bindings for, so we don't
+   * keep trying.  Also guarded by state.lock().
+   */
+  final Set<Key<?>> failedJitBindings = Sets.newHashSet();
 
   Lookups lookups = new DeferredLookups(this);
 
@@ -116,6 +122,7 @@ final class InjectorImpl implements Injector, Lookups {
       localContext = parent.localContext;
     } else {
       localContext = new ThreadLocal<Object[]>() {
+        @Override
         protected Object[] initialValue() {
           return new Object[1];
         }
@@ -231,7 +238,7 @@ final class InjectorImpl implements Injector, Lookups {
   private <T> BindingImpl<T> getJustInTimeBinding(Key<T> key, Errors errors, JitLimitation jitType)
       throws ErrorsException {
 
-    boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);    
+    boolean jitOverride = isProvider(key) || isTypeLiteral(key) || isMembersInjector(key);
     synchronized (state.lock()) {
       // first try to find a JIT binding that we've already created
       for (InjectorImpl injector = this; injector != null; injector = injector.parent) {
@@ -252,8 +259,25 @@ final class InjectorImpl implements Injector, Lookups {
         }
       }
       
+      // If we previously failed creating this JIT binding and our Errors has
+      // already recorded an error, then just directly throw that error.
+      // We need to do this because it's possible we already cleaned up the
+      // entry in jitBindings (during cleanup), and we may be trying
+      // to create it again (in the case of a recursive JIT binding).
+      // We need both of these guards for different reasons
+      // failedJitBindings.contains: We want to continue processing if we've never
+      //   failed before, so that our initial error message contains
+      //   as much useful information as possible about what errors exist.
+      // errors.hasErrors: If we haven't already failed, then it's OK to
+      //   continue processing, to make sure the ultimate error message
+      //   is the correct one.
+      // See: ImplicitBindingsTest#testRecursiveJitBindingsCleanupCorrectly
+      // for where this guard compes into play.
+      if (failedJitBindings.contains(key) && errors.hasErrors()) {
+        throw errors.toException();
+      }
       return createJustInTimeBindingRecursive(key, errors, options.jitDisabled, jitType);
-    }
+    } // end synchronized(state.lock())
   }
 
   /** Returns true if the key type is Provider (but not a subclass of Provider). */
@@ -570,6 +594,7 @@ final class InjectorImpl implements Injector, Lookups {
   
   /** Cleans up any state that may have been cached when constructing the JIT binding. */
   private void removeFailedJitBinding(Key<?> key, InjectionPoint ip) {
+    failedJitBindings.add(key);
     jitBindings.remove(key);
     membersInjectorStore.remove(key.getTypeLiteral());
     provisionListenerStore.remove(key);
@@ -1019,6 +1044,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
   }
 
+  @Override
   public String toString() {
     return Objects.toStringHelper(Injector.class)
         .add("bindings", state.getExplicitBindingsThisLevel().values())
