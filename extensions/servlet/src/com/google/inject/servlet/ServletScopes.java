@@ -23,6 +23,7 @@ import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+import com.google.inject.Scopes;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -76,8 +77,10 @@ public class ServletScopes {
 
               if (t == null) {
                 t = creator.get();
-                // Store a sentinel for provider-given null values.
-                scopeMap.put(name, t != null ? t : NullObject.INSTANCE);
+                if (!Scopes.isCircularProxy(t)) {
+                  // Store a sentinel for provider-given null values.
+                  scopeMap.put(name, t != null ? t : NullObject.INSTANCE);
+                }
               }
 
               return t;
@@ -105,18 +108,22 @@ public class ServletScopes {
             T t = (T) obj;
             if (t == null) {
               t = creator.get();
-              request.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
+              if (!Scopes.isCircularProxy(t)) {
+                request.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
+              }
             }
             return t;
           }
         }
 
+        @Override
         public String toString() {
           return String.format("%s[%s]", creator, REQUEST);
         }
       };
     }
 
+    @Override
     public String toString() {
       return "ServletScopes.REQUEST";
     }
@@ -140,17 +147,21 @@ public class ServletScopes {
             T t = (T) obj;
             if (t == null) {
               t = creator.get();
-              session.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
+              if (!Scopes.isCircularProxy(t)) {
+                session.setAttribute(name, (t != null) ? t : NullObject.INSTANCE);
+              }
             }
             return t;
           }
         }
+        @Override
         public String toString() {
           return String.format("%s[%s]", creator, SESSION);
         }
       };
     }
 
+    @Override
     public String toString() {
       return "ServletScopes.SESSION";
     }

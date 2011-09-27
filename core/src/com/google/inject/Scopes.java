@@ -65,7 +65,7 @@ public class Scopes {
                 T provided = creator.get();
 
                 // don't remember proxies; these exist only to serve circular dependencies
-                if (provided instanceof CircularDependencyProxy) {
+                if (isCircularProxy(provided)) {
                   return provided;
                 }
 
@@ -87,6 +87,7 @@ public class Scopes {
           return returnedInstance;
         }
 
+        @Override
         public String toString() {
           return String.format("%s[%s]", creator, SINGLETON);
         }
@@ -154,7 +155,7 @@ public class Scopes {
 
       if (binding instanceof LinkedBindingImpl) {
         LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
-        Injector injector = (Injector) linkedBinding.getInjector();
+        Injector injector = linkedBinding.getInjector();
         if (injector != null) {
           binding = injector.getBinding(linkedBinding.getLinkedKey());
           continue;
@@ -170,5 +171,17 @@ public class Scopes {
 
       return false;
     } while (true);
+  }
+  
+  /**
+   * Returns true if the object is a proxy for a circular dependency,
+   * constructed by Guice because it encountered a circular dependency. Scope
+   * implementations should be careful to <b>not cache circular proxies</b>,
+   * because the proxies are not intended for general purpose use. (They are
+   * designed just to fulfill the immediate injection, not all injections.
+   * Caching them can lead to IllegalArgumentExceptions or ClassCastExceptions.)
+   */
+  public static boolean isCircularProxy(Object object) {
+    return object instanceof CircularDependencyProxy;
   }
 }

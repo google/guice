@@ -17,11 +17,19 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 import junit.framework.TestCase;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -500,5 +508,91 @@ public class CircularDependencyTest extends TestCase {
   }
   static class Bar {
     @Inject String string;
+  }
+  
+  /**
+   * When Scope Providers call their unscoped Provider's get() methods are
+   * called, it's possible that the result is a circular proxy designed for one
+   * specific parameter (not for all possible parameters). But custom scopes
+   * typically cache the results without checking to see if the result is a
+   * proxy. This leads to caching a result that is unsuitable for reuse for
+   * other parameters.
+   * 
+   * This means that custom proxies have to do an
+   *   {@code if(Scopes.isCircularProxy(..))}
+   * in order to avoid exceptions.
+   */
+  public void testCustomScopeCircularProxies() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindScope(SimpleSingleton.class, new BasicSingleton());
+        bind(H.class).to(HImpl.class);
+        bind(I.class).to(IImpl.class);
+        bind(J.class).to(JImpl.class);
+      }
+    });
+    
+    // The reason this happens is because the Scope gets these requests, in order:
+    // entry: Key<IImpl> (1 - from getInstance call)
+    // entry: Key<HImpl>
+    // entry: Key<IImpl> (2 - circular dependency from HImpl)
+    // result of 2nd Key<IImpl> - a com.google.inject.$Proxy, because it's a circular proxy
+    // result of Key<HImpl> - an HImpl
+    // entry: Key<JImpl>
+    // entry: Key<IImpl> (3 - another circular dependency, this time from JImpl)    
+    // At this point, if the first Key<Impl> result was cached, our cache would have
+    //  Key<IImpl> caching to an instanceof of I, but not an an instanceof of IImpl.
+    // If returned this, it would result in cglib giving a ClassCastException or
+    // java reflection giving an IllegalArgumentException when filling in parameters
+    // for the constructor, because JImpl wants an IImpl, not an I.
+    
+    try {
+      injector.getInstance(IImpl.class);
+      fail();
+    } catch(ProvisionException pe) {
+      assertContains(Iterables.getOnlyElement(pe.getErrorMessages()).getMessage(),
+          "Tried proxying " + IImpl.class.getName()
+          + " to support a circular dependency, but it is not an interface.");
+    }
+  }
+  
+  interface H {}
+  interface I {}
+  interface J {}
+  @SimpleSingleton
+  static class HImpl implements H {
+     @Inject HImpl(I i) {}     
+  }
+  @SimpleSingleton
+  static class IImpl implements I {
+     @Inject IImpl(HImpl i, J j) {}
+  }
+  @SimpleSingleton
+  static class JImpl implements J {
+     @Inject JImpl(IImpl i) {}
+  }
+  
+  @Target({ ElementType.TYPE, ElementType.METHOD })
+  @Retention(RUNTIME)
+  @ScopeAnnotation
+  public @interface SimpleSingleton {}
+  public static class BasicSingleton implements Scope {
+    private static Map<Key, Object> cache = Maps.newHashMap();
+    public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
+      return new Provider<T>() {
+        @SuppressWarnings("unchecked")
+        public T get() {
+          if (!cache.containsKey(key)) {
+            T t = unscoped.get();
+            if (Scopes.isCircularProxy(t)) {
+              return t;
+            }
+            cache.put(key, t);
+          }
+          return (T)cache.get(key);
+        }
+      };
+    }
   }
 }
