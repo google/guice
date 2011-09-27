@@ -41,6 +41,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * An internal representation of a servlet definition mapped to a particular URI pattern. Also
@@ -195,19 +196,20 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
 
     HttpServletRequest request = new HttpServletRequestWrapper(
         (HttpServletRequest) servletRequest) {
+      private boolean pathComputed;
       private String path;
-      private boolean pathComputed = false;
-      //must use a boolean on the memo field, because null is a legal value (TODO no, it's not)
 
-      private boolean pathInfoComputed = false;
+      private boolean pathInfoComputed;
       private String pathInfo;
 
       @Override
       public String getPathInfo() {
         if (!isPathInfoComputed()) {
           int servletPathLength = getServletPath().length();
-          pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/");
-          pathInfo = pathInfo.length() > servletPathLength ? pathInfo.substring(servletPathLength) : null;
+          pathInfo = getRequestURI().substring(getContextPath().length())
+              .replaceAll("[/]{2,}", "/");
+          pathInfo = pathInfo.length() > servletPathLength
+              ? pathInfo.substring(servletPathLength) : null;
 
           // Corner case: when servlet path and request path match exactly (without trailing '/'),
           // then pathinfo is null
@@ -221,8 +223,10 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
         return pathInfo;
       }
 
-      // NOTE(dhanji): These two are a bit of a hack to help ensure that request dipatcher-sent
+      // NOTE(dhanji): These two are a bit of a hack to help ensure that request dispatcher-sent
       // requests don't use the same path info that was memoized for the original request.
+      // NOTE(iqshum): I don't think this is possible, since the dispatcher-sent request would
+      // perform its own wrapping.
       private boolean isPathInfoComputed() {
         return pathInfoComputed
             && !(null != servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST));
@@ -261,7 +265,20 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       }
     };
 
-    httpServlet.get().service(request, servletResponse);
+    doServiceImpl(request, (HttpServletResponse) servletResponse);
+  }
+
+  private void doServiceImpl(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    GuiceFilter.Context previous = GuiceFilter.localContext.get();
+    HttpServletRequest originalRequest
+        = (previous != null) ? previous.getOriginalRequest() : request;
+    GuiceFilter.localContext.set(new GuiceFilter.Context(originalRequest, request, response));
+    try {
+      httpServlet.get().service(request, response);
+    } finally {
+      GuiceFilter.localContext.set(previous);
+    }
   }
 
   String getKey() {

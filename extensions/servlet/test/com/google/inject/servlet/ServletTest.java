@@ -24,13 +24,17 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 
 import junit.framework.TestCase;
@@ -44,13 +48,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -77,7 +85,6 @@ public class ServletTest extends TestCase {
     final Injector injector = createInjector();
     final HttpServletRequest request = newFakeHttpServletRequest();
     final HttpServletResponse response = newFakeHttpServletResponse();
-    final Map<String, String[]> params = Maps.newHashMap();
 
     final boolean[] invoked = new boolean[1];
     GuiceFilter filter = new GuiceFilter();
@@ -99,6 +106,148 @@ public class ServletTest extends TestCase {
     filter.doFilter(request, response, filterChain);
 
     assertTrue(invoked[0]);
+  }
+
+  public void testRequestAndResponseBindings_wrappingFilter() throws Exception {
+    final HttpServletRequest request = newFakeHttpServletRequest();
+    final ImmutableMap<String, String[]> wrappedParamMap
+        = ImmutableMap.of("wrap", new String[]{"a", "b"});
+    final HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request) {
+      @Override public Map getParameterMap() {
+        return wrappedParamMap;
+      }
+
+      @Override public Object getAttribute(String attr) {
+        // Ensure that attributes are stored on the original request object.
+        throw new UnsupportedOperationException();
+      }
+    };
+    final HttpServletResponse response = newFakeHttpServletResponse();
+    final HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(response);
+
+    final boolean[] filterInvoked = new boolean[1];
+    final Injector injector = createInjector(new ServletModule() {
+      @Override protected void configureServlets() {
+        filter("/*").through(new Filter() {
+          @Inject Provider<ServletRequest> servletReqProvider;
+          @Inject Provider<HttpServletRequest> reqProvider;
+          @Inject Provider<ServletResponse> servletRespProvider;
+          @Inject Provider<HttpServletResponse> respProvider;
+
+          public void init(FilterConfig filterConfig) {}
+
+          public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
+              throws IOException, ServletException {
+            filterInvoked[0] = true;
+            assertSame(req, servletReqProvider.get());
+            assertSame(req, reqProvider.get());
+
+            assertSame(resp, servletRespProvider.get());
+            assertSame(resp, respProvider.get());
+
+            chain.doFilter(requestWrapper, responseWrapper);
+
+            assertSame(req, reqProvider.get());
+            assertSame(resp, respProvider.get());
+          }
+
+          public void destroy() {}
+        });
+      }
+    });
+
+    GuiceFilter filter = new GuiceFilter();
+    final boolean[] chainInvoked = new boolean[1];
+    FilterChain filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        chainInvoked[0] = true;
+        assertSame(requestWrapper, servletRequest);
+        assertSame(requestWrapper, injector.getInstance(ServletRequest.class));
+        assertSame(requestWrapper, injector.getInstance(HTTP_REQ_KEY));
+
+        assertSame(responseWrapper, servletResponse);
+        assertSame(responseWrapper, injector.getInstance(ServletResponse.class));
+        assertSame(responseWrapper, injector.getInstance(HTTP_RESP_KEY));
+
+        assertSame(servletRequest.getParameterMap(), injector.getInstance(REQ_PARAMS_KEY));
+
+        InRequest inRequest = injector.getInstance(InRequest.class);
+        assertSame(inRequest, injector.getInstance(InRequest.class));
+      }
+    };
+    filter.doFilter(request, response, filterChain);
+
+    assertTrue(chainInvoked[0]);
+    assertTrue(filterInvoked[0]);
+  }
+
+  public void testRequestAndResponseBindings_matchesPassedParameters() throws Exception {
+    final int[] filterInvoked = new int[1];
+    final boolean[] servletInvoked = new boolean[1];
+    final Injector injector = createInjector(new ServletModule() {
+      @Override protected void configureServlets() {
+        final HttpServletRequest[] previousReq = new HttpServletRequest[1];
+        final HttpServletResponse[] previousResp = new HttpServletResponse[1];
+
+        final Provider<ServletRequest> servletReqProvider = getProvider(ServletRequest.class);
+        final Provider<HttpServletRequest> reqProvider = getProvider(HttpServletRequest.class);
+        final Provider<ServletResponse> servletRespProvider = getProvider(ServletResponse.class);
+        final Provider<HttpServletResponse> respProvider = getProvider(HttpServletResponse.class);
+
+        Filter filter = new Filter() {
+          public void init(FilterConfig filterConfig) {}
+
+          public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
+              throws IOException, ServletException {
+            filterInvoked[0]++;
+            assertSame(req, servletReqProvider.get());
+            assertSame(req, reqProvider.get());
+            if (previousReq[0] != null) {
+              assertEquals(req, previousReq[0]);
+            }
+
+            assertSame(resp, servletRespProvider.get());
+            assertSame(resp, respProvider.get());
+            if (previousResp[0] != null) {
+              assertEquals(resp, previousResp[0]);
+            }
+
+            chain.doFilter(
+                previousReq[0] = new HttpServletRequestWrapper((HttpServletRequest) req),
+                previousResp[0] = new HttpServletResponseWrapper((HttpServletResponse) resp));
+
+            assertSame(req, reqProvider.get());
+            assertSame(resp, respProvider.get());
+          }
+
+          public void destroy() {}
+        };
+
+        filter("/*").through(filter);
+        filter("/*").through(filter);  // filter twice to test wrapping in filters
+        serve("/*").with(new HttpServlet() {
+          @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+            servletInvoked[0] = true;
+            assertSame(req, servletReqProvider.get());
+            assertSame(req, reqProvider.get());
+
+            assertSame(resp, servletRespProvider.get());
+            assertSame(resp, respProvider.get());
+          }
+        });
+      }
+    });
+
+    GuiceFilter filter = new GuiceFilter();
+    filter.doFilter(newFakeHttpServletRequest(), newFakeHttpServletResponse(), new FilterChain() {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+        throw new IllegalStateException("Shouldn't get here");
+      }
+    });
+
+    assertEquals(2, filterInvoked[0]);
+    assertTrue(servletInvoked[0]);
   }
 
   public void testNewRequestObject()
@@ -240,6 +389,10 @@ public class ServletTest extends TestCase {
       final Map<String, Object> attributes = Maps.newHashMap(); 
       final HttpSession session = newFakeHttpSession();
 
+      @Override public String getMethod() {
+        return "GET";
+      }
+
       @Override public Object getAttribute(String name) {
         return attributes.get(name);
       }
@@ -300,8 +453,8 @@ public class ServletTest extends TestCase {
         new Class[] { HttpSession.class }, new FakeHttpSessionHandler());
   }
 
-  private Injector createInjector() throws CreationException {
-    return Guice.createInjector(new AbstractModule() {
+  private Injector createInjector(Module... modules) throws CreationException {
+    return Guice.createInjector(Lists.<Module>asList(new AbstractModule() {
       @Override
       protected void configure() {
         install(new ServletModule());
@@ -310,7 +463,7 @@ public class ServletTest extends TestCase {
         bind(InRequest.class);
         bind(IN_REQUEST_NULL_KEY).toProvider(Providers.<InRequest>of(null)).in(RequestScoped.class);
       }
-    });
+    }, modules));
   }
 
   @SessionScoped

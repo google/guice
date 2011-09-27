@@ -139,21 +139,20 @@ class ManagedServletPipeline {
               requestToProcess = servletRequest;
             }
 
-            servletRequest.setAttribute(REQUEST_DISPATCHER_REQUEST, Boolean.TRUE);
-
             // now dispatch to the servlet
-            try {
-              servletDefinition.doService(requestToProcess, servletResponse);
-            } finally {
-              servletRequest.removeAttribute(REQUEST_DISPATCHER_REQUEST);
-            }
+            doServiceImpl(servletDefinition, requestToProcess, servletResponse);
           }
 
           public void include(ServletRequest servletRequest, ServletResponse servletResponse)
               throws ServletException, IOException {
+            // route to the target servlet
+            doServiceImpl(servletDefinition, servletRequest, servletResponse);
+          }
+
+          private void doServiceImpl(ServletDefinition servletDefinition, ServletRequest servletRequest,
+              ServletResponse servletResponse) throws ServletException, IOException {
             servletRequest.setAttribute(REQUEST_DISPATCHER_REQUEST, Boolean.TRUE);
 
-            // route to the target servlet
             try {
               servletDefinition.doService(servletRequest, servletResponse);
             } finally {

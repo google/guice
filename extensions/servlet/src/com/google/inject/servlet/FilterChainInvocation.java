@@ -21,6 +21,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A Filter chain impl which basically passes itself to the "current" filter and iterates the chain
@@ -54,18 +56,27 @@ class FilterChainInvocation implements FilterChain {
       throws IOException, ServletException {
     index++;
 
-    //dispatch down the chain while there are more filters
-    if (index < filterDefinitions.length) {
-      filterDefinitions[index].doFilter(servletRequest, servletResponse, this);
-    } else {
+    GuiceFilter.Context previous = GuiceFilter.localContext.get();
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
+    HttpServletRequest originalRequest
+        = (previous != null) ? previous.getOriginalRequest() : request;
+    GuiceFilter.localContext.set(new GuiceFilter.Context(originalRequest, request, response));
+    try {
+      //dispatch down the chain while there are more filters
+      if (index < filterDefinitions.length) {
+        filterDefinitions[index].doFilter(servletRequest, servletResponse, this);
+      } else {
+        //we've reached the end of the filterchain, let's try to dispatch to a servlet
+        final boolean serviced = servletPipeline.service(servletRequest, servletResponse);
 
-      //we've reached the end of the filterchain, let's try to dispatch to a servlet
-      final boolean serviced = servletPipeline.service(servletRequest, servletResponse);
-
-      //dispatch to the normal filter chain only if one of our servlets did not match
-      if (!serviced) {
-        proceedingChain.doFilter(servletRequest, servletResponse);
+        //dispatch to the normal filter chain only if one of our servlets did not match
+        if (!serviced) {
+          proceedingChain.doFilter(servletRequest, servletResponse);
+        }
       }
+    } finally {
+      GuiceFilter.localContext.set(previous);
     }
   }
 }

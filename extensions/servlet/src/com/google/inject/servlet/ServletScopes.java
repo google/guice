@@ -17,6 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -38,6 +40,12 @@ public class ServletScopes {
 
   private ServletScopes() {}
 
+  /** Keys bound in request-scope which are handled directly by GuiceFilter. */
+  private static final ImmutableSet<Key<?>> REQUEST_CONTEXT_KEYS = ImmutableSet.of(
+      Key.get(HttpServletRequest.class),
+      Key.get(HttpServletResponse.class),
+      new Key<Map<String, String[]>>(RequestParameters.class) {});
+
   /** A sentinel attribute value representing null. */
   enum NullObject { INSTANCE }
 
@@ -45,7 +53,7 @@ public class ServletScopes {
    * HTTP servlet request scope.
    */
   public static final Scope REQUEST = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
+    public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       final String name = key.toString();
       return new Provider<T>() {
         public T get() {
@@ -77,8 +85,17 @@ public class ServletScopes {
               // exception is thrown.
           }
 
-          HttpServletRequest request = GuiceFilter.getRequest();
-
+          // Always synchronize and get/set attributes on the underlying request
+          // object since Filters may wrap the request and change the value of
+          // {@code GuiceFilter.getRequest()}.
+          //
+          // This _correctly_ throws up if the thread is out of scope.
+          HttpServletRequest request = GuiceFilter.getOriginalRequest();
+          if (REQUEST_CONTEXT_KEYS.contains(key)) {
+            // Don't store these keys as attributes, since they are handled by
+            // GuiceFilter itself.
+            return creator.get();
+          }
           synchronized (request) {
             Object obj = request.getAttribute(name);
             if (NullObject.INSTANCE == obj) {
@@ -182,7 +199,7 @@ public class ServletScopes {
     }
 
     return new Callable<T>() {
-      private HttpServletRequest request = continuingRequest;
+      private final HttpServletRequest request = continuingRequest;
 
       public T call() throws Exception {
         GuiceFilter.Context context = GuiceFilter.localContext.get();
@@ -191,7 +208,7 @@ public class ServletScopes {
 
         // Only set up the request continuation if we're running in a
         // new vanilla thread.
-        GuiceFilter.localContext.set(new GuiceFilter.Context(request, null));
+        GuiceFilter.localContext.set(new GuiceFilter.Context(request, request, null));
         try {
           return callable.call();
         } finally {

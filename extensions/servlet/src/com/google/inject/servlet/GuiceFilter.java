@@ -96,27 +96,32 @@ public class GuiceFilter implements Filter {
   //VisibleForTesting
   static void reset() {
     pipeline = new DefaultFilterPipeline();
+    localContext.remove();
   }
 
   public void doFilter(ServletRequest servletRequest,
       ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
 
-    Context previous = localContext.get();
-
     // Prefer the injected pipeline, but fall back on the static one for web.xml users.
     FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
 
+    Context previous = GuiceFilter.localContext.get();
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
+    HttpServletRequest originalRequest
+        = (previous != null) ? previous.getOriginalRequest() : request;
+    localContext.set(new Context(originalRequest, request, response));
     try {
-      localContext.set(new Context((HttpServletRequest) servletRequest,
-          (HttpServletResponse) servletResponse));
-
       //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
       filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
-
     } finally {
       localContext.set(previous);
     }
+  }
+
+  static HttpServletRequest getOriginalRequest() {
+    return getContext().getOriginalRequest();
   }
 
   static HttpServletRequest getRequest() {
@@ -131,7 +136,7 @@ public class GuiceFilter implements Filter {
     return servletContext.get();
   }
 
-  static Context getContext() {
+  private static Context getContext() {
     Context context = localContext.get();
     if (context == null) {
       throw new OutOfScopeException("Cannot access scoped object. Either we"
@@ -143,13 +148,19 @@ public class GuiceFilter implements Filter {
   }
 
   static class Context {
-
+    final HttpServletRequest originalRequest;
     final HttpServletRequest request;
     final HttpServletResponse response;
 
-    Context(HttpServletRequest request, HttpServletResponse response) {
+    Context(HttpServletRequest originalRequest, HttpServletRequest request,
+        HttpServletResponse response) {
+      this.originalRequest = originalRequest;
       this.request = request;
       this.response = response;
+    }
+
+    HttpServletRequest getOriginalRequest() {
+      return originalRequest;
     }
 
     HttpServletRequest getRequest() {

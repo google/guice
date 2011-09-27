@@ -137,8 +137,6 @@ class ManagedFilterPipeline implements FilterPipeline{
   private ServletRequest withDispatcher(ServletRequest servletRequest,
       final ManagedServletPipeline servletPipeline) {
 
-    HttpServletRequest request = (HttpServletRequest) servletRequest;
-
     // don't wrap the request if there are no servlets mapped. This prevents us from inserting our
     // wrapper unless it's actually going to be used. This is necessary for compatibility for apps
     // that downcast their HttpServletRequests to a concrete implementation.
@@ -146,6 +144,7 @@ class ManagedFilterPipeline implements FilterPipeline{
       return servletRequest;
     }
 
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
     //noinspection OverlyComplexAnonymousInnerClass
     return new HttpServletRequestWrapper(request) {
 
