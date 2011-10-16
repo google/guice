@@ -18,6 +18,7 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Key;
@@ -37,11 +38,16 @@ import java.util.concurrent.CountDownLatch;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class Initializer {
+  
   /** the only thread that we'll use to inject members. */
   private final Thread creatingThread = Thread.currentThread();
 
   /** zero means everything is injected. */
   private final CountDownLatch ready = new CountDownLatch(1);
+  
+  /** Maps from instances that need injection to the MembersInjector that will inject them. */
+  private final Map<Object, MembersInjectorImpl<?>> pendingMembersInjectors =
+      Maps.newIdentityHashMap();
 
   /** Maps instances that need injection to a source that registered them */
   private final Map<Object, InjectableReference<?>> pendingInjection = Maps.newIdentityHashMap();
@@ -64,7 +70,8 @@ final class Initializer {
       return Initializables.of(instance);
     }
 
-    InjectableReference<T> initializable = new InjectableReference<T>(injector, instance, key, source);
+    InjectableReference<T> initializable =
+        new InjectableReference<T>(injector, instance, key, source);
     pendingInjection.put(instance, initializable);
     return initializable;
   }
@@ -76,7 +83,7 @@ final class Initializer {
   void validateOustandingInjections(Errors errors) {
     for (InjectableReference<?> reference : pendingInjection.values()) {
       try {
-        reference.validate(errors);
+        pendingMembersInjectors.put(reference.instance, reference.validate(errors));
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
@@ -111,7 +118,6 @@ final class Initializer {
     private final T instance;
     private final Object source;
     private final Key<T> key;
-    private MembersInjectorImpl<T> membersInjector;
 
     public InjectableReference(InjectorImpl injector, T instance, Key<T> key, Object source) {
       this.injector = injector;
@@ -120,10 +126,10 @@ final class Initializer {
       this.source = checkNotNull(source, "source");
     }
 
-    public void validate(Errors errors) throws ErrorsException {
+    public MembersInjectorImpl<T> validate(Errors errors) throws ErrorsException {
       @SuppressWarnings("unchecked") // the type of 'T' is a TypeLiteral<T>
           TypeLiteral<T> type = TypeLiteral.get((Class<T>) instance.getClass());
-      membersInjector = injector.membersInjectorStore.get(type, errors.withSource(source));
+      return injector.membersInjectorStore.get(type, errors.withSource(source));
     }
 
     /**
@@ -148,6 +154,13 @@ final class Initializer {
 
       // toInject needs injection, do it right away. we only do this once, even if it fails
       if (pendingInjection.remove(instance) != null) {
+        // safe because we only insert a members injector for the appropriate instance
+        @SuppressWarnings("unchecked")
+        MembersInjectorImpl<T> membersInjector =
+            (MembersInjectorImpl<T>)pendingMembersInjectors.remove(instance);
+        Preconditions.checkState(membersInjector != null,
+            "No membersInjector available for instance: " + instance + ", from key: " + key);
+        
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
         membersInjector.injectAndNotify(instance, errors.withSource(source), key, source, 
