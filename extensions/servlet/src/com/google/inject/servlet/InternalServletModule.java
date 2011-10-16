@@ -94,6 +94,10 @@ final class InternalServletModule extends AbstractModule {
     bind(BackwardsCompatibleServletContextProvider.class);
   }
 
+  @Provides @Singleton @ScopingOnly GuiceFilter provideScopingOnlyGuiceFilter() {
+    return new GuiceFilter(new DefaultFilterPipeline());
+  }
+
   @Provides @RequestScoped HttpServletRequest provideHttpServletRequest() {
     return GuiceFilter.getRequest();
   }

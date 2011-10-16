@@ -63,7 +63,8 @@ class ServletSpiVisitor
         ServletResponse.class, ManagedFilterPipeline.class, ManagedServletPipeline.class,
         FilterPipeline.class, ServletContext.class, HttpServletRequest.class, Filter.class,
         HttpServletResponse.class, HttpSession.class, Map.class, HttpServlet.class,
-        InternalServletModule.BackwardsCompatibleServletContextProvider.class);
+        InternalServletModule.BackwardsCompatibleServletContextProvider.class,
+        GuiceFilter.class);
     if(forInjector) {
       // only ignore these if this is for the live injector, any other time it'd be an error!
       builder.add(Injector.class, Stage.class, Logger.class);

@@ -15,8 +15,6 @@
  */
 package com.google.inject.servlet;
 
-import com.google.inject.Singleton;
-
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -31,7 +29,6 @@ import javax.servlet.ServletResponse;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  * @see com.google.inject.servlet.ManagedFilterPipeline See Also ManagedFilterPipeline.
  */
-@Singleton
 class DefaultFilterPipeline implements FilterPipeline {
   public void initPipeline(ServletContext context) {
   }

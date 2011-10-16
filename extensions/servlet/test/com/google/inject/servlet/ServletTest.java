@@ -371,6 +371,47 @@ public class ServletTest extends TestCase {
     assertEquals(NullObject.INSTANCE, deserializedSession.getAttribute(inSessionNullKey));
   }
 
+  public void testGuiceFilterConstructors() throws Exception {
+    final RuntimeException servletException = new RuntimeException();
+    final RuntimeException chainException = new RuntimeException();
+    final Injector injector = createInjector(new ServletModule() {
+      @Override protected void configureServlets() {
+        serve("/*").with(new HttpServlet() {
+          @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+            throw servletException;
+          }
+        });
+      }
+    });
+    final HttpServletRequest request = newFakeHttpServletRequest();
+    FilterChain filterChain = new FilterChain() {
+      public void doFilter(ServletRequest servletRequest,
+          ServletResponse servletResponse) {
+        throw chainException;
+      }
+    };
+
+    try {
+      new GuiceFilter().doFilter(request, null, filterChain);
+      fail();
+    } catch (RuntimeException e) {
+      assertSame(servletException, e);
+    }
+    try {
+      injector.getInstance(GuiceFilter.class).doFilter(request, null, filterChain);
+      fail();
+    } catch (RuntimeException e) {
+      assertSame(servletException, e);
+    }
+    try {
+      injector.getInstance(Key.get(GuiceFilter.class, ScopingOnly.class))
+          .doFilter(request, null, filterChain);
+      fail();
+    } catch (RuntimeException e) {
+      assertSame(chainException, e);
+    }
+  }
+
   private static class ThrowingInvocationHandler implements InvocationHandler {
     @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       throw new UnsupportedOperationException("No methods are supported on this object");

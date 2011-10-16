@@ -64,8 +64,7 @@ public class GuiceFilter implements Filter {
   /**
    * We allow both the static and dynamic versions of the pipeline to exist.
    */
-  @Inject
-  private final FilterPipeline injectedPipeline = null;
+  private final FilterPipeline injectedPipeline;
 
   /** Used to inject the servlets configured via {@link ServletModule} */
   static volatile WeakReference<ServletContext> servletContext =
@@ -78,6 +77,15 @@ public class GuiceFilter implements Filter {
       + "in your web application. If this is deliberate, you may safely "
       + "ignore this message. If this is NOT deliberate however, "
       + "your application may not work as expected.";
+
+  public GuiceFilter() {
+    // Use the static FilterPipeline
+    this(null);
+  }
+
+  @Inject GuiceFilter(FilterPipeline filterPipeline) {
+    injectedPipeline = filterPipeline;
+  }
 
   //VisibleForTesting
   @Inject
@@ -103,8 +111,7 @@ public class GuiceFilter implements Filter {
       ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
 
-    // Prefer the injected pipeline, but fall back on the static one for web.xml users.
-    FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
+    FilterPipeline filterPipeline = getFilterPipeline();
 
     Context previous = GuiceFilter.localContext.get();
     HttpServletRequest request = (HttpServletRequest) servletRequest;
@@ -181,7 +188,7 @@ public class GuiceFilter implements Filter {
     // In the default pipeline, this is a noop. However, if replaced
     // by a managed pipeline, a lazy init will be triggered the first time
     // dispatch occurs.
-    FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
+    FilterPipeline filterPipeline = getFilterPipeline();
     filterPipeline.initPipeline(servletContext);
   }
 
@@ -189,12 +196,17 @@ public class GuiceFilter implements Filter {
 
     try {
       // Destroy all registered filters & servlets in that order
-      FilterPipeline filterPipeline = null != injectedPipeline ? injectedPipeline : pipeline;
+      FilterPipeline filterPipeline = getFilterPipeline();
       filterPipeline.destroyPipeline();
 
     } finally {
       reset();
       servletContext.clear();
     }
+  }
+
+  private FilterPipeline getFilterPipeline() {
+    // Prefer the injected pipeline, but fall back on the static one for web.xml users.
+    return (null != injectedPipeline) ? injectedPipeline : pipeline;
   }
 }
