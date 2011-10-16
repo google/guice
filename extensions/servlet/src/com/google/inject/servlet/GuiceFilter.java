@@ -78,6 +78,8 @@ public class GuiceFilter implements Filter {
       + "in your web application. If this is deliberate, you may safely "
       + "ignore this message. If this is NOT deliberate however, "
       + "your application may not work as expected.";
+  
+  private static final Logger LOGGER = Logger.getLogger(GuiceFilter.class.getName());
 
   //VisibleForTesting
   @Inject
@@ -86,7 +88,7 @@ public class GuiceFilter implements Filter {
     // This can happen if you create many injectors and they all have their own
     // servlet module. This is legal, caveat a small warning.
     if (GuiceFilter.pipeline instanceof ManagedFilterPipeline) {
-        Logger.getLogger(GuiceFilter.class.getName()).warning(MULTIPLE_INJECTORS_WARNING);
+      LOGGER.warning(MULTIPLE_INJECTORS_WARNING);
     }
 
     // We overwrite the default pipeline
