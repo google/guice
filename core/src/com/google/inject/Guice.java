@@ -52,8 +52,7 @@ public final class Guice {
   private Guice() {}
 
   /**
-   * Creates an injector for the given set of modules. This is equivalent to
-   * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
+   * Creates an injector for the given set of modules.
    *
    * @throws CreationException if one or more errors occur during injector
    *     construction
@@ -63,8 +62,7 @@ public final class Guice {
   }
 
   /**
-   * Creates an injector for the given set of modules. This is equivalent to
-   * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
+   * Creates an injector for the given set of modules.
    *
    * @throws CreationException if one or more errors occur during injector
    *     creation

@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SingleServiceIntegrationTest extends TestCase {
 
-  public final void testAsyncServiceLifecycle() throws InterruptedException {
+  public final void testAsyncServiceLifecycle() throws Exception {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     final CountDownLatch startLatch = new CountDownLatch(1);
@@ -38,9 +39,14 @@ public class SingleServiceIntegrationTest extends TestCase {
       }
     };
 
-    service.start();
-    // This should not pass!
+    Future<?> future = service.start();
+    // This should not pass!  TODO(sameb): Why?  Looks like it should to me
     assertTrue(startLatch.await(2, TimeUnit.SECONDS));
+    // onStart() is called before the state is set to STARTED, so we need
+    // to wait until the Future finishes to guarantee it really was started.
+    // This still manages to test what we want because the startLatch check
+    // is before this.
+    future.get(1, TimeUnit.SECONDS);
 
     service.stop();
     assertTrue(stopLatch.await(2, TimeUnit.SECONDS));
