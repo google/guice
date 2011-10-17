@@ -43,7 +43,7 @@ public interface ConvertedConstantBinding<T> extends Binding<T>, HasDependencies
   TypeConverterBinding getTypeConverterBinding();
 
   /**
-   * Returns the key for the source binding. That binding can e retrieved from an injector using
+   * Returns the key for the source binding. That binding can be retrieved from an injector using
    * {@link com.google.inject.Injector#getBinding(Key) Injector.getBinding(key)}.
    */
   Key<String> getSourceKey();
