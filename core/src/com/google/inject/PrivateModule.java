@@ -110,7 +110,7 @@ public abstract class PrivateModule implements Module {
 
   /** Makes the binding for {@code key} available to other modules and the injector. */
   protected final <T> void expose(Key<T> key) {
-    binder.expose(key);
+    binder().expose(key);
   }
 
   /**
@@ -119,7 +119,7 @@ public abstract class PrivateModule implements Module {
    * binding annotation.
    */
   protected final AnnotatedElementBuilder expose(Class<?> type) {
-    return binder.expose(type);
+    return binder().expose(type);
   }
 
   /**
@@ -128,7 +128,7 @@ public abstract class PrivateModule implements Module {
    * binding annotation.
    */
   protected final AnnotatedElementBuilder expose(TypeLiteral<?> type) {
-    return binder.expose(type);
+    return binder().expose(type);
   }
 
   // everything below is copied from AbstractModule
@@ -137,6 +137,7 @@ public abstract class PrivateModule implements Module {
    * Returns the current binder.
    */
   protected final PrivateBinder binder() {
+    checkState(binder != null, "The binder can only be used inside configure()");
     return binder;
   }
 
@@ -144,77 +145,77 @@ public abstract class PrivateModule implements Module {
    * @see Binder#bindScope(Class, Scope)
    */
   protected final void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
-    binder.bindScope(scopeAnnotation, scope);
+    binder().bindScope(scopeAnnotation, scope);
   }
 
   /**
    * @see Binder#bind(Key)
    */
   protected final <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-    return binder.bind(key);
+    return binder().bind(key);
   }
 
   /**
    * @see Binder#bind(TypeLiteral)
    */
   protected final <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    return binder.bind(typeLiteral);
+    return binder().bind(typeLiteral);
   }
 
   /**
    * @see Binder#bind(Class)  
    */
   protected final <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return binder.bind(clazz);
+    return binder().bind(clazz);
   }
 
   /**
    * @see Binder#bindConstant()
    */
   protected final AnnotatedConstantBindingBuilder bindConstant() {
-    return binder.bindConstant();
+    return binder().bindConstant();
   }
 
   /**
    * @see Binder#install(Module)
    */
   protected final void install(Module module) {
-    binder.install(module);
+    binder().install(module);
   }
 
   /**
    * @see Binder#addError(String, Object[])
    */
   protected final void addError(String message, Object... arguments) {
-    binder.addError(message, arguments);
+    binder().addError(message, arguments);
   }
 
   /**
    * @see Binder#addError(Throwable)
    */
   protected final void addError(Throwable t) {
-    binder.addError(t);
+    binder().addError(t);
   }
 
   /**
    * @see Binder#addError(Message)
    */
   protected final void addError(Message message) {
-    binder.addError(message);
+    binder().addError(message);
   }
 
   /**
    * @see Binder#requestInjection(Object)
    */
   protected final void requestInjection(Object instance) {
-    binder.requestInjection(instance);
+    binder().requestInjection(instance);
   }
 
   /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected final void requestStaticInjection(Class<?>... types) {
-    binder.requestStaticInjection(types);
+    binder().requestStaticInjection(types);
   }
 
   /*if[AOP]*/
@@ -224,7 +225,7 @@ public abstract class PrivateModule implements Module {
   protected final void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       org.aopalliance.intercept.MethodInterceptor... interceptors) {
-    binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
+    binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
   /*end[AOP]*/
 
@@ -232,28 +233,28 @@ public abstract class PrivateModule implements Module {
    * Instructs Guice to require a binding to the given key.
    */
   protected final void requireBinding(Key<?> key) {
-    binder.getProvider(key);
+    binder().getProvider(key);
   }
 
   /**
    * Instructs Guice to require a binding to the given type.
    */
   protected final void requireBinding(Class<?> type) {
-    binder.getProvider(type);
+    binder().getProvider(type);
   }
 
   /**
    * @see Binder#getProvider(Key)
    */
   protected final <T> Provider<T> getProvider(Key<T> key) {
-    return binder.getProvider(key);
+    return binder().getProvider(key);
   }
   
   /**
    * @see Binder#getProvider(Class)
    */
   protected final <T> Provider<T> getProvider(Class<T> type) {
-    return binder.getProvider(type);
+    return binder().getProvider(type);
   }
 
   /**
@@ -261,28 +262,28 @@ public abstract class PrivateModule implements Module {
    */
   protected final void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    binder.convertToTypes(typeMatcher, converter);
+    binder().convertToTypes(typeMatcher, converter);
   }
 
   /**
    * @see Binder#currentStage()
    */
   protected final Stage currentStage() {
-    return binder.currentStage();
+    return binder().currentStage();
   }
 
   /**
    * @see Binder#getMembersInjector(Class)
    */
   protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-    return binder.getMembersInjector(type);
+    return binder().getMembersInjector(type);
   }
 
   /**
    * @see Binder#getMembersInjector(TypeLiteral)
    */
   protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
-    return binder.getMembersInjector(type);
+    return binder().getMembersInjector(type);
   }
 
   /**
@@ -290,6 +291,6 @@ public abstract class PrivateModule implements Module {
    */
   protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeListener listener) {
-    binder.bindListener(typeMatcher, listener);
+    binder().bindListener(typeMatcher, listener);
   }
 }

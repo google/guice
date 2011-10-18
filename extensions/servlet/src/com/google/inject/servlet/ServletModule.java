@@ -235,12 +235,25 @@ public class ServletModule extends AbstractModule {
   private FiltersModuleBuilder filtersModuleBuilder;
   private ServletsModuleBuilder servletsModuleBuilder;
 
+  private FiltersModuleBuilder getFiltersModuleBuilder() {
+    checkState(filtersModuleBuilder != null,
+        "This method can only be used inside configureServlets()");
+    return filtersModuleBuilder;
+  }
+
+  private ServletsModuleBuilder getServletModuleBuilder() {
+    checkState(servletsModuleBuilder != null,
+        "This method can only be used inside configureServlets()");
+    return servletsModuleBuilder;
+  }
+
   /**
    * @param urlPattern Any Servlet-style pattern. examples: /*, /html/*, *.html, etc.
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filter(String urlPattern, String... morePatterns) {
-    return filtersModuleBuilder.filter(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
+    return getFiltersModuleBuilder()
+        .filter(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
   }
 
   /**
@@ -248,7 +261,8 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
-    return filtersModuleBuilder.filterRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
+    return getFiltersModuleBuilder()
+        .filterRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
   }
 
   /**
@@ -256,7 +270,8 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serve(String urlPattern, String... morePatterns) {
-    return servletsModuleBuilder.serve(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
+    return getServletModuleBuilder()
+        .serve(ImmutableList.<String>builder().add(urlPattern).add(morePatterns).build());
   }
 
   /**
@@ -264,7 +279,8 @@ public class ServletModule extends AbstractModule {
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
-    return servletsModuleBuilder.serveRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
+    return getServletModuleBuilder()
+        .serveRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
   }
 
   /**

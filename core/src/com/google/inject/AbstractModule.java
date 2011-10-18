@@ -75,6 +75,7 @@ public abstract class AbstractModule implements Module {
    * Gets direct access to the underlying {@code Binder}.
    */
   protected Binder binder() {
+    checkState(binder != null, "The binder can only be used inside configure()");
     return binder;
   }
 
@@ -83,56 +84,56 @@ public abstract class AbstractModule implements Module {
    */
   protected void bindScope(Class<? extends Annotation> scopeAnnotation,
       Scope scope) {
-    binder.bindScope(scopeAnnotation, scope);
+    binder().bindScope(scopeAnnotation, scope);
   }
 
   /**
    * @see Binder#bind(Key)
    */
   protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-    return binder.bind(key);
+    return binder().bind(key);
   }
 
   /**
    * @see Binder#bind(TypeLiteral)
    */
   protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    return binder.bind(typeLiteral);
+    return binder().bind(typeLiteral);
   }
 
   /**
    * @see Binder#bind(Class)
    */
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return binder.bind(clazz);
+    return binder().bind(clazz);
   }
 
   /**
    * @see Binder#bindConstant()
    */
   protected AnnotatedConstantBindingBuilder bindConstant() {
-    return binder.bindConstant();
+    return binder().bindConstant();
   }
 
   /**
    * @see Binder#install(Module)
    */
   protected void install(Module module) {
-    binder.install(module);
+    binder().install(module);
   }
 
   /**
    * @see Binder#addError(String, Object[])
    */
   protected void addError(String message, Object... arguments) {
-    binder.addError(message, arguments);
+    binder().addError(message, arguments);
   }
 
   /**
    * @see Binder#addError(Throwable) 
    */
   protected void addError(Throwable t) {
-    binder.addError(t);
+    binder().addError(t);
   }
 
   /**
@@ -140,7 +141,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected void addError(Message message) {
-    binder.addError(message);
+    binder().addError(message);
   }
 
   /**
@@ -148,14 +149,14 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected void requestInjection(Object instance) {
-    binder.requestInjection(instance);
+    binder().requestInjection(instance);
   }
 
   /**
    * @see Binder#requestStaticInjection(Class[])
    */
   protected void requestStaticInjection(Class<?>... types) {
-    binder.requestStaticInjection(types);
+    binder().requestStaticInjection(types);
   }
 
   /*if[AOP]*/
@@ -167,7 +168,7 @@ public abstract class AbstractModule implements Module {
   protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       org.aopalliance.intercept.MethodInterceptor... interceptors) {
-    binder.bindInterceptor(classMatcher, methodMatcher, interceptors);
+    binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
   /*end[AOP]*/
 
@@ -180,7 +181,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected void requireBinding(Key<?> key) {
-    binder.getProvider(key);
+    binder().getProvider(key);
   }
 
   /**
@@ -192,7 +193,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected void requireBinding(Class<?> type) {
-    binder.getProvider(type);
+    binder().getProvider(type);
   }
 
   /**
@@ -200,7 +201,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected <T> Provider<T> getProvider(Key<T> key) {
-    return binder.getProvider(key);
+    return binder().getProvider(key);
   }
 
   /**
@@ -208,7 +209,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected <T> Provider<T> getProvider(Class<T> type) {
-    return binder.getProvider(type);
+    return binder().getProvider(type);
   }
 
   /**
@@ -217,7 +218,7 @@ public abstract class AbstractModule implements Module {
    */
   protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeConverter converter) {
-    binder.convertToTypes(typeMatcher, converter);
+    binder().convertToTypes(typeMatcher, converter);
   }
 
   /**
@@ -225,7 +226,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected Stage currentStage() {
-    return binder.currentStage();
+    return binder().currentStage();
   }
 
   /**
@@ -233,7 +234,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-    return binder.getMembersInjector(type);
+    return binder().getMembersInjector(type);
   }
 
   /**
@@ -241,7 +242,7 @@ public abstract class AbstractModule implements Module {
    * @since 2.0
    */
   protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
-    return binder.getMembersInjector(type);
+    return binder().getMembersInjector(type);
   }
 
   /**
@@ -251,7 +252,7 @@ public abstract class AbstractModule implements Module {
    */
   protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeListener listener) {
-    binder.bindListener(typeMatcher, listener);
+    binder().bindListener(typeMatcher, listener);
   }
   
   /**
@@ -260,6 +261,6 @@ public abstract class AbstractModule implements Module {
    */
   protected void bindListener(Matcher<? super Key<?>> keyMatcher,
       ProvisionListener... listener) {
-    binder.bindListener(keyMatcher, listener);
+    binder().bindListener(keyMatcher, listener);
   }
 }
