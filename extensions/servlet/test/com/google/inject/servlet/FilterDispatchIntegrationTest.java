@@ -1,6 +1,7 @@
 package com.google.inject.servlet;
 
 import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
+import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletRequest;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 
@@ -21,6 +22,8 @@ import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -233,5 +236,88 @@ public class FilterDispatchIntegrationTest extends TestCase {
         throws ServletException, IOException {
       service((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
     }
+  }
+  
+  public final void testFilterExceptionPrunesStack() throws Exception {
+    Injector injector = Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        filter("/").through(TestFilter.class);
+        filter("/nothing").through(TestFilter.class);
+        filter("/").through(ThrowingFilter.class);
+      }
+    });
+
+    HttpServletRequest request = newFakeHttpServletRequest();    
+    FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+    pipeline.initPipeline(null);    
+    try {
+      pipeline.dispatch(request, null, null);
+      fail("expected exception");
+    } catch(ServletException ex) {
+      for (StackTraceElement element : ex.getStackTrace()) {
+        String className = element.getClassName();
+        assertTrue("was: " + element,
+            !className.equals(FilterChainInvocation.class.getName())
+            && !className.equals(FilterDefinition.class.getName()));
+      }
+    }
+  }
+  
+  public final void testServletExceptionPrunesStack() throws Exception {
+    Injector injector = Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        filter("/").through(TestFilter.class);
+        filter("/nothing").through(TestFilter.class);
+        serve("/").with(ThrowingServlet.class);
+      }
+    });
+
+    HttpServletRequest request = newFakeHttpServletRequest();    
+    FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+    pipeline.initPipeline(null);    
+    try {
+      pipeline.dispatch(request, null, null);
+      fail("expected exception");
+    } catch(ServletException ex) {
+      for (StackTraceElement element : ex.getStackTrace()) {
+        String className = element.getClassName();
+        assertTrue("was: " + element,
+            !className.equals(FilterChainInvocation.class.getName())
+            && !className.equals(FilterDefinition.class.getName()));
+      }
+    }
+  }
+  
+  @Singleton
+  private static class ThrowingServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+      throw new ServletException("failure!");
+    }
+    
+  }
+
+
+  @Singleton
+  private static class ThrowingFilter implements Filter {
+    @Override
+    public void destroy() {
+    }
+    
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws ServletException {
+      throw new ServletException("we failed!");
+    }
+    
+    @Override
+    public void init(FilterConfig filterConfig) {
+
+    }
+    
   }
 }

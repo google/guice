@@ -15,7 +15,14 @@
  */
 package com.google.inject.servlet;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -37,12 +44,19 @@ import javax.servlet.http.HttpServletResponse;
  * @since 1.0
  */
 class FilterChainInvocation implements FilterChain {
+  
+  private static final Set<String> SERVLET_INTERNAL_METHODS = ImmutableSet.of(
+      FilterDefinition.class.getName() + ".doFilter",
+      FilterChainInvocation.class.getName() + ".doFilter");
+  
   private final FilterDefinition[] filterDefinitions;
   private final FilterChain proceedingChain;
   private final ManagedServletPipeline servletPipeline;
 
   //state variable tracks current link in filterchain
   private int index = -1;
+  // whether or not we've caught an exception & cleaned up stack traces
+  private boolean cleanedStacks = false;
 
   public FilterChainInvocation(FilterDefinition[] filterDefinitions,
       ManagedServletPipeline servletPipeline, FilterChain proceedingChain) {
@@ -75,8 +89,37 @@ class FilterChainInvocation implements FilterChain {
           proceedingChain.doFilter(servletRequest, servletResponse);
         }
       }
+    } catch (Throwable t) {
+      // Only clean on the first pass through -- one exception deep in a filter
+      // will propogate upward & hit this catch clause multiple times.  We don't
+      // want to iterate through the stack elements for every filter.
+      if (!cleanedStacks) {
+        cleanedStacks = true;
+        pruneStacktrace(t);
+      }
+      Throwables.propagateIfInstanceOf(t, ServletException.class);
+      Throwables.propagateIfInstanceOf(t, IOException.class);
+      throw Throwables.propagate(t);
     } finally {
       GuiceFilter.localContext.set(previous);
+    }
+  }
+  
+  /**
+   * Removes stacktrace elements related to AOP internal mechanics from the
+   * throwable's stack trace and any causes it may have.
+   */
+  private void pruneStacktrace(Throwable throwable) {
+    for (Throwable t = throwable; t != null; t = t.getCause()) {
+      StackTraceElement[] stackTrace = t.getStackTrace();
+      List<StackTraceElement> pruned = Lists.newArrayList();
+      for (StackTraceElement element : stackTrace) {
+        String name = element.getClassName() + "." + element.getMethodName();
+        if (!SERVLET_INTERNAL_METHODS.contains(name)) {
+          pruned.add(element);
+        }
+      }
+      t.setStackTrace(pruned.toArray(new StackTraceElement[pruned.size()]));
     }
   }
 }
