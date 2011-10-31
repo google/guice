@@ -159,7 +159,7 @@ final class Initializer {
         MembersInjectorImpl<T> membersInjector =
             (MembersInjectorImpl<T>)pendingMembersInjectors.remove(instance);
         Preconditions.checkState(membersInjector != null,
-            "No membersInjector available for instance: " + instance + ", from key: " + key);
+            "No membersInjector available for instance: %s, from key: %s", instance, key);
         
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
