@@ -15,8 +15,7 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
 
@@ -33,23 +32,12 @@ import javax.servlet.Filter;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class FiltersModuleBuilder extends AbstractModule {
-  private final List<FilterDefinition> filterDefinitions = Lists.newArrayList();
-  private final List<FilterInstanceBindingEntry> filterInstanceEntries = Lists.newArrayList();
-
-  //invoked on injector config
-  @Override
-  protected void configure() {
-    // Create bindings for filter instances
-    for (FilterInstanceBindingEntry entry : filterInstanceEntries) {
-      bind(entry.key).toInstance(entry.filter);
-    }
-
-    // Bind these filter definitions to a unique random key. Doesn't matter what it is,
-    // coz it's never used.
-    for(FilterDefinition fd : filterDefinitions) {
-      bind(FilterDefinition.class).annotatedWith(UniqueAnnotations.create()).toProvider(fd);
-    }
+class FiltersModuleBuilder {
+  
+  private final Binder binder;
+  
+  public FiltersModuleBuilder(Binder binder) {
+    this.binder = binder;
   }
 
   public ServletModule.FilterKeyBindingBuilder filter(List<String> patterns) {
@@ -58,16 +46,6 @@ class FiltersModuleBuilder extends AbstractModule {
 
   public ServletModule.FilterKeyBindingBuilder filterRegex(List<String> regexes) {
     return new FilterKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
-  }
-
-  private static class FilterInstanceBindingEntry {
-    final Key<Filter> key;
-    final Filter filter;
-
-    FilterInstanceBindingEntry(Key<Filter> key, Filter filter) {
-      this.key = key;
-      this.filter = filter;
-    }
   }
 
   //non-static inner class so it can access state of enclosing module class
@@ -108,7 +86,7 @@ class FiltersModuleBuilder extends AbstractModule {
         Map<String, String> initParams,
         Filter filterInstance) {
       for (String pattern : uriPatterns) {
-        filterDefinitions.add(
+        binder.bind(FilterDefinition.class).annotatedWith(UniqueAnnotations.create()).toProvider(
             new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
                 initParams, filterInstance));
       }
@@ -117,7 +95,7 @@ class FiltersModuleBuilder extends AbstractModule {
     public void through(Filter filter,
         Map<String, String> initParams) {
       Key<Filter> filterKey = Key.get(Filter.class, UniqueAnnotations.create());
-      filterInstanceEntries.add(new FilterInstanceBindingEntry(filterKey, filter));
+      binder.bind(filterKey).toInstance(filter);
       through(filterKey, initParams, filter);
     }
   }

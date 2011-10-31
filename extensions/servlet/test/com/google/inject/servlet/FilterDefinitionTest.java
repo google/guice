@@ -119,7 +119,8 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>(), null);
+        UriPatternType.get(UriPatternType.SERVLET, pattern),
+        new HashMap<String, String>(), null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
@@ -129,9 +130,8 @@ public class FilterDefinitionTest extends TestCase {
 
     final boolean proceed[] = new boolean[1];
     filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
-      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-          throws IOException, ServletException {
-
+      @Override
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
         proceed[0] = true;
       }
     });
@@ -153,10 +153,9 @@ public class FilterDefinitionTest extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     final MockFilter mockFilter = new MockFilter() {
+      @Override
       public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-          FilterChain filterChain) throws IOException, ServletException {
-        setRun(true);
-
+          FilterChain filterChain) {
         //suppress rest of chain...
       }
     };
@@ -179,7 +178,8 @@ public class FilterDefinitionTest extends TestCase {
 
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), new HashMap<String, String>(), null);
+        UriPatternType.get(UriPatternType.SERVLET, pattern),
+        new HashMap<String, String>(), null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector,
         Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
@@ -190,8 +190,8 @@ public class FilterDefinitionTest extends TestCase {
 
     final boolean proceed[] = new boolean[1];
     filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
-      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-          throws IOException, ServletException {
+      @Override
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
         proceed[0] = true;
       }
     });
@@ -208,10 +208,9 @@ public class FilterDefinitionTest extends TestCase {
   private static class MockFilter implements Filter {
     private boolean init;
     private boolean destroy;
-    private boolean run;
     private FilterConfig config;
 
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
       init = true;
 
       this.config = filterConfig;
@@ -219,14 +218,8 @@ public class FilterDefinitionTest extends TestCase {
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
         FilterChain filterChain) throws IOException, ServletException {
-      run = true;
-
       //proceed
       filterChain.doFilter(servletRequest, servletResponse);
-    }
-
-    protected void setRun(boolean run) {
-      this.run = run;
     }
 
     public void destroy() {
@@ -239,10 +232,6 @@ public class FilterDefinitionTest extends TestCase {
 
     public boolean isDestroy() {
       return destroy;
-    }
-
-    public boolean isRun() {
-      return run;
     }
 
     public FilterConfig getConfig() {

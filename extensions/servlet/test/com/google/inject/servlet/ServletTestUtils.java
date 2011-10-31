@@ -11,6 +11,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -26,9 +29,19 @@ public class ServletTestUtils {
   private ServletTestUtils() {}
 
   private static class ThrowingInvocationHandler implements InvocationHandler {
-    @Override public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       throw new UnsupportedOperationException("No methods are supported on this object");
     }
+  }
+  
+  /**
+   * Returns a FilterChain that does nothing.
+   */
+  public static FilterChain newNoOpFilterChain() {
+    return new FilterChain() {
+      public void doFilter(ServletRequest request, ServletResponse response) {
+      }
+    };
   }
   
   /**

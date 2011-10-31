@@ -1,7 +1,24 @@
+/**
+ * Copyright (C) 2011 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.inject.servlet;
 
 import static com.google.inject.servlet.ManagedServletPipeline.REQUEST_DISPATCHER_REQUEST;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletRequest;
+import static com.google.inject.servlet.ServletTestUtils.newNoOpFilterChain;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 
@@ -18,12 +35,11 @@ import org.easymock.IMocksControl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -199,7 +215,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
       inits++;
     }
 
@@ -220,6 +236,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
     public static final String FORWARD_TO = "/forwarded.html";
     public List<String> processedUris = new ArrayList<String>();
 
+    @Override
     protected void service(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
         throws ServletException, IOException {
       String requestUri = httpServletRequest.getRequestURI();
@@ -232,10 +249,61 @@ public class FilterDispatchIntegrationTest extends TestCase {
       }
     }
 
+    @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
         throws ServletException, IOException {
       service((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
     }
+  }
+  
+  public void testFilterOrder() throws Exception {
+    AtomicInteger counter = new AtomicInteger();
+    final CountFilter f1 = new CountFilter(counter);
+    final CountFilter f2 = new CountFilter(counter);
+    
+    Injector injector = Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        filter("/").through(f1);
+        install(new ServletModule() {
+          @Override
+          protected void configureServlets() {
+            filter("/").through(f2);
+          }
+        });
+      }
+    });
+    
+    HttpServletRequest request = newFakeHttpServletRequest();    
+    final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+    pipeline.initPipeline(null);    
+    pipeline.dispatch(request, null, newNoOpFilterChain());
+    assertEquals(0, f1.calledAt);
+    assertEquals(1, f2.calledAt);
+  }
+  
+  /** A filter that keeps count of when it was called by increment a counter. */
+  private static class CountFilter implements Filter {
+    private final AtomicInteger counter;
+    private int calledAt = -1;
+
+    public CountFilter(AtomicInteger counter) {
+      this.counter = counter;
+    }
+    
+    public void destroy() {
+    }
+    
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+        throws ServletException, IOException {
+      if (calledAt != -1) {
+        fail("not expecting to be called twice");
+      }
+      calledAt = counter.getAndIncrement();
+      chain.doFilter(request, response);
+    }
+    
+    public void init(FilterConfig filterConfig) {}
   }
   
   public final void testFilterExceptionPrunesStack() throws Exception {
@@ -295,7 +363,7 @@ public class FilterDispatchIntegrationTest extends TestCase {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
+        throws ServletException {
       throw new ServletException("failure!");
     }
     

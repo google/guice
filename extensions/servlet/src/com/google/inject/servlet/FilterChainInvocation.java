@@ -18,7 +18,6 @@ package com.google.inject.servlet;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.util.List;

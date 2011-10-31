@@ -45,16 +45,14 @@ public class ServletModule extends AbstractModule {
   protected final void configure() {
     checkState(filtersModuleBuilder == null, "Re-entry is not allowed.");
     checkState(servletsModuleBuilder == null, "Re-entry is not allowed.");
-    filtersModuleBuilder = new FiltersModuleBuilder();
-    servletsModuleBuilder = new ServletsModuleBuilder();
+    filtersModuleBuilder = new FiltersModuleBuilder(binder());
+    servletsModuleBuilder = new ServletsModuleBuilder(binder());
     try {
       // Install common bindings (skipped if already installed).
       install(new InternalServletModule());
   
       // Install local filter and servlet bindings.
       configureServlets();
-      install(filtersModuleBuilder);
-      install(servletsModuleBuilder);
     } finally {
       filtersModuleBuilder = null;
       servletsModuleBuilder = null;

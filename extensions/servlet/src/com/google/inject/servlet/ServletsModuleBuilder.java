@@ -15,9 +15,8 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
 
@@ -35,30 +34,13 @@ import javax.servlet.http.HttpServlet;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-class ServletsModuleBuilder extends AbstractModule {
-  private final List<ServletDefinition> servletDefinitions = Lists.newArrayList();
-  private final List<ServletInstanceBindingEntry> servletInstanceEntries = Lists.newArrayList();
-
-  //invoked on injector config
-  @Override
-  protected void configure() {
-    // Create bindings for servlet instances
-    for (ServletInstanceBindingEntry entry : servletInstanceEntries) {
-      bind(entry.key).toInstance(entry.servlet);
-    }
-
-    // Ensure that servlets are not bound twice to the same pattern.
-    Set<String> servletUris = Sets.newHashSet();
-    for (ServletDefinition servletDefinition : servletDefinitions) {
-      if (servletUris.contains(servletDefinition.getPattern())) {
-        addError("More than one servlet was mapped to the same URI pattern: "
-            + servletDefinition.getPattern());
-      }
-      else {
-        bind(Key.get(ServletDefinition.class, UniqueAnnotations.create())).toProvider(servletDefinition);
-        servletUris.add(servletDefinition.getPattern());
-      }
-    }
+class ServletsModuleBuilder {
+  
+  private final Set<String> servletUris = Sets.newHashSet();
+  private final Binder binder;
+  
+  public ServletsModuleBuilder(Binder binder) {
+    this.binder = binder;
   }
 
   //the first level of the EDSL--
@@ -68,16 +50,6 @@ class ServletsModuleBuilder extends AbstractModule {
 
   public ServletModule.ServletKeyBindingBuilder serveRegex(List<String> regexes) {
     return new ServletKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
-  }
-
-  private static class ServletInstanceBindingEntry {
-    final Key<HttpServlet> key;
-    final HttpServlet servlet;
-
-    ServletInstanceBindingEntry(Key<HttpServlet> key, HttpServlet servlet) {
-      this.key = key;
-      this.servlet = servlet;
-    }
   }
 
   //non-static inner class so it can access state of enclosing module class
@@ -111,21 +83,25 @@ class ServletsModuleBuilder extends AbstractModule {
         Map<String, String> initParams) {
       with(servletKey, initParams, null);
     }
-    
-    private void with(Key<? extends HttpServlet> servletKey,
-        Map<String, String> initParams,
+
+    private void with(Key<? extends HttpServlet> servletKey, Map<String, String> initParams,
         HttpServlet servletInstance) {
       for (String pattern : uriPatterns) {
-        servletDefinitions.add(
-            new ServletDefinition(pattern, servletKey, UriPatternType.get(uriPatternType, pattern),
-                initParams, servletInstance));
+        // Ensure two servlets aren't bound to the same pattern.
+        if (!servletUris.add(pattern)) {
+          binder.addError("More than one servlet was mapped to the same URI pattern: " + pattern);
+        } else {
+          binder.bind(Key.get(ServletDefinition.class, UniqueAnnotations.create())).toProvider(
+              new ServletDefinition(pattern, servletKey, UriPatternType
+                  .get(uriPatternType, pattern), initParams, servletInstance));
+        }
       }
     }
 
     public void with(HttpServlet servlet,
         Map<String, String> initParams) {
       Key<HttpServlet> servletKey = Key.get(HttpServlet.class, UniqueAnnotations.create());
-      servletInstanceEntries.add(new ServletInstanceBindingEntry(servletKey, servlet));
+      binder.bind(servletKey).toInstance(servlet);
       with(servletKey, initParams, servlet);
     }
   }

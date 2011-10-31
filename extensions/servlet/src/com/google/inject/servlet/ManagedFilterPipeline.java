@@ -81,8 +81,8 @@ class ManagedFilterPipeline implements FilterPipeline{
     for (Binding<FilterDefinition> entry : injector.findBindingsByType(FILTER_DEFS)) {
       filterDefinitions.add(entry.getProvider().get());
     }
-
-    // Convert to a fixed size array for speed.
+    
+    // Copy to a fixed-size array for speed of iteration.
     return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
   }
 

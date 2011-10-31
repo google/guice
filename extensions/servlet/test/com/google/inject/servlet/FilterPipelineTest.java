@@ -98,7 +98,7 @@ public class FilterPipelineTest extends TestCase {
 
   @Singleton
   public static class TestFilter implements Filter {
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -112,11 +112,11 @@ public class FilterPipelineTest extends TestCase {
 
   @Singleton
   public static class NeverFilter implements Filter {
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-        FilterChain filterChain) throws IOException, ServletException {
+        FilterChain filterChain) {
       fail("This filter should never have fired");
     }
 
