@@ -46,28 +46,29 @@ public class TypesTest extends TestCase {
   // generic types for comparison
   Map<String, Integer> a;
   Inner<Float, Double> b;
-  List<String[][]> c;
+  List<Set<String>[][]> c;
   List<String> d;
   Set<String> e;
   Outer<String>.Inner f;
 
   private ParameterizedType mapStringInteger;
   private ParameterizedType innerFloatDouble;
-  private ParameterizedType listStringArray;
+  private ParameterizedType listSetStringArray;
   private ParameterizedType listString;
   private ParameterizedType setString;
-  private GenericArrayType stringArray;
   private ParameterizedType outerInner;
+  private GenericArrayType setStringArray;
 
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     mapStringInteger = (ParameterizedType) getClass().getDeclaredField("a").getGenericType();
     innerFloatDouble = (ParameterizedType) getClass().getDeclaredField("b").getGenericType();
-    listStringArray = (ParameterizedType) getClass().getDeclaredField("c").getGenericType();
+    listSetStringArray = (ParameterizedType) getClass().getDeclaredField("c").getGenericType();
     listString = (ParameterizedType) getClass().getDeclaredField("d").getGenericType();
     setString = (ParameterizedType) getClass().getDeclaredField("e").getGenericType();
-    stringArray = (GenericArrayType) listStringArray.getActualTypeArguments()[0];
     outerInner = (ParameterizedType) getClass().getDeclaredField("f").getGenericType();
+    setStringArray = (GenericArrayType) listSetStringArray.getActualTypeArguments()[0];
   }
 
   public void testListSetMap() {
@@ -155,19 +156,19 @@ public class TypesTest extends TestCase {
     assertEqualsBothWays(mapStringInteger, parameterizedType);
     assertEquals(mapStringInteger.toString(), parameterizedType.toString());
 
-    GenericArrayType genericArrayType = Types.arrayOf(
-        Types.arrayOf(String.class));
-    assertEqualsBothWays(stringArray, genericArrayType);
-    assertEquals(stringArray.toString(), genericArrayType.toString());
+    GenericArrayType genericArrayType = Types.arrayOf(Types.arrayOf(
+        Types.newParameterizedType(Set.class, String.class)));
+    assertEqualsBothWays(setStringArray, genericArrayType);
+    assertEquals(setStringArray.toString(), genericArrayType.toString());
   }
 
   public void testToString() {
     Assert.assertEquals("java.lang.String", MoreTypes.typeToString(String.class));
-    assertEquals("java.lang.String[][]", MoreTypes.typeToString(stringArray));
+    assertEquals("java.util.Set<java.lang.String>[][]", MoreTypes.typeToString(setStringArray));
     assertEquals("java.util.Map<java.lang.String, java.lang.Integer>",
         MoreTypes.typeToString(mapStringInteger));
-    assertEquals("java.util.List<java.lang.String[][]>",
-        MoreTypes.typeToString(listStringArray));
+    assertEquals("java.util.List<java.util.Set<java.lang.String>[][]>",
+        MoreTypes.typeToString(listSetStringArray));
     assertEquals(innerFloatDouble.toString(),
         MoreTypes.typeToString(innerFloatDouble));
   }
@@ -178,7 +179,7 @@ public class TypesTest extends TestCase {
    * Ensure that owning types are required when necessary, and forbidden
    * otherwise.
    */
-  public void testCanonicalizeRequiresOwnerTypes() throws NoSuchFieldException {
+  public void testCanonicalizeRequiresOwnerTypes() {
     try {
       Types.newParameterizedType(Owning.class, String.class);
       fail();
