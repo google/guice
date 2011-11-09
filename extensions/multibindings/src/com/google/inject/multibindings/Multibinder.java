@@ -72,8 +72,8 @@ import java.util.Set;
  * }</code></pre>
  *
  * <p>Contributing multibindings from different modules is supported. For
- * example, it is okay to have both {@code CandyModule} and {@code ChipsModule}
- * to both create their own {@code Multibinder<Snack>}, and to each contribute
+ * example, it is okay for both {@code CandyModule} and {@code ChipsModule}
+ * to create their own {@code Multibinder<Snack>}, and to each contribute
  * bindings to the set of snacks. When that set is injected, it will contain
  * elements from both modules.
  * 
