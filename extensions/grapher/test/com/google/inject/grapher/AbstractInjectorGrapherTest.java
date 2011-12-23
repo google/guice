@@ -26,7 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.spi.InjectionPoint;
-import com.google.testing.testsize.MediumTest;
 
 import junit.framework.TestCase;
 
@@ -41,7 +40,6 @@ import java.util.Set;
  *
  * @author bojand@google.com (Bojan Djordjevic)
  */
-@MediumTest
 public class AbstractInjectorGrapherTest extends TestCase {
   private static final String TEST_STRING = "test";
 
