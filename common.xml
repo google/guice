@@ -44,6 +44,10 @@
 
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
 
+    <condition property="Eclipse-ExtensibleAPI" value="true">
+      <equals arg1="${module}" arg2="com.google.inject"/>
+    </condition>
+
     <condition property="Import-Package" value="!com.google.inject.*,*" else="!${module}.*,${imports},*">
       <istrue value="${fragment}"/>
     </condition>
