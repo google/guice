@@ -361,9 +361,18 @@ public class ScopesTest extends TestCase {
   @ScopeAnnotation
   public @interface CustomScoped {}
 
+  static final Scope CUSTOM_SCOPE = new Scope() {
+    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+      return Scopes.SINGLETON.scope(key, unscoped);
+    }
+  };
+
   @Target({ ElementType.TYPE, ElementType.METHOD })
   @ScopeAnnotation
   public @interface NotRuntimeRetainedScoped {}
+
+  @CustomScoped
+  static class AnnotatedCustomScoped {}
 
   @Singleton
   static class AnnotatedSingleton {
@@ -559,6 +568,117 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(injector.getBinding(d)));
     assertFalse(Scopes.isSingleton(injector.getBinding(e)));
     assertFalse(Scopes.isSingleton(injector.getBinding(f)));
+  }
+
+  public void testIsScopedPositive() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+    final Key<String> d = Key.get(String.class, named("D"));
+    final Key<String> e = Key.get(String.class, named("E"));
+    final Key<Object> f = Key.get(Object.class, named("F"));
+    final Key<String> g = Key.get(String.class, named("G"));
+
+    Module customBindings = new AbstractModule() {
+      protected void configure() {
+        bindScope(CustomScoped.class, CUSTOM_SCOPE);
+        bind(a).to(b);
+        bind(b).to(c);
+        bind(c).toProvider(Providers.of("c")).in(CUSTOM_SCOPE);
+        bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
+        bind(f).to(AnnotatedCustomScoped.class);
+        install(new PrivateModule() {
+          @Override
+          protected void configure() {
+            bind(g).toProvider(Providers.of("g")).in(CustomScoped.class);
+            expose(g);
+          }
+        });
+      }
+
+      @Provides @Named("E") @CustomScoped String provideE() {
+        return "e";
+      }
+    };
+
+    @SuppressWarnings("unchecked") // we know the module contains only bindings
+    List<Element> moduleBindings = Elements.getElements(customBindings);
+    ImmutableMap<Key<?>, Binding<?>> map = indexBindings(moduleBindings);
+    assertFalse(isCustomScoped(map.get(a))); // linked bindings are not followed by modules
+    assertFalse(isCustomScoped(map.get(b)));
+    assertTrue(isCustomScoped(map.get(c)));
+    assertTrue(isCustomScoped(map.get(d)));
+    assertTrue(isCustomScoped(map.get(e)));
+    assertFalse(isCustomScoped(map.get(f))); // annotated classes are not followed by modules
+    assertTrue(isCustomScoped(map.get(g)));
+
+    Injector injector = Guice.createInjector(customBindings);
+    assertTrue(isCustomScoped(injector.getBinding(a)));
+    assertTrue(isCustomScoped(injector.getBinding(b)));
+    assertTrue(isCustomScoped(injector.getBinding(c)));
+    assertTrue(isCustomScoped(injector.getBinding(d)));
+    assertTrue(isCustomScoped(injector.getBinding(e)));
+    assertTrue(isCustomScoped(injector.getBinding(f)));
+    assertTrue(isCustomScoped(injector.getBinding(g)));
+  }
+
+  public void testIsScopedNegative() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+    final Key<String> d = Key.get(String.class, named("D"));
+    final Key<String> e = Key.get(String.class, named("E"));
+    final Key<String> f = Key.get(String.class, named("F"));
+    final Key<String> g = Key.get(String.class, named("G"));
+    final Key<String> h = Key.get(String.class, named("H"));
+
+    Module customBindings = new AbstractModule() {
+      protected void configure() {
+        bind(a).to(b);
+        bind(b).to(c);
+        bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
+        bind(d).toProvider(Providers.of("d")).in(Singleton.class);
+        install(new PrivateModule() {
+          @Override
+          protected void configure() {
+            bind(f).toProvider(Providers.of("f")).in(Singleton.class);
+            expose(f);
+          }
+        });
+        bind(g).toInstance("g");
+        bind(h).toProvider(Providers.of("h")).asEagerSingleton();
+      }
+
+      @Provides @Named("E") @Singleton String provideE() {
+        return "e";
+      }
+    };
+
+    @SuppressWarnings("unchecked") // we know the module contains only bindings
+    List<Element> moduleBindings = Elements.getElements(customBindings);
+    ImmutableMap<Key<?>, Binding<?>> map = indexBindings(moduleBindings);
+    assertFalse(isCustomScoped(map.get(a)));
+    assertFalse(isCustomScoped(map.get(b)));
+    assertFalse(isCustomScoped(map.get(c)));
+    assertFalse(isCustomScoped(map.get(d)));
+    assertFalse(isCustomScoped(map.get(e)));
+    assertFalse(isCustomScoped(map.get(f)));
+    assertFalse(isCustomScoped(map.get(g)));
+    assertFalse(isCustomScoped(map.get(h)));
+
+    Injector injector = Guice.createInjector(customBindings);
+    assertFalse(isCustomScoped(injector.getBinding(a)));
+    assertFalse(isCustomScoped(injector.getBinding(b)));
+    assertFalse(isCustomScoped(injector.getBinding(c)));
+    assertFalse(isCustomScoped(injector.getBinding(d)));
+    assertFalse(isCustomScoped(injector.getBinding(e)));
+    assertFalse(isCustomScoped(injector.getBinding(f)));
+    assertFalse(isCustomScoped(injector.getBinding(g)));
+    assertFalse(isCustomScoped(injector.getBinding(h)));
+  }
+
+  private boolean isCustomScoped(Binding<?> binding) {
+    return Scopes.isScoped(binding, CUSTOM_SCOPE, CustomScoped.class);
   }
 
   ImmutableMap<Key<?>, Binding<?>> indexBindings(Iterable<Element> elements) {

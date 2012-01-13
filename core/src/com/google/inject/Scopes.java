@@ -172,7 +172,63 @@ public class Scopes {
       return false;
     } while (true);
   }
-  
+
+  /**
+
+   * Returns true if {@code binding} has the given scope. If the binding is a {@link
+   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
+   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
+   * also true if the target binding has the given scope.
+   *
+   * @param binding binding to check
+   * @param scope scope implementation instance
+   * @param scopeAnnotation scope annotation class
+   */
+  public static boolean isScoped(Binding<?> binding, final Scope scope,
+      final Class<? extends Annotation> scopeAnnotation) {
+    do {
+      boolean matches = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
+        public Boolean visitNoScoping() {
+          return false;
+        }
+
+        public Boolean visitScopeAnnotation(Class<? extends Annotation> visitedAnnotation) {
+          return visitedAnnotation == scopeAnnotation;
+        }
+
+        public Boolean visitScope(Scope visitedScope) {
+          return visitedScope == scope;
+        }
+
+        public Boolean visitEagerSingleton() {
+          return false;
+        }
+      });
+
+      if (matches) {
+        return true;
+      }
+
+      if (binding instanceof LinkedBindingImpl) {
+        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
+        Injector injector = linkedBinding.getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(linkedBinding.getLinkedKey());
+          continue;
+        }
+      } else if(binding instanceof ExposedBinding) {
+        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
+        Injector injector = exposedBinding.getPrivateElements().getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(exposedBinding.getKey());
+          continue;
+        }
+      }
+
+      return false;
+    } while (true);
+  }
+
   /**
    * Returns true if the object is a proxy for a circular dependency,
    * constructed by Guice because it encountered a circular dependency. Scope
