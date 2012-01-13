@@ -116,8 +116,8 @@
       description="Build jar files"/>
 
   <target name="test.compile-with-deps" depends="test.compile"
-	  description="Build a jar of tests with internal.util refocused.">
-  	<mkdir dir="${build.dir}/dist"/>
+      description="Build a jar of tests with internal.util refocused.">
+    <mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
         classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
@@ -134,7 +134,7 @@
       <keep pattern="com.google.inject.**"/>
       <keep pattern="com.googlecode.**"/>
     </jarjar>
-  </target>  	
+  </target>
 
   <target name="jar.withdeps" depends="compile"
       description="Build jar with dependencies embedded.">
@@ -146,7 +146,7 @@
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-2.2.2.jar"/>
       <zipfileset src="${common.basedir}/lib/build/asm-3.3.1.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/guava-r09.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/guava-11.0.1.jar"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
@@ -154,11 +154,14 @@
       <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
       <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
+      <!-- the servlet extension uses this but core doesn't,
+           so we explicitly instruct the build to keep it. -->
+      <keep pattern="com.google.common.base.Throwables"/>
     </jarjar>
   </target>
 
   <target name="jar.withrenameddeps" depends="compile"
-	      description="Build jar with dependencies embedded.">
+      description="Build jar with dependencies embedded.">
     <mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"

@@ -234,6 +234,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <keep>
                 <pattern>com.googlecode.**</pattern>
               </keep>
+              <keep>
+                <!-- the servlet extension uses this but core doesn't,
+                     so we explicitly instruct the build to keep it. -->
+                <pattern>com.google.common.base.Throwables</pattern>
+              </keep>
             </rules>
           </configuration>
           <!--
@@ -319,7 +324,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <archive>
               <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
               <!--  Exclude to mirror ant build -->
-     		  <addMavenDescriptor>false</addMavenDescriptor>
+          <addMavenDescriptor>false</addMavenDescriptor>
             </archive>
           </configuration>
           <executions>
