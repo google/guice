@@ -98,11 +98,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
-          </instructions>
-        </configuration>
       </plugin>
       <!--
        | Remove duplicate jarjar'd LICENSE and NOTICE

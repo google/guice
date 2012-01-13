@@ -19,12 +19,18 @@ package com.google.inject.servlet;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.inject.Binding;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
+import com.google.inject.internal.LinkedBindingImpl;
+import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.ExposedBinding;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -46,6 +52,14 @@ public class ServletScopes {
       Key.get(HttpServletRequest.class),
       Key.get(HttpServletResponse.class),
       new Key<Map<String, String[]>>(RequestParameters.class) {});
+
+  /**
+   * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
+   * scope falls back to this scope map if no http request is available, and
+   * requires {@link #scopeRequest} to be called as an alertnative.
+   */
+  private static final ThreadLocal<Map<String, Object>> requestScopeContext
+      = new ThreadLocal<Map<String, Object>>();
 
   /** A sentinel attribute value representing null. */
   enum NullObject { INSTANCE }
@@ -233,12 +247,59 @@ public class ServletScopes {
   }
 
   /**
-   * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
-   * scope falls back to this scope map if no http request is available, and
-   * requires {@link #scopeRequest} to be called as an alertnative.
+   * Returns true if {@code binding} is request-scoped. If the binding is a
+   * {@link com.google.inject.spi.LinkedKeyBinding linked key binding} and
+   * belongs to an injector (i. e. it was retrieved via
+   * {@link Injector#getBinding Injector.getBinding()}), then this method will
+   * also return true if the target binding is request-scoped.
    */
-  private static final ThreadLocal<Map<String, Object>> requestScopeContext
-      = new ThreadLocal<Map<String, Object>>();
+  public static boolean isRequestScoped(Binding<?> binding) {
+    do {
+      boolean requestScoped = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
+        @Override
+        public Boolean visitNoScoping() {
+          return false;
+        }
+
+        @Override
+        public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
+          return scopeAnnotation == RequestScoped.class;
+        }
+
+        @Override
+        public Boolean visitScope(Scope scope) {
+          return scope == ServletScopes.REQUEST;
+        }
+
+        @Override
+        public Boolean visitEagerSingleton() {
+          return false;
+        }
+      });
+
+      if (requestScoped) {
+        return true;
+      }
+
+      if (binding instanceof LinkedBindingImpl) {
+        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl<?>) binding;
+        Injector injector = linkedBinding.getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(linkedBinding.getLinkedKey());
+          continue;
+        }
+      } else if (binding instanceof ExposedBinding) {
+        ExposedBinding<?> exposedBinding = (ExposedBinding<?>) binding;
+        Injector injector = exposedBinding.getPrivateElements().getInjector();
+        if (injector != null) {
+          binding = injector.getBinding(exposedBinding.getKey());
+          continue;
+        }
+      }
+
+      return false;
+    } while (true);
+  }
 
   /**
    * Scopes the given callable inside a request scope. This is not the same
