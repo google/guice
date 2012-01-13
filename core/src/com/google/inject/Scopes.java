@@ -120,17 +120,8 @@ public class Scopes {
     }
   };
 
-  /**
-   * Returns true if {@code binding} is singleton-scoped. If the binding is a {@link
-   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
-   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
-   * also true if the target binding is singleton-scoped.
-   *
-   * @since 3.0
-   */
-  public static boolean isSingleton(Binding<?> binding) {
-    do {
-      boolean singleton = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
+  private static final BindingScopingVisitor<Boolean> IS_SINGLETON_VISITOR
+      = new BindingScopingVisitor<Boolean>() {
         public Boolean visitNoScoping() {
           return false;
         }
@@ -147,8 +138,19 @@ public class Scopes {
         public Boolean visitEagerSingleton() {
           return true;
         }
-      });
+      };
 
+  /**
+   * Returns true if {@code binding} is singleton-scoped. If the binding is a {@link
+   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
+   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
+   * also true if the target binding is singleton-scoped.
+   *
+   * @since 3.0
+   */
+  public static boolean isSingleton(Binding<?> binding) {
+    do {
+      boolean singleton = binding.acceptScopingVisitor(IS_SINGLETON_VISITOR);
       if (singleton) {
         return true;
       }
