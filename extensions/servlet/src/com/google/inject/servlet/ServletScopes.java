@@ -254,51 +254,7 @@ public class ServletScopes {
    * also return true if the target binding is request-scoped.
    */
   public static boolean isRequestScoped(Binding<?> binding) {
-    do {
-      boolean requestScoped = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
-        @Override
-        public Boolean visitNoScoping() {
-          return false;
-        }
-
-        @Override
-        public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-          return scopeAnnotation == RequestScoped.class;
-        }
-
-        @Override
-        public Boolean visitScope(Scope scope) {
-          return scope == ServletScopes.REQUEST;
-        }
-
-        @Override
-        public Boolean visitEagerSingleton() {
-          return false;
-        }
-      });
-
-      if (requestScoped) {
-        return true;
-      }
-
-      if (binding instanceof LinkedBindingImpl) {
-        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl<?>) binding;
-        Injector injector = linkedBinding.getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(linkedBinding.getLinkedKey());
-          continue;
-        }
-      } else if (binding instanceof ExposedBinding) {
-        ExposedBinding<?> exposedBinding = (ExposedBinding<?>) binding;
-        Injector injector = exposedBinding.getPrivateElements().getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(exposedBinding.getKey());
-          continue;
-        }
-      }
-
-      return false;
-    } while (true);
+    return Scopes.isScoped(binding, ServletScopes.REQUEST, RequestScoped.class);
   }
 
   /**
