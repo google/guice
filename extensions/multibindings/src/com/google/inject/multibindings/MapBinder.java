@@ -16,10 +16,19 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.multibindings.Element.Type.MAPBINDER;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
 import static com.google.inject.multibindings.Multibinder.setOf;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
+
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -43,14 +52,6 @@ import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
-
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * An API to bind multiple map entries separately, only to later inject them as
@@ -333,7 +334,7 @@ public abstract class MapBinder<K, V> {
       checkNotNull(key, "key");
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
-      Key<V> valueKey = Key.get(valueType, new RealElement(entrySetBinder.getSetName()));
+      Key<V> valueKey = Key.get(valueType, new RealElement(entrySetBinder.getSetName(), MAPBINDER));
       entrySetBinder.addBinding().toInstance(new MapEntry<K, Provider<V>>(key,
           binder.getProvider(valueKey), valueKey));
       return binder.bind(valueKey);
@@ -465,6 +466,7 @@ public abstract class MapBinder<K, V> {
     private boolean matchesValueKey(Key key) {
       return key.getAnnotation() instanceof Element
           && ((Element) key.getAnnotation()).setName().equals(entrySetBinder.getSetName())
+          && ((Element) key.getAnnotation()).type() == MAPBINDER
           && key.getTypeLiteral().equals(valueType);
     }
 

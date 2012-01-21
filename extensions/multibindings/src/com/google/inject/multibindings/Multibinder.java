@@ -16,7 +16,15 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.multibindings.Element.Type.MULTIBINDER;
 import static com.google.inject.name.Names.named;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -41,13 +49,6 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * An API to bind multiple values separately, only to later inject them as a
@@ -263,7 +264,6 @@ public abstract class Multibinder<T> {
       }
     }
 
-    @SuppressWarnings("unchecked")
     public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
@@ -279,7 +279,7 @@ public abstract class Multibinder<T> {
     @Override public LinkedBindingBuilder<T> addBinding() {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
-      return binder.bind(Key.get(elementType, new RealElement(setName)));
+      return binder.bind(Key.get(elementType, new RealElement(setName, MULTIBINDER)));
     }
 
     /**
@@ -312,7 +312,8 @@ public abstract class Multibinder<T> {
     private boolean keyMatches(Key<?> key) {
       return key.getTypeLiteral().equals(elementType)
           && key.getAnnotation() instanceof Element
-          && ((Element) key.getAnnotation()).setName().equals(setName);
+          && ((Element) key.getAnnotation()).setName().equals(setName)
+          && ((Element) key.getAnnotation()).type() == MULTIBINDER;
     }
 
     private boolean isInitialized() {

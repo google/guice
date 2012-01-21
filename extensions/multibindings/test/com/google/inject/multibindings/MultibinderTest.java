@@ -41,12 +41,14 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
+import com.google.inject.util.Types;
 
 import junit.framework.TestCase;
 
@@ -60,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -67,6 +70,8 @@ import java.util.Set;
  */
 public class MultibinderTest extends TestCase {
 
+  final TypeLiteral<Map<String, String>> mapOfStringString =
+      new TypeLiteral<Map<String, String>>() {};
   final TypeLiteral<Set<String>> setOfString = new TypeLiteral<Set<String>>() {};
   final TypeLiteral<Set<Integer>> setOfInteger = new TypeLiteral<Set<Integer>>() {};
   final TypeLiteral<String> stringType = TypeLiteral.get(String.class);
@@ -600,7 +605,8 @@ public class MultibinderTest extends TestCase {
     assertEquals(expected, s1);
   }
 
-  public void failing_testSetAndMapValueConflict() {
+  // See issue 670
+  public void testSetAndMapValueAreDistinct() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class)
@@ -612,5 +618,62 @@ public class MultibinderTest extends TestCase {
     });
 
     assertEquals(ImmutableSet.<String>of("A"), injector.getInstance(Key.get(setOfString)));
+  }
+  
+  // See issue 670
+  public void testSetAndMapValueAreDistinctInSpi() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder.newSetBinder(binder(), String.class)
+            .addBinding().toInstance("A");
+
+        MapBinder.newMapBinder(binder(), String.class, String.class)
+            .addBinding("B").toInstance("b");
+      }
+    });
+    Collector collector = new Collector();
+    Binding<Map<String, String>> mapbinding = injector.getBinding(Key.get(mapOfStringString));
+    mapbinding.acceptTargetVisitor(collector);
+    assertNotNull(collector.mapbinding);
+    
+    Binding<Set<String>> setbinding = injector.getBinding(Key.get(setOfString));
+    setbinding.acceptTargetVisitor(collector);
+    assertNotNull(collector.setbinding);
+    
+    // Capture the value bindings and assert we have them right --
+    // they'll always be in the right order because we preserve
+    // binding order.
+    List<Binding<String>> bindings = injector.findBindingsByType(stringType);
+    assertEquals(2, bindings.size());
+    Binding<String> a = bindings.get(0);
+    Binding<String> b = bindings.get(1);
+    assertEquals("A", ((InstanceBinding<String>)a).getInstance());
+    assertEquals("b", ((InstanceBinding<String>)b).getInstance());
+    
+    // Now make sure "A" belongs only to the set binding,
+    // and "b" only belongs to the map binding.
+    assertFalse(collector.mapbinding.containsElement(a));
+    assertTrue(collector.mapbinding.containsElement(b));
+    
+    assertTrue(collector.setbinding.containsElement(a));
+    assertFalse(collector.setbinding.containsElement(b));
+  }
+  
+  private static class Collector extends DefaultBindingTargetVisitor<Object, Object> implements
+      MultibindingsTargetVisitor<Object, Object> {
+    MapBinderBinding<? extends Object> mapbinding;
+    MultibinderBinding<? extends Object> setbinding;
+    
+    @Override
+    public Object visit(MapBinderBinding<? extends Object> mapbinding) {
+      this.mapbinding = mapbinding;
+      return null;
+    }
+    
+    @Override
+    public Object visit(MultibinderBinding<? extends Object> multibinding) {
+     this.setbinding = multibinding;
+     return null;
+    }
   }
 }

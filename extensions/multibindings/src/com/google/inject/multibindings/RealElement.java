@@ -27,10 +27,12 @@ class RealElement implements Element {
 
   private final int uniqueId;
   private final String setName;
+  private final Type type;
 
-  RealElement(String setName) {
+  RealElement(String setName, Type type) {
     uniqueId = nextUniqueId.getAndIncrement();
     this.setName = setName;
+    this.type = type;
   }
 
   public String setName() {
@@ -40,6 +42,10 @@ class RealElement implements Element {
   public int uniqueId() {
     return uniqueId;
   }
+  
+  public Type type() {
+	  return type;
+  }
 
   public Class<? extends Annotation> annotationType() {
     return Element.class;
@@ -47,17 +53,19 @@ class RealElement implements Element {
 
   @Override public String toString() {
     return "@" + Element.class.getName() + "(setName=" + setName
-        + ",uniqueId=" + uniqueId + ")";
+        + ",uniqueId=" + uniqueId + ", type=" + type + ")";
   }
 
   @Override public boolean equals(Object o) {
     return o instanceof Element
         && ((Element) o).setName().equals(setName())
-        && ((Element) o).uniqueId() == uniqueId();
+        && ((Element) o).uniqueId() == uniqueId()
+        && ((Element) o).type() == type();
   }
 
   @Override public int hashCode() {
     return 127 * ("setName".hashCode() ^ setName.hashCode())
-        + 127 * ("uniqueId".hashCode() ^ uniqueId);
+        + 127 * ("uniqueId".hashCode() ^ uniqueId)
+        + 127 * ("type".hashCode() ^ type.hashCode());
   }
 }

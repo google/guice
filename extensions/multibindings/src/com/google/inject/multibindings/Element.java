@@ -32,6 +32,13 @@ import java.lang.annotation.Retention;
  */
 @Retention(RUNTIME) @BindingAnnotation
 @interface Element {
+
+  enum Type {
+    MAPBINDER,
+    MULTIBINDER;
+  }
+
   String setName();
   int uniqueId();
+  Type type();
 }
