@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.Key;
+import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
@@ -32,10 +32,10 @@ final class ProvisionListenerStackCallback<T> {
 
   private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0]; 
   private final ProvisionListener[] listeners;
-  private final Key<T> key;
+  private final Binding<T> binding;
 
-  public ProvisionListenerStackCallback(Key<T> key, List<ProvisionListener> listeners) {
-    this.key = key;
+  public ProvisionListenerStackCallback(Binding<T> binding, List<ProvisionListener> listeners) {
+    this.binding = binding;
     if (listeners.isEmpty()) {
       this.listeners = EMPTY_LISTENER;
     } else {
@@ -64,7 +64,7 @@ final class ProvisionListenerStackCallback<T> {
           provision.erredListener.getClass() : "(unknown)";
       throw errors
           .errorInUserCode(caught, "Error notifying ProvisionListener %s of %s.%n"
-              + " Reason: %s", listener, key, caught)
+              + " Reason: %s", listener, binding.getKey(), caught)
           .toException();
     } else {
       return provision.result;
@@ -105,6 +105,7 @@ final class ProvisionListenerStackCallback<T> {
       } else if (index < listeners.length) {
         int currentIdx = index;
         try {
+
           listeners[index].onProvision(this);
         } catch(RuntimeException re) {
           erredListener = listeners[currentIdx];
@@ -121,8 +122,11 @@ final class ProvisionListenerStackCallback<T> {
     }
     
     @Override
-    public Key<T> getKey() {
-      return key;
+    public Binding<T> getBinding() {
+      // TODO(sameb): Because so many places cast directly to BindingImpl & subclasses,
+      // we can't decorate this to prevent calling getProvider().get(), which means
+      // if someone calls that they'll get strange errors.
+      return binding;
     }
     
     @Override

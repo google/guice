@@ -37,22 +37,26 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
   private final Class<? extends Provider<?>> providerType;
   private final Key<? extends Provider<T>> providerKey;
   private BindingImpl<? extends Provider<T>> providerBinding;
+  private ProvisionListenerStackCallback<T> provisionCallback;
   
   ProvidedByInternalFactory(
       Class<?> rawType,
       Class<? extends Provider<?>> providerType,
       Key<? extends Provider<T>> providerKey,
-      boolean allowProxy,
-      ProvisionListenerStackCallback<T> provisionCallback) {
-    super(providerKey, allowProxy, provisionCallback);
+      boolean allowProxy) {
+    super(providerKey, allowProxy);
     this.rawType = rawType;
     this.providerType = providerType; 
     this.providerKey = providerKey;
   }
   
+  void setProvisionListenerCallback(ProvisionListenerStackCallback<T> listener) {
+    provisionCallback = listener;
+  }
+  
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     providerBinding =
-        injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT); 
+        injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }
   
   @SuppressWarnings("unchecked")// 
@@ -65,12 +69,13 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
       errors = errors.withSource(providerKey);
       Provider provider = providerBinding.getInternalFactory().get(
           errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, linked);
+      return circularGet(provider, errors, context, dependency, linked, provisionCallback);
     } finally {
       context.popState();
     }
   }
   
+  @Override
   protected T provision(javax.inject.Provider<? extends T> provider, Errors errors,
       Dependency<?> dependency, ConstructionContext<T> constructionContext)
       throws ErrorsException {

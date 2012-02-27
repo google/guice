@@ -548,7 +548,7 @@ final class InjectorImpl implements Injector, Lookups {
           // We do not pass cb.getInternalConstructor as the second parameter
           // so that cached exceptions while constructing it get stored.
           // See TypeListenerTest#testTypeListenerThrows
-          removeFailedJitBinding(key, null);
+          removeFailedJitBinding(binding, null);
           cleanup(binding, new HashSet<Key>());
         }
       }
@@ -579,7 +579,7 @@ final class InjectorImpl implements Injector, Lookups {
             }
           }
           if(failed) {
-            removeFailedJitBinding(depKey, ip);
+            removeFailedJitBinding(depBinding, ip);
             bindingFailed = true;
           }
         } else if(state.getExplicitBinding(depKey) == null) {
@@ -593,11 +593,11 @@ final class InjectorImpl implements Injector, Lookups {
   }
   
   /** Cleans up any state that may have been cached when constructing the JIT binding. */
-  private void removeFailedJitBinding(Key<?> key, InjectionPoint ip) {
-    failedJitBindings.add(key);
-    jitBindings.remove(key);
-    membersInjectorStore.remove(key.getTypeLiteral());
-    provisionListenerStore.remove(key);
+  private void removeFailedJitBinding(Binding<?> binding, InjectionPoint ip) {
+    failedJitBindings.add(binding.getKey());
+    jitBindings.remove(binding.getKey());
+    membersInjectorStore.remove(binding.getKey().getTypeLiteral());
+    provisionListenerStore.remove(binding);
     if(ip != null) {
       constructors.remove(ip);
     }
@@ -700,10 +700,9 @@ final class InjectorImpl implements Injector, Lookups {
     Key<? extends Provider<T>> providerKey = (Key<? extends Provider<T>>) Key.get(providerType);
     ProvidedByInternalFactory<T> internalFactory =
         new ProvidedByInternalFactory<T>(rawType, providerType,
-            providerKey, !options.disableCircularProxies,
-            provisionListenerStore.get(key));
+            providerKey, !options.disableCircularProxies);
     Object source = rawType;
-    return LinkedProviderBindingImpl.createWithInitializer(
+    BindingImpl<T> binding = LinkedProviderBindingImpl.createWithInitializer(
         this,
         key,
         source,
@@ -711,6 +710,8 @@ final class InjectorImpl implements Injector, Lookups {
         scoping,
         providerKey,
         internalFactory);
+    internalFactory.setProvisionListenerCallback(provisionListenerStore.get(binding));
+    return binding;
   }
 
   /** Creates a binding for a type annotated with @ImplementedBy. */

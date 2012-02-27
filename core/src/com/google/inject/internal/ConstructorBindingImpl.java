@@ -127,7 +127,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     factory.constructorInjector =
         (ConstructorInjector<T>) injector.constructors.get(constructorInjectionPoint, errors);
     factory.provisionCallback =
-      injector.provisionListenerStore.get(getKey());
+      injector.provisionListenerStore.get(this);
   }
   
   /** True if this binding has been initialized and is ready for use. */

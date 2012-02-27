@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Key;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
@@ -27,6 +29,7 @@ import javax.inject.Provider;
  */
 final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implements CreationListener {
 
+  private final ProvisionListenerStackCallback<T> provisionCallback;
   private final InjectorImpl injector;
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
   private InternalFactory<? extends javax.inject.Provider<? extends T>> providerFactory;
@@ -37,7 +40,8 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       Object source,
       boolean allowProxy,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source, allowProxy, provisionCallback);
+    super(source, allowProxy);
+    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
     this.injector = injector;
     this.providerKey = providerKey;
   }
@@ -56,7 +60,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
     try {
       errors = errors.withSource(providerKey);
       javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, linked);
+      return circularGet(provider, errors, context, dependency, linked, provisionCallback);
     } finally {
       context.popState();
     }

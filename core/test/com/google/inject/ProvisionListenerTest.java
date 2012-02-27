@@ -22,6 +22,7 @@ import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
@@ -283,6 +284,59 @@ public class ProvisionListenerTest extends TestCase {
     assertEquals(of(Key.get(Foo.class)), capturer.getAndClear());
   }
   
+  public void testSingletonMatcher() {
+    final Counter counter = new Counter();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(new AbstractMatcher<Binding<?>>() {
+          @Override
+          public boolean matches(Binding<?> t) {
+            return Scopes.isSingleton(t);
+          }
+        }, counter);
+      }
+    });
+    assertEquals(0, counter.count);
+    // no increment for getting Many.
+    injector.getInstance(Many.class);
+    assertEquals(0, counter.count);
+    // but an increment for getting Sole, since it's a singleton.
+    injector.getInstance(Sole.class);
+    assertEquals(1, counter.count);
+  }
+  
+  public void testCallingBindingDotGetProviderDotGet() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(Matchers.any(), new ProvisionListener() {
+          @Override
+          public <T> void onProvision(ProvisionInvocation<T> provision) {
+            provision.getBinding().getProvider().get(); // AGH!
+          }
+        });
+      }
+    });
+    
+    try {
+      injector.getInstance(Sole.class);
+      fail();
+    } catch(ProvisionException expected) {
+      // We don't really care what kind of error you get, we only care you get an error.
+    }
+    
+    try {
+      injector.getInstance(Many.class);
+      fail();
+    } catch(ProvisionException expected) {
+      // We don't really care what kind of error you get, we only care you get an error.
+    }
+  }
+  
+  @Singleton static class Sole {}
+  static class Many {}
+  
   @ImplementedBy(Foo.class) static interface JitFoo {}  
   @ProvidedBy(JitFoo2P.class) static class JitFoo2 {}  
   static interface LinkedFoo {}
@@ -314,9 +368,9 @@ public class ProvisionListenerTest extends TestCase {
   private static class Capturer implements ProvisionListener {
     List<Key> keys = Lists.newArrayList(); 
     public <T> void onProvision(ProvisionInvocation<T> provision) {
-      keys.add(provision.getKey());
+      keys.add(provision.getBinding().getKey());
       T provisioned = provision.provision();
-      assertEquals(provision.getKey().getRawType(), provisioned.getClass());
+      assertEquals(provision.getBinding().getKey().getRawType(), provisioned.getClass());
     }
     
     List<Key> getAndClear() {
@@ -368,12 +422,17 @@ public class ProvisionListenerTest extends TestCase {
         actual.add(dep.getDependency().getKey().getRawType());
       }
       assertEquals(expected, actual);
-      provisionList.add(provision.getKey().getRawType());
+      provisionList.add(provision.getBinding().getKey().getRawType());
     }
   }
   
-  private static Matcher<Object> keyMatcher(Class<?> clazz) {
-    return Matchers.only(Key.get(clazz));
+  private static Matcher<Binding<?>> keyMatcher(final Class<?> clazz) {
+    return new AbstractMatcher<Binding<?>>() {
+      @Override
+      public boolean matches(Binding<?> t) {
+        return t.getKey().equals(Key.get(clazz));
+      }
+    };
   }
   
   @SuppressWarnings("unchecked")
@@ -389,7 +448,7 @@ public class ProvisionListenerTest extends TestCase {
         
         bindListener(Matchers.any(), new ProvisionListener() {
           public <T> void onProvision(ProvisionInvocation<T> provision) {
-            totalList.add(provision.getKey().getRawType());
+            totalList.add(provision.getBinding().getKey().getRawType());
           }
         });
         
@@ -490,7 +549,7 @@ public class ProvisionListenerTest extends TestCase {
     
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       notified.set(true);
-      assertEquals(notifyType, provision.getKey().getRawType());            
+      assertEquals(notifyType, provision.getBinding().getKey().getRawType());            
       assertEquals(2, provision.getDependencyChain().size());
       
       assertEquals(null, provision.getDependencyChain().get(0).getDependency());

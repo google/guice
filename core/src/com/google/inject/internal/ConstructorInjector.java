@@ -81,6 +81,7 @@ final class ConstructorInjector<T> {
       return t;
     }
 
+    constructionContext.startConstruction();
     try {
       // Optimization: Don't go through the callback stack if we have no listeners.
       if (!provisionCallback.hasListeners()) {
@@ -94,6 +95,7 @@ final class ConstructorInjector<T> {
       }
     } finally {
       constructionContext.removeCurrentReference();
+      constructionContext.finishConstruction();
     }
   }
 
@@ -101,7 +103,6 @@ final class ConstructorInjector<T> {
   private T provision(Errors errors, InternalContext context,
       ConstructionContext<T> constructionContext) throws ErrorsException {
     try {
-      constructionContext.startConstruction();
       T t;
       try {
         Object[] parameters = SingleParameterInjector.getAll(errors, context, parameterInjectors);

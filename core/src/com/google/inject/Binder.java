@@ -383,12 +383,12 @@ public interface Binder {
    * through Providers) can also be notified through TypeListeners registered in
    * {@link #bindListener}.
    * 
-   * @param keyMatcher that matches keys of provisioned objects the listener
+   * @param bindingMatcher that matches bindings of provisioned objects the listener
    *          should be notified of
-   * @param listeners for provisioned objects matched by keyMatcher   * 
+   * @param listeners for provisioned objects matched by bindingMatcher 
    * @since 4.0
    */
-  void bindListener(Matcher<? super Key<?>> keyMatcher, ProvisionListener... listeners);
+  void bindListener(Matcher<? super Binding<?>> bindingMatcher, ProvisionListener... listeners);
 
   /**
    * Returns a binder that uses {@code source} as the reference location for

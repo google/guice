@@ -256,11 +256,11 @@ public abstract class AbstractModule implements Module {
   }
   
   /**
-   * @see Binder#bindListener(Matcher, ProvisionListener)
+   * @see Binder#bindListener(Matcher, ProvisionListener...)
    * @since 4.0
    */
-  protected void bindListener(Matcher<? super Key<?>> keyMatcher,
+  protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
       ProvisionListener... listener) {
-    binder().bindListener(keyMatcher, listener);
+    binder().bindListener(bindingMatcher, listener);
   }
 }

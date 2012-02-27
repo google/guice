@@ -30,19 +30,22 @@ import com.google.inject.spi.ProviderInstanceBinding;
 */
 final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
 
+  private final ProvisionListenerStackCallback<T> provisionCallback;
   private final Initializable<Provider<? extends T>> initializable;
 
   public InternalFactoryToInitializableAdapter(
       Initializable<Provider<? extends T>> initializable,
       Object source, boolean allowProxy,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source, allowProxy, provisionCallback);
+    super(source, allowProxy);
+    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
     this.initializable = checkNotNull(initializable, "provider");
   }
 
   public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
       throws ErrorsException {
-    return circularGet(initializable.get(errors), errors, context, dependency, linked);
+    return circularGet(initializable.get(errors), errors, context, dependency, linked,
+        provisionCallback);
   }
   
   @Override

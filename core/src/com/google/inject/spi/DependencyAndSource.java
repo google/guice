@@ -16,7 +16,9 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.Injector;
 import com.google.inject.internal.util.StackTraceElements;
 
 import java.lang.reflect.Member;
@@ -40,7 +42,7 @@ public final class DependencyAndSource {
    * Returns the Dependency, if one exists. For anything that can be referenced
    * by {@link Injector#getBinding}, a dependency exists. A dependency will not
    * exist (and this will return null) for types initialized with
-   * {@link Binder#requestInjection} or {@link Injector#injectMembers(Object),
+   * {@link Binder#requestInjection} or {@link Injector#injectMembers(Object)},
    * nor will it exist for objects injected into Providers bound with
    * LinkedBindingBuilder#toProvider(Provider).
    */

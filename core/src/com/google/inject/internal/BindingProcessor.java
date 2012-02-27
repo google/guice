@@ -67,6 +67,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
     }
     
     return command.acceptTargetVisitor(new Processor<T, Boolean>((BindingImpl<T>)command) {
+      @Override
       public Boolean visit(ConstructorBinding<? extends T> binding) {
         prepareBinding();
         try {
@@ -81,6 +82,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         return true;
       }
 
+      @Override
       public Boolean visit(InstanceBinding<? extends T> binding) {
         prepareBinding();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
@@ -95,15 +97,18 @@ final class BindingProcessor extends AbstractBindingProcessor {
         return true;
       }
 
+      @Override
       public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
         prepareBinding();
         Provider<? extends T> provider = binding.getProviderInstance();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<Provider<? extends T>> initializable = initializer
             .<Provider<? extends T>>requestInjection(injector, provider, null, source, injectionPoints);
+        // always visited with Binding<T>
+        @SuppressWarnings("unchecked") 
         InternalFactory<T> factory = new InternalFactoryToInitializableAdapter<T>(
             initializable, source, !injector.options.disableCircularProxies,
-            injector.provisionListenerStore.get(key));
+            injector.provisionListenerStore.get((ProviderInstanceBinding<T>)binding));
         InternalFactory<? extends T> scopedFactory
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(new ProviderInstanceBindingImpl<T>(injector, key, source, scopedFactory, scoping,
@@ -111,12 +116,15 @@ final class BindingProcessor extends AbstractBindingProcessor {
         return true;
       }
 
+      @Override
       public Boolean visit(ProviderKeyBinding<? extends T> binding) {
         prepareBinding();
         Key<? extends javax.inject.Provider<? extends T>> providerKey = binding.getProviderKey();
+        // always visited with Binding<T>
+        @SuppressWarnings("unchecked") 
         BoundProviderFactory<T> boundProviderFactory = new BoundProviderFactory<T>(
             injector, providerKey, source, !injector.options.disableCircularProxies,
-            injector.provisionListenerStore.get(key));
+            injector.provisionListenerStore.get((ProviderKeyBinding<T>)binding));
         bindingData.addCreationListener(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);
@@ -125,6 +133,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         return true;
       }
 
+      @Override
       public Boolean visit(LinkedKeyBinding<? extends T> binding) {
         prepareBinding();
         Key<? extends T> linkedKey = binding.getLinkedKey();
@@ -141,18 +150,22 @@ final class BindingProcessor extends AbstractBindingProcessor {
         return true;
       }
 
+      @Override
       public Boolean visit(UntargettedBinding<? extends T> untargetted) {
         return false;
       }
 
+      @Override
       public Boolean visit(ExposedBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
-
+      
+      @Override
       public Boolean visit(ConvertedConstantBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }
-
+      
+      @Override
       public Boolean visit(ProviderBinding<? extends T> binding) {
         throw new IllegalArgumentException("Cannot apply a non-module element");
       }

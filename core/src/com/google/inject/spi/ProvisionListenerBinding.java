@@ -18,14 +18,14 @@ package com.google.inject.spi;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
-import com.google.inject.Key;
+import com.google.inject.Binding;
 import com.google.inject.matcher.Matcher;
 
 import java.util.List;
 
 /**
  * Binds keys (picked using a Matcher) to a provision listener. Listeners are created explicitly in
- * a module using {@link Binder#bindListener(Matcher, ProvisionListener)} statements:
+ * a module using {@link Binder#bindListener(Matcher, ProvisionListener...)} statements:
  *
  * @author sameb@google.com (Sam Berlin)
  * @since 4.0
@@ -33,14 +33,14 @@ import java.util.List;
 public final class ProvisionListenerBinding implements Element {
 
   private final Object source;
-  private final Matcher<? super Key<?>> keyMatcher;
+  private final Matcher<? super Binding<?>> bindingMatcher;
   private final List<ProvisionListener> listeners;
 
   ProvisionListenerBinding(Object source,
-      Matcher<? super Key<?>> typeMatcher,
+      Matcher<? super Binding<?>> bindingMatcher,
       ProvisionListener[] listeners) {
     this.source = source;
-    this.keyMatcher = typeMatcher;
+    this.bindingMatcher = bindingMatcher;
     this.listeners = ImmutableList.copyOf(listeners);
   }
 
@@ -49,9 +49,11 @@ public final class ProvisionListenerBinding implements Element {
     return listeners;
   }
 
-  /** Returns the key matcher which chooses which keys the listener should be notified of. */
-  public Matcher<? super Key<?>> getKeyMatcher() {
-    return keyMatcher;
+  /**
+   * Returns the binding matcher which chooses which bindings the listener should be notified of.
+   */  
+  public Matcher<? super Binding<?>> getBindingMatcher() {
+    return bindingMatcher;
   }
 
   public Object getSource() {
@@ -63,7 +65,7 @@ public final class ProvisionListenerBinding implements Element {
   }
 
   public void applyTo(Binder binder) {
-    binder.withSource(getSource()).bindListener(keyMatcher,
+    binder.withSource(getSource()).bindListener(bindingMatcher,
         listeners.toArray(new ProvisionListener[listeners.size()]));
   }
 }

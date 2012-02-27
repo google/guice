@@ -16,7 +16,7 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.Key;
+import com.google.inject.Binding;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 
@@ -50,13 +50,19 @@ public interface ProvisionListener {
   /** Encapsulates a single act of provisioning.*/ 
   public abstract static class ProvisionInvocation<T> {
 
-    /** Returns the Key which will be provisioned. */
-    public abstract Key<T> getKey();
+    /**
+     * Returns the Binding this is provisioning.
+     * <p>
+     * You must not call {@link Provider#get()} on the provider returned by
+     * {@link Binding#getProvider}, otherwise you will get confusing error messages.
+     */
+    public abstract Binding<T> getBinding();
 
     /** Performs the provision, returning the object provisioned. */
     public abstract T provision();
     
     /** Returns the dependency chain that led to this object being provisioned. */
     public abstract List<DependencyAndSource> getDependencyChain();
+    
   }
 }

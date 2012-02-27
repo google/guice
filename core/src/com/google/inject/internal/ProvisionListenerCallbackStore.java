@@ -20,6 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
@@ -35,11 +36,11 @@ import java.util.Map;
 final class ProvisionListenerCallbackStore {
   private final ImmutableList<ProvisionListenerBinding> listenerBindings;
 
-  private final Map<Key<?>, ProvisionListenerStackCallback<?>> cache
+  private final Map<KeyBinding, ProvisionListenerStackCallback<?>> cache
       = new MapMaker().makeComputingMap(
-          new Function<Key<?>, ProvisionListenerStackCallback<?>>() {
-            public ProvisionListenerStackCallback<?> apply(Key<?> key) {
-              return create(key);
+          new Function<KeyBinding, ProvisionListenerStackCallback<?>>() {
+            public ProvisionListenerStackCallback<?> apply(KeyBinding key) {
+              return create(key.binding);
             }
           });
 
@@ -50,8 +51,8 @@ final class ProvisionListenerCallbackStore {
   /** Returns a new {@link ProvisionListenerStackCallback} for the key.
    */
   @SuppressWarnings("unchecked") // the ProvisionListenerStackCallback type always agrees with the passed type
-  public <T> ProvisionListenerStackCallback<T> get(Key<T> key) {
-    return (ProvisionListenerStackCallback<T>) cache.get(key);
+  public <T> ProvisionListenerStackCallback<T> get(Binding<T> binding) {
+    return (ProvisionListenerStackCallback<T>) cache.get(new KeyBinding(binding.getKey(), binding));
   }
 
   /**
@@ -63,7 +64,7 @@ final class ProvisionListenerCallbackStore {
    * 
    * Returns true if the type was stored in the cache, false otherwise.
    */
-  boolean remove(Key<?> type) {
+  boolean remove(Binding<?> type) {
     return cache.remove(type) != null;
   }
 
@@ -71,19 +72,39 @@ final class ProvisionListenerCallbackStore {
    * Creates a new {@link ProvisionListenerStackCallback} with the correct listeners
    * for the key.
    */
-  private <T> ProvisionListenerStackCallback<T> create(Key<T> key) {
+  private <T> ProvisionListenerStackCallback<T> create(Binding<T> binding) {
     List<ProvisionListener> listeners = null;
-    for (ProvisionListenerBinding binding : listenerBindings) {
-      if (binding.getKeyMatcher().matches(key)) {
+    for (ProvisionListenerBinding provisionBinding : listenerBindings) {
+      if (provisionBinding.getBindingMatcher().matches(binding)) {
         if (listeners == null) {
           listeners = Lists.newArrayList();
         }
-        listeners.addAll(binding.getListeners());
+        listeners.addAll(provisionBinding.getListeners());
       }
     }
     if (listeners == null) {
       listeners = ImmutableList.of();
     }
-    return new ProvisionListenerStackCallback<T>(key, listeners);
+    return new ProvisionListenerStackCallback<T>(binding, listeners);
+  }
+  
+  /** A struct that holds key & binding but uses just key for equality/hashcode. */
+  private static class KeyBinding {
+    final Key<?> key;
+    final Binding<?> binding;
+    
+    KeyBinding(Key<?> key, Binding<?> binding) {
+      this.key = key;
+      this.binding = binding;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+      return obj instanceof KeyBinding && key.equals(((KeyBinding)obj).key);
+    }
+    @Override
+    public int hashCode() {
+      return key.hashCode();
+    }
   }
 }
