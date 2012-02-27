@@ -44,7 +44,7 @@ class RealElement implements Element {
   }
   
   public Type type() {
-	  return type;
+    return type;
   }
 
   public Class<? extends Annotation> annotationType() {

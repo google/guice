@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.spi.InjectionPoint;
 
-import net.sf.cglib.core.MethodWrapper;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
@@ -170,7 +169,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     // to this injector. Otherwise, the proxies for each injector will waste PermGen memory
     try {
     Enhancer enhancer = BytecodeGen.newEnhancer(declaringClass, visibility);
-    enhancer.setCallbackFilter(new IndicesCallbackFilter(methods));
+    enhancer.setCallbackFilter(new IndicesCallbackFilter(declaringClass, methods));
     enhancer.setCallbackTypes(callbackTypes);
     return new ProxyConstructor<T>(enhancer, injectionPoint, callbacks, interceptors);
     } catch (Throwable e) {
@@ -199,35 +198,35 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
   }
 
   /**
-   * A callback filter that maps methods to unique IDs. We define equals and
-   * hashCode without using any state related to the injector so that enhanced
-   * classes intercepting the same methods can be shared between injectors (and
-   * child injectors, etc).
+   * A callback filter that maps methods to unique IDs. We define equals and hashCode using the
+   * declaring class so that enhanced classes can be shared between injectors.
    */
   private static class IndicesCallbackFilter implements CallbackFilter {
-    final Map<Object, Integer> indices;
-    final int hashCode;
+    final Class<?> declaringClass;
+    final Map<Method, Integer> indices;
 
-    IndicesCallbackFilter(List<Method> methods) {
-      final Map<Object, Integer> indices = Maps.newHashMap();
+    IndicesCallbackFilter(Class<?> declaringClass, List<Method> methods) {
+      this.declaringClass = declaringClass;
+      final Map<Method, Integer> indices = Maps.newHashMap();
       for (int i = 0; i < methods.size(); i++) {
-        indices.put(MethodWrapper.create(methods.get(i)), i);
+        Method method = methods.get(i);
+        indices.put(method, i);
       }
+
       this.indices = indices;
-      this.hashCode = indices.hashCode();
     }
 
     public int accept(Method method) {
-      return indices.get(MethodWrapper.create(method));
+      return indices.get(method);
     }
 
     @Override public boolean equals(Object o) {
       return o instanceof IndicesCallbackFilter &&
-          ((IndicesCallbackFilter) o).indices.equals(indices);
+          ((IndicesCallbackFilter) o).declaringClass == declaringClass;
     }
 
     @Override public int hashCode() {
-      return hashCode;
+      return declaringClass.hashCode();
     }
   }
 
