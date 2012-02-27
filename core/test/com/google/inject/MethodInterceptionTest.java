@@ -79,7 +79,7 @@ public class MethodInterceptionTest extends TestCase {
 
     Interceptable nullFoosOne = childOne.getInstance(Interceptable.class);
     assertNotNull(nullFoosOne.bar());
-    assertNull(nullFoosOne.foo());
+    assertNull(nullFoosOne.foo()); // confirm it's being intercepted
 
     Injector childTwo = injector.createChildInjector(new AbstractModule() {
       protected void configure() {
@@ -88,10 +88,21 @@ public class MethodInterceptionTest extends TestCase {
     });
 
     Interceptable nullFoosTwo = childTwo.getInstance(Interceptable.class);
-    assertNull(nullFoosTwo.foo());
+    assertNull(nullFoosTwo.foo()); // confirm it's being intercepted
 
     assertSame("Child injectors should share proxy classes, otherwise memory leaks!",
         nullFoosOne.getClass(), nullFoosTwo.getClass());
+    
+    Injector injector2 = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.returns(only(Foo.class)),
+            new ReturnNullInterceptor());
+      }
+    });
+    Interceptable separateNullFoos = injector2.getInstance(Interceptable.class);
+    assertNull(separateNullFoos.foo()); // confirm it's being intercepted
+    assertSame("different injectors should share proxy classes, otherwise memory leaks!",
+        nullFoosOne.getClass(), separateNullFoos.getClass());
   }
 
   public void testGetThis() {
