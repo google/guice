@@ -22,18 +22,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -66,9 +72,17 @@ import java.util.Set;
  *   }
  * }
  * </code></pre>
+ * You also can declare that a CheckedProvider construct
+ * a particular class whose constructor throws an exception:
+ * <pre><code>ThrowingProviderBinder.create(binder())
+ *    .bind(RemoteProvider.class, Customer.class)
+ *    .providing(CustomerImpl.class)
+ *    .in(RequestScope.class);
+ * </code></pre>
  * 
  * @author jmourits@google.com (Jerome Mourits)
  * @author jessewilson@google.com (Jesse Wilson)
+ * @author sameb@google.com (Sam Berlin)
  */
 public class ThrowingProviderBinder {
 
@@ -92,13 +106,27 @@ public class ThrowingProviderBinder {
   public static Module forModule(Module module) {
     return CheckedProviderMethodsModule.forModule(module);
   }
-
-  public <P extends CheckedProvider> SecondaryBinder<P> 
-      bind(final Class<P> interfaceType, final Type valueType) {
-    return new SecondaryBinder<P>(interfaceType, valueType);
+  
+  /**
+   * @deprecated Use {@link #bind(Class, Class)} or {@link #bind(Class, TypeLiteral)} instead. 
+   */
+  @Deprecated
+  public <P extends CheckedProvider> SecondaryBinder<P, ?> 
+      bind(Class<P> interfaceType, Type clazz) {
+    return new SecondaryBinder<P, Object>(interfaceType, clazz);
   }
 
-  public class SecondaryBinder<P extends CheckedProvider> {
+  public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
+      bind(Class<P> interfaceType, Class<T> clazz) {
+    return new SecondaryBinder<P, T>(interfaceType, clazz);
+  }
+  
+  public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
+      bind(Class<P> interfaceType, TypeLiteral<T> typeLiteral) {
+    return new SecondaryBinder<P, T>(interfaceType, typeLiteral.getType());
+  }
+
+  public class SecondaryBinder<P extends CheckedProvider, T> {
     private final Class<P> interfaceType;
     private final Type valueType;
     private final List<Class<? extends Throwable>> exceptionTypes;
@@ -128,17 +156,17 @@ public class ThrowingProviderBinder {
       return interfaceKey;
     }
 
-    public SecondaryBinder<P> annotatedWith(Class<? extends Annotation> annotationType) {
+    public SecondaryBinder<P, T> annotatedWith(Class<? extends Annotation> annotationType) {
       if (!(this.annotationType == null && this.annotation == null)) {
-        throw new IllegalStateException();
+        throw new IllegalStateException("Cannot set annotation twice");
       }
       this.annotationType = annotationType;
       return this;
     }
 
-    public SecondaryBinder<P> annotatedWith(Annotation annotation) {
+    public SecondaryBinder<P, T> annotatedWith(Annotation annotation) {
       if (!(this.annotationType == null && this.annotation == null)) {
-        throw new IllegalStateException();
+        throw new IllegalStateException("Cannot set annotation twice");
       }
       this.annotation = annotation;
       return this;
@@ -149,16 +177,79 @@ public class ThrowingProviderBinder {
       binder.bind(targetKey).toInstance(target);
       return to(targetKey);
     }
-
+    
     public ScopedBindingBuilder to(Class<? extends P> targetType) {
       return to(Key.get(targetType));
     }
     
+    public ScopedBindingBuilder providing(Class<? extends T> cxtorClass) {
+      return providing(TypeLiteral.get(cxtorClass));
+    }
+    
+    @SuppressWarnings("unchecked") // safe because this is the cxtor of the literal
+    public ScopedBindingBuilder providing(TypeLiteral<? extends T> cxtorLiteral) {     
+      // Find the injection point of the class we want to create & get its constructor.
+      InjectionPoint ip = null;
+      try {
+        ip = InjectionPoint.forConstructorOf(cxtorLiteral);
+      } catch (ConfigurationException ce) {
+        for (Message message : ce.getErrorMessages()) {
+          binder.addError(message);
+        }
+      }
+
+      final Provider<T> typeProvider;
+      final Key<? extends T> typeKey;
+      // If we found an injection point, then bind the cxtor to a unique key
+      if (ip != null) {
+        Constructor<? extends T> cxtor = (Constructor<? extends T>) ip.getMember();
+        // Validate the exceptions are consistent with the CheckedProvider interface.
+        CheckedProvideUtils.validateExceptions(
+            binder, cxtorLiteral.getExceptionTypes(cxtor), exceptionTypes, interfaceType);
+        
+        typeKey = Key.get(cxtorLiteral, UniqueAnnotations.create());
+        binder.bind(typeKey).toConstructor((Constructor) cxtor).in(Scopes.NO_SCOPE);
+        typeProvider = binder.getProvider((Key<T>) typeKey);
+      } else {
+        // never used, but need it assigned.
+        typeProvider = null;
+        typeKey = null;
+      }
+        
+      // Create a CheckedProvider that calls our cxtor
+      CheckedProvider<T> checkedProvider = new CheckedProviderWithDependencies<T>() {
+        @Override
+        public T get() throws Exception {
+          try {
+            return typeProvider.get();
+          } catch (ProvisionException pe) {
+            // Rethrow the provision cause as the actual exception
+            if (pe.getCause() instanceof Exception) {
+              throw (Exception) pe.getCause();
+            } else if (pe.getCause() instanceof Error) {
+              throw (Error) pe.getCause();
+            } else {
+              throw new AssertionError(pe.getCause()); // Impossible!
+            }
+          }
+        }
+        
+        @Override
+        public Set<Dependency<?>> getDependencies() {
+          return ImmutableSet.<Dependency<?>>of(Dependency.get(typeKey));
+        }
+      };
+      
+      Key<CheckedProvider> targetKey = Key.get(CheckedProvider.class, UniqueAnnotations.create());
+      binder.bind(targetKey).toInstance(checkedProvider);
+      return toInternal(targetKey);
+    }
+    
     ScopedBindingBuilder toProviderMethod(CheckedProviderMethod<?> target) {
       Key<CheckedProviderMethod> targetKey =
-        Key.get(CheckedProviderMethod.class, UniqueAnnotations.create());
+          Key.get(CheckedProviderMethod.class, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
-      
+
       return toInternal(targetKey);
     }
 

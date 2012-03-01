@@ -75,8 +75,7 @@ final class CheckedProviderMethodsModule implements Module {
     List<CheckedProviderMethod<?>> result = Lists.newArrayList();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
-        CheckedProvides checkedProvides =
-          (CheckedProvides)method.getAnnotation(CheckedProvides.class);
+        CheckedProvides checkedProvides = method.getAnnotation(CheckedProvides.class);
         if(checkedProvides != null) {
           result.add(createProviderMethod(binder, method, checkedProvides.value()));
         }

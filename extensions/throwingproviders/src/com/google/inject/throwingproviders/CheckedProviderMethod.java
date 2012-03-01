@@ -76,9 +76,9 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   void configure(Binder binder) {
     binder = binder.withSource(method);
 
-    SecondaryBinder<?> sbinder = 
+    SecondaryBinder<?, ?> sbinder = 
       ThrowingProviderBinder.create(binder)
-        .bind(checkedProvider, key.getTypeLiteral().getType());
+        .bind(checkedProvider, key.getTypeLiteral());
     if(key.getAnnotation() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotation());
     } else if(key.getAnnotationType() != null) {
@@ -94,29 +94,9 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
       // misplaced @Exposed, calling this will add an error to the binder's error queue
       ((PrivateBinder) binder).expose(sbinder.getKey());
     }
-
-    // Validate the exceptions in the method match the exceptions
-    // in the CheckedProvider.
-    for(TypeLiteral<?> exType : exceptionTypes) {
-      Class<?> exActual = exType.getRawType();
-      // Ignore runtime exceptions & errors.
-      if(RuntimeException.class.isAssignableFrom(exActual) || Error.class.isAssignableFrom(exActual)) {
-        continue;
-      }
-      
-      boolean notAssignable = true;
-      for(Class<? extends Throwable> exExpected : sbinder.getExceptionTypes()) {
-        if (exExpected.isAssignableFrom(exActual)) {
-          notAssignable = false;
-          break;
-        }
-      }
-      if(notAssignable) {
-        binder.addError(
-            "%s is not compatible with the exceptions (%s) declared in the CheckedProvider interface (%s)",
-            exActual, sbinder.getExceptionTypes(), checkedProvider);
-      }
-    }
+    
+    CheckedProvideUtils.validateExceptions(
+        binder, exceptionTypes, sbinder.getExceptionTypes(), checkedProvider);
   }
 
   public T get() throws Exception {
