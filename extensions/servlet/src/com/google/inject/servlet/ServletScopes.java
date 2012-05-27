@@ -26,11 +26,7 @@ import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
-import com.google.inject.internal.LinkedBindingImpl;
-import com.google.inject.spi.BindingScopingVisitor;
-import com.google.inject.spi.ExposedBinding;
 
-import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -58,8 +54,8 @@ public class ServletScopes {
    * scope falls back to this scope map if no http request is available, and
    * requires {@link #scopeRequest} to be called as an alertnative.
    */
-  private static final ThreadLocal<Map<String, Object>> requestScopeContext
-      = new ThreadLocal<Map<String, Object>>();
+  private static final ThreadLocal<Context> requestScopeContext
+      = new ThreadLocal<Context>();
 
   /** A sentinel attribute value representing null. */
   enum NullObject { INSTANCE }
@@ -79,10 +75,10 @@ public class ServletScopes {
             // NOTE(dhanji): We don't need to synchronize on the scope map
             // unlike the HTTP request because we're the only ones who have
             // a reference to it, and it is only available via a threadlocal.
-            Map<String, Object> scopeMap = requestScopeContext.get();
-            if (null != scopeMap) {
+            Context context = requestScopeContext.get();
+            if (null != context) {
               @SuppressWarnings("unchecked")
-              T t = (T) scopeMap.get(name);
+              T t = (T) context.map.get(name);
 
               // Accounts for @Nullable providers.
               if (NullObject.INSTANCE == t) {
@@ -93,7 +89,7 @@ public class ServletScopes {
                 t = creator.get();
                 if (!Scopes.isCircularProxy(t)) {
                   // Store a sentinel for provider-given null values.
-                  scopeMap.put(name, t != null ? t : NullObject.INSTANCE);
+                  context.map.put(name, t != null ? t : NullObject.INSTANCE);
                 }
               }
 
@@ -214,7 +210,7 @@ public class ServletScopes {
       final Map<Key<?>, Object> seedMap) {
     Preconditions.checkArgument(null != seedMap,
         "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
-    
+
     // Snapshot the seed map and add all the instances to our continuing HTTP request.
     final ContinuingHttpServletRequest continuingRequest =
         new ContinuingHttpServletRequest(GuiceFilter.getRequest());
@@ -224,24 +220,65 @@ public class ServletScopes {
     }
 
     return new Callable<T>() {
-      private final HttpServletRequest request = continuingRequest;
-
       public T call() throws Exception {
-        GuiceFilter.Context context = GuiceFilter.localContext.get();
-        Preconditions.checkState(null == context,
+        Preconditions.checkState(null == GuiceFilter.localContext.get(),
             "Cannot continue request in the same thread as a HTTP request!");
+        return new GuiceFilter.Context(continuingRequest, continuingRequest, null)
+            .call(callable);
+      }
+    };
+  }
 
-        // Only set up the request continuation if we're running in a
-        // new vanilla thread.
-        GuiceFilter.localContext.set(new GuiceFilter.Context(request, request, null));
-        try {
-          return callable.call();
-        } finally {
-          // Clear the copied context if we set one up.
-          if (null == context) {
-            GuiceFilter.localContext.remove();
-          }
-        }
+  /**
+   * Wraps the given callable in a contextual callable that "transfers" the
+   * request to another thread. This acts as a way of transporting
+   * request context data from the current thread to a future thread.
+   *
+   * <p>As opposed to {@link #continueRequest}, this method propagates all
+   * existing scoped objects. The primary use case is in server implementations
+   * where you can detach the request processing thread while waiting for data,
+   * and reattach to a different thread to finish processing at a later time.
+   *
+   * <p>Because {@code HttpServletRequest} objects are not typically
+   * thread-safe, the callable returned by this method must not be run on a
+   * different thread until the current request scope has terminated. In other
+   * words, do not use this method to propagate the current request scope to
+   * worker threads that may run concurrently with the current thread.
+   *
+   *
+   * @param callable code to be executed in another thread, which depends on
+   *     the request scope.
+   * @return a callable that will invoke the given callable, making the request
+   *     context available to it.
+   * @throws OutOfScopeException if this method is called from a non-request
+   *     thread, or if the request has completed.
+   */
+  public static <T> Callable<T> transferRequest(Callable<T> callable) {
+    return (GuiceFilter.localContext.get() != null)
+        ? transferHttpRequest(callable)
+        : transferNonHttpRequest(callable);
+  }
+
+  private static <T> Callable<T> transferHttpRequest(final Callable<T> callable) {
+    final GuiceFilter.Context context = GuiceFilter.localContext.get();
+    if (context == null) {
+      throw new OutOfScopeException("Not in a request scope");
+    }
+    return new Callable<T>() {
+      public T call() throws Exception {
+        return context.call(callable);
+      }
+    };
+  }
+
+  private static <T> Callable<T> transferNonHttpRequest(final Callable<T> callable) {
+    final Context context = requestScopeContext.get();
+    if (context == null) {
+      throw new OutOfScopeException("Not in a request scope");
+    }
+    return new Callable<T>() {
+      public T call() throws Exception {
+        return context.call(callable);
       }
     };
   }
@@ -279,10 +316,10 @@ public class ServletScopes {
         "Seed map cannot be null, try passing in Collections.emptyMap() instead.");
 
     // Copy the seed values into our local scope map.
-    final Map<String, Object> scopeMap = Maps.newHashMap();
+    final Context context = new Context();
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
       Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
-      scopeMap.put(entry.getKey().toString(), value);
+      context.map.put(entry.getKey().toString(), value);
     }
 
     return new Callable<T>() {
@@ -291,14 +328,7 @@ public class ServletScopes {
             "An HTTP request is already in progress, cannot scope a new request in this thread.");
         Preconditions.checkState(null == requestScopeContext.get(),
             "A request scope is already in progress, cannot scope a new request in this thread.");
-
-        requestScopeContext.set(scopeMap);
-
-        try {
-          return callable.call();
-        } finally {
-          requestScopeContext.remove();
-        }
+        return context.call(callable);
       }
     };
   }
@@ -318,5 +348,26 @@ public class ServletScopes {
     }
 
     return object;
+  }
+
+  private static class Context {
+    final Map<String, Object> map = Maps.newHashMap();
+    volatile Thread owner;
+
+    <T> T call(Callable<T> callable) throws Exception {
+      Thread oldOwner = owner;
+      Thread newOwner = Thread.currentThread();
+      Preconditions.checkState(oldOwner == null || oldOwner == newOwner,
+          "Trying to transfer request scope but original scope is still active");
+      owner = newOwner;
+      Context previous = requestScopeContext.get();
+      requestScopeContext.set(this);
+      try {
+        return callable.call();
+      } finally {
+        owner = oldOwner;
+        requestScopeContext.set(previous);
+      }
+    }
   }
 }

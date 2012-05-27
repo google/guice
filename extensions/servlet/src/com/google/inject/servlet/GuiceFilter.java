@@ -16,11 +16,14 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.OutOfScopeException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -109,23 +112,33 @@ public class GuiceFilter implements Filter {
     localContext.remove();
   }
 
-  public void doFilter(ServletRequest servletRequest,
-      ServletResponse servletResponse, FilterChain filterChain)
+  public void doFilter(
+      final ServletRequest servletRequest,
+      final ServletResponse servletResponse,
+      final FilterChain filterChain)
       throws IOException, ServletException {
 
-    FilterPipeline filterPipeline = getFilterPipeline();
+    final FilterPipeline filterPipeline = getFilterPipeline();
 
     Context previous = GuiceFilter.localContext.get();
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
     HttpServletRequest originalRequest
         = (previous != null) ? previous.getOriginalRequest() : request;
-    localContext.set(new Context(originalRequest, request, response));
     try {
-      //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
-      filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
-    } finally {
-      localContext.set(previous);
+      new Context(originalRequest, request, response).call(new Callable<Void>() {
+        @Override public Void call() throws Exception {
+          //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
+          filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
+          return null;
+        }
+      });
+    } catch (IOException e) {
+      throw e;
+    } catch (ServletException e) {
+      throw e;
+    } catch (Exception e) {
+      Throwables.propagate(e);
     }
   }
 
@@ -160,6 +173,7 @@ public class GuiceFilter implements Filter {
     final HttpServletRequest originalRequest;
     final HttpServletRequest request;
     final HttpServletResponse response;
+    volatile Thread owner;
 
     Context(HttpServletRequest originalRequest, HttpServletRequest request,
         HttpServletResponse response) {
@@ -178,6 +192,22 @@ public class GuiceFilter implements Filter {
 
     HttpServletResponse getResponse() {
       return response;
+    }
+
+    <T> T call(Callable<T> callable) throws Exception {
+      Thread oldOwner = owner;
+      Thread newOwner = Thread.currentThread();
+      Preconditions.checkState(oldOwner == null || oldOwner == newOwner,
+          "Trying to transfer request scope but original scope is still active");
+      owner = newOwner;
+      Context previous = localContext.get();
+      localContext.set(this);
+      try {
+        return callable.call();
+      } finally {
+        owner = oldOwner;
+        localContext.set(previous);
+      }
     }
   }
 
