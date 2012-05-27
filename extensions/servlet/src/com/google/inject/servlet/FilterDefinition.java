@@ -23,7 +23,6 @@ import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -153,20 +152,16 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     }
   }
 
-  public void doFilter(ServletRequest servletRequest,
-      ServletResponse servletResponse, FilterChainInvocation filterChainInvocation)
-      throws IOException, ServletException {
+  public Filter getFilterIfMatching(ServletRequest servletRequest,
+      ServletResponse servletResponse) {
 
     final HttpServletRequest request = (HttpServletRequest) servletRequest;
     final String path = request.getRequestURI().substring(request.getContextPath().length());
 
     if (shouldFilter(path)) {
-      filter.get()
-            .doFilter(servletRequest, servletResponse, filterChainInvocation);
-
+      return filter.get();
     } else {
-      //otherwise proceed down chain anyway
-      filterChainInvocation.doFilter(servletRequest, servletResponse);
+      return null;
     }
   }
 

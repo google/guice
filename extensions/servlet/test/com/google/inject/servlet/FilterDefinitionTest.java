@@ -128,8 +128,11 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("Init did not fire", mockFilter.isInit());
 
+    Filter matchingFilter = filterDef.getFilterIfMatching(request, null);
+    assertSame(mockFilter, matchingFilter);
+
     final boolean proceed[] = new boolean[1];
-    filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
+    matchingFilter.doFilter(request, null, new FilterChainInvocation(null, null, null) {
       @Override
       public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
         proceed[0] = true;
@@ -188,8 +191,11 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("init did not fire", mockFilter.isInit());
 
+    Filter matchingFilter = filterDef.getFilterIfMatching(request, null);
+    assertSame(mockFilter, matchingFilter);
+
     final boolean proceed[] = new boolean[1];
-    filterDef.doFilter(request, null, new FilterChainInvocation(null, null, null) {
+    matchingFilter.doFilter(request, null, new FilterChainInvocation(null, null, null) {
       @Override
       public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
         proceed[0] = true;

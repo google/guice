@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -45,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 class FilterChainInvocation implements FilterChain {
   
   private static final Set<String> SERVLET_INTERNAL_METHODS = ImmutableSet.of(
-      FilterDefinition.class.getName() + ".doFilter",
       FilterChainInvocation.class.getName() + ".doFilter");
   
   private final FilterDefinition[] filterDefinitions;
@@ -67,8 +67,6 @@ class FilterChainInvocation implements FilterChain {
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
       throws IOException, ServletException {
-    index++;
-
     GuiceFilter.Context previous = GuiceFilter.localContext.get();
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -76,9 +74,12 @@ class FilterChainInvocation implements FilterChain {
         = (previous != null) ? previous.getOriginalRequest() : request;
     GuiceFilter.localContext.set(new GuiceFilter.Context(originalRequest, request, response));
     try {
-      //dispatch down the chain while there are more filters
-      if (index < filterDefinitions.length) {
-        filterDefinitions[index].doFilter(servletRequest, servletResponse, this);
+      Filter filter = findNextFilter(servletRequest, servletResponse);
+      if (filter != null) {
+        // call to the filter, which can either consume the request or
+        // recurse back into this method. (in which case we will go to find the next filter,
+        // or dispatch to the servlet if no more filters are left)
+        filter.doFilter(servletRequest, servletResponse, this);
       } else {
         //we've reached the end of the filterchain, let's try to dispatch to a servlet
         final boolean serviced = servletPipeline.service(servletRequest, servletResponse);
@@ -102,6 +103,20 @@ class FilterChainInvocation implements FilterChain {
     } finally {
       GuiceFilter.localContext.set(previous);
     }
+  }
+
+  /**
+   * Iterates over the remaining filter definitions.
+   * Returns the first applicable filter, or null if none apply.
+   */
+  private Filter findNextFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+    while (++index < filterDefinitions.length) {
+      Filter filter = filterDefinitions[index].getFilterIfMatching(servletRequest, servletResponse);
+      if (filter != null) {
+        return filter;
+      }
+    }
+    return null;
   }
   
   /**
