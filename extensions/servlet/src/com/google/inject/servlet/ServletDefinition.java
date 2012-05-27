@@ -68,11 +68,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
     this.servletInstance = servletInstance;
   }
-  
+
   public ServletDefinition get() {
     return this;
   }
-  
+
   public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
@@ -81,7 +81,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             new InstanceServletBindingImpl(initParams,
                 pattern,
                 servletInstance,
-                patternMatcher));        
+                patternMatcher));
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedServletBindingImpl(initParams,
@@ -95,7 +95,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
   }
 
   boolean shouldServe(String uri) {
-    return patternMatcher.matches(uri);
+    return uri != null && patternMatcher.matches(uri);
   }
 
   public void init(final ServletContext servletContext, Injector injector,
@@ -163,7 +163,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
    *
    * @return Returns true if this servlet triggered for the given request. Or false if
    *          guice-servlet should continue dispatching down the servlet pipeline.
-   * 
+   *
    * @throws IOException If thrown by underlying servlet
    * @throws ServletException If thrown by underlying servlet
    */
@@ -171,7 +171,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       ServletResponse servletResponse) throws IOException, ServletException {
 
     final HttpServletRequest request = (HttpServletRequest) servletRequest;
-    final String path = request.getRequestURI().substring(request.getContextPath().length());
+    final String path = ServletUtils.getContextRelativePath(request);
 
     final boolean serve = shouldServe(path);
 

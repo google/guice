@@ -60,11 +60,11 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
     this.filterInstance = filterInstance;
   }
-  
+
   public FilterDefinition get() {
     return this;
   }
-  
+
   public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding) {
     if(visitor instanceof ServletModuleTargetVisitor) {
@@ -73,7 +73,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
             new InstanceFilterBindingImpl(initParams,
                 pattern,
                 filterInstance,
-                patternMatcher));        
+                patternMatcher));
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedFilterBindingImpl(initParams,
@@ -87,7 +87,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   }
 
   private boolean shouldFilter(String uri) {
-    return patternMatcher.matches(uri);
+    return uri != null && patternMatcher.matches(uri);
   }
 
   public void init(final ServletContext servletContext, Injector injector,
@@ -133,7 +133,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   public void destroy(Set<Filter> destroyedSoFar) {
     // filters are always singletons
     Filter reference = filter.get();
-    
+
     // Do nothing if this Filter was invalid (usually due to not being scoped
     // properly), or was already destroyed. According to Servlet Spec: it is
     // "out of service", and does not need to be destroyed.
@@ -152,8 +152,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
 
   public Filter getFilterIfMatching(HttpServletRequest request) {
 
-    final String path = request.getRequestURI().substring(request.getContextPath().length());
-
+    final String path = ServletUtils.getContextRelativePath(request);
     if (shouldFilter(path)) {
       return filter.get();
     } else {

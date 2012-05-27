@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
@@ -31,14 +32,16 @@ import com.google.inject.spi.BindingScopingVisitor;
 
 import junit.framework.TestCase;
 
+import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Basic unit test for lifecycle of a ServletDefinition (wrapper).
@@ -65,15 +68,9 @@ public class ServletDefinitionTest extends TestCase {
 
     //some init params
     //noinspection SSBasedInspection
-    final Map<String, String> initParams = new HashMap<String, String>() {
-      {
-        put("ahsd", "asdas24dok");
-        put("ahssd", "asdasd124ok");
-        put("ahfsasd", "asda124sdok");
-        put("ahsasgd", "a124sdasdok");
-        put("ahsd124124", "as124124124dasdok");
-      }
-    };
+    final Map<String, String> initParams = new ImmutableMap.Builder<String, String>()
+      .put("ahsd", "asdas24dok")
+      .put("ahssd", "asdasd124ok").build();
 
     String pattern = "/*";
     final ServletDefinition servletDefinition = new ServletDefinition(pattern,
@@ -101,7 +98,28 @@ public class ServletDefinitionTest extends TestCase {
       assertTrue(initParams.containsKey(name));
       assertEquals(initParams.get(name), servletConfig.getInitParameter(name));
     }
-    
+
     verify(injector, binding, servletContext);
+  }
+
+  public void testServiceWithContextPath() throws IOException, ServletException   {
+    String pattern = "/*";
+    //some init params
+    Map<String, String> initParams = new ImmutableMap.Builder<String, String>()
+        .put("ahsd", "asdas24dok")
+        .put("ahssd", "asdasd124ok")
+        .build();
+
+    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
+        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
+        initParams, null);
+    HttpServletResponse servletResponse = createMock(HttpServletResponse.class);
+    HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
+
+    expect(servletRequest.getContextPath()).andReturn("/a_context_path");
+    expect(servletRequest.getRequestURI()).andReturn("/test.html");
+    replay(servletRequest, servletResponse);
+    servletDefinition.service(servletRequest, servletResponse);
+    verify(servletRequest, servletResponse);
   }
 }

@@ -6,6 +6,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
@@ -28,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
@@ -56,14 +58,9 @@ public class FilterDefinitionTest extends TestCase {
 
     //some init params
     //noinspection SSBasedInspection
-    final Map<String, String> initParams = new HashMap<String, String>() {{
-      put("ahsd", "asdas24dok");
-      put("ahssd", "asdasd124ok");
-      put("ahfsasd", "asda124sdok");
-      put("ahsasgd", "a124sdasdok");
-      put("ahsd124124", "as124124124dasdok");
-    }};
-
+    final Map<String, String> initParams = new ImmutableMap.Builder<String, String>()
+      .put("ahsd", "asdas24dok")
+      .put("ahssd", "asdasd124ok").build();
 
     ServletContext servletContext = createMock(ServletContext.class);
     final String contextName = "thing__!@@44";
@@ -90,7 +87,7 @@ public class FilterDefinitionTest extends TestCase {
       assertTrue(initParams.containsKey(name));
       assertTrue(initParams.get(name).equals(filterConfig.getInitParameter(name)));
     }
-    
+
     verify(binding, injector, servletContext);
   }
 
@@ -167,7 +164,7 @@ public class FilterDefinitionTest extends TestCase {
         .andReturn(true);
     expect(injector.getBinding(Key.get(Filter.class)))
         .andReturn(binding);
-    
+
     expect(injector.getInstance(Key.get(Filter.class)))
         .andReturn(mockFilter)
         .anyTimes();
@@ -209,6 +206,78 @@ public class FilterDefinitionTest extends TestCase {
 
     verify(injector, request);
 
+  }
+
+  public void testGetFilterIfMatching() throws ServletException {
+    String pattern = "/*";
+    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
+        UriPatternType.get(UriPatternType.SERVLET, pattern),
+        new HashMap<String, String>(), null);
+    HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
+    ServletContext servletContext = createMock(ServletContext.class);
+    Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
+
+    final MockFilter mockFilter = new MockFilter() {
+      @Override
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+          FilterChain filterChain) {
+        //suppress rest of chain...
+      }
+    };
+    expect(injector.getBinding(Key.get(Filter.class)))
+        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
+    expect(injector.getInstance(Key.get(Filter.class)))
+        .andReturn(mockFilter)
+        .anyTimes();
+
+    expect(servletRequest.getContextPath()).andReturn("/a_context_path");
+    expect(servletRequest.getRequestURI()).andReturn("/a_context_path/test.html");
+
+    replay(servletRequest, binding, injector);
+    filterDef.init(servletContext, injector,
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    Filter filter = filterDef.getFilterIfMatching(servletRequest);
+    assertSame(filter, mockFilter);
+    verify(servletRequest, binding, injector);
+  }
+
+  public void testGetFilterIfMatchingNotMatching() throws ServletException {
+    String pattern = "/*";
+    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
+        UriPatternType.get(UriPatternType.SERVLET, pattern),
+        new HashMap<String, String>(), null);
+    HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
+    ServletContext servletContext = createMock(ServletContext.class);
+    Injector injector = createMock(Injector.class);
+    Binding binding = createMock(Binding.class);
+
+    final MockFilter mockFilter = new MockFilter() {
+      @Override
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+          FilterChain filterChain) {
+        //suppress rest of chain...
+      }
+    };
+    expect(injector.getBinding(Key.get(Filter.class)))
+        .andReturn(binding);
+    expect(binding.acceptScopingVisitor((BindingScopingVisitor) anyObject()))
+        .andReturn(true);
+    expect(injector.getInstance(Key.get(Filter.class)))
+        .andReturn(mockFilter)
+        .anyTimes();
+
+    expect(servletRequest.getContextPath()).andReturn("/a_context_path");
+    expect(servletRequest.getRequestURI()).andReturn("/test.html");
+
+    replay(servletRequest, binding, injector);
+    filterDef.init(servletContext, injector,
+        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    Filter filter = filterDef.getFilterIfMatching(servletRequest);
+    assertNull(filter);
+    verify(servletRequest, binding, injector);
   }
 
   private static class MockFilter implements Filter {
