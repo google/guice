@@ -222,7 +222,7 @@ public class ThrowingProviderBinder {
             } else if (pe.getCause() instanceof Error) {
               throw (Error) pe.getCause();
             } else {
-              throw new AssertionError(pe.getCause()); // Impossible!
+              throw new AssertionError(pe); // Impossible!
             }
           }
         }
