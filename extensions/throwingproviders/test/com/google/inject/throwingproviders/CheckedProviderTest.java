@@ -20,6 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.CreationException;
@@ -27,6 +28,11 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.OutOfScopeException;
+import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
+import com.google.inject.Scope;
+import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.name.Named;
@@ -39,6 +45,10 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder.Result;
 import junit.framework.TestCase;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.BindException;
 import java.rmi.AccessException;
 import java.rmi.RemoteException;
@@ -1378,6 +1388,56 @@ public class CheckedProviderTest extends TestCase {
   static class NormalInjectableFoo implements Foo {
     @Inject
     public NormalInjectableFoo() {
+    }
+    
+    @Override public String s() { return null; }
+  }
+  
+  public void testProvisionExceptionOnDependenciesOfCxtor() throws Exception {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          ThrowingProviderBinder.create(binder())
+              .bind(RemoteProvider.class, Foo.class)
+              .providing(ProvisionExceptionFoo.class);
+          bindScope(BadScope.class, new Scope() {
+            @Override
+            public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+              return new Provider<T>() {
+                @Override
+                public T get() {
+                  throw new OutOfScopeException("failure");
+                }
+              };
+            }
+          });
+        }
+      });
+    
+    try {
+      injector.getInstance(Key.get(remoteProviderOfFoo)).get();
+      fail();
+    } catch(ProvisionException pe) {
+      assertEquals(2, pe.getErrorMessages().size());
+      List<Message> messages = Lists.newArrayList(pe.getErrorMessages());
+      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure",
+          messages.get(0).getMessage());
+      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure",
+          messages.get(1).getMessage());
+    }
+  }
+  
+  @ScopeAnnotation
+  @Target(ElementType.TYPE)
+  @Retention(RetentionPolicy.RUNTIME)
+  private @interface BadScope { }
+  
+  @BadScope private static class Unscoped1 {}
+  @BadScope private static class Unscoped2 {}
+  
+  static class ProvisionExceptionFoo implements Foo {
+    @ThrowingInject
+    public ProvisionExceptionFoo(Unscoped1 a, Unscoped2 b) {
     }
     
     @Override public String s() { return null; }

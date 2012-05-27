@@ -222,7 +222,11 @@ public class ThrowingProviderBinder {
             } else if (pe.getCause() instanceof Error) {
               throw (Error) pe.getCause();
             } else {
-              throw new AssertionError(pe); // Impossible!
+              // If this failed because of multiple reasons (ie, more than
+              // one dependency failed due to scoping errors), then
+              // the ProvisionException won't have a cause, so we need
+              // to rethrow it as-is.
+              throw pe;
             }
           }
         }
@@ -265,6 +269,10 @@ public class ThrowingProviderBinder {
               new InvocationHandler() {
                 public Object invoke(Object proxy, Method method, Object[] args)
                     throws Throwable {
+                  // Allow methods like .equals(..), .hashcode(..), .toString(..) to work.
+                  if (method.getDeclaringClass() == Object.class) {
+                    return method.invoke(this, args);
+                  }
                   return resultProvider.get().getOrThrow();
                 }
               }));
