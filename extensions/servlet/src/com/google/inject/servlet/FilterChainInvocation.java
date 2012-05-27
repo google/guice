@@ -74,7 +74,7 @@ class FilterChainInvocation implements FilterChain {
         = (previous != null) ? previous.getOriginalRequest() : request;
     GuiceFilter.localContext.set(new GuiceFilter.Context(originalRequest, request, response));
     try {
-      Filter filter = findNextFilter(servletRequest, servletResponse);
+      Filter filter = findNextFilter(request);
       if (filter != null) {
         // call to the filter, which can either consume the request or
         // recurse back into this method. (in which case we will go to find the next filter,
@@ -109,9 +109,9 @@ class FilterChainInvocation implements FilterChain {
    * Iterates over the remaining filter definitions.
    * Returns the first applicable filter, or null if none apply.
    */
-  private Filter findNextFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
+  private Filter findNextFilter(HttpServletRequest request) {
     while (++index < filterDefinitions.length) {
-      Filter filter = filterDefinitions[index].getFilterIfMatching(servletRequest, servletResponse);
+      Filter filter = filterDefinitions[index].getFilterIfMatching(request);
       if (filter != null) {
         return filter;
       }

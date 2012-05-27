@@ -34,8 +34,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -152,10 +150,8 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     }
   }
 
-  public Filter getFilterIfMatching(ServletRequest servletRequest,
-      ServletResponse servletResponse) {
+  public Filter getFilterIfMatching(HttpServletRequest request) {
 
-    final HttpServletRequest request = (HttpServletRequest) servletRequest;
     final String path = request.getRequestURI().substring(request.getContextPath().length());
 
     if (shouldFilter(path)) {

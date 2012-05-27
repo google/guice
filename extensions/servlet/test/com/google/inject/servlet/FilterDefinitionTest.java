@@ -128,7 +128,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("Init did not fire", mockFilter.isInit());
 
-    Filter matchingFilter = filterDef.getFilterIfMatching(request, null);
+    Filter matchingFilter = filterDef.getFilterIfMatching(request);
     assertSame(mockFilter, matchingFilter);
 
     final boolean proceed[] = new boolean[1];
@@ -191,7 +191,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("init did not fire", mockFilter.isInit());
 
-    Filter matchingFilter = filterDef.getFilterIfMatching(request, null);
+    Filter matchingFilter = filterDef.getFilterIfMatching(request);
     assertSame(mockFilter, matchingFilter);
 
     final boolean proceed[] = new boolean[1];
