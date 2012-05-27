@@ -4,6 +4,13 @@ package com.google.inject.throwingproviders;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Annotations;
+import com.google.inject.internal.Errors;
+import com.google.inject.spi.Message;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 
 /**
  * Utilities for the throwing provider module.
@@ -13,6 +20,43 @@ import com.google.inject.TypeLiteral;
 class CheckedProvideUtils {
   
   private CheckedProvideUtils() {}
+  
+  private static final String CONSTRUCTOR_RULES =
+      "Classes must have either one (and only one) constructor annotated with @ThrowingInject.";
+  
+  @SuppressWarnings("unchecked") // safe because it's a constructor of the typeLiteral
+  static <T> Constructor<? extends T> findThrowingConstructor(
+      TypeLiteral<? extends T> typeLiteral, Binder binder) {
+    
+    Class<?> rawType = typeLiteral.getRawType();
+    Errors errors = new Errors(rawType);
+    Constructor<?> cxtor = null;
+    for (Constructor<?> constructor : rawType.getDeclaredConstructors()) {
+      if (constructor.isAnnotationPresent(ThrowingInject.class)) {
+        if (cxtor != null) {
+          errors.addMessage("%s has more than one constructor annotated with @ThrowingInject. "
+              + CONSTRUCTOR_RULES, rawType);
+        }
+
+        cxtor = constructor;
+        Annotation misplacedBindingAnnotation = Annotations.findBindingAnnotation(
+            errors, cxtor, ((AnnotatedElement) cxtor).getAnnotations());
+        if (misplacedBindingAnnotation != null) {
+          errors.misplacedBindingAnnotation(cxtor, misplacedBindingAnnotation);
+        }
+      }
+    }
+    
+    if (cxtor == null) {
+      errors.addMessage(
+          "Could not find a suitable constructor in %s. " + CONSTRUCTOR_RULES, rawType);
+    }
+
+    for (Message msg : errors.getMessages()) {
+      binder.addError(msg);
+    }
+    return (Constructor<? extends T>) cxtor;
+  }
   
   /** Adds errors to the binder if the exceptions aren't valid. */
   static void validateExceptions(Binder binder,
