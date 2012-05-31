@@ -19,6 +19,7 @@ import static com.google.inject.servlet.ServletScopes.REQUEST;
 import static com.google.inject.servlet.ServletScopes.SESSION;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -50,6 +51,8 @@ final class InternalServletModule extends AbstractModule {
   @Singleton
   static class BackwardsCompatibleServletContextProvider implements Provider<ServletContext> {
     private ServletContext injectedServletContext;
+
+    @Inject BackwardsCompatibleServletContextProvider() {}
 
     // This setter is called by the GuiceServletContextListener
     void set(ServletContext injectedServletContext) {
