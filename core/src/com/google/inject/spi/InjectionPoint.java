@@ -444,6 +444,7 @@ public final class InjectionPoint {
       this.field = field;
     }
 
+    @Override
     InjectionPoint toInjectionPoint() {
       return new InjectionPoint(declaringType, field, optional);
     }
@@ -463,6 +464,7 @@ public final class InjectionPoint {
       this.method = method;
     }
 
+    @Override
     InjectionPoint toInjectionPoint() {
       return new InjectionPoint(declaringType, method, optional);
     }

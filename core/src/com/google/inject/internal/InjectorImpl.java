@@ -71,11 +71,14 @@ final class InjectorImpl implements Injector, Lookups {
     final Stage stage;
     final boolean jitDisabled;
     final boolean disableCircularProxies;
+    final boolean atInjectRequired;
     
-    InjectorOptions(Stage stage, boolean jitDisabled, boolean disableCircularProxies) {
+    InjectorOptions(Stage stage, boolean jitDisabled, boolean disableCircularProxies,
+        boolean atInjectRequired) {
       this.stage = stage;
       this.jitDisabled = jitDisabled;
       this.disableCircularProxies = disableCircularProxies;
+      this.atInjectRequired = atInjectRequired;
     }
     
     @Override
@@ -84,6 +87,7 @@ final class InjectorImpl implements Injector, Lookups {
           .add("stage", stage)
           .add("jitDisabled", jitDisabled)
           .add("disableCircularProxies", disableCircularProxies)
+          .add("atInjectRequired", atInjectRequired)
           .toString();
     }
   }
@@ -179,7 +183,7 @@ final class InjectorImpl implements Injector, Lookups {
     if(isProvider(key)) {
       try {
         // This is safe because isProvider above ensures that T is a Provider<?>
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "cast"})
         Key<?> providedKey = (Key<?>)getProvidedKey((Key)key, new Errors());
         if(getExistingBinding(providedKey) != null) {
           return getBinding(key);
@@ -651,7 +655,14 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     
-    return ConstructorBindingImpl.create(this, key, null, source, scoping, errors, jitBinding && options.jitDisabled);
+    return ConstructorBindingImpl.create(this,
+        key,
+        null, /* use default constructor */
+        source,
+        scoping,
+        errors,
+        jitBinding && options.jitDisabled,
+        options.atInjectRequired);
   }
 
   /**
@@ -813,7 +824,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (isProvider(key)) {
       // These casts are safe. We know T extends Provider<X> and that given Key<Provider<X>>,
       // createProviderBinding() will return BindingImpl<Provider<X>>.
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "cast"})
       BindingImpl<T> binding = (BindingImpl<T>) createProviderBinding((Key) key, errors);
       return binding;
     }
@@ -822,7 +833,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (isMembersInjector(key)) {
       // These casts are safe. T extends MembersInjector<X> and that given Key<MembersInjector<X>>,
       // createMembersInjectorBinding() will return BindingImpl<MembersInjector<X>>.
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"unchecked", "cast"})
       BindingImpl<T> binding = (BindingImpl<T>) createMembersInjectorBinding((Key) key, errors);
       return binding;
     }

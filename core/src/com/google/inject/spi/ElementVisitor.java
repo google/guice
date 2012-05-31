@@ -17,6 +17,7 @@
 package com.google.inject.spi;
 
 import com.google.inject.Binding;
+import com.google.inject.Inject;
 
 /**
  * Visit elements.
@@ -105,4 +106,11 @@ public interface ElementVisitor<V> {
    * @since 3.0
    */
   V visit(DisableCircularProxiesOption option);
+  
+  /**
+   * Visit a require explicit {@literal @}{@link Inject} command.
+   * 
+   * @since 4.0
+   */
+  V visit(RequireAtInjectOnConstructorsOption option);
 }

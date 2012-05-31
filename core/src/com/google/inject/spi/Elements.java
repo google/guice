@@ -315,6 +315,10 @@ public final class Elements {
     public void requireExplicitBindings() {
       elements.add(new RequireExplicitBindingsOption(getSource()));     
     }
+    
+    public void requireAtInjectOnConstructors() {
+      elements.add(new RequireAtInjectOnConstructorsOption(getSource()));
+    }
 
     public void expose(Key<?> key) {
       exposeInternal(key);

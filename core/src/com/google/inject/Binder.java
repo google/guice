@@ -470,4 +470,17 @@ public interface Binder {
    * @since 3.0
    */
   void disableCircularProxies();
+  
+  /**
+   * Requires that a {@literal @}{@link Inject} annotation exists on a constructor in order for
+   * Guice to consider it an eligible injectable class. By default, Guice will inject classes that
+   * have a no-args constructor if no {@literal @}{@link Inject} annotation exists on any
+   * constructor.
+   * <p>
+   * If the class is bound using {@link LinkedBindingBuilder#toConstructor}, Guice will still inject
+   * that constructor regardless of annotations.
+   *
+   * @since 4.0
+   */
+  void requireAtInjectOnConstructors();
 }

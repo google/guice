@@ -72,7 +72,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         prepareBinding();
         try {
           ConstructorBindingImpl<T> onInjector = ConstructorBindingImpl.create(injector, key, 
-              binding.getConstructor(), source, scoping, errors, false);
+              binding.getConstructor(), source, scoping, errors, false, false);
           scheduleInitialization(onInjector);
           putBinding(onInjector);
         } catch (ErrorsException e) {

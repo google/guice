@@ -94,4 +94,8 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
   public V visit(RequireExplicitBindingsOption option) {
     return visitOther(option);
   }
+  
+  public V visit(RequireAtInjectOnConstructorsOption option) {
+    return visitOther(option);
+  }
 }

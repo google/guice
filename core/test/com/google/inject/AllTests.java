@@ -36,6 +36,7 @@ import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
+
 import com.googlecode.guice.GuiceTck;
 import com.googlecode.guice.Jsr330Test;
 
@@ -92,6 +93,7 @@ public class AllTests {
     // ProxyFactoryTest is AOP-only
     suite.addTestSuite(ReflectionTest.class);
     suite.addTestSuite(RequestInjectionTest.class);
+    suite.addTestSuite(RequireAtInjectOnConstructorsTest.class);
     suite.addTestSuite(ScopesTest.class);
     suite.addTestSuite(SerializationTest.class);
     suite.addTestSuite(SuperclassTest.class);

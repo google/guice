@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.DisableCircularProxiesOption;
+import com.google.inject.spi.RequireAtInjectOnConstructorsOption;
 import com.google.inject.spi.RequireExplicitBindingsOption;
 
 /**
@@ -33,6 +34,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
 
   private boolean disableCircularProxies = false;
   private boolean jitDisabled = false;
+  private boolean atInjectRequired = false;
 
   InjectorOptionsProcessor(Errors errors) {
     super(errors);
@@ -49,6 +51,12 @@ class InjectorOptionsProcessor extends AbstractProcessor {
     jitDisabled = true;
     return true;
   }
+  
+  @Override
+  public Boolean visit(RequireAtInjectOnConstructorsOption option) {
+    atInjectRequired = true;
+    return true;    
+  }  
 
   InjectorOptions getOptions(Stage stage, InjectorOptions parentOptions) {
     checkNotNull(stage, "stage must be set");
@@ -56,13 +64,15 @@ class InjectorOptionsProcessor extends AbstractProcessor {
       return new InjectorOptions(
           stage,
           jitDisabled,
-          disableCircularProxies);
+          disableCircularProxies,
+          atInjectRequired);
     } else {
       checkState(stage == parentOptions.stage, "child & parent stage don't match");
       return new InjectorOptions(
           stage,
           jitDisabled || parentOptions.jitDisabled,
-          disableCircularProxies || parentOptions.disableCircularProxies); 
+          disableCircularProxies || parentOptions.disableCircularProxies,
+          atInjectRequired || parentOptions.atInjectRequired); 
     }
   }
 

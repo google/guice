@@ -139,6 +139,13 @@ public final class Errors implements Serializable {
     return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
   }
 
+  public Errors atInjectRequired(Class clazz) {
+    return addMessage(
+        "Explicit @Inject annotations are required on constructors,"
+        + " but %s has no constructors annotated with @Inject.",
+        clazz);
+  }
+
   public Errors converterReturnedNull(String stringValue, Object source,
       TypeLiteral<?> type, TypeConverterBinding typeConverterBinding) {
     return addMessage("Received null converting '%s' (bound at %s) to %s%n"
@@ -647,17 +654,17 @@ public final class Errors implements Serializable {
 
   private static final Collection<Converter<?>> converters = ImmutableList.of(
       new Converter<Class>(Class.class) {
-        public String toString(Class c) {
+        @Override public String toString(Class c) {
           return c.getName();
         }
       },
       new Converter<Member>(Member.class) {
-        public String toString(Member member) {
+        @Override public String toString(Member member) {
           return Classes.toString(member);
         }
       },
       new Converter<Key>(Key.class) {
-        public String toString(Key key) {
+        @Override public String toString(Key key) {
           if (key.getAnnotationType() != null) {
             return key.getTypeLiteral() + " annotated with "
                 + (key.getAnnotation() != null ? key.getAnnotation() : key.getAnnotationType());
