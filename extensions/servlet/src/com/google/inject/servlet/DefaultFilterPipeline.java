@@ -17,6 +17,7 @@ package com.google.inject.servlet;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,6 +31,9 @@ import javax.servlet.ServletResponse;
  * @see com.google.inject.servlet.ManagedFilterPipeline See Also ManagedFilterPipeline.
  */
 class DefaultFilterPipeline implements FilterPipeline {
+  @Inject DefaultFilterPipeline() {
+  }
+
   public void initPipeline(ServletContext context) {
   }
 
