@@ -194,6 +194,9 @@ public class ServletScopes {
    *      are not available.</li>
    * </ul>
    *
+   * <p>The returned callable will throw a {@link ScopingException} when called
+   * if the HTTP request scope is still active on the current thread.
+   *
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
    * @param seedMap the initial set of scoped instances for Guice to seed the
@@ -221,7 +224,7 @@ public class ServletScopes {
 
     return new Callable<T>() {
       public T call() throws Exception {
-        Preconditions.checkState(null == GuiceFilter.localContext.get(),
+        checkScopingState(null == GuiceFilter.localContext.get(),
             "Cannot continue request in the same thread as a HTTP request!");
         return new GuiceFilter.Context(continuingRequest, continuingRequest, null)
             .call(callable);
@@ -245,6 +248,9 @@ public class ServletScopes {
    * words, do not use this method to propagate the current request scope to
    * worker threads that may run concurrently with the current thread.
    *
+   * <p>The returned callable will throw a {@link ScopingException} when called
+   * if the request scope being transferred is still active on a different
+   * thread.
    *
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
@@ -301,6 +307,9 @@ public class ServletScopes {
    * in non-HTTP requests (for example: RPC requests) as well as in HTTP
    * request threads.
    *
+   * <p>The returned callable will throw a {@link ScopingException} when called
+   * if there is a request scope already active on the current thread.
+   *
    * @param callable code to be executed which depends on the request scope.
    *     Typically in another thread, but not necessarily so.
    * @param seedMap the initial set of scoped instances for Guice to seed the
@@ -324,9 +333,9 @@ public class ServletScopes {
 
     return new Callable<T>() {
       public T call() throws Exception {
-        Preconditions.checkState(null == GuiceFilter.localContext.get(),
+        checkScopingState(null == GuiceFilter.localContext.get(),
             "An HTTP request is already in progress, cannot scope a new request in this thread.");
-        Preconditions.checkState(null == requestScopeContext.get(),
+        checkScopingState(null == requestScopeContext.get(),
             "A request scope is already in progress, cannot scope a new request in this thread.");
         return context.call(callable);
       }
@@ -357,7 +366,7 @@ public class ServletScopes {
     <T> T call(Callable<T> callable) throws Exception {
       Thread oldOwner = owner;
       Thread newOwner = Thread.currentThread();
-      Preconditions.checkState(oldOwner == null || oldOwner == newOwner,
+      checkScopingState(oldOwner == null || oldOwner == newOwner,
           "Trying to transfer request scope but original scope is still active");
       owner = newOwner;
       Context previous = requestScopeContext.get();
@@ -368,6 +377,12 @@ public class ServletScopes {
         owner = oldOwner;
         requestScopeContext.set(previous);
       }
+    }
+  }
+
+  private static void checkScopingState(boolean condition, String msg) {
+    if (!condition) {
+      throw new ScopingException(msg);
     }
   }
 }
