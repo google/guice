@@ -228,7 +228,7 @@ public class MoreTypes {
       }
       TypeVariable<?> va = (TypeVariable) a;
       TypeVariable<?> vb = (TypeVariable) b;
-      return va.getGenericDeclaration() == vb.getGenericDeclaration()
+      return va.getGenericDeclaration().equals(vb.getGenericDeclaration())
           && va.getName().equals(vb.getName());
 
     } else {

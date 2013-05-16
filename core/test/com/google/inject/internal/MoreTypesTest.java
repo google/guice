@@ -20,6 +20,7 @@ import com.google.inject.TypeLiteral;
 
 import junit.framework.TestCase;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +43,11 @@ public class MoreTypesTest extends TestCase {
     assertEquals("java.util.Map<com.google.inject.internal.MoreTypesTest$Inner<java.lang.Long>, "
             + "java.util.Set<com.google.inject.internal.MoreTypesTest$Inner<java.lang.Long>>>",
         MoreTypes.typeToString(mapInnerLongToSetInnerLong.getType()));
+  }
+
+  public <T> void testEquals_typeVariable() throws Exception {
+    Type type = getClass().getMethod("testEquals_typeVariable").getTypeParameters()[0];
+    assertTrue(MoreTypes.equals(new TypeLiteral<T>() {}.getType(), type));
   }
 
   public static class Inner<T> {}
