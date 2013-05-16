@@ -478,6 +478,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     AssistedSingleton create(String string);
   }
   
+  @SuppressWarnings("GuiceAssistedInjectScoping")
   @Singleton
   static class AssistedSingleton {
     @Inject
