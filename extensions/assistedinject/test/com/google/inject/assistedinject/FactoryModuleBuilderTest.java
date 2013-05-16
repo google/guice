@@ -462,16 +462,22 @@ public class FactoryModuleBuilderTest extends TestCase {
   }
   
   public void testSingletonScopeOnAssistedClassIsIgnored() {
-    // production stage is important, because it will trigger eager singleton creation
-    Injector injector = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
+    try {
+      Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
         install(new FactoryModuleBuilder().build(SingletonFactory.class));
       }
     });
-    
-    SingletonFactory factory = injector.getInstance(SingletonFactory.class);
-    assertNotSame(factory.create("foo"), factory.create("bar"));
+      fail();
+    } catch (CreationException ce) {
+      assertEquals(1, ce.getErrorMessages().size());
+      assertEquals("Found scope annotation [" + Singleton.class.getName() + "]"
+          + " on implementation class [" + AssistedSingleton.class.getName() + "]"
+          + " of AssistedInject factory [" + SingletonFactory.class.getName() + "]."
+          + "\nThis is not allowed, please remove the scope annotation.",
+          Iterables.getOnlyElement(ce.getErrorMessages()).getMessage());
+    }
   }
   
   interface SingletonFactory {

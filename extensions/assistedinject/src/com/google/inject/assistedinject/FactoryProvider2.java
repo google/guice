@@ -241,6 +241,15 @@ final class FactoryProvider2 <F> implements InvocationHandler,
         if(implementation == null) {
           implementation = returnType.getTypeLiteral();
         }
+        Class<? extends Annotation> scope =
+            Annotations.findScopeAnnotation(errors, implementation.getRawType());
+        if (scope != null) {
+          errors.addMessage("Found scope annotation [%s] on implementation class "
+              + "[%s] of AssistedInject factory [%s].\nThis is not allowed, please"
+              + " remove the scope annotation.",
+              scope, implementation.getRawType(), factoryType);
+        }
+        
         InjectionPoint ctorInjectionPoint;
         try {
           ctorInjectionPoint =
