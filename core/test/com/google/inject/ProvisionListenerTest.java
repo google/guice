@@ -37,6 +37,7 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests for {@link Binder#bindListener(Matcher, ProvisionListener...)}
@@ -634,6 +635,63 @@ public class ProvisionListenerTest extends TestCase {
     } catch (CreationException ce) {
       assertContains(
           ce.getMessage(), "Binding to core guice framework type is not allowed: Injector.");
+    }
+  }
+
+  public void testProvisionIsNotifiedAfterContextsClear() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(Matchers.any(), new ProvisionListener() {
+          @Override
+          public <T> void onProvision(ProvisionInvocation<T> provision) {
+            Object provisioned = provision.provision();
+            if (provisioned instanceof X) {
+              ((X)provisioned).init();
+            } else if (provisioned instanceof Y) {
+              X.createY = false;
+              ((Y)provisioned).init();
+            }
+          }
+        });
+      }
+    });
+
+    X.createY = true;
+    X x = injector.getInstance(X.class);
+    assertNotSame(x, x.y.x);
+    assertFalse("x.ID: " + x.ID + ", x.y.x.iD: " + x.y.x.ID, x.ID == x.y.x.ID);
+  }
+
+  private static class X {
+    final static AtomicInteger COUNTER = new AtomicInteger();
+    static boolean createY;
+
+    final int ID = COUNTER.getAndIncrement();
+    final Provider<Y> yProvider;
+    Y y;
+
+    @Inject X(Provider<Y> yProvider) {
+      this.yProvider = yProvider;
+    }
+
+    void init() {
+      if (createY) {
+        this.y = yProvider.get();
+      }
+    }
+  }
+
+  private static class Y {
+    final Provider<X> xProvider;
+    X x;
+
+    @Inject Y(Provider<X> xProvider) {
+      this.xProvider = xProvider;
+    }
+
+    void init() {
+      this.x = xProvider.get();
     }
   }
 }

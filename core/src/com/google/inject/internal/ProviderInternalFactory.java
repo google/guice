@@ -46,7 +46,7 @@ abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
       throws ErrorsException {    
     Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
-    
+
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
       if (!allowProxy) {

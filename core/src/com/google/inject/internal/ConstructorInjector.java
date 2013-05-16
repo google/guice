@@ -94,7 +94,6 @@ final class ConstructorInjector<T> {
         });
       }
     } finally {
-      constructionContext.removeCurrentReference();
       constructionContext.finishConstruction();
     }
   }
@@ -125,6 +124,8 @@ final class ConstructorInjector<T> {
           : userException;
       throw errors.withSource(constructionProxy.getInjectionPoint())
           .errorInjectingConstructor(cause).toException();
+    } finally {
+      constructionContext.removeCurrentReference();
     }
   }
 }
