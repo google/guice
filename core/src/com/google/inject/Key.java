@@ -18,6 +18,8 @@ package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.inject.internal.Annotations.generateAnnotation;
+import static com.google.inject.internal.Annotations.isAllDefaultMethods;
 
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
@@ -350,10 +352,15 @@ public class Key<T> {
    * Gets the strategy for an annotation type.
    */
   static AnnotationStrategy strategyFor(Class<? extends Annotation> annotationType) {
+    annotationType = Annotations.canonicalizeIfNamed(annotationType);
+    if (isAllDefaultMethods(annotationType)) {
+      return strategyFor(generateAnnotation(annotationType));
+    }
+    
     checkNotNull(annotationType, "annotation type");
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);
-    return new AnnotationTypeStrategy(Annotations.canonicalizeIfNamed(annotationType), null);
+    return new AnnotationTypeStrategy(annotationType, null);
 
   }
 

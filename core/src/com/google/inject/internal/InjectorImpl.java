@@ -72,13 +72,15 @@ final class InjectorImpl implements Injector, Lookups {
     final boolean jitDisabled;
     final boolean disableCircularProxies;
     final boolean atInjectRequired;
+    final boolean exactBindingAnnotationsRequired;
     
     InjectorOptions(Stage stage, boolean jitDisabled, boolean disableCircularProxies,
-        boolean atInjectRequired) {
+        boolean atInjectRequired, boolean exactBindingAnnotationsRequired) {
       this.stage = stage;
       this.jitDisabled = jitDisabled;
       this.disableCircularProxies = disableCircularProxies;
       this.atInjectRequired = atInjectRequired;
+      this.exactBindingAnnotationsRequired = exactBindingAnnotationsRequired;
     }
     
     @Override
@@ -88,6 +90,7 @@ final class InjectorImpl implements Injector, Lookups {
           .add("jitDisabled", jitDisabled)
           .add("disableCircularProxies", disableCircularProxies)
           .add("atInjectRequired", atInjectRequired)
+          .add("exactBindingAnnotationsRequired", exactBindingAnnotationsRequired)
           .toString();
     }
   }
@@ -853,7 +856,7 @@ final class InjectorImpl implements Injector, Lookups {
     // If the key has an annotation...
     if (key.getAnnotationType() != null) {
       // Look for a binding without annotation attributes or return null.
-      if (key.hasAttributes()) {
+      if (key.hasAttributes() && !options.exactBindingAnnotationsRequired) {
         try {
           Errors ignored = new Errors();
           return getBindingOrThrow(key.withoutAttributes(), ignored, JitLimitation.NO_JIT);

@@ -1040,5 +1040,31 @@ public class FactoryProvider2Test extends TestCase {
     Color getColor() { return injector.getInstance(Key.get(Color.class, FactoryProvider2.DEFAULT_ANNOTATION)); }
   }
   
+  public void testReturnValueMatchesParamValue() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      public void configure() {
+        install(new FactoryModuleBuilder().build(Delegater.Factory.class));
+      }
+    });
+    Delegater delegate = new Delegater();
+    Delegater user = injector.getInstance(Delegater.Factory.class).create(delegate);
+    assertSame(delegate, user.delegate);
+  }
+
+  static class Delegater {
+    interface Factory {
+      Delegater create(Delegater delegate);
+    }
+
+    private final Delegater delegate;
   
+    @Inject Delegater(@Assisted Delegater delegater) {
+      this.delegate = delegater;
+    }
+
+    Delegater() {
+      this.delegate = null;
+    }
+  }
 }

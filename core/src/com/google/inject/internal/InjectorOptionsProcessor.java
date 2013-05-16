@@ -23,6 +23,7 @@ import com.google.inject.Stage;
 import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.DisableCircularProxiesOption;
 import com.google.inject.spi.RequireAtInjectOnConstructorsOption;
+import com.google.inject.spi.RequireExactBindingAnnotationsOption;
 import com.google.inject.spi.RequireExplicitBindingsOption;
 
 /**
@@ -35,6 +36,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
   private boolean disableCircularProxies = false;
   private boolean jitDisabled = false;
   private boolean atInjectRequired = false;
+  private boolean exactBindingAnnotationsRequired = false;
 
   InjectorOptionsProcessor(Errors errors) {
     super(errors);
@@ -58,6 +60,12 @@ class InjectorOptionsProcessor extends AbstractProcessor {
     return true;    
   }  
 
+  @Override
+  public Boolean visit(RequireExactBindingAnnotationsOption option) {
+    exactBindingAnnotationsRequired = true;
+    return true;
+  }
+
   InjectorOptions getOptions(Stage stage, InjectorOptions parentOptions) {
     checkNotNull(stage, "stage must be set");
     if(parentOptions == null) {
@@ -65,14 +73,16 @@ class InjectorOptionsProcessor extends AbstractProcessor {
           stage,
           jitDisabled,
           disableCircularProxies,
-          atInjectRequired);
+          atInjectRequired,
+          exactBindingAnnotationsRequired);
     } else {
       checkState(stage == parentOptions.stage, "child & parent stage don't match");
       return new InjectorOptions(
           stage,
           jitDisabled || parentOptions.jitDisabled,
           disableCircularProxies || parentOptions.disableCircularProxies,
-          atInjectRequired || parentOptions.atInjectRequired); 
+          atInjectRequired || parentOptions.atInjectRequired,
+          exactBindingAnnotationsRequired || parentOptions.exactBindingAnnotationsRequired);
     }
   }
 

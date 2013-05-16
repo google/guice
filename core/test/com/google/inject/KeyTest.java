@@ -203,4 +203,47 @@ public class KeyTest extends TestCase {
   class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
     A a; B b; C c;
   }
+  
+  public void testKeysWithDefaultAnnotations() {
+    AllDefaults allDefaults = HasAnnotations.class.getAnnotation(AllDefaults.class);
+    assertEquals(Key.get(Foo.class, allDefaults), Key.get(Foo.class, AllDefaults.class));
+    
+    Marker marker = HasAnnotations.class.getAnnotation(Marker.class);    
+    assertEquals(Key.get(Foo.class, marker), Key.get(Foo.class, Marker.class));
+    
+    Key<?> noDefaults = Key.get(Foo.class, NoDefaults.class);
+    assertNull(noDefaults.getAnnotation());
+    assertEquals(NoDefaults.class, noDefaults.getAnnotationType());
+    
+    Key<?> someDefaults = Key.get(Foo.class, SomeDefaults.class);
+    assertNull(someDefaults.getAnnotation());
+    assertEquals(SomeDefaults.class, someDefaults.getAnnotationType());    
+  }
+  
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface AllDefaults {
+    int v1() default 1;
+    String v2() default "foo";    
+  }
+
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface SomeDefaults {
+    int v1() default 1;
+    String v2() default "foo";
+    Class<?> clazz();
+  }
+  
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface NoDefaults {
+    int value();
+  }
+  
+  @Retention(RUNTIME)
+  @BindingAnnotation @interface Marker {
+  }
+  
+  @AllDefaults
+  @Marker
+  class HasAnnotations {}
+  
 }

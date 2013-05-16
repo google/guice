@@ -483,4 +483,14 @@ public interface Binder {
    * @since 4.0
    */
   void requireAtInjectOnConstructors();
+
+  /**
+   * Requires that Guice finds an exactly matching binding annotation.  This disables the
+   * error-prone feature in Guice where it can substitute a binding for
+   * <code>{@literal @}Named Foo</code> when attempting to inject
+   * <code>{@literal @}Named("foo") Foo</code>.
+   *
+   * @since 4.0
+   */
+  void requireExactBindingAnnotations();
 }

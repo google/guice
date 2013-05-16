@@ -113,4 +113,11 @@ public interface ElementVisitor<V> {
    * @since 4.0
    */
   V visit(RequireAtInjectOnConstructorsOption option);
+
+  /**
+   * Visit a require exact binding annotations command.
+   *
+   * @since 4.0
+   */
+  V visit(RequireExactBindingAnnotationsOption option);
 }

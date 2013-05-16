@@ -320,6 +320,10 @@ public final class Elements {
       elements.add(new RequireAtInjectOnConstructorsOption(getSource()));
     }
 
+    public void requireExactBindingAnnotations() {
+      elements.add(new RequireExactBindingAnnotationsOption(getSource()));
+    }
+
     public void expose(Key<?> key) {
       exposeInternal(key);
     }

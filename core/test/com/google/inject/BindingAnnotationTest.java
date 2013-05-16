@@ -29,27 +29,75 @@ import java.lang.annotation.Retention;
  */
 public class BindingAnnotationTest extends TestCase {
 
-  public void testAnnotationWithValueMatchesKeyWithTypeOnly() throws
-      CreationException {
+  public void testAnnotationWithValueMatchesKeyWithTypeOnly() throws CreationException {
     Injector c = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bindConstant().annotatedWith(Blue.class).to("foo");
-        bind(Foo.class);
+        bind(BlueFoo.class);
       }
     });
 
-    Foo foo = c.getInstance(Foo.class);
+    BlueFoo foo = c.getInstance(BlueFoo.class);
 
     assertEquals("foo", foo.s);
+  }
+
+  public void testRequireExactAnnotationsDisablesFallback() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          binder().requireExactBindingAnnotations();
+          bindConstant().annotatedWith(Blue.class).to("foo");
+          bind(BlueFoo.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+          "BindingAnnotationTest$Blue(value=5) was bound",
+          "at " + BindingAnnotationTest.class.getName(), ".configure(BindingAnnotationTest.java:");
+    }
+  }
+  
+  public void testRequireExactAnnotationsDoesntBreakIfDefaultsExist() {
+       Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          binder().requireExactBindingAnnotations();
+          bindConstant().annotatedWith(Red.class).to("foo");
+          bind(RedFoo.class);
+        }
+      }).getInstance(RedFoo.class);      
+  }
+
+  public void testRequireExactAnnotationsRequireAllOptionals() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          binder().requireExactBindingAnnotations();
+          bindConstant().annotatedWith(Color.class).to("foo");
+          bind(ColorFoo.class);
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+          "BindingAnnotationTest$Color",
+          "at " + BindingAnnotationTest.class.getName(), ".configure(BindingAnnotationTest.java:");
+    }
   }
 
   public void testAnnotationWithValueThatDoesntMatch() {
     try {
       Guice.createInjector(new AbstractModule() {
+        @Override
         protected void configure() {
           bindConstant().annotatedWith(createBlue(6)).to("six");
           bind(String.class).toInstance("bar");
-          bind(Foo.class);
+          bind(BlueFoo.class);
         }
       });
       fail();
@@ -60,14 +108,38 @@ public class BindingAnnotationTest extends TestCase {
     }
   }
 
-  static class Foo {
+  static class BlueFoo {
     @Inject @Blue(5) String s; 
+  }
+
+  static class RedFoo {
+    @Inject @Red String s;
+  }
+  
+  static class ColorFoo {
+    @Inject @Color(b=2) String s;
   }
 
   @Retention(RUNTIME)
   @BindingAnnotation
   @interface Blue {
     int value();
+  }
+
+  @Retention(RUNTIME)
+  @BindingAnnotation
+  @interface Red {
+    int r() default 42;
+    int g() default 42;
+    int b() default 42;
+  }
+  
+  @Retention(RUNTIME)
+  @BindingAnnotation
+  @interface Color {
+    int r() default 0;
+    int g() default 0;
+    int b();
   }
 
   public Blue createBlue(final int value) {

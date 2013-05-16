@@ -41,6 +41,7 @@ import com.google.inject.internal.Annotations;
 import com.google.inject.internal.BytecodeGen;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -576,7 +577,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     final Key<?> returnType = data.returnType;
 
     // We ignore any pre-existing binding annotation.
-    final Key<?> assistedReturnType = Key.get(returnType.getTypeLiteral(), Assisted.class);
+    final Key<?> returnKey = Key.get(returnType.getTypeLiteral(), UniqueAnnotations.create());
 
     Module assistedModule = new AbstractModule() {
       @Override @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
@@ -601,7 +602,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
         // but if it isn't, we'll end up throwing a fairly good error
         // message for the user.
         if(constructor != null) {
-          binder.bind(assistedReturnType)
+          binder.bind(returnKey)
               .toConstructor(constructor, (TypeLiteral)data.implementationType)
               .in(Scopes.NO_SCOPE); // make sure we erase any scope on the implementation type
         }
@@ -609,7 +610,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     };
 
     Injector forCreate = injector.createChildInjector(assistedModule);
-    Binding binding = forCreate.getBinding(assistedReturnType);
+    Binding binding = forCreate.getBinding(returnKey);
     // If we have providers cached in data, cache the binding for future optimizations.
     if(data.optimized) {
       data.cachedBinding = binding;
