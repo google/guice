@@ -87,8 +87,10 @@ final class BindingProcessor extends AbstractBindingProcessor {
         prepareBinding();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         T instance = binding.getInstance();
+        @SuppressWarnings("unchecked") // safe to cast to binding<T> because
+                                       // the processor was constructed w/ it
         Initializable<T> ref = initializer.requestInjection(
-            injector, instance, key, source, injectionPoints);
+            injector, instance, (Binding<T>) binding, source, injectionPoints);
         ConstantFactory<? extends T> factory = new ConstantFactory<T>(ref);
         InternalFactory<? extends T> scopedFactory
             = Scoping.scope(key, injector, factory, source, scoping);

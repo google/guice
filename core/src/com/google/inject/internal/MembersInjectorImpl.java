@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 
@@ -58,7 +59,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   public void injectMembers(T instance) {
     Errors errors = new Errors(typeLiteral);
     try {
-      injectAndNotify(instance, errors, null, typeLiteral, false);
+      injectAndNotify(instance, errors, null, null, typeLiteral, false);
     } catch (ErrorsException e) {
       errors.merge(e.getErrors());
     }
@@ -66,18 +67,31 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwProvisionExceptionIfErrorsExist();
   }
 
-  void injectAndNotify(final T instance, final Errors errors,
-      final Key<T> key, final Object source, final boolean toolableOnly)
-      throws ErrorsException {
+  void injectAndNotify(final T instance,
+      final Errors errors,
+      final Key<T> key, // possibly null!
+      final ProvisionListenerStackCallback<T> provisionCallback, // possibly null!
+      final Object source,
+      final boolean toolableOnly) throws ErrorsException {
     if (instance == null) {
       return;
     }
 
     injector.callInContext(new ContextualCallable<Void>() {
-      public Void call(InternalContext context) throws ErrorsException {
+      @Override
+      public Void call(final InternalContext context) throws ErrorsException {
         context.pushState(key, source);
         try {
+          if (provisionCallback != null && provisionCallback.hasListeners()) {
+            provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
+              @Override public T call() {
           injectMembers(instance, errors, context, toolableOnly);
+                return instance;
+              }
+            });
+          } else {
+            injectMembers(instance, errors, context, toolableOnly);
+          }
         } finally {
           context.popState();
         }

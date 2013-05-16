@@ -370,8 +370,7 @@ public class BindingTest extends TestCase {
       }
     });
     
-    assertEquals(ImmutableSet.of(TypeLiteral.get(Stage.class), TypeLiteral.get(D.class)),
-        heardTypes);
+    assertEquals(ImmutableSet.of(TypeLiteral.get(D.class)), heardTypes);
   }
 
   public void testInterfaceToImplementationConstructor() throws NoSuchMethodException {

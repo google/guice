@@ -26,6 +26,7 @@ import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
@@ -51,8 +52,8 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       Module.class,
       Provider.class,
       Scope.class,
+      Stage.class,
       TypeLiteral.class);
-  // TODO(jessewilson): fix BuiltInModule, then add Stage
   
   protected final ProcessedBindingData bindingData;
   

@@ -35,7 +35,9 @@ public interface ProvisionListener {
    * Invoked by Guice when an object requires provisioning. Provisioning occurs
    * when Guice locates and injects the dependencies for a binding. For types
    * bound to a Provider, provisioning encapsulates the {@link Provider#get}
-   * method. For other types, provisioning encapsulates the construction of the
+   * method. For toInstance or constant bindings, provisioning encapsulates
+   * the injecting of {@literal @}{@code Inject}ed fields or methods.
+   * For other types, provisioning encapsulates the construction of the
    * object. If a type is bound within a {@link Scope}, provisioning depends on
    * the scope. Types bound in Singleton scope will only be provisioned once.
    * Types bound in no scope will be provisioned every time they are injected.

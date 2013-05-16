@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
@@ -57,21 +58,25 @@ final class Initializer {
    *
    * @param instance an instance that optionally has members to be injected (each annotated with
    *      @Inject).
-   * @param key a key to use for keeping the state of the dependency chain
+   * @param binding the binding that caused this initializable to be created, if it exists.
    * @param source the source location that this injection was requested
    */
-  <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Key<T> key,
+  <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Binding<T> binding,
       Object source, Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
 
-    // short circuit if the object has no injections
-    if (instance == null
-        || (injectionPoints.isEmpty() && !injector.membersInjectorStore.hasTypeListeners())) {
+    ProvisionListenerStackCallback<T> provisionCallback =
+        binding == null ? null : injector.provisionListenerStore.get(binding);
+
+    // short circuit if the object has no injections or listeners.
+    if (instance == null || (injectionPoints.isEmpty()
+        && !injector.membersInjectorStore.hasTypeListeners()
+        && (provisionCallback == null || !provisionCallback.hasListeners()))) {
       return Initializables.of(instance);
     }
 
-    InjectableReference<T> initializable =
-        new InjectableReference<T>(injector, instance, key, source);
+    InjectableReference<T> initializable = new InjectableReference<T>(
+        injector, instance, binding == null ? null : binding.getKey(), provisionCallback, source);
     pendingInjection.put(instance, initializable);
     return initializable;
   }
@@ -118,10 +123,13 @@ final class Initializer {
     private final T instance;
     private final Object source;
     private final Key<T> key;
+    private final ProvisionListenerStackCallback<T> provisionCallback;
 
-    public InjectableReference(InjectorImpl injector, T instance, Key<T> key, Object source) {
+    public InjectableReference(InjectorImpl injector, T instance, Key<T> key,
+        ProvisionListenerStackCallback<T> provisionCallback, Object source) {
       this.injector = injector;
       this.key = key; // possibly null!
+      this.provisionCallback = provisionCallback; // possibly null!
       this.instance = checkNotNull(instance, "instance");
       this.source = checkNotNull(source, "source");
     }
@@ -163,7 +171,11 @@ final class Initializer {
         
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
-        membersInjector.injectAndNotify(instance, errors.withSource(source), key, source, 
+        membersInjector.injectAndNotify(instance,
+            errors.withSource(source),
+            key,
+            provisionCallback,
+            source,
             injector.options.stage == Stage.TOOL);
       }
 

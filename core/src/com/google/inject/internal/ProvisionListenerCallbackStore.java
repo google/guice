@@ -18,15 +18,20 @@ package com.google.inject.internal;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Binding;
+import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Stage;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * {@link ProvisionListenerStackCallback} for each key.
@@ -34,6 +39,12 @@ import java.util.Map;
  * @author sameb@google.com (Sam Berlin)
  */
 final class ProvisionListenerCallbackStore {
+
+  // TODO(sameb): Consider exposing this in the API somehow?  Maybe?
+  // Lots of code often want to skip over the internal stuffs.
+  private static final Set<Key<?>> INTERNAL_BINDINGS =
+      ImmutableSet.of(Key.get(Injector.class), Key.get(Stage.class), Key.get(Logger.class));
+  
   private final ImmutableList<ProvisionListenerBinding> listenerBindings;
 
   private final Map<KeyBinding, ProvisionListenerStackCallback<?>> cache
@@ -52,7 +63,12 @@ final class ProvisionListenerCallbackStore {
    */
   @SuppressWarnings("unchecked") // the ProvisionListenerStackCallback type always agrees with the passed type
   public <T> ProvisionListenerStackCallback<T> get(Binding<T> binding) {
-    return (ProvisionListenerStackCallback<T>) cache.get(new KeyBinding(binding.getKey(), binding));
+    // Never notify any listeners for internal bindings.
+    if (!INTERNAL_BINDINGS.contains(binding.getKey())) {
+      return (ProvisionListenerStackCallback<T>) cache.get(
+          new KeyBinding(binding.getKey(), binding));
+    }
+    return ProvisionListenerStackCallback.emptyListener();
   }
 
   /**
@@ -82,8 +98,10 @@ final class ProvisionListenerCallbackStore {
         listeners.addAll(provisionBinding.getListeners());
       }
     }
-    if (listeners == null) {
-      listeners = ImmutableList.of();
+    if (listeners == null || listeners.isEmpty()) {
+      // Optimization: don't bother constructing the callback if there are
+      // no listeners.
+      return ProvisionListenerStackCallback.emptyListener();
     }
     return new ProvisionListenerStackCallback<T>(binding, listeners);
   }

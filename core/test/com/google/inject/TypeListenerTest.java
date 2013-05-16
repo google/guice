@@ -596,7 +596,8 @@ public class TypeListenerTest extends TestCase {
     try {
       Guice.createInjector(new AbstractModule() {
         protected void configure() {
-          bindListener(Matchers.only(new TypeLiteral<Stage>() {}), new TypeListener() {
+          requestInjection(new Object());
+          bindListener(Matchers.any(), new TypeListener() {
             public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
               encounter.addError("There was an error on %s", type);
               encounter.addError(new IllegalArgumentException("whoops!"));
@@ -609,7 +610,7 @@ public class TypeListenerTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) There was an error on com.google.inject.Stage",
+          "1) There was an error on java.lang.Object",
           "2) An exception was caught and reported. Message: whoops!",
           "3) And another problem",
           "4) An exception was caught and reported. Message: null",

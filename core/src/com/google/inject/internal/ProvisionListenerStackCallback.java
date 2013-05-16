@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.DependencyAndSource;
@@ -31,8 +32,17 @@ import java.util.List;
 final class ProvisionListenerStackCallback<T> {
 
   private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0]; 
+  @SuppressWarnings("rawtypes")
+  private static final ProvisionListenerStackCallback<?> EMPTY_CALLBACK =
+      new ProvisionListenerStackCallback(null /* unused, so ok */, ImmutableList.of());
+
   private final ProvisionListener[] listeners;
   private final Binding<T> binding;
+
+  @SuppressWarnings("unchecked")
+  public static <T> ProvisionListenerStackCallback<T> emptyListener() {
+    return (ProvisionListenerStackCallback<T>) EMPTY_CALLBACK;
+  }
 
   public ProvisionListenerStackCallback(Binding<T> binding, List<ProvisionListener> listeners) {
     this.binding = binding;

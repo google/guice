@@ -500,7 +500,7 @@ public class SpiUtils {
     return new MapResult<K, V>(k, new BindResult<V>(PROVIDER_INSTANCE, v, null));
   }
 
-  private static class MapResult<K, V> {
+  static class MapResult<K, V> {
     private final K k;
     private final BindResult<V> v;
     
@@ -534,7 +534,7 @@ public class SpiUtils {
   /** The kind of binding. */
   static enum BindType { INSTANCE, LINKED, PROVIDER_INSTANCE }
   /** The result of the binding. */
-  private static class BindResult<T> {
+  static class BindResult<T> {
     private final BindType type;
     private final Key<? extends T> key;
     private final T instance;

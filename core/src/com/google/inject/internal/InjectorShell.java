@@ -129,9 +129,9 @@ final class InjectorShell {
       checkState(privateElements == null || parent != null, "PrivateElements with no parent");
       checkState(state != null, "no state. Did you remember to lock() ?");
 
-      // bind Stage and Singleton if this is a top-level injector
+      // bind Singleton if this is a top-level injector
       if (parent == null) {
-        modules.add(0, new RootModule(stage));
+        modules.add(0, new RootModule());
       }
       elements.addAll(Elements.getElements(stage, modules));
       
@@ -174,6 +174,7 @@ final class InjectorShell {
       new TypeConverterBindingProcessor(errors).process(injector, elements);
       stopwatch.resetAndLog("Converters creation");
 
+      bindStage(injector, stage);
       bindInjector(injector);
       bindLogger(injector);
       
@@ -270,16 +271,21 @@ final class InjectorShell {
     }
   }
 
-  private static class RootModule implements Module {
-    final Stage stage;
-
-    private RootModule(Stage stage) {
-      this.stage = checkNotNull(stage, "stage");
+  private static void bindStage(InjectorImpl injector, Stage stage) {
+    Key<Stage> key = Key.get(Stage.class);
+    InstanceBindingImpl<Stage> stageBinding = new InstanceBindingImpl<Stage>(
+        injector,
+        key,
+        SourceProvider.UNKNOWN_SOURCE,
+        new ConstantFactory<Stage>(Initializables.of(stage)),
+        ImmutableSet.<InjectionPoint>of(),
+        stage);
+    injector.state.putBinding(key, stageBinding);
     }
 
+  private static class RootModule implements Module {
     public void configure(Binder binder) {
       binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
-      binder.bind(Stage.class).toInstance(stage);
       binder.bindScope(Singleton.class, SINGLETON);
       binder.bindScope(javax.inject.Singleton.class, SINGLETON);
     }

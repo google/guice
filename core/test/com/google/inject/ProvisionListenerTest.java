@@ -21,17 +21,21 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.spi.DependencyAndSource;
+import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProvisionListener;
+import com.google.inject.util.Providers;
 
 import junit.framework.TestCase;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -244,12 +248,19 @@ public class ProvisionListenerTest extends TestCase {
           throw new RuntimeException(ex);
         }
         bind(LinkedFoo.class).to(Foo.class);
+        bind(Interface.class).toInstance(new Implementation());
+        bindConstant().annotatedWith(named("constant")).to("MyConstant");
       }
       
       @Provides @Named("pi") Foo provideFooBar() {
         return new Foo();
       }
     });
+    
+    // toInstance & constant bindings are notified in random order, at the very beginning.
+    assertEquals(
+        ImmutableSet.of(Key.get(Interface.class), Key.get(String.class, named("constant"))),
+        capturer.getAsSetAndClear());
     
     // simple binding
     assertNotNull(injector.getInstance(Foo.class));
@@ -334,6 +345,9 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
   
+  interface Interface {}
+  class Implementation implements Interface {}
+  
   @Singleton static class Sole {}
   static class Many {}
   
@@ -370,7 +384,23 @@ public class ProvisionListenerTest extends TestCase {
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       keys.add(provision.getBinding().getKey());
       T provisioned = provision.provision();
+      // InstanceBindings are the only kind of binding where the key can
+      // be an instanceof the provisioned, because it isn't linked to any
+      // direct implementation.  I guess maybe it'd also be possible
+      // with a toConstructor binding... but we don't use that in our tests.
+      if (provision.getBinding() instanceof InstanceBinding) {
+        Class<? super T> expected = provision.getBinding().getKey().getRawType();
+        assertTrue("expected instanceof: " + expected + ", but was: " + provisioned,
+            expected.isInstance(provisioned));
+      } else {
       assertEquals(provision.getBinding().getKey().getRawType(), provisioned.getClass());
+    }
+    }
+    
+    Set<Key> getAsSetAndClear() {
+      Set<Key> copy = ImmutableSet.copyOf(keys);
+      keys.clear();
+      return copy;
     }
     
     List<Key> getAndClear() {
@@ -454,8 +484,10 @@ public class ProvisionListenerTest extends TestCase {
         
         // Build up a list of asserters for our dependency chains.
         ImmutableList.Builder<Class<?>> chain = ImmutableList.builder();
+        chain.add(Instance.class);
+        bindListener(keyMatcher(Instance.class), new ChainAsserter(pList, chain.build()));
         
-        chain.add(Instance.class).add(A.class);
+        chain.add(A.class);
         bindListener(keyMatcher(A.class), new ChainAsserter(pList, chain.build()));
         
         chain.add(B.class).add(BImpl.class);
@@ -482,7 +514,8 @@ public class ProvisionListenerTest extends TestCase {
     });
     Instance instance = injector.getInstance(Instance.class);
     // make sure we're checking all of the chain asserters..
-    assertEquals(of(A.class, BImpl.class, C.class, DP.class, D.class, E.class, F.class),
+    assertEquals(
+        of(Instance.class, A.class, BImpl.class, C.class, DP.class, D.class, E.class, F.class),
         pList);
     // and make sure that nothing else was notified that we didn't expect.
     assertEquals(totalList, pList);
@@ -585,5 +618,22 @@ public class ProvisionListenerTest extends TestCase {
     @SuppressWarnings("unused")
     @Inject F f;
   }
-  private static class F {}
+  private static class F {
+  }
+
+  public void testBindToInjectorWithListeningGivesSaneException() {
+    try {
+      Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bindListener(Matchers.any(), new Counter());
+          bind(Injector.class).toProvider(Providers.<Injector>of(null));
+        }
+      });
+      fail();
+    } catch (CreationException ce) {
+      assertContains(
+          ce.getMessage(), "Binding to core guice framework type is not allowed: Injector.");
+    }
+  }
 }

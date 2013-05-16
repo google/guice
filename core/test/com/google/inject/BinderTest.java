@@ -456,6 +456,7 @@ public class BinderTest extends TestCase {
           bind(Module.class).annotatedWith(red).toProvider(Providers.<Module>of(null));
           bind(Provider.class).annotatedWith(red).toProvider(Providers.<Provider>of(null));
           bind(Scope.class).annotatedWith(red).toProvider(Providers.<Scope>of(null));
+          bind(Stage.class).annotatedWith(red).toProvider(Providers.<Stage>of(null));
           bind(TypeLiteral.class).annotatedWith(red).toProvider(Providers.<TypeLiteral>of(null));
           bind(new TypeLiteral<Key<String>>() {}).toProvider(Providers.<Key<String>>of(null));
         }
@@ -471,6 +472,7 @@ public class BinderTest extends TestCase {
           "Binding to core guice framework type is not allowed: Module.",
           "Binding to Provider is not allowed.",
           "Binding to core guice framework type is not allowed: Scope.",
+          "Binding to core guice framework type is not allowed: Stage.",
           "Binding to core guice framework type is not allowed: TypeLiteral.",
           "Binding to core guice framework type is not allowed: Key.");
     }
