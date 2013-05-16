@@ -79,6 +79,9 @@ import java.util.Set;
 final class FactoryProvider2 <F> implements InvocationHandler,
     ProviderWithExtensionVisitor<F>, HasDependencies, AssistedInjectBinding<F> {
 
+  /** A constant annotation to denote the return value, instead of creating a new one each time. */
+  static final Annotation RETURN_ANNOTATION = UniqueAnnotations.create();
+
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION = new Assisted() {
     public String value() {
@@ -577,7 +580,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     final Key<?> returnType = data.returnType;
 
     // We ignore any pre-existing binding annotation.
-    final Key<?> returnKey = Key.get(returnType.getTypeLiteral(), UniqueAnnotations.create());
+    final Key<?> returnKey = Key.get(returnType.getTypeLiteral(), RETURN_ANNOTATION);
 
     Module assistedModule = new AbstractModule() {
       @Override @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
