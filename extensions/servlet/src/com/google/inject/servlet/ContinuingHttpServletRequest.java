@@ -68,6 +68,9 @@ class ContinuingHttpServletRequest extends HttpServletRequestWrapper {
   }
 
   @Override public Cookie[] getCookies() {
+    if (super.getCookies() == null) {
+      return null;
+    }
     // TODO(dhanji): Cookies themselves are mutable. Is this a problem?
     return super.getCookies().clone();
   }

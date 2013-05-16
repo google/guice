@@ -41,6 +41,7 @@ public class AllTests {
     suite.addTestSuite(ServletPipelineRequestDispatcherTest.class);
     suite.addTestSuite(ServletDispatchIntegrationTest.class);
     suite.addTestSuite(InvalidScopeBindingTest.class);
+    suite.addTestSuite(ContinuingHttpServletRequestTest.class);
 
     // Varargs URL mapping tests.
     suite.addTestSuite(VarargsFilterDispatchIntegrationTest.class);
