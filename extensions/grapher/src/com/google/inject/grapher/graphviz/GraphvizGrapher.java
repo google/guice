@@ -249,7 +249,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
   @Override protected void newImplementationNode(ImplementationNode node) {
     NodeId nodeId = node.getId();
     GraphvizNode gnode = new GraphvizNode(nodeId);
-    gnode.setStyle(NodeStyle.INVISIBLE);
+    gnode.setStyle(NodeStyle.SOLID);
 
     gnode.setHeaderBackgroundColor("#000000");
     gnode.setHeaderTextColor("#ffffff");
@@ -265,7 +265,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
   @Override protected void newInstanceNode(InstanceNode node) {
     NodeId nodeId = node.getId();
     GraphvizNode gnode = new GraphvizNode(nodeId);
-    gnode.setStyle(NodeStyle.INVISIBLE);
+    gnode.setStyle(NodeStyle.SOLID);
 
     gnode.setHeaderBackgroundColor("#000000");
     gnode.setHeaderTextColor("#ffffff");
