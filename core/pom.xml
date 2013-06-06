@@ -15,6 +15,7 @@
 
   <properties>
     <cglib.version>3.0</cglib.version>
+    <asm.version>4.0</asm.version>
   </properties>
 
   <dependencies>
@@ -37,6 +38,11 @@
       <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
       <version>${cglib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <version>${asm.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>
@@ -207,6 +213,12 @@
           <version>${cglib.version}</version>
           <optional>true</optional>
         </dependency>
+        <dependency>
+          <groupId>org.ow2.asm</groupId>
+          <artifactId>asm-util</artifactId>
+          <version>${asm.version}</version>
+          <optional>true</optional>
+        </dependency>
       </dependencies>
       <build>
         <plugins>
@@ -215,7 +227,7 @@
             <artifactId>jarjar-maven-plugin</artifactId>
             <configuration>
               <includes>
-                <include>*:asm</include>
+                <include>*:asm*</include>
                 <include>*:cglib</include>
                 <include>*:guava</include>
                 <include>*:jsr305</include>
