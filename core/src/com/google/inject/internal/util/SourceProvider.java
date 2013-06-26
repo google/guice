@@ -16,8 +16,6 @@
 
 package com.google.inject.internal.util;
 
-import static com.google.common.collect.Iterables.concat;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
@@ -33,20 +31,42 @@ public final class SourceProvider {
   /** Indicates that the source is unknown. */
   public static final Object UNKNOWN_SOURCE = "[unknown source]";
 
+  private final SourceProvider parent;
   private final ImmutableSet<String> classNamesToSkip;
-
+  
   public static final SourceProvider DEFAULT_INSTANCE
       = new SourceProvider(ImmutableSet.of(SourceProvider.class.getName()));
 
   private SourceProvider(Iterable<String> classesToSkip) {
-    this.classNamesToSkip = ImmutableSet.copyOf(classesToSkip);
+    this(null, classesToSkip);
+  }
+
+  private SourceProvider(SourceProvider parent, Iterable<String> classesToSkip) {
+    this.parent = parent;
+    
+    ImmutableSet.Builder<String> classNamesToSkipBuilder = ImmutableSet.builder();
+    for (String classToSkip : classesToSkip) {
+      if (parent == null || !parent.shouldBeSkipped(classToSkip)) {
+        classNamesToSkipBuilder.add(classToSkip);
+      }
+    }
+    this.classNamesToSkip = classNamesToSkipBuilder.build();
   }
 
   /** Returns a new instance that also skips {@code moreClassesToSkip}. */
   public SourceProvider plusSkippedClasses(Class... moreClassesToSkip) {
-    return new SourceProvider(concat(classNamesToSkip, asStrings(moreClassesToSkip)));
+    return new SourceProvider(this, asStrings(moreClassesToSkip));
   }
 
+  /** Returns true if the className should be skipped. */
+  private boolean shouldBeSkipped(String className) {
+    if ((parent != null && parent.shouldBeSkipped(className))
+        || classNamesToSkip.contains(className)) {
+      return true;
+    }
+    return false;
+  }
+  
   /** Returns the class names as Strings */
   private static List<String> asStrings(Class... classes) {
     List<String> strings = Lists.newArrayList();
@@ -63,7 +83,8 @@ public final class SourceProvider {
   public StackTraceElement get() {
     for (final StackTraceElement element : new Throwable().getStackTrace()) {
       String className = element.getClassName();
-      if (!classNamesToSkip.contains(className)) {
+      
+      if (!shouldBeSkipped(className)) {
         return element;
       }
     }
