@@ -200,7 +200,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    */
   FactoryProvider2(Key<F> factoryKey, BindingCollector collector) {
     this.factoryKey = factoryKey;
-    
+
     TypeLiteral<F> factoryType = factoryKey.getTypeLiteral();
     Errors errors = new Errors();
 
@@ -335,7 +335,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     }
     return visitor.visit(binding);
   }
-  
+
   private void validateFactoryReturnType(Errors errors, Class<?> returnType, Class<?> factoryType) {
     if (Modifier.isPublic(factoryType.getModifiers())
         && !Modifier.isPublic(returnType.getModifiers())) {

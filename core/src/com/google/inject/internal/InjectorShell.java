@@ -270,7 +270,7 @@ final class InjectorShell {
       return "Provider<Logger>";
     }
   }
-
+  
   private static void bindStage(InjectorImpl injector, Stage stage) {
     Key<Stage> key = Key.get(Stage.class);
     InstanceBindingImpl<Stage> stageBinding = new InstanceBindingImpl<Stage>(
@@ -281,7 +281,7 @@ final class InjectorShell {
         ImmutableSet.<InjectionPoint>of(),
         stage);
     injector.state.putBinding(key, stageBinding);
-    }
+  }
 
   private static class RootModule implements Module {
     public void configure(Binder binder) {

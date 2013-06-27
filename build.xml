@@ -28,7 +28,7 @@
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
-  	<ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
+        <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="extensions/servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
@@ -57,9 +57,9 @@
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/persist/build" includes="*.jar" excludes="*-with-deps.jar"/>
     </copy>
-  	<copy toDir="${build.dir}/dist">
-  	  <fileset dir="extensions/grapher/build" includes="*.jar" excludes="*-with-deps.jar"/>
-  	</copy>    	
+        <copy toDir="${build.dir}/dist">
+          <fileset dir="extensions/grapher/build" includes="*.jar" excludes="*-with-deps.jar"/>
+        </copy>
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
@@ -107,20 +107,20 @@
       </syspropertyset>
     </java>
   </target>
-	
+
   <property name="old.api" value="2.0"/>
   <property name="new.api" value="3.0"/>
   <target name="jdiff">
-  	<property name="jdiff.home" value="lib/build/jdiff"/>
-  	<property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
-  	<delete dir="${jdiff.tmp}"/>
-  	<mkdir dir="${jdiff.tmp}"/>
-  	
-  	<!-- Generate API for current version. -->
+        <property name="jdiff.home" value="lib/build/jdiff"/>
+        <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
+        <delete dir="${jdiff.tmp}"/>
+        <mkdir dir="${jdiff.tmp}"/>
+  
+        <!-- Generate API for current version. -->
     <javadoc packagenames="com.google.*"
-	         docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+                 docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
              maxmemory="512M"
-    	     classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -134,7 +134,7 @@
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
-    	<fileset dir="${grapher.src.dir}"/>
+        <fileset dir="${grapher.src.dir}"/>
 
       <doclet name="jdiff.JDiff"
               path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
@@ -143,33 +143,33 @@
       </doclet>
     </javadoc>
 
-  	<!-- Do a diff against the previous version. -->
-	<javadoc packagenames="com.google.*"
-	         destdir="${jdiff.tmp}"
-		     docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
-	         maxmemory="512M"
-		     sourcefiles="${jdiff.home}/Null.java"
-  	         classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
-	  <doclet name="jdiff.JDiff">
-	  	<param name="-oldapi" value="${old.api}"/>
-	  	<param name="-oldapidir" value="latest-api-diffs"/>	  	
-	  	<param name="-javadocold" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${old.api}/javadoc/"/>
-	  	<param name="-newapi" value="${new.api}"/>
-	    <param name="-newapidir" value="${jdiff.tmp}"/>
-	  	<param name="-javadocnew" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${new.api}/javadoc/"/>
-	  	<param name="-stats"/>
-	  	<param name="-docchanges"/>
-	  </doclet>
-	</javadoc>
+        <!-- Do a diff against the previous version. -->
+        <javadoc packagenames="com.google.*"
+                 destdir="${jdiff.tmp}"
+                     docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+                 maxmemory="512M"
+                     sourcefiles="${jdiff.home}/Null.java"
+                 classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+          <doclet name="jdiff.JDiff">
+                <param name="-oldapi" value="${old.api}"/>
+                <param name="-oldapidir" value="latest-api-diffs"/>             
+                <param name="-javadocold" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${old.api}/javadoc/"/>
+                <param name="-newapi" value="${new.api}"/>
+            <param name="-newapidir" value="${jdiff.tmp}"/>
+                <param name="-javadocnew" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${new.api}/javadoc/"/>
+                <param name="-stats"/>
+                <param name="-docchanges"/>
+          </doclet>
+        </javadoc>
   </target>
   
   <target name="javadoc">
     <javadoc packagenames="com.google.*"
              destdir="build/docs"
-    	     docletpath="lib/build/doclava.jar"
+             docletpath="lib/build/doclava.jar"
              bootclasspath="${java.home}/lib/rt.jar"
              maxmemory="512M"
-    	     classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -182,7 +182,7 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
-    	<fileset dir="${grapher.src.dir}"/>
+        <fileset dir="${grapher.src.dir}"/>
       <!-- TODO: this breaks Doclava for some reason
       <fileset dir="${struts2.src.dir}"/> -->
 
@@ -192,7 +192,7 @@
         <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" /> 
         <param name="-apiversion" value="Guice_${new.api}"/>
         <param name="-assetsdir" value="javadoc/assets"/>
-      	<param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
+        <param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
         <!-- TODO: fix doclava federation
           http://aopalliance.sourceforge.net/doc
           http://www.springframework.org/docs/api/

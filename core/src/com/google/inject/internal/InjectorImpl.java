@@ -73,7 +73,7 @@ final class InjectorImpl implements Injector, Lookups {
     final boolean disableCircularProxies;
     final boolean atInjectRequired;
     final boolean exactBindingAnnotationsRequired;
-    
+
     InjectorOptions(Stage stage, boolean jitDisabled, boolean disableCircularProxies,
         boolean atInjectRequired, boolean exactBindingAnnotationsRequired) {
       this.stage = stage;
@@ -265,7 +265,7 @@ final class InjectorImpl implements Injector, Lookups {
           }
         }
       }
-      
+
       // If we previously failed creating this JIT binding and our Errors has
       // already recorded an error, then just directly throw that error.
       // We need to do this because it's possible we already cleaned up the
@@ -291,7 +291,7 @@ final class InjectorImpl implements Injector, Lookups {
   private static boolean isProvider(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(Provider.class);
   }
-  
+
   private static boolean isTypeLiteral(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(TypeLiteral.class);
   }
@@ -846,7 +846,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (convertedBinding != null) {
       return convertedBinding;
     }
-    
+
     if (!isTypeLiteral(key) 
         && jitDisabled
         && jitType != JitLimitation.NEW_OR_EXISTING_JIT) {

@@ -111,7 +111,7 @@ public class BindingAnnotationTest extends TestCase {
   static class BlueFoo {
     @Inject @Blue(5) String s; 
   }
-
+  
   static class RedFoo {
     @Inject @Red String s;
   }
@@ -125,7 +125,7 @@ public class BindingAnnotationTest extends TestCase {
   @interface Blue {
     int value();
   }
-
+  
   @Retention(RUNTIME)
   @BindingAnnotation
   @interface Red {

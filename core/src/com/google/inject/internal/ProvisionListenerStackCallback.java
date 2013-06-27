@@ -30,15 +30,15 @@ import java.util.List;
  * @author sameb@google.com (Sam Berlin)
  */
 final class ProvisionListenerStackCallback<T> {
-
-  private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0]; 
+  
+  private static final ProvisionListener EMPTY_LISTENER[] = new ProvisionListener[0];
   @SuppressWarnings("rawtypes")
   private static final ProvisionListenerStackCallback<?> EMPTY_CALLBACK =
       new ProvisionListenerStackCallback(null /* unused, so ok */, ImmutableList.of());
 
   private final ProvisionListener[] listeners;
   private final Binding<T> binding;
-
+  
   @SuppressWarnings("unchecked")
   public static <T> ProvisionListenerStackCallback<T> emptyListener() {
     return (ProvisionListenerStackCallback<T>) EMPTY_CALLBACK;

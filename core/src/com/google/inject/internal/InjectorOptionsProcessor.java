@@ -58,7 +58,7 @@ class InjectorOptionsProcessor extends AbstractProcessor {
   public Boolean visit(RequireAtInjectOnConstructorsOption option) {
     atInjectRequired = true;
     return true;    
-  }  
+  }
 
   @Override
   public Boolean visit(RequireExactBindingAnnotationsOption option) {

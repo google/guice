@@ -1036,10 +1036,10 @@ public class FactoryProvider2Test extends TestCase {
   
   static class Segway implements Car {
     @Inject Injector injector;
-    
+
     Color getColor() { return injector.getInstance(Key.get(Color.class, FactoryProvider2.DEFAULT_ANNOTATION)); }
   }
-  
+
   public void testReturnValueMatchesParamValue() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -1058,7 +1058,7 @@ public class FactoryProvider2Test extends TestCase {
     }
 
     private final Delegater delegate;
-  
+
     @Inject Delegater(@Assisted Delegater delegater) {
       this.delegate = delegater;
     }

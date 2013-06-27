@@ -64,7 +64,7 @@ final class Initializer {
   <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Binding<T> binding,
       Object source, Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
-
+    
     ProvisionListenerStackCallback<T> provisionCallback =
         binding == null ? null : injector.provisionListenerStore.get(binding);
 

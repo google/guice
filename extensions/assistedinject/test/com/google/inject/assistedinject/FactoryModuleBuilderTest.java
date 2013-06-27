@@ -464,11 +464,11 @@ public class FactoryModuleBuilderTest extends TestCase {
   public void testSingletonScopeOnAssistedClassIsIgnored() {
     try {
       Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        install(new FactoryModuleBuilder().build(SingletonFactory.class));
-      }
-    });
+        @Override
+        protected void configure() {
+          install(new FactoryModuleBuilder().build(SingletonFactory.class));
+        }
+      });
       fail();
     } catch (CreationException ce) {
       assertEquals(1, ce.getErrorMessages().size());
@@ -483,7 +483,7 @@ public class FactoryModuleBuilderTest extends TestCase {
   interface SingletonFactory {
     AssistedSingleton create(String string);
   }
-  
+
   @SuppressWarnings("GuiceAssistedInjectScoping")
   @Singleton
   static class AssistedSingleton {

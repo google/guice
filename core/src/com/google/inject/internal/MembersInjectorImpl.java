@@ -85,7 +85,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
           if (provisionCallback != null && provisionCallback.hasListeners()) {
             provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
               @Override public T call() {
-          injectMembers(instance, errors, context, toolableOnly);
+                injectMembers(instance, errors, context, toolableOnly);
                 return instance;
               }
             });

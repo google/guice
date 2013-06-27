@@ -394,8 +394,8 @@ public class ProvisionListenerTest extends TestCase {
         assertTrue("expected instanceof: " + expected + ", but was: " + provisioned,
             expected.isInstance(provisioned));
       } else {
-      assertEquals(provision.getBinding().getKey().getRawType(), provisioned.getClass());
-    }
+        assertEquals(provision.getBinding().getKey().getRawType(), provisioned.getClass());
+      }
     }
     
     Set<Key> getAsSetAndClear() {
