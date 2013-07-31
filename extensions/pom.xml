@@ -83,6 +83,18 @@
           </instructions>
         </configuration>
       </plugin>
+      <!--
+       | Generate sources jar
+      -->
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+      <!--
+       | Generate javadoc jar
+      -->
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 
