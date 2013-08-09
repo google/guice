@@ -16,21 +16,16 @@
 
 package com.google.inject.multibindings;
 
-import static com.google.common.base.Predicates.equalTo;
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.multibindings.Element.Type.MULTIBINDER;
 import static com.google.inject.name.Names.named;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -328,16 +323,14 @@ public abstract class Multibinder<T> {
     public Set<T> get() {
       checkConfiguration(isInitialized(), "Multibinder is not initialized");
 
-      Map<T, Binding<T>> result = new LinkedHashMap<T, Binding<T>>();
+      Set<T> result = new LinkedHashSet<T>();
       for (Binding<T> binding : bindings) {
         final T newValue = binding.getProvider().get();
         checkConfiguration(newValue != null, "Set injection failed due to null element");
-        Binding<T> duplicateBinding = result.put(newValue, binding);
-        if (!permitDuplicates && duplicateBinding != null) {
-          throw newDuplicateValuesException(result, binding, newValue, duplicateBinding);
-        }
+        checkConfiguration(result.add(newValue) || permitDuplicates,
+            "Set injection failed due to duplicated element \"%s\"", newValue);
       }
-      return Collections.unmodifiableSet(result.keySet());
+      return Collections.unmodifiableSet(result);
     }
     
     @SuppressWarnings("unchecked")
@@ -452,35 +445,6 @@ public abstract class Multibinder<T> {
     }
 
     throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
-  }
-
-  private static <T> ConfigurationException newDuplicateValuesException(
-      Map<T, Binding<T>> existingBindings,
-      Binding<T> binding,
-      final T newValue,
-      Binding<T> duplicateBinding) {
-    T oldValue = getOnlyElement(filter(existingBindings.keySet(), equalTo(newValue)));
-    String oldString = oldValue.toString();
-    String newString = newValue.toString();
-    if (Objects.equal(oldString, newString)) {
-      // When the value strings match, just show the source of the bindings
-      return new ConfigurationException(ImmutableSet.of(new Message(Errors.format(
-          "Set injection failed due to duplicated element \"%s\""
-              + "\n    Bound at %s\n    Bound at %s",
-          newValue,
-          duplicateBinding.getSource(),
-          binding.getSource()))));
-    } else {
-      // When the value strings don't match, include them both as they may be useful for debugging
-      return new ConfigurationException(ImmutableSet.of(new Message(Errors.format(
-          "Set injection failed due to multiple elements comparing equal:"
-              + "\n    \"%s\"\n        bound at %s"
-              + "\n    \"%s\"\n        bound at %s",
-          oldValue,
-          duplicateBinding.getSource(),
-          newValue,
-          binding.getSource()))));
-    }
   }
 
   static <T> T checkNotNull(T reference, String name) {
