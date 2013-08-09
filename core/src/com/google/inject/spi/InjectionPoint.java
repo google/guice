@@ -678,7 +678,7 @@ public final class InjectionPoint {
             InjectableMethod injectableMethod = new InjectableMethod(
                 current, method, atInject);
             if (checkForMisplacedBindingAnnotations(method, errors)
-                | !isValidMethod(injectableMethod, errors)) {
+                || !isValidMethod(injectableMethod, errors)) {
               if (overrideIndex != null) {
                 boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
                 if(removed) {
