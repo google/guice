@@ -25,11 +25,13 @@ import com.google.inject.name.NamedEquivalanceTest;
 import com.google.inject.name.NamesTest;
 import com.google.inject.spi.BindingTargetVisitorTest;
 import com.google.inject.spi.ElementApplyToTest;
+import com.google.inject.spi.ElementSourceTest;
 import com.google.inject.spi.ElementsTest;
 import com.google.inject.spi.HasDependenciesTest;
 import com.google.inject.spi.InjectionPointTest;
 import com.google.inject.spi.InjectorSpiTest;
 import com.google.inject.spi.ModuleRewriterTest;
+import com.google.inject.spi.ModuleSourceTest;
 import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
 import com.google.inject.spi.ToolStageInjectorTest;
@@ -125,6 +127,8 @@ public class AllTests {
     suite.addTestSuite(ProviderMethodsTest.class);
     suite.addTestSuite(SpiBindingsTest.class);
     suite.addTestSuite(ToolStageInjectorTest.class);
+    suite.addTestSuite(ModuleSourceTest.class);
+    suite.addTestSuite(ElementSourceTest.class);
 
     // tools
     // suite.addTestSuite(JmxTest.class); not a testcase

@@ -44,7 +44,10 @@ public class StackTraceElements {
         }
       });
   /*end[AOP]*/
-
+  
+  private static Map<Object, Object> cache = new MapMaker().makeMap();
+  private static final String UNKNOWN_SOURCE = "Unknown Source";
+  
   public static Object forMember(Member member) {
     if (member == null) {
       return SourceProvider.UNKNOWN_SOURCE;
@@ -80,5 +83,123 @@ public class StackTraceElements {
     end[NO_AOP]*/
 
     return new StackTraceElement(implementation.getName(), "class", fileName, lineNumber);
+  }
+  
+  /**
+   * Clears the internal cache for {@link StackTraceElement StackTraceElements}.
+   */
+  public static void clearCache() {
+    cache.clear();
+  }
+  
+  /**
+   * Returns encoded in-memory version of {@link StackTraceElement StackTraceElements}.
+   */
+  public static InMemoryStackTraceElement[] convertToInMemoryStackTraceElement(
+      StackTraceElement[] stackTraceElements) {
+    InMemoryStackTraceElement[] inMemoryStackTraceElements = 
+        new InMemoryStackTraceElement[stackTraceElements.length];
+    for (int i = 0; i < stackTraceElements.length; i++) {
+      inMemoryStackTraceElements[i] = 
+          weakIntern(new InMemoryStackTraceElement(stackTraceElements[i]));
+    }
+    return inMemoryStackTraceElements;
+  }
+  
+  /**
+   * Decodes in-memory stack trace elements to regular {@link StackTraceElement StackTraceElements}.
+   */
+  public static StackTraceElement[] convertToStackTraceElement(
+      InMemoryStackTraceElement[] inMemoryStackTraceElements) {
+    StackTraceElement[] stackTraceElements = 
+        new StackTraceElement[inMemoryStackTraceElements.length];
+    for (int i = 0; i < inMemoryStackTraceElements.length; i++) {
+      String declaringClass = inMemoryStackTraceElements[i].getClassName();
+      String methodName = inMemoryStackTraceElements[i].getMethodName();
+      int lineNumber = inMemoryStackTraceElements[i].getLineNumber();
+      stackTraceElements[i] = 
+          new StackTraceElement(declaringClass, methodName, UNKNOWN_SOURCE, lineNumber);
+    }
+    return stackTraceElements;
+  }
+  
+  private static InMemoryStackTraceElement weakIntern(
+      InMemoryStackTraceElement inMemoryStackTraceElement) {
+    InMemoryStackTraceElement cached = 
+        (InMemoryStackTraceElement) cache.get(inMemoryStackTraceElement);
+    if (cached != null) {
+      return cached;
+    }
+    inMemoryStackTraceElement = new InMemoryStackTraceElement(
+        weakIntern(inMemoryStackTraceElement.getClassName()), 
+        weakIntern(inMemoryStackTraceElement.getMethodName()), 
+        inMemoryStackTraceElement.getLineNumber());
+    cache.put(inMemoryStackTraceElement, inMemoryStackTraceElement);
+    return inMemoryStackTraceElement;
+  }
+  
+  private static String weakIntern(String s) {
+    String cached = (String) cache.get(s);
+    if (cached != null) {
+      return cached;
+    }
+    cache.put(s, s);
+    return s;  
+  }
+  
+  /**
+   * In-Memory version of {@link StackTraceElement} that does not store the file name. 
+   */
+  public static class InMemoryStackTraceElement {
+    private String declaringClass;
+    private String methodName;
+    private int lineNumber;
+
+    InMemoryStackTraceElement(StackTraceElement ste) {
+      this(ste.getClassName(), ste.getMethodName(), ste.getLineNumber());
+    }
+
+    InMemoryStackTraceElement(String declaringClass, String methodName, int lineNumber) {
+      this.declaringClass = declaringClass;
+      this.methodName = methodName;
+      this.lineNumber = lineNumber;
+    }
+
+    String getClassName() {
+      return declaringClass;
+    }
+    
+    String getMethodName() {
+      return methodName;
+    }
+    
+    int getLineNumber() {
+      return lineNumber;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof InMemoryStackTraceElement)) {
+        return false;
+      }
+      InMemoryStackTraceElement e = (InMemoryStackTraceElement) obj;
+      return e.declaringClass.equals(declaringClass) && e.lineNumber == lineNumber && 
+          methodName.equals(e.methodName);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = 31 * declaringClass.hashCode() + methodName.hashCode();
+      result = 31 * result + lineNumber;
+      return result;
+    }
+    
+    @Override
+    public String toString() {
+      return declaringClass + "." + methodName + "(" + lineNumber + ")";
+    }
   }
 }

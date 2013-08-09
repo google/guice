@@ -44,6 +44,7 @@ import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
+import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.matcher.Matcher;
 
 import java.lang.annotation.Annotation;
@@ -62,6 +63,19 @@ import java.util.Set;
  * @since 2.0
  */
 public final class Elements {
+
+  private enum IncludeStackTraceFlagValues {
+    // Minimum stack trace collection
+    DEFAULT,
+    // Full stack trace for everything
+    COMPLETE
+  }
+
+  // Use "-Dguice_include_stack_traces={DEFAULT,COMPLETE}" to specify
+  // how guice should collect stack trace data.
+  private static final String guice_include_stack_traces_property =
+       System.getProperty("guice_include_stack_traces", "DEFAULT");
+
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
     @Override public Object visit(InstanceBinding<?> binding) {
@@ -102,6 +116,10 @@ public final class Elements {
     for (Module module : modules) {
       binder.install(module);
     }
+    if (collectCompleteStackTrace()) {
+      // Free the memory consumed by the stack trace elements cache
+      StackTraceElements.clearCache();
+    }
     return Collections.unmodifiableList(binder.elements);
   }
 
@@ -123,11 +141,19 @@ public final class Elements {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
+
+  private static boolean collectCompleteStackTrace() {
+    return IncludeStackTraceFlagValues.COMPLETE.name().equals(
+        guice_include_stack_traces_property);
+  }
+
   private static class RecordingBinder implements Binder, PrivateBinder {
     private final Stage stage;
     private final Set<Module> modules;
     private final List<Element> elements;
     private final Object source;
+    /** The current modules stack */
+    private ModuleSource moduleSource = null;
     private final SourceProvider sourceProvider;
 
     /** The binder where exposed bindings will be created */
@@ -155,6 +181,7 @@ public final class Elements {
       this.modules = prototype.modules;
       this.elements = prototype.elements;
       this.source = source;
+      this.moduleSource = prototype.moduleSource;
       this.sourceProvider = sourceProvider;
       this.parent = prototype.parent;
       this.privateElements = prototype.privateElements;
@@ -166,6 +193,7 @@ public final class Elements {
       this.modules = Sets.newHashSet();
       this.elements = privateElements.getElementsMutable();
       this.source = parent.source;
+      this.moduleSource = parent.moduleSource;
       this.sourceProvider = parent.sourceProvider;
       this.parent = parent;
       this.privateElements = privateElements;
@@ -176,12 +204,13 @@ public final class Elements {
         Matcher<? super Class<?>> classMatcher,
         Matcher<? super Method> methodMatcher,
         org.aopalliance.intercept.MethodInterceptor... interceptors) {
-      elements.add(new InterceptorBinding(getSource(), classMatcher, methodMatcher, interceptors));
+      elements.add(new InterceptorBinding(
+          getElementSource(), classMatcher, methodMatcher, interceptors));
     }
     /*end[AOP]*/
 
     public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-      elements.add(new ScopeBinding(getSource(), annotationType, scope));
+      elements.add(new ScopeBinding(getElementSource(), annotationType, scope));
     }
 
     @SuppressWarnings("unchecked") // it is safe to use the type literal for the raw type
@@ -190,12 +219,12 @@ public final class Elements {
     }
 
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
-      elements.add(new InjectionRequest<T>(getSource(), type, instance));
+      elements.add(new InjectionRequest<T>(getElementSource(), type, instance));
     }
 
     public <T> MembersInjector<T> getMembersInjector(final TypeLiteral<T> typeLiteral) {
       final MembersInjectorLookup<T> element
-          = new MembersInjectorLookup<T>(getSource(), typeLiteral);
+          = new MembersInjectorLookup<T>(getElementSource(), typeLiteral);
       elements.add(element);
       return element.getMembersInjector();
     }
@@ -205,27 +234,30 @@ public final class Elements {
     }
 
     public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
-      elements.add(new TypeListenerBinding(getSource(), listener, typeMatcher));
+      elements.add(new TypeListenerBinding(getElementSource(), listener, typeMatcher));
     }
-    
+
     public void bindListener(Matcher<? super Binding<?>> bindingMatcher,
         ProvisionListener... listeners) {
-      elements.add(new ProvisionListenerBinding(getSource(), bindingMatcher, listeners));
+      elements.add(new ProvisionListenerBinding(getElementSource(), bindingMatcher, listeners));
     }
 
     public void requestStaticInjection(Class<?>... types) {
       for (Class<?> type : types) {
-        elements.add(new StaticInjectionRequest(getSource(), type));
+        elements.add(new StaticInjectionRequest(getElementSource(), type));
       }
     }
 
     public void install(Module module) {
       if (modules.add(module)) {
         Binder binder = this;
+        // Update the module source for the new module
+        if (!(module instanceof ProviderMethodsModule)) {
+          moduleSource = getModuleSource(module);
+        }
         if (module instanceof PrivateModule) {
           binder = binder.newPrivateBinder();
         }
-
         try {
           module.configure(binder);
         } catch (RuntimeException e) {
@@ -237,6 +269,10 @@ public final class Elements {
           }
         }
         binder.install(ProviderMethodsModule.forModule(module));
+        // We are done with this module, so undo module source change
+        if (!(module instanceof ProviderMethodsModule)) {
+          moduleSource = moduleSource.getParent();
+        }
       }
     }
 
@@ -245,12 +281,12 @@ public final class Elements {
     }
 
     public void addError(String message, Object... arguments) {
-      elements.add(new Message(getSource(), Errors.format(message, arguments)));
+      elements.add(new Message(getElementSource(), Errors.format(message, arguments)));
     }
 
     public void addError(Throwable t) {
       String message = "An exception was caught and reported. Message: " + t.getMessage();
-      elements.add(new Message(ImmutableList.of(getSource()), message, t));
+      elements.add(new Message(ImmutableList.of((Object) getElementSource()), message, t));
     }
 
     public void addError(Message message) {
@@ -258,7 +294,7 @@ public final class Elements {
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-      return new BindingBuilder<T>(this, elements, getSource(), key);
+      return new BindingBuilder<T>(this, elements, getElementSource(), key);
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
@@ -270,11 +306,11 @@ public final class Elements {
     }
 
     public AnnotatedConstantBindingBuilder bindConstant() {
-      return new ConstantBindingBuilderImpl<Void>(this, elements, getSource());
+      return new ConstantBindingBuilderImpl<Void>(this, elements, getElementSource());
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      final ProviderLookup<T> element = new ProviderLookup<T>(getSource(), key);
+      final ProviderLookup<T> element = new ProviderLookup<T>(getElementSource(), key);
       elements.add(element);
       return element.getProvider();
     }
@@ -285,7 +321,7 @@ public final class Elements {
 
     public void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
         TypeConverter converter) {
-      elements.add(new TypeConverterBinding(getSource(), typeMatcher, converter));
+      elements.add(new TypeConverterBinding(getElementSource(), typeMatcher, converter));
     }
 
     public RecordingBinder withSource(final Object source) {
@@ -303,25 +339,25 @@ public final class Elements {
     }
 
     public PrivateBinder newPrivateBinder() {
-      PrivateElementsImpl privateElements = new PrivateElementsImpl(getSource());
+      PrivateElementsImpl privateElements = new PrivateElementsImpl(getElementSource());
       elements.add(privateElements);
       return new RecordingBinder(this, privateElements);
     }
-    
+
     public void disableCircularProxies() {
-      elements.add(new DisableCircularProxiesOption(getSource()));
+      elements.add(new DisableCircularProxiesOption(getElementSource()));
     }
-    
+
     public void requireExplicitBindings() {
-      elements.add(new RequireExplicitBindingsOption(getSource()));     
+      elements.add(new RequireExplicitBindingsOption(getElementSource()));
     }
-    
+
     public void requireAtInjectOnConstructors() {
-      elements.add(new RequireAtInjectOnConstructorsOption(getSource()));
+      elements.add(new RequireAtInjectOnConstructorsOption(getElementSource()));
     }
 
     public void requireExactBindingAnnotations() {
-      elements.add(new RequireExactBindingAnnotationsOption(getSource()));
+      elements.add(new RequireExactBindingAnnotationsOption(getElementSource()));
     }
 
     public void expose(Key<?> key) {
@@ -346,15 +382,70 @@ public final class Elements {
         };
       }
 
-      ExposureBuilder<T> builder = new ExposureBuilder<T>(this, getSource(), key);
+      ExposureBuilder<T> builder = new ExposureBuilder<T>(this, getElementSource(), key);
       privateElements.addExposureBuilder(builder);
       return builder;
     }
 
-    protected Object getSource() {
-      return sourceProvider != null
-          ? sourceProvider.get()
-          : source;
+    private ModuleSource getModuleSource(Module module) {
+      StackTraceElement[] partialCallStack;
+      if (!collectCompleteStackTrace()) {
+        partialCallStack = new StackTraceElement[0];
+      } else {
+        partialCallStack = getPartialCallStack(new Throwable().getStackTrace());
+      }
+      if (moduleSource == null) {
+        return new ModuleSource(module, partialCallStack);
+      }
+      return moduleSource.createChild(module, partialCallStack);
+    }
+
+    private ElementSource getElementSource() {
+      Object declaringSource = source;
+      // Full call stack
+      StackTraceElement[] callStack;
+      // The call stack starts from current top module configure and ends at this method caller
+      StackTraceElement[] partialCallStack;
+      if (!collectCompleteStackTrace()) {
+        callStack = null;
+        partialCallStack = new StackTraceElement[0];
+      } else {
+        callStack = new Throwable().getStackTrace();
+        partialCallStack = getPartialCallStack(callStack);
+      }
+      if (declaringSource == null) {
+        // TODO(salmanmir): can we avoid getting the full stack trace by using modules stack?
+        if (callStack == null) {
+          callStack = new Throwable().getStackTrace();
+        }
+        declaringSource = sourceProvider.get(callStack);
+      }
+      ElementSource originalSource = null;
+      if (declaringSource instanceof ElementSource) {
+        originalSource = (ElementSource) declaringSource;
+        declaringSource = originalSource.getDeclaringSource();
+      }
+      // Build the binding call stack
+      return new ElementSource(
+          originalSource, declaringSource, moduleSource, partialCallStack);
+    }
+
+    /**
+     * Removes the {@link #moduleSource} call stack from the beginning of current call stack. It
+     * also removes the last two elements in order to make {@link #install(Module)} the last call
+     * in the call stack.
+     */
+    private StackTraceElement[] getPartialCallStack(StackTraceElement[] callStack) {
+      int toSkip = 0;
+      if (moduleSource != null) {
+        toSkip = moduleSource.getStackTraceSize();
+      }
+      // -1 for skipping 'getModuleSource' and 'getElementSource' calls
+      int chunkSize = callStack.length - toSkip - 1;
+
+      StackTraceElement[] partialCallStack = new StackTraceElement[chunkSize];
+      System.arraycopy(callStack, 1, partialCallStack, 0, chunkSize);
+      return partialCallStack;
     }
 
     @Override public String toString() {

@@ -57,6 +57,9 @@ public final class ProvisionListenerBinding implements Element {
   }
 
   public Object getSource() {
+    if (source instanceof ElementSource) {
+      return ((ElementSource) source).getDeclaringSource();
+    }
     return source;
   }
 

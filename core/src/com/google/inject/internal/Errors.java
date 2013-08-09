@@ -31,6 +31,7 @@ import com.google.inject.internal.util.Classes;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
@@ -675,6 +676,9 @@ public final class Errors implements Serializable {
       });
 
   public static Object convert(Object o) {
+    if (o instanceof ElementSource) {
+      o = ((ElementSource) o).getDeclaringSource();
+    }
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {
         return converter.convert(o);
@@ -684,6 +688,10 @@ public final class Errors implements Serializable {
   }
 
   public static void formatSource(Formatter formatter, Object source) {
+    if (source instanceof ElementSource) {
+      source = ((ElementSource) source).getDeclaringSource();
+    }
+
     if (source instanceof Dependency) {
       Dependency<?> dependency = (Dependency<?>) source;
       InjectionPoint injectionPoint = dependency.getInjectionPoint();

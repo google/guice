@@ -30,6 +30,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.PrivateElements;
 
@@ -65,6 +66,9 @@ public final class PrivateElementsImpl implements PrivateElements {
   }
 
   public Object getSource() {
+    if (source instanceof ElementSource) {
+      return ((ElementSource) source).getDeclaringSource();
+    }
     return source;
   }
 

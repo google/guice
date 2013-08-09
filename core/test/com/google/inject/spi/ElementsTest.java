@@ -939,11 +939,11 @@ public class ElementsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public Void visit(PrivateElements two) {
             assertEquals(ab, two.getExposedKeys());
-            assertEquals("1 ElementsTest.java", two.getSource());
+            assertEquals("1 ElementsTest.java", two.getSource().toString());
             checkElements(two.getElements(),
                 new FailingElementVisitor() {
                   @Override public <T> Void visit(Binding<T> binding) {
-                    assertEquals("2 ElementsTest.java", binding.getSource());
+                    assertEquals("2 ElementsTest.java", binding.getSource().toString());
                     assertEquals(Key.get(List.class), binding.getKey());
                     return null;
                   }

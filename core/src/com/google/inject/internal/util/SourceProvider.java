@@ -16,6 +16,7 @@
 
 package com.google.inject.internal.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
@@ -80,8 +81,9 @@ public final class SourceProvider {
    * Returns the calling line of code. The selected line is the nearest to the top of the stack that
    * is not skipped.
    */
-  public StackTraceElement get() {
-    for (final StackTraceElement element : new Throwable().getStackTrace()) {
+  public StackTraceElement get(StackTraceElement[] stackTraceElements) {
+    Preconditions.checkNotNull(stackTraceElements, "The stack trace elements cannot be null.");
+    for (final StackTraceElement element : stackTraceElements) {
       String className = element.getClassName();
       
       if (!shouldBeSkipped(className)) {
