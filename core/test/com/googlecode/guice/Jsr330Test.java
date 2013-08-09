@@ -442,7 +442,9 @@ public class Jsr330Test extends TestCase {
   }
 
   static class L {
-    @Inject final B b = null;
+    @SuppressWarnings("InjectJavaxInjectOnFinalField")
+    @Inject
+    final B b = null;
   }
 
   static abstract class AbstractM {
