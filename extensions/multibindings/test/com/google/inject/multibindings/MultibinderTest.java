@@ -48,10 +48,14 @@ import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
-import com.google.inject.util.Types;
 
 import junit.framework.TestCase;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -254,6 +258,32 @@ public class MultibinderTest extends TestCase {
     }
   }
 
+  public void testMultibinderSetIsSerializable() throws IOException, ClassNotFoundException {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        Multibinder.newSetBinder(binder(), String.class)
+            .addBinding().toInstance("A");
+      }
+    });
+
+    Set<String> set = injector.getInstance(Key.get(setOfString));
+    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteStream);
+    try {
+      objectOutputStream.writeObject(set);
+    } finally {
+      objectOutputStream.close();
+    }
+    ObjectInputStream objectInputStream = new ObjectInputStream(
+        new ByteArrayInputStream(byteStream.toByteArray()));
+    try {
+      Object setCopy = objectInputStream.readObject();
+      assertEquals(set, setCopy);
+    } finally {
+      objectInputStream.close();
+    }
+  }
+
   public void testMultibinderSetIsLazy() {
     Module module = new AbstractModule() {
       protected void configure() {
@@ -275,26 +305,92 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testMultibinderSetForbidsDuplicateElements() {
-    Module module = new AbstractModule() {
+    Module module1 = new AbstractModule() {
       protected void configure() {
         final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
+      }
+    };
+    Module module2 = new AbstractModule() {
+      protected void configure() {
+        final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
       }
     };
-    Injector injector = Guice.createInjector(module);
+    Injector injector = Guice.createInjector(module1, module2);
 
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
-    } catch(ProvisionException expected) {
+    } catch (ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Set injection failed due to duplicated element \"A\"");
+          "1) Set injection failed due to duplicated element \"A\"",
+          "Bound at " + module1.getClass().getName(),
+          "Bound at " + module2.getClass().getName());
     }
 
     // But we can still visit the module!
-    assertSetVisitor(Key.get(setOfString), stringType, setOf(module), MODULE, false, 0,
+    assertSetVisitor(Key.get(setOfString), stringType, setOf(module1, module2), MODULE, false, 0,
         instance("A"), instance("A"));
+  }
+
+  public void testMultibinderSetShowsBothElementsIfToStringDifferent() {
+    // A simple example of a type whose toString returns more information than its equals method
+    // considers.
+    class ValueType {
+      int a;
+      int b;
+      ValueType(int a, int b) {
+        this.a = a;
+        this.b = b;
+      }
+      @Override
+      public boolean equals(Object obj) {
+        return (obj instanceof ValueType) && (((ValueType) obj).a == a);
+      }
+      @Override
+      public int hashCode() {
+        return a;
+      }
+      @Override
+      public String toString() {
+        return String.format("ValueType(%d,%d)", a, b);
+      }
+    }
+    
+    Module module1 = new AbstractModule() {
+      protected void configure() {
+        final Multibinder<ValueType> multibinder =
+            Multibinder.newSetBinder(binder(), ValueType.class);
+        multibinder.addBinding().toInstance(new ValueType(1, 2));
+      }
+    };
+    Module module2 = new AbstractModule() {
+      protected void configure() {
+        final Multibinder<ValueType> multibinder =
+            Multibinder.newSetBinder(binder(), ValueType.class);
+        multibinder.addBinding().toInstance(new ValueType(1, 3));
+      }
+    };
+    Injector injector = Guice.createInjector(module1, module2);
+
+    TypeLiteral<ValueType> valueType = TypeLiteral.get(ValueType.class);
+    TypeLiteral<Set<ValueType>> setOfValueType = new TypeLiteral<Set<ValueType>>() {};
+    try {
+      injector.getInstance(Key.get(setOfValueType));
+      fail();
+    } catch (ProvisionException expected) {
+      assertContains(expected.getMessage(),
+          "1) Set injection failed due to multiple elements comparing equal:",
+          "\"ValueType(1,2)\"",
+          "bound at " + module1.getClass().getName(),
+          "\"ValueType(1,3)\"",
+          "bound at " + module2.getClass().getName());
+    }
+
+    // But we can still visit the module!
+    assertSetVisitor(Key.get(setOfValueType), valueType, setOf(module1, module2), MODULE, false, 0,
+        instance(new ValueType(1, 2)), instance(new ValueType(1, 3)));
   }
 
   public void testMultibinderSetPermitDuplicateElements() {
