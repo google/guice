@@ -22,18 +22,11 @@ import static com.google.inject.multibindings.Multibinder.checkNotNull;
 import static com.google.inject.multibindings.Multibinder.setOf;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -52,6 +45,14 @@ import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
+
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * An API to bind multiple map entries separately, only to later inject them as
@@ -334,10 +335,12 @@ public abstract class MapBinder<K, V> {
       checkNotNull(key, "key");
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
-      Key<V> valueKey = Key.get(valueType, new RealElement(entrySetBinder.getSetName(), MAPBINDER));
-      entrySetBinder.addBinding().toInstance(new MapEntry<K, Provider<V>>(key,
-          binder.getProvider(valueKey), valueKey));
-      return binder.bind(valueKey);
+      RealElement.BindingBuilder<V> valueBinding = RealElement.addMapBinding(
+          binder, key, valueType, entrySetBinder.getSetName());
+      Key<V> valueKey = Key.get(valueType, valueBinding.getAnnotation());
+      entrySetBinder.addBinding().toInstance(new ProviderMapEntry<K, V>(
+          key, binder.getProvider(valueKey), valueKey));
+      return valueBinding;
     }
 
     public void configure(Binder binder) {
@@ -352,7 +355,6 @@ public abstract class MapBinder<K, V> {
       binder.bind(providerMapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, Provider<V>>>(mapKey) {
         private Map<K, Provider<V>> providerMap;
 
-        @SuppressWarnings({ "unused", "unchecked" })
         @Toolable @Inject void initialize(Injector injector) {
           RealMapBinder.this.binder = null;
           permitDuplicates = entrySetBinder.permitsDuplicates(injector);
@@ -363,9 +365,9 @@ public abstract class MapBinder<K, V> {
             Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
             checkConfiguration(previous == null || permitDuplicates,
                 "Map injection failed due to duplicated key \"%s\"", entry.getKey());
-            Key<V> valueKey = (Key<V>)((MapEntry)entry).getValueKey();
-            bindingsMutable.add(new MapEntry(entry.getKey(),
-                injector.getBinding(valueKey), valueKey));
+            ProviderMapEntry<K, V> providerEntry = (ProviderMapEntry<K, V>) entry;
+            Key<V> valueKey = providerEntry.getValueKey();
+            bindingsMutable.add(Maps.immutableEntry(entry.getKey(), injector.getBinding(valueKey)));
           }
 
           providerMap = ImmutableMap.copyOf(providerMapMutable);
@@ -444,9 +446,9 @@ public abstract class MapBinder<K, V> {
           } else {
             Key<?> key;
             if (element instanceof Binding) {
-              key = ((Binding)element).getKey();
+              key = ((Binding<?>)element).getKey();
             } else if (element instanceof ProviderLookup) {
-              key = ((ProviderLookup)element).getKey();
+              key = ((ProviderLookup<?>)element).getKey();
             } else {
               return false; // cannot match;
             }
@@ -463,7 +465,7 @@ public abstract class MapBinder<K, V> {
     }
 
     /** Returns true if the key indicates this is a value in the map. */
-    private boolean matchesValueKey(Key key) {
+    private boolean matchesValueKey(Key<?> key) {
       return key.getAnnotation() instanceof Element
           && ((Element) key.getAnnotation()).setName().equals(entrySetBinder.getSetName())
           && ((Element) key.getAnnotation()).type() == MAPBINDER
@@ -579,18 +581,26 @@ public abstract class MapBinder<K, V> {
       }
     }
 
-    private static final class MapEntry<K, V> implements Map.Entry<K, V> {
+    /**
+     * Implementation of {@code {@link Map.Entry}&lt;K, {@link Provider}&lt;V&gt;&gt;} that
+     * defines equality based on the provider's key rather than the provider itself. This allows
+     * Guice to remove duplicate bindings.
+     * 
+     * @param <K> the map's key type
+     * @param <V> the type provided by the map's values
+     */
+    private static final class ProviderMapEntry<K, V> implements Map.Entry<K, Provider<V>> {
       private final K key;
-      private final V value;
-      private final Key<?> valueKey;
+      private final Provider<V> provider;
+      private final Key<V> valueKey;
 
-      private MapEntry(K key, V value, Key<?> valueKey) {
+      private ProviderMapEntry(K key, Provider<V> provider, Key<V> valueKey) {
         this.key = key;
-        this.value = value;
+        this.provider = provider;
         this.valueKey = valueKey;
       }
       
-      public Key<?> getValueKey() {
+      public Key<V> getValueKey() {
         return valueKey;
       }
 
@@ -598,27 +608,32 @@ public abstract class MapBinder<K, V> {
         return key;
       }
 
-      public V getValue() {
-        return value;
+      public Provider<V> getValue() {
+        return provider;
       }
 
-      public V setValue(V value) {
+      public Provider<V> setValue(Provider<V> value) {
         throw new UnsupportedOperationException();
       }
 
+      /**
+       * We don't follow the normal rules for Map.Entry equality, but that's okay, because
+       * the providers we return will never compare equal to anything else anyway. By defining
+       * equality this way, we let Guice remove duplicate bindings.
+       */
       @Override public boolean equals(Object obj) {
-        return obj instanceof Map.Entry
-            && key.equals(((Map.Entry<?, ?>) obj).getKey())
-            && value.equals(((Map.Entry<?, ?>) obj).getValue());
+        return obj instanceof ProviderMapEntry
+            && key.equals(((ProviderMapEntry<?, ?>) obj).getKey())
+            && valueKey.equals(((ProviderMapEntry<?, ?>) obj).getValueKey());
       }
 
       @Override public int hashCode() {
         return 127 * ("key".hashCode() ^ key.hashCode())
-            + 127 * ("value".hashCode() ^ value.hashCode());
+            + 127 * ("valueKey".hashCode() ^ valueKey.hashCode());
       }
 
       @Override public String toString() {
-        return "MapEntry(" + key + ", " + value + ")";
+        return "ProviderMapEntry(" + key + ", " + valueKey + ")";
       }
     }
 
@@ -647,6 +662,10 @@ public abstract class MapBinder<K, V> {
           equality.equals(((RealMapBinderProviderWithDependencies<?>)obj).equality);
       }
       
+      @Override
+      public int hashCode() {
+        return equality.hashCode();
+      }
     }
   }
 }

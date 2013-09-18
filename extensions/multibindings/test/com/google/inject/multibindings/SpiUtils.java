@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -219,7 +220,7 @@ public class SpiUtils {
   private static <T> void mapModuleTest(Key<T> mapKey, TypeLiteral<?> keyType,
       TypeLiteral<?> valueType, Iterable<? extends Module> modules, boolean allowDuplicates,
       int expectedMapBindings, MapResult... results) {
-    List<Element> elements = Elements.getElements(modules);
+    Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Visitor<T> visitor = new Visitor<T>();
     MapBinderBinding<T> mapbinder = null;
     for(Element element : elements) {

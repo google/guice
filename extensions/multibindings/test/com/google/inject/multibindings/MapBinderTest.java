@@ -25,7 +25,9 @@ import static com.google.inject.multibindings.SpiUtils.providerInstance;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -33,6 +35,7 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -41,10 +44,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author dpb@google.com (David P. Baker)
@@ -317,22 +318,49 @@ public class MapBinderTest extends TestCase {
         multibinder.permitDuplicates();
       }
     };
-    final Set<Key<?>> allBindings = new HashSet<Key<?>>();
-    for (Element element : Elements.getElements(ab, bc)) {
-      element.acceptVisitor(new DefaultElementVisitor<Void>() {
-            @Override public <T> Void visit(Binding<T> binding) {
-              Key<?> key = binding.getKey();
-              assertTrue(String.format("Duplicate binding for %s", key),
-                  allBindings.add(binding.getKey()));
-              return null;
-            }
-          });
-    }
     Injector injector = Guice.createInjector(ab, bc);
 
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injector.getInstance(Key.get(mapOfString)));
     assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(ab, bc), BOTH, true, 0,
-        instance("a", "A"), instance("b", "B"), instance("b", "B"), instance("c", "C"));
+        instance("a", "A"), instance("b", "B"), instance("c", "C"));
+  }
+
+  public void testMapBinderMapDoesNotDedupeDuplicateValues() {
+    class ValueType {
+      int keyPart;
+      int dataPart;
+      private ValueType(int keyPart, int dataPart) {
+        this.keyPart = keyPart;
+        this.dataPart = dataPart;
+      }
+      @Override
+      public boolean equals(Object obj) {
+        return (obj instanceof ValueType) && (keyPart == ((ValueType) obj).keyPart);
+      }
+      @Override
+      public int hashCode() {
+        return keyPart;
+      }
+    }
+    Module m1 = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, ValueType> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, ValueType.class);
+        multibinder.addBinding("a").toInstance(new ValueType(1, 2));
+      }
+    };
+    Module m2 = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, ValueType> multibinder = MapBinder.newMapBinder(
+            binder(), String.class, ValueType.class);
+        multibinder.addBinding("b").toInstance(new ValueType(1, 3));
+      }
+    };
+    
+    Injector injector = Guice.createInjector(m1, m2);
+    Map<String, ValueType> map = injector.getInstance(new Key<Map<String, ValueType>>() {});
+    assertEquals(2, map.get("a").dataPart);
+    assertEquals(3, map.get("b").dataPart);
   }
 
   public void testMapBinderMultimap() {
@@ -359,7 +387,7 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", setOf("A"), "b", setOf("B1", "B2"), "c", setOf("C")),
         injector.getInstance(Key.get(mapOfSetOfString)));
     assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(ab1c, b2c), BOTH, true, 0,
-        instance("a", "A"), instance("b", "B1"), instance("b", "B2"), instance("c", "C"), instance("c", "C"));
+        instance("a", "A"), instance("b", "B1"), instance("b", "B2"), instance("c", "C"));
   }
 
   public void testMapBinderMultimapWithAnotation() {
@@ -624,11 +652,64 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"),
         injector.getInstance(Key.get(mapOfString)));
     assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(abcd, ef), BOTH, true, 0,
-        instance("a", "A"), instance("b", "B"), instance("c", "C"), instance("c", "C"), instance(
+        instance("a", "A"), instance("b", "B"), instance("c", "C"), instance(
             "d", "D"), instance("e", "E"), instance("f", "F"));
 
   }  
 
+  /** Ensure there are no initialization race conditions in basic map injection. */
+  public void testBasicMapDependencyInjection() {
+    final AtomicReference<Map<String, String>> injectedMap =
+        new AtomicReference<Map<String, String>>();
+    final Object anObject = new Object() {
+      @Inject void initialize(Map<String, String> map) {
+        injectedMap.set(map);
+      }
+    };
+    Module abc = new AbstractModule() {
+      protected void configure() {
+        requestInjection(anObject);
+        MapBinder<String, String> multibinder =
+            MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B");
+        multibinder.addBinding("c").toInstance("C");
+      }
+    };
+    Guice.createInjector(abc);
+    assertEquals(mapOf("a", "A", "b", "B", "c", "C"), injectedMap.get());
+  } 
+
+  /** Ensure there are no initialization race conditions in provider multimap injection. */
+  public void testProviderMultimapDependencyInjection() {
+    final AtomicReference<Map<String, Set<Provider<String>>>> injectedMultimap =
+        new AtomicReference<Map<String, Set<Provider<String>>>>();
+    final Object anObject = new Object() {
+      @Inject void initialize(Map<String, Set<Provider<String>>> multimap) {
+        injectedMultimap.set(multimap);
+      }
+    };
+    Module abc = new AbstractModule() {
+      protected void configure() {
+        requestInjection(anObject);
+        MapBinder<String, String> multibinder =
+            MapBinder.newMapBinder(binder(), String.class, String.class);
+        multibinder.permitDuplicates();
+        multibinder.addBinding("a").toInstance("A");
+        multibinder.addBinding("b").toInstance("B");
+        multibinder.addBinding("c").toInstance("C");
+      }
+    };
+    Guice.createInjector(abc);
+    Map<String, String> map = Maps.transformValues(injectedMultimap.get(),
+        new Function<Set<Provider<String>>, String>() {
+          public String apply(Set<Provider<String>> stringProvidersSet) {
+            return Iterables.getOnlyElement(stringProvidersSet).get();
+          }
+        });
+    assertEquals(mapOf("a", "A", "b", "B", "c", "C"), map);
+  }
+  
   @Retention(RUNTIME) @BindingAnnotation
   @interface Abc {}
 

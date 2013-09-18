@@ -224,7 +224,8 @@ public abstract class Multibinder<T> {
    * API.
    */
   static final class RealMultibinder<T> extends Multibinder<T>
-      implements Module, ProviderWithExtensionVisitor<Set<T>>, HasDependencies, MultibinderBinding<Set<T>> {
+      implements Module, ProviderWithExtensionVisitor<Set<T>>, HasDependencies,
+          MultibinderBinding<Set<T>> {
 
     private final TypeLiteral<T> elementType;
     private final String setName;
@@ -256,12 +257,12 @@ public abstract class Multibinder<T> {
      * or just an annotation type, we use the annotation's name. Otherwise,
      * the name is the empty string.
      */
-    private String nameOf(Key<?> key) {
+    private static String nameOf(Key<?> setKey) {
       Annotation annotation = setKey.getAnnotation();
       Class<? extends Annotation> annotationType = setKey.getAnnotationType();      
       if (annotation != null && !Annotations.isMarker(annotationType)) {
         return setKey.getAnnotation().toString();
-      } else if(setKey.getAnnotationType() != null) {
+      } else if (setKey.getAnnotationType() != null) {
         return "@" + setKey.getAnnotationType().getName();
       } else {
         return "";
@@ -283,7 +284,7 @@ public abstract class Multibinder<T> {
     @Override public LinkedBindingBuilder<T> addBinding() {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
-      return binder.bind(Key.get(elementType, new RealElement(setName, MULTIBINDER)));
+      return RealElement.addBinding(binder, MULTIBINDER, elementType, setName);
     }
 
     /**
@@ -343,8 +344,8 @@ public abstract class Multibinder<T> {
     public <B, V> V acceptExtensionVisitor(
         BindingTargetVisitor<B, V> visitor,
         ProviderInstanceBinding<? extends B> binding) {
-      if(visitor instanceof MultibindingsTargetVisitor) {
-        return ((MultibindingsTargetVisitor<Set<T>, V>)visitor).visit(this);
+      if (visitor instanceof MultibindingsTargetVisitor) {
+        return ((MultibindingsTargetVisitor<Set<T>, V>) visitor).visit(this);
       } else {
         return visitor.visit(binding);
       }
@@ -364,24 +365,25 @@ public abstract class Multibinder<T> {
     
     @SuppressWarnings("unchecked")
     public List<Binding<?>> getElements() {
-      if(isInitialized()) {
-        return (List)bindings; // safe because bindings is immutable.
+      if (isInitialized()) {
+        return (List<Binding<?>>) (List<?>) bindings; // safe because bindings is immutable.
       } else {
         throw new UnsupportedOperationException("getElements() not supported for module bindings");
       }
     }
     
     public boolean permitsDuplicates() {
-      if(isInitialized()) {
+      if (isInitialized()) {
         return permitDuplicates;
       } else {
-        throw new UnsupportedOperationException("permitsDuplicates() not supported for module bindings");   
+        throw new UnsupportedOperationException(
+            "permitsDuplicates() not supported for module bindings");   
       }
     }
 
     public boolean containsElement(com.google.inject.spi.Element element) {
-      if(element instanceof Binding) {
-        Binding binding = (Binding)element;
+      if (element instanceof Binding) {
+        Binding<?> binding = (Binding<?>) element;
         return keyMatches(binding.getKey()) 
             || binding.getKey().equals(permitDuplicatesKey)
             || binding.getKey().equals(setKey);

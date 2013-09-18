@@ -25,8 +25,11 @@ import java.lang.annotation.Retention;
 
 /**
  * An internal binding annotation applied to each element in a multibinding.
- * All elements are assigned a globally-unique id to allow different modules
- * to contribute multibindings independently.
+ * Breaks the Java annotation rules for equals and hashCode, instead defining
+ * equality based on whether the associated bindings match. This allows
+ * different modules to contribute multibindings independently, while still
+ * supporting SPI-based module manipulations like
+ * {@link com.google.inject.util.Modules#override Modules.override}.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
