@@ -18,10 +18,13 @@ package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.internal.RehashableKeys;
 
 /**
  * A lookup of the provider for a type. Lookups are created explicitly in a module using
@@ -35,7 +38,7 @@ import com.google.inject.Provider;
  */
 public final class ProviderLookup<T> implements Element {
   private final Object source;
-  private final Key<T> key;
+  private Key<T> key;  // effectively final, as it will not change once it escapes into user code
   private Provider<T> delegate;
 
   public ProviderLookup(Object source, Key<T> key) {
@@ -95,6 +98,16 @@ public final class ProviderLookup<T> implements Element {
 
       @Override public String toString() {
         return "Provider<" + key.getTypeLiteral() + ">";
+      }
+    };
+  }
+
+  RehashableKeys getKeyRehasher() {
+    return new RehashableKeys() {
+      @Override public void rehashKeys() {
+        if (needsRehashing(key)) {
+          key = rehash(key);
+        }
       }
     };
   }

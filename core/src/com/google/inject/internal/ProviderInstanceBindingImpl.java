@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -86,6 +89,14 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
         getSource(), key, getScoping(), injectionPoints, providerInstance);
   }
 
+  public BindingImpl<T> withRehashedKeys() {
+    if (needsRehashing(getKey())) {
+      return withKey(rehash(getKey()));
+    } else {
+      return this;
+    }
+  }
+
   public void applyTo(Binder binder) {
     getScoping().applyTo(
         binder.withSource(getSource()).bind(getKey()).toProvider(getProviderInstance()));
@@ -100,7 +111,7 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
         .add("provider", providerInstance)
         .toString();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof ProviderInstanceBindingImpl) {
@@ -112,7 +123,7 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping());

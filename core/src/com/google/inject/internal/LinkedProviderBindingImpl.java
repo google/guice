@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -32,7 +35,7 @@ final class LinkedProviderBindingImpl<T>
 
   final Key<? extends javax.inject.Provider<? extends T>> providerKey;
   final DelayedInitialize delayedInitializer;
-  
+
   private LinkedProviderBindingImpl(InjectorImpl injector, Key<T> key, Object source,
       InternalFactory<? extends T> internalFactory, Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
@@ -54,7 +57,7 @@ final class LinkedProviderBindingImpl<T>
     this.providerKey = providerKey;
     this.delayedInitializer = null;
   }
-  
+
   static <T> LinkedProviderBindingImpl<T> createWithInitializer(InjectorImpl injector, Key<T> key,
       Object source, InternalFactory<? extends T> internalFactory, Scoping scoping,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
@@ -70,23 +73,37 @@ final class LinkedProviderBindingImpl<T>
   public Key<? extends javax.inject.Provider<? extends T>> getProviderKey() {
     return providerKey;
   }
-  
+
   public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
     if (delayedInitializer != null) {
       delayedInitializer.initialize(injector, errors);
     }
   }
-  
+
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(providerKey));
   }
-  
+
   public BindingImpl<T> withScoping(Scoping scoping) {
     return new LinkedProviderBindingImpl<T>(getSource(), getKey(), scoping, providerKey);
   }
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedProviderBindingImpl<T>(getSource(), key, getScoping(), providerKey);
+  }
+
+  public BindingImpl<T> withRehashedKeys() {
+    boolean keyNeedsRehashing = needsRehashing(getKey());
+    boolean providerKeyNeedsRehashing = needsRehashing(providerKey);
+    if (keyNeedsRehashing || providerKeyNeedsRehashing) {
+      return new LinkedProviderBindingImpl<T>(
+          getSource(),
+          keyNeedsRehashing ? rehash(getKey()) : getKey(),
+          getScoping(),
+          providerKeyNeedsRehashing ? rehash(providerKey) : providerKey);
+    } else {
+      return this;
+    }
   }
 
   public void applyTo(Binder binder) {
@@ -102,7 +119,7 @@ final class LinkedProviderBindingImpl<T>
         .add("provider", providerKey)
         .toString();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof LinkedProviderBindingImpl) {
@@ -114,7 +131,7 @@ final class LinkedProviderBindingImpl<T>
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping(), providerKey);

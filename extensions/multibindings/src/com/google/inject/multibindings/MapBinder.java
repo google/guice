@@ -16,6 +16,8 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
 import static com.google.inject.multibindings.Element.Type.MAPBINDER;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
@@ -95,7 +97,7 @@ import java.util.Set;
  * that module can order its bindings appropriately. Avoid relying on the
  * iteration order of elements contributed by different modules, since there is
  * no equivalent mechanism to order modules.
- * 
+ *
  * <p>The map is unmodifiable.  Elements can only be added to the map by
  * configuring the MapBinder.  Elements can never be removed from the map.
  *
@@ -224,7 +226,7 @@ public abstract class MapBinder<K, V> {
         Map.class, Entry.class, keyType.getType(), Types.providerOf(valueType.getType())));
   }
 
-  private static <K, V> MapBinder<K, V> newMapBinder(Binder binder, 
+  private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
       TypeLiteral<K> keyType, TypeLiteral<V> valueType,
       Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
       Key<Map<K, Set<V>>> multimapKey, Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
@@ -301,7 +303,7 @@ public abstract class MapBinder<K, V> {
 
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
-    
+
     private boolean permitDuplicates;
     private ImmutableList<Map.Entry<K, Binding<V>>> mapBindings;
 
@@ -384,7 +386,7 @@ public abstract class MapBinder<K, V> {
       });
 
       final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
-      binder.bind(mapKey).toProvider(new RealMapWithExtensionProvider<Map<K, V>>(mapKey) {        
+      binder.bind(mapKey).toProvider(new RealMapWithExtensionProvider<Map<K, V>>(mapKey) {
         public Map<K, V> get() {
           Map<K, V> map = new LinkedHashMap<K, V>();
           for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
@@ -428,7 +430,7 @@ public abstract class MapBinder<K, V> {
           if (isInitialized()) {
             return (List)mapBindings; // safe because mapBindings is immutable
           } else {
-            throw new UnsupportedOperationException("getElements() not supported for module bindings");   
+            throw new UnsupportedOperationException("getElements() not supported for module bindings");
           }
         }
 
@@ -436,7 +438,7 @@ public abstract class MapBinder<K, V> {
           if (isInitialized()) {
             return permitDuplicates;
           } else {
-            throw new UnsupportedOperationException("permitsDuplicates() not supported for module bindings");   
+            throw new UnsupportedOperationException("permitsDuplicates() not supported for module bindings");
           }
         }
 
@@ -453,7 +455,7 @@ public abstract class MapBinder<K, V> {
               return false; // cannot match;
             }
 
-            return key.equals(mapKey) 
+            return key.equals(mapKey)
                 || key.equals(providerMapKey)
                 || key.equals(multimapKey)
                 || key.equals(providerMultimapKey)
@@ -576,7 +578,7 @@ public abstract class MapBinder<K, V> {
       }
 
       @Override public boolean equals(Object o) {
-        return o instanceof MultimapBinder 
+        return o instanceof MultimapBinder
             && ((MultimapBinder<?, ?>) o).multimapKey.equals(multimapKey);
       }
     }
@@ -585,23 +587,30 @@ public abstract class MapBinder<K, V> {
      * Implementation of {@code {@link Map.Entry}&lt;K, {@link Provider}&lt;V&gt;&gt;} that
      * defines equality based on the provider's key rather than the provider itself. This allows
      * Guice to remove duplicate bindings.
-     * 
+     *
      * @param <K> the map's key type
      * @param <V> the type provided by the map's values
      */
     private static final class ProviderMapEntry<K, V> implements Map.Entry<K, Provider<V>> {
       private final K key;
       private final Provider<V> provider;
-      private final Key<V> valueKey;
+      private volatile Key<V> valueKey;
 
       private ProviderMapEntry(K key, Provider<V> provider, Key<V> valueKey) {
         this.key = key;
         this.provider = provider;
         this.valueKey = valueKey;
       }
-      
+
       public Key<V> getValueKey() {
-        return valueKey;
+        // Every time, check if the value key needs rehashing.
+        // If so, update the field as an optimization for next time.
+        Key<V> currentValueKey = valueKey;
+        if (needsRehashing(currentValueKey)) {
+          currentValueKey = rehash(currentValueKey);
+          valueKey = currentValueKey;
+        }
+        return currentValueKey;
       }
 
       public K getKey() {
@@ -624,12 +633,15 @@ public abstract class MapBinder<K, V> {
       @Override public boolean equals(Object obj) {
         return obj instanceof ProviderMapEntry
             && key.equals(((ProviderMapEntry<?, ?>) obj).getKey())
-            && valueKey.equals(((ProviderMapEntry<?, ?>) obj).getValueKey());
+            && getValueKey().equals(((ProviderMapEntry<?, ?>) obj).getValueKey());
       }
 
+      /**
+       * Again, we are not following the normal rules for Map.Entry, this time to avoid
+       * our hashCode changing if our {@link #valueKey} does.
+       */
       @Override public int hashCode() {
-        return 127 * ("key".hashCode() ^ key.hashCode())
-            + 127 * ("valueKey".hashCode() ^ valueKey.hashCode());
+        return key.hashCode();
       }
 
       @Override public String toString() {
@@ -644,24 +656,24 @@ public abstract class MapBinder<K, V> {
         super(equality);
       }
     }
-    
+
     /**
      * A base class for ProviderWithDependencies that need equality
      * based on a specific object.
      */
     private static abstract class RealMapBinderProviderWithDependencies<T> implements ProviderWithDependencies<T> {
       private final Object equality;
-      
+
       public RealMapBinderProviderWithDependencies(Object equality) {
         this.equality = equality;
       }
-      
+
       @Override
       public boolean equals(Object obj) {
         return this.getClass() == obj.getClass() &&
           equality.equals(((RealMapBinderProviderWithDependencies<?>)obj).equality);
       }
-      
+
       @Override
       public int hashCode() {
         return equality.hashCode();

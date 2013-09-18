@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
+
 import com.google.common.base.Objects;
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -49,6 +52,14 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
     return new UntargettedBindingImpl<T>(getSource(), key, getScoping());
   }
 
+  public BindingImpl<T> withRehashedKeys() {
+    if (needsRehashing(getKey())) {
+      return withKey(rehash(getKey()));
+    } else {
+      return this;
+    }
+  }
+
   public void applyTo(Binder binder) {
     getScoping().applyTo(binder.withSource(getSource()).bind(getKey()));
   }
@@ -58,7 +69,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
         .add("key", getKey())
         .add("source", getSource())
         .toString();
-  }  
+  }
 
   @Override
   public boolean equals(Object obj) {
@@ -70,7 +81,7 @@ final class UntargettedBindingImpl<T> extends BindingImpl<T> implements Untarget
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping());

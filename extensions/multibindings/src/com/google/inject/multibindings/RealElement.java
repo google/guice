@@ -37,8 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * <p>Annotation equality is defined based on the binding it is used in, letting Guice spot and
  * remove duplicate bindings without false conflicts. However, as the binding is mutable, so is
- * the annotation. To minimise issues with hashtables, the hashCode will not mutate once the
- * binding type has been set.
+ * the annotation.
  * 
  * @author chrispurcell@google.com (Chris Purcell)
  */
@@ -149,23 +148,13 @@ class RealElement implements Element {
   
   /**
    * Returns the hash code of this annotation. This depends on the binding the annotation is in.
-   * It is guaranteed, however, that the hash code will not change once the binding has been
-   * built.
    * 
    * <p>This <b>does not</b> match the definition of {@link Annotation#hashCode}. However, as
    * these annotations will only ever be used within Guice, and {@link Element} itself is package
    * private and will never be used as an annotation, this should not cause problems.
    */
   @Override public int hashCode() {
-    switch (targetType) {
-      case INSTANCE:
-      case PROVIDER_INSTANCE:
-        // Target is mutable; don't include it in the hash.
-        return Objects.hashCode(setName, type, mapKey, scope, targetType);
-        
-      default:
-        return Objects.hashCode(setName, type, mapKey, scope, targetType, target);
-    }
+    return Objects.hashCode(setName, type, mapKey, scope, targetType, target);
   }
 
   private enum TargetType {

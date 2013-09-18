@@ -131,6 +131,11 @@ public class Key<T> {
     this.hashCode = computeHashCode();
   }
 
+  /**
+   * Computes the hash code for this key. This logic is duplicated in {@link
+   * com.google.inject.internal.RehashableKeys.Keys#needsRehashing}; if it is
+   * changed here, be sure to change it there also.
+   */
   private int computeHashCode() {
     return typeLiteral.hashCode() * 31 + annotationStrategy.hashCode();
   }
@@ -279,7 +284,7 @@ public class Key<T> {
   /**
    * Returns a new key of the specified type with the same annotation as this
    * key.
-   * 
+   *
    * @since 3.0
    */
   public <T> Key<T> ofType(Class<T> type) {
@@ -289,7 +294,7 @@ public class Key<T> {
   /**
    * Returns a new key of the specified type with the same annotation as this
    * key.
-   * 
+   *
    * @since 3.0
    */
   public Key<?> ofType(Type type) {
@@ -299,7 +304,7 @@ public class Key<T> {
   /**
    * Returns a new key of the specified type with the same annotation as this
    * key.
-   * 
+   *
    * @since 3.0
    */
   public <T> Key<T> ofType(TypeLiteral<T> type) {
@@ -308,7 +313,7 @@ public class Key<T> {
 
   /**
    * Returns true if this key has annotation attributes.
-   * 
+   *
    * @since 3.0
    */
   public boolean hasAttributes() {
@@ -318,7 +323,7 @@ public class Key<T> {
   /**
    * Returns this key without annotation attributes, i.e. with only the
    * annotation type.
-   * 
+   *
    * @since 3.0
    */
   public Key<T> withoutAttributes() {
@@ -356,7 +361,7 @@ public class Key<T> {
     if (isAllDefaultMethods(annotationType)) {
       return strategyFor(generateAnnotation(annotationType));
     }
-    
+
     checkNotNull(annotationType, "annotation type");
     ensureRetainedAtRuntime(annotationType);
     ensureIsBindingAnnotation(annotationType);

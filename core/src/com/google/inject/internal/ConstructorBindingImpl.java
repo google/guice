@@ -18,6 +18,8 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -70,14 +72,14 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
    * @param failIfNotLinked true if this ConstructorBindingImpl's InternalFactory should
    *                             only succeed if retrieved from a linked binding
    */
-  static <T> ConstructorBindingImpl<T> create(InjectorImpl injector, Key<T> key, 
+  static <T> ConstructorBindingImpl<T> create(InjectorImpl injector, Key<T> key,
       InjectionPoint constructorInjector, Object source, Scoping scoping, Errors errors,
       boolean failIfNotLinked, boolean failIfNotExplicit)
       throws ErrorsException {
     int numErrors = errors.size();
 
     @SuppressWarnings("unchecked") // constructorBinding guarantees type is consistent
-    Class<? super T> rawType = constructorInjector == null 
+    Class<? super T> rawType = constructorInjector == null
         ? key.getTypeLiteral().getRawType()
         : (Class) constructorInjector.getDeclaringType().getRawType();
 
@@ -124,7 +126,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     return new ConstructorBindingImpl<T>(
         injector, key, source, scopedFactory, scoping, factoryFactory, constructorInjector);
   }
-  
+
   /** Returns true if the inject annotation is on the constructor. */
   private static boolean hasAtInject(Constructor cxtor) {
     return cxtor.isAnnotationPresent(Inject.class)
@@ -139,7 +141,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     factory.provisionCallback =
       injector.provisionListenerStore.get(this);
   }
-  
+
   /** True if this binding has been initialized and is ready for use. */
   boolean isInitialized() {
     return factory.constructorInjector != null;
@@ -153,7 +155,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       return constructorInjectionPoint;
     }
   }
-  
+
   /** Returns a set of dependencies that can be iterated over to clean up stray JIT bindings. */
   Set<Dependency<?>> getInternalDependencies() {
     ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
@@ -168,10 +170,10 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       builder.add(getConstructor())
              .addAll(getInjectableMembers());
     }
-    
-    return Dependency.forInjectionPoints(builder.build());   
+
+    return Dependency.forInjectionPoints(builder.build());
   }
-  
+
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {
     checkState(factory.constructorInjector != null, "not initialized");
     return visitor.visit(this);
@@ -211,6 +213,14 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
         null, key, getSource(), factory, getScoping(), factory, constructorInjectionPoint);
   }
 
+  @Override public BindingImpl<T> withRehashedKeys() {
+    if (needsRehashing(getKey())) {
+      return withKey(rehash(getKey()));
+    } else {
+      return this;
+    }
+  }
+
   @SuppressWarnings("unchecked") // the raw constructor member and declaring type always agree
   public void applyTo(Binder binder) {
     InjectionPoint constructor = getConstructor();
@@ -225,7 +235,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
         .add("scope", getScoping())
         .toString();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof ConstructorBindingImpl) {
@@ -237,7 +247,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping(), constructorInjectionPoint);
@@ -249,7 +259,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     private boolean allowCircularProxy;
     private ConstructorInjector<T> constructorInjector;
     private ProvisionListenerStackCallback<T> provisionCallback;
-    
+
     Factory(boolean failIfNotLinked, Key<?> key) {
       this.failIfNotLinked = failIfNotLinked;
       this.key = key;
@@ -259,7 +269,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
     public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
         throws ErrorsException {
       checkState(constructorInjector != null, "Constructor not ready");
-      
+
       if(failIfNotLinked && !linked) {
         throw errors.jitDisabled(key).toException();
       }

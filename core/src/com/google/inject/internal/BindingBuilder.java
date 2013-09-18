@@ -41,7 +41,7 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class BindingBuilder<T> extends AbstractBindingBuilder<T>
-    implements AnnotatedBindingBuilder<T> {
+    implements AnnotatedBindingBuilder<T>, RehashableKeys {
 
   public BindingBuilder(Binder binder, List<Element> elements, Object source, Key<T> key) {
     super(binder, elements, source, key);
@@ -157,7 +157,6 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     }
 
     try {
-      @SuppressWarnings("unchecked") // safe; constructor is a subtype of toConstruct
       InjectionPoint constructorPoint = InjectionPoint.forConstructor(constructor, type);
       setBinding(new ConstructorBindingImpl<T>(base.getKey(), base.getSource(), base.getScoping(),
           constructorPoint, injectionPoints));
@@ -166,6 +165,10 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     }
 
     return this;
+  }
+  
+  public void rehashKeys() {
+    setBinding(getBinding().withRehashedKeys());
   }
 
   @Override public String toString() {

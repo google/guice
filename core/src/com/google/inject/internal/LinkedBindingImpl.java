@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -50,7 +53,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
   public Key<? extends T> getLinkedKey() {
     return targetKey;
   }
-  
+
   public Set<Dependency<?>> getDependencies() {
     return ImmutableSet.<Dependency<?>>of(Dependency.get(targetKey));
   }
@@ -61,6 +64,20 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedBindingImpl<T>(getSource(), key, getScoping(), targetKey);
+  }
+
+  public BindingImpl<T> withRehashedKeys() {
+    boolean keyNeedsRehashing = needsRehashing(getKey());
+    boolean targetKeyNeedsRehashing = needsRehashing(targetKey);
+    if (keyNeedsRehashing || targetKeyNeedsRehashing) {
+      return new LinkedBindingImpl<T>(
+          getSource(),
+          keyNeedsRehashing ? rehash(getKey()) : getKey(),
+          getScoping(),
+          targetKeyNeedsRehashing ? rehash(targetKey) : targetKey);
+    } else {
+      return this;
+    }
   }
 
   public void applyTo(Binder binder) {
@@ -75,7 +92,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
         .add("target", targetKey)
         .toString();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof LinkedBindingImpl) {
@@ -87,7 +104,7 @@ public final class LinkedBindingImpl<T> extends BindingImpl<T> implements Linked
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping(), targetKey);

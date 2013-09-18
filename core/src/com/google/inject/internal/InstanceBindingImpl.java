@@ -16,6 +16,9 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
+import static com.google.inject.internal.RehashableKeys.Keys.rehash;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -83,6 +86,14 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
     return new InstanceBindingImpl<T>(getSource(), key, getScoping(), injectionPoints, instance);
   }
 
+  public BindingImpl<T> withRehashedKeys() {
+    if (needsRehashing(getKey())) {
+      return withKey(rehash(getKey()));
+    } else {
+      return this;
+    }
+  }
+
   public void applyTo(Binder binder) {
     // instance bindings aren't scoped
     binder.withSource(getSource()).bind(getKey()).toInstance(instance);
@@ -95,7 +106,7 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
         .add("instance", instance)
         .toString();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof InstanceBindingImpl) {
@@ -107,7 +118,7 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
       return false;
     }
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hashCode(getKey(), getScoping());

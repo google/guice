@@ -43,6 +43,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
+import com.google.inject.internal.RehashableKeys;
 import com.google.inject.internal.util.SourceProvider;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.matcher.Matcher;
@@ -120,6 +121,7 @@ public final class Elements {
       // Free the memory consumed by the stack trace elements cache
       StackTraceElements.clearCache();
     }
+    binder.rehashKeys();
     return Collections.unmodifiableList(binder.elements);
   }
 
@@ -147,10 +149,11 @@ public final class Elements {
         guice_include_stack_traces_property);
   }
 
-  private static class RecordingBinder implements Binder, PrivateBinder {
+  private static class RecordingBinder implements Binder, PrivateBinder, RehashableKeys {
     private final Stage stage;
     private final Set<Module> modules;
     private final List<Element> elements;
+    private final List<RehashableKeys> rehashables;
     private final Object source;
     /** The current modules stack */
     private ModuleSource moduleSource = null;
@@ -164,6 +167,7 @@ public final class Elements {
       this.stage = stage;
       this.modules = Sets.newHashSet();
       this.elements = Lists.newArrayList();
+      this.rehashables = Lists.newArrayList();
       this.source = null;
       this.sourceProvider = SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
           Elements.class, RecordingBinder.class, AbstractModule.class,
@@ -180,6 +184,7 @@ public final class Elements {
       this.stage = prototype.stage;
       this.modules = prototype.modules;
       this.elements = prototype.elements;
+      this.rehashables = prototype.rehashables;
       this.source = source;
       this.moduleSource = prototype.moduleSource;
       this.sourceProvider = sourceProvider;
@@ -192,6 +197,7 @@ public final class Elements {
       this.stage = parent.stage;
       this.modules = Sets.newHashSet();
       this.elements = privateElements.getElementsMutable();
+      this.rehashables = Lists.newArrayList();
       this.source = parent.source;
       this.moduleSource = parent.moduleSource;
       this.sourceProvider = parent.sourceProvider;
@@ -215,7 +221,7 @@ public final class Elements {
 
     @SuppressWarnings("unchecked") // it is safe to use the type literal for the raw type
     public void requestInjection(Object instance) {
-      requestInjection((TypeLiteral) TypeLiteral.get(instance.getClass()), instance);
+      requestInjection((TypeLiteral<Object>) TypeLiteral.get(instance.getClass()), instance);
     }
 
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
@@ -294,7 +300,9 @@ public final class Elements {
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-      return new BindingBuilder<T>(this, elements, getElementSource(), key);
+      BindingBuilder<T> builder = new BindingBuilder<T>(this, elements, getElementSource(), key);
+      rehashables.add(builder);
+      return builder;
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
@@ -312,6 +320,7 @@ public final class Elements {
     public <T> Provider<T> getProvider(final Key<T> key) {
       final ProviderLookup<T> element = new ProviderLookup<T>(getElementSource(), key);
       elements.add(element);
+      rehashables.add(element.getKeyRehasher());
       return element.getProvider();
     }
 
@@ -340,8 +349,10 @@ public final class Elements {
 
     public PrivateBinder newPrivateBinder() {
       PrivateElementsImpl privateElements = new PrivateElementsImpl(getElementSource());
+      RecordingBinder binder = new RecordingBinder(this, privateElements);
       elements.add(privateElements);
-      return new RecordingBinder(this, privateElements);
+      rehashables.add(binder);
+      return binder;
     }
 
     public void disableCircularProxies() {
@@ -446,6 +457,12 @@ public final class Elements {
       StackTraceElement[] partialCallStack = new StackTraceElement[chunkSize];
       System.arraycopy(callStack, 1, partialCallStack, 0, chunkSize);
       return partialCallStack;
+    }
+
+    @Override public void rehashKeys() {
+      for (RehashableKeys rehashable : rehashables) {
+        rehashable.rehashKeys();
+      }
     }
 
     @Override public String toString() {
