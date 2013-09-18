@@ -100,7 +100,9 @@ public class ErrorHandlingTest {
     Invalid(String s) {}
   }
 
-  @Singleton @GoodScope
+  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error to test
+  @Singleton 
+  @GoodScope
   static class TooManyScopes {
   }
 
