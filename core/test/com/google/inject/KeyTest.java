@@ -106,7 +106,7 @@ public class KeyTest extends TestCase {
       assertEquals(wrappers[t], primitiveKey.getTypeLiteral().getType());
       assertEquals(wrappers[t], wrapperKey.getTypeLiteral().getType());
     }
-    
+
     Key<Integer> integerKey = Key.get(Integer.class);
     Key<Integer> integerKey2 = Key.get(Integer.class, Named.class);
     Key<Integer> integerKey3 = Key.get(Integer.class, Names.named("int"));
@@ -191,6 +191,35 @@ public class KeyTest extends TestCase {
     }
   }
 
+  public void testCannotGetKeyWithUnspecifiedTypeVariables() {
+    TypeLiteral<Integer> typeLiteral = KeyTest.createTypeLiteral();
+    try {
+      Key.get(typeLiteral);
+      fail("Guice should not allow keys for T");
+    } catch (ConfigurationException e) {
+      assertContains(e.getMessage(),
+          "T cannot be used as a key; It is not fully specified.");
+    }
+  }
+
+  private static <T> TypeLiteral<T> createTypeLiteral() {
+    return new TypeLiteral<T>() {};
+  }
+
+  public void testCannotCreateKeySubclassesWithUnspecifiedTypeVariables() {
+    try {
+      KeyTest.<Integer>createKey();
+      fail("Guice should not allow keys for T");
+    } catch (ConfigurationException e) {
+      assertContains(e.getMessage(),
+          "T cannot be used as a key; It is not fully specified.");
+    }
+  }
+
+  private static <T> Key<T> createKey() {
+    return new Key<T>() {};
+  }
+
   interface B {}
 
   @Retention(RUNTIME)
@@ -203,27 +232,27 @@ public class KeyTest extends TestCase {
   class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
     A a; B b; C c;
   }
-  
+
   public void testKeysWithDefaultAnnotations() {
     AllDefaults allDefaults = HasAnnotations.class.getAnnotation(AllDefaults.class);
     assertEquals(Key.get(Foo.class, allDefaults), Key.get(Foo.class, AllDefaults.class));
-    
-    Marker marker = HasAnnotations.class.getAnnotation(Marker.class);    
+
+    Marker marker = HasAnnotations.class.getAnnotation(Marker.class);
     assertEquals(Key.get(Foo.class, marker), Key.get(Foo.class, Marker.class));
-    
+
     Key<?> noDefaults = Key.get(Foo.class, NoDefaults.class);
     assertNull(noDefaults.getAnnotation());
     assertEquals(NoDefaults.class, noDefaults.getAnnotationType());
-    
+
     Key<?> someDefaults = Key.get(Foo.class, SomeDefaults.class);
     assertNull(someDefaults.getAnnotation());
-    assertEquals(SomeDefaults.class, someDefaults.getAnnotationType());    
+    assertEquals(SomeDefaults.class, someDefaults.getAnnotationType());
   }
-  
+
   @Retention(RUNTIME)
   @BindingAnnotation @interface AllDefaults {
     int v1() default 1;
-    String v2() default "foo";    
+    String v2() default "foo";
   }
 
   @Retention(RUNTIME)
@@ -232,18 +261,18 @@ public class KeyTest extends TestCase {
     String v2() default "foo";
     Class<?> clazz();
   }
-  
+
   @Retention(RUNTIME)
   @BindingAnnotation @interface NoDefaults {
     int value();
   }
-  
+
   @Retention(RUNTIME)
   @BindingAnnotation @interface Marker {
   }
-  
+
   @AllDefaults
   @Marker
   class HasAnnotations {}
-  
+
 }

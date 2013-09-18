@@ -72,7 +72,8 @@ public class Key<T> {
   @SuppressWarnings("unchecked")
   protected Key(Class<? extends Annotation> annotationType) {
     this.annotationStrategy = strategyFor(annotationType);
-    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = MoreTypes.canonicalizeForKey(
+        (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
   }
 
@@ -92,7 +93,8 @@ public class Key<T> {
   protected Key(Annotation annotation) {
     // no usages, not test-covered
     this.annotationStrategy = strategyFor(annotation);
-    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = MoreTypes.canonicalizeForKey(
+        (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
   }
 
@@ -110,7 +112,8 @@ public class Key<T> {
   @SuppressWarnings("unchecked")
   protected Key() {
     this.annotationStrategy = NullAnnotationStrategy.INSTANCE;
-    this.typeLiteral = (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass());
+    this.typeLiteral = MoreTypes.canonicalizeForKey(
+        (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
   }
 
