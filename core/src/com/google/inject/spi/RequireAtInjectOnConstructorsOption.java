@@ -35,9 +35,6 @@ public final class RequireAtInjectOnConstructorsOption implements Element {
   }
 
   public Object getSource() {
-    if (source instanceof ElementSource) {
-      return ((ElementSource) source).getDeclaringSource();
-    }
     return source;
   }
 

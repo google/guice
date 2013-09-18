@@ -14,14 +14,18 @@ import java.util.List;
  * defines the Guice {@link Element element}. For example, if the element is created from a method
  * annotated by {@literal @Provides}, the declaring source of element would be the method itself. 
  * <p>
- * The creation call stack is the sequence of calls ends at one of {@link Binder} {@code bindXXX()} 
- * methods and eventually defines the element. Note that {@link #getStackTrace()} lists {@link 
- * StackTraceElement StackTraceElements} in reverse chronological order. The first element (index 
- * zero) is the last method call and the last element is the first method invocation.
+ * The {@link #getStackTrace()} refers to the sequence of calls ends at one of {@link Binder} 
+ * {@code bindXXX()} methods and eventually defines the element. Note that {@link #getStackTrace()} 
+ * lists {@link StackTraceElement StackTraceElements} in reverse chronological order. The first 
+ * element (index zero) is the last method call and the last element is the first method invocation.
+ * By default, the stack trace is not collected. The default behavior can be changed by setting the 
+ * {@code guice_include_stack_traces} flag value. The value can be either {@code DEFAULT} or 
+ * {@code COMPLETE}. Note that collecting stack traces for every binding can cause a performance hit
+ * when the injector is created.
  * <p>
  * The sequence of class names of {@link Module modules} involved in the element creation can be 
- * retrieved by {@link #getModuleClassNames()}. Similar to the call stack, the order is reverse 
- * chronological. The first module (index 0) is the module that installs the {@link Element 
+ * retrieved by {@link #getModuleClassNames()}. Similar to {@link #getStackTrace()}, the order is 
+ * reverse chronological. The first module (index 0) is the module that installs the {@link Element 
  * element}. The last module is the root module.
  * <p>
  * In order to support the cases where a Guice {@link Element element} is created from another
@@ -125,18 +129,24 @@ public final class ElementSource {
    *  4 - theRest(). 
    * }
    * <p>
-   * 1 and 3 are returned.   
+   * 1 and 3 are returned.
+   * <p>
+   * In the cases where stack trace is not available (i.e.,the stack trace was not collected), 
+   * it returns an empty array.
    */
   public List<Integer> getModuleConfigurePositionsInStackTrace() {
+    if (!isStackTraceRetained()) {
+      return ImmutableList.<Integer>of();
+    }
     int size = moduleSource.size();
     Integer[] positions = new Integer[size];
     int position = partialCallStack.length;
-    positions[0] = position;
+    positions[0] = position - 1;
     ModuleSource current = moduleSource;
     int cursor = 1;
     while (cursor < size) {
       position += current.getPartialCallStack().length;
-      positions[cursor] = position;
+      positions[cursor] = position - 1;
       current = current.getParent();
       cursor++;
     }
@@ -147,7 +157,9 @@ public final class ElementSource {
    * Returns the sequence of method calls that ends at one of {@link Binder} {@code bindXXX()} 
    * methods and eventually defines the element. Note that {@link #getStackTrace()} lists {@link 
    * StackTraceElement StackTraceElements} in reverse chronological order. The first element (index 
-   * zero) is the last method call and the last element is the first method invocation.
+   * zero) is the last method call and the last element is the first method invocation. In the cases
+   * where stack trace is not available (i.e.,the stack trace was not collected), it returns an 
+   * empty array.
    */
   public StackTraceElement[] getStackTrace() {
     int modulesCallStackSize = moduleSource.getStackTraceSize();
@@ -161,6 +173,13 @@ public final class ElementSource {
     return callStack;
   }
   
+  /**
+   * Returns true if stack trace was collected.
+   */ 
+  public boolean isStackTraceRetained() {
+    return (partialCallStack.length > 0);
+  }
+
   /**
    * Returns {@code getDeclaringSource().toString()} value.
    */

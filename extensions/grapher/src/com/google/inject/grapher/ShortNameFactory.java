@@ -22,6 +22,7 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.util.StackTraceElements;
+import com.google.inject.spi.ElementSource;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -98,6 +99,9 @@ public class ShortNameFactory implements NameFactory {
    * or a {@link Method} when a provider method is used.
    */
   public String getSourceName(Object source) {
+    if (source instanceof ElementSource) {
+      source = ((ElementSource) source).getDeclaringSource();
+    }
     if (source instanceof Method) {
       source = StackTraceElements.forMember((Method) source);
     }

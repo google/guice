@@ -16,6 +16,8 @@
 
 package com.google.inject;
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.spi.ElementSource;
 import com.google.inject.util.Modules;
 
 import junit.framework.TestCase;
@@ -53,8 +55,14 @@ public class ModulesTest extends TestCase {
       }
     };
     Injector injector = Guice.createInjector(Modules.combine(skipSourcesModule));
-    StackTraceElement source = (StackTraceElement) injector.getBinding(Integer.class).getSource();
-    assertEquals(skipSourcesModule.getClass().getName(), source.getClassName());
+    ElementSource source = (ElementSource) injector.getBinding(Integer.class).getSource();
+    // Check modules stack
+    assertEquals(source.getModuleClassNames().size(), 4);
+    assertEquals(ImmutableList.of("com.google.inject.ModulesTest$2",
+        "com.google.inject.util.Modules$2", "com.google.inject.ModulesTest$1",
+        "com.google.inject.util.Modules$2"), source.getModuleClassNames());
+    StackTraceElement stackTraceElement = (StackTraceElement) source.getDeclaringSource();
+    assertEquals(skipSourcesModule.getClass().getName(), stackTraceElement.getClassName());
   }
 
   private <T> Module newModule(final T toBind) {

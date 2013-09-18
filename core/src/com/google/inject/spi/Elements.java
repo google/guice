@@ -72,10 +72,6 @@ public final class Elements {
     COMPLETE
   }
 
-  // Use "-Dguice_include_stack_traces={DEFAULT,COMPLETE}" to specify
-  // how guice should collect stack trace data.
-  private static final String guice_include_stack_traces_property =
-       System.getProperty("guice_include_stack_traces", "DEFAULT");
 
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
@@ -143,10 +139,9 @@ public final class Elements {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
-
   private static boolean collectCompleteStackTrace() {
     return IncludeStackTraceFlagValues.COMPLETE.name().equals(
-        guice_include_stack_traces_property);
+        System.getProperty("guice_include_stack_traces"));
   }
 
   private static class RecordingBinder implements Binder, PrivateBinder, RehashableKeys {

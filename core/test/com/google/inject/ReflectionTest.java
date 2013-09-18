@@ -18,6 +18,8 @@ package com.google.inject;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.inject.spi.ElementSource;
+
 import junit.framework.TestCase;
 
 import java.lang.annotation.Retention;
@@ -41,7 +43,8 @@ public class ReflectionTest extends TestCase {
 
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(foo, fooBinding.getProvider().get());
-    assertNotNull(fooBinding.getSource());
+    ElementSource source = (ElementSource) fooBinding.getSource();
+    assertNotNull(source.getDeclaringSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
   }
 
@@ -54,7 +57,8 @@ public class ReflectionTest extends TestCase {
 
     Binding<?> i = injector.getBinding(Key.get(int.class, I.class));
     assertEquals(5, i.getProvider().get());
-    assertNotNull(i.getSource());
+    ElementSource source = (ElementSource) i.getSource();
+    assertNotNull(source.getDeclaringSource());
     assertEquals(Key.get(int.class, I.class), i.getKey());
   }
 
@@ -70,7 +74,8 @@ public class ReflectionTest extends TestCase {
 
     Binding<Foo> fooBinding = injector.getBinding(Key.get(Foo.class));
     assertSame(bar, fooBinding.getProvider().get());
-    assertNotNull(fooBinding.getSource());
+    ElementSource source = (ElementSource) fooBinding.getSource();
+    assertNotNull(source.getDeclaringSource());
     assertEquals(Key.get(Foo.class), fooBinding.getKey());
   }
 

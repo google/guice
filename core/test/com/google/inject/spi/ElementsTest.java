@@ -20,6 +20,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -1228,6 +1229,12 @@ public class ElementsTest extends TestCase {
     for (int i = 0; i < visitors.length; i++) {
       ElementVisitor<?> visitor = visitors[i];
       Element element = elements.get(i);
+      if (!(element instanceof Message)) {
+          ElementSource source = (ElementSource) element.getSource();
+          assertTrue(source.getModuleClassNames().size() > 0);
+          assertFalse(source.isStackTraceRetained()) ;
+          assertEquals(0, source.getStackTrace().length);
+      }
       if (!(visitor instanceof ExternalFailureVisitor)) {
         assertContains(element.getSource().toString(), "ElementsTest.java");
       }

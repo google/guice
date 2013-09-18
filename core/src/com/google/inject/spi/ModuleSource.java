@@ -74,10 +74,14 @@ final class ModuleSource {
    * Module#configure(Binder) configure(Binder)} method invocation
    */
   StackTraceElement[] getPartialCallStack() {
-    int chunkSize = partialCallStack.length;
-    StackTraceElement[] callStack = new StackTraceElement[chunkSize];
-    System.arraycopy(partialCallStack, 0, callStack, 0, chunkSize);
-    return callStack;
+    return StackTraceElements.convertToStackTraceElement(partialCallStack);
+  }
+  
+  /**
+   * Returns the size of partial call stack.
+   */
+  int getPartialCallStackSize() {
+    return partialCallStack.length;
   }
   
   /** 

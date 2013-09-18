@@ -79,7 +79,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof InstanceBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(InstanceBinding<? extends T> binding) {
@@ -111,7 +111,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ProviderInstanceBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(
@@ -137,7 +137,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ProviderKeyBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(Key.get(String.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(ProviderKeyBinding<? extends T> binding) {
@@ -166,7 +166,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof LinkedKeyBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(aKey, binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(LinkedKeyBinding<? extends T> binding) {
@@ -198,7 +198,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof ConstructorBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(Key.get(D.class), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(ConstructorBinding<? extends T> binding) {
@@ -225,7 +225,7 @@ public class SpiBindingsTest extends TestCase {
         new FailingElementVisitor() {
           @Override public <T> Void visit(Binding<T> binding) {
             assertTrue(binding instanceof InstanceBinding);
-            assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+            checkBindingSource(binding);
             assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(InstanceBinding<? extends T> binding) {
@@ -248,7 +248,7 @@ public class SpiBindingsTest extends TestCase {
 
     Binding<Integer> binding = injector.getBinding(Key.get(Integer.class, Names.named("one")));
     assertEquals(Key.get(Integer.class, Names.named("one")), binding.getKey());
-    assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+    checkBindingSource(binding);
     assertTrue(binding instanceof ConvertedConstantBinding);
     binding.acceptTargetVisitor(new FailingTargetVisitor<Integer>() {
       @Override public Void visit(
@@ -270,7 +270,7 @@ public class SpiBindingsTest extends TestCase {
     Key<Provider<String>> providerOfStringKey = new Key<Provider<String>>() {};
     Binding<Provider<String>> binding = injector.getBinding(providerOfStringKey);
     assertEquals(providerOfStringKey, binding.getKey());
-    assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+    checkBindingSource(binding);
     assertTrue(binding instanceof ProviderBinding);
     binding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
       @Override public Void visit(
@@ -382,7 +382,7 @@ public class SpiBindingsTest extends TestCase {
     Key<Provider<String>> providerOfStringKey = new Key<Provider<String>>() {};
     Binding<Provider<String>> providerBinding = injector.getBinding(providerOfStringKey);
     assertEquals(providerOfStringKey, providerBinding.getKey());
-    assertContains(providerBinding.getSource().toString(), "SpiBindingsTest.java");
+    checkBindingSource(providerBinding);
     assertTrue("binding: " + providerBinding, providerBinding instanceof ProviderBinding);
     providerBinding.acceptTargetVisitor(new FailingTargetVisitor<Provider<String>>() {
       @Override public Void visit(ProviderBinding<? extends Provider<String>> binding) {
@@ -394,7 +394,7 @@ public class SpiBindingsTest extends TestCase {
     // Check for String binding -- that one is ProviderInstanceBinding, and gets hooked
     Binding<String> binding = injector.getBinding(String.class);
     assertEquals(Key.get(String.class), binding.getKey());
-    assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+    checkBindingSource(binding);
     assertTrue(binding instanceof ProviderInstanceBinding);
     assertEquals("visited", binding.acceptTargetVisitor(new FailingSpiTargetVisitor<String>()));
   }
@@ -406,6 +406,14 @@ public class SpiBindingsTest extends TestCase {
     }
   }
 
+  public void checkBindingSource(Binding binding) {
+    assertContains(binding.getSource().toString(), "SpiBindingsTest.java");
+    ElementSource source = (ElementSource) binding.getSource();
+    assertTrue(source.getModuleClassNames().size() > 0);
+    assertFalse(source.isStackTraceRetained()) ;
+    assertEquals(0, source.getStackTrace().length);
+  }
+  
   public void checkInjector(Module module, ElementVisitor<?>... visitors) {
     Injector injector = Guice.createInjector(module);
 
