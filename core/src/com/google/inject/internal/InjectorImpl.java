@@ -128,12 +128,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (parent != null) {
       localContext = parent.localContext;
     } else {
-      localContext = new ThreadLocal<Object[]>() {
-        @Override
-        protected Object[] initialValue() {
-          return new Object[1];
-        }
-      };
+      localContext = new LocalContextThreadLocal();
     }
   }
 
@@ -1066,4 +1061,10 @@ final class InjectorImpl implements Injector, Lookups {
         .toString();
   }
 
+  private static final class LocalContextThreadLocal extends ThreadLocal<Object[]> {
+    @Override
+    protected Object[] initialValue() {
+      return new Object[1];
+    }
+  }
 }
