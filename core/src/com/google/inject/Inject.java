@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * <li>Every instance it constructs. The class being constructed must have
  * exactly one of its constructors marked with {@code @Inject} or must have a
  * constructor taking no parameters. The Injector then proceeds to perform
- * method and field injections.
+ * field and method injections.
  * 
  * <li>Pre-constructed instances passed to {@link Injector#injectMembers},
  * {@link com.google.inject.binder.LinkedBindingBuilder#toInstance(Object)} and
