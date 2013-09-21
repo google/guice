@@ -1,9 +1,8 @@
 rm -rf build/docs
-CV=3.0
+CV=4.0
 
 # remove old api-diffs
-svn rm latest-api-diffs/$CV
-svn ci -m "Removed old $CV api diffs." latest-api-diffs/$CV
+git rm -r latest-api-diffs/$CV
 
 # create new api-diffs
 ant jdiff
@@ -16,5 +15,5 @@ ant javadoc
 cp -r build/docs/javadoc latest-api-diffs/$CV/javadoc
 
 # commit changes
-svn add latest-api-diffs/$CV
-svn ci -m "Added updated $CV api diffs." latest-api-diffs/$CV latest-api-diffs/$CV.xml
+git add -A latest-api-diffs
+git commit -m "Added updated $CV api diffs."  latest-api-diffs
