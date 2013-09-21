@@ -16,10 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
-
-import java.util.Map;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 /**
  * Lazily creates (and caches) values for keys. If creating the value fails (with errors), an
@@ -29,9 +28,9 @@ import java.util.Map;
  */
 public abstract class FailableCache<K, V> {
   
-  private final Map<K, Object> delegate = new MapMaker().makeComputingMap(
-      new Function<K, Object>() {
-        public Object apply(K key) {
+  private final LoadingCache<K, Object> delegate = CacheBuilder.newBuilder().build(
+      new CacheLoader<K, Object>() {
+        public Object load(K key) {
           Errors errors = new Errors();
           V result = null;
           try {
@@ -46,7 +45,7 @@ public abstract class FailableCache<K, V> {
   protected abstract V create(K key, Errors errors) throws ErrorsException;
   
   public V get(K key, Errors errors) throws ErrorsException {
-    Object resultOrError = delegate.get(key);
+    Object resultOrError = delegate.getUnchecked(key);
     if (resultOrError instanceof Errors) {
       errors.merge((Errors) resultOrError);
       throw errors.toException();
@@ -58,6 +57,6 @@ public abstract class FailableCache<K, V> {
   }
   
   boolean remove(K key) {
-    return delegate.remove(key) != null;
+    return delegate.asMap().remove(key) != null;
   }
 }

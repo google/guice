@@ -16,11 +16,12 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -29,7 +30,6 @@ import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListenerBinding;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -47,10 +47,10 @@ final class ProvisionListenerCallbackStore {
   
   private final ImmutableList<ProvisionListenerBinding> listenerBindings;
 
-  private final Map<KeyBinding, ProvisionListenerStackCallback<?>> cache
-      = new MapMaker().makeComputingMap(
-          new Function<KeyBinding, ProvisionListenerStackCallback<?>>() {
-            public ProvisionListenerStackCallback<?> apply(KeyBinding key) {
+  private final LoadingCache<KeyBinding, ProvisionListenerStackCallback<?>> cache
+      = CacheBuilder.newBuilder().build(
+          new CacheLoader<KeyBinding, ProvisionListenerStackCallback<?>>() {
+            public ProvisionListenerStackCallback<?> load(KeyBinding key) {
               return create(key.binding);
             }
           });
@@ -65,7 +65,7 @@ final class ProvisionListenerCallbackStore {
   public <T> ProvisionListenerStackCallback<T> get(Binding<T> binding) {
     // Never notify any listeners for internal bindings.
     if (!INTERNAL_BINDINGS.contains(binding.getKey())) {
-      return (ProvisionListenerStackCallback<T>) cache.get(
+      return (ProvisionListenerStackCallback<T>) cache.getUnchecked(
           new KeyBinding(binding.getKey(), binding));
     }
     return ProvisionListenerStackCallback.emptyListener();
@@ -81,7 +81,7 @@ final class ProvisionListenerCallbackStore {
    * Returns true if the type was stored in the cache, false otherwise.
    */
   boolean remove(Binding<?> type) {
-    return cache.remove(type) != null;
+    return cache.asMap().remove(type) != null;
   }
 
   /**

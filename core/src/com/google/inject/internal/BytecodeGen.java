@@ -16,9 +16,9 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -83,7 +82,7 @@ public final class BytecodeGen {
     @Override protected String getTag() {
       return "ByGuice";
     }
-    
+
     @Override
     public String getClassName(String prefix, String source, Object key,
         net.sf.cglib.core.Predicate names) {
@@ -94,7 +93,7 @@ public final class BytecodeGen {
       return super.getClassName(prefix, "FastClass", key, names);
     }
   };
-  
+
   static final net.sf.cglib.core.NamingPolicy ENHANCER_NAMING_POLICY
       = new net.sf.cglib.core.DefaultNamingPolicy() {
     @Override
@@ -125,24 +124,24 @@ public final class BytecodeGen {
    * Weak cache of bridge class loaders that make the Guice implementation
    * classes visible to various code-generated proxies of client classes.
    */
-  private static final Map<ClassLoader, ClassLoader> CLASS_LOADER_CACHE;
+  private static final LoadingCache<ClassLoader, ClassLoader> CLASS_LOADER_CACHE;
 
   static {
-    if (CUSTOM_LOADER_ENABLED) {
-      CLASS_LOADER_CACHE = new MapMaker().weakKeys().weakValues().makeComputingMap(
-          new Function<ClassLoader, ClassLoader>() {
-            public ClassLoader apply(final ClassLoader typeClassLoader) {
-              logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
-              return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-                public ClassLoader run() {
-                  return new BridgeClassLoader(typeClassLoader);
-                }
-              });
-            }
-          });
-    } else {
-      CLASS_LOADER_CACHE = ImmutableMap.of();
+    CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().weakKeys().weakValues();
+    if (!CUSTOM_LOADER_ENABLED) {
+      builder.maximumSize(0);
     }
+    CLASS_LOADER_CACHE = builder.build(
+        new CacheLoader<ClassLoader, ClassLoader>() {
+          public ClassLoader load(final ClassLoader typeClassLoader) {
+            logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
+            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+              public ClassLoader run() {
+                return new BridgeClassLoader(typeClassLoader);
+              }
+            });
+          }
+        });
   }
 
   /**
@@ -166,7 +165,7 @@ public final class BytecodeGen {
     if (!CUSTOM_LOADER_ENABLED) {
       return delegate;
     }
-    
+
     // java.* types can be seen everywhere
     if (type.getName().startsWith("java.")) {
       return GUICE_CLASS_LOADER;
@@ -183,7 +182,7 @@ public final class BytecodeGen {
     if (Visibility.forType(type) == Visibility.PUBLIC) {
       if (delegate != SystemBridgeHolder.SYSTEM_BRIDGE.getParent()) {
         // delegate guaranteed to be non-null here
-        return CLASS_LOADER_CACHE.get(delegate);
+        return CLASS_LOADER_CACHE.getUnchecked(delegate);
       }
       // delegate may or may not be null here
       return SystemBridgeHolder.SYSTEM_BRIDGE;

@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This test is in a separate package so we can test package-level visibility
@@ -80,14 +81,14 @@ public class BytecodeGenTest extends TestCase {
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     injector.getInstance(PublicUserOfPackagePrivate.class); // This must pass.
   }
-  
+
   public void testEnhancerNaming() {
     Injector injector = Guice.createInjector(interceptorModule, new PackageVisibilityTestModule());
     PublicUserOfPackagePrivate pupp = injector.getInstance(PublicUserOfPackagePrivate.class);
     assertTrue(pupp.getClass().getName().startsWith(
         PublicUserOfPackagePrivate.class.getName() + "$$EnhancerByGuice$$"));
   }
-  
+
   // TODO(sameb): Figure out how to test FastClass naming tests.
 
   /**
@@ -228,7 +229,7 @@ public class BytecodeGenTest extends TestCase {
       assertNotSame(testProxy.getClass().getClassLoader(), systemClassLoader);
     }
   }
-  
+
   public void testProxyClassUnloading() {
     Object testObject = Guice.createInjector(interceptorModule, testModule)
         .getInstance(proxyTestClass);
@@ -247,24 +248,21 @@ public class BytecodeGenTest extends TestCase {
      * this should be enough to queue the weak reference
      * unless something is holding onto it accidentally.
      */
+    final int MAX_COUNT = 100;
     String[] buf;
     System.gc();
-    buf = new String[8 * 1024 * 1024];
-    buf = null;
-    System.gc();
-    buf = new String[8 * 1024 * 1024];
-    buf = null;
-    System.gc();
-    buf = new String[8 * 1024 * 1024];
-    buf = null;
-    System.gc();
-    buf = new String[8 * 1024 * 1024];
-    buf = null;
-    System.gc();
+    //TODO(cgruber): Use com.google.common.testing.GcFinalization and a countdown latch to un-flake.
+    for (int count = 0 ; clazzRef.get() != null ; count++) {
+      buf = new String[8 * 1024 * 1024];
+      buf = null;
+      System.gc();
+      assertTrue("Timeout waiting for class to be unloaded.  This may be a flaky result.",
+          count <= MAX_COUNT);
+    }
 
     // This test could be somewhat flaky when the GC isn't working.
     // If it fails, run the test again to make sure it's failing reliably.
-    assertNull(clazzRef.get());
+    assertNull("Proxy class was not unloaded.", clazzRef.get());
   }
 
   public void testProxyingPackagePrivateMethods() {
