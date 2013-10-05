@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
@@ -40,11 +41,11 @@ public class PrivateModuleTest extends TestCase {
 
   public void testBasicUsage() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).annotatedWith(named("a")).toInstance("public");
 
         install(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             bind(String.class).annotatedWith(named("b")).toInstance("i");
 
             bind(AB.class).annotatedWith(named("one")).to(AB.class);
@@ -53,7 +54,7 @@ public class PrivateModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             bind(String.class).annotatedWith(named("b")).toInstance("ii");
 
             bind(AB.class).annotatedWith(named("two")).to(AB.class);
@@ -74,7 +75,7 @@ public class PrivateModuleTest extends TestCase {
   
   public void testWithoutPrivateModules() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         PrivateBinder bindA = binder().newPrivateBinder();
         bindA.bind(String.class).annotatedWith(named("a")).toInstance("i");
         bindA.expose(String.class).annotatedWith(named("a"));
@@ -94,7 +95,7 @@ public class PrivateModuleTest extends TestCase {
   public void testMisplacedExposedAnnotation() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {}
+        @Override protected void configure() {}
 
         @Provides @Exposed
         String provideString() {
@@ -112,7 +113,7 @@ public class PrivateModuleTest extends TestCase {
   public void testMisplacedExposeStatement() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           ((PrivateBinder) binder()).expose(String.class).annotatedWith(named("a"));
         }
       });
@@ -126,9 +127,9 @@ public class PrivateModuleTest extends TestCase {
 
   public void testPrivateModulesAndProvidesMethods() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         install(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             expose(String.class).annotatedWith(named("a"));
           }
 
@@ -142,7 +143,7 @@ public class PrivateModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          public void configure() {}
+          @Override public void configure() {}
 
           @Provides @Named("c") String providePrivateC() {
             return "private";
@@ -175,16 +176,16 @@ public class PrivateModuleTest extends TestCase {
   public void testCannotBindAKeyExportedByASibling() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           install(new PrivateModule() {
-            public void configure() {
+            @Override public void configure() {
               bind(String.class).toInstance("public");
               expose(String.class);
             }
           });
 
           install(new PrivateModule() {
-            public void configure() {
+            @Override public void configure() {
               bind(String.class).toInstance("private");
             }
           });
@@ -202,12 +203,12 @@ public class PrivateModuleTest extends TestCase {
   public void testExposeButNoBind() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(String.class).annotatedWith(named("a")).toInstance("a");
           bind(String.class).annotatedWith(named("b")).toInstance("b");
 
           install(new PrivateModule() {
-            public void configure() {
+            @Override public void configure() {
               expose(AB.class);
             }
           });
@@ -229,12 +230,12 @@ public class PrivateModuleTest extends TestCase {
     try {
       Guice.createInjector(
           new PrivateModule() {
-            public void configure() {
+            @Override public void configure() {
               bind(C.class);
             }
           },
           new PrivateModule() {
-            public void configure() {
+            @Override public void configure() {
               bind(AB.class);
             }
           }
@@ -254,11 +255,11 @@ public class PrivateModuleTest extends TestCase {
 
   public void testNestedPrivateInjectors() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configure() {
+      @Override public void configure() {
         expose(String.class);
 
         install(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             bind(String.class).toInstance("nested");
             expose(String.class);
           }
@@ -271,11 +272,11 @@ public class PrivateModuleTest extends TestCase {
 
   public void testInstallingRegularModulesFromPrivateModules() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configure() {
+      @Override public void configure() {
         expose(String.class);
 
         install(new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(String.class).toInstance("nested");
           }
         });
@@ -287,14 +288,14 @@ public class PrivateModuleTest extends TestCase {
 
   public void testNestedPrivateModulesWithSomeKeysUnexposed() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-      public void configure() {
+      @Override public void configure() {
         bind(String.class).annotatedWith(named("bound outer, exposed outer")).toInstance("boeo");
         expose(String.class).annotatedWith(named("bound outer, exposed outer"));
         bind(String.class).annotatedWith(named("bound outer, exposed none")).toInstance("boen");
         expose(String.class).annotatedWith(named("bound inner, exposed both"));
 
         install(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             bind(String.class).annotatedWith(named("bound inner, exposed both")).toInstance("bieb");
             expose(String.class).annotatedWith(named("bound inner, exposed both"));
             bind(String.class).annotatedWith(named("bound inner, exposed none")).toInstance("bien");
@@ -324,7 +325,7 @@ public class PrivateModuleTest extends TestCase {
   public void testDependenciesBetweenPrivateAndPublic() {
     Injector injector = Guice.createInjector(
         new PrivateModule() {
-          protected void configure() {}
+          @Override protected void configure() {}
 
           @Provides @Exposed @Named("a") String provideA() {
             return "A";
@@ -335,7 +336,7 @@ public class PrivateModuleTest extends TestCase {
           }
         },
         new AbstractModule() {
-          protected void configure() {}
+          @Override protected void configure() {}
 
           @Provides @Named("ab") String provideAb(@Named("a") String a) {
             return a + "B";
@@ -353,7 +354,7 @@ public class PrivateModuleTest extends TestCase {
   public void testDependenciesBetweenPrivateAndPublicWithPublicEagerSingleton() {
     Injector injector = Guice.createInjector(
         new PrivateModule() {
-          protected void configure() {}
+          @Override protected void configure() {}
 
           @Provides @Exposed @Named("a") String provideA() {
             return "A";
@@ -364,7 +365,7 @@ public class PrivateModuleTest extends TestCase {
           }
         },
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(String.class).annotatedWith(named("abcde")).toProvider(new Provider<String>() {
               @Inject @Named("abcd") String abcd;
 
@@ -390,7 +391,7 @@ public class PrivateModuleTest extends TestCase {
   public void testDependenciesBetweenPrivateAndPublicWithPrivateEagerSingleton() {
     Injector injector = Guice.createInjector(
         new AbstractModule() {
-          protected void configure() {}
+          @Override protected void configure() {}
 
           @Provides @Named("ab") String provideAb(@Named("a") String a) {
             return a + "B";
@@ -401,7 +402,7 @@ public class PrivateModuleTest extends TestCase {
           }
         },
         new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(String.class).annotatedWith(named("abcde")).toProvider(new Provider<String>() {
               @Inject @Named("abcd") String abcd;
 
@@ -434,7 +435,7 @@ public class PrivateModuleTest extends TestCase {
 
   public void testSpiAccess() {
     Injector injector = Guice.createInjector(new PrivateModule() {
-          public void configure() {
+          @Override public void configure() {
             bind(String.class).annotatedWith(named("a")).toInstance("private");
             bind(String.class).annotatedWith(named("b")).toInstance("exposed");
             expose(String.class).annotatedWith(named("b"));
@@ -464,7 +465,10 @@ public class PrivateModuleTest extends TestCase {
           "Unable to create binding for java.util.List.",
           "It was already configured on one or more child injectors or private modules",
           "bound at " + FailingPrivateModule.class.getName() + ".configure(",
+          asModuleChain(FailingModule.class, ManyPrivateModules.class, FailingPrivateModule.class),
           "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
+          asModuleChain(
+              FailingModule.class, ManyPrivateModules.class, SecondFailingPrivateModule.class),
           "If it was in a PrivateModule, did you forget to expose the binding?",
           "at " + FailingModule.class.getName() + ".configure(");
     }
@@ -481,7 +485,9 @@ public class PrivateModuleTest extends TestCase {
           "Unable to create binding for com.google.inject.Provider<java.util.List>.",
           "It was already configured on one or more child injectors or private modules",
           "bound at " + FailingPrivateModule.class.getName() + ".configure(",
+          asModuleChain(ManyPrivateModules.class, FailingPrivateModule.class),
           "bound at " + SecondFailingPrivateModule.class.getName() + ".configure(",
+          asModuleChain(ManyPrivateModules.class, SecondFailingPrivateModule.class),
           "If it was in a PrivateModule, did you forget to expose the binding?",
           "while locating com.google.inject.Provider<java.util.List>");
     }
@@ -504,16 +510,14 @@ public class PrivateModuleTest extends TestCase {
   }
   
   private static class FailingModule extends AbstractModule {
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
       bind(Collection.class).to(List.class);
       install(new ManyPrivateModules());
     }
   }
 
   private static class ManyPrivateModules extends AbstractModule {
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
       // make sure duplicate sources are collapsed
       install(new FailingPrivateModule());
       install(new FailingPrivateModule());
@@ -523,8 +527,7 @@ public class PrivateModuleTest extends TestCase {
   }
 
   private static class FailingPrivateModule extends PrivateModule {
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
       bind(List.class).toInstance(new ArrayList());
       
       // Add the Provider<List> binding, created just-in-time,
@@ -540,8 +543,7 @@ public class PrivateModuleTest extends TestCase {
   
   /** A second class, so we can see another name in the source list. */
   private static class SecondFailingPrivateModule extends PrivateModule {
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
       bind(List.class).toInstance(new ArrayList());
       
       // Add the Provider<List> binding, created just-in-time,

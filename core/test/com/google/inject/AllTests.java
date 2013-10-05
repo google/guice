@@ -37,6 +37,7 @@ import com.google.inject.spi.ProviderMethodsTest;
 import com.google.inject.spi.SpiBindingsTest;
 import com.google.inject.spi.ToolStageInjectorTest;
 import com.google.inject.util.NoopOverrideTest;
+import com.google.inject.util.OverrideModuleTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
 

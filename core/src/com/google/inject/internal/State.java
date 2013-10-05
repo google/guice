@@ -24,6 +24,7 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ProvisionListenerBinding;
+import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 
@@ -57,11 +58,11 @@ interface State {
       throw new UnsupportedOperationException();
     }
 
-    public Scope getScope(Class<? extends Annotation> scopingAnnotation) {
+    public ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation) {
       return null;
     }
 
-    public void putAnnotation(Class<? extends Annotation> annotationType, Scope scope) {
+    public void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope) {
       throw new UnsupportedOperationException();
     }
 
@@ -133,11 +134,10 @@ interface State {
   Map<Key<?>, Binding<?>> getExplicitBindingsThisLevel();
 
   void putBinding(Key<?> key, BindingImpl<?> binding);
+ 
+  ScopeBinding getScopeBinding(Class<? extends Annotation> scopingAnnotation);
 
-  /** Returns the matching scope, or null. */
-  Scope getScope(Class<? extends Annotation> scopingAnnotation);
-
-  void putAnnotation(Class<? extends Annotation> annotationType, Scope scope);
+  void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope);
 
   void addConverter(TypeConverterBinding typeConverterBinding);
 

@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Binding;
@@ -26,6 +27,7 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.ProvisionListenerBinding;
+import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 
@@ -47,7 +49,7 @@ final class InheritingState implements State {
   private final Map<Key<?>, Binding<?>> explicitBindingsMutable = Maps.newLinkedHashMap();
   private final Map<Key<?>, Binding<?>> explicitBindings
       = Collections.unmodifiableMap(explicitBindingsMutable);
-  private final Map<Class<? extends Annotation>, Scope> scopes = Maps.newHashMap();
+  private final Map<Class<? extends Annotation>, ScopeBinding> scopes = Maps.newHashMap();
   private final List<TypeConverterBinding> converters = Lists.newArrayList();
   /*if[AOP]*/
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
@@ -80,12 +82,12 @@ final class InheritingState implements State {
     explicitBindingsMutable.put(key, binding);
   }
 
-  public Scope getScope(Class<? extends Annotation> annotationType) {
-    Scope scope = scopes.get(annotationType);
-    return scope != null ? scope : parent.getScope(annotationType);
+  public ScopeBinding getScopeBinding(Class<? extends Annotation> annotationType) {
+    ScopeBinding scopeBinding = scopes.get(annotationType);
+    return scopeBinding != null ? scopeBinding : parent.getScopeBinding(annotationType);
   }
 
-  public void putAnnotation(Class<? extends Annotation> annotationType, Scope scope) {
+  public void putScopeBinding(Class<? extends Annotation> annotationType, ScopeBinding scope) {
     scopes.put(annotationType, scope);
   }
 
@@ -170,6 +172,10 @@ final class InheritingState implements State {
   }
 
   public Map<Class<? extends Annotation>, Scope> getScopes() {
-    return scopes;
+    ImmutableMap.Builder<Class<? extends Annotation>, Scope> builder = ImmutableMap.builder();
+    for (Map.Entry<Class<? extends Annotation>, ScopeBinding> entry : scopes.entrySet()) {
+      builder.put(entry.getKey(), entry.getValue().getScope());
+    }
+    return builder.build();
   }
 }

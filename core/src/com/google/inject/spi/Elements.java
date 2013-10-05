@@ -121,17 +121,25 @@ public final class Elements {
     return Collections.unmodifiableList(binder.elements);
   }
 
+  private static class ElementsAsModule implements Module {
+    private final Iterable<? extends Element> elements;
+
+    ElementsAsModule(Iterable<? extends Element> elements) {
+      this.elements = elements;
+    }
+
+    public void configure(Binder binder) {
+      for (Element element : elements) {
+        element.applyTo(binder);
+      }
+    }
+  }
+
   /**
    * Returns the module composed of {@code elements}.
    */
   public static Module getModule(final Iterable<? extends Element> elements) {
-    return new Module() {
-      public void configure(Binder binder) {
-        for (Element element : elements) {
-          element.applyTo(binder);
-        }
-      }
-    };
+    return new ElementsAsModule(elements);
   }
 
   @SuppressWarnings("unchecked")

@@ -21,6 +21,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+
 import junit.framework.Assert;
 
 import java.io.ByteArrayInputStream;
@@ -35,6 +40,20 @@ import java.io.ObjectOutputStream;
  */
 public class Asserts {
   private Asserts() {}
+
+  /**
+   * Returns the String that would appear in an error message for this chain of classes 
+   * as modules.
+   */
+  public static String asModuleChain(Class... classes) {
+    return Joiner.on(" -> ").appendTo(new StringBuilder(" (via modules: "),
+        Iterables.transform(ImmutableList.copyOf(classes), new Function<Class, String>() {
+          @Override
+          public String apply(Class input) {
+            return input.getName();
+          }
+        })).append(")").toString();
+  }
 
   /**
    * Fails unless {@code expected.equals(actual)}, {@code

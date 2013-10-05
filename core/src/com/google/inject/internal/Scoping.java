@@ -25,6 +25,7 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.ScopeBinding;
 
 import java.lang.annotation.Annotation;
 
@@ -41,7 +42,7 @@ public abstract class Scoping {
    * in(Scopes.NO_SCOPE)}, where the 'NO_SCOPE' has been explicitly applied.
    */
   public static final Scoping UNSCOPED = new Scoping() {
-    public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
       return visitor.visitNoScoping();
     }
 
@@ -53,13 +54,13 @@ public abstract class Scoping {
       return Scopes.NO_SCOPE.toString();
     }
 
-    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
       // do nothing
     }
   };
 
   public static final Scoping SINGLETON_ANNOTATION = new Scoping() {
-    public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
       return visitor.visitScopeAnnotation(Singleton.class);
     }
 
@@ -71,13 +72,13 @@ public abstract class Scoping {
       return Singleton.class.getName();
     }
 
-    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
       scopedBindingBuilder.in(Singleton.class);
     }
   };
 
   public static final Scoping SINGLETON_INSTANCE = new Scoping() {
-    public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
       return visitor.visitScope(Scopes.SINGLETON);
     }
 
@@ -89,13 +90,13 @@ public abstract class Scoping {
       return Scopes.SINGLETON.toString();
     }
 
-    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
       scopedBindingBuilder.in(Scopes.SINGLETON);
     }
   };
 
   public static final Scoping EAGER_SINGLETON = new Scoping() {
-    public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+    @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
       return visitor.visitEagerSingleton();
     }
 
@@ -107,7 +108,7 @@ public abstract class Scoping {
       return "eager singleton";
     }
 
-    public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+    @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
       scopedBindingBuilder.asEagerSingleton();
     }
   };
@@ -119,7 +120,7 @@ public abstract class Scoping {
     }
 
     return new Scoping() {
-      public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+      @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
         return visitor.visitScopeAnnotation(scopingAnnotation);
       }
 
@@ -131,7 +132,7 @@ public abstract class Scoping {
         return scopingAnnotation.getName();
       }
 
-      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
         scopedBindingBuilder.in(scopingAnnotation);
       }
     };
@@ -143,7 +144,7 @@ public abstract class Scoping {
     }
 
     return new Scoping() {
-      public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
+      @Override public <V> V acceptVisitor(BindingScopingVisitor<V> visitor) {
         return visitor.visitScope(scope);
       }
 
@@ -155,7 +156,7 @@ public abstract class Scoping {
         return scope.toString();
       }
 
-      public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
+      @Override public void applyTo(ScopedBindingBuilder scopedBindingBuilder) {
         scopedBindingBuilder.in(scope);
       }
     };
@@ -254,9 +255,9 @@ public abstract class Scoping {
       return scoping;
     }
 
-    Scope scope = injector.state.getScope(scopeAnnotation);
+    ScopeBinding scope = injector.state.getScopeBinding(scopeAnnotation);
     if (scope != null) {
-      return forInstance(scope);
+      return forInstance(scope.getScope());
     }
 
     errors.scopeNotFound(scopeAnnotation);

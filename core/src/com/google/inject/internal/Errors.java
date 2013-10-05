@@ -35,6 +35,7 @@ import com.google.inject.spi.ElementSource;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 
@@ -63,7 +64,7 @@ import java.util.Set;
  * returned instance will contain full context.
  *
  * <p>To avoid messages with redundant context, {@link #withSource} should be added sparingly. A
- * good rule of thumb is to assume a ethod's caller has already specified enough context to
+ * good rule of thumb is to assume a method's caller has already specified enough context to
  * identify that method. When calling a method that's defined in a different context, call that
  * method with an errors object that includes its context.
  *
@@ -200,13 +201,12 @@ public final class Errors implements Serializable {
     return addMessage("@ProvidedBy points to the same class it annotates.");
   }
 
-  public Errors missingRuntimeRetention(Object source) {
-    return addMessage("Please annotate with @Retention(RUNTIME).%n"
-        + " Bound at %s.", convert(source));
+  public Errors missingRuntimeRetention(Class<? extends Annotation> annotation) {
+    return addMessage(format("Please annotate %s with @Retention(RUNTIME).", annotation));
   }
 
-  public Errors missingScopeAnnotation() {
-    return addMessage("Please annotate with @ScopeAnnotation.");
+  public Errors missingScopeAnnotation(Class<? extends Annotation> annotation) {
+    return addMessage(format("Please annotate %s with @ScopeAnnotation.", annotation));
   }
 
   public Errors optionalConstructor(Constructor constructor) {
@@ -251,10 +251,10 @@ public final class Errors implements Serializable {
     return addMessage("%s does not define %s", type, constructor);
   }
 
-  public Errors duplicateScopes(Scope existing,
+  public Errors duplicateScopes(ScopeBinding existing,
       Class<? extends Annotation> annotationType, Scope scope) {
-    return addMessage("Scope %s is already bound to %s. Cannot bind %s.", existing,
-        annotationType, scope);
+    return addMessage("Scope %s is already bound to %s at %s.%n Cannot bind %s.",
+        existing.getScope(), annotationType, existing.getSource(), scope);
   }
 
   public Errors voidProviderMethod() {
@@ -676,64 +676,117 @@ public final class Errors implements Serializable {
       });
 
   public static Object convert(Object o) {
+    ElementSource source = null;
     if (o instanceof ElementSource) {
-      o = ((ElementSource) o).getDeclaringSource();
+      source = (ElementSource)o;
+      o = source.getDeclaringSource();
     }
+    return convert(o, source);
+  }
+
+  public static Object convert(Object o, ElementSource source) {
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {
-        return converter.convert(o);
+        return appendModules(converter.convert(o), source);
       }
     }
-    return o;
+    return appendModules(o, source);
+  }
+
+  private static Object appendModules(Object source, ElementSource elementSource) {
+    String modules = moduleSourceString(elementSource);
+    if (modules.length() == 0) {
+      return source;
+    } else {
+      return source + modules;
+    }
+  }
+
+  private static String moduleSourceString(ElementSource elementSource) {
+    // if we only have one module (or don't know what they are), then don't bother
+    // reporting it, because the source already is going to report exactly that module.
+    if (elementSource == null) {
+      return "";
+    }
+    List<String> modules = Lists.newArrayList(elementSource.getModuleClassNames());
+    // Insert any original element sources w/ module info into the path.
+    while(elementSource.getOriginalElementSource() != null) {
+      elementSource = elementSource.getOriginalElementSource();
+      modules.addAll(0, elementSource.getModuleClassNames());
+    }
+    if (modules.size() <= 1) {
+      return "";
+    }
+
+    // Ideally we'd do:
+    //    return Joiner.on(" -> ")
+    //        .appendTo(new StringBuilder(" (via modules: "), Lists.reverse(modules))
+    //        .append(")").toString();
+    // ... but for some reason we can't find Lists.reverse, so do it the boring way.
+    StringBuilder builder = new StringBuilder(" (via modules: ");
+    for (int i = modules.size() - 1; i >= 0; i--) {
+      builder.append(modules.get(i));
+      if (i != 0) {
+        builder.append(" -> ");
+      }
+    }
+    builder.append(")");
+    return builder.toString();
   }
 
   public static void formatSource(Formatter formatter, Object source) {
+    ElementSource elementSource = null;
     if (source instanceof ElementSource) {
-      source = ((ElementSource) source).getDeclaringSource();
+      elementSource = (ElementSource)source;
+      source = elementSource.getDeclaringSource();
     }
+    formatSource(formatter, source, elementSource);
+  }
 
+  public static void formatSource(Formatter formatter, Object source, ElementSource elementSource) {
+    String modules = moduleSourceString(elementSource);
     if (source instanceof Dependency) {
       Dependency<?> dependency = (Dependency<?>) source;
       InjectionPoint injectionPoint = dependency.getInjectionPoint();
       if (injectionPoint != null) {
-        formatInjectionPoint(formatter, dependency, injectionPoint);
+        formatInjectionPoint(formatter, dependency, injectionPoint, elementSource);
       } else {
-        formatSource(formatter, dependency.getKey());
+        formatSource(formatter, dependency.getKey(), elementSource);
       }
 
     } else if (source instanceof InjectionPoint) {
-      formatInjectionPoint(formatter, null, (InjectionPoint) source);
+      formatInjectionPoint(formatter, null, (InjectionPoint) source, elementSource);
 
     } else if (source instanceof Class) {
-      formatter.format("  at %s%n", StackTraceElements.forType((Class<?>) source));
+      formatter.format("  at %s%s%n", StackTraceElements.forType((Class<?>) source), modules);
 
     } else if (source instanceof Member) {
-      formatter.format("  at %s%n", StackTraceElements.forMember((Member) source));
+      formatter.format("  at %s%s%n", StackTraceElements.forMember((Member) source), modules);
 
     } else if (source instanceof TypeLiteral) {
-      formatter.format("  while locating %s%n", source);
+      formatter.format("  while locating %s%s%n", source, modules);
 
     } else if (source instanceof Key) {
       Key<?> key = (Key<?>) source;
-      formatter.format("  while locating %s%n", convert(key));
+      formatter.format("  while locating %s%n", convert(key, elementSource));
 
     } else {
-      formatter.format("  at %s%n", source);
+      formatter.format("  at %s%s%n", source, modules);
     }
   }
 
   public static void formatInjectionPoint(Formatter formatter, Dependency<?> dependency,
-      InjectionPoint injectionPoint) {
+      InjectionPoint injectionPoint, ElementSource elementSource) {
     Member member = injectionPoint.getMember();
     Class<? extends Member> memberType = Classes.memberType(member);
 
     if (memberType == Field.class) {
       dependency = injectionPoint.getDependencies().get(0);
-      formatter.format("  while locating %s%n", convert(dependency.getKey()));
+      formatter.format("  while locating %s%n", convert(dependency.getKey(), elementSource));
       formatter.format("    for field at %s%n", StackTraceElements.forMember(member));
 
     } else if (dependency != null) {
-      formatter.format("  while locating %s%n", convert(dependency.getKey()));
+      formatter.format("  while locating %s%n", convert(dependency.getKey(), elementSource));
       formatter.format("    for parameter %s at %s%n",
           dependency.getParameterIndex(), StackTraceElements.forMember(member));
 

@@ -186,7 +186,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testMultipleBindingAnnotations() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {}
+        @Override protected void configure() {}
 
         @Provides @Named("A") @Blue
         public String provideString() {
@@ -229,7 +229,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       this.second = second;
     }
 
-    protected void configure() {}
+    @Override protected void configure() {}
 
     @Named("First") @Provides T provideFirst() {
       return first;
@@ -246,7 +246,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   
   public void testAutomaticProviderMethods() {
     Injector injector = Guice.createInjector((Module) new AbstractModule() {
-      protected void configure() { }
+      @Override protected void configure() { }
       private int next = 1;
 
       @Provides @Named("count")
@@ -266,7 +266,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
    */
   public void testAutomaticProviderMethodsDoNotCauseDoubleBinding() {
     Module installsSelf = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         install(this);
         bind(Integer.class).toInstance(5);
       }
@@ -284,7 +284,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     final List<Number> numbers = ImmutableList.<Number>of(1, 2, 3);
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         @SuppressWarnings("unchecked")
         Key<List<? super Integer>> listOfSupertypesOfInteger = (Key<List<? super Integer>>)
             Key.get(Types.listOf(Types.supertypeOf(Integer.class)));
@@ -311,7 +311,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   public void testProviderMethodDependenciesAreExposed() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Integer.class).toInstance(50);
         bindConstant().annotatedWith(Names.named("units")).to("Kg");
       }
@@ -362,7 +362,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testVoidProviderMethods() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {}
+        @Override protected void configure() {}
 
         @Provides void provideFoo() {}
       });

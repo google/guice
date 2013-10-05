@@ -20,7 +20,6 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
@@ -77,7 +76,7 @@ public class ElementsTest extends TestCase {
   public void testAddMessageErrorCommand() {
     checkModule(
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             addError("Message %s %d %s", "A", 5, "C");
           }
         },

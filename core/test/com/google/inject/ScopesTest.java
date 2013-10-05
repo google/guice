@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -46,7 +47,7 @@ import java.util.Map;
 public class ScopesTest extends TestCase {
 
   private final AbstractModule singletonsModule = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       bind(BoundAsSingleton.class).in(Scopes.SINGLETON);
       bind(AnnotatedSingleton.class);
       bind(EagerSingleton.class).asEagerSingleton();
@@ -122,7 +123,7 @@ public class ScopesTest extends TestCase {
 
   public void testOverriddingAnnotation() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(AnnotatedSingleton.class).in(Scopes.NO_SCOPE);
       }
     });
@@ -135,7 +136,7 @@ public class ScopesTest extends TestCase {
   public void testScopingAnnotationsOnAbstractTypeViaBind() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(A.class).to(AImpl.class);
         }
       });
@@ -191,7 +192,7 @@ public class ScopesTest extends TestCase {
   public void testScopeUsedButNotBound() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(B.class).in(CustomScoped.class);
           bind(C.class);
         }
@@ -245,7 +246,7 @@ public class ScopesTest extends TestCase {
     final RememberProviderScope scope = new RememberProviderScope();
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(CustomScoped.class, scope);
         bind(List.class).to(ArrayList.class).in(CustomScoped.class);
       }
@@ -259,56 +260,86 @@ public class ScopesTest extends TestCase {
     assertTrue(listProvider.get() instanceof ArrayList);
   }
 
+  static class OuterRuntimeModule extends AbstractModule {
+    @Override protected void configure() {
+      install(new InnerRuntimeModule());
+    }
+  }
+  static class InnerRuntimeModule extends AbstractModule {
+    @Override protected void configure() {
+      bindScope(NotRuntimeRetainedScoped.class, Scopes.NO_SCOPE);
+    }
+  }
   public void testScopeAnnotationWithoutRuntimeRetention() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bindScope(NotRuntimeRetainedScoped.class, Scopes.NO_SCOPE);
-        }
-      });
+      Guice.createInjector(new OuterRuntimeModule());
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Please annotate with @Retention(RUNTIME).",
-          "at " + NotRuntimeRetainedScoped.class.getName() + ".class(ScopesTest.java:");
+          "1) Please annotate " + NotRuntimeRetainedScoped.class.getName()
+              + " with @Retention(RUNTIME).",
+          "at " + InnerRuntimeModule.class.getName() + ".configure(ScopesTest.java:",
+          asModuleChain(OuterRuntimeModule.class, InnerRuntimeModule.class));
     }
   }
 
+  static class OuterDeprecatedModule extends AbstractModule {
+    @Override protected void configure() {
+      install(new InnerDeprecatedModule());
+    }
+  }
+  static class InnerDeprecatedModule extends AbstractModule {
+    @Override protected void configure() {
+      bindScope(Deprecated.class, Scopes.NO_SCOPE);
+    }
+  }
   public void testBindScopeToAnnotationWithoutScopeAnnotation() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bindScope(Deprecated.class, Scopes.NO_SCOPE);
-        }
-      });
+      Guice.createInjector(new OuterDeprecatedModule());
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Please annotate with @ScopeAnnotation.",
-          "at " + Deprecated.class.getName() + ".class(");
+          "1) Please annotate " + Deprecated.class.getName() + " with @ScopeAnnotation.",
+          "at " + InnerDeprecatedModule.class.getName() + ".configure(ScopesTest.java:",
+          asModuleChain(OuterDeprecatedModule.class, InnerDeprecatedModule.class));
+    }
+  }
+
+  static class OuterScopeModule extends AbstractModule {
+    @Override protected void configure() {
+      install(new CustomNoScopeModule());
+      install(new CustomSingletonModule());
+    }
+  }
+  static class CustomNoScopeModule extends AbstractModule {
+    @Override protected void configure() {
+      bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+    }
+  }
+  static class CustomSingletonModule extends AbstractModule {
+    @Override protected void configure() {
+      bindScope(CustomScoped.class, Scopes.SINGLETON);
     }
   }
 
   public void testBindScopeTooManyTimes() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bindScope(CustomScoped.class, Scopes.NO_SCOPE);
-          bindScope(CustomScoped.class, Scopes.SINGLETON);
-        }
-      });
+      Guice.createInjector(new OuterScopeModule());
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Scope Scopes.NO_SCOPE is already bound to " + CustomScoped.class.getName(),
+          "1) Scope Scopes.NO_SCOPE is already bound to " + CustomScoped.class.getName()
+              + " at " + CustomNoScopeModule.class.getName() + ".configure(ScopesTest.java:",
+          asModuleChain(OuterScopeModule.class, CustomNoScopeModule.class),
           "Cannot bind Scopes.SINGLETON.",
-          "at " + ScopesTest.class.getName(), ".configure(ScopesTest.java:");
+          "at " + ScopesTest.class.getName(), ".configure(ScopesTest.java:",
+          asModuleChain(OuterScopeModule.class, CustomSingletonModule.class));
     }
   }
 
   public void testDuplicateScopeAnnotations() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(CustomScoped.class, Scopes.NO_SCOPE);
       }
     });
@@ -440,7 +471,7 @@ public class ScopesTest extends TestCase {
 
   public void testScopeThatGetsAnUnrelatedObject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(B.class);
         bind(C.class);
         ProviderGetScope providerGetScope = new ProviderGetScope();
@@ -477,7 +508,7 @@ public class ScopesTest extends TestCase {
     final Key<String> i = Key.get(String.class, named("I"));
 
     Module singletonBindings = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(a).to(b);
         bind(b).to(c);
         bind(c).toProvider(Providers.of("c")).in(Scopes.SINGLETON);
@@ -486,8 +517,7 @@ public class ScopesTest extends TestCase {
         bind(f).toProvider(Providers.of("f")).in(Singleton.class);
         bind(h).to(AnnotatedSingleton.class);
         install(new PrivateModule() {
-          @Override
-          protected void configure() {
+          @Override protected void configure() {
             bind(i).toProvider(Providers.of("i")).in(Singleton.class);
             expose(i);
           }
@@ -533,15 +563,14 @@ public class ScopesTest extends TestCase {
     final Key<String> f = Key.get(String.class, named("F"));
 
     Module singletonBindings = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(a).to(b);
         bind(b).to(c);
         bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
         bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
         bindScope(CustomScoped.class, Scopes.NO_SCOPE);
         install(new PrivateModule() {
-          @Override
-          protected void configure() {
+          @Override protected void configure() {
             bind(f).toProvider(Providers.of("f")).in(CustomScoped.class);
             expose(f);
           }
@@ -582,7 +611,7 @@ public class ScopesTest extends TestCase {
     final Key<String> g = Key.get(String.class, named("G"));
 
     Module customBindings = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(CustomScoped.class, CUSTOM_SCOPE);
         bind(a).to(b);
         bind(b).to(c);
@@ -590,8 +619,7 @@ public class ScopesTest extends TestCase {
         bind(d).toProvider(Providers.of("d")).in(CustomScoped.class);
         bind(f).to(AnnotatedCustomScoped.class);
         install(new PrivateModule() {
-          @Override
-          protected void configure() {
+          @Override protected void configure() {
             bind(g).toProvider(Providers.of("g")).in(CustomScoped.class);
             expose(g);
           }
@@ -635,14 +663,13 @@ public class ScopesTest extends TestCase {
     final Key<String> h = Key.get(String.class, named("H"));
 
     Module customBindings = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(a).to(b);
         bind(b).to(c);
         bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
         bind(d).toProvider(Providers.of("d")).in(Singleton.class);
         install(new PrivateModule() {
-          @Override
-          protected void configure() {
+          @Override protected void configure() {
             bind(f).toProvider(Providers.of("f")).in(Singleton.class);
             expose(f);
           }

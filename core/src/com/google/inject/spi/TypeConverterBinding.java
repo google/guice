@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Errors;
 import com.google.inject.matcher.Matcher;
 
 /**
@@ -67,6 +68,6 @@ public final class TypeConverterBinding implements Element {
 
   @Override public String toString() {
     return typeConverter + " which matches " + typeMatcher
-        + " (bound at " + source + ")";
+        + " (bound at " + Errors.convert(source) + ")";
   }
 }

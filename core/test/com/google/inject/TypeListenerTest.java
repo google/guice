@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.only;
@@ -82,7 +83,7 @@ public class TypeListenerTest extends TestCase {
     }
   };
 
-  public void testTypeListenersAreFired() throws NoSuchMethodException {
+  public void testTypeListenersAreFired() {
     final AtomicInteger firedCount = new AtomicInteger();
 
     final TypeListener typeListener = new TypeListener() {
@@ -93,7 +94,7 @@ public class TypeListenerTest extends TestCase {
     };
 
     Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, typeListener);
         bind(A.class);
       }
@@ -111,7 +112,7 @@ public class TypeListenerTest extends TestCase {
     };
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             encounter.register(injectionListener);
@@ -154,7 +155,7 @@ public class TypeListenerTest extends TestCase {
     final Matcher<Object> buzz = only(C.class.getMethod("buzz"));
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindInterceptor(any(), buzz, prefixInterceptor("ka"));
         bindInterceptor(any(), any(), prefixInterceptor("fe"));
 
@@ -174,30 +175,38 @@ public class TypeListenerTest extends TestCase {
   }
   /*end[AOP]*/
 
+  class OuterThrowsModule extends AbstractModule {
+    @Override protected void configure() {
+      install(new InnerThrowsModule());
+    }
+  }
+  class InnerThrowsModule extends AbstractModule {
+    @Override protected void configure() {
+      bindListener(onlyAbcd, failingTypeListener);
+      bind(B.class);
+      bind(C.class);
+    }
+  }
   public void testTypeListenerThrows() {
     try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bindListener(onlyAbcd, failingTypeListener);
-          bind(B.class);
-          bind(C.class);
-        }
-      });
+      Guice.createInjector(new OuterThrowsModule());
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           ".configure(TypeListenerTest.java:",
+          asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
           "of " + B.class.getName(), 
           "Reason: java.lang.ClassCastException: whoops, failure #1",
           "2) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
           ".configure(TypeListenerTest.java:",
+          asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
           "of " + C.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #2");
     }
     
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, failingTypeListener);
       }
     });
@@ -230,7 +239,7 @@ public class TypeListenerTest extends TestCase {
 
   public void testInjectionListenerThrows() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             encounter.register(failingInjectionListener);
@@ -277,7 +286,7 @@ public class TypeListenerTest extends TestCase {
   public void testInjectMembersTypeListenerFails() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           getMembersInjector(A.class);
           bindListener(onlyAbcd, failingTypeListener);
         }
@@ -304,8 +313,9 @@ public class TypeListenerTest extends TestCase {
     };
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
+          @SuppressWarnings("unchecked")
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             typeEncounters.incrementAndGet();
             encounter.register((InjectionListener) listener);
@@ -363,7 +373,7 @@ public class TypeListenerTest extends TestCase {
     };
 
     Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(only(TypeLiteral.get(C.class)), new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             Provider<B> bProvider = encounter.getProvider(B.class);
@@ -401,7 +411,7 @@ public class TypeListenerTest extends TestCase {
 
   public void testLookupsPostCreate() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(only(TypeLiteral.get(C.class)), new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             assertNotNull(encounter.getProvider(B.class).get());
@@ -434,8 +444,9 @@ public class TypeListenerTest extends TestCase {
     };
 
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
+          @SuppressWarnings("unchecked")
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             encounter.register((MembersInjector) membersInjector);
             encounter.register((InjectionListener) injectionListener);
@@ -469,7 +480,7 @@ public class TypeListenerTest extends TestCase {
 
   public void testMembersInjectorThrows() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             encounter.register(failingMembersInjector);
@@ -522,7 +533,7 @@ public class TypeListenerTest extends TestCase {
     final AtomicInteger notificationCount = new AtomicInteger();
 
     Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(onlyAbcd, new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             notificationCount.incrementAndGet();
@@ -540,7 +551,7 @@ public class TypeListenerTest extends TestCase {
     final AtomicReference<TypeEncounter<?>> encounterReference = new AtomicReference<TypeEncounter<?>>();
 
     Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindListener(any(), new TypeListener() {
           public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             encounterReference.set(encounter);
@@ -595,7 +606,7 @@ public class TypeListenerTest extends TestCase {
   public void testAddErrors() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           requestInjection(new Object());
           bindListener(Matchers.any(), new TypeListener() {
             public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {

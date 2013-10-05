@@ -40,21 +40,21 @@ final class ScopeBindingProcessor extends AbstractProcessor {
     Class<? extends Annotation> annotationType = command.getAnnotationType();
 
     if (!Annotations.isScopeAnnotation(annotationType)) {
-      errors.withSource(annotationType).missingScopeAnnotation();
+      errors.missingScopeAnnotation(annotationType);
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
     if (!Annotations.isRetainedAtRuntime(annotationType)) {
-      errors.withSource(annotationType)
-          .missingRuntimeRetention(command.getSource());
+      errors.missingRuntimeRetention(annotationType);
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    Scope existing = injector.state.getScope(checkNotNull(annotationType, "annotation type"));
+    ScopeBinding existing = injector.state.getScopeBinding(checkNotNull(annotationType, "annotation type"));
     if (existing != null) {
       errors.duplicateScopes(existing, annotationType, scope);
     } else {
-      injector.state.putAnnotation(annotationType, checkNotNull(scope, "scope"));
+      checkNotNull(scope, "scope");
+      injector.state.putScopeBinding(annotationType, command);
     }
 
     return true;

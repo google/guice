@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.util;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
@@ -23,6 +24,19 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Objects;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
+import com.google.inject.CreationException;
+import com.google.inject.Exposed;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.PrivateModule;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.Scope;
+import com.google.inject.ScopeAnnotation;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 
@@ -160,24 +174,33 @@ public class OverrideModuleTest extends TestCase {
     assertEquals("C3", injector.getInstance(key3));
   }
 
+  static class OuterReplacementsModule extends AbstractModule {
+    @Override protected void configure() {
+      install(new InnerReplacementsModule());
+    }
+  }
+  static class InnerReplacementsModule extends AbstractModule {
+    @Override protected void configure() {
+      bind(String.class).toInstance("B");
+      bind(String.class).toInstance("C");
+    }
+  }
   public void testOverridesTwiceFails() {
     Module original = newModule("A");
-
-    Module replacements = new AbstractModule() {
-      @Override protected void configure() {
-        bind(String.class).toInstance("B");
-        bind(String.class).toInstance("C");
-      }
-    };
-
+    Module replacements = new OuterReplacementsModule();
     Module module = Modules.override(original).with(replacements);
     try {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "A binding to java.lang.String "
-              + "was already configured at " + replacements.getClass().getName(),
-          "at " + replacements.getClass().getName());
+      assertContains(expected.getMessage(),
+          "A binding to java.lang.String was already configured at "
+              + InnerReplacementsModule.class.getName(),
+          asModuleChain(Modules.OverrideModule.class,
+              OuterReplacementsModule.class, InnerReplacementsModule.class),
+          "at " + InnerReplacementsModule.class.getName(),
+          asModuleChain(Modules.OverrideModule.class,
+              OuterReplacementsModule.class, InnerReplacementsModule.class));
     }
   }
 
@@ -200,9 +223,14 @@ public class OverrideModuleTest extends TestCase {
       createInjector(module);
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "1) A binding to java.lang.String "
-          + "was already configured at " + replacements.getClass().getName(),
-          "at " + original.getClass().getName());
+      // The replacement comes first because we replace A with C,
+      // then we encounter B and freak out.
+      assertContains(expected.getMessage(),
+          "1) A binding to java.lang.String was already configured at "
+              + replacements.getClass().getName(),
+          asModuleChain(Modules.OverrideModule.class, replacements.getClass()),
+          "at " + original.getClass().getName(),
+          asModuleChain(Modules.OverrideModule.class, original.getClass()));
     }
   }
 
@@ -210,7 +238,7 @@ public class OverrideModuleTest extends TestCase {
     final SingleUseScope scope = new SingleUseScope();
 
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(TestScopeAnnotation.class, scope);
         bind(String.class).in(TestScopeAnnotation.class);
       }
@@ -276,10 +304,16 @@ public class OverrideModuleTest extends TestCase {
       }
     };
 
-    Module original = new AbstractModule() {
+    final Module original = new AbstractModule() {
       @Override protected void configure() {
         bindScope(TestScopeAnnotation.class, scope);
         bind(Date.class).in(scope);
+        bind(String.class).in(scope);
+      }
+    };
+    Module originalWrapper = new AbstractModule() {
+      @Override protected void configure() {
+        install(original);
       }
     };
 
@@ -290,23 +324,30 @@ public class OverrideModuleTest extends TestCase {
     };
 
     try {
-      createInjector(Modules.override(original).with(replacements));
+      createInjector(Modules.override(originalWrapper).with(replacements));
       fail("Exception expected");
     } catch (CreationException e) {
       assertContains(e.getMessage(),
           "1) The scope for @TestScopeAnnotation is bound directly and cannot be overridden.",
-          "at ", getClass().getName(), ".configure(");
+          "original binding at " + original.getClass().getName() + ".configure(",
+          asModuleChain(originalWrapper.getClass(), original.getClass()),
+          "bound directly at " + original.getClass().getName() + ".configure(",
+          asModuleChain(originalWrapper.getClass(), original.getClass()),
+          "bound directly at " + original.getClass().getName() + ".configure(",
+          asModuleChain(originalWrapper.getClass(), original.getClass()),          
+          "at ", replacements.getClass().getName() + ".configure(",
+          asModuleChain(Modules.OverrideModule.class, replacements.getClass()));
     }
   }
 
   public void testOverrideIsLazy() {
     final AtomicReference<String> value = new AtomicReference<String>("A");
     Module overridden = Modules.override(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).annotatedWith(named("original")).toInstance(value.get());
       }
     }).with(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).annotatedWith(named("override")).toInstance(value.get());
       }
     });
@@ -320,9 +361,9 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverridePrivateModuleOverPrivateModule() {
     Module exposes5and6 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(Integer.class).toInstance(5);
             expose(Integer.class);
 
@@ -331,7 +372,7 @@ public class OverrideModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(Long.class).toInstance(6L);
             expose(Long.class);
 
@@ -342,9 +383,9 @@ public class OverrideModuleTest extends TestCase {
     };
 
     AbstractModule exposes15 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(Integer.class).toInstance(15);
             expose(Integer.class);
 
@@ -353,7 +394,7 @@ public class OverrideModuleTest extends TestCase {
         });
 
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(Character.class).toInstance('H');
           }
         });
@@ -373,14 +414,14 @@ public class OverrideModuleTest extends TestCase {
 
   public void testOverrideModuleAndPrivateModule() {
     Module exposes5 = new PrivateModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Integer.class).toInstance(5);
         expose(Integer.class);
       }
     };
 
     Module binds15 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Integer.class).toInstance(15);
       }
     };
@@ -397,9 +438,9 @@ public class OverrideModuleTest extends TestCase {
         = new AtomicReference<Provider<Character>>();
 
     Module exposes5 = new PrivateModule() {
-      protected void configure() {
+      @Override protected void configure() {
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             bind(Integer.class).toInstance(5);
             expose(Integer.class);
             charAProvider.set(getProvider(Character.class));
@@ -422,11 +463,11 @@ public class OverrideModuleTest extends TestCase {
         = new AtomicReference<Provider<Character>>();
 
     Module binds15 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(Integer.class).toInstance(15);
 
         install(new PrivateModule() {
-          protected void configure() {
+          @Override protected void configure() {
             charBProvider.set(getProvider(Character.class));
             bind(Character.class).toInstance('B');
           }
@@ -458,15 +499,21 @@ public class OverrideModuleTest extends TestCase {
       return unscoped;
     }
   }
+  
+  static class NewModule<T> extends AbstractModule {
+    private final T bound;
+    NewModule(T bound) {
+      this.bound = bound;
+    }
+    @Override protected void configure() {
+      @SuppressWarnings("unchecked")
+      Class<T> type = (Class<T>)bound.getClass();
+      bind(type).toInstance(bound);
+    }
+  }
 
   private static <T> Module newModule(final T bound) {
-    return new AbstractModule() {
-      @Override protected void configure() {
-        @SuppressWarnings("unchecked")
-        Class<T> type = (Class<T>) bound.getClass();
-        bind(type).toInstance(bound);
-      }
-    };
+    return new NewModule<T>(bound);
   }
   
   private static final String RESULT = "RESULT";

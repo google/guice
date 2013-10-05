@@ -116,7 +116,7 @@ public class ParentInjectorTest extends TestCase {
 
   public void testScopesInherited() {
     Injector parent = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(MyScope.class, Scopes.SINGLETON);
       }
     });
@@ -138,14 +138,14 @@ public class ParentInjectorTest extends TestCase {
 
   public void testInterceptorsInherited() {
     Injector parent = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         super.bindInterceptor(Matchers.any(), Matchers.returns(Matchers.identicalTo(A.class)),
             returnNullInterceptor);
       }
     });
 
     Injector child = parent.createChildInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(C.class);
       }
     });
@@ -176,7 +176,7 @@ public class ParentInjectorTest extends TestCase {
   public void testInjectorInjectionSpanningInjectors() {
     Injector parent = Guice.createInjector();
     Injector child = parent.createChildInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(D.class);
       }
     });
@@ -218,7 +218,7 @@ public class ParentInjectorTest extends TestCase {
   public void testScopeBoundInChildInjectorOnly() {
     Injector parent = Guice.createInjector();
     Injector child = parent.createChildInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(MyScope.class, Scopes.SINGLETON);
       }
     });
@@ -239,7 +239,7 @@ public class ParentInjectorTest extends TestCase {
   public void testErrorInParentButOkayInChild() {
     Injector parent = Guice.createInjector();
     Injector childInjector = parent.createChildInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bindScope(MyScope.class, Scopes.SINGLETON);
         bind(Object.class).to(F.class);
       }
@@ -267,7 +267,7 @@ public class ParentInjectorTest extends TestCase {
   static class A {}
 
   private final Module bindsA = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       bind(A.class).toInstance(new A());
     }
   };
@@ -276,7 +276,7 @@ public class ParentInjectorTest extends TestCase {
   static class RealB implements B {}
 
   private final Module bindsB = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       bind(B.class).to(RealB.class);
     }
   };
@@ -291,13 +291,13 @@ public class ParentInjectorTest extends TestCase {
   };
 
   private final Module bindListConverterModule = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       convertToTypes(Matchers.any(), listConverter);
     }
   };
 
   private final Module bindStringNamedB = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       bind(String.class).annotatedWith(Names.named("B")).toInstance("buzz");
     }
   };
@@ -317,7 +317,7 @@ public class ParentInjectorTest extends TestCase {
   }
 
   private final Module bindsD = new AbstractModule() {
-    protected void configure() {
+    @Override protected void configure() {
       bind(D.class);
     }
   };

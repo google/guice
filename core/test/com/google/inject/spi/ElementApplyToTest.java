@@ -23,6 +23,7 @@ import com.google.inject.Module;
  */
 public class ElementApplyToTest extends ElementsTest {
 
+  @Override
   protected void checkModule(Module module, ElementVisitor<?>... visitors) {
     // convert from module to elements and back
     super.checkModule(Elements.getModule(Elements.getElements(module)), visitors);
