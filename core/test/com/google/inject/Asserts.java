@@ -17,6 +17,8 @@
 
 package com.google.inject;
 
+import static com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
+import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -53,6 +55,33 @@ public class Asserts {
             return input.getName();
           }
         })).append(")").toString();
+  }
+
+  /**
+   * Returns the source file appears in error messages based on {@link 
+   * #getIncludeStackTraceOption()} value.
+   */
+  public static String getDeclaringSourcePart(Class clazz) {
+    if (getIncludeStackTraceOption() == IncludeStackTraceOption.OFF) {
+      return ".configure(Unknown Source";
+    }
+    return ".configure(" + clazz.getSimpleName() + ".java:";
+  }
+
+  /**
+   * Returns true if {@link #getIncludeStackTraceOption()} returns {@link
+   * IncludeStackTraceOption#OFF}.
+   */
+  public static boolean isIncludeStackTraceOff() {
+    return getIncludeStackTraceOption() == IncludeStackTraceOption.OFF;
+  }
+
+  /**
+   * Returns true if {@link #getIncludeStackTraceOption()} returns {@link
+   * IncludeStackTraceOption#COMPLETE}.
+   */
+  public static boolean isIncludeStackTraceComplete() {
+    return getIncludeStackTraceOption() == IncludeStackTraceOption.COMPLETE;
   }
 
   /**

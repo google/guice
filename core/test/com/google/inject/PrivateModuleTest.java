@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
@@ -121,7 +122,7 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(), "Cannot expose java.lang.String on a standard binder. ",
           "Exposed bindings are only applicable to private binders.",
-          " at " + PrivateModuleTest.class.getName(), "configure(PrivateModuleTest.java:");
+          " at " + PrivateModuleTest.class.getName(), getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -195,8 +196,8 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "A binding to java.lang.String was already configured at ",
-          getClass().getName(), ".configure(PrivateModuleTest.java:",
-          " at " + getClass().getName(), ".configure(PrivateModuleTest.java:");
+          getClass().getName(), getDeclaringSourcePart(getClass()),
+          " at " + getClass().getName(), getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -218,7 +219,7 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "Could not expose() " + AB.class.getName() + ", it must be explicitly bound",
-          ".configure(PrivateModuleTest.java:");
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -244,7 +245,7 @@ public class PrivateModuleTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) No implementation for " + C.class.getName() + " was bound.",
-          "at " + getClass().getName(), ".configure(PrivateModuleTest.java:",
+          "at " + getClass().getName(), getDeclaringSourcePart(getClass()),
           "2) No implementation for " + String.class.getName(), "Named(value=a) was bound.",
           "for field at " + AB.class.getName() + ".a(PrivateModuleTest.java:",
           "3) No implementation for " + String.class.getName(), "Named(value=b) was bound.",
@@ -450,7 +451,7 @@ public class PrivateModuleTest extends TestCase {
     assertEquals(ImmutableSet.<Key<?>>of(Key.get(String.class, named("b"))),
         privateElements.getExposedKeys());
     assertContains(privateElements.getExposedSource(Key.get(String.class, named("b"))).toString(),
-        PrivateModuleTest.class.getName(), ".configure(PrivateModuleTest.java:");
+        PrivateModuleTest.class.getName(), getDeclaringSourcePart(getClass()));
     Injector privateInjector = privateElements.getInjector();
     assertEquals("private", privateInjector.getInstance(Key.get(String.class, Names.named("a"))));
   }
@@ -508,7 +509,7 @@ public class PrivateModuleTest extends TestCase {
           "while locating " + PrivateFoo.class.getName());
     }
   }
-  
+
   private static class FailingModule extends AbstractModule {
     @Override protected void configure() {
       bind(Collection.class).to(List.class);

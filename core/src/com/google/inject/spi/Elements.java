@@ -17,10 +17,13 @@
 package com.google.inject.spi;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
+import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -65,14 +68,6 @@ import java.util.Set;
  */
 public final class Elements {
 
-  private enum IncludeStackTraceFlagValues {
-    // Minimum stack trace collection
-    DEFAULT,
-    // Full stack trace for everything
-    COMPLETE
-  }
-
-
   private static final BindingTargetVisitor<Object, Object> GET_INSTANCE_VISITOR
       = new DefaultBindingTargetVisitor<Object, Object>() {
     @Override public Object visit(InstanceBinding<?> binding) {
@@ -113,14 +108,12 @@ public final class Elements {
     for (Module module : modules) {
       binder.install(module);
     }
-    if (collectCompleteStackTrace()) {
-      // Free the memory consumed by the stack trace elements cache
-      StackTraceElements.clearCache();
-    }
+    // Free the memory consumed by the stack trace elements cache
+    StackTraceElements.clearCache();
     binder.rehashKeys();
     return Collections.unmodifiableList(binder.elements);
   }
-
+  
   private static class ElementsAsModule implements Module {
     private final Iterable<? extends Element> elements;
 
@@ -145,11 +138,6 @@ public final class Elements {
   @SuppressWarnings("unchecked")
   static <T> BindingTargetVisitor<T, T> getInstanceVisitor() {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
-  }
-
-  private static boolean collectCompleteStackTrace() {
-    return IncludeStackTraceFlagValues.COMPLETE.name().equals(
-        System.getProperty("guice_include_stack_traces"));
   }
 
   private static class RecordingBinder implements Binder, PrivateBinder, RehashableKeys {
@@ -245,7 +233,7 @@ public final class Elements {
     public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
       elements.add(new TypeListenerBinding(getElementSource(), listener, typeMatcher));
     }
-
+    
     public void bindListener(Matcher<? super Binding<?>> bindingMatcher,
         ProvisionListener... listeners) {
       elements.add(new ProvisionListenerBinding(getElementSource(), bindingMatcher, listeners));
@@ -266,7 +254,7 @@ public final class Elements {
         }
         if (module instanceof PrivateModule) {
           binder = binder.newPrivateBinder();
-        }
+        }      
         try {
           module.configure(binder);
         } catch (RuntimeException e) {
@@ -336,7 +324,7 @@ public final class Elements {
       elements.add(new TypeConverterBinding(getElementSource(), typeMatcher, converter));
     }
 
-    public RecordingBinder withSource(final Object source) {
+    public RecordingBinder withSource(final Object source) {            
       return new RecordingBinder(this, source, null);
     }
 
@@ -357,15 +345,15 @@ public final class Elements {
       rehashables.add(binder);
       return binder;
     }
-
+    
     public void disableCircularProxies() {
       elements.add(new DisableCircularProxiesOption(getElementSource()));
     }
-
+    
     public void requireExplicitBindings() {
-      elements.add(new RequireExplicitBindingsOption(getElementSource()));
+      elements.add(new RequireExplicitBindingsOption(getElementSource()));     
     }
-
+    
     public void requireAtInjectOnConstructors() {
       elements.add(new RequireAtInjectOnConstructorsOption(getElementSource()));
     }
@@ -403,10 +391,10 @@ public final class Elements {
 
     private ModuleSource getModuleSource(Module module) {
       StackTraceElement[] partialCallStack;
-      if (!collectCompleteStackTrace()) {
-        partialCallStack = new StackTraceElement[0];
-      } else {
+      if (getIncludeStackTraceOption() == IncludeStackTraceOption.COMPLETE) {
         partialCallStack = getPartialCallStack(new Throwable().getStackTrace());
+      } else {
+        partialCallStack = new StackTraceElement[0];
       }
       if (moduleSource == null) {
         return new ModuleSource(module, partialCallStack);
@@ -415,29 +403,37 @@ public final class Elements {
     }
 
     private ElementSource getElementSource() {
-      Object declaringSource = source;
       // Full call stack
-      StackTraceElement[] callStack;
+      StackTraceElement[] callStack = null;
       // The call stack starts from current top module configure and ends at this method caller
-      StackTraceElement[] partialCallStack;
-      if (!collectCompleteStackTrace()) {
-        callStack = null;
-        partialCallStack = new StackTraceElement[0];
-      } else {
-        callStack = new Throwable().getStackTrace();
-        partialCallStack = getPartialCallStack(callStack);
-      }
-      if (declaringSource == null) {
-        // TODO(salmanmir): can we avoid getting the full stack trace by using modules stack?
-        if (callStack == null) {
-          callStack = new Throwable().getStackTrace();
-        }
-        declaringSource = sourceProvider.get(callStack);
-      }
+      StackTraceElement[] partialCallStack = new StackTraceElement[0];
+      // The element original source
       ElementSource originalSource = null;
+      // The element declaring source
+      Object declaringSource = source;
       if (declaringSource instanceof ElementSource) {
         originalSource = (ElementSource) declaringSource;
         declaringSource = originalSource.getDeclaringSource();
+      }
+      IncludeStackTraceOption stackTraceOption = getIncludeStackTraceOption();
+      if (stackTraceOption == IncludeStackTraceOption.COMPLETE ||
+          (stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE 
+          && declaringSource == null)) {
+        callStack = new Throwable().getStackTrace();
+      }
+      if (stackTraceOption == IncludeStackTraceOption.COMPLETE) {
+        partialCallStack = getPartialCallStack(callStack);
+      }
+      if (declaringSource == null) {
+        // So 'source' and 'originalSource' are null otherwise declaringSource has some value
+        if (stackTraceOption == IncludeStackTraceOption.COMPLETE ||
+            stackTraceOption == IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE) {
+          // With the above conditions and assignments 'callStack' is non-null
+          declaringSource = sourceProvider.get(callStack);
+        } else { // or if (stackTraceOption == IncludeStackTraceOptions.OFF)
+          // As neither 'declaring source' nor 'call stack' is available use 'module source'
+          declaringSource = sourceProvider.getFromClassNames(moduleSource.getModuleClassNames());
+        }
       }
       // Build the binding call stack
       return new ElementSource(
@@ -445,9 +441,9 @@ public final class Elements {
     }
 
     /**
-     * Removes the {@link #moduleSource} call stack from the beginning of current call stack. It
-     * also removes the last two elements in order to make {@link #install(Module)} the last call
-     * in the call stack.
+     * Removes the {@link #moduleSource} call stack from the beginning of current call stack. It  
+     * also removes the last two elements in order to make {@link #install(Module)} the last call 
+     * in the call stack.  
      */
     private StackTraceElement[] getPartialCallStack(StackTraceElement[] callStack) {
       int toSkip = 0;
@@ -461,7 +457,7 @@ public final class Elements {
       System.arraycopy(callStack, 1, partialCallStack, 0, chunkSize);
       return partialCallStack;
     }
-
+    
     @Override public void rehashKeys() {
       for (RehashableKeys rehashable : rehashables) {
         rehashable.rehashKeys();

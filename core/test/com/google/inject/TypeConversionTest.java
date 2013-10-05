@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
@@ -178,7 +179,7 @@ public class TypeConversionTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "Error converting 'invalid' (bound at " + InnerErrorModule.class.getName()
-              + ".configure(" + TypeConversionTest.class.getSimpleName() + ".java:",
+              + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterErrorModule.class, InnerErrorModule.class),
           "using TypeConverter<Integer> which matches identicalTo(class java.lang.Integer)"
               + " (bound at [unknown source]).",
@@ -269,15 +270,16 @@ public class TypeConversionTest extends TestCase {
     assertTrue(injector.getTypeConverterBindings().contains(converterBinding));
   }
 
-  public void testInvalidCustomValue() throws CreationException {
-    Module module = new AbstractModule() {
-      @Override protected void configure() {
-        convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), failingTypeConverter());
-        bindConstant().annotatedWith(NumericValue.class).to("invalid");
-        bind(DateHolder.class);
-      }
-    };
+  static class InvalidCustomValueModule extends AbstractModule {
+    @Override protected void configure() {
+      convertToTypes(Matchers.only(TypeLiteral.get(Date.class)), failingTypeConverter());
+      bindConstant().annotatedWith(NumericValue.class).to("invalid");
+      bind(DateHolder.class);
+    }
+  }
 
+  public void testInvalidCustomValue() throws CreationException {
+    Module module = new InvalidCustomValueModule();
     try {
       Guice.createInjector(module);
       fail();
@@ -286,9 +288,9 @@ public class TypeConversionTest extends TestCase {
       assertTrue(cause instanceof UnsupportedOperationException);
       assertContains(expected.getMessage(),
           "1) Error converting 'invalid' (bound at ", getClass().getName(),
-          ".configure(TypeConversionTest.java:", "to java.util.Date",
+          getDeclaringSourcePart(getClass()), "to java.util.Date",
           "using BrokenConverter which matches only(java.util.Date) ",
-          "(bound at " + getClass().getName(), ".configure(TypeConversionTest.java:",
+          "(bound at " + getClass().getName(), getDeclaringSourcePart(getClass()),
           "Reason: java.lang.UnsupportedOperationException: Cannot convert",
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:");
     }
@@ -332,12 +334,12 @@ public class TypeConversionTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) Received null converting 'foo' (bound at ",
           getClass().getName(),
-          ".configure(TypeConversionTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterModule.class, InnerModule.class),
           "to java.util.Date",
           "using CustomConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(),
-          ".configure(TypeConversionTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterModule.class, InnerModule.class, ConverterNullModule.class),
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
           asModuleChain(OuterModule.class, InnerModule.class));
@@ -358,12 +360,12 @@ public class TypeConversionTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) Type mismatch converting 'foo' (bound at ",
           getClass().getName(),
-          ".configure(TypeConversionTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterModule.class, InnerModule.class),
           "to java.util.Date",
           "using CustomConverter which matches only(java.util.Date) ",
           "(bound at " + getClass().getName(),
-          ".configure(TypeConversionTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterModule.class, InnerModule.class, ConverterCustomModule.class),
           "Converter returned -1.",
           "at " + DateHolder.class.getName() + ".date(TypeConversionTest.java:",
@@ -429,18 +431,18 @@ public class TypeConversionTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Multiple converters can convert 'foo' (bound at ", getClass().getName(),
-          ".configure(TypeConversionTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterAmbiguousModule.class, InnerAmbiguousModule.class),
           "to java.util.Date:",
           "CustomConverter which matches only(java.util.Date) (bound at "
               + Ambiguous1Module.class.getName()
-              + ".configure(" + TypeConversionTest.class.getSimpleName() + ".java:",
+              + getDeclaringSourcePart(getClass()),
           asModuleChain(
               OuterAmbiguousModule.class, InnerAmbiguousModule.class, Ambiguous1Module.class),
           "and",
           "CustomConverter which matches only(java.util.Date) (bound at "
               + Ambiguous2Module.class.getName()
-              + ".configure(" + TypeConversionTest.class.getSimpleName() + ".java:",
+              + getDeclaringSourcePart(getClass()),
           asModuleChain(
               OuterAmbiguousModule.class, InnerAmbiguousModule.class, Ambiguous2Module.class),
           "Please adjust your type converter configuration to avoid overlapping matches.",
@@ -460,7 +462,7 @@ public class TypeConversionTest extends TestCase {
     };
   }
 
-  private TypeConverter failingTypeConverter() {
+  private static TypeConverter failingTypeConverter() {
     return new TypeConverter() {
       public Object convert(String value, TypeLiteral<?> toType) {
         throw new UnsupportedOperationException("Cannot convert");

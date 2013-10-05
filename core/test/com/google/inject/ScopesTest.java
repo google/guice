@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -201,7 +202,7 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) No scope is bound to " + CustomScoped.class.getName(),
-          "at " + getClass().getName(), ".configure(ScopesTest.java:",
+          "at " + getClass().getName(), getDeclaringSourcePart(getClass()),
           "2) No scope is bound to " + CustomScoped.class.getName(),
           "at " + C.class.getName() + ".class");
     }
@@ -278,7 +279,7 @@ public class ScopesTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) Please annotate " + NotRuntimeRetainedScoped.class.getName()
               + " with @Retention(RUNTIME).",
-          "at " + InnerRuntimeModule.class.getName() + ".configure(ScopesTest.java:",
+          "at " + InnerRuntimeModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterRuntimeModule.class, InnerRuntimeModule.class));
     }
   }
@@ -300,7 +301,7 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Please annotate " + Deprecated.class.getName() + " with @ScopeAnnotation.",
-          "at " + InnerDeprecatedModule.class.getName() + ".configure(ScopesTest.java:",
+          "at " + InnerDeprecatedModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterDeprecatedModule.class, InnerDeprecatedModule.class));
     }
   }
@@ -329,10 +330,10 @@ public class ScopesTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Scope Scopes.NO_SCOPE is already bound to " + CustomScoped.class.getName()
-              + " at " + CustomNoScopeModule.class.getName() + ".configure(ScopesTest.java:",
+              + " at " + CustomNoScopeModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterScopeModule.class, CustomNoScopeModule.class),
           "Cannot bind Scopes.SINGLETON.",
-          "at " + ScopesTest.class.getName(), ".configure(ScopesTest.java:",
+          "at " + ScopesTest.class.getName(), getDeclaringSourcePart(getClass()),
           asModuleChain(OuterScopeModule.class, CustomSingletonModule.class));
     }
   }

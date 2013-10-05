@@ -18,6 +18,8 @@ package com.google.inject.spi;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
+import static com.google.inject.Asserts.isIncludeStackTraceComplete;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableMap;
@@ -86,8 +88,9 @@ public class ElementsTest extends TestCase {
             assertEquals("Message A 5 C", command.getMessage());
             assertNull(command.getCause());
             assertContains(command.getSources().toString(),
-                ElementsTest.class.getName(), ".configure(ElementsTest.java:");
-            assertContains(command.getSource(), "ElementsTest.java");
+                ElementsTest.class.getName(),
+                getDeclaringSourcePart(ElementsTest.class));
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -107,7 +110,7 @@ public class ElementsTest extends TestCase {
             assertEquals("A", command.getCause().getMessage());
             assertEquals(command.getMessage(),
                 "An exception was caught and reported. Message: A");
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -596,7 +599,7 @@ public class ElementsTest extends TestCase {
             assertEquals("Setting the scope is not permitted when binding to a single instance.",
                 command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -913,8 +916,8 @@ public class ElementsTest extends TestCase {
             one.expose(Collection.class).annotatedWith(SampleAnnotation.class);
             one.bind(List.class).to(ArrayList.class);
 
-            PrivateBinder two = binder().withSource("1 ElementsTest.java")
-                .newPrivateBinder().withSource("2 ElementsTest.java");
+            PrivateBinder two = binder().withSource("1 FooBar")
+                .newPrivateBinder().withSource("2 FooBar");
             two.expose(String.class).annotatedWith(Names.named("a"));
             two.expose(b);
             two.bind(List.class).to(ArrayList.class);
@@ -936,14 +939,14 @@ public class ElementsTest extends TestCase {
           }
         },
 
-        new FailingElementVisitor() {
+        new ExternalFailureVisitor() {
           @Override public Void visit(PrivateElements two) {
             assertEquals(ab, two.getExposedKeys());
-            assertEquals("1 ElementsTest.java", two.getSource().toString());
+            assertEquals("1 FooBar", two.getSource().toString());
             checkElements(two.getElements(),
-                new FailingElementVisitor() {
+                new ExternalFailureVisitor() {
                   @Override public <T> Void visit(Binding<T> binding) {
-                    assertEquals("2 ElementsTest.java", binding.getSource().toString());
+                    assertEquals("2 FooBar", binding.getSource().toString());
                     assertEquals(Key.get(List.class), binding.getKey());
                     return null;
                   }
@@ -976,7 +979,7 @@ public class ElementsTest extends TestCase {
             assertEquals("More than one annotation is specified for this binding.",
                 command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -1003,7 +1006,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visit(Message command) {
             assertEquals("Implementation is set more than once.", command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -1030,7 +1033,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visit(Message command) {
             assertEquals("Scope is set more than once.", command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -1058,7 +1061,7 @@ public class ElementsTest extends TestCase {
             assertEquals("More than one annotation is specified for this binding.",
                 command.getMessage());
             assertNull(command.getCause());
-            assertContains(command.getSource(), "ElementsTest.java");
+            assertContains(command.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -1085,7 +1088,7 @@ public class ElementsTest extends TestCase {
           @Override public Void visit(Message message) {
             assertEquals("Constant value is set more than once.", message.getMessage());
             assertNull(message.getCause());
-            assertContains(message.getSource(), "ElementsTest.java");
+            assertContains(message.getSource(), getDeclaringSourcePart(ElementsTest.class));
             return null;
           }
         }
@@ -1214,7 +1217,6 @@ public class ElementsTest extends TestCase {
     assertEquals(1, aConfigureCount.get());
   }
 
-
   /**
    * Ensures the module performs the commands consistent with {@code visitors}.
    */
@@ -1231,11 +1233,14 @@ public class ElementsTest extends TestCase {
       if (!(element instanceof Message)) {
           ElementSource source = (ElementSource) element.getSource();
           assertTrue(source.getModuleClassNames().size() > 0);
-          assertFalse(source.isStackTraceRetained()) ;
-          assertEquals(0, source.getStackTrace().length);
+          if (isIncludeStackTraceComplete()) {
+            assertTrue(source.getStackTrace().length > 0);
+          } else {
+            assertEquals(0, source.getStackTrace().length);
+          }
       }
       if (!(visitor instanceof ExternalFailureVisitor)) {
-        assertContains(element.getSource().toString(), "ElementsTest.java");
+        assertContains(element.getSource().toString(), getDeclaringSourcePart(ElementsTest.class));
       }
       element.acceptVisitor(visitor);
     }

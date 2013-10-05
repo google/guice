@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.*;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.base.Objects;
@@ -85,7 +85,8 @@ public class DuplicateBindingsTest extends TestCase {
       fail("should have failed");
     } catch(CreationException ce) {
       assertContains(ce.getMessage(),
-          "A binding to " + Foo.class.getName() + " was already configured at " + FailingProviderModule.class.getName(),
+          "A binding to " + Foo.class.getName() + " was already configured " +
+          "at " + FailingProviderModule.class.getName(),
           "at " + FailingProviderModule.class.getName()
           );
     }
@@ -123,7 +124,7 @@ public class DuplicateBindingsTest extends TestCase {
         new ScopedModule(Scopes.NO_SCOPE, foo, pFoo, pclFoo, clFoo, cFoo)
     );
   }
-  
+
   public void testMixedScopeFails() {
     try {
       Guice.createInjector(
@@ -132,20 +133,25 @@ public class DuplicateBindingsTest extends TestCase {
       );
       fail("expected exception");
     } catch(CreationException ce) {
-      assertContains(ce.getMessage(), 
-          "A binding to " + Foo.class.getName() + " annotated with " + named("pInstance") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + ScopedModule.class.getName(), 
-          "A binding to " + Foo.class.getName() + " annotated with " + named("pKey") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + ScopedModule.class.getName(), 
-          "A binding to " + Foo.class.getName() + " annotated with " + named("linkedKey") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + ScopedModule.class.getName(), 
-          "A binding to " + FooImpl.class.getName() + " was already configured at " + SimpleModule.class.getName(),
-          "at " + ScopedModule.class.getName(), 
-          "A binding to " + Foo.class.getName() + " annotated with " + named("constructor") + " was already configured at " + SimpleModule.class.getName(),
-          "at " + ScopedModule.class.getName());
+      String segment1 = "A binding to " + Foo.class.getName() + " annotated with "
+          + named("pInstance") + " was already configured at " + SimpleModule.class.getName();
+      String segment2 = "A binding to " + Foo.class.getName() + " annotated with " + named("pKey")
+          + " was already configured at " + SimpleModule.class.getName();
+      String segment3 = "A binding to " + Foo.class.getName() + " annotated with " 
+          + named("constructor") + " was already configured at " + SimpleModule.class.getName();
+      String segment4 = "A binding to " + FooImpl.class.getName() + " was already configured at "
+          + SimpleModule.class.getName();
+      String atSegment = "at " + ScopedModule.class.getName();
+      if (isIncludeStackTraceOff()) {
+        assertContains(ce.getMessage(), segment1 , atSegment, segment2, atSegment, segment3,
+            atSegment, segment4, atSegment);
+      } else {
+        assertContains(ce.getMessage(), segment1 , atSegment, segment2, atSegment, segment4,
+            atSegment, segment3, atSegment);
+      }
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   public void testMixedTargetsFails() {
     try {

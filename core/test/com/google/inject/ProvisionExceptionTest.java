@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.Asserts.reserialize;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
@@ -94,7 +95,8 @@ public class ProvisionExceptionTest extends TestCase {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertContains(e.getMessage(),
           "1) Error in custom provider, java.lang.UnsupportedOperationException",
-          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
+          "at " + ProvisionExceptionTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -136,7 +138,8 @@ public class ProvisionExceptionTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertContains(e.getMessage(), "1) User Exception",
-          "at " + ProvisionExceptionTest.class.getName(), ".configure(ProvisionExceptionTest.java");
+          "at " + ProvisionExceptionTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 

@@ -17,6 +17,7 @@
 package com.google.inject.internal.util;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
@@ -46,7 +47,7 @@ public class LineNumbersTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
           "for parameter 0 at " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
+          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -75,7 +76,7 @@ public class LineNumbersTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
           "for parameter 0 at " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
+          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -125,7 +126,7 @@ public class LineNumbersTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
           "for parameter 0 at " + GeneratingClassLoader.name + ".<init>(Unknown Source)",
-          "at " + LineNumbersTest.class.getName(), ".configure(LineNumbersTest.java:");
+          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
     }
   }
   

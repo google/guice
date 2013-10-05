@@ -18,6 +18,7 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.only;
 import static com.google.inject.name.Names.named;
@@ -194,12 +195,12 @@ public class TypeListenerTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          ".configure(TypeListenerTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
           "of " + B.class.getName(), 
           "Reason: java.lang.ClassCastException: whoops, failure #1",
           "2) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          ".configure(TypeListenerTest.java:",
+          getDeclaringSourcePart(getClass()),
           asModuleChain(OuterThrowsModule.class, InnerThrowsModule.class),
           "of " + C.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #2");
@@ -216,7 +217,7 @@ public class TypeListenerTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          ".configure(TypeListenerTest.java:",
+          getDeclaringSourcePart(getClass()),
           "of " + B.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #3");
     }
@@ -228,7 +229,7 @@ public class TypeListenerTest extends TestCase {
     } catch (ConfigurationException expected) {
       assertContains(expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at " + getClass().getName(),
-          ".configure(TypeListenerTest.java:",
+          getDeclaringSourcePart(getClass()),
           "of " + B.class.getName(),
           "Reason: java.lang.ClassCastException: whoops, failure #3");
     }
@@ -295,7 +296,7 @@ public class TypeListenerTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) Error notifying TypeListener clumsy (bound at ",
-          TypeListenerTest.class.getName(), ".configure(TypeListenerTest.java:",
+          TypeListenerTest.class.getName(), getDeclaringSourcePart(getClass()),
           "of " + A.class.getName(),
           " Reason: java.lang.ClassCastException: whoops, failure #1");
     }

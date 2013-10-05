@@ -78,11 +78,24 @@
           excludes="build/**,**/.svn/**,classes/**,.settings/**,bin/**,latest-api-diffs/**,latest-javadoc/**,.classpath,.project"/>
     </zip>
   </target>
-  
+
   <target name="test.dist"
-      depends="jar, test.compile-with-deps"
-      description="Execute JUnit tests against distribution jar.">
-    <java fork="true" 
+    description="Execute JUnit tests against distribution jar.">
+    <antcall target="test.dist.run">
+      <param name="jvmarg-value" value="-Dguice_include_stack_traces="/>
+    </antcall>
+    <antcall target="test.dist.run">
+      <param name="jvmarg-value" value="-Dguice_include_stack_traces=OFF"/>
+    </antcall>
+    <antcall target="test.dist.run">
+      <param name="jvmarg-value" value="-Dguice_include_stack_traces=COMPLETE"/>
+    </antcall>
+  </target>
+
+  <target name="test.dist.run"
+    depends="jar, test.compile-with-deps"
+    description="Execute JUnit tests against distribution jar with the given jvmarg.">
+    <java fork="true"
         classname="junit.textui.TestRunner"
         failonerror="true"
         taskname="junit">
@@ -98,7 +111,8 @@
         <pathelement location="lib/build/bnd-0.0.384.jar"/>
         <pathelement location="lib/build/felix-2.0.5.jar"/>
       </classpath>
-      <arg value="com.google.inject.AllTests"/>    
+      <arg value="com.google.inject.AllTests"/>
+      <jvmarg value="${jvmarg-value}"/>
       <syspropertyset>
         <propertyref name="guice.custom.loader"/>
         <propertyref name="version"/>

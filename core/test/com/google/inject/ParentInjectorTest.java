@@ -17,6 +17,7 @@ limitations under the License.
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -44,8 +45,8 @@ public class ParentInjectorTest extends TestCase {
       fail("Created the same explicit binding on both parent and child");
     } catch (CreationException e) {
       assertContains(e.getMessage(), "A binding to ", A.class.getName(), " was already configured",
-          " at ", getClass().getName(), ".configure(ParentInjectorTest.java:",
-          " at ", getClass().getName(), ".configure(ParentInjectorTest.java:");
+          " at ", getClass().getName(), getDeclaringSourcePart(getClass()),
+          " at ", getClass().getName(), getDeclaringSourcePart(getClass()));
     }
   }
 

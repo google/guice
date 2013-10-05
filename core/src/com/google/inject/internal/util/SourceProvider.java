@@ -92,4 +92,17 @@ public final class SourceProvider {
     }
     throw new AssertionError();
   }
+
+  /**
+   * Returns the non-skipped module class name.
+   */
+  public Object getFromClassNames(List<String> moduleClassNames) {
+    Preconditions.checkNotNull(moduleClassNames, "The list of module class names cannot be null.");
+    for (final String moduleClassName : moduleClassNames) {
+      if (!shouldBeSkipped(moduleClassName)) {
+        return new StackTraceElement(moduleClassName, "configure", null, -1);
+      }
+    }
+    return UNKNOWN_SOURCE;
+  }
 }

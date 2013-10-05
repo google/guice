@@ -19,9 +19,9 @@ import java.util.List;
  * lists {@link StackTraceElement StackTraceElements} in reverse chronological order. The first 
  * element (index zero) is the last method call and the last element is the first method invocation.
  * By default, the stack trace is not collected. The default behavior can be changed by setting the 
- * {@code guice_include_stack_traces} flag value. The value can be either {@code DEFAULT} or 
- * {@code COMPLETE}. Note that collecting stack traces for every binding can cause a performance hit
- * when the injector is created.
+ * {@code guice_include_stack_traces} flag value. The value can be either {@code OFF}, {@code
+ * ONLY_FOR_DECLARING_SOURCE} or {@code COMPLETE}. Note that collecting stack traces for every
+ * binding can cause a performance hit when the injector is created.
  * <p>
  * The sequence of class names of {@link Module modules} involved in the element creation can be 
  * retrieved by {@link #getModuleClassNames()}. Similar to {@link #getStackTrace()}, the order is 
@@ -35,7 +35,7 @@ import java.util.List;
 public final class ElementSource {
 
   /** 
-   * The {@link ElementSource source} of element that this element created from (if there is any), 
+   * The {@link ElementSource source} of element that this element created from (if there is any),
    * otherwise {@code null}.
    */
   final ElementSource originalElementSource;
@@ -44,8 +44,8 @@ public final class ElementSource {
   final ModuleSource moduleSource;
   
   /** 
-   * The partial call stack that starts at the last module {@link Module#Configure(Binder) 
-   * configure(Binder)} call. 
+   * The partial call stack that starts at the last module {@link Module#Configure(Binder)
+   * configure(Binder)} call. The value is empty if stack trace collection is off.
    */
   final InMemoryStackTraceElement[] partialCallStack;
   
@@ -59,7 +59,7 @@ public final class ElementSource {
 
   /**
    * Creates a new {@ElementSource} from the given parameters. 
-   * @param originalElementSource The source of element that this element created from (if there is 
+   * @param originalElementSource The source of element that this element created from (if there is
    * any), otherwise {@code null}.
    * @param declaringSource the source (in)directly declared the element.
    * @param moduleSource the moduleSource when the element is bound
@@ -68,17 +68,17 @@ public final class ElementSource {
    */
   ElementSource(/* @Nullable */ ElementSource originalSource, Object declaringSource, 
       ModuleSource moduleSource, StackTraceElement[] partialCallStack) {
+    Preconditions.checkNotNull(declaringSource, "declaringSource cannot be null.");
     Preconditions.checkNotNull(moduleSource, "moduleSource cannot be null.");
     Preconditions.checkNotNull(partialCallStack, "partialCallStack cannot be null.");
-    Preconditions.checkNotNull(declaringSource, "declaringSource cannot be null.");
     this.originalElementSource = originalSource;
+    this.declaringSource = declaringSource;
     this.moduleSource = moduleSource;
     this.partialCallStack = StackTraceElements.convertToInMemoryStackTraceElement(partialCallStack);
-    this.declaringSource = declaringSource;
   }
   
   /**
-   * Returns the {@link ElementSource} of the element this was created or copied from.  If this was 
+   * Returns the {@link ElementSource} of the element this was created or copied from. If this was
    * not created or copied from another element, returns {@code null}.
    */
   public ElementSource getOriginalElementSource() {
@@ -96,29 +96,17 @@ public final class ElementSource {
   }
   
   /**
-   * Returns the class names of modules involved in creating this {@link Element}.  The first
+   * Returns the class names of modules involved in creating this {@link Element}. The first
    * element (index 0) is the class name of module that defined the element, and the last element
-   * is the class name of root module. In the cases where the class name is null an empty string
-   * is returned.
+   * is the class name of root module.
    */
   public List<String> getModuleClassNames() {
-    String[] classNames = new String[moduleSource.size()];
-    ModuleSource current = moduleSource;
-    int cursor = 0;
-    while (current != null) {
-      classNames[cursor] = current.getModuleClassName();
-      if (classNames[cursor] == null) {
-          classNames[cursor] = "";
-      }
-      current = current.getParent();
-      cursor++;
-    }
-    return ImmutableList.<String>copyOf(classNames);
+    return moduleSource.getModuleClassNames();
   }
-  
+
   /**
-   * Returns the position of {@link Module#configure(Binder) configure(Binder)} method call in the 
-   * {@link #getStackTrace() stack trace} for modules that their classes returned by 
+   * Returns the position of {@link Module#configure(Binder) configure(Binder)} method call in the
+   * {@link #getStackTrace() stack trace} for modules that their classes returned by
    * {@link #getModuleClassNames()}. For example, if the stack trace looks like the following:
    * <p>
    * {@code
@@ -131,28 +119,23 @@ public final class ElementSource {
    * <p>
    * 1 and 3 are returned.
    * <p>
-   * In the cases where stack trace is not available (i.e.,the stack trace was not collected), 
-   * it returns an empty array.
+   * In the cases where stack trace is not available (i.e., the stack trace was not collected),
+   * it returns -1 for all module positions.
    */
   public List<Integer> getModuleConfigurePositionsInStackTrace() {
-    if (!isStackTraceRetained()) {
-      return ImmutableList.<Integer>of();
-    }
     int size = moduleSource.size();
     Integer[] positions = new Integer[size];
-    int position = partialCallStack.length;
-    positions[0] = position - 1;
+    int chunkSize = partialCallStack.length;
+    positions[0] = chunkSize - 1;
     ModuleSource current = moduleSource;
-    int cursor = 1;
-    while (cursor < size) {
-      position += current.getPartialCallStack().length;
-      positions[cursor] = position - 1;
+    for (int cursor = 1; cursor < size; cursor++) {
+      chunkSize = current.getPartialCallStackSize();
+      positions[cursor] = positions[cursor - 1] + chunkSize;
       current = current.getParent();
-      cursor++;
     }
     return ImmutableList.<Integer>copyOf(positions);
   }
-  
+
   /**
    * Returns the sequence of method calls that ends at one of {@link Binder} {@code bindXXX()} 
    * methods and eventually defines the element. Note that {@link #getStackTrace()} lists {@link 
@@ -164,20 +147,13 @@ public final class ElementSource {
   public StackTraceElement[] getStackTrace() {
     int modulesCallStackSize = moduleSource.getStackTraceSize();
     int chunkSize = partialCallStack.length;
-    int size = moduleSource.getStackTraceSize() + partialCallStack.length;
+    int size = moduleSource.getStackTraceSize() + chunkSize;
     StackTraceElement[] callStack = new StackTraceElement[size];
     System.arraycopy(
         StackTraceElements.convertToStackTraceElement(partialCallStack), 0, callStack, 0, 
         chunkSize);
     System.arraycopy(moduleSource.getStackTrace(), 0, callStack, chunkSize, modulesCallStackSize);
     return callStack;
-  }
-  
-  /**
-   * Returns true if stack trace was collected.
-   */ 
-  public boolean isStackTraceRetained() {
-    return (partialCallStack.length > 0);
   }
 
   /**

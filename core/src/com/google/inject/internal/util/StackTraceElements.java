@@ -33,6 +33,10 @@ import java.util.Map;
  */
 public class StackTraceElements {
 
+  private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
+  private static final InMemoryStackTraceElement[] EMPTY_INMEMORY_STACK_TRACE = 
+      new InMemoryStackTraceElement[0];
+
   /*if[AOP]*/
   static final LoadingCache<Class<?>, LineNumbers> lineNumbersCache =
       CacheBuilder.newBuilder().weakKeys().softValues().build(
@@ -100,6 +104,9 @@ public class StackTraceElements {
    */
   public static InMemoryStackTraceElement[] convertToInMemoryStackTraceElement(
       StackTraceElement[] stackTraceElements) {
+    if (stackTraceElements.length == 0) {
+      return EMPTY_INMEMORY_STACK_TRACE;
+    }
     InMemoryStackTraceElement[] inMemoryStackTraceElements = 
         new InMemoryStackTraceElement[stackTraceElements.length];
     for (int i = 0; i < stackTraceElements.length; i++) {
@@ -114,6 +121,9 @@ public class StackTraceElements {
    */
   public static StackTraceElement[] convertToStackTraceElement(
       InMemoryStackTraceElement[] inMemoryStackTraceElements) {
+    if (inMemoryStackTraceElements.length == 0) {
+      return EMPTY_STACK_TRACE;
+    }
     StackTraceElement[] stackTraceElements = 
         new StackTraceElement[inMemoryStackTraceElements.length];
     for (int i = 0; i < inMemoryStackTraceElements.length; i++) {

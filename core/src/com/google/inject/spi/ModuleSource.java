@@ -1,9 +1,12 @@
 package com.google.inject.spi;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.internal.util.StackTraceElements.InMemoryStackTraceElement;
+
+import java.util.List;
 
 /**
  * Associated to a {@link Module module}, provides the module class name, the parent module {@link
@@ -11,10 +14,9 @@ import com.google.inject.internal.util.StackTraceElements.InMemoryStackTraceElem
  * Module#configure(Binder) configure(Binder)} method invocation.  
  */
 final class ModuleSource {
-   
+
   /**
-   * The class name of module that this {@link ModuleSource} associated to. This value is null when
-   * the module class {@link Class#getName() getName()} returns null.
+   * The class name of module that this {@link ModuleSource} associated to.
    */
   private final String moduleClassName;
   
@@ -27,9 +29,9 @@ final class ModuleSource {
    * The chunk of call stack that starts from the parent module {@link Module#configure(Binder) 
    * configure(Binder)} call and ends just before the module {@link Module#configure(Binder) 
    * configure(Binder)} method invocation. For a module without a parent module the chunk starts 
-   * from the bottom of call stack.
+   * from the bottom of call stack. The array is non-empty if stack trace collection is on.
    */
-  private final InMemoryStackTraceElement[] partialCallStack;  
+  private final InMemoryStackTraceElement[] partialCallStack;
 
   /**
    * Creates a new {@link ModuleSource} with a {@literal null} parent.
@@ -60,7 +62,7 @@ final class ModuleSource {
   }
   
   /** 
-   * Returns the corresponding module class name. The value can be null.
+   * Returns the corresponding module class name.
    *
    * @see Class#getName()
    */
@@ -69,16 +71,17 @@ final class ModuleSource {
   }
 
   /**
-   * Returns the chunk of call stack that starts from the parent module {@link 
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link 
-   * Module#configure(Binder) configure(Binder)} method invocation
+   * Returns the chunk of call stack that starts from the parent module {@link
+   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
+   * Module#configure(Binder) configure(Binder)} method invocation. The return array is non-empty
+   * only if stack trace collection is on.
    */
   StackTraceElement[] getPartialCallStack() {
     return StackTraceElements.convertToStackTraceElement(partialCallStack);
   }
   
   /**
-   * Returns the size of partial call stack.
+   * Returns the size of partial call stack if stack trace collection is on otherwise zero.
    */
   int getPartialCallStackSize() {
     return partialCallStack.length;
@@ -101,7 +104,23 @@ final class ModuleSource {
   ModuleSource getParent() {
     return parent;
   }
-  
+
+  /**
+   * Returns the class names of modules in this module source. The first element (index 0) is filled
+   * by this object {@link #getModuleClassName()}. The second element is filled by the parent's 
+   * {@link #getModuleClassName()} and so on.
+   */
+  List<String> getModuleClassNames() {
+    ImmutableList.Builder<String> classNames = ImmutableList.builder();
+    ModuleSource current = this;
+    while (current != null) {
+      String className = current.moduleClassName;
+      classNames.add(className);
+      current = current.parent;
+    }
+    return classNames.build();
+  }
+
   /**
    * Returns the size of {@link ModuleSource ModuleSources} chain (all parents) that ends at this 
    * object.
@@ -115,22 +134,24 @@ final class ModuleSource {
   
   /**
    * Returns the size of call stack that ends just before the module {@link Module#configure(Binder)
-   * configure(Binder)} method invocation (see {@link #getStackTrace()}). 
+   * configure(Binder)} method invocation (see {@link #getStackTrace()}).
    */
   int getStackTraceSize() {
     if (parent == null) {
       return partialCallStack.length;
     }
-    return parent.getStackTraceSize() + partialCallStack.length;  
-  }  
-  
+    return parent.getStackTraceSize() + partialCallStack.length;
+  }
+
   /**
-   * Returns the full call stack that ends just before the module {@link Module#configure(Binder) 
-   * configure(Binder)} method invocation. 
+   * Returns the full call stack that ends just before the module {@link Module#configure(Binder)
+   * configure(Binder)} method invocation. The return array is non-empty if stack trace collection
+   * on.
    */
   StackTraceElement[] getStackTrace() {
-    StackTraceElement[] callStack = new StackTraceElement[getStackTraceSize()];
-    int cursor = 0; // Index 0 stores the top Module.configure() 
+    int stackTraceSize = getStackTraceSize();
+    StackTraceElement[] callStack = new StackTraceElement[stackTraceSize];
+    int cursor = 0;
     ModuleSource current = this;
     while (current != null) {
       StackTraceElement[] chunk = 

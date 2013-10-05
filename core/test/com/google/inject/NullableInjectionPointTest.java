@@ -1,6 +1,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 
 import junit.framework.TestCase;
 
@@ -122,7 +123,7 @@ public class NullableInjectionPointTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "Binding to null instances is not allowed.",
-          "at " + getClass().getName(), ".configure(NullableInjectionPointTest.java:");
+          "at " + getClass().getName(), getDeclaringSourcePart(getClass()));
     }
   }
 

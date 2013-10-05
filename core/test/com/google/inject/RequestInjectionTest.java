@@ -17,6 +17,7 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.inject.matcher.Matchers;
@@ -128,7 +129,7 @@ public class RequestInjectionTest extends TestCase {
       assertContains(expected.getMessage(),
           "1) Error in custom provider, java.lang.UnsupportedOperationException",
           "for field at " + NeedsRunnable.class.getName() + ".runnable(RequestInjectionTest.java:",
-          "at " + getClass().getName(), ".configure(RequestInjectionTest.java:");
+          "at " + getClass().getName(), getDeclaringSourcePart(getClass()));
     }
   }
 
