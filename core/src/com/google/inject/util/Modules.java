@@ -52,10 +52,11 @@ import java.util.Set;
  */
 public final class Modules {
   private Modules() {}
-
-  public static final Module EMPTY_MODULE = new Module() {
+  
+  public static final Module EMPTY_MODULE = new EmptyModule();
+  private static class EmptyModule implements Module {
     public void configure(Binder binder) {}
-  };
+  }
 
   /**
    * Returns a builder that creates a module that overlays override modules over the given
@@ -108,15 +109,22 @@ public final class Modules {
    * Returns a new module that installs all of {@code modules}.
    */
   public static Module combine(Iterable<? extends Module> modules) {
-    final Set<Module> modulesSet = ImmutableSet.copyOf(modules);
-    return new Module() {
-      public void configure(Binder binder) {
-        binder = binder.skipSources(getClass());
-        for (Module module : modulesSet) {
-          binder.install(module);
-        }
+    return new CombinedModule(modules);
+  }
+  
+  private static class CombinedModule implements Module {
+    final Set<Module> modulesSet;
+    
+    CombinedModule(Iterable<? extends Module> modules) {
+      this.modulesSet = ImmutableSet.copyOf(modules);
+    }
+    
+    public void configure(Binder binder) {
+      binder = binder.skipSources(getClass());
+      for (Module module : modulesSet) {
+        binder.install(module);
       }
-    };
+    }
   }
 
   /**

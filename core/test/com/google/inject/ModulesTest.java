@@ -49,18 +49,21 @@ public class ModulesTest extends TestCase {
    * The module returned by Modules.combine shouldn't show up in binder sources.
    */
   public void testCombineSources() {
+    final Module m1 = newModule(1);
+    final Module m2 = newModule(2L);
+    final Module combined1 = Modules.combine(m1, m2);
     Module skipSourcesModule = new AbstractModule() {
       @Override protected void configure() {
-        install(Modules.combine(newModule(1), newModule(2L)));
+        install(combined1);
       }
     };
-    Injector injector = Guice.createInjector(Modules.combine(skipSourcesModule));
+    final Module combined2 = Modules.combine(skipSourcesModule);
+    Injector injector = Guice.createInjector(combined2);
     ElementSource source = (ElementSource) injector.getBinding(Integer.class).getSource();
-    // Check modules stack
     assertEquals(source.getModuleClassNames().size(), 4);
-    assertEquals(ImmutableList.of("com.google.inject.ModulesTest$2",
-        "com.google.inject.util.Modules$2", "com.google.inject.ModulesTest$1",
-        "com.google.inject.util.Modules$2"), source.getModuleClassNames());
+    assertEquals(ImmutableList.of(m1.getClass().getName(),
+        combined1.getClass().getName(), skipSourcesModule.getClass().getName(),
+        combined2.getClass().getName()), source.getModuleClassNames());
     StackTraceElement stackTraceElement = (StackTraceElement) source.getDeclaringSource();
     assertEquals(skipSourcesModule.getClass().getName(), stackTraceElement.getClassName());
   }
