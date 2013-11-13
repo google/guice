@@ -275,6 +275,32 @@ See the Apache License Version 2.0 for the specific language governing permissio
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <!--<argLine>-Dguice_include_stack_traces=OFF</argLine>-->
           </configuration>
+          <executions>
+            <execution>
+              <id>stack-traces-off</id>
+              <phase>test</phase>
+              <goals><goal>test</goal></goals>
+              <configuration>
+                <argLine>-Dguice_include_stack_traces=OFF</argLine>
+              </configuration>
+            </execution>
+            <execution>
+              <id>stack-traces-complete</id>
+              <phase>test</phase>
+              <goals><goal>test</goal></goals>
+              <configuration>
+                <argLine>-Dguice_include_stack_traces=COMPLETE</argLine>
+              </configuration>
+            </execution>
+            <execution>
+              <id>default-test</id>
+              <phase>test</phase>
+              <goals><goal>test</goal></goals>
+              <configuration>
+                <argLine>-Dguice_include_stack_traces=ONLY_FOR_DECLARING_SOURCE</argLine>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <!--
          | Shared OSGi manifest configuration
