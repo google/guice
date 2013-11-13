@@ -58,8 +58,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     providerBinding =
         injector.getBindingOrThrow(providerKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
   }
-  
-  @SuppressWarnings("unchecked")// 
+
   public T get(Errors errors, InternalContext context, Dependency dependency, boolean linked)
       throws ErrorsException {
     checkState(providerBinding != null, "not initialized");
@@ -67,7 +66,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
     context.pushState(providerKey, providerBinding.getSource());
     try {
       errors = errors.withSource(providerKey);
-      Provider provider = providerBinding.getInternalFactory().get(
+      Provider<? extends T> provider = providerBinding.getInternalFactory().get(
           errors, context, dependency, true);
       return circularGet(provider, errors, context, dependency, linked, provisionCallback);
     } finally {

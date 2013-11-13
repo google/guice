@@ -69,9 +69,9 @@ public abstract class DefaultBindingTargetVisitor<T, V> implements BindingTarget
     return visitOther(convertedConstantBinding);
   }
 
-   // javac says it's an error to cast ProviderBinding<? extends T> to Binding<? extends T>
   @SuppressWarnings("unchecked")
   public V visit(ProviderBinding<? extends T> providerBinding) {
-    return visitOther((Binding) providerBinding);
+    // TODO(cushon): remove raw (Binding) cast when we don't care about javac 6 anymore
+    return visitOther((Binding<? extends T>) (Binding) providerBinding);
   }
 }
