@@ -17,12 +17,14 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.ProvisionException;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProvisionListener;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Intercepts provisions with a stack of listeners.
@@ -49,7 +51,8 @@ final class ProvisionListenerStackCallback<T> {
     if (listeners.isEmpty()) {
       this.listeners = EMPTY_LISTENER;
     } else {
-      this.listeners = listeners.toArray(new ProvisionListener[listeners.size()]);
+      Set<ProvisionListener> deDuplicated = Sets.newLinkedHashSet(listeners);
+      this.listeners = deDuplicated.toArray(new ProvisionListener[deDuplicated.size()]);
     }
   }
   

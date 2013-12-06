@@ -313,4 +313,17 @@ public class MethodInterceptionTest extends TestCase {
     }
   }
   
+  public void testDeDuplicateInterceptors() throws Exception {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        CountingInterceptor interceptor = new CountingInterceptor();
+        bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
+        bindInterceptor(Matchers.any(), Matchers.any(), interceptor);
+      }
+    });
+
+    Interceptable interceptable = injector.getInstance(Interceptable.class);
+    interceptable.foo();
+    assertEquals(1, count.get());
+  }
 }

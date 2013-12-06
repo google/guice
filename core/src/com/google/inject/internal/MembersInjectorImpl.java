@@ -34,8 +34,8 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final TypeLiteral<T> typeLiteral;
   private final InjectorImpl injector;
   private final ImmutableList<SingleMemberInjector> memberInjectors;
-  private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
-  private final ImmutableList<InjectionListener<? super T>> injectionListeners;
+  private final ImmutableSet<MembersInjector<? super T>> userMembersInjectors;
+  private final ImmutableSet<InjectionListener<? super T>> injectionListeners;
   /*if[AOP]*/
   private final ImmutableList<MethodAspect> addedAspects;
   /*end[AOP]*/
@@ -135,9 +135,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
     // TODO: There's no way to know if a user's MembersInjector wants toolable injections.
     if(!toolableOnly) {
-    // optimization: use manual for/each to save allocating an iterator here
-      for (int i = 0, size = userMembersInjectors.size(); i < size; i++) {
-        MembersInjector<? super T> userMembersInjector = userMembersInjectors.get(i);
+      for (MembersInjector<? super T> userMembersInjector : userMembersInjectors) {
         try {
           userMembersInjector.injectMembers(t);
         } catch (RuntimeException e) {

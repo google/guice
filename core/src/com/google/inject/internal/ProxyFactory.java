@@ -20,6 +20,7 @@ import static com.google.inject.internal.BytecodeGen.newFastClass;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.spi.InjectionPoint;
@@ -135,8 +136,10 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
         interceptorsMapBuilder = ImmutableMap.builder();
       }
 
-      interceptorsMapBuilder.put(pair.method, ImmutableList.copyOf(pair.interceptors));
-      callbacks[i] = new InterceptorStackCallback(pair.method, pair.interceptors);
+      ImmutableList<MethodInterceptor> deDuplicated =
+          ImmutableSet.copyOf(pair.interceptors).asList();
+      interceptorsMapBuilder.put(pair.method, deDuplicated);
+      callbacks[i] = new InterceptorStackCallback(pair.method, deDuplicated);
     }
 
     interceptors = interceptorsMapBuilder != null

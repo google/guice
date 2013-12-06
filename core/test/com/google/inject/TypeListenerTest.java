@@ -630,6 +630,49 @@ public class TypeListenerTest extends TestCase {
     }
   }
 
+  private static class CountingMembersInjector implements MembersInjector<D> {
+    public void injectMembers(D instance) {
+      ++instance.userInjected;
+    }
+  }
+
+  private static class CountingInjectionListener implements InjectionListener<D> {
+    public void afterInjection(D injectee) {
+      ++injectee.listenersNotified;
+    }
+  }
+
+  private static class DuplicatingTypeListener implements TypeListener {
+    int count = 0;
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+      ++count;
+
+      MembersInjector membersInjector = new CountingMembersInjector();
+      encounter.register(membersInjector);
+      encounter.register(membersInjector);
+
+      InjectionListener injectionListener = new CountingInjectionListener();
+      encounter.register(injectionListener);
+      encounter.register(injectionListener);
+    }
+  }
+
+  public void testDeDuplicateTypeListeners() {
+    final DuplicatingTypeListener typeListener = new DuplicatingTypeListener();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(any(), typeListener);
+        bindListener(only(new TypeLiteral<D>() {}), typeListener);
+      }
+    });
+    D d = injector.getInstance(D.class);
+    d.assertAllCounts(1);
+    assertEquals(1, typeListener.count);
+  }
+
   // TODO: recursively accessing a lookup should fail
 
   static class A {

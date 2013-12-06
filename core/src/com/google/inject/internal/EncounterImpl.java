@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
@@ -76,16 +77,16 @@ final class EncounterImpl<T> implements TypeEncounter<T> {
   }
   /*end[AOP]*/
 
-  ImmutableList<MembersInjector<? super T>> getMembersInjectors() {
+  ImmutableSet<MembersInjector<? super T>> getMembersInjectors() {
     return membersInjectors == null
-        ? ImmutableList.<MembersInjector<? super T>>of()
-        : ImmutableList.copyOf(membersInjectors);
+        ? ImmutableSet.<MembersInjector<? super T>>of()
+        : ImmutableSet.copyOf(membersInjectors);
   }
 
-  ImmutableList<InjectionListener<? super T>> getInjectionListeners() {
+  ImmutableSet<InjectionListener<? super T>> getInjectionListeners() {
     return injectionListeners == null
-        ? ImmutableList.<InjectionListener<? super T>>of()
-        : ImmutableList.copyOf(injectionListeners);
+        ? ImmutableSet.<InjectionListener<? super T>>of()
+        : ImmutableSet.copyOf(injectionListeners);
   }
 
   public void register(MembersInjector<? super T> membersInjector) {

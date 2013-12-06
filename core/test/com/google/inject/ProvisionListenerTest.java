@@ -695,4 +695,17 @@ public class ProvisionListenerTest extends TestCase {
       this.x = xProvider.get();
     }
   }
+  
+  public void testDeDuplicateProvisionListeners() {
+    final Counter counter = new Counter();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bindListener(Matchers.any(), counter);
+        bindListener(Matchers.any(), counter);
+      }
+    });
+    injector.getInstance(Many.class);
+    assertEquals("ProvisionListener not de-duplicated", 1, counter.count);
+  }
 }
