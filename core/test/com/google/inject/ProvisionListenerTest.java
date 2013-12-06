@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author sameb@google.com (Sam Berlin)
  */
+// TODO(sameb): Add some tests for private modules & child injectors.
 public class ProvisionListenerTest extends TestCase {
 
   public void testExceptionInListenerBeforeProvisioning() {

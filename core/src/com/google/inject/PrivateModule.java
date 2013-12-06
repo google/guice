@@ -24,6 +24,7 @@ import com.google.inject.binder.AnnotatedElementBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
 
@@ -292,5 +293,13 @@ public abstract class PrivateModule implements Module {
   protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
       TypeListener listener) {
     binder().bindListener(typeMatcher, listener);
+  }
+  
+  /**
+   * @see Binder#bindListener(Matcher, ProvisionListener...)
+   */
+  protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+      ProvisionListener... listeners) {
+    binder().bindListener(bindingMatcher, listeners);
   }
 }
