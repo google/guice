@@ -52,7 +52,7 @@ public class ServletScopes {
   /**
    * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
    * scope falls back to this scope map if no http request is available, and
-   * requires {@link #scopeRequest} to be called as an alertnative.
+   * requires {@link #scopeRequest} to be called as an alternative.
    */
   private static final ThreadLocal<Context> requestScopeContext
       = new ThreadLocal<Context>();
