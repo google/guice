@@ -61,9 +61,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://google-guice.googlecode.com/svn/trunk</connection>
-    <developerConnection>scm:svn:https://google-guice.googlecode.com/svn/trunk</developerConnection>
-    <url>http://code.google.com/p/google-guice/source/browse</url>
+    <connection>scm:git:https://code.google.com/p/google-guice/</connection>
+    <developerConnection>scm:git:https://code.google.com/p/google-guice/</developerConnection>
+    <url>https://code.google.com/p/google-guice/</url>
   </scm>
 
   <issueManagement>
@@ -73,7 +73,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <ciManagement>
     <system>Hudson</system>
-    <url>https://grid.sonatype.org/ci/job/Google-Guice/</url>
+    <url>https://grid.sonatype.org/ci/job/google-guice/</url>
   </ciManagement>
 
   <licenses>

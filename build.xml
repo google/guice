@@ -264,6 +264,9 @@
         <include name="NOTICE"/>
       </zipfileset>]]></replacetoken>
     </replace>
+    <replace file="build/no_aop/common.xml" value='Bundle-Name" value="$${ant.project.name} (no_aop)'>
+      <replacetoken><![CDATA[Bundle-Name" value="${ant.project.name}]]></replacetoken>
+    </replace>
   </target>
 
   <target name="clean.all"
