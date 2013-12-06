@@ -65,7 +65,6 @@ public class ServletScopes {
    */
   public static final Scope REQUEST = new Scope() {
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
-      final String name = key.toString();
       return new Provider<T>() {
         public T get() {
           // Check if the alternate request scope should be used, if no HTTP
@@ -78,7 +77,7 @@ public class ServletScopes {
             Context context = requestScopeContext.get();
             if (null != context) {
               @SuppressWarnings("unchecked")
-              T t = (T) context.map.get(name);
+              T t = (T) context.map.get(key);
 
               // Accounts for @Nullable providers.
               if (NullObject.INSTANCE == t) {
@@ -89,7 +88,7 @@ public class ServletScopes {
                 t = creator.get();
                 if (!Scopes.isCircularProxy(t)) {
                   // Store a sentinel for provider-given null values.
-                  context.map.put(name, t != null ? t : NullObject.INSTANCE);
+                  context.map.put(key, t != null ? t : NullObject.INSTANCE);
                 }
               }
 
@@ -109,6 +108,7 @@ public class ServletScopes {
             // GuiceFilter itself.
             return creator.get();
           }
+          String name = key.toString();
           synchronized (request) {
             Object obj = request.getAttribute(name);
             if (NullObject.INSTANCE == obj) {
@@ -328,7 +328,7 @@ public class ServletScopes {
     final Context context = new Context();
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
       Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
-      context.map.put(entry.getKey().toString(), value);
+      context.map.put(entry.getKey(), value);
     }
 
     return new Callable<T>() {
@@ -360,7 +360,7 @@ public class ServletScopes {
   }
 
   private static class Context {
-    final Map<String, Object> map = Maps.newHashMap();
+    final Map<Key, Object> map = Maps.newHashMap();
     volatile Thread owner;
 
     <T> T call(Callable<T> callable) throws Exception {
