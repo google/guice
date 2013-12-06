@@ -71,6 +71,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MapBinderTest extends TestCase {
 
+  final TypeLiteral<Map<String, javax.inject.Provider<String>>> mapOfStringJavaxProvider =
+      new TypeLiteral<Map<String, javax.inject.Provider<String>>>() {};
+  final TypeLiteral<Map<String, Provider<String>>> mapOfStringProvider =
+      new TypeLiteral<Map<String, Provider<String>>>() {}; 
   final TypeLiteral<Map<String, String>> mapOfString = new TypeLiteral<Map<String, String>>() {};
   final TypeLiteral<Map<String, Integer>> mapOfInteger = new TypeLiteral<Map<String, Integer>>() {};
   final TypeLiteral<Map<String, Set<String>>> mapOfSetOfString =
@@ -105,6 +109,10 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", "A", "b", "B", "c", "C", "d", "D", "e", "E"), abcde);
     assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(abc, de), BOTH, false, 0,
         instance("a", "A"), instance("b", "B"), instance("c", "C"), instance("d", "D"), instance("e", "E"));
+
+    // just make sure these succeed
+    injector.getInstance(Key.get(mapOfStringProvider));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider));
   }
 
   public void testMapBinderAggregationForAnnotationInstance() {
@@ -127,6 +135,10 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
     assertMapVisitor(key, stringType, stringType, setOf(module), BOTH, false, 0,
         instance("a", "A"), instance("b", "B"), instance("c", "C"));
+    
+    // just make sure these succeed
+    injector.getInstance(Key.get(mapOfStringProvider, Names.named("abc")));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, Names.named("abc")));
   }
 
   public void testMapBinderAggregationForAnnotationType() {
@@ -149,6 +161,10 @@ public class MapBinderTest extends TestCase {
     assertEquals(mapOf("a", "A", "b", "B", "c", "C"), abc);
     assertMapVisitor(key, stringType, stringType, setOf(module), BOTH, false, 0,
         instance("a", "A"), instance("b", "B"), instance("c", "C"));
+    
+    // just make sure these succeed
+    injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
   }
 
   public void testMapBinderWithMultipleAnnotationValueSets() {
@@ -178,6 +194,12 @@ public class MapBinderTest extends TestCase {
         instance("a", "A"), instance("b", "B"), instance("c", "C"));
     assertMapVisitor(deKey, stringType, stringType, setOf(module), BOTH, false, 1,
         instance("d", "D"), instance("e", "E"));     
+    
+    // just make sure these succeed
+    injector.getInstance(Key.get(mapOfStringProvider, named("abc")));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, named("abc")));
+    injector.getInstance(Key.get(mapOfStringProvider, named("de")));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, named("de")));
   }
 
   public void testMapBinderWithMultipleAnnotationTypeSets() {
@@ -207,6 +229,12 @@ public class MapBinderTest extends TestCase {
         instance("a", "A"), instance("b", "B"), instance("c", "C"));
     assertMapVisitor(deKey, stringType, stringType, setOf(module), BOTH, false, 1,
         instance("d", "D"), instance("e", "E"));
+    
+    // just make sure these succeed
+    injector.getInstance(Key.get(mapOfStringProvider, Abc.class));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, Abc.class));
+    injector.getInstance(Key.get(mapOfStringProvider, De.class));
+    injector.getInstance(Key.get(mapOfStringJavaxProvider, De.class));
   }
 
   public void testMapBinderWithMultipleTypes() {

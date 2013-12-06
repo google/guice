@@ -22,6 +22,7 @@ import static com.google.inject.multibindings.Element.Type.MAPBINDER;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.multibindings.Multibinder.checkNotNull;
 import static com.google.inject.multibindings.Multibinder.setOf;
+import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 
 import com.google.common.collect.ImmutableList;
@@ -211,6 +212,15 @@ public abstract class MapBinder<K, V> {
     return (TypeLiteral<Map<K, Provider<V>>>) TypeLiteral.get(
         Types.mapOf(keyType.getType(), Types.providerOf(valueType.getType())));
   }
+  
+  // provider map <K, V> is safely a Map<K, javax.inject.Provider<V>>>
+  @SuppressWarnings("unchecked")
+  static <K, V> TypeLiteral<Map<K, javax.inject.Provider<V>>> mapOfJavaxProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, javax.inject.Provider<V>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(),
+            newParameterizedType(javax.inject.Provider.class, valueType.getType())));
+  }
 
   @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
   static <K, V> TypeLiteral<Map<K, Set<Provider<V>>>> mapOfSetOfProviderOf(
@@ -296,6 +306,7 @@ public abstract class MapBinder<K, V> {
     private final TypeLiteral<K> keyType;
     private final TypeLiteral<V> valueType;
     private final Key<Map<K, V>> mapKey;
+    private final Key<Map<K, javax.inject.Provider<V>>> javaxProviderMapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
     private final Key<Map<K, Set<V>>> multimapKey;
     private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
@@ -315,6 +326,7 @@ public abstract class MapBinder<K, V> {
       this.valueType = valueType;
       this.mapKey = mapKey;
       this.providerMapKey = providerMapKey;
+      this.javaxProviderMapKey = providerMapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
       this.multimapKey = multimapKey;
       this.providerMultimapKey = providerMultimapKey;
       this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
@@ -354,7 +366,9 @@ public abstract class MapBinder<K, V> {
       // Binds a Map<K, Provider<V>> from a collection of Set<Entry<K, Provider<V>>.
       final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
           .getProvider(entrySetBinder.getSetKey());
-      binder.bind(providerMapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, Provider<V>>>(mapKey) {
+      
+      binder.bind(providerMapKey).toProvider(
+          new RealMapBinderProviderWithDependencies<Map<K, Provider<V>>>(mapKey) {
         private Map<K, Provider<V>> providerMap;
 
         @Toolable @Inject void initialize(Injector injector) {
@@ -384,6 +398,13 @@ public abstract class MapBinder<K, V> {
           return dependencies;
         }
       });
+      
+      // The map this exposes is internally an ImmutableMap, so it's OK to massage
+      // the guice Provider to javax Provider in the value (since Guice provider
+      // implements javax Provider).
+      @SuppressWarnings("unchecked")
+      Key massagedProviderMapKey = (Key)providerMapKey;
+      binder.bind(javaxProviderMapKey).to(massagedProviderMapKey);
 
       final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
       binder.bind(mapKey).toProvider(new RealMapWithExtensionProvider<Map<K, V>>(mapKey) {
@@ -457,6 +478,7 @@ public abstract class MapBinder<K, V> {
 
             return key.equals(mapKey)
                 || key.equals(providerMapKey)
+                || key.equals(javaxProviderMapKey)
                 || key.equals(multimapKey)
                 || key.equals(providerMultimapKey)
                 || key.equals(entrySetBinder.getSetKey())

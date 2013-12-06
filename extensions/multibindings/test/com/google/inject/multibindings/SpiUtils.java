@@ -18,6 +18,7 @@ package com.google.inject.multibindings;
 
 import static com.google.inject.multibindings.MapBinder.entryOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOf;
+import static com.google.inject.multibindings.MapBinder.mapOfJavaxProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfSetOfProviderOf;
 import static com.google.inject.multibindings.Multibinder.setOf;
@@ -153,11 +154,13 @@ public class SpiUtils {
       fail("Found all entries of: " + mapResults + ", but more were left over: " + entries);
     }
     
-    Key<?> mapOfProvider = adapt(mapKey, mapOfProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfProvider = adapt(mapKey, mapOfSetOfProviderOf(keyType, valueType));
-    Key<?> mapOfSet = adapt(mapKey, mapOf(keyType, setOf(valueType)));
-    Key<?> setOfEntry = adapt(mapKey, setOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+    Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
+    Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
+    boolean mapJavaxProviderMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false; 
     boolean mapSetProviderMatch = false;
@@ -175,6 +178,9 @@ public class SpiUtils {
       } else if(b.getKey().equals(mapOfProvider)) {
         assertTrue(contains);
         mapProviderMatch = true;
+      } else if (b.getKey().equals(mapOfJavaxProvider)) {
+        assertTrue(contains);
+        mapJavaxProviderMatch = true;
       } else if(b.getKey().equals(mapOfSet)) {
         assertTrue(contains);
         mapSetMatch = true;
@@ -199,21 +205,11 @@ public class SpiUtils {
     assertEquals("Incorrect other matches: " + otherMatches, mapResults.size(), sizeOfOther);
     assertTrue(entrySetMatch);
     assertTrue(mapProviderMatch);
+    assertTrue(mapJavaxProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
         otherMapBindings.size());
-  }
-  
-  /** Adapts a key, keeping the original annotation, using the new type literal. */
-  private static Key<?> adapt(Key<?> mapKey, TypeLiteral<?> resultType) {
-    if(mapKey.getAnnotation() != null) {
-      return Key.get(resultType, mapKey.getAnnotation());
-    } else if(mapKey.getAnnotationType() != null) {
-      return Key.get(resultType, mapKey.getAnnotationType());
-    } else {
-      return Key.get(resultType);
-    }
   }
   
   @SuppressWarnings("unchecked")
@@ -235,10 +231,10 @@ public class SpiUtils {
     assertEquals(valueType, mapbinder.getValueTypeLiteral());
     List<MapResult> mapResults = Lists.newArrayList(results);
     
-    Key<?> mapOfProvider = adapt(mapKey, mapOfProviderOf(keyType, valueType));
-    Key<?> mapOfSetOfProvider = adapt(mapKey, mapOfSetOfProviderOf(keyType, valueType));
-    Key<?> mapOfSet = adapt(mapKey, mapOf(keyType, setOf(valueType)));
-    Key<?> setOfEntry = adapt(mapKey, setOf(entryOfProviderOf(keyType, valueType)));    
+    Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+    Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
+    Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));    
     boolean entrySetMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false; 
