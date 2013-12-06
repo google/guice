@@ -37,7 +37,6 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
-import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 
@@ -658,24 +657,5 @@ public class OverrideModuleTest extends TestCase {
       return new Object();
     }
   }
-
-  public void testCorrectStage() {
-    final Stage stage = Stage.PRODUCTION;
-    Module module = Modules.override(new AbstractModule() {
-      @Override
-      protected void configure() {
-        if (currentStage() != Stage.PRODUCTION) {
-          addError("Wronge stage in overridden module:" + currentStage());
-        }
-      }
-    }).with(new AbstractModule() {
-      @Override
-      protected void configure() {
-        if (currentStage() != Stage.PRODUCTION) {
-          addError("Wronge stage in overriding module:" + currentStage());
-        }
-      }
-    });
-    Guice.createInjector(stage, module);
-  }
+    
 }
