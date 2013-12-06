@@ -325,7 +325,7 @@ public final class Elements {
     }
 
     public RecordingBinder withSource(final Object source) {            
-      return new RecordingBinder(this, source, null);
+      return source == this.source ? this : new RecordingBinder(this, source, null);
     }
 
     public RecordingBinder skipSources(Class... classesToSkip) {

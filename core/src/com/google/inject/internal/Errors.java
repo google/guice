@@ -115,7 +115,7 @@ public final class Errors implements Serializable {
    * Returns an instance that uses {@code source} as a reference point for newly added errors.
    */
   public Errors withSource(Object source) {
-    return source == SourceProvider.UNKNOWN_SOURCE
+    return source == this.source || source == SourceProvider.UNKNOWN_SOURCE
         ? this
         : new Errors(this, source);
   }
