@@ -171,7 +171,7 @@ public final class Modules {
     @Override
     public void configure() {
       Binder baseBinder = binder();
-      List<Element> baseElements = Elements.getElements(baseModules);
+      List<Element> baseElements = Elements.getElements(currentStage(), baseModules);
 
       // If the sole element was a PrivateElements, we want to override
       // the private elements within that -- so refocus our elements
@@ -191,7 +191,7 @@ public final class Modules {
       
       final Binder binder = baseBinder.skipSources(this.getClass());
       final LinkedHashSet<Element> elements = new LinkedHashSet<Element>(baseElements);
-      final List<Element> overrideElements = Elements.getElements(overrides);
+      final List<Element> overrideElements = Elements.getElements(currentStage(), overrides);
 
       final Set<Key<?>> overriddenKeys = Sets.newHashSet();
       final Map<Class<? extends Annotation>, ScopeBinding> overridesScopeAnnotations =
