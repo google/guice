@@ -167,10 +167,10 @@
           <doclet name="jdiff.JDiff">
                 <param name="-oldapi" value="${old.api}"/>
                 <param name="-oldapidir" value="latest-api-diffs"/>             
-                <param name="-javadocold" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${old.api}/javadoc/"/>
+                <param name="-javadocold" value="http://google-guice.googlecode.com/git/latest-api-diffs/${old.api}/javadoc/"/>
                 <param name="-newapi" value="${new.api}"/>
             <param name="-newapidir" value="${jdiff.tmp}"/>
-                <param name="-javadocnew" value="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/${new.api}/javadoc/"/>
+                <param name="-javadocnew" value="http://google-guice.googlecode.com/git/latest-api-diffs/${new.api}/javadoc/"/>
                 <param name="-stats"/>
                 <param name="-docchanges"/>
           </doclet>
@@ -203,7 +203,8 @@
       <doclet name="com.google.doclava.Doclava">
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
         <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
-        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" /> 
+        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
+      	<param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
         <param name="-apiversion" value="Guice_${new.api}"/>
         <param name="-assetsdir" value="javadoc/assets"/>
         <param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
