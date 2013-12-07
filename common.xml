@@ -148,9 +148,8 @@
         classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
       <fileset dir="${build.dir}/classes"/>
-      <zipfileset src="${common.basedir}/lib/build/cglib-3.0.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/asm-4.0.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/asm-util-4.0.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>
+      <zipfileset src="${common.basedir}/lib/build/asm-4.2.jar"/>
       <zipfileset src="${common.basedir}/lib/build/guava-11.0.1.jar"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
@@ -172,7 +171,7 @@
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
         classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
-      <zipfileset src="${common.basedir}/lib/build/cglib-3.0.jar">
+      <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar">
         <include name="LICENSE"/>
         <include name="NOTICE"/>
       </zipfileset>
