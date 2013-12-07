@@ -256,10 +256,7 @@
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar">
-        <include name="LICENSE"/>
-        <include name="NOTICE"/>
-      </zipfileset>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value='Bundle-Name" value="$${ant.project.name} (no_aop)'>
       <replacetoken><![CDATA[Bundle-Name" value="${ant.project.name}]]></replacetoken>

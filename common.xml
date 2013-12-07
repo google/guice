@@ -171,10 +171,7 @@
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
         classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
     <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
-      <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar">
-        <include name="LICENSE"/>
-        <include name="NOTICE"/>
-      </zipfileset>
+      <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>
       <fileset dir="${build.dir}/classes"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
