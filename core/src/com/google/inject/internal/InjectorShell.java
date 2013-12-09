@@ -147,7 +147,7 @@ final class InjectorShell {
 
       // add default type converters if this is a top-level injector
       if (parent == null) {
-        new TypeConverterBindingProcessor(errors).prepareBuiltInConverters(injector);
+        TypeConverterBindingProcessor.prepareBuiltInConverters(injector);
       }
 
       stopwatch.resetAndLog("Module execution");
