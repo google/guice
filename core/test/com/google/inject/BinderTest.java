@@ -22,7 +22,6 @@ import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.Asserts.isIncludeStackTraceOff;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.name.Named;
@@ -121,7 +120,7 @@ public class BinderTest extends TestCase {
             segment1, atSegment, sourceFileName,
             segment4, atSegment, sourceFileName,
             segment2, atSegment, sourceFileName);
-      } 
+      }
     }
   }
 
@@ -248,7 +247,7 @@ public class BinderTest extends TestCase {
   public void testArrayTypeCanonicalization() {
     final String[] strings = new String[] { "A" };
     final Integer[] integers = new Integer[] { 1 };
-    
+
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
@@ -279,7 +278,7 @@ public class BinderTest extends TestCase {
           "at " + getClass().getName(), getDeclaringSourcePart(getClass()));
       assertContains(expected.getMessage(), "1 error");
     }
-    
+
     // passes because duplicates are ignored
     injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -292,7 +291,7 @@ public class BinderTest extends TestCase {
     assertSame(strings, injector.getInstance(new Key<String[]>() {}));
     assertSame(strings, injector.getInstance(String[].class));
   }
-  
+
   static class ParentModule extends AbstractModule {
     @Override protected void configure() {
       install(new FooModule());
@@ -318,7 +317,7 @@ public class BinderTest extends TestCase {
       bind(String.class).toInstance(constant);
     }
   }
-  
+
   /**
    * Binding something to two different things should give an error.
    */
@@ -335,7 +334,7 @@ public class BinderTest extends TestCase {
       assertContains(expected.getMessage(), "1 error");
     }
   }
-  
+
   /**
    * Binding an @ImplementedBy thing to something else should also fail.
    */
@@ -375,7 +374,7 @@ public class BinderTest extends TestCase {
     // Also validate that we're using the explicit (and not @ImplementedBy) implementation
     assertFalse(injector.getInstance(HasImplementedBy1.class) instanceof ImplementsHasImplementedBy1);
   }
-  
+
   /**
    * See issue 614, Problem Two
    * http://code.google.com/p/google-guice/issues/detail?id=614
@@ -389,7 +388,7 @@ public class BinderTest extends TestCase {
       }
     });
   }
-  
+
   /**
    * Untargetted bindings should follow @ImplementedBy and @ProvidedBy
    * annotations if they exist. Otherwise the class should be constructed
@@ -406,7 +405,7 @@ public class BinderTest extends TestCase {
         bind(JustAClass.class);
       }
     });
-    
+
     assertNotNull(injector.getInstance(HasProvidedBy1.class));
     assertNotNull(injector.getInstance(HasImplementedBy1.class));
     assertNotSame(HasProvidedBy2.class,
@@ -448,7 +447,7 @@ public class BinderTest extends TestCase {
       Guice.createInjector(new AbstractModule() {
         @Override
         protected void configure() {
-          addError(new Message(ImmutableList.of(), "Whoops!", new IllegalArgumentException()));
+          addError(new Message("Whoops!", new IllegalArgumentException()));
         }
       });
       fail();
@@ -508,43 +507,43 @@ public class BinderTest extends TestCase {
           "Binding to core guice framework type is not allowed: AbstractModule.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Binder.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Binding.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Injector.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Key.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Module.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to Provider is not allowed.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Scope.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Stage.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: TypeLiteral.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-          
+
           "Binding to core guice framework type is not allowed: Key.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class));
@@ -588,27 +587,27 @@ public class BinderTest extends TestCase {
   static class ExtendsHasImplementedBy2 extends HasImplementedBy2 {}
 
   static class JustAClass {}
-  
+
   @ImplementedBy(ImplementsHasImplementedByThatNeedsAnotherImplementedBy.class)
   static interface HasImplementedByThatNeedsAnotherImplementedBy {
   }
-  
+
   static class ImplementsHasImplementedByThatNeedsAnotherImplementedBy
     implements HasImplementedByThatNeedsAnotherImplementedBy {
-    @Inject 
+    @Inject
     ImplementsHasImplementedByThatNeedsAnotherImplementedBy(
-        HasImplementedBy1 h1n1) {}                             
+        HasImplementedBy1 h1n1) {}
   }
-  
+
   @ImplementedBy(ImplementsHasImplementedByThatWantsExplicit.class)
-  static interface HasImplementedByThatWantsExplicit {    
+  static interface HasImplementedByThatWantsExplicit {
   }
-  
+
   static class ImplementsHasImplementedByThatWantsExplicit
       implements HasImplementedByThatWantsExplicit {
     @Inject ImplementsHasImplementedByThatWantsExplicit(JustAnInterface jai) {}
   }
-  
+
   static interface JustAnInterface {}
 
 

@@ -81,13 +81,13 @@ import java.util.Set;
  * to create their own {@code Multibinder<Snack>}, and to each contribute
  * bindings to the set of snacks. When that set is injected, it will contain
  * elements from both modules.
- * 
+ *
  * <p>The set's iteration order is consistent with the binding order. This is
  * convenient when multiple elements are contributed by the same module because
  * that module can order its bindings appropriately. Avoid relying on the
  * iteration order of elements contributed by different modules, since there is
  * no equivalent mechanism to order modules.
- * 
+ *
  * <p>The set is unmodifiable.  Elements can only be added to the set by
  * configuring the multibinder.  Elements can never be removed from the set.
  *
@@ -249,7 +249,7 @@ public abstract class Multibinder<T> {
       this.setName = nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
-    
+
     /**
      * Returns the name the set should use.  This is based on the annotation.
      * If the annotation has an instance and is not a marker annotation,
@@ -259,7 +259,7 @@ public abstract class Multibinder<T> {
      */
     private static String nameOf(Key<?> setKey) {
       Annotation annotation = setKey.getAnnotation();
-      Class<? extends Annotation> annotationType = setKey.getAnnotationType();      
+      Class<? extends Annotation> annotationType = setKey.getAnnotationType();
       if (annotation != null && !Annotations.isMarker(annotationType)) {
         return setKey.getAnnotation().toString();
       } else if (setKey.getAnnotationType() != null) {
@@ -339,7 +339,7 @@ public abstract class Multibinder<T> {
       }
       return ImmutableSet.copyOf(result.keySet());
     }
-    
+
     @SuppressWarnings("unchecked")
     public <B, V> V acceptExtensionVisitor(
         BindingTargetVisitor<B, V> visitor,
@@ -354,7 +354,7 @@ public abstract class Multibinder<T> {
     String getSetName() {
       return setName;
     }
-    
+
     public TypeLiteral<?> getElementTypeLiteral() {
       return elementType;
     }
@@ -362,7 +362,7 @@ public abstract class Multibinder<T> {
     public Key<Set<T>> getSetKey() {
       return setKey;
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<Binding<?>> getElements() {
       if (isInitialized()) {
@@ -371,20 +371,20 @@ public abstract class Multibinder<T> {
         throw new UnsupportedOperationException("getElements() not supported for module bindings");
       }
     }
-    
+
     public boolean permitsDuplicates() {
       if (isInitialized()) {
         return permitDuplicates;
       } else {
         throw new UnsupportedOperationException(
-            "permitsDuplicates() not supported for module bindings");   
+            "permitsDuplicates() not supported for module bindings");
       }
     }
 
     public boolean containsElement(com.google.inject.spi.Element element) {
       if (element instanceof Binding) {
         Binding<?> binding = (Binding<?>) element;
-        return keyMatches(binding.getKey()) 
+        return keyMatches(binding.getKey())
             || binding.getKey().equals(permitDuplicatesKey)
             || binding.getKey().equals(setKey);
       } else {
@@ -491,6 +491,6 @@ public abstract class Multibinder<T> {
 
     NullPointerException npe = new NullPointerException(name);
     throw new ConfigurationException(ImmutableSet.of(
-        new Message(ImmutableList.of(), npe.toString(), npe)));
+        new Message(npe.toString(), npe)));
   }
 }

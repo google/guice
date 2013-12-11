@@ -18,7 +18,6 @@ package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
@@ -45,7 +44,7 @@ public final class ProvisionException extends RuntimeException {
 
   public ProvisionException(String message, Throwable cause) {
     super(cause);
-    this.messages = ImmutableSet.of(new Message(ImmutableList.of(), message, cause));
+    this.messages = ImmutableSet.of(new Message(message, cause));
   }
 
   public ProvisionException(String message) {

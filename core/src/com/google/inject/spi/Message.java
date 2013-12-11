@@ -55,6 +55,13 @@ public final class Message implements Serializable, Element {
     this.cause = cause;
   }
 
+  /**
+   * @since 4.0
+   */
+  public Message(String message, Throwable cause) {
+    this(ImmutableList.of(), message, cause);
+  }
+
   public Message(Object source, String message) {
     this(ImmutableList.of(source), message, null);
   }
