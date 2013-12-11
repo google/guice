@@ -52,7 +52,7 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
 
   public Object intercept(Object proxy, Method method, Object[] arguments,
       MethodProxy methodProxy) throws Throwable {
-    return new InterceptedMethodInvocation(proxy, methodProxy, arguments).proceed();
+    return new InterceptedMethodInvocation(proxy, methodProxy, arguments, 0).proceed();
   }
 
   private class InterceptedMethodInvocation implements MethodInvocation {
@@ -60,26 +60,25 @@ final class InterceptorStackCallback implements net.sf.cglib.proxy.MethodInterce
     final Object proxy;
     final Object[] arguments;
     final MethodProxy methodProxy;
-    int index = -1;
+    final int index;
 
     public InterceptedMethodInvocation(Object proxy, MethodProxy methodProxy,
-        Object[] arguments) {
+        Object[] arguments, int index) {
       this.proxy = proxy;
       this.methodProxy = methodProxy;
       this.arguments = arguments;
+      this.index = index;
     }
 
     public Object proceed() throws Throwable {
       try {
-        index++;
         return index == interceptors.length
             ? methodProxy.invokeSuper(proxy, arguments)
-            : interceptors[index].invoke(this);
+            : interceptors[index].invoke(
+                new InterceptedMethodInvocation(proxy, methodProxy, arguments, index + 1));
       } catch (Throwable t) {
         pruneStacktrace(t);
         throw t;
-      } finally {
-        index--;
       }
     }
 

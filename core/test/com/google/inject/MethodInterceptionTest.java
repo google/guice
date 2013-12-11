@@ -34,6 +34,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -325,5 +326,44 @@ public class MethodInterceptionTest extends TestCase {
     Interceptable interceptable = injector.getInstance(Interceptable.class);
     interceptable.foo();
     assertEquals(1, count.get());
+  }
+
+  public void testCallLater() {
+    final Queue<Runnable> queue = Lists.newLinkedList();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bindInterceptor(Matchers.any(), Matchers.any(), new CallLaterInterceptor(queue));
+      }
+    });
+
+    Interceptable interceptable = injector.getInstance(Interceptable.class);
+    interceptable.foo();
+    assertNull(interceptable.lastElements);
+    assertEquals(1, queue.size());
+
+    queue.remove().run();
+    assertNotNull(interceptable.lastElements);
+  }
+
+  private final class CallLaterInterceptor implements MethodInterceptor {
+    private final Queue<Runnable> queue;
+
+    public CallLaterInterceptor(Queue<Runnable> queue) {
+      this.queue = queue;
+    }
+
+    public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
+      queue.add(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            methodInvocation.proceed();
+          } catch (Throwable t) {
+            throw new RuntimeException(t);
+          }
+        }
+      });
+      return null;
+    }
   }
 }
