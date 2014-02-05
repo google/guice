@@ -85,6 +85,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </licenses>
 
   <modules>
+    <module>blender</module>
     <module>core</module>
     <module>extensions</module>
   </modules>

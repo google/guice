@@ -1,6 +1,6 @@
 package com.google.inject.persist;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Stage;
 import com.google.inject.persist.jpa.JpaPersistModule;

@@ -23,7 +23,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.ConfigurationException;
+import com.google.inject.Guice;
 import com.google.inject.TypeLiteral;
+import com.google.inject.config.HierarchyTraversalFilter;
 import com.google.inject.util.Types;
 
 import java.io.Serializable;
@@ -35,6 +37,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -269,10 +272,11 @@ public class MoreTypes {
 
     // check our supertypes
     if (!rawType.isInterface()) {
-      while (rawType != Object.class) {
+        HierarchyTraversalFilter filter = Guice.createHierarchyTraversalFilter();
+      while (filter.isWorthScanning(rawType)) {
         Class<?> rawSupertype = rawType.getSuperclass();
         if (rawSupertype == toResolve) {
-          return rawType.getGenericSuperclass();
+          return getGenericSuperclass(rawType);
         } else if (toResolve.isAssignableFrom(rawSupertype)) {
           return getGenericSupertype(rawType.getGenericSuperclass(), rawSupertype, toResolve);
         }
@@ -282,6 +286,18 @@ public class MoreTypes {
 
     // we can't resolve this further
     return toResolve;
+  }
+
+  private static HashMap<Class<?>, Type> cacheGenericSuperclass = new HashMap<Class<?>, Type>();
+
+  public static Type getGenericSuperclass(Class<?> rawType) {
+    Type t = cacheGenericSuperclass.get(rawType);
+    if( t!=null )
+      return t;
+
+    t = rawType.getGenericSuperclass();
+    cacheGenericSuperclass.put(rawType,t);
+    return t;
   }
 
   public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable unknown) {

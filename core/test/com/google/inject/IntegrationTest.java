@@ -17,11 +17,12 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.any;
-
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import com.google.inject.config.AbstractModule;
 
 /**
  * @author crazybob@google.com (Bob Lee)

@@ -28,13 +28,13 @@
  *     where and how it should send in ("inject") the objects you depend on
  *     (your "dependencies").
  *
- * <dt>{@link com.google.inject.Module}
+ * <dt>{@link com.google.inject.config.Module}
  * <dd>The interface you will implement in order to specify "bindings" --
  *     instructions for how Guice should handle injection -- for a particular
  *     set of interfaces.
  *
  * <dt>{@link com.google.inject.Binder}
- * <dd>The object that Guice passes into your {@link com.google.inject.Module}
+ * <dd>The object that Guice passes into your {@link com.google.inject.config.Module}
  *     to collect these bindings.
  *
  * <dt>{@link com.google.inject.Provider}

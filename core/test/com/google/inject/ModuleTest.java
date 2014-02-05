@@ -2,6 +2,8 @@
 
 package com.google.inject;
 
+import com.google.inject.config.Module;
+
 import junit.framework.TestCase;
 
 /**

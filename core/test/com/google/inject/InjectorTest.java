@@ -19,8 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -31,6 +29,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.google.inject.config.AbstractModule;
 
 /**
  * @author crazybob@google.com (Bob Lee)

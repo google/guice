@@ -244,24 +244,24 @@ public class InjectionPointTest extends TestCase {
     Set<InjectionPoint> points;
 
     points = InjectionPoint.forInstanceMethodsAndFields(Super.class);
-    assertEquals(points.toString(), 6, points.size());
-    assertPoints(points, Super.class, "atInject", "gInject", "privateAtAndPublicG",
+    assertEquals(points.toString(), 8, points.size());
+    assertPoints(points, Super.class, "atField", "gField", "atInject", "gInject", "privateAtAndPublicG",
         "privateGAndPublicAt", "atFirstThenG", "gFirstThenAt");
 
     points = InjectionPoint.forInstanceMethodsAndFields(Sub.class);
-    assertEquals(points.toString(), 7, points.size());
+    assertEquals(points.toString(), 9, points.size());
     // Superclass will always have is private members injected,
     // and 'gInject' was last @Injected in Super, so that remains the owner
-    assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
+    assertPoints(points, Super.class, "privateAtAndPublicG", "gInject", "atField", "gField", "privateGAndPublicAt");
     // Subclass also has the "private" methods, but they do not override
     // the superclass' methods, and it now owns the inject2 methods.
     assertPoints(points, Sub.class, "privateAtAndPublicG", "privateGAndPublicAt",
         "atFirstThenG", "gFirstThenAt");
     
     points = InjectionPoint.forInstanceMethodsAndFields(SubSub.class);
-    assertEquals(points.toString(), 6, points.size());
+    assertEquals(points.toString(), 8, points.size());
     // Superclass still has all the injection points it did before..
-    assertPoints(points, Super.class, "privateAtAndPublicG", "privateGAndPublicAt", "gInject");
+    assertPoints(points, Super.class, "privateAtAndPublicG", "gInject", "atField", "gField", "privateGAndPublicAt");
     // Subclass is missing the privateGAndPublicAt because it first became public with
     // javax.inject.Inject and was overrode without an annotation, which means it
     // disappears.  (It was guice @Inject in Super, but it was private there, so it doesn't
@@ -280,6 +280,10 @@ public class InjectionPointTest extends TestCase {
   }
   
   static class Super {
+    @javax.inject.Inject String atField;
+    @com.google.inject.Inject String gField;
+
+
     @javax.inject.Inject public void atInject() {}
     @com.google.inject.Inject public void gInject() {}
 

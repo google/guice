@@ -18,15 +18,15 @@ package com.google.inject.name;
 
 import static com.google.inject.Asserts.assertContains;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 
 import junit.framework.TestCase;
 

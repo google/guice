@@ -19,11 +19,12 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import junit.framework.TestCase;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
+
+import com.google.inject.config.AbstractModule;
 
 /**
  * @author crazybob@google.com (Bob Lee)

@@ -18,7 +18,7 @@ package com.google.inject.servlet;
 import static com.google.inject.servlet.ServletScopes.REQUEST;
 import static com.google.inject.servlet.ServletScopes.SESSION;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Provides;

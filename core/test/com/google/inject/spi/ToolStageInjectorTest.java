@@ -1,6 +1,5 @@
 package com.google.inject.spi;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -9,6 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.spi.Toolable;
 
 import junit.framework.TestCase;

@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
@@ -28,10 +29,12 @@ import com.google.inject.spi.TypeListener;
 
 import junit.framework.TestCase;
 
+
 /*if[AOP]*/
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 /*end[AOP]*/
+
 
 import java.lang.reflect.Constructor;
 import java.util.Collection;

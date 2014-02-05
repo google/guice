@@ -16,13 +16,13 @@
 
 package com.google.inject.throwingproviders;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Exposed;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.PrivateModule;
+import com.google.inject.config.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;

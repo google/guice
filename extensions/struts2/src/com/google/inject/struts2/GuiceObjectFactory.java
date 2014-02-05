@@ -16,11 +16,11 @@
 
 package com.google.inject.struts2;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.config.Module;
 import com.google.inject.internal.Annotations;
 import com.google.inject.servlet.ServletModule;
 

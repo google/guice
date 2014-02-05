@@ -18,11 +18,11 @@ package com.googlecode.guice.bundle;
 
 import static com.google.inject.name.Names.named;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.matcher.AbstractMatcher;
 
 import org.osgi.framework.Bundle;

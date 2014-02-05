@@ -19,7 +19,7 @@ package com.google.inject.servlet;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Key;
 
 import java.util.Map;

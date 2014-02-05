@@ -18,7 +18,7 @@ package com.google.inject.tools.jmx;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Key;
 import com.google.inject.Singleton;

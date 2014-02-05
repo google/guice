@@ -1,7 +1,7 @@
 package com.googlecode.guice;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.config.AbstractModule;
 
 public class PackageVisibilityTestModule extends AbstractModule {
 

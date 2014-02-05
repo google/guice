@@ -17,6 +17,8 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 import com.google.inject.spi.ElementSource;
 import com.google.inject.util.Modules;
 

@@ -17,7 +17,7 @@
 package com.google.inject.servlet;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;

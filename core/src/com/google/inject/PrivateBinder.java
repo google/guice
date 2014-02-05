@@ -20,7 +20,7 @@ import com.google.inject.binder.AnnotatedElementBuilder;
 
 /**
  * Returns a binder whose configuration information is hidden from its environment by default. See
- * {@link com.google.inject.PrivateModule PrivateModule} for details.
+ * {@link com.google.inject.config.PrivateModule PrivateModule} for details.
  * 
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0

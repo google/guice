@@ -16,6 +16,9 @@
 
 package com.google.inject.internal.util;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
@@ -26,6 +29,28 @@ import java.util.logging.Logger;
 public final class Stopwatch {
   private static final Logger logger = Logger.getLogger(Stopwatch.class.getName());
 
+//  static {
+//      logger.setLevel(Level.ALL); 
+//      logger.addHandler( new Handler() {
+//
+//        @Override
+//        public void publish(LogRecord record) {
+//            System.out.println("Stopwatch--"+record.getMessage());
+//        }
+//
+//        @Override
+//        public void flush() {
+//            
+//        }
+//
+//        @Override
+//        public void close() throws SecurityException {
+//            
+//        }
+//          
+//      });
+//  }
+  
   private long start = System.currentTimeMillis();
 
   /**
@@ -33,11 +58,9 @@ public final class Stopwatch {
    */
   public long reset() {
     long now = System.currentTimeMillis();
-    try {
-      return now - start;
-    } finally {
-      start = now;
-    }
+    long l = now - start;
+    start = now;
+    return l;
   }
 
   /**

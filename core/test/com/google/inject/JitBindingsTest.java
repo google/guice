@@ -21,10 +21,12 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING_PROVIDER;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
-
 import junit.framework.TestCase;
 
 import java.util.Set;
+
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.PrivateModule;
 
 /**
  * Some tests for {@link Binder#requireExplicitBindings()}

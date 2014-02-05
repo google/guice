@@ -19,7 +19,7 @@ package com.google.inject.persist;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 
 import org.aopalliance.intercept.MethodInterceptor;
 

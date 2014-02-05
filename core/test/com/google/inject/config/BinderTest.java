@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.google.inject.config;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
@@ -24,6 +24,23 @@ import static com.google.inject.Asserts.isIncludeStackTraceOff;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.Asserts;
+import com.google.inject.Binder;
+import com.google.inject.Binding;
+import com.google.inject.ConfigurationException;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.ProvidedBy;
+import com.google.inject.Provider;
+import com.google.inject.Scope;
+import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;

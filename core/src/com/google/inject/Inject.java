@@ -25,6 +25,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import com.google.inject.config.Module;
+
 /**
  * Annotates members of your implementation class (constructors, methods
  * and fields) into which the {@link Injector} should inject values.

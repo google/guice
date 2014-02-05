@@ -22,6 +22,8 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.TypeConverter;

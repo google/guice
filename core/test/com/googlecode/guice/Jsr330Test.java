@@ -19,7 +19,6 @@ package com.googlecode.guice;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -29,6 +28,7 @@ import com.google.inject.Scope;
 import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;

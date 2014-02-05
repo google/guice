@@ -26,6 +26,8 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
+import com.google.inject.config.AbstractModule;
+
 import java.lang.annotation.Retention;
 import java.text.DecimalFormat;
 import java.util.concurrent.Callable;

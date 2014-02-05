@@ -23,6 +23,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import com.google.inject.config.Module;
+
 /**
  * Annotates methods of a {@link Module} to create a provider method binding. The method's return
  * type is bound to its returned value. Guice will pass dependencies to the method as parameters.

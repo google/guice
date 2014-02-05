@@ -18,6 +18,8 @@ package com.google.inject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 import com.google.inject.util.Modules;
 
 import junit.framework.TestCase;

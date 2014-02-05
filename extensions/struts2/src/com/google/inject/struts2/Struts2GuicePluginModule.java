@@ -16,7 +16,7 @@
 
 package com.google.inject.struts2;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 
 /**
  * Initializes the Struts 2 Guice Plugin.

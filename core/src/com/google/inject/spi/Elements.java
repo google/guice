@@ -23,15 +23,11 @@ import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOptio
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
-import com.google.inject.Module;
 import com.google.inject.PrivateBinder;
-import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
@@ -39,6 +35,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
+import com.google.inject.config.PrivateModule;
 import com.google.inject.internal.AbstractBindingBuilder;
 import com.google.inject.internal.BindingBuilder;
 import com.google.inject.internal.ConstantBindingBuilderImpl;

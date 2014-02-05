@@ -16,9 +16,9 @@
 
 package com.googlecode.guice;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
+import com.google.inject.config.AbstractModule;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

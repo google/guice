@@ -17,15 +17,15 @@
 package com.google.inject.spi;
 
 import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
 import com.google.inject.name.Names;
 
 import junit.framework.TestCase;

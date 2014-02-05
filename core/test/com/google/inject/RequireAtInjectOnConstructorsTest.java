@@ -17,6 +17,9 @@
 
 package com.google.inject;
 
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.PrivateModule;
+
 import junit.framework.TestCase;
 
 /**

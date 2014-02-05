@@ -24,6 +24,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.inject.config.AbstractModule;
+import com.google.inject.config.Module;
+import com.google.inject.config.PrivateModule;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;

@@ -2,7 +2,6 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
-
 import junit.framework.TestCase;
 
 import java.lang.annotation.Documented;
@@ -10,6 +9,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.google.inject.config.AbstractModule;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
