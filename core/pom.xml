@@ -13,11 +13,6 @@
 
   <name>Google Guice - Core Library</name>
 
-  <properties>
-    <cglib.version>3.0</cglib.version>
-    <asm.version>4.0</asm.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>javax.inject</groupId>
@@ -32,17 +27,16 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>11.0.1</version>
+      <version>16.0.1</version>
     </dependency>
+    <!--
+     | CGLIB is embedded by default by the JarJar build profile
+    -->
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
-      <version>${cglib.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-util</artifactId>
-      <version>${asm.version}</version>
+      <version>3.1</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>
@@ -92,6 +86,8 @@
            | Temporarily excluded tests
           -->
           <excludes>
+            <exclude>**/*$*</exclude>
+            <exclude>**/ErrorHandlingTest*</exclude>
             <exclude>**/OSGiContainerTest*</exclude>
             <exclude>**/ScopesTest*</exclude>
             <exclude>**/TypeConversionTest*</exclude>
@@ -207,7 +203,7 @@
     </profile>
     <profile>
       <!--
-       | JarJar build profile: re-package ASM and CGLIB classes under the Guice namespace
+       | JarJar build profile: Embed CGLIB (and ASM) classes under a Guice namespace
       -->
       <id>guice.with.jarjar</id>
       <activation>
@@ -216,35 +212,48 @@
           <value>!false</value>
         </property>
       </activation>
-      <dependencies>
-        <!--
-         | Mark as optional: embedded by JarJar
-        -->
-        <dependency>
-          <groupId>cglib</groupId>
-          <artifactId>cglib</artifactId>
-          <version>${cglib.version}</version>
-          <optional>true</optional>
-        </dependency>
-        <dependency>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-util</artifactId>
-          <version>${asm.version}</version>
-          <optional>true</optional>
-        </dependency>
-      </dependencies>
       <build>
         <plugins>
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>jarjar-maven-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>jarjar</id>
+                <goals><goal>jarjar</goal></goals>
+              </execution>
+            </executions>
             <configuration>
+              <overwrite>true</overwrite>
               <includes>
                 <include>*:asm*</include>
                 <include>*:cglib</include>
-                <include>*:guava</include>
-                <include>*:jsr305</include>
               </includes>
+              <rules>
+                <rule>
+                  <pattern>net.sf.cglib.*</pattern>
+                  <result>com.google.inject.internal.cglib.$@1</result>
+                </rule>
+                <rule>
+                  <pattern>net.sf.cglib.**.*</pattern>
+                  <result>com.google.inject.internal.cglib.@1.$@2</result>
+                </rule>
+                <rule>
+                  <pattern>org.objectweb.asm.*</pattern>
+                  <result>com.google.inject.internal.asm.$@1</result>
+                </rule>
+                <rule>
+                  <pattern>org.objectweb.asm.**.*</pattern>
+                  <result>com.google.inject.internal.asm.@1.$@2</result>
+                </rule>
+                <keep>
+                  <pattern>com.google.inject.**</pattern>
+                </keep>
+                <keep>
+                  <pattern>com.googlecode.**</pattern>
+                </keep>
+              </rules>
             </configuration>
           </plugin>
           <plugin>
@@ -254,14 +263,17 @@
             <artifactId>maven-jar-plugin</artifactId>
             <executions>
               <execution>
-                <id>no_deps</id>
+                <id>classes</id>
                 <phase>package</phase>
                 <goals>
                   <goal>jar</goal>
                 </goals>
                 <configuration>
                   <classesDirectory>${project.build.directory}/original-classes</classesDirectory>
-                  <classifier>no_deps</classifier>
+                  <classifier>classes</classifier>
+                  <archive>
+                    <manifestFile combine.self="override" />
+                  </archive>
                 </configuration>
               </execution>
             </executions>
@@ -269,6 +281,42 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!--
+       | m2e profile - enable use of JarJar inside Eclipse
+      -->
+      <id>m2e</id>
+      <activation>
+        <property>
+          <name>m2e.version</name>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping</artifactId>
+              <version>1.0.0</version>
+              <configuration>
+                <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>jarjar-maven-plugin</artifactId>
+                        <versionRange>[1.4,)</versionRange>
+                        <goals><goal>jarjar</goal></goals>
+                      </pluginExecutionFilter>
+                      <action><execute /></action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMappingMetadata>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
   </profiles>
-
 </project>

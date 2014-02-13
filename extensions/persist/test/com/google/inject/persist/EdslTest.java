@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Stage;
 import com.google.inject.persist.jpa.JpaPersistModule;
-
+import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 /**
@@ -13,12 +13,14 @@ import junit.framework.TestCase;
 public class EdslTest extends TestCase {
 
   public void testModuleConfigUsingJpa() throws Exception {
+    Logger.getLogger(getClass().getName()).info("Starting EDSL test.");
     Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
       @Override
       protected void configure() {
         install(new JpaPersistModule("myunit"));
         binder().requireExplicitBindings();
-      };
+      }
     });
+    Logger.getLogger(getClass().getName()).info("Completed EDSL test.");
   }
 }

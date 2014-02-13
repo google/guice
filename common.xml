@@ -14,7 +14,7 @@
     <javac srcdir="${src.dir}"
          debug="on"
          destdir="${build.dir}/classes"
-         source="1.5" target="1.5" includeantruntime="false">
+         source="1.6" target="1.6" includeantruntime="false">
       <compilerarg value="-Xlint:all,-serial"/>
       <classpath refid="compile.classpath"/>
     </javac>
@@ -39,7 +39,7 @@
     <property name="Bundle-DocURL" value="http://code.google.com/p/google-guice/"/>
     <property name="Bundle-Copyright" value="Copyright (C) 2006 Google Inc."/>
     <property name="Bundle-License" value="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
-    <property name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5,JavaSE-1.6"/>
+    <property name="Bundle-RequiredExecutionEnvironment" value="JavaSE-1.6"/>
     <property name="Bundle-Vendor" value="Google, Inc."/>
 
     <property name="Export-Package" value="!${module}.internal.*,${module}.*;version=${api.version}"/>
@@ -76,7 +76,7 @@
     <javac srcdir="${test.dir}"
          debug="on"
          destdir="${build.dir}/test"
-         source="1.5" target="1.5" includeantruntime="false">
+         source="1.6" target="1.6" includeantruntime="false">
       <classpath path="${build.dir}/classes"/>
       <classpath path="${build.dir}/test"/>
       <classpath refid="compile.classpath"/>
@@ -119,7 +119,7 @@
       depends="source.jar, jar"
       description="Build jar files"/>
 
-  <target name="test.compile-with-deps" depends="test.compile"
+  <target name="test.withdeps" depends="test.compile"
       description="Build a jar of tests with internal.util refocused.">
     <mkdir dir="${build.dir}/dist"/>
     <dirname property="common.basedir" file="${ant.file.common}"/>
@@ -131,10 +131,6 @@
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
       <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
-      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
-      <rule pattern="javax.annotation.*.class" result="com.google.inject.internal.jsr305.$@1"/>
-      <rule pattern="javax.annotation.**.*.class" result="com.google.inject.internal.jsr305.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
       <keep pattern="com.googlecode.**"/>
     </jarjar>
@@ -150,35 +146,10 @@
       <fileset dir="${build.dir}/classes"/>
       <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>
       <zipfileset src="${common.basedir}/lib/build/asm-4.2.jar"/>
-      <zipfileset src="${common.basedir}/lib/build/guava-11.0.1.jar"/>
       <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
       <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
       <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
       <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
-      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
-      <keep pattern="com.google.inject.**"/>
-      <!-- the servlet extension uses this but core doesn't,
-           so we explicitly instruct the build to keep it. -->
-      <keep pattern="com.google.common.base.Throwables"/>
-    </jarjar>
-  </target>
-
-  <target name="jar.withrenameddeps" depends="compile"
-      description="Build jar with dependencies embedded.">
-    <mkdir dir="${build.dir}/dist"/>
-    <dirname property="common.basedir" file="${ant.file.common}"/>
-    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-        classpath="${common.basedir}/lib/build/jarjar-1.1.jar"/>
-    <jarjar jarfile="${build.dir}/${ant.project.name}-with-deps.jar">
-      <zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>
-      <fileset dir="${build.dir}/classes"/>
-      <rule pattern="net.sf.cglib.*" result="com.google.inject.internal.cglib.$@1"/>
-      <rule pattern="net.sf.cglib.**.*" result="com.google.inject.internal.cglib.@1.$@2"/>
-      <rule pattern="org.objectweb.asm.*" result="com.google.inject.internal.asm.$@1"/>
-      <rule pattern="org.objectweb.asm.**.*" result="com.google.inject.internal.asm.@1.$@2"/>
-      <rule pattern="com.google.common.*" result="com.google.inject.internal.guava.$@1"/>
-      <rule pattern="com.google.common.**.*" result="com.google.inject.internal.guava.@1.$@2"/>
       <keep pattern="com.google.inject.**"/>
     </jarjar>
   </target>

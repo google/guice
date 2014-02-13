@@ -54,6 +54,16 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
+    <!--
+     | Some extension tests depend on cglib which is not embedded
+     | in an execution that doesn't include package.
+    -->
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>3.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -97,46 +107,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <!--
-       | JarJar build profile: re-package ASM and CGLIB references under the Guice namespace
-      -->
-      <id>guice.with.jarjar</id>
-      <activation>
-        <property>
-          <name>guice.with.jarjar</name>
-          <value>!false</value>
-        </property>
-      </activation>
-      <dependencies>
-        <!--
-         | Extensions compile first against the non-JarJar'd core - and are then JarJar'd themselves
-         | (optional dependency so it doesn't leak to client projects that depend on Guice artifacts)
-        -->
-        <dependency>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-          <version>${project.version}</version>
-          <classifier>no_deps</classifier>
-          <optional>true</optional>
-        </dependency>
-      </dependencies>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>jarjar-maven-plugin</artifactId>
-            <configuration>
-              <excludes>
-                <exclude>*:*</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
 </project>

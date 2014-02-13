@@ -13,4 +13,14 @@
 
   <name>Google Guice - Extensions - JMX</name>
 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>true</skip> <!-- Test is not actually a unit test. -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

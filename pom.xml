@@ -111,14 +111,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </properties>
 
   <dependencies>
-    <!--
-     | Run tests with TestNG
-    -->
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>5.11</version>
-      <classifier>jdk15</classifier>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -174,97 +170,29 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>1.6</version>
+          <version>1.10</version>
           <configuration>
             <signature>
               <groupId>org.codehaus.mojo.signature</groupId>
-              <artifactId>java15</artifactId>
+              <artifactId>java16</artifactId>
               <version>1.0</version>
             </signature>
           </configuration>
           <executions>
             <execution>
-              <id>check-java-1.5-compat</id>
+              <id>check-java-1.6-compat</id>
               <phase>process-classes</phase>
               <goals>
                 <goal>check</goal>
               </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <!--
-         | Shared JarJar configuration
-        -->
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>jarjar-maven-plugin</artifactId>
-          <version>1.4</version>
-          <configuration>
-            <rules>
-              <rule>
-                <pattern>net.sf.cglib.*</pattern>
-                <result>com.google.inject.internal.cglib.$@1</result>
-              </rule>
-              <rule>
-                <pattern>net.sf.cglib.**.*</pattern>
-                <result>com.google.inject.internal.cglib.@1.$@2</result>
-              </rule>
-              <rule>
-                <pattern>org.objectweb.asm.*</pattern>
-                <result>com.google.inject.internal.asm.$@1</result>
-              </rule>
-              <rule>
-                <pattern>org.objectweb.asm.**.*</pattern>
-                <result>com.google.inject.internal.asm.@1.$@2</result>
-              </rule>
-              <rule>
-                <pattern>com.google.common.*</pattern>
-                <result>com.google.inject.internal.guava.$@1</result>
-              </rule>
-              <rule>
-                <pattern>com.google.common.**.*</pattern>
-                <result>com.google.inject.internal.guava.@1.$@2</result>
-              </rule>
-              <keep>
-                <pattern>com.google.inject.**</pattern>
-              </keep>
-              <keep>
-                <pattern>com.googlecode.**</pattern>
-              </keep>
-              <keep>
-                <!-- the servlet extension uses this but core doesn't,
-                     so we explicitly instruct the build to keep it. -->
-                <pattern>com.google.common.base.Throwables</pattern>
-              </keep>
-            </rules>
-          </configuration>
-          <!--
-           | JarJar all classes before running tests
-          -->
-          <executions>
-            <execution>
-              <id>jarjar-classes</id>
-              <phase>process-test-classes</phase>
-              <goals>
-                <goal>jarjar</goal>
-              </goals>
-              <configuration>
-                <input>{classes}</input>
-              </configuration>
-            </execution>
-            <execution>
-              <id>jarjar-test-classes</id>
-              <phase>process-test-classes</phase>
-              <goals>
-                <goal>jarjar</goal>
-              </goals>
-              <configuration>
-                <input>{test-classes}</input>
-              </configuration>
             </execution>
           </executions>
         </plugin>
