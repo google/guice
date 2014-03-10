@@ -16,6 +16,7 @@
 
 package com.google.inject.servlet;
 
+import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.reserialize;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletRequest;
 import static com.google.inject.servlet.ServletTestUtils.newFakeHttpServletResponse;
@@ -35,6 +36,11 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.ProvisionException;
+import com.google.inject.internal.Errors;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletScopes.NullObject;
 import com.google.inject.util.Providers;
 
@@ -68,7 +74,6 @@ public class ServletTest extends TestCase {
   private static final Key<Map<String, String[]>> REQ_PARAMS_KEY
       = new Key<Map<String, String[]>>(RequestParameters.class) {};
 
-  private static final Key<InRequest> IN_REQUEST_KEY = Key.get(InRequest.class);
   private static final Key<InRequest> IN_REQUEST_NULL_KEY = Key.get(InRequest.class, Null.class);
   private static final Key<InSession> IN_SESSION_KEY = Key.get(InSession.class);
   private static final Key<InSession> IN_SESSION_NULL_KEY = Key.get(InSession.class, Null.class);
@@ -77,6 +82,39 @@ public class ServletTest extends TestCase {
   public void setUp() {
     //we need to clear the reference to the pipeline every test =(
     GuiceFilter.reset();
+  }
+  
+  public void testScopeExceptions() throws Exception {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        install(new ServletModule());        
+      }
+      @Provides @RequestScoped String provideString() { return "foo"; }
+      @Provides @SessionScoped Integer provideInteger() { return 1; }
+      @Provides @RequestScoped @Named("foo") String provideNamedString() { return "foo"; }
+    });
+    
+    try {
+      injector.getInstance(String.class);
+      fail();
+    } catch(ProvisionException oose) {
+      assertContains(oose.getMessage(), "Cannot access scoped [java.lang.String].");
+    }
+    
+    try {
+      injector.getInstance(Integer.class);
+      fail();
+    } catch(ProvisionException oose) {
+      assertContains(oose.getMessage(), "Cannot access scoped [java.lang.Integer].");
+    }
+    
+    Key<?> key = Key.get(String.class, Names.named("foo"));
+    try {
+      injector.getInstance(key);
+      fail();
+    } catch(ProvisionException oose) {
+      assertContains(oose.getMessage(), "Cannot access scoped [" + Errors.convert(key) + "]");
+    }
   }
 
   public void testRequestAndResponseBindings() throws Exception {
@@ -183,7 +221,7 @@ public class ServletTest extends TestCase {
   public void testRequestAndResponseBindings_matchesPassedParameters() throws Exception {
     final int[] filterInvoked = new int[1];
     final boolean[] servletInvoked = new boolean[1];
-    final Injector injector = createInjector(new ServletModule() {
+    createInjector(new ServletModule() {
       @Override protected void configureServlets() {
         final HttpServletRequest[] previousReq = new HttpServletRequest[1];
         final HttpServletResponse[] previousResp = new HttpServletResponse[1];
@@ -340,8 +378,7 @@ public class ServletTest extends TestCase {
     assertTrue(invoked[0]);
   }
 
-  public void testHttpSessionIsSerializable()
-      throws IOException, ClassNotFoundException, ServletException {
+  public void testHttpSessionIsSerializable() throws Exception {
     final Injector injector = createInjector();
     final HttpServletRequest request = newFakeHttpServletRequest();
     final HttpSession session = request.getSession();

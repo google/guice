@@ -20,6 +20,7 @@ import static com.google.inject.servlet.ServletScopes.SESSION;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -102,15 +103,15 @@ final class InternalServletModule extends AbstractModule {
   }
 
   @Provides @RequestScoped HttpServletRequest provideHttpServletRequest() {
-    return GuiceFilter.getRequest();
+    return GuiceFilter.getRequest(Key.get(HttpServletRequest.class));
   }
 
   @Provides @RequestScoped HttpServletResponse provideHttpServletResponse() {
-    return GuiceFilter.getResponse();
+    return GuiceFilter.getResponse(Key.get(HttpServletResponse.class));
   }
 
   @Provides HttpSession provideHttpSession() {
-    return GuiceFilter.getRequest().getSession();
+    return GuiceFilter.getRequest(Key.get(HttpSession.class)).getSession();
   }
 
   @SuppressWarnings("unchecked") // defined by getParameterMap()

@@ -103,7 +103,7 @@ public class ServletScopes {
           // {@code GuiceFilter.getRequest()}.
           //
           // This _correctly_ throws up if the thread is out of scope.
-          HttpServletRequest request = GuiceFilter.getOriginalRequest();
+          HttpServletRequest request = GuiceFilter.getOriginalRequest(key);
           if (REQUEST_CONTEXT_KEYS.contains(key)) {
             // Don't store these keys as attributes, since they are handled by
             // GuiceFilter itself.
@@ -144,11 +144,11 @@ public class ServletScopes {
    * HTTP session scope.
    */
   public static final Scope SESSION = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
+    public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       final String name = key.toString();
       return new Provider<T>() {
         public T get() {
-          HttpSession session = GuiceFilter.getRequest().getSession();
+          HttpSession session = GuiceFilter.getRequest(key).getSession();
           synchronized (session) {
             Object obj = session.getAttribute(name);
             if (NullObject.INSTANCE == obj) {
@@ -217,7 +217,8 @@ public class ServletScopes {
 
     // Snapshot the seed map and add all the instances to our continuing HTTP request.
     final ContinuingHttpServletRequest continuingRequest =
-        new ContinuingHttpServletRequest(GuiceFilter.getRequest());
+        new ContinuingHttpServletRequest(
+            GuiceFilter.getRequest(Key.get(HttpServletRequest.class)));
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
       Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
       continuingRequest.setAttribute(entry.getKey().toString(), value);
