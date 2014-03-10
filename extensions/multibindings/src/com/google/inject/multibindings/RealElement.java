@@ -214,6 +214,10 @@ class RealElement implements Element {
     }
 
     public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
+      return toProvider((javax.inject.Provider<T>) provider);
+    }
+
+    public ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider) {
       delegate.toProvider(provider);
       annotation.targetType = TargetType.PROVIDER_INSTANCE;
       annotation.target = provider;

@@ -31,9 +31,16 @@ import java.util.Set;
 public interface ProviderInstanceBinding<T> extends Binding<T>, HasDependencies {
 
   /**
-   * Returns the user-supplied, unscoped provider.
+   * If the user supplied a JSR330 binding, then this will wrap that one. To always return the
+   * user-supplied provider, use {@link #getUserSuppliedProvider}.
+   * 
+   * @deprecated Use {@link #getUserSuppliedProvider} instead.
    */
+  @Deprecated
   Provider<? extends T> getProviderInstance();
+  
+  /** Returns the user-supplied, unscoped provider. */
+  javax.inject.Provider<? extends T> getUserSuppliedProvider();
 
   /**
    * Returns the field and method injection points of the provider, injected at injector-creation

@@ -97,6 +97,10 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
   }
 
   public BindingBuilder<T> toProvider(Provider<? extends T> provider) {
+    return toProvider((javax.inject.Provider<T>) provider);
+  }
+
+  public BindingBuilder<T> toProvider(javax.inject.Provider<? extends T> provider) {
     checkNotNull(provider, "provider");
     checkNotTargetted();
 

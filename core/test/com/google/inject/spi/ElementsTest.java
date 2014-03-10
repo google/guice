@@ -370,11 +370,27 @@ public class ElementsTest extends TestCase {
         return "A";
       }
     };
+    
+    final javax.inject.Provider<Integer> intJavaxProvider = new javax.inject.Provider<Integer>() {
+      public Integer get() {
+        return 42;
+      }
+    };
+    
+    final javax.inject.Provider<Double> doubleJavaxProvider = new javax.inject.Provider<Double>() {
+      @javax.inject.Inject String string;
+      
+      public Double get() {
+        return 42.42;
+      }
+    };
 
     checkModule(
         new AbstractModule() {
           protected void configure() {
             bind(String.class).toProvider(aProvider);
+            bind(Integer.class).toProvider(intJavaxProvider);
+            bind(Double.class).toProvider(doubleJavaxProvider);
             bind(List.class).toProvider(ListProvider.class);
             bind(Collection.class).toProvider(Key.get(ListProvider.class));
             bind(Iterable.class).toProvider(new TypeLiteral<TProvider<List>>() {});
@@ -388,7 +404,49 @@ public class ElementsTest extends TestCase {
             command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(
                   ProviderInstanceBinding<? extends T> binding) {
+                assertSame(aProvider, binding.getUserSuppliedProvider());
                 assertSame(aProvider, binding.getProviderInstance());
+                return null;
+              }
+            });
+            return null;
+          }
+        },
+        
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> command) {
+            assertTrue(command instanceof ProviderInstanceBinding);
+            assertEquals(Key.get(Integer.class), command.getKey());
+            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visit(
+                  ProviderInstanceBinding<? extends T> binding) {
+                assertSame(intJavaxProvider, binding.getUserSuppliedProvider());
+                assertEquals(42, binding.getProviderInstance().get());
+                // we don't wrap this w/ dependencies if there were none.
+                assertFalse(binding.getProviderInstance() instanceof HasDependencies);
+                return null;
+              }
+            });
+            return null;
+          }
+        },        
+        
+        new FailingElementVisitor() {
+          @Override public <T> Void visit(Binding<T> command) {
+            assertTrue(command instanceof ProviderInstanceBinding);
+            assertEquals(Key.get(Double.class), command.getKey());
+            command.acceptTargetVisitor(new FailingTargetVisitor<T>() {
+              @Override public Void visit(
+                  ProviderInstanceBinding<? extends T> binding) {
+                assertSame(doubleJavaxProvider, binding.getUserSuppliedProvider());
+                assertEquals(42.42, binding.getProviderInstance().get());
+                // we do wrap it with dependencies if there were some.
+                assertTrue(binding.getProviderInstance() instanceof HasDependencies);
+                Set<Dependency<?>> deps =
+                    ((HasDependencies) binding.getProviderInstance()).getDependencies();
+                assertEquals(1, deps.size());
+                assertEquals(String.class,
+                    deps.iterator().next().getKey().getTypeLiteral().getRawType());
                 return null;
               }
             });

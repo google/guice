@@ -135,7 +135,7 @@ public class SpiUtils {
           break;
         case PROVIDER_INSTANCE:
           if (value instanceof ProviderInstanceBinding
-              && ((ProviderInstanceBinding) value).getProviderInstance().get().equals(
+              && ((ProviderInstanceBinding) value).getUserSuppliedProvider().get().equals(
                   result.v.instance)) {
             found = entry;
           }
@@ -376,7 +376,7 @@ public class SpiUtils {
           break;
         case PROVIDER_INSTANCE:
           if (item instanceof ProviderInstanceBinding
-              && ((ProviderInstanceBinding) item).getProviderInstance().get().equals(
+              && ((ProviderInstanceBinding) item).getUserSuppliedProvider().get().equals(
                   result.instance)) {
             found = item;
           }

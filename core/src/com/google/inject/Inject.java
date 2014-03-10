@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * 
  * <li>Pre-constructed instances passed to {@link Injector#injectMembers},
  * {@link com.google.inject.binder.LinkedBindingBuilder#toInstance(Object)} and
- * {@link com.google.inject.binder.LinkedBindingBuilder#toProvider(Provider)}.
+ * {@link com.google.inject.binder.LinkedBindingBuilder#toProvider(javax.inject.Provider)}.
  * In this case all constructors are, of course, ignored.
  *
  * <li>Static fields and methods of classes which any {@link Module} has
