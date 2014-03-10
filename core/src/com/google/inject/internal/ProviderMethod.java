@@ -24,8 +24,13 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.internal.util.StackTraceElements;
+import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.ProviderWithDependencies;
+import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithExtensionVisitor;
+import com.google.inject.spi.ProvidesMethodBinding;
+import com.google.inject.spi.ProvidesMethodTargetVisitor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +43,8 @@ import java.util.Set;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class ProviderMethod<T> implements ProviderWithDependencies<T> {
+public class ProviderMethod<T> implements ProviderWithExtensionVisitor<T>, HasDependencies,
+    ProvidesMethodBinding<T> {
   private final Key<T> key;
   private final Class<? extends Annotation> scopeAnnotation;
   private final Object instance;
@@ -74,6 +80,10 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
 
   // exposed for GIN
   public Object getInstance() {
+    return instance;
+  }
+  
+  public Object getEnclosingInstance() {
     return instance;
   }
 
@@ -113,6 +123,15 @@ public class ProviderMethod<T> implements ProviderWithDependencies<T> {
 
   public Set<Dependency<?>> getDependencies() {
     return dependencies;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
+      ProviderInstanceBinding<? extends B> binding) {
+    if (visitor instanceof ProvidesMethodTargetVisitor) {
+      return ((ProvidesMethodTargetVisitor<T, V>)visitor).visit(this);
+    }
+    return visitor.visit(binding);
   }
 
   @Override public String toString() {

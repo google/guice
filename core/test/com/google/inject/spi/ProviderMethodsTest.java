@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -402,5 +403,53 @@ public class ProviderMethodsTest extends TestCase implements Module {
       loggerRef.set(logger);
       return 42;
     }
+  }
+  
+  public void testSpi() throws Exception {
+    Module m1 = new AbstractModule() {
+      @Override protected void configure() {}
+      @Provides @Named("foo") String provideFoo(Integer dep) { return "foo"; }
+    };
+    Module m2 = new AbstractModule() {
+      @Override protected void configure() {}
+      @Provides Integer provideInt(@Named("foo") String dep) { return 42; }
+    };
+    Injector injector = Guice.createInjector(m1, m2);
+    
+    Binding<String> stringBinding =
+        injector.getBinding(Key.get(String.class, Names.named("foo")));
+    ProvidesMethodBinding<String> stringMethod =
+        stringBinding.acceptTargetVisitor(new BindingCapturer<String>());
+    assertEquals(m1, stringMethod.getEnclosingInstance());
+    assertEquals(m1.getClass().getDeclaredMethod("provideFoo", Integer.class),
+        stringMethod.getMethod());
+    assertEquals(((HasDependencies) stringBinding).getDependencies(),
+        stringMethod.getDependencies());
+    assertEquals(Key.get(String.class, Names.named("foo")), stringMethod.getKey());
+    
+    Binding<Integer> intBinding = injector.getBinding(Integer.class);
+    ProvidesMethodBinding<Integer> intMethod =
+        intBinding.acceptTargetVisitor(new BindingCapturer<Integer>());
+    assertEquals(m2, intMethod.getEnclosingInstance());
+    assertEquals(m2.getClass().getDeclaredMethod("provideInt", String.class),
+        intMethod.getMethod());
+    assertEquals(((HasDependencies) intBinding).getDependencies(),
+        intMethod.getDependencies());
+    assertEquals(Key.get(Integer.class), intMethod.getKey());
+    
+  }
+  
+  private static class BindingCapturer<T> extends DefaultBindingTargetVisitor<T, ProvidesMethodBinding<T>>
+      implements ProvidesMethodTargetVisitor<T, ProvidesMethodBinding<T>> {
+    
+    @SuppressWarnings("unchecked")
+    public ProvidesMethodBinding<T> visit(
+        ProvidesMethodBinding<? extends T> providesMethodBinding) {
+      return (ProvidesMethodBinding<T>)providesMethodBinding;
+    }
+    
+    @Override protected ProvidesMethodBinding<T> visitOther(Binding<? extends T> binding) {
+      throw new IllegalStateException("unexpected visit of: " + binding);
+    }    
   }
 }
