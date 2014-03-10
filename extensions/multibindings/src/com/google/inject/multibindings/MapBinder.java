@@ -25,11 +25,15 @@ import static com.google.inject.multibindings.Multibinder.setOf;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -38,6 +42,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Errors;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -302,7 +307,7 @@ public abstract class MapBinder<K, V> {
    *
    * <p>We use a subclass to hide 'implements Module' from the public API.
    */
-  private static final class RealMapBinder<K, V> extends MapBinder<K, V> implements Module {
+  static final class RealMapBinder<K, V> extends MapBinder<K, V> implements Module {
     private final TypeLiteral<K> keyType;
     private final TypeLiteral<V> valueType;
     private final Key<Map<K, V>> mapKey;
@@ -377,13 +382,38 @@ public abstract class MapBinder<K, V> {
 
           Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
           List<Map.Entry<K, Binding<V>>> bindingsMutable = Lists.newArrayList();
+          Set<K> duplicateKeys = null;
           for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
             Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
-            checkConfiguration(previous == null || permitDuplicates,
-                "Map injection failed due to duplicated key \"%s\"", entry.getKey());
+            if (previous != null && !permitDuplicates) {
+              if (duplicateKeys == null) {
+                duplicateKeys = Sets.newHashSet();
+              }
+              duplicateKeys.add(entry.getKey());
+            }
             ProviderMapEntry<K, V> providerEntry = (ProviderMapEntry<K, V>) entry;
             Key<V> valueKey = providerEntry.getValueKey();
             bindingsMutable.add(Maps.immutableEntry(entry.getKey(), injector.getBinding(valueKey)));
+          }
+          if (duplicateKeys != null) {
+            Multimap<K, String> dups = LinkedHashMultimap.create();
+            for (Map.Entry<K, Binding<V>> entry : bindingsMutable) {
+              if (duplicateKeys.contains(entry.getKey())) {
+                dups.put(entry.getKey(), "\t" + Errors.convert(entry.getValue().getSource()));
+              }
+            }
+            StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
+            boolean first = true;
+            for (K key : dups.keySet()) {
+              if (first) {
+                first = false;
+                sb.append("\"" + key + "\", from bindings at:\n");
+              } else {
+                sb.append("\n and key: \"" + key + "\", from bindings at:\n");
+              }
+              Joiner.on('\n').appendTo(sb, dups.get(key)).append("\n");
+            }
+            checkConfiguration(false, sb.toString());
           }
 
           providerMap = ImmutableMap.copyOf(providerMapMutable);

@@ -16,6 +16,7 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
 import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
@@ -40,6 +41,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
@@ -82,7 +84,6 @@ public class MapBinderTest extends TestCase {
       
   private final TypeLiteral<String> stringType = TypeLiteral.get(String.class);
   private final TypeLiteral<Integer> intType = TypeLiteral.get(Integer.class);
-  private final TypeLiteral<Set<String>> stringSetType = new TypeLiteral<Set<String>>() {};
 
   public void testMapBinderAggregatesMultipleModules() {
     Module abc = new AbstractModule() {
@@ -325,6 +326,56 @@ public class MapBinderTest extends TestCase {
     
     assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(module), MODULE, false, 0,
         instance("a", "A"), instance("a", "B"));
+  }
+
+  public void testExhaustiveDuplicateErrorMessage() throws Exception {
+    class Module1 extends AbstractModule {
+      @Override protected void configure() {
+        MapBinder<String, Object> mapbinder =
+            MapBinder.newMapBinder(binder(), String.class, Object.class);
+        mapbinder.addBinding("a").to(String.class);
+      }
+    }
+    class Module2 extends AbstractModule {
+      @Override protected void configure() {
+        MapBinder<String, Object> mapbinder =
+            MapBinder.newMapBinder(binder(), String.class, Object.class);
+        mapbinder.addBinding("a").to(Integer.class);
+        mapbinder.addBinding("b").to(String.class);
+      }
+    }
+    class Module3 extends AbstractModule {
+      @Override protected void configure() {
+        MapBinder<String, Object> mapbinder =
+            MapBinder.newMapBinder(binder(), String.class, Object.class);
+        mapbinder.addBinding("b").to(Integer.class);
+      }
+    }
+    class Main extends AbstractModule {
+      @Override protected void configure() {
+        MapBinder.newMapBinder(binder(), String.class, Object.class);
+        install(new Module1());
+        install(new Module2());
+        install(new Module3());
+      }
+      @Provides String provideString() { return "foo"; }
+      @Provides Integer provideInt() { return 42; }
+    }
+    try {
+      Guice.createInjector(new Main());
+      fail();
+    } catch(CreationException ce) {
+      assertContains(ce.getMessage(),
+          "Map injection failed due to duplicated key \"a\", from bindings at:",
+          asModuleChain(Main.class, Module1.class),
+          asModuleChain(Main.class, Module2.class),
+          "and key: \"b\", from bindings at:",
+          asModuleChain(Main.class, Module2.class),
+          asModuleChain(Main.class, Module3.class),
+          "at " + Main.class.getName() + ".configure(",
+          asModuleChain(Main.class, MapBinder.RealMapBinder.class));
+      assertEquals(1, ce.getErrorMessages().size());
+    }
   }
 
   public void testMapBinderMapPermitDuplicateElements() {
