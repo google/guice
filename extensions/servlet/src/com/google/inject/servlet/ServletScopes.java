@@ -19,6 +19,7 @@ package com.google.inject.servlet;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -326,10 +327,13 @@ public class ServletScopes {
 
     // Copy the seed values into our local scope map.
     final Context context = new Context();
-    for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
-      Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
-      context.map.put(entry.getKey(), value);
-    }
+    Map<Key<?>, Object> validatedAndCanonicalizedMap =
+        Maps.transformEntries(seedMap, new EntryTransformer<Key<?>, Object, Object>() {
+          @Override public Object transformEntry(Key<?> key, Object value) {
+            return validateAndCanonicalizeValue(key, value);
+          }
+        });
+    context.map.putAll(validatedAndCanonicalizedMap);
 
     return new Callable<T>() {
       public T call() throws Exception {
