@@ -205,7 +205,7 @@
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
         <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
         <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
-      	<param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
+        <param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
         <param name="-apiversion" value="Guice_${new.api}"/>
         <param name="-assetsdir" value="javadoc/assets"/>
         <param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
@@ -252,7 +252,7 @@
       <arg value="-DNO_AOP" />
     </munge>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-4.2.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>]]></replacetoken>
