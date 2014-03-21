@@ -33,7 +33,7 @@ com.google.inject.Binder
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="com.google.inject.AbstractModule.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="com.google.inject.Guice.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.google.inject.Binding.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.google.inject.Binder.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -52,6 +52,21 @@ Interface com.google.inject.<A HREF="http://google-guice.googlecode.com/git/late
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
 <p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bindListener_removed(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/Binder.html#bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)" target="_top"><tt>bindListener</tt></A>(<code>Matcher&lt;TypeLiteral&lt;?&gt;&gt;,</nobr> TypeListener<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Registers a listener for injectable types.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
 <a NAME="Added"></a>
 <TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
@@ -63,6 +78,13 @@ Interface com.google.inject.<A HREF="http://google-guice.googlecode.com/git/late
   <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])" target="_top"><tt>bindListener</tt></A>(<code>Matcher&lt;Binding&lt;?&gt;&gt;,</nobr> ProvisionListener[]<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Registers listeners for provisioned objects.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bindListener_added(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)" target="_top"><tt>bindListener</tt></A>(<code>Matcher&lt;TypeLiteral&lt;?&gt;&gt;,</nobr> TypeListener<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Registers a listener for injectable types.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -89,12 +111,255 @@ Interface com.google.inject.<A HREF="http://google-guice.googlecode.com/git/late
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bindConstant_changed()"></A>
+  <nobr><code>AnnotatedConstantBindingBuilder</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindConstant()" target="_top"><tt>bindConstant</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Binder.html"><TT>Binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="com.google.inject.Binder.bindInterceptor_changed(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])"></A>
   <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindInterceptor(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" target="_top"><tt>bindInterceptor</tt></A>(<code>Matcher&lt;Class&lt;?&gt;&gt;,</nobr> Matcher&lt;Method&gt;<nobr>,</nobr> MethodInterceptor[]<nobr><nobr></code>)  </nobr>
   </TD>
   <TD VALIGN="TOP" WIDTH="30%">
-Documentation <a href="docdiffs_com.google.inject.html#com.google.inject.Binder.dmethod.bindInterceptor(Matcher&lt;Class&lt;?&gt;&gt;, Matcher&lt;Method&gt;, MethodInterceptor[])">changed</a> from <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/Binder.html#bindInterceptor(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" target="_self"><tt>old</tt></A> to <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindInterceptor(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" target="_self"><tt>new</tt></A>.<br>  </TD>
+Documentation <a href="docdiffs_com.google.inject.html#com.google.inject.Binder.dmethod.bindInterceptor(Matcher&lt;Class&lt;?&gt;&gt;, Matcher&lt;Method&gt;, MethodInterceptor[])">changed</a> from <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/Binder.html#bindInterceptor(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" target="_self"><tt>old</tt></A> to <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindInterceptor(com.google.inject.matcher.Matcher<? super java.lang.Class<?>>, com.google.inject.matcher.Matcher<? super java.lang.reflect.Method>, org.aopalliance.intercept.MethodInterceptor[])" target="_self"><tt>new</tt></A>.<br> Changed from non-abstract to abstract.
+  </TD>
   <TD VALIGN="TOP">Binds method interceptor[s] to methods matched by class and method matchers.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bindScope_changed(java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.Scope)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bindScope(java.lang.Class<? extends java.lang.annotation.Annotation>, com.google.inject.Scope)" target="_top"><tt>bindScope</tt></A>(<code>Class&lt;Annotation&gt;,</nobr> Scope<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Binds a scope to an annotation.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.convertToTypes_changed(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeConverter)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#convertToTypes(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeConverter)" target="_top"><tt>convertToTypes</tt></A>(<code>Matcher&lt;TypeLiteral&lt;?&gt;&gt;,</nobr> TypeConverter<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Binds a type converter.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.currentStage_changed()"></A>
+  <nobr><code>Stage</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#currentStage()" target="_top"><tt>currentStage</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Gets the current stage.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.disableCircularProxies_changed()"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#disableCircularProxies()" target="_top"><tt>disableCircularProxies</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Prevents Guice from constructing a <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Proxy.html"><TT>Proxy</TT></A> when a circular dependency
+ is found.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.install_changed(com.google.inject.Module)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#install(com.google.inject.Module)" target="_top"><tt>install</tt></A>(<code>Module</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Uses the given module to configure more bindings.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.newPrivateBinder_changed()"></A>
+  <nobr><code>PrivateBinder</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#newPrivateBinder()" target="_top"><tt>newPrivateBinder</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Creates a new private child environment for bindings and other configuration.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.requestStaticInjection_changed(java.lang.Class[])"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#requestStaticInjection(java.lang.Class[])" target="_top"><tt>requestStaticInjection</tt></A>(<code>Class[]</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Upon successful creation, the <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Injector.html"><TT>Injector</TT></A> will inject static fields
+ and methods in the given classes.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.requireExplicitBindings_changed()"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#requireExplicitBindings()" target="_top"><tt>requireExplicitBindings</tt></A>()  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Instructs the Injector that bindings must be listed in a Module in order to
+ be injected.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.skipSources_changed(java.lang.Class[])"></A>
+  <nobr><code>Binder</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#skipSources(java.lang.Class[])" target="_top"><tt>skipSources</tt></A>(<code>Class[]</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns a binder that skips {@code classesToSkip} when identify the
+ calling code.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.withSource_changed(java.lang.Object)"></A>
+  <nobr><code>Binder</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#withSource(java.lang.Object)" target="_top"><tt>withSource</tt></A>(<code>Object</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns a binder that uses {@code source} as the reference location for
+ configuration errors.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.addError_changed(com.google.inject.spi.Message)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#addError(com.google.inject.spi.Message)" target="_top"><tt>addError</tt></A>(<code>Message</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Records an error message to be presented to the user at a later time.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.addError_changed(java.lang.String, java.lang.Object[])"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#addError(java.lang.String, java.lang.Object[])" target="_top"><tt>addError</tt></A>(<code>String,</nobr> Object[]<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Records an error message which will be presented to the user at a later
+ time.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.addError_changed(java.lang.Throwable)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#addError(java.lang.Throwable)" target="_top"><tt>addError</tt></A>(<code>Throwable</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Records an exception, the full details of which will be logged, and the
+ message of which will be presented to the user at a later
+ time.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bind_changed(com.google.inject.TypeLiteral<T>)"></A>
+  <nobr><code>AnnotatedBindingBuilder&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bind(com.google.inject.TypeLiteral<T>)" target="_top"><tt>bind</tt></A>(<code>TypeLiteral&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Binder.html"><TT>Binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bind_changed(java.lang.Class<T>)"></A>
+  <nobr><code>AnnotatedBindingBuilder&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bind(java.lang.Class<T>)" target="_top"><tt>bind</tt></A>(<code>Class&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Binder.html"><TT>Binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.bind_changed(com.google.inject.Key<T>)"></A>
+  <nobr><code>LinkedBindingBuilder&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#bind(com.google.inject.Key<T>)" target="_top"><tt>bind</tt></A>(<code>Key&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Binder.html"><TT>Binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getMembersInjector_changed(com.google.inject.TypeLiteral<T>)"></A>
+  <nobr><code>MembersInjector&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#getMembersInjector(com.google.inject.TypeLiteral<T>)" target="_top"><tt>getMembersInjector</tt></A>(<code>TypeLiteral&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type {@code T}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getMembersInjector_changed(java.lang.Class<T>)"></A>
+  <nobr><code>MembersInjector&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#getMembersInjector(java.lang.Class<T>)" target="_top"><tt>getMembersInjector</tt></A>(<code>Class&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns the members injector used to inject dependencies into methods and fields on instances
+ of the given type {@code T}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getProvider_changed(com.google.inject.Key<T>)"></A>
+  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#getProvider(com.google.inject.Key<T>)" target="_top"><tt>getProvider</tt></A>(<code>Key&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getProvider_changed(java.lang.Class<T>)"></A>
+  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#getProvider(java.lang.Class<T>)" target="_top"><tt>getProvider</tt></A>(<code>Class&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.requestInjection_changed(com.google.inject.TypeLiteral<T>, T)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#requestInjection(com.google.inject.TypeLiteral<T>, T)" target="_top"><tt>requestInjection</tt></A>(<code>TypeLiteral&lt;T&gt;,</nobr> T<nobr><nobr></code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Upon successful creation, the <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Injector.html"><TT>Injector</TT></A> will inject instance fields
+ and methods of the given object.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.requestInjection_changed(java.lang.Object)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Binder.html#requestInjection(java.lang.Object)" target="_top"><tt>requestInjection</tt></A>(<code>Object</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Upon successful creation, the <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/Injector.html"><TT>Injector</TT></A> will inject instance fields
+ and methods of the given object.</TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -121,7 +386,7 @@ Documentation <a href="docdiffs_com.google.inject.html#com.google.inject.Binder.
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<A HREF="com.google.inject.AbstractModule.html"><B>PREV CLASS</B></A>
-&nbsp;<A HREF="com.google.inject.Guice.html"><B>NEXT CLASS</B></A>
+&nbsp;<A HREF="com.google.inject.Binding.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.google.inject.Binder.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

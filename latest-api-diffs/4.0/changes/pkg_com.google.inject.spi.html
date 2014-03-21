@@ -71,6 +71,20 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesMethodBinding"></A>
+  <nobr><A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProvidesMethodBinding.html" target="_top"><tt><I>ProvidesMethodBinding</I></tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">An {@literal @}<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProvidesMethodBinding/Provides.html"><TT>Provides</TT></A> binding.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesMethodTargetVisitor"></A>
+  <nobr><A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProvidesMethodTargetVisitor.html" target="_top"><tt><I>ProvidesMethodTargetVisitor</I></tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A visitor for the {@literal @}<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProvidesMethodTargetVisitor/Provides.html"><TT>Provides</TT></A> bindings.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="ProvisionListener"></A>
   <nobr><A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProvisionListener.html" target="_top"><tt><I>ProvisionListener</I></tt></A></nobr>
   </TD>
@@ -114,6 +128,27 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="BindingScopingVisitor"></A>
+  <nobr><A HREF="com.google.inject.spi.BindingScopingVisitor.html"><I>BindingScopingVisitor</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Visits each of the strategies used to scope an injection.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="BindingTargetVisitor"></A>
+  <nobr><A HREF="com.google.inject.spi.BindingTargetVisitor.html"><I>BindingTargetVisitor</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Visits each of the strategies used to find an instance to satisfy an injection.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ConstructorBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.ConstructorBinding.html"><I>ConstructorBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to the constructor of a concrete clss.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="ConvertedConstantBinding"></A>
   <nobr><A HREF="com.google.inject.spi.ConvertedConstantBinding.html"><I>ConvertedConstantBinding</I></A></nobr>
   </TD>
@@ -128,10 +163,117 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Element"></A>
+  <nobr><A HREF="com.google.inject.spi.Element.html"><I>Element</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A core component of a module or injector.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="ElementVisitor"></A>
   <nobr><A HREF="com.google.inject.spi.ElementVisitor.html"><I>ElementVisitor</I></A></nobr>
   </TD>
   <TD VALIGN="TOP">Visit elements.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ExposedBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.ExposedBinding.html"><I>ExposedBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a key exposed from an enclosed private environment.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="HasDependencies"></A>
+  <nobr><A HREF="com.google.inject.spi.HasDependencies.html"><I>HasDependencies</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Implemented by <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/HasDependencies/com/google/inject/Binding.html"><TT>bindings</TT></A>, <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/HasDependencies/com/google/inject/Provider.html"><TT> providers</TT></A> and instances that expose their dependencies explicitly.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="InjectionListener"></A>
+  <nobr><A HREF="com.google.inject.spi.InjectionListener.html"><I>InjectionListener</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Listens for injections into instances of type {@code I}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="InstanceBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.InstanceBinding.html"><I>InstanceBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a single instance.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="LinkedKeyBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.LinkedKeyBinding.html"><I>LinkedKeyBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a linked key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Message"></A>
+  <nobr><A HREF="com.google.inject.spi.Message.html">Message</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">An error message and the context in which it occured.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PrivateElements"></A>
+  <nobr><A HREF="com.google.inject.spi.PrivateElements.html"><I>PrivateElements</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A private collection of elements that are hidden from the enclosing injector or module by
+ default.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProviderBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.ProviderBinding.html"><I>ProviderBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ProviderBinding/Provider.html"><TT>Provider</TT></A> that delegates to the binding for the provided type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProviderInstanceBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.ProviderInstanceBinding.html"><I>ProviderInstanceBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a provider instance.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProviderKeyBinding"></A>
+  <nobr><A HREF="com.google.inject.spi.ProviderKeyBinding.html"><I>ProviderKeyBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a provider key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProviderWithExtensionVisitor"></A>
+  <nobr><A HREF="com.google.inject.spi.ProviderWithExtensionVisitor.html"><I>ProviderWithExtensionVisitor</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A Provider that is part of an extension which supports a custom
+ BindingTargetVisitor.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="TypeConverter"></A>
+  <nobr><A HREF="com.google.inject.spi.TypeConverter.html"><I>TypeConverter</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Converts constant string values to a different type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="TypeEncounter"></A>
+  <nobr><A HREF="com.google.inject.spi.TypeEncounter.html"><I>TypeEncounter</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Context of an injectable type encounter.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="TypeListener"></A>
+  <nobr><A HREF="com.google.inject.spi.TypeListener.html"><I>TypeListener</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Listens for Guice to encounter injectable types.</TD>
 </TR>
 </TABLE>
 &nbsp;

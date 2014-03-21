@@ -64,6 +64,11 @@ Similarly, documentation which was inherited from another class or interface is 
 <A NAME="com.google.inject.spi.ConvertedConstantBinding.dmethod.getSourceKey()"></A><a href="com.google.inject.spi.ConvertedConstantBinding.html" class="hiddenlink">Class <b>ConvertedConstantBinding</b></a>, <a href="com.google.inject.spi.ConvertedConstantBinding.html#com.google.inject.spi.ConvertedConstantBinding.getSourceKey_changed()" class="hiddenlink">Key&lt;String&gt; <b>getSourceKey()</b></a><br><br><blockquote>Returns the key for the source binding. That binding can <strike>e</strike><span style="background: #FFFF00">be</span> retrieved from an injector using
  <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Injector.html#getBinding(Key)"><TT>Injector.getBinding(key)</TT></A>.</blockquote>
 <hr align="left" width="100%">
+<A NAME="com.google.inject.spi.ProviderInstanceBinding.dmethod.getProviderInstance()"></A><a href="com.google.inject.spi.ProviderInstanceBinding.html" class="hiddenlink">Class <b>ProviderInstanceBinding</b></a>, <a href="com.google.inject.spi.ProviderInstanceBinding.html#com.google.inject.spi.ProviderInstanceBinding.getProviderInstance_changed()" class="hiddenlink">Provider&lt;? extends T&gt; <b>getProviderInstance()</b></a><br><br><blockquote><strike>Returns</strike><span style="background: #FFFF00">If</span> the user<strike>-</strike><span style="background: #FFFF00"> </span>supplied<span style="background: #FFFF00"> a JSR330 binding</span>, <strike>unscoped</strike><span style="background: #FFFF00">then this will wrap that one. To always return the
+</span> <span style="background: #FFFF00">user-supplied </span>provider<span style="background: #FFFF00">, use <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/.html#getUserSuppliedProvider"><TT>.getUserSuppliedProvider</TT></A>.
+ 
+ @deprecated Use <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/.html#getUserSuppliedProvider"><TT>.getUserSuppliedProvider</TT></A> instead</span>.</blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>

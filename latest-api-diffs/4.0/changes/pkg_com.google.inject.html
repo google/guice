@@ -33,7 +33,7 @@ com.google.inject
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_com.google.inject.grapher.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.assistedinject.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -119,6 +119,14 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Binding"></A>
+  <nobr><A HREF="com.google.inject.Binding.html"><I>Binding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A mapping from a key (type and optional annotation) to the strategy for getting instances of the
+ type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="Guice"></A>
   <nobr><A HREF="com.google.inject.Guice.html">Guice</A></nobr>
   </TD>
@@ -137,10 +145,39 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Injector"></A>
+  <nobr><A HREF="com.google.inject.Injector.html"><I>Injector</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Builds the graphs of objects that make up your application.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="Key"></A>
   <nobr><A HREF="com.google.inject.Key.html">Key</A></nobr>
   </TD>
   <TD VALIGN="TOP">Binding key consisting of an injection type and an optional annotation.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MembersInjector"></A>
+  <nobr><A HREF="com.google.inject.MembersInjector.html"><I>MembersInjector</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Injects dependencies into the fields and methods on instances of type {@code T}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Module"></A>
+  <nobr><A HREF="com.google.inject.Module.html"><I>Module</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A module contributes configuration information, typically interface
+ bindings, which will be used to create an <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Module/Injector.html"><TT>Injector</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PrivateBinder"></A>
+  <nobr><A HREF="com.google.inject.PrivateBinder.html"><I>PrivateBinder</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Returns a binder whose configuration information is hidden from its environment by default.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -151,10 +188,24 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Provider"></A>
+  <nobr><A HREF="com.google.inject.Provider.html"><I>Provider</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">An object capable of providing instances of type {@code T}.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="Provides"></A>
   <nobr><A HREF="com.google.inject.Provides.html">Provides</A></nobr>
   </TD>
   <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/Provides/Module.html"><TT>Module</TT></A> to create a provider method binding.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="Scope"></A>
+  <nobr><A HREF="com.google.inject.Scope.html"><I>Scope</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A scope is a level of visibility that instances provided by Guice may have.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -187,7 +238,7 @@ Package <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/jav
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
 &nbsp;<B>PREV PACKAGE</B>&nbsp;
-&nbsp;<A HREF="pkg_com.google.inject.grapher.html"><B>NEXT PACKAGE</B></A>
+&nbsp;<A HREF="pkg_com.google.inject.assistedinject.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="pkg_com.google.inject.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

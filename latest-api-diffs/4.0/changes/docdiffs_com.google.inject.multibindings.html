@@ -153,15 +153,19 @@ Similarly, documentation which was inherited from another class or interface is 
  example, it is okay <strike>to have</strike><span style="background: #FFFF00">for</span> both {@code CandyModule} and {@code ChipsModule}
  to <strike>both </strike>create their own {@code Multibinder<Snack>}, and to each contribute
  bindings to the set of snacks. When that set is injected, it will contain
- elements from both modules.
+ elements from both modules.<strike>
  
- <p>The set's iteration order is consistent with the binding order. This is
+</strike><span style="background: #FFFF00">
+
+</span> <p>The set's iteration order is consistent with the binding order. This is
  convenient when multiple elements are contributed by the same module because
  that module can order its bindings appropriately. Avoid relying on the
  iteration order of elements contributed by different modules, since there is
- no equivalent mechanism to order modules.
+ no equivalent mechanism to order modules.<strike>
  
- <p>The set is unmodifiable.  Elements can only be added to the set by
+</strike><span style="background: #FFFF00">
+
+</span> <p>The set is unmodifiable.  Elements can only be added to the set by
  configuring the multibinder.  Elements can never be removed from the set.
 
  <p>Elements are resolved at set injection time. If an element is bound to a
