@@ -16,7 +16,7 @@ function cleanAndBuild {
 
 function findAndCompareJars {
   version=3.0
-  for ANT in `find -name "*-snapshot.jar" -path "./build/dist/*"`
+  for ANT in `find ./build/dist/* -name "*-snapshot.jar" `
   do
     if [ $ANT = "./build/dist/guice-snapshot.jar" ]; then  #Check main build
       MVN=./core/target/guice-$version-SNAPSHOT.jar
