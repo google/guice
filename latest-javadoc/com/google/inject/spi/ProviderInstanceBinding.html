@@ -221,6 +221,8 @@
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderKeyBinding.html">ProviderKeyBinding</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderWithDependencies.html">ProviderWithDependencies</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/ProviderWithExtensionVisitor.html">ProviderWithExtensionVisitor</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvidesMethodTargetVisitor.html">ProvidesMethodTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
           <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvisionListener.html">ProvisionListener</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeConverter.html">TypeConverter</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeEncounter.html">TypeEncounter</a>&lt;I&gt;</li>
@@ -502,6 +504,28 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html#getProviderInstance()">getProviderInstance</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+      <em>
+  This method is deprecated.
+      Use <code><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider()">getUserSuppliedProvider()</a></code> instead.
+</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_4.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Provider&lt;?&nbsp;extends&nbsp;T&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider()">getUserSuppliedProvider</a></span>()</nobr>
         
         <div class="jd-descrdiv">Returns the user-supplied, unscoped provider.</div>
   
@@ -853,9 +877,47 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      <p>
+  <p class="caution">
+      <strong>
+  This method is deprecated.</strong><br/> Use <code><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider()">getUserSuppliedProvider()</a></code> instead.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>If the user supplied a JSR330 binding, then this will wrap that one. To always return the
+ user-supplied provider, use <code><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html#getUserSuppliedProvider()">getUserSuppliedProvider()</a></code>.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getUserSuppliedProvider()"></A>
+
+<div class="jd-details api apilevel-Guice_4.0"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Provider&lt;?&nbsp;extends&nbsp;T&gt;
+      </span>
+      <span class="sympad">getUserSuppliedProvider</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div>
+
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+
+</div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the user-supplied, unscoped provider.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the user-supplied, unscoped provider. </p></div>
 
     </div>
 </div>
