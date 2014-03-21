@@ -3347,19 +3347,6 @@
 <parameter name="providerType" type="java.lang.Class&lt;? extends javax.inject.Provider&lt;? extends T&gt;&gt;">
 </parameter>
 </method>
-<method name="toProvider"
- return="com.google.inject.binder.ScopedBindingBuilder"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="provider" type="javax.inject.Provider&lt;? extends T&gt;">
-</parameter>
-</method>
 </interface>
 <interface name="ScopedBindingBuilder"
  abstract="true"
@@ -3579,7 +3566,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GrapherParameters"
+<constructor name="AbstractInjectorGrapher.GrapherParameters"
  type="com.google.inject.grapher.AbstractInjectorGrapher.GrapherParameters"
  static="false"
  final="false"
@@ -9485,18 +9472,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="message" type="java.lang.String">
-</parameter>
-<parameter name="cause" type="java.lang.Throwable">
-</parameter>
-</constructor>
-<constructor name="Message"
- type="com.google.inject.spi.Message"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
 <parameter name="sources" type="java.util.List&lt;java.lang.Object&gt;">
 </parameter>
 <parameter name="message" type="java.lang.String">
@@ -9681,17 +9656,6 @@
  synchronized="false"
  static="false"
  final="false"
- deprecated="deprecated"
- visibility="public"
->
-</method>
-<method name="getUserSuppliedProvider"
- return="javax.inject.Provider&lt;? extends T&gt;"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -9861,72 +9825,6 @@
 </parameter>
 </method>
 </interface>
-<interface name="ProvidesMethodBinding"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<implements name="com.google.inject.spi.HasDependencies">
-</implements>
-<method name="getEnclosingInstance"
- return="java.lang.Object"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getKey"
- return="com.google.inject.Key&lt;T&gt;"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getMethod"
- return="java.lang.reflect.Method"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</interface>
-<interface name="ProvidesMethodTargetVisitor"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<implements name="com.google.inject.spi.BindingTargetVisitor">
-</implements>
-<method name="visit"
- return="V"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="providesMethodBinding" type="com.google.inject.spi.ProvidesMethodBinding&lt;? extends T&gt;">
-</parameter>
-</method>
-</interface>
 <interface name="ProvisionListener"
  abstract="true"
  static="false"
@@ -9956,7 +9854,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ProvisionInvocation"
+<constructor name="ProvisionListener.ProvisionInvocation"
  type="com.google.inject.spi.ProvisionListener.ProvisionInvocation"
  static="false"
  final="false"
@@ -10916,7 +10814,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="SecondaryBinder"
+<constructor name="ThrowingProviderBinder.SecondaryBinder"
  type="com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder"
  static="false"
  final="false"
