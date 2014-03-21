@@ -55,7 +55,7 @@
 <link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.ico" />
 <title>
 
-  LinkedKeyBinding
+  ProvidesMethodTargetVisitor
 
 
 | Guice
@@ -85,7 +85,7 @@
 </noscript>
 </head>
 
-<body class="Guice_2.0">
+<body class="Guice_4.0">
 
 <div id="header">
     <div id="headerLeft">
@@ -214,7 +214,7 @@
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/HasDependencies.html">HasDependencies</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InjectionListener.html">InjectionListener</a>&lt;I&gt;</li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/InstanceBinding.html">InstanceBinding</a>&lt;T&gt;</li>
-          <li class="selected api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/LinkedKeyBinding.html">LinkedKeyBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/LinkedKeyBinding.html">LinkedKeyBinding</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/PrivateElements.html">PrivateElements</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderBinding.html">ProviderBinding</a>&lt;T&nbsp;extends&nbsp;<a href="../../../../com/google/inject/Provider.html">Provider</a>&lt;?&gt;&gt;</li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html">ProviderInstanceBinding</a>&lt;T&gt;</li>
@@ -222,7 +222,7 @@
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/ProviderWithDependencies.html">ProviderWithDependencies</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/spi/ProviderWithExtensionVisitor.html">ProviderWithExtensionVisitor</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a>&lt;T&gt;</li>
-          <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvidesMethodTargetVisitor.html">ProvidesMethodTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
+          <li class="selected api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvidesMethodTargetVisitor.html">ProvidesMethodTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
           <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/spi/ProvisionListener.html">ProvisionListener</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeConverter.html">TypeConverter</a></li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/spi/TypeEncounter.html">TypeEncounter</a>&lt;I&gt;</li>
@@ -311,13 +311,6 @@
   
   
 
-  
-   
-  
-  
-  
-  
-
 
 <div class="sum-details-links">
 
@@ -346,7 +339,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
 
 
   
@@ -364,7 +357,7 @@ Summary:
      
     
     interface
-<h1>LinkedKeyBinding</h1>
+<h1>ProvidesMethodTargetVisitor</h1>
 
 
 
@@ -372,7 +365,7 @@ Summary:
   
       implements 
       
-        <a href="../../../../com/google/inject/Binding.html">Binding</a>&lt;T&gt; 
+        <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">BindingTargetVisitor</a>&lt;T,&nbsp;V&gt; 
       
   
   
@@ -382,13 +375,13 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-Guice_2.0">
+<div id="jd-content" class="api apilevel-Guice_4.0">
 <table class="jd-inheritance-table">
 
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.spi.LinkedKeyBinding&lt;T&gt;</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.inject.spi.ProvidesMethodTargetVisitor&lt;T,&nbsp;V&gt;</td>
     </tr>
     
 
@@ -404,7 +397,10 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p>A binding to a linked key. The other key's binding is used to resolve injections.</p>
+<p>A visitor for the @<code><a href="../../../../com/google/inject/Provides.html">Provides</a></code> bindings.
+ <p>
+ If your <code><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">BindingTargetVisitor</a></code> implements this interface, bindings created by using
+ <code>@Provides</code> will be visited through this interface.</p>
 
 
 
@@ -464,19 +460,19 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Guice_2.0" >
+    <tr class="alt-color api apilevel-Guice_4.0" >
         <td class="jd-typecol"><nobr>
             abstract
             
             
             
             
-            <a href="../../../../com/google/inject/Key.html">Key</a>&lt;?&nbsp;extends&nbsp;T&gt;</nobr>
+            V</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/spi/LinkedKeyBinding.html#getLinkedKey()">getLinkedKey</a></span>()</nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/ProvidesMethodTargetVisitor.html#visit(com.google.inject.spi.ProvidesMethodBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; providesMethodBinding)</nobr>
         
-        <div class="jd-descrdiv">Returns the linked key used to resolve injections.</div>
+        <div class="jd-descrdiv">Visits an <code><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a></code> created with an @<code><a href="../../../../com/google/inject/Provides.html">Provides</a></code> method.</div>
   
   </td></tr>
 
@@ -498,19 +494,19 @@ Summary:
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.inject.Binding" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.inject.Binding-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.inject.spi.BindingTargetVisitor" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.inject.spi.BindingTargetVisitor-trigger"
           src="../../../../../javadoc/assets/images/triangle-closed.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="../../../../com/google/inject/Binding.html">com.google.inject.Binding</a>
+  <a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">com.google.inject.spi.BindingTargetVisitor</a>
 
-<div id="inherited-methods-com.google.inject.Binding">
-  <div id="inherited-methods-com.google.inject.Binding-list"
+<div id="inherited-methods-com.google.inject.spi.BindingTargetVisitor">
+  <div id="inherited-methods-com.google.inject.spi.BindingTargetVisitor-list"
         class="jd-inheritedlinks">
   </div>
-  <div id="inherited-methods-com.google.inject.Binding-summary" style="display: none;">
+  <div id="inherited-methods-com.google.inject.spi.BindingTargetVisitor-summary" style="display: none;">
     <table class="jd-sumtable-expando">
     
 
@@ -522,112 +518,13 @@ From interface
             
             
             
-            &lt;V&gt;
+            
             V</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#acceptScopingVisitor(com.google.inject.spi.BindingScopingVisitor<V>)">acceptScopingVisitor</a></span>(<a href="../../../../com/google/inject/spi/BindingScopingVisitor.html">BindingScopingVisitor</a>&lt;V&gt; visitor)</nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ConstructorBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ConstructorBinding.html">ConstructorBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
         
-        <div class="jd-descrdiv">Accepts a scoping visitor.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-Guice_2.0" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            &lt;V&gt;
-            V</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#acceptTargetVisitor(com.google.inject.spi.BindingTargetVisitor<? super T, V>)">acceptTargetVisitor</a></span>(<a href="../../../../com/google/inject/spi/BindingTargetVisitor.html">BindingTargetVisitor</a>&lt;?&nbsp;super&nbsp;T,&nbsp;V&gt; visitor)</nobr>
-        
-        <div class="jd-descrdiv">Accepts a target visitor.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-Guice_1.0" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="../../../../com/google/inject/Key.html">Key</a>&lt;T&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#getKey()">getKey</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">Returns the key for this binding.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-Guice_1.0" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="../../../../com/google/inject/Provider.html">Provider</a>&lt;T&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/Binding.html#getProvider()">getProvider</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">Returns the scoped provider guice uses to fulfill requests for this
- binding.</div>
-  
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.inject.spi.Element" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.inject.spi.Element-trigger"
-          src="../../../../../javadoc/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="../../../../com/google/inject/spi/Element.html">com.google.inject.spi.Element</a>
-
-<div id="inherited-methods-com.google.inject.spi.Element">
-  <div id="inherited-methods-com.google.inject.spi.Element-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.inject.spi.Element-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-Guice_2.0" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            &lt;T&gt;
-            T</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#acceptVisitor(com.google.inject.spi.ElementVisitor<T>)">acceptVisitor</a></span>(<a href="../../../../com/google/inject/spi/ElementVisitor.html">ElementVisitor</a>&lt;T&gt; visitor)</nobr>
-        
-        <div class="jd-descrdiv">Accepts an element visitor.</div>
+        <div class="jd-descrdiv">Visit a constructor binding.</div>
   
   </td></tr>
 
@@ -640,12 +537,12 @@ From interface
             
             
             
-            void</nobr>
+            V</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#applyTo(com.google.inject.Binder)">applyTo</a></span>(<a href="../../../../com/google/inject/Binder.html">Binder</a> binder)</nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ConvertedConstantBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ConvertedConstantBinding.html">ConvertedConstantBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
         
-        <div class="jd-descrdiv">Writes this module element to the given binder (optional operation).</div>
+        <div class="jd-descrdiv">Visit a binding created from converting a bound instance to a new type.</div>
   
   </td></tr>
 
@@ -658,13 +555,121 @@ From interface
             
             
             
-            Object</nobr>
+            V</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../com/google/inject/spi/Element.html#getSource()">getSource</a></span>()</nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ExposedBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ExposedBinding.html">ExposedBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
         
-        <div class="jd-descrdiv">Returns an arbitrary object containing information about the "place" where this element was
- configured.</div>
+        <div class="jd-descrdiv">Visit a binding to a key exposed from an enclosed private environment.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.InstanceBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/InstanceBinding.html">InstanceBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit a instance binding.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.LinkedKeyBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/LinkedKeyBinding.html">LinkedKeyBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit a linked key binding.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ProviderBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderBinding.html">ProviderBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit a binding to a <code><a href="../../../../com/google/inject/Provider.html">Provider</a></code> that delegates to the binding for the
+ provided type.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ProviderInstanceBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderInstanceBinding.html">ProviderInstanceBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit a provider instance binding.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.ProviderKeyBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/ProviderKeyBinding.html">ProviderKeyBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit a provider key binding.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-Guice_2.0" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            V</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../com/google/inject/spi/BindingTargetVisitor.html#visit(com.google.inject.spi.UntargettedBinding<? extends T>)">visit</a></span>(<a href="../../../../com/google/inject/spi/UntargettedBinding.html">UntargettedBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; binding)</nobr>
+        
+        <div class="jd-descrdiv">Visit an untargetted binding.</div>
   
   </td></tr>
 
@@ -717,9 +722,9 @@ From interface
 
 
 
-<A NAME="getLinkedKey()"></A>
+<A NAME="visit(com.google.inject.spi.ProvidesMethodBinding<? extends T>)"></A>
 
-<div class="jd-details api apilevel-Guice_2.0"> 
+<div class="jd-details api apilevel-Guice_4.0"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -727,15 +732,15 @@ From interface
          
         abstract 
          
-        <a href="../../../../com/google/inject/Key.html">Key</a>&lt;?&nbsp;extends&nbsp;T&gt;
+        V
       </span>
-      <span class="sympad">getLinkedKey</span>
-      <span class="normal">()</span>
+      <span class="sympad">visit</span>
+      <span class="normal">(<a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a>&lt;?&nbsp;extends&nbsp;T&gt; providesMethodBinding)</span>
     </h4>
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_2.0">API Level Guice_2.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
 
 </div>
         
@@ -744,8 +749,7 @@ From interface
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the linked key used to resolve injections. That binding can be retrieved from an
- injector using <code><a href="../../../../com/google/inject/Injector.html#getBinding(com.google.inject.Key<T>)">Injector.getBinding(key)</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Visits an <code><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a></code> created with an @<code><a href="../../../../com/google/inject/Provides.html">Provides</a></code> method.
 </p></div>
 
     </div>

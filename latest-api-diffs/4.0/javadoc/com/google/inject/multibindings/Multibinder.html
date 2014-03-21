@@ -385,13 +385,13 @@ Summary:
  to create their own <code>Multibinder&lt;Snack&gt;</code>, and to each contribute
  bindings to the set of snacks. When that set is injected, it will contain
  elements from both modules.
- 
+
  <p>The set's iteration order is consistent with the binding order. This is
  convenient when multiple elements are contributed by the same module because
  that module can order its bindings appropriately. Avoid relying on the
  iteration order of elements contributed by different modules, since there is
  no equivalent mechanism to order modules.
- 
+
  <p>The set is unmodifiable.  Elements can only be added to the set by
  configuring the multibinder.  Elements can never be removed from the set.
 
