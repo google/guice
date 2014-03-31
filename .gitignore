@@ -1,4 +1,4 @@
-build/
+/build/
 target/
 bin/
 .project
