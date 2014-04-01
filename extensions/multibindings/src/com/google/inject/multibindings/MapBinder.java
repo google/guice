@@ -25,14 +25,15 @@ import static com.google.inject.multibindings.Multibinder.setOf;
 import static com.google.inject.util.Types.newParameterizedType;
 import static com.google.inject.util.Types.newParameterizedTypeWithOwner;
 
+import com.google.common.base.Supplier;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -56,6 +57,7 @@ import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -404,7 +406,9 @@ public abstract class MapBinder<K, V> {
             bindingsMutable.add(Maps.immutableEntry(entry.getKey(), injector.getBinding(valueKey)));
           }
           if (duplicateKeys != null) {
-            Multimap<K, String> dups = LinkedHashMultimap.create();
+            // Must use a ListMultimap in case more than one binding has the same source
+            // and is listed multiple times.
+            Multimap<K, String> dups = newLinkedKeyArrayValueMultimap();
             for (Map.Entry<K, Binding<V>> entry : bindingsMutable) {
               if (duplicateKeys.contains(entry.getKey())) {
                 dups.put(entry.getKey(), "\t at " + Errors.convert(entry.getValue().getSource()));
@@ -761,6 +765,16 @@ public abstract class MapBinder<K, V> {
       public int hashCode() {
         return equality.hashCode();
       }
+    }
+
+    private Multimap<K, String> newLinkedKeyArrayValueMultimap() {
+      return Multimaps.newListMultimap(
+          new LinkedHashMap<K, Collection<String>>(),
+          new Supplier<List<String>>() {
+            @Override public List<String> get() {
+              return Lists.newArrayList();
+            }
+          });
     }
   }
 }
