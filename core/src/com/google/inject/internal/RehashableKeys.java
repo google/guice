@@ -14,8 +14,8 @@ public interface RehashableKeys {
   public static class Keys {
 
     /**
-     * Returns true if the cached hashcode for the given key is out-of-date. This will only occur
-     * if the key contains a mutable annotation.
+     * Returns true if the cached hashcode and toString for the given key is out-of-date. This will
+     * only occur if the key contains a mutable annotation.
      */
     public static boolean needsRehashing(Key<?> key) {
       if (!key.hasAttributes()) {
@@ -25,7 +25,7 @@ public interface RehashableKeys {
       return (key.hashCode() != newHashCode);
     }
 
-    /** Returns a copy of the given key with an up-to-date hashcode. */
+    /** Returns a copy of the given key with an up-to-date hashcode and toString. */
     public static <T> Key<T> rehash(Key<T> key) {
       if (key.hasAttributes()) {
         // This will recompute the hashcode for us.

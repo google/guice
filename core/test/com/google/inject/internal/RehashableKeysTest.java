@@ -69,6 +69,7 @@ public class RehashableKeysTest extends TestCase {
     Key<?> keyCopy = rehash(key);
     assertEquals(key, keyCopy);
     assertEquals(key.hashCode(), keyCopy.hashCode());
+    assertEquals(key.toString(), keyCopy.toString());
   }
 
   public void testRehash_mutableAnnotation() {
@@ -77,11 +78,13 @@ public class RehashableKeysTest extends TestCase {
     Key<?> keyCopy = rehash(key);
     assertTrue(key.equals(keyCopy));
     assertTrue(key.hashCode() == keyCopy.hashCode());
+    assertTrue(key.toString().equals(keyCopy.toString()));
 
     annotation.setValue(101);
     Key<?> keyCopy2 = rehash(key);
     assertTrue(key.equals(keyCopy2));
     assertFalse(key.hashCode() == keyCopy2.hashCode());
+    assertFalse(key.toString().equals(keyCopy2.toString()));
 
     annotation.setValue(100);
     Key<?> keyCopy3 = rehash(keyCopy2);
@@ -89,6 +92,7 @@ public class RehashableKeysTest extends TestCase {
     assertTrue(key.hashCode() == keyCopy3.hashCode());
     assertTrue(keyCopy2.equals(keyCopy3));
     assertFalse(keyCopy2.hashCode() == keyCopy3.hashCode());
+    assertFalse(keyCopy2.toString().equals(keyCopy3.toString()));
   }
 
   @Retention(RUNTIME) @BindingAnnotation
@@ -117,6 +121,11 @@ public class RehashableKeysTest extends TestCase {
 
     void setValue(int value) {
       this.value = value;
+    }
+    
+    @Override
+    public String toString() {
+      return getClass().getSimpleName() + "[" + value + "]";
     }
 
     @Override

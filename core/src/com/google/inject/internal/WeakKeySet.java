@@ -31,6 +31,12 @@ import java.util.Set;
  */
 final class WeakKeySet {
 
+  // TODO(user): Instead of relying on Key#toString(), consider maintaining a set of custom weak
+  // references for child injectors. On some actions, we can poll the ReferenceQueue and clear the
+  // relevant blacklisted values. This would allow us to avoid forcing the toString memoization on
+  // Key and fix the memory leak referenced in
+  // https://code.google.com/p/google-guice/issues/detail?id=756.
+
   /**
    * We store strings rather than keys so we don't hold strong references.
    *
