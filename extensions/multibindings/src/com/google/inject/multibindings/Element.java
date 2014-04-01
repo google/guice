@@ -38,7 +38,8 @@ import java.lang.annotation.Retention;
 
   enum Type {
     MAPBINDER,
-    MULTIBINDER;
+    MULTIBINDER,
+    OPTIONALBINDER;
   }
 
   String setName();

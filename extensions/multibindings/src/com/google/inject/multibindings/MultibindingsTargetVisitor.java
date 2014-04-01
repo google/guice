@@ -22,8 +22,9 @@ import com.google.inject.spi.BindingTargetVisitor;
  * A visitor for the multibinder extension.
  * <p>
  * If your {@link BindingTargetVisitor} implements this interface, bindings created by using
- * {@link Multibinder} or {@link MapBinder} will be visited through this interface.
- * 
+ * {@link Multibinder}, {@link MapBinder} or {@link OptionalBinderBinding} will be visited through
+ * this interface.
+ *
  * @since 3.0
  * @author sameb@google.com (Sam Berlin)
  */
@@ -38,5 +39,12 @@ public interface MultibindingsTargetVisitor<T, V> extends BindingTargetVisitor<T
    * Visits a binding created through {@link MapBinder}.
    */
   V visit(MapBinderBinding<? extends T> mapbinding);
+  
+  /**
+   * Visits a binding created through {@link OptionalBinder}.
+   * 
+   * @since 4.0
+   */
+  V visit(OptionalBinderBinding<? extends T> optionalbinding);
 
 }

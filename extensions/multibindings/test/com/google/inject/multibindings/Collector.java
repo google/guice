@@ -18,10 +18,11 @@ package com.google.inject.multibindings;
 
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
-class Collector extends DefaultBindingTargetVisitor<Object, Object>
-    implements MultibindingsTargetVisitor<Object, Object> {
+class Collector extends DefaultBindingTargetVisitor<Object, Object> implements
+    MultibindingsTargetVisitor<Object, Object> {
   MapBinderBinding<? extends Object> mapbinding;
   MultibinderBinding<? extends Object> setbinding;
+  OptionalBinderBinding<? extends Object> optionalbinding;
 
   @Override
   public Object visit(MapBinderBinding<? extends Object> mapbinding) {
@@ -33,5 +34,11 @@ class Collector extends DefaultBindingTargetVisitor<Object, Object>
   public Object visit(MultibinderBinding<? extends Object> multibinding) {
    this.setbinding = multibinding;
    return null;
+  }
+  
+  @Override
+  public Object visit(OptionalBinderBinding<? extends Object> optionalbinding) {
+    this.optionalbinding = optionalbinding;
+    return null;
   }
 }

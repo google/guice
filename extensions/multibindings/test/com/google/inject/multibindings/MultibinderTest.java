@@ -25,7 +25,11 @@ import static com.google.inject.multibindings.SpiUtils.providerInstance;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -47,7 +51,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.RehashableKeys;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
@@ -83,6 +86,8 @@ import java.util.Set;
  */
 public class MultibinderTest extends TestCase {
 
+  final TypeLiteral<Optional<String>> optionalOfString =
+      new TypeLiteral<Optional<String>>() {};
   final TypeLiteral<Map<String, String>> mapOfStringString =
       new TypeLiteral<Map<String, String>>() {};
   final TypeLiteral<Set<String>> setOfString = new TypeLiteral<Set<String>>() {};
@@ -1056,10 +1061,17 @@ public class MultibinderTest extends TestCase {
 
         MapBinder.newMapBinder(binder(), String.class, String.class)
             .addBinding("B").toInstance("b");
+
+        OptionalBinder.newOptionalBinder(binder(), String.class)
+            .setDefault().toInstance("C");
+        OptionalBinder.newOptionalBinder(binder(), String.class)
+            .setBinding().toInstance("D");
       }
     });
 
-    assertEquals(ImmutableSet.<String>of("A"), injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableSet.of("A"), injector.getInstance(Key.get(setOfString)));
+    assertEquals(ImmutableMap.of("B", "b"), injector.getInstance(Key.get(mapOfStringString)));
+    assertEquals(Optional.of("D"), injector.getInstance(Key.get(optionalOfString)));
   }
 
   // See issue 670
@@ -1071,6 +1083,9 @@ public class MultibinderTest extends TestCase {
 
         MapBinder.newMapBinder(binder(), String.class, String.class)
             .addBinding("B").toInstance("b");
+        
+        OptionalBinder.newOptionalBinder(binder(), String.class)
+            .setDefault().toInstance("C");
       }
     });
     Collector collector = new Collector();
@@ -1082,40 +1097,36 @@ public class MultibinderTest extends TestCase {
     setbinding.acceptTargetVisitor(collector);
     assertNotNull(collector.setbinding);
 
-    // Capture the value bindings and assert we have them right --
-    // they'll always be in the right order because we preserve
-    // binding order.
-    List<Binding<String>> bindings = injector.findBindingsByType(stringType);
-    assertEquals(2, bindings.size());
+    Binding<Optional<String>> optionalbinding = injector.getBinding(Key.get(optionalOfString));
+    optionalbinding.acceptTargetVisitor(collector);
+    assertNotNull(collector.optionalbinding);
+
+    // There should only be three instance bindings for string types
+    // (but because of the OptionalBinder, there's 2 ProviderInstanceBindings also).
+    // We also know the InstanceBindings will be in the order: A, b, C because that's
+    // how we bound them, and binding order is preserved.
+    List<Binding<String>> bindings = FluentIterable.from(injector.findBindingsByType(stringType))
+        .filter(Predicates.instanceOf(InstanceBinding.class))
+        .toList();
+    assertEquals(bindings.toString(), 3, bindings.size());
     Binding<String> a = bindings.get(0);
     Binding<String> b = bindings.get(1);
-    assertEquals("A", ((InstanceBinding<String>)a).getInstance());
-    assertEquals("b", ((InstanceBinding<String>)b).getInstance());
+    Binding<String> c = bindings.get(2);
+    assertEquals("A", ((InstanceBinding<String>) a).getInstance());
+    assertEquals("b", ((InstanceBinding<String>) b).getInstance());
+    assertEquals("C", ((InstanceBinding<String>) c).getInstance());
 
-    // Now make sure "A" belongs only to the set binding,
-    // and "b" only belongs to the map binding.
+    // Make sure the correct elements belong to their own sets.
     assertFalse(collector.mapbinding.containsElement(a));
     assertTrue(collector.mapbinding.containsElement(b));
+    assertFalse(collector.mapbinding.containsElement(c));
 
     assertTrue(collector.setbinding.containsElement(a));
     assertFalse(collector.setbinding.containsElement(b));
-  }
-
-  private static class Collector extends DefaultBindingTargetVisitor<Object, Object> implements
-      MultibindingsTargetVisitor<Object, Object> {
-    MapBinderBinding<? extends Object> mapbinding;
-    MultibinderBinding<? extends Object> setbinding;
-
-    @Override
-    public Object visit(MapBinderBinding<? extends Object> mapbinding) {
-      this.mapbinding = mapbinding;
-      return null;
-    }
-
-    @Override
-    public Object visit(MultibinderBinding<? extends Object> multibinding) {
-     this.setbinding = multibinding;
-     return null;
-    }
+    assertFalse(collector.setbinding.containsElement(c));
+    
+    assertFalse(collector.optionalbinding.containsElement(a));
+    assertFalse(collector.optionalbinding.containsElement(b));
+    assertTrue(collector.optionalbinding.containsElement(c));
   }
 }
