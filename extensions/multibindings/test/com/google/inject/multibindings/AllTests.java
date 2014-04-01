@@ -28,6 +28,7 @@ public class AllTests {
     TestSuite suite = new TestSuite();
     suite.addTestSuite(MapBinderTest.class);
     suite.addTestSuite(MultibinderTest.class);
+    suite.addTestSuite(OptionalBinderTest.class);
     return suite;
   }
 }
