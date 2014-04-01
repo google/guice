@@ -29,11 +29,11 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -42,11 +42,12 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.Errors;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.Errors;
 import com.google.inject.multibindings.Multibinder.RealMultibinder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProviderWithDependencies;
@@ -316,6 +317,7 @@ public abstract class MapBinder<K, V> {
     private final Key<Map<K, Set<V>>> multimapKey;
     private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
+    private final Map<K, String> duplicateKeyErrorMessages;
 
     /* the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
@@ -336,6 +338,12 @@ public abstract class MapBinder<K, V> {
       this.providerMultimapKey = providerMultimapKey;
       this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
       this.binder = binder;
+      this.duplicateKeyErrorMessages = Maps.newHashMap();
+    }
+    
+    /** Sets the error message to be shown if the key had duplicate non-equal bindings. */
+    void updateDuplicateKeyMessage(K k, String errMsg) {
+      duplicateKeyErrorMessages.put(k, errMsg);
     }
 
     @Override
@@ -355,9 +363,9 @@ public abstract class MapBinder<K, V> {
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
       RealElement.BindingBuilder<V> valueBinding = RealElement.addMapBinding(
-          binder, key, valueType, entrySetBinder.getSetName());
+          binder, key, keyType, valueType, entrySetBinder.getSetName());
       Key<V> valueKey = Key.get(valueType, valueBinding.getAnnotation());
-      entrySetBinder.addBinding().toInstance(new ProviderMapEntry<K, V>(
+      entrySetBinder.addBinding().toProvider(new ProviderMapEntry<K, V>(
           key, binder.getProvider(valueKey), valueKey));
       return valueBinding;
     }
@@ -399,7 +407,7 @@ public abstract class MapBinder<K, V> {
             Multimap<K, String> dups = LinkedHashMultimap.create();
             for (Map.Entry<K, Binding<V>> entry : bindingsMutable) {
               if (duplicateKeys.contains(entry.getKey())) {
-                dups.put(entry.getKey(), "\t" + Errors.convert(entry.getValue().getSource()));
+                dups.put(entry.getKey(), "\t at " + Errors.convert(entry.getValue().getSource()));
               }
             }
             StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
@@ -407,9 +415,18 @@ public abstract class MapBinder<K, V> {
             for (K key : dups.keySet()) {
               if (first) {
                 first = false;
-                sb.append("\"" + key + "\", from bindings at:\n");
+                if (duplicateKeyErrorMessages.containsKey(key)) {
+                  sb.setLength(0);
+                  sb.append(duplicateKeyErrorMessages.get(key));
+                } else {
+                  sb.append("\"" + key + "\", from bindings:\n");
+                }
               } else {
-                sb.append("\n and key: \"" + key + "\", from bindings at:\n");
+                if (duplicateKeyErrorMessages.containsKey(key)) {
+                  sb.append("\n and " + duplicateKeyErrorMessages.get(key));
+                } else {
+                  sb.append("\n and key: \"" + key + "\", from bindings:\n");
+                }
               }
               Joiner.on('\n').appendTo(sb, dups.get(key)).append("\n");
             }
@@ -494,35 +511,40 @@ public abstract class MapBinder<K, V> {
         }
 
         public boolean containsElement(com.google.inject.spi.Element element) {
-          if (entrySetBinder.containsElement(element)) {
-            return true;
-          } else {
-            Key<?> key;
-            if (element instanceof Binding) {
-              key = ((Binding<?>)element).getKey();
-            } else if (element instanceof ProviderLookup) {
-              key = ((ProviderLookup<?>)element).getKey();
-            } else {
-              return false; // cannot match;
-            }
-
-            return key.equals(mapKey)
-                || key.equals(providerMapKey)
-                || key.equals(javaxProviderMapKey)
-                || key.equals(multimapKey)
-                || key.equals(providerMultimapKey)
-                || key.equals(entrySetBinder.getSetKey())
-                || matchesValueKey(key);
-            }
+          return RealMapBinder.this.containsElement(element);
         }
       });
     }
 
+    boolean containsElement(com.google.inject.spi.Element element) {
+      if (entrySetBinder.containsElement(element)) {
+        return true;
+      } else {
+        Key<?> key;
+        if (element instanceof Binding) {
+          key = ((Binding<?>)element).getKey();
+        } else if (element instanceof ProviderLookup) {
+          key = ((ProviderLookup<?>)element).getKey();
+        } else {
+          return false; // cannot match;
+        }
+
+        return key.equals(mapKey)
+            || key.equals(providerMapKey)
+            || key.equals(javaxProviderMapKey)
+            || key.equals(multimapKey)
+            || key.equals(providerMultimapKey)
+            || key.equals(entrySetBinder.getSetKey())
+            || matchesValueKey(key);
+        }
+    }
+
     /** Returns true if the key indicates this is a value in the map. */
     private boolean matchesValueKey(Key<?> key) {
-      return key.getAnnotation() instanceof Element
-          && ((Element) key.getAnnotation()).setName().equals(entrySetBinder.getSetName())
-          && ((Element) key.getAnnotation()).type() == MAPBINDER
+      return key.getAnnotation() instanceof RealElement
+          && ((RealElement) key.getAnnotation()).setName().equals(entrySetBinder.getSetName())
+          && ((RealElement) key.getAnnotation()).type() == MAPBINDER
+          && ((RealElement) key.getAnnotation()).mapKeyType.equals(keyType)
           && key.getTypeLiteral().equals(valueType);
     }
 
@@ -643,7 +665,8 @@ public abstract class MapBinder<K, V> {
      * @param <K> the map's key type
      * @param <V> the type provided by the map's values
      */
-    private static final class ProviderMapEntry<K, V> implements Map.Entry<K, Provider<V>> {
+    private static final class ProviderMapEntry<K, V> implements
+        ProviderWithDependencies<Map.Entry<K, Provider<V>>>, Map.Entry<K, Provider<V>> {
       private final K key;
       private final Provider<V> provider;
       private volatile Key<V> valueKey;
@@ -652,6 +675,14 @@ public abstract class MapBinder<K, V> {
         this.key = key;
         this.provider = provider;
         this.valueKey = valueKey;
+      }
+      
+      public Entry<K, Provider<V>> get() {
+        return this;
+      }
+      
+      public Set<Dependency<?>> getDependencies() {
+        return ((HasDependencies) provider).getDependencies();
       }
 
       public Key<V> getValueKey() {

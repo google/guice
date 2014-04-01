@@ -246,27 +246,8 @@ public abstract class Multibinder<T> {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
       this.setKey = checkNotNull(setKey, "setKey");
-      this.setName = nameOf(setKey);
+      this.setName = RealElement.nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
-    }
-
-    /**
-     * Returns the name the set should use.  This is based on the annotation.
-     * If the annotation has an instance and is not a marker annotation,
-     * we ask the annotation for its toString.  If it was a marker annotation
-     * or just an annotation type, we use the annotation's name. Otherwise,
-     * the name is the empty string.
-     */
-    private static String nameOf(Key<?> setKey) {
-      Annotation annotation = setKey.getAnnotation();
-      Class<? extends Annotation> annotationType = setKey.getAnnotationType();
-      if (annotation != null && !Annotations.isMarker(annotationType)) {
-        return setKey.getAnnotation().toString();
-      } else if (setKey.getAnnotationType() != null) {
-        return "@" + setKey.getAnnotationType().getName();
-      } else {
-        return "";
-      }
     }
 
     public void configure(Binder binder) {

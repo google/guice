@@ -160,9 +160,10 @@ public class AbstractInjectorGrapherTest extends TestCase {
         new BindingEdge(stringNode.getId(), stringInstanceNode.getId(), BindingEdge.Type.NORMAL),
         new BindingEdge(iaNode.getId(), a2ProviderNode.getId(), BindingEdge.Type.PROVIDER),
         new DependencyEdge(a2Node.getId(), stringNode.getId(),
-            InjectionPoint.forConstructor(A2.class.getConstructor(Provider.class))));
-    assertEquals(expectedNodes, grapher.nodes);
-    assertEquals(expectedEdges, grapher.edges);
+            InjectionPoint.forConstructor(A2.class.getConstructor(Provider.class))),
+        new DependencyEdge(a2ProviderNode.getId(), a2Node.getId(), null));
+    assertEquals("wrong nodes", expectedNodes, grapher.nodes);
+    assertEquals("wrong edges", expectedEdges, grapher.edges);
   }
 
   public void testGraphWithGivenRoot() throws Exception {

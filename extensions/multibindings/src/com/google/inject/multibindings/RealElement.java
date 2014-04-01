@@ -25,6 +25,7 @@ import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.internal.Annotations;
 import com.google.inject.spi.InjectionPoint;
 
 import java.lang.annotation.Annotation;
@@ -54,7 +55,7 @@ class RealElement implements Element {
    */
   static <T> BindingBuilder<T> addBinding(
       Binder binder, Element.Type type, TypeLiteral<T> elementType, String setName) {
-    RealElement annotation = new RealElement(setName, type, null);
+    RealElement annotation = new RealElement(setName, type, null, null);
     LinkedBindingBuilder<T> delegate = binder
         .skipSources(RealElement.class)
         .bind(Key.get(elementType, annotation));
@@ -66,32 +67,36 @@ class RealElement implements Element {
    * {@link BindingBuilder}.
    * 
    * @param binder the current Guice binder
-   * @param mapKey the key used to fetch the element from the map
-   * @param elementType the type of element stored in the collection
+   * @param entryKey the key used to fetch the element from the map
+   * @param keyType the type of the key in the map, to disambiguate maps with the same value
+   * @param valueType the type of value in the map
    * @param setName the string used internally to identify the collection
    */
-  static <T> BindingBuilder<T> addMapBinding(
-      Binder binder, Object mapKey, TypeLiteral<T> elementType, String setName) {
-    RealElement annotation = new RealElement(setName, Element.Type.MAPBINDER, mapKey);
+  static <T> BindingBuilder<T> addMapBinding(Binder binder, Object entryKey,
+      TypeLiteral<?> keyType, TypeLiteral<T> valueType, String setName) {
+    RealElement annotation =
+        new RealElement(setName, Element.Type.MAPBINDER, keyType, entryKey);
     LinkedBindingBuilder<T> delegate = binder
         .skipSources(RealElement.class)
-        .bind(Key.get(elementType, annotation));
+        .bind(Key.get(valueType, annotation));
     return new BindingBuilder<T>(annotation, delegate);
   }
   
   private final int uniqueId;
   private final String setName;
   private final Element.Type type;
-  private final Object mapKey;
+  private final Object mapEntryKey;
   private TargetType targetType = TargetType.UNTARGETTED;
   private Object target = null;
   private Object scope = Scopes.NO_SCOPE;
+  final TypeLiteral<?> mapKeyType;
 
-  private RealElement(String setName, Element.Type type, Object mapKey) {
+  private RealElement(String setName, Element.Type type, TypeLiteral<?> mapKeyType, Object mapKey) {
     this.uniqueId = nextUniqueId.incrementAndGet();
     this.setName = setName;
     this.type = type;
-    this.mapKey = mapKey;
+    this.mapEntryKey = mapKey;
+    this.mapKeyType = mapKeyType;
   }
   
   public String setName() {
@@ -140,7 +145,8 @@ class RealElement implements Element {
     RealElement other = (RealElement) obj;
     return (setName.equals(other.setName)
         && type.equals(other.type)
-        && Objects.equal(mapKey, other.mapKey)
+        && Objects.equal(mapKeyType, other.mapKeyType)
+        && Objects.equal(mapEntryKey, other.mapEntryKey)
         && scope.equals(other.scope)
         && targetType.equals(other.targetType)
         && Objects.equal(target, other.target));
@@ -154,7 +160,26 @@ class RealElement implements Element {
    * private and will never be used as an annotation, this should not cause problems.
    */
   @Override public int hashCode() {
-    return Objects.hashCode(setName, type, mapKey, scope, targetType, target);
+    return Objects.hashCode(setName, type, mapEntryKey, scope, targetType, target, mapKeyType);
+  }
+
+  /**
+   * Returns the name the binding should use.  This is based on the annotation.
+   * If the annotation has an instance and is not a marker annotation,
+   * we ask the annotation for its toString.  If it was a marker annotation
+   * or just an annotation type, we use the annotation's name. Otherwise,
+   * the name is the empty string.
+   */
+  static String nameOf(Key<?> key) {
+    Annotation annotation = key.getAnnotation();
+    Class<? extends Annotation> annotationType = key.getAnnotationType();
+    if (annotation != null && !Annotations.isMarker(annotationType)) {
+      return key.getAnnotation().toString();
+    } else if (key.getAnnotationType() != null) {
+      return "@" + key.getAnnotationType().getName();
+    } else {
+      return "";
+    }
   }
 
   private enum TargetType {
