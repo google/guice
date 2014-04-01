@@ -29,6 +29,12 @@
       <artifactId>guava</artifactId>
       <version>16.0.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
+      <version>16.0.1</version>
+      <scope>test</scope>
+    </dependency>
     <!--
      | CGLIB is embedded by default by the JarJar build profile
     -->

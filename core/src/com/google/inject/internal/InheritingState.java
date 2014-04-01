@@ -56,12 +56,13 @@ final class InheritingState implements State {
   /*end[AOP]*/
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
   private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList(); 
-  private final WeakKeySet blacklistedKeys = new WeakKeySet();
+  private final WeakKeySet blacklistedKeys;
   private final Object lock;
 
   InheritingState(State parent) {
     this.parent = checkNotNull(parent, "parent");
     this.lock = (parent == State.NONE) ? this : parent.lock();
+    this.blacklistedKeys = new WeakKeySet(lock);
   }
 
   public State parent() {
@@ -154,9 +155,9 @@ final class InheritingState implements State {
     return result;
   }
 
-  public void blacklist(Key<?> key, Object source) {
-    parent.blacklist(key, source);
-    blacklistedKeys.add(key, source);
+  public void blacklist(Key<?> key, State state, Object source) {
+    parent.blacklist(key, state, source);
+    blacklistedKeys.add(key, state, source);
   }
 
   public boolean isBlacklisted(Key<?> key) {
