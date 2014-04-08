@@ -34,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -73,7 +72,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1130,32 +1128,5 @@ public class MultibinderTest extends TestCase {
     assertFalse(collector.optionalbinding.containsElement(a));
     assertFalse(collector.optionalbinding.containsElement(b));
     assertTrue(collector.optionalbinding.containsElement(c));
-  }
-  
-  // Tests for com.google.inject.internal.WeakKeySet not leaking memory.
-  public void testWeakKeySet_integration_multibinder() {
-    Key<Set<String>> setKey = Key.get(new TypeLiteral<Set<String>>() {});
-
-    Injector parentInjector = Guice.createInjector(new AbstractModule() {
-          @Override protected void configure() {
-            bind(String.class).toInstance("hi");
-          }
-        });
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, setKey);
-
-    Injector childInjector = parentInjector.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        Multibinder<String> binder = Multibinder.newSetBinder(binder(), String.class);
-        binder.addBinding().toInstance("foo");
-      }
-    });
-    WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
-    WeakKeySetUtils.assertBlacklisted(parentInjector, setKey);
-   
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
-    childInjector = null;
-   
-    GcFinalization.awaitClear(weakRef);
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, setKey);
   }
 }

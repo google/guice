@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -61,7 +60,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -873,7 +871,7 @@ public class MapBinderTest extends TestCase {
     expected.put(1, 1);
     expected.put(2, 2);
     assertEquals(expected, s1);
-  }
+  }  
 
   public void testTwoMapBindersAreDistinct() {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -909,33 +907,5 @@ public class MapBinderTest extends TestCase {
   
     assertFalse(map2Binding.containsElement(a));
     assertTrue(map2Binding.containsElement(b));
-  }
-
-  // Tests for com.google.inject.internal.WeakKeySet not leaking memory.
-  public void testWeakKeySet_integration_mapbinder() {
-    Key<Map<String, String>> mapKey = Key.get(new TypeLiteral<Map<String, String>>() {});
-    
-    Injector parentInjector = Guice.createInjector(new AbstractModule() {
-          @Override protected void configure() {
-            bind(String.class).toInstance("hi");
-          }
-        });
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
-
-    Injector childInjector = parentInjector.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        MapBinder<String, String> binder =
-            MapBinder.newMapBinder(binder(), String.class, String.class);
-        binder.addBinding("bar").toInstance("foo");
-      }
-    });
-    WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
-    WeakKeySetUtils.assertBlacklisted(parentInjector, mapKey);
-    
-    // Clear the ref, GC, and ensure that we are no longer blacklisting.
-    childInjector = null;
-    
-    GcFinalization.awaitClear(weakRef);
-    WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
   }
 }

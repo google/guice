@@ -105,7 +105,6 @@
         <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
         <pathelement location="lib/guava-16.0.1.jar"/>
-        <pathelement location="lib/build/guava-testlib-16.0.1.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
