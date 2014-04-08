@@ -55,6 +55,16 @@
       <scope>test</scope>
     </dependency>
     <!--
+     | Some extension tests depend on guava test libs which are not inherited
+     | from test scope.
+    -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
+      <version>16.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
      | Some extension tests depend on cglib which is not embedded
      | in an execution that doesn't include package.
     -->

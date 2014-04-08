@@ -105,7 +105,7 @@ interface State {
       return ImmutableList.of();
     }
 
-    public void blacklist(Key<?> key, Object source) {
+    public void blacklist(Key<?> key, State state, Object source) {
     }
 
     public boolean isBlacklisted(Key<?> key) {
@@ -165,9 +165,9 @@ interface State {
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors
    * blacklist their bound keys on their parent injectors to prevent just-in-time bindings on the
-   * parent injector that would conflict.
+   * parent injector that would conflict and pass along their state to control the lifetimes.
    */
-  void blacklist(Key<?> key, Object source);
+  void blacklist(Key<?> key, State state, Object source);
 
   /**
    * Returns true if {@code key} is forbidden from being bound in this injector. This indicates that

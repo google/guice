@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -59,6 +60,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map.Entry;
@@ -910,6 +912,30 @@ public class OptionalBinderTest extends TestCase {
     assertSame(i1, i2);
     assertEquals(2, i2.intValue());
   }
+  
+ // Tests for com.google.inject.internal.WeakKeySet not leaking memory.
+ public void testWeakKeySet_integration() {   
+   Injector parentInjector = Guice.createInjector(new AbstractModule() {
+         @Override protected void configure() {
+           bind(String.class).toInstance("hi");
+         }
+       });
+   WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
+
+   Injector childInjector = parentInjector.createChildInjector(new AbstractModule() {
+     @Override protected void configure() {
+       OptionalBinder.newOptionalBinder(binder(), Integer.class).setDefault().toInstance(4);
+     }
+   });
+   WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
+   WeakKeySetUtils.assertBlacklisted(parentInjector, Key.get(Integer.class));
+   
+   // Clear the ref, GC, and ensure that we are no longer blacklisting.
+   childInjector = null;
+   
+   GcFinalization.awaitClear(weakRef);
+   WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
+ }
   
   @SuppressWarnings("unchecked") 
   private <V> Set<V> setOf(V... elements) {
