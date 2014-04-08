@@ -83,7 +83,7 @@
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>5.0</version>
+      <version>5.0.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
