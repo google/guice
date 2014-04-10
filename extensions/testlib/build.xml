@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<project name="guice-testlib" basedir="." default="jar">
+
+  <import file="../../common.xml"/>
+
+  <path id="compile.classpath">
+    <fileset dir="${lib.dir}" includes="*.jar"/>
+    <fileset dir="${lib.dir}/build" includes="*.jar"/>
+    <pathelement path="../../build/classes"/>
+  </path>
+
+  <target name="jar" depends="compile, manifest" description="Build jar.">
+    <jar destfile="${build.dir}/${ant.project.name}-${version}.jar"
+        manifest="${build.dir}/META-INF/MANIFEST.MF">
+      <fileset dir="${build.dir}/classes" />
+    </jar>
+  </target>
+
+</project>

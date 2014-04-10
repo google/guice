@@ -28,7 +28,8 @@
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
-        <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/testlib/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
       <fileset dir="extensions/servlet/build" includes="*.jar"/>
@@ -57,9 +58,12 @@
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/persist/build" includes="*.jar"/>
     </copy>
-        <copy toDir="${build.dir}/dist">
-          <fileset dir="extensions/grapher/build" includes="*.jar"/>
-        </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/grapher/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/testlib/build" includes="*.jar"/>
+    </copy>
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
@@ -153,6 +157,7 @@
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
       <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${testlib.src.dir}"/>
 
       <doclet name="jdiff.JDiff" path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
         <param name="-apidir" value="${jdiff.tmp}" />
@@ -179,7 +184,7 @@
           </doclet>
         </javadoc>
   </target>
-  
+
   <target name="javadoc">
     <javadoc packagenames="com.google.*"
              destdir="build/docs"
@@ -200,6 +205,7 @@
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${testlib.src.dir}"/>
       <!-- TODO: this breaks Doclava for some reason
       <fileset dir="${struts2.src.dir}"/> -->
 
@@ -280,6 +286,7 @@
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
     <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
     <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/testlib" antfile="build.xml" target="clean"/>
   </target>
   
 </project>
