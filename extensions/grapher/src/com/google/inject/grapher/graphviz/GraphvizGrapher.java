@@ -116,7 +116,7 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
     attrs.put("label", getNodeLabel(node));
     // remove most of the margin because the table has internal padding
-    attrs.put("margin", "0.02,0");
+    attrs.put("margin", "\"0.02,0\"");
     attrs.put("shape", node.getShape().toString());
     attrs.put("style", node.getStyle().toString());
     
