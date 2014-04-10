@@ -255,6 +255,9 @@ public class OptionalBindingTest extends TestCase {
   }
 
   static class HasOptionalConstructor {
+    // Suppress compiler errors by the error-prone checker InjectedConstructorAnnotations,
+    // which catches optional injected constructors.
+    @SuppressWarnings("InjectedConstructorAnnotations")
     @Inject(optional=true)
     HasOptionalConstructor() {}
   }

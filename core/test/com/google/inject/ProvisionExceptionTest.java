@@ -295,6 +295,9 @@ public class ProvisionExceptionTest extends TestCase {
   }
 
   static class ConstructorWithBindingAnnotation {
+    // Suppress compiler errors by the error-prone checker InjectedConstructorAnnotations,
+    // which catches injected constructors with binding annotations.
+    @SuppressWarnings("InjectedConstructorAnnotations")
     @Inject @Green ConstructorWithBindingAnnotation(String greenString) {}
   }
 
