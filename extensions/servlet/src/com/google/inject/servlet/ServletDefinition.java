@@ -217,6 +217,8 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             if (pathInfo.isEmpty() && servletPathLength > 0) {
               pathInfo = null;
             }
+          } else {
+            pathInfo = null; // we know nothing additional about the URI.
           }
           pathInfoComputed = true;
         }
