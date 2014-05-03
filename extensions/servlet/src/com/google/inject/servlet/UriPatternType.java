@@ -37,6 +37,15 @@ public enum UriPatternType {
     }
   }
 
+  private static String getUri(String uri) {
+    // Strip out the query, if it existed in the URI.  See issue 379.
+    int queryIdx = uri.indexOf('?');
+    if (queryIdx != -1) {
+      uri = uri.substring(0, queryIdx);
+    }
+    return uri;
+  }
+
   /**
    * Matches URIs using the pattern grammar of the Servlet API and web.xml.
    *
@@ -66,6 +75,7 @@ public enum UriPatternType {
         return false;
       }
 
+      uri = getUri(uri);
       if (patternKind == Kind.PREFIX) {
         return uri.endsWith(pattern);
       } else if (patternKind == Kind.SUFFIX) {
@@ -112,7 +122,7 @@ public enum UriPatternType {
     }
 
     public boolean matches(String uri) {
-      return null != uri && this.pattern.matcher(uri).matches();
+      return null != uri && this.pattern.matcher(getUri(uri)).matches();
     }
 
     public String extractPath(String path) {
