@@ -128,7 +128,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     /** The factory method associated with this data*/
     final Method factoryMethod;
 
-    /** true if {@link #isValidForOptimizedAssistedInject} returned true. */
+    /** true if {@link #validForOptimizedAssistedInject} returned true. */
     final boolean optimized;
     /** the list of optimized providers, empty if not optimized. */
     final List<ThreadLocalProvider> providers;
@@ -192,26 +192,20 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   
   /** The key that this is bound to. */
   private final Key<F> factoryKey;
-  
-  /** The implementation type, for equality/hashing purposes. */
-  private final TypeLiteral<?> implementationType;
 
   /**
-   * @param factoryKey a key for a Java interface that defines one or more create methods.
-   * @param implementationType the implementation type, or null if FactoryModuleBuilder was used
+   * @param factoryType a Java interface that defines one or more create methods.
    * @param collector binding configuration that maps method return types to
    *    implementation types.
    */
-  FactoryProvider2(
-      Key<F> factoryKey, TypeLiteral<?> implementationType, BindingCollector collector) {
+  FactoryProvider2(Key<F> factoryKey, BindingCollector collector) {
     this.factoryKey = factoryKey;
-    this.implementationType = implementationType;
 
     TypeLiteral<F> factoryType = factoryKey.getTypeLiteral();
     Errors errors = new Errors();
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
-    Class<F> factoryRawType = (Class<F>) (Class<?>) factoryType.getRawType();
+    Class<F> factoryRawType = (Class) factoryType.getRawType();
 
     try {
       if(!factoryRawType.isInterface()) {
@@ -275,7 +269,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
           continue;
         }
 
-        Constructor<?> constructor = (Constructor<?>) ctorInjectionPoint.getMember();
+        Constructor<?> constructor = (Constructor)ctorInjectionPoint.getMember();
         List<ThreadLocalProvider> providers = Collections.emptyList();
         Set<Dependency<?>> deps = getDependencies(ctorInjectionPoint, implementation);
         boolean optimized = false;
@@ -327,11 +321,10 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     return factoryKey;
   }
 
-  // Safe cast because values are typed to AssistedData, which is an AssistedMethod, and
-  // the collection is immutable.
+  // safe cast because values are typed to AssistedData, which is an AssistedMethod
   @SuppressWarnings("unchecked")
   public Collection<AssistedMethod> getAssistedMethods() {
-    return (Collection<AssistedMethod>) (Collection<?>) assistDataByMethod.values();
+    return (Collection)assistDataByMethod.values();
   }
 
   @SuppressWarnings("unchecked")
@@ -357,7 +350,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * Returns true if the ConfigurationException is due to an error of TypeLiteral not being fully
    * specified.
    */
-  private boolean isTypeNotSpecified(TypeLiteral<?> typeLiteral, ConfigurationException ce) {
+  private boolean isTypeNotSpecified(TypeLiteral typeLiteral, ConfigurationException ce) {
     Collection<Message> messages = ce.getErrorMessages();
     if (messages.size() == 1) {
       Message msg = Iterables.getOnlyElement(
@@ -375,8 +368,8 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * {@link AssistedInject} constructors exist, this will default to looking for an
    * {@literal @}{@link Inject} constructor.
    */
-  private <T> InjectionPoint findMatchingConstructorInjectionPoint(
-      Method method, Key<?> returnType, TypeLiteral<T> implementation, List<Key<?>> paramList)
+  private InjectionPoint findMatchingConstructorInjectionPoint(
+      Method method, Key<?> returnType, TypeLiteral<?> implementation, List<Key<?>> paramList)
       throws ErrorsException {
     Errors errors = new Errors(method);
     if(returnType.getTypeLiteral().equals(implementation)) {
@@ -412,8 +405,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
             errors
                 .addMessage(
                     "%s has more than one constructor annotated with @AssistedInject"
-                        + " that matches the parameters in method %s.  Unable to create "
-                        + "AssistedInject factory.",
+                        + " that matches the parameters in method %s.  Unable to create AssistedInject factory.",
                     implementation, method);
             throw errors.toException();
           } else {
@@ -437,7 +429,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
           // safe because we got the constructor from this implementation.
           @SuppressWarnings("unchecked")
           InjectionPoint ip = InjectionPoint.forConstructor(
-              (Constructor<? super T>) matchingConstructor, implementation);
+              (Constructor)matchingConstructor, implementation);
           return ip;
       } else {
         errors.addMessage(
@@ -500,7 +492,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   private Set<Dependency<?>> removeAssistedDeps(Set<Dependency<?>> deps) {
     ImmutableSet.Builder<Dependency<?>> builder = ImmutableSet.builder();
     for(Dependency<?> dep : deps) {
-      Class<?> annotationType = dep.getKey().getAnnotationType();
+      Class annotationType = dep.getKey().getAnnotationType();
       if (annotationType == null || !annotationType.equals(Assisted.class)) {
         builder.add(dep);
       }
@@ -542,7 +534,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * is a {@link Provider} for a parameter that is {@literal @}{@link Assisted}.
    */
   private boolean isInjectorOrAssistedProvider(Dependency<?> dependency) {
-    Class<?> annotationType = dependency.getKey().getAnnotationType();
+    Class annotationType = dependency.getKey().getAnnotationType();
     if (annotationType != null && annotationType.equals(Assisted.class)) { // If it's assisted..
       if (dependency.getKey().getTypeLiteral().getRawType().equals(Provider.class)) { // And a Provider...
         return true;
@@ -601,8 +593,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   /**
    * Creates a child injector that binds the args, and returns the binding for the method's result.
    */
-  public Binding<?> getBindingFromNewInjector(
-      final Method method, final Object[] args, final AssistData data) {
+  public Binding<?> getBindingFromNewInjector(final Method method, final Object[] args, final AssistData data) {
     checkState(injector != null,
         "Factories.create() factories cannot be used until they're initialized by Guice.");
 
@@ -612,9 +603,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     final Key<?> returnKey = Key.get(returnType.getTypeLiteral(), RETURN_ANNOTATION);
 
     Module assistedModule = new AbstractModule() {
-      @Override
-      @SuppressWarnings({
-        "unchecked", "rawtypes"}) // raw keys are necessary for the args array and return value
+      @Override @SuppressWarnings("unchecked") // raw keys are necessary for the args array and return value
       protected void configure() {
         Binder binder = binder().withSource(method);
 
@@ -644,7 +633,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     };
 
     Injector forCreate = injector.createChildInjector(assistedModule);
-    Binding<?> binding = forCreate.getBinding(returnKey);
+    Binding binding = forCreate.getBinding(returnKey);
     // If we have providers cached in data, cache the binding for future optimizations.
     if(data.optimized) {
       data.cachedBinding = binding;
@@ -657,14 +646,8 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * use that to get an instance of the return type.
    */
   public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
-    if (method.getDeclaringClass().equals(Object.class)) {
-      if ("equals".equals(method.getName())) {
-        return proxy == args[0];
-      } else if ("hashCode".equals(method.getName())) {
-        return System.identityHashCode(proxy);
-      } else {
-        return method.invoke(this, args);
-      }
+    if (method.getDeclaringClass() == Object.class) {
+      return method.invoke(this, args);
     }
 
     AssistData data = assistDataByMethod.get(method);
@@ -700,19 +683,9 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   @Override public String toString() {
     return factory.getClass().getInterfaces()[0].getName();
   }
-  
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(factoryKey, implementationType);
-  }
 
-  @Override public boolean equals(Object obj) {
-    if (!(obj instanceof FactoryProvider2)) {
-      return false;
-    }
-    FactoryProvider2<?> other = (FactoryProvider2<?>) obj;
-    return factoryKey.equals(other.factoryKey)
-        && Objects.equal(implementationType, other.implementationType);
+  @Override public boolean equals(Object o) {
+    return o == this || o == factory;
   }
 
   /** Returns true if {@code thrown} can be thrown by {@code invoked} without wrapping. */
