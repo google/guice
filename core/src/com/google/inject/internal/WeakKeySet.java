@@ -78,7 +78,6 @@ final class WeakKeySet {
    */
   private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
     synchronized (lock) {
-      
       for (KeyAndSource keyAndSource : keysAndSources) {
         Multiset<Object> set = backingSet.get(keyAndSource.mapKey);
         if (set != null) {
@@ -125,15 +124,15 @@ final class WeakKeySet {
 
   public boolean contains(Key<?> key) {
     evictionCache.cleanUp();
-    return backingSet != null && backingSet.containsKey(key);
+    return backingSet != null && backingSet.containsKey(toMapKey(key));
   }
 
   public Set<Object> getSources(Key<?> key) {
     evictionCache.cleanUp();
-    Multiset<Object> sources = (backingSet == null) ? null : backingSet.get(key);
+    Multiset<Object> sources = (backingSet == null) ? null : backingSet.get(toMapKey(key));
     return (sources == null) ? null : sources.elementSet();
   }
-  
+
   private static Object toMapKey(Key<?> key) {
     Annotation annotation = key.getAnnotation();
     if (annotation != null
