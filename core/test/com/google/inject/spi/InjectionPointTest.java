@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
@@ -39,8 +40,10 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -269,14 +272,54 @@ public class InjectionPointTest extends TestCase {
     assertPoints(points, Sub.class, "privateAtAndPublicG", "atFirstThenG", "gFirstThenAt");    
   }
   
-  private void assertPoints(Iterable<InjectionPoint> points, Class clazz, String... methodNames) {
+  /**
+   * This test serves two purposes:
+   *   1) It makes sure that the bridge methods javax generates don't stop
+   *   us from injecting superclass methods in the case of javax.inject.Inject.
+   *   This would happen prior to java8 (where javac didn't copy annotations
+   *   from the superclass into the subclass method when it generated the
+   *   bridge methods).
+   *   
+   *   2) It makes sure that the methods we're going to inject have the correct
+   *   generic types.  Java8 copies the annotations from super to subclasses,
+   *   but it doesn't copy the generic type information.  Guice would naively
+   *   consider the subclass an injectable method and eject the superclass
+   *   from the 'overrideIndex', leaving only a class with improper generic types.
+   */
+  public void testSyntheticBridgeMethodsInSubclasses() {
+    Set<InjectionPoint> points;
+    
+    points = InjectionPoint.forInstanceMethodsAndFields(RestrictedSuper.class);
+    assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
+    assertEquals(points.toString(), 2, points.size());
+    assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
+    
+    points = InjectionPoint.forInstanceMethodsAndFields(ExposedSub.class);
+    assertPointDependencies(points, new TypeLiteral<Provider<String>>() {});
+    assertEquals(points.toString(), 2, points.size());
+    assertPoints(points, RestrictedSuper.class, "jInject", "gInject");
+  }
+  
+  private void assertPoints(Iterable<InjectionPoint> points, Class<?> clazz,
+      String... methodNames) {
     Set<String> methods = new HashSet<String>();
-    for(InjectionPoint point : points) {
-      if(point.getDeclaringType().getRawType() == clazz) {
+    for (InjectionPoint point : points) {
+      if (point.getDeclaringType().getRawType() == clazz) {
         methods.add(point.getMember().getName());
       }
     }
     assertEquals(points.toString(), ImmutableSet.copyOf(methodNames), methods);
+  }
+  
+  /** Asserts that each injection point has the specified dependencies, in the given order. */
+  private void assertPointDependencies(Iterable<InjectionPoint> points,
+      TypeLiteral<?>... literals) {
+    for (InjectionPoint point : points) {
+      assertEquals(literals.length, point.getDependencies().size());
+      for (Dependency<?> dep : point.getDependencies()) {
+        assertEquals(literals[dep.getParameterIndex()], dep.getKey().getTypeLiteral());
+      }
+    }
   }
   
   static class Super {
@@ -297,15 +340,30 @@ public class InjectionPointTest extends TestCase {
     @com.google.inject.Inject public void privateAtAndPublicG() {}
     @javax.inject.Inject public void privateGAndPublicAt() {}
     
-    @com.google.inject.Inject public void atFirstThenG() {}
-    @javax.inject.Inject public void gFirstThenAt() {}
+    @com.google.inject.Inject
+    @Override 
+    public void atFirstThenG() {}
+    
+    @javax.inject.Inject
+    @Override 
+    public void gFirstThenAt() {}
   }
   
   static class SubSub extends Sub {
-    public void privateAtAndPublicG() {}
-    public void privateGAndPublicAt() {}
+    @Override public void privateAtAndPublicG() {}
+    @Override public void privateGAndPublicAt() {}
     
-    public void atFirstThenG() {}
-    public void gFirstThenAt() {}
+    @Override public void atFirstThenG() {}
+    @Override public void gFirstThenAt() {}
+  }
+  
+  static class RestrictedSuper {
+    @com.google.inject.Inject public void gInject(Provider<String> p) {}
+    @javax.inject.Inject public void jInject(Provider<String> p) {}
+  }
+  
+  public static class ExposedSub extends RestrictedSuper {
+    // The subclass may generate bridge/synthetic methods to increase the visibility
+    // of the superclass methods, since the superclass was package-private but this is public.
   }
 }

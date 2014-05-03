@@ -672,7 +672,7 @@ public final class InjectionPoint {
       }
 
       for (Method method : current.getRawType().getDeclaredMethods()) {
-        if (Modifier.isStatic(method.getModifiers()) == statics) {
+        if (isEligibleForInjection(method, statics)) {
           Annotation atInject = getAtInject(method);
           if (atInject != null) {
             InjectableMethod injectableMethod = new InjectableMethod(
@@ -740,6 +740,30 @@ public final class InjectionPoint {
       }
     }
     return builder.build();
+  }
+
+  /** 
+   * Returns true if the method is eligible to be injected.  This is different than
+   * {@link #isValidMethod}, because ineligibility will not drop a method
+   * from being injected if a superclass was eligible & valid. 
+   * Bridge & synthetic methods are excluded from eligibility for two reasons:
+   * 
+   * <p>Prior to Java8, javac would generate these methods in subclasses without
+   * annotations, which means this would accidentally stop injecting a method
+   * annotated with {@link javax.inject.Inject}, since the spec says to stop
+   * injecting if a subclass isn't annotated with it.
+   * 
+   * <p>Starting at Java8, javac copies the annotations to the generated subclass
+   * method, except it leaves out the generic types.  If this considered it a valid
+   * injectable method, this would eject the parent's overridden method that had the
+   * proper generic types, and would use invalid injectable parameters as a result.
+   * 
+   * <p>The fix for both is simply to ignore these synthetic bridge methods.
+   */
+  private static boolean isEligibleForInjection(Method method, boolean statics) {
+    return Modifier.isStatic(method.getModifiers()) == statics
+        && !method.isBridge()
+        && !method.isSynthetic();
   }
 
   private static boolean isValidMethod(InjectableMethod injectableMethod,
