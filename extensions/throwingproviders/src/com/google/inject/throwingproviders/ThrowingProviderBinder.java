@@ -18,11 +18,12 @@ package com.google.inject.throwingproviders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
-import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -32,8 +33,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.InjectionPoint;
-import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.util.Types;
 
@@ -392,8 +391,15 @@ public class ThrowingProviderBinder {
         }
       }
       
-      if (interfaceType.getDeclaredMethods().length == 1) {
-        Method method = interfaceType.getDeclaredMethods()[0];
+      // Skip synthetic/bridge methods because java8 generates
+      // a default method on the interface w/ the superinterface type that
+      // just delegates directly to the overridden method.
+      List<Method> declaredMethods = FluentIterable
+          .from(Arrays.asList(interfaceType.getDeclaredMethods()))
+          .filter(NotSyntheticOrBridgePredicate.INSTANCE)
+          .toList();
+      if (declaredMethods.size() == 1) {
+        Method method = declaredMethods.get(0);
         if(!checkArgument(method.getName().equals("get"),
             "%s may not declare any new methods, but declared %s",
             interfaceType, method)) {
@@ -405,7 +411,7 @@ public class ThrowingProviderBinder {
           return false;
         }
       } else {
-        if(!checkArgument(interfaceType.getDeclaredMethods().length == 0,
+        if(!checkArgument(declaredMethods.isEmpty(),
             "%s may not declare any new methods, but declared %s",
             interfaceType, Arrays.asList(interfaceType.getDeclaredMethods()))) {
           return false;
@@ -478,5 +484,12 @@ public class ThrowingProviderBinder {
     }
     
     private static final long serialVersionUID = 0L;
+  }
+  
+  private static class NotSyntheticOrBridgePredicate implements Predicate<Method> {
+    static NotSyntheticOrBridgePredicate INSTANCE = new NotSyntheticOrBridgePredicate();
+    @Override public boolean apply(Method input) {
+      return !input.isBridge() && !input.isSynthetic();
+    }
   }
 }

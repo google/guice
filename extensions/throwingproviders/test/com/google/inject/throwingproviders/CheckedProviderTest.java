@@ -746,7 +746,7 @@ public class CheckedProviderTest extends TestCase {
   }
 
   interface StringRemoteProvider extends CheckedProvider<String> {
-    String get() throws RemoteException;  
+    @Override String get() throws RemoteException;  
   }
 
   @SuppressWarnings("deprecation")
