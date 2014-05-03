@@ -41,13 +41,7 @@ import java.util.Set;
  */
 final class WeakKeySet {
 
-  /**
-   * The key for the Map is {@link Key} for most bindings, String for multibindings.
-   * <p>
-   * Reason being that multibinding Key's annotations hold a reference to their injector, implying
-   * we'd leak memory.
-   */
-  private Map<Object, Multiset<Object>> backingSet;
+  private Map<BlacklistKey, Multiset<Object>> backingMap;
   
   /**
    * This is already locked externally on add and getSources but we need it to handle clean up in
@@ -79,11 +73,11 @@ final class WeakKeySet {
   private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
     synchronized (lock) {
       for (KeyAndSource keyAndSource : keysAndSources) {
-        Multiset<Object> set = backingSet.get(keyAndSource.mapKey);
+        Multiset<Object> set = backingMap.get(keyAndSource.blacklistKey);
         if (set != null) {
           set.remove(keyAndSource.source);
           if (set.isEmpty()) {
-            backingSet.remove(keyAndSource.mapKey);
+            backingMap.remove(keyAndSource.blacklistKey);
           }
         }
       }
@@ -95,19 +89,19 @@ final class WeakKeySet {
   }
 
   public void add(Key<?> key, State state, Object source) {
-    if (backingSet == null) {
-      backingSet = Maps.newHashMap();
+    if (backingMap == null) {
+      backingMap = Maps.newHashMap();
     }
     // if it's an instanceof Class, it was a JIT binding, which we don't
     // want to retain.
     if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
       source = null;
     }
-    Object mapKey = toMapKey(key);
-    Multiset<Object> sources = backingSet.get(mapKey);
+    BlacklistKey blacklistKey = new BlacklistKey(key);
+    Multiset<Object> sources = backingMap.get(blacklistKey);
     if (sources == null) {
       sources = LinkedHashMultiset.create();
-      backingSet.put(mapKey, sources);
+      backingMap.put(blacklistKey, sources);
     }
     Object convertedSource = Errors.convert(source);
     sources.add(convertedSource);
@@ -118,44 +112,33 @@ final class WeakKeySet {
       if (keyAndSources == null) {
         evictionCache.put(state, keyAndSources = Sets.newHashSet());
       }
-      keyAndSources.add(new KeyAndSource(mapKey, convertedSource));
+      keyAndSources.add(new KeyAndSource(blacklistKey, convertedSource));
     }
   }
 
   public boolean contains(Key<?> key) {
     evictionCache.cleanUp();
-    return backingSet != null && backingSet.containsKey(toMapKey(key));
+    return backingMap != null && backingMap.containsKey(new BlacklistKey(key));
   }
 
   public Set<Object> getSources(Key<?> key) {
     evictionCache.cleanUp();
-    Multiset<Object> sources = (backingSet == null) ? null : backingSet.get(toMapKey(key));
+    Multiset<Object> sources = (backingMap == null) ? null : backingMap.get(new BlacklistKey(key));
     return (sources == null) ? null : sources.elementSet();
   }
 
-  private static Object toMapKey(Key<?> key) {
-    Annotation annotation = key.getAnnotation();
-    if (annotation != null
-        // HACK: See comment on backingSet for more info. This is tested in MultibinderTest,
-        // MapBinderTest, and OptionalBinderTest in the multibinder test suite.
-        && "com.google.inject.multibindings.RealElement".equals(annotation.getClass().getName())) {
-      return key.toString();
-    }
-    return key;
-  }
-
   private static final class KeyAndSource {
-    final Object mapKey;
+    final BlacklistKey blacklistKey;
     final Object source;
 
-    KeyAndSource(Object mapKey, Object source) {
-      this.mapKey = mapKey;
+    KeyAndSource(BlacklistKey blacklistKey, Object source) {
+      this.blacklistKey = blacklistKey;
       this.source = source;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(mapKey, source);
+      return Objects.hashCode(blacklistKey, source);
     }
 
     @Override
@@ -169,8 +152,50 @@ final class WeakKeySet {
       }
 
       KeyAndSource other = (KeyAndSource) obj;
-      return Objects.equal(mapKey, other.mapKey)
+      return Objects.equal(blacklistKey, other.blacklistKey)
           && Objects.equal(source, other.source);
     }
+  }
+  
+  /**
+   * The key for the Map is {@link Key} for most bindings, String for multibindings.
+   * <p>
+   * Reason being that multibinding Key's annotations hold a reference to their injector, implying
+   * we'd leak memory.
+   */
+  private static final class BlacklistKey {
+    final Object delegate;
+    
+    BlacklistKey(Key<?> key) {
+      // HACK: See comment on BlacklistKey for more info. This is tested in MultibinderTest,
+      // MapBinderTest, and OptionalBinderTest in the multibinder test suite.
+      if (isMultiBinderKey(key)) {
+        delegate = key.toString();
+      } else {
+        delegate = key;
+      }
+    }
+
+    public boolean equals(Object obj) {
+      if (obj instanceof BlacklistKey) {
+        return delegate.equals(((BlacklistKey) obj).delegate);
+      } else {
+        return false;
+      }
+    }
+
+    public int hashCode() {
+      return delegate.hashCode();
+    }
+  }
+
+  /**
+   * Returns {@code true} if the {@link Key} represents a multibound element.
+   */
+  private static boolean isMultiBinderKey(Key<?> key) {
+    Annotation annotation = key.getAnnotation();
+    return annotation != null
+        // Can't depend on multibinder in core.
+        && "com.google.inject.multibindings.RealElement".equals(annotation.getClass().getName());
   }
 }
