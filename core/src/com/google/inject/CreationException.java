@@ -47,7 +47,7 @@ public class CreationException extends RuntimeException {
   }
 
   @Override public String getMessage() {
-    return Errors.format("Guice creation errors", messages);
+    return Errors.format("Unable to create injector, see the following errors", messages);
   }
 
   private static final long serialVersionUID = 0;
