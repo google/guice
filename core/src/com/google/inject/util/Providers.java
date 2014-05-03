@@ -97,40 +97,60 @@ public final class Providers {
     Set<InjectionPoint> injectionPoints =
         InjectionPoint.forInstanceMethodsAndFields(provider.getClass());
     if(injectionPoints.isEmpty()) {
-      return new Provider<T>() {
-        public T get() {
-          return delegate.get();
-        }
-    
-        @Override public String toString() {
-          return "guicified(" + delegate + ")";
-        }
-      };
+      return new GuicifiedProvider<T>(delegate);
     } else {
       Set<Dependency<?>> mutableDeps = Sets.newHashSet();
       for(InjectionPoint ip : injectionPoints) {
         mutableDeps.addAll(ip.getDependencies());
       }
       final Set<Dependency<?>> dependencies = ImmutableSet.copyOf(mutableDeps);
-      return new ProviderWithDependencies<T>() {
-        @SuppressWarnings("unused")
-        @Inject
-        void initialize(Injector injector) {
-          injector.injectMembers(delegate);
-        }
-        
-        public Set<Dependency<?>> getDependencies() {
-          return dependencies;
-        }
-        
-        public T get() {
-          return delegate.get();
-        }
-    
-        @Override public String toString() {
-          return "guicified(" + delegate + ")";
-        }
-      };
+      return new GuicifiedProviderWithDependencies<T>(dependencies, delegate);
+    }
+  }
+
+  private static class GuicifiedProvider<T> implements Provider<T> {
+    protected final javax.inject.Provider<T> delegate;
+
+    private GuicifiedProvider(javax.inject.Provider<T> delegate) {
+      this.delegate = delegate;
+    }
+
+    public T get() {
+      return delegate.get();
+    }
+
+    @Override public String toString() {
+      return "guicified(" + delegate + ")";
+    }
+
+    @Override public boolean equals(Object obj) {
+      return (obj instanceof GuicifiedProvider)
+          && Objects.equal(delegate, ((GuicifiedProvider<?>) obj).delegate);
+    }
+
+    @Override public int hashCode() {
+      return Objects.hashCode(delegate);
+    }
+  }
+
+  private static final class GuicifiedProviderWithDependencies<T>
+      extends GuicifiedProvider<T> implements ProviderWithDependencies<T> {
+    private final Set<Dependency<?>> dependencies;
+
+    private GuicifiedProviderWithDependencies(Set<Dependency<?>> dependencies,
+        javax.inject.Provider<T> delegate) {
+      super(delegate);
+      this.dependencies = dependencies;
+    }
+
+    @SuppressWarnings("unused")
+    @Inject
+    void initialize(Injector injector) {
+      injector.injectMembers(delegate);
+    }
+
+    public Set<Dependency<?>> getDependencies() {
+      return dependencies;
     }
   }
 }
