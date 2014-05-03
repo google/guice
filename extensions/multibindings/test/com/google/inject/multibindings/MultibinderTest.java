@@ -330,7 +330,7 @@ public class MultibinderTest extends TestCase {
     Module module2 = new AbstractModule() {
       protected void configure() {
         final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(Providers.of("A"));
+        multibinder.addBinding().toInstance("A");
       }
     };
     Injector injector = Guice.createInjector(module1, module2);
@@ -385,7 +385,7 @@ public class MultibinderTest extends TestCase {
       protected void configure() {
         final Multibinder<ValueType> multibinder =
             Multibinder.newSetBinder(binder(), ValueType.class);
-        multibinder.addBinding().toProvider(Providers.of(new ValueType(1, 3)));
+        multibinder.addBinding().toInstance(new ValueType(1, 3));
       }
     };
     Injector injector = Guice.createInjector(module1, module2);
@@ -724,14 +724,11 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testModuleOverrideRepeatedInstallsAndMultibindings_toProviderInstance() {
-    // Providers#of() does not redefine equals/hashCode, so use the same one both times.
-    final Provider<String> aProvider = Providers.of("A");
-    final Provider<String> bProvider = Providers.of("B");
     Module ab = new AbstractModule() {
       @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-        multibinder.addBinding().toProvider(aProvider);
-        multibinder.addBinding().toProvider(bProvider);
+        multibinder.addBinding().toProvider(Providers.of("A"));
+        multibinder.addBinding().toProvider(Providers.of("B"));
       }
     };
 

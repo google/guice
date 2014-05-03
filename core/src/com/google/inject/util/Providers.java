@@ -18,6 +18,7 @@ package com.google.inject.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -50,15 +51,32 @@ public final class Providers {
    *     life a Guice-supplied Provider will never return null.
    */
   public static <T> Provider<T> of(final T instance) {
-    return new Provider<T>() {
-      public T get() {
-        return instance;
-      }
+    return new ConstantProvider<T>(instance);
+  }
 
-      @Override public String toString() {
-        return "of(" + instance + ")";
-      }
-    };
+  private static final class ConstantProvider<T> implements Provider<T> {
+    private final T instance;
+
+    private ConstantProvider(T instance) {
+      this.instance = instance;
+    }
+
+    public T get() {
+      return instance;
+    }
+
+    @Override public String toString() {
+      return "of(" + instance + ")";
+    }
+
+    @Override public boolean equals(Object obj) {
+      return (obj instanceof ConstantProvider)
+          && Objects.equal(instance, ((ConstantProvider<?>) obj).instance);
+    }
+
+    @Override public int hashCode() {
+      return Objects.hashCode(instance);
+    }
   }
 
   /**

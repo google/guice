@@ -16,6 +16,7 @@
 
 package com.google.inject.util;
 
+import com.google.common.testing.EqualsTester;
 import com.google.inject.Provider;
 
 import junit.framework.TestCase;
@@ -37,5 +38,16 @@ public class ProvidersTest extends TestCase {
   public void testOfNull() {
     Provider<String> p = Providers.of(null);
     assertNull(p.get());
+  }
+  
+  public void testOfEquality() {
+    new EqualsTester()
+        .addEqualityGroup(
+            Providers.of(null),
+            Providers.of(null))
+        .addEqualityGroup(
+            Providers.of("Hello"),
+            Providers.of("Hello"))
+        .testEquals();
   }
 }
