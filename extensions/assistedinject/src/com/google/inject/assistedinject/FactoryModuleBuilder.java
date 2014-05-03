@@ -331,7 +331,7 @@ public final class FactoryModuleBuilder {
   public <F> Module build(final Key<F> factoryInterface) {
     return new AbstractModule() {
       @Override protected void configure() {
-        Provider<F> provider = new FactoryProvider2<F>(factoryInterface, bindings);  
+        Provider<F> provider = new FactoryProvider2<F>(factoryInterface, bindings);
         bind(factoryInterface).toProvider(provider);
       }
     };

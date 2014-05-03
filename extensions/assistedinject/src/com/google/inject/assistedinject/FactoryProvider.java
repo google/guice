@@ -18,6 +18,7 @@ package com.google.inject.assistedinject;
 
 import static com.google.inject.internal.Annotations.getKey;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -159,6 +160,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
   private Injector injector;
 
   private final TypeLiteral<F> factoryType;
+  private final TypeLiteral<?> implementationType;
   private final Map<Method, AssistedConstructor<?>> factoryMethodToConstructor;
 
   public static <F> Provider<F> newFactory(Class<F> factoryType, Class<?> implementationType){
@@ -171,7 +173,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
         = createMethodMapping(factoryType, implementationType);
 
     if (!factoryMethodToConstructor.isEmpty()) {
-      return new FactoryProvider<F>(factoryType, factoryMethodToConstructor);
+      return new FactoryProvider<F>(factoryType, implementationType, factoryMethodToConstructor);
     } else {
       BindingCollector collector = new BindingCollector();
 
@@ -180,18 +182,16 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       Errors errors = new Errors();
       Key<?> implementationKey = Key.get(implementationType);
 
-      if (implementationType != null) {
-        try {
-          for (Method method : factoryType.getRawType().getMethods()) {
-            Key<?> returnType = getKey(factoryType.getReturnType(method), method,
-                method.getAnnotations(), errors);
-            if (!implementationKey.equals(returnType)) {
-              collector.addBinding(returnType, implementationType);
-            }
+      try {
+        for (Method method : factoryType.getRawType().getMethods()) {
+          Key<?> returnType = getKey(factoryType.getReturnType(method), method,
+              method.getAnnotations(), errors);
+          if (!implementationKey.equals(returnType)) {
+            collector.addBinding(returnType, implementationType);
           }
-        } catch (ErrorsException e) {
-          throw new ConfigurationException(e.getErrors().getMessages());
-        }
+      }
+      } catch (ErrorsException e) {
+        throw new ConfigurationException(e.getErrors().getMessages());
       }
 
       return new FactoryProvider2<F>(Key.get(factoryType), collector);
@@ -199,8 +199,10 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
   }
 
   private FactoryProvider(TypeLiteral<F> factoryType,
+      TypeLiteral<?> implementationType,
       Map<Method, AssistedConstructor<?>> factoryMethodToConstructor) {
     this.factoryType = factoryType;
+    this.implementationType = implementationType;
     this.factoryMethodToConstructor = factoryMethodToConstructor;
     checkDeclaredExceptionsMatch();
   }
@@ -253,8 +255,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
 
     for (Constructor<?> constructor : implementationType.getRawType().getDeclaredConstructors()) {
       if (constructor.getAnnotation(AssistedInject.class) != null) {
-        @SuppressWarnings("unchecked") // the constructor type and implementation type agree
-        AssistedConstructor assistedConstructor = new AssistedConstructor(
+        AssistedConstructor<?> assistedConstructor = AssistedConstructor.create(
             constructor, implementationType.getParameterTypes(constructor));
         constructors.add(assistedConstructor);
       }
@@ -272,9 +273,9 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
           constructors.size(), factoryType, factoryMethods.length);
     }
 
-    Map<ParameterListKey, AssistedConstructor> paramsToConstructor = Maps.newHashMap();
+    Map<ParameterListKey, AssistedConstructor<?>> paramsToConstructor = Maps.newHashMap();
 
-    for (AssistedConstructor c : constructors) {
+    for (AssistedConstructor<?> c : constructors) {
       if (paramsToConstructor.containsKey(c.getAssistedParameters())) {
         throw new RuntimeException("Duplicate constructor, " + c);
       }
@@ -312,7 +313,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
         }
       }
 
-      AssistedConstructor matchingConstructor = paramsToConstructor.remove(methodParams);
+      AssistedConstructor<?> matchingConstructor = paramsToConstructor.remove(methodParams);
 
       result.put(method, matchingConstructor);
     }
@@ -336,7 +337,13 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
       public Object invoke(Object proxy, Method method, Object[] creationArgs) throws Throwable {
         // pass methods from Object.class to the proxy
         if (method.getDeclaringClass().equals(Object.class)) {
-          return method.invoke(this, creationArgs);
+          if ("equals".equals(method.getName())) {
+            return proxy == creationArgs[0];
+          } else if ("hashCode".equals(method.getName())) {
+            return System.identityHashCode(proxy);
+          } else {
+            return method.invoke(this, creationArgs);
+          }
         }
 
         AssistedConstructor<?> constructor = factoryMethodToConstructor.get(method);
@@ -367,9 +374,24 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     };
 
     @SuppressWarnings("unchecked") // we imprecisely treat the class literal of T as a Class<T>
-    Class<F> factoryRawType = (Class) factoryType.getRawType();
+    Class<F> factoryRawType = (Class<F>) (Class<?>) factoryType.getRawType();
     return factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
         new Class[] { factoryRawType }, invocationHandler));
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(factoryType, implementationType);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FactoryProvider)) {
+      return false;
+    }
+    FactoryProvider<?> other = (FactoryProvider<?>) obj;
+    return factoryType.equals(other.factoryType)
+        && implementationType.equals(other.implementationType);
   }
 
   private static ConfigurationException newConfigurationException(String format, Object... args) {

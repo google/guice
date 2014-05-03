@@ -29,6 +29,8 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryProvider2Test.Equals.ComparisonMethod;
+import com.google.inject.assistedinject.FactoryProvider2Test.Equals.Impl;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -151,6 +153,7 @@ public class FactoryProvider2Test extends TestCase {
     private Color color;
     private float maxMph;
 
+    @SuppressWarnings("unused")
     public Corvette(Color color, boolean isConvertable) {
       throw new IllegalStateException("Not an @AssistedInject constructor");
     }
@@ -165,6 +168,7 @@ public class FactoryProvider2Test extends TestCase {
 
   public void testConstructorDoesntNeedAllFactoryMethodArguments() {
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(SummerCarFactory.class).toProvider(
             FactoryProvider.newFactory(SummerCarFactory.class, Beetle.class));
@@ -363,7 +367,7 @@ public class FactoryProvider2Test extends TestCase {
 
   public static class ExplodingCar implements Car {
     @Inject
-    public ExplodingCar(@Assisted Color color) {
+    public ExplodingCar(@SuppressWarnings("unused") @Assisted Color color) {
       throw new IllegalStateException("kaboom!");
     }
   }
@@ -386,7 +390,7 @@ public class FactoryProvider2Test extends TestCase {
 
   public static class DefectiveCar implements Car {
     @Inject
-    public DefectiveCar() throws ExplosionException, FireException {
+    public DefectiveCar() throws ExplosionException {
       throw new ExplosionException();
     }
   }
@@ -430,7 +434,7 @@ public class FactoryProvider2Test extends TestCase {
     }
 
     @Inject
-    public WildcardCollection(@Assisted Collection<?> items) { }
+    public WildcardCollection(@SuppressWarnings("unused") @Assisted Collection<?> items) { }
   }
 
   public void testWildcardGenerics() {
@@ -657,6 +661,7 @@ public class FactoryProvider2Test extends TestCase {
 
   public void testFactoryBuildingConcreteTypes() {
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
       protected void configure() {
         bind(double.class).toInstance(5.0d);
         // note there is no 'thatMakes()' call here:
@@ -864,13 +869,14 @@ public class FactoryProvider2Test extends TestCase {
     assertEquals(250, redCamaro.horsePower);
   }
 
+  @SuppressWarnings("unused")
   public interface Insurance<T extends Car> {
   }
 
   public static class MustangInsurance implements Insurance<Mustang> {
     private final double premium;
     private final double limit;
-    private Mustang car;
+    @SuppressWarnings("unused") private Mustang car;
 
     @Inject
     public MustangInsurance(@Named("lowLimit") double limit, @Assisted Mustang car,
@@ -886,7 +892,7 @@ public class FactoryProvider2Test extends TestCase {
   public static class CamaroInsurance implements Insurance<Camaro> {
     private final double premium;
     private final double limit;
-    private Camaro car;
+    @SuppressWarnings("unused") private Camaro car;
 
     @Inject
     public CamaroInsurance(@Named("highLimit") double limit, @Assisted Camaro car,
@@ -1009,7 +1015,8 @@ public class FactoryProvider2Test extends TestCase {
         injector.getInstance(Key.get(camaroInsuranceFactoryType));
 
     Camaro camaro = new Camaro(3000, 1967, Color.BLUE);
-    AutoInsurance camaroPolicy = (AutoInsurance) camaroInsuranceFactory.create(camaro, 800.0d);
+    AutoInsurance<?> camaroPolicy =
+        (AutoInsurance<?>) camaroInsuranceFactory.create(camaro, 800.0d);
     assertEquals(800.0d, camaroPolicy.premium);
     assertEquals(50000.0d, camaroPolicy.limit);
     assertEquals(camaro, camaroPolicy.car);
@@ -1034,6 +1041,63 @@ public class FactoryProvider2Test extends TestCase {
     assertSame(Color.GREEN, green.getColor());
   }
   
+  public void testDuplicateAssistedFactoryBinding() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Double.class).toInstance(5.0d);
+        bind(ColoredCarFactory.class).toProvider(
+            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+        bind(ColoredCarFactory.class).toProvider(
+            FactoryProvider.newFactory(ColoredCarFactory.class, Mustang.class));
+      }
+    });
+    ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
+
+    Mustang blueMustang = (Mustang) carFactory.create(Color.BLUE);
+    assertEquals(Color.BLUE, blueMustang.color);
+    assertEquals(5.0d, blueMustang.engineSize);
+
+    Mustang redMustang = (Mustang) carFactory.create(Color.RED);
+    assertEquals(Color.RED, redMustang.color);
+    assertEquals(5.0d, redMustang.engineSize);
+  }
+
+  public interface Equals {
+
+    enum ComparisonMethod { SHALLOW, DEEP; }
+
+    interface Factory {
+      Equals equals(Equals.ComparisonMethod comparisonMethod);
+    }
+
+    public static class Impl implements Equals {
+      private final double sigma;
+      private final ComparisonMethod comparisonMethod;
+
+      @AssistedInject
+      public Impl(double sigma, @Assisted ComparisonMethod comparisonMethod) {
+        this.sigma = sigma;
+        this.comparisonMethod = comparisonMethod;
+      }
+    }
+  }
+
+  public void testFactoryMethodCalledEquals() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Double.class).toInstance(0.01d);
+        bind(Equals.Factory.class).toProvider(
+            FactoryProvider.newFactory(Equals.Factory.class, Equals.Impl.class));
+      }
+    });
+    Equals.Factory equalsFactory = injector.getInstance(Equals.Factory.class);
+    Equals.Impl shallowEquals = (Impl) equalsFactory.equals(ComparisonMethod.SHALLOW);
+    assertEquals(ComparisonMethod.SHALLOW, shallowEquals.comparisonMethod);
+    assertEquals(0.01d, shallowEquals.sigma);
+  }
+
   static class Segway implements Car {
     @Inject Injector injector;
 
