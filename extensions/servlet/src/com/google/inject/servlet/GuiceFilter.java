@@ -16,7 +16,6 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -175,7 +174,6 @@ public class GuiceFilter implements Filter {
     final HttpServletRequest originalRequest;
     final HttpServletRequest request;
     final HttpServletResponse response;
-    volatile Thread owner;
 
     Context(HttpServletRequest originalRequest, HttpServletRequest request,
         HttpServletResponse response) {
@@ -196,18 +194,14 @@ public class GuiceFilter implements Filter {
       return response;
     }
 
-    <T> T call(Callable<T> callable) throws Exception {
-      Thread oldOwner = owner;
-      Thread newOwner = Thread.currentThread();
-      Preconditions.checkState(oldOwner == null || oldOwner == newOwner,
-          "Trying to transfer request scope but original scope is still active");
-      owner = newOwner;
+    // Synchronized to prevent two threads from using the same request
+    // scope concurrently.
+    synchronized <T> T call(Callable<T> callable) throws Exception {
       Context previous = localContext.get();
       localContext.set(this);
       try {
         return callable.call();
       } finally {
-        owner = oldOwner;
         localContext.set(previous);
       }
     }

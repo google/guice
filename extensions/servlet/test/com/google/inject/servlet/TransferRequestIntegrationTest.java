@@ -27,10 +27,11 @@ import com.google.inject.Provides;
 import junit.framework.TestCase;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 // TODO: Add test for HTTP transferring.
 /**
@@ -88,16 +89,16 @@ public class TransferRequestIntegrationTest extends TestCase {
     executor.shutdownNow();
   }
 
-  public void testTransferNonHttpRequest_concurrentUseFails() throws Exception {
+  public void testTransferNonHttpRequest_concurrentUseBlocks() throws Exception {
     Callable<Boolean> callable = new Callable<Boolean>() {
       @Override public Boolean call() throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
           Future<Boolean> future = executor.submit(ServletScopes.transferRequest(FALSE_CALLABLE));
           try {
-            return future.get();
-          } catch (ExecutionException e) {
-            return e.getCause() instanceof IllegalStateException;
+            return future.get(100, TimeUnit.MILLISECONDS);
+          } catch (TimeoutException e) {
+            return true;
           }
         } finally {
           executor.shutdownNow();

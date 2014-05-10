@@ -244,15 +244,10 @@ public class ServletScopes {
    * where you can detach the request processing thread while waiting for data,
    * and reattach to a different thread to finish processing at a later time.
    *
-   * <p>Because {@code HttpServletRequest} objects are not typically
-   * thread-safe, the callable returned by this method must not be run on a
-   * different thread until the current request scope has terminated. In other
-   * words, do not use this method to propagate the current request scope to
-   * worker threads that may run concurrently with the current thread.
-   *
-   * <p>The returned callable will throw a {@link ScopingException} when called
-   * if the request scope being transferred is still active on a different
-   * thread.
+   * <p>Because request-scoped objects are not typically thread-safe, the
+   * callable returned by this method must not be run on a different thread
+   * until the current request scope has terminated. The returned callable will
+   * block until the current thread has released the request scope.
    *
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
@@ -366,20 +361,15 @@ public class ServletScopes {
 
   private static class Context {
     final Map<Key, Object> map = Maps.newHashMap();
-    volatile Thread owner;
 
-    <T> T call(Callable<T> callable) throws Exception {
-      Thread oldOwner = owner;
-      Thread newOwner = Thread.currentThread();
-      checkScopingState(oldOwner == null || oldOwner == newOwner,
-          "Trying to transfer request scope but original scope is still active");
-      owner = newOwner;
+    // Synchronized to prevent two threads from using the same request
+    // scope concurrently.
+    synchronized <T> T call(Callable<T> callable) throws Exception {
       Context previous = requestScopeContext.get();
       requestScopeContext.set(this);
       try {
         return callable.call();
       } finally {
-        owner = oldOwner;
         requestScopeContext.set(previous);
       }
     }
