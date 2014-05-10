@@ -33,6 +33,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
+import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
@@ -44,6 +46,7 @@ import junit.framework.TestCase;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -355,7 +358,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
     ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
     javax.inject.Provider provider = binding.getUserSuppliedProvider();    
-    assertEquals(ProviderMethod.class, provider.getClass());
+    assertTrue(ProviderMethod.class.isAssignableFrom(provider.getClass()));
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());    
     assertSame(provider, binding.getProviderInstance());
   }
@@ -451,5 +454,193 @@ public class ProviderMethodsTest extends TestCase implements Module {
     @Override protected ProvidesMethodBinding<T> visitOther(Binding<? extends T> binding) {
       throw new IllegalStateException("unexpected visit of: " + binding);
     }    
+  }
+
+  public void testProvidesMethodVisibility() {
+    Injector injector = Guice.createInjector(new VisibilityModule());
+
+    assertEquals(42, injector.getInstance(Integer.class).intValue());
+    assertEquals(42L, injector.getInstance(Long.class).longValue());
+    assertEquals(42D, injector.getInstance(Double.class).doubleValue());
+    assertEquals(42F, injector.getInstance(Float.class).floatValue());
+  }
+
+  private static class VisibilityModule extends AbstractModule {
+    @Override protected void configure() {}
+
+    @SuppressWarnings("unused")
+    @Provides Integer foo() {
+      return 42;
+    }
+
+    @SuppressWarnings("unused")
+    @Provides private Long bar() {
+      return 42L;
+    }
+
+    @SuppressWarnings("unused")
+    @Provides protected Double baz() {
+      return 42D;
+    }
+
+    @SuppressWarnings("unused")
+    @Provides public Float quux() {
+      return 42F;
+    }
+  }
+
+  public void testProvidesMethodInheritenceHierarchy() {
+    try {
+      Guice.createInjector(new Sub1Module(), new Sub2Module());
+      fail("Expected injector creation failure");
+    } catch (CreationException expected) {
+      // both of our super class bindings cause errors
+      assertContains(expected.getMessage(), 
+          "A binding to java.lang.Long was already configured",
+          "A binding to java.lang.Integer was already configured");
+    }
+  }
+
+  public void testProvidesMethodsDefinedInSuperClass() {
+    Injector injector = Guice.createInjector(new Sub1Module());
+    assertEquals(42, injector.getInstance(Integer.class).intValue());
+    assertEquals(42L, injector.getInstance(Long.class).longValue());
+    assertEquals(42D, injector.getInstance(Double.class).doubleValue());
+  }
+
+  private static class BaseModule extends AbstractModule {
+    @Override protected void configure() {}
+
+    @Provides Integer foo() {
+      return 42;
+    }
+
+    @Provides Long bar() {
+      return 42L;
+    }
+  }
+
+  private static class Sub1Module extends BaseModule {
+    @Provides Double baz() {
+      return 42D;
+    }
+  }
+
+  private static class Sub2Module extends BaseModule {
+    @Provides Float quux() {
+      return 42F;
+    }
+  }
+
+  /*if[AOP]*/
+  public void testShareFastClass() {
+    CallerInspecterModule module = new CallerInspecterModule();
+    Guice.createInjector(Stage.PRODUCTION, module);
+    assertEquals(module.fooCallerClass, module.barCallerClass);
+    assertTrue(module.fooCallerClass.contains("$$FastClassByGuice$$"));
+  }
+
+  private static class CallerInspecterModule extends AbstractModule {
+    // start them off as unequal
+    String barCallerClass = "not_set_bar";
+    String fooCallerClass = "not_set_foo";
+
+    @Override protected void configure() {}
+
+    @Provides @Singleton Integer foo() {
+      this.fooCallerClass = new Exception().getStackTrace()[1].getClassName();
+      return 42;
+    }
+
+    @Provides @Singleton Long bar() {
+      this.barCallerClass = new Exception().getStackTrace()[1].getClassName();
+      return 42L;
+    }
+  }
+
+  public void testShareFastClassWithSuperClass() {
+    CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
+    Guice.createInjector(Stage.PRODUCTION, module);
+    assertEquals("Expected provider methods in the same class to share fastclass classes", 
+        module.fooCallerClass, module.barCallerClass);
+    assertFalse(
+        "Did not expect provider methods in the subclasses to share fastclass classes "
+            + "with their parent classes",
+        module.bazCallerClass.equals(module.barCallerClass));
+  }
+  
+
+  private static class CallerInspecterSubClassModule extends CallerInspecterModule {
+    String bazCallerClass;
+
+    @Override protected void configure() {}
+
+    @Provides @Singleton Double baz() {
+      this.bazCallerClass = new Exception().getStackTrace()[1].getClassName();
+      return 42D;
+    }
+  }
+  /*end[AOP]*/
+  
+  // Test the behavior of provider methods when they are overridden
+  public void testOverrideProviderMethod() {
+    try {
+      Guice.createInjector(new SuperClassModule() {
+        @Override
+        @Provides
+        Double normalOverrideWithProvides() {
+          return 2D;
+        }
+      });
+      fail();
+    } catch (CreationException expected) {
+      assertContains(expected.getMessage(),
+          "A binding to java.lang.Double was already configured");
+    }
+
+    Injector injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
+      @Override Long normalOverrideWithoutProvides() {
+        return 2L;
+      }
+    });
+    assertEquals(2L, injector.getInstance(Long.class).longValue());
+    
+    injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
+      @Override ImmutableSet<String> covariantReturnOverrideWithoutProvides() {
+        return ImmutableSet.of("subset");
+      }
+    });
+    assertEquals(ImmutableSet.of("subset"), 
+        injector.getInstance(new Key<Collection<String>>() {}));
+    // This is super weird since two keys get bound to the same method.
+    // TODO(sameb): make this throw an exception at configure() time!
+    injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
+      @Override
+      @Provides
+      String covariantReturnOverrideWithProvides() {
+        return "sub";
+      }
+    });
+    assertEquals("sub", injector.getInstance(String.class));
+    assertEquals("sub", injector.getInstance(CharSequence.class));
+  }
+
+  private static class SuperClassModule extends AbstractModule {
+    @Override protected void configure() {}
+    @Provides Double normalOverrideWithProvides() {
+      return 1D;
+    }
+    
+    @Provides Long normalOverrideWithoutProvides() {
+      return 1L;
+    }
+
+    @Provides CharSequence covariantReturnOverrideWithProvides() {
+      return "base";
+    }
+    
+    @Provides Collection<String> covariantReturnOverrideWithoutProvides() {
+      return ImmutableList.of("baselist");
+    }
   }
 }

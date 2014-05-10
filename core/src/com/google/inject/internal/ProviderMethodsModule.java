@@ -123,7 +123,7 @@ public final class ProviderMethodsModule implements Module {
       binder.addError(message);
     }
 
-    return new ProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
+    return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
         parameterProviders, scopeAnnotation);
   }
 
