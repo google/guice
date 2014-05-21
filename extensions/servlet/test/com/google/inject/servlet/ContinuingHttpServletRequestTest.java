@@ -15,6 +15,7 @@
  */
 package com.google.inject.servlet;
 
+import junit.framework.AssertionFailedError;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -50,9 +51,48 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
     replay(delegate);
 
-    assertTrue(Arrays.equals(cookies,
-        new ContinuingHttpServletRequest(delegate).getCookies()));
+    ContinuingHttpServletRequest continuingRequest = new ContinuingHttpServletRequest(
+        delegate);
+
+    assertCookieArraysEqual(cookies, continuingRequest.getCookies());
+
+    // Now mutate the original cookies, this shouldnt be reflected in the continued request.
+    cookies[0].setValue("INVALID");
+    cookies[1].setValue("INVALID");
+    cookies[1].setMaxAge(123);
+
+    try {
+      assertCookieArraysEqual(cookies, continuingRequest.getCookies());
+      fail();
+    } catch (AssertionFailedError e) {
+      // Expected.
+    }
+
+    // Perform a snapshot of the snapshot.
+    ContinuingHttpServletRequest furtherContinuingRequest = new ContinuingHttpServletRequest(
+        continuingRequest);
+
+    // The cookies should be fixed.
+    assertCookieArraysEqual(continuingRequest.getCookies(), furtherContinuingRequest.getCookies());
 
     verify(delegate);
+  }
+
+  private static void assertCookieArraysEqual(Cookie[] one, Cookie[] two) {
+    assertEquals(one.length, two.length);
+    for (int i = 0; i < one.length; i++) {
+      Cookie cookie = one[i];
+      assertCookiequality(cookie, two[i]);
+    }
+  }
+
+  private static void assertCookiequality(Cookie one, Cookie two) {
+    assertEquals(one.getName(), two.getName());
+    assertEquals(one.getComment(), two.getComment());
+    assertEquals(one.getDomain(), two.getDomain());
+    assertEquals(one.getPath(), two.getPath());
+    assertEquals(one.getValue(), two.getValue());
+    assertEquals(one.getMaxAge(), two.getMaxAge());
+    assertEquals(one.getSecure(), two.getSecure());
   }
 }
