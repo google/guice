@@ -23,12 +23,14 @@ import static org.easymock.EasyMock.verify;
 
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 public class ContinuingHttpServletRequestTest extends TestCase {
+
+  private static final String TEST_VALUE_1 = "testValue1";
+  private static final String TEST_VALUE_2 = "testValue2";
+  private static final int DEFAULT_MAX_AGE = new Cookie("", "").getMaxAge();
 
   public void testReturnNullCookiesIfDelegateHasNoNull() {
     HttpServletRequest delegate = createMock(HttpServletRequest.class);
@@ -43,7 +45,7 @@ public class ContinuingHttpServletRequestTest extends TestCase {
   
   public void testReturnDelegateCookies() {
     Cookie[] cookies = new Cookie[]{
-        new Cookie("testName1", "testValue1"),
+        new Cookie("testName1", TEST_VALUE_1),
         new Cookie("testName2", "testValue2")
     };
     HttpServletRequest delegate = createMock(HttpServletRequest.class);
@@ -68,6 +70,11 @@ public class ContinuingHttpServletRequestTest extends TestCase {
       // Expected.
     }
 
+    // Verify that they remain equal to the original values.
+    assertEquals(TEST_VALUE_1, continuingRequest.getCookies()[0].getValue());
+    assertEquals(TEST_VALUE_2, continuingRequest.getCookies()[1].getValue());
+    assertEquals(DEFAULT_MAX_AGE, continuingRequest.getCookies()[1].getMaxAge());
+
     // Perform a snapshot of the snapshot.
     ContinuingHttpServletRequest furtherContinuingRequest = new ContinuingHttpServletRequest(
         continuingRequest);
@@ -82,11 +89,11 @@ public class ContinuingHttpServletRequestTest extends TestCase {
     assertEquals(one.length, two.length);
     for (int i = 0; i < one.length; i++) {
       Cookie cookie = one[i];
-      assertCookiequality(cookie, two[i]);
+      assertCookieEquality(cookie, two[i]);
     }
   }
 
-  private static void assertCookiequality(Cookie one, Cookie two) {
+  private static void assertCookieEquality(Cookie one, Cookie two) {
     assertEquals(one.getName(), two.getName());
     assertEquals(one.getComment(), two.getComment());
     assertEquals(one.getDomain(), two.getDomain());
