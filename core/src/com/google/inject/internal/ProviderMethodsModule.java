@@ -81,12 +81,24 @@ public final class ProviderMethodsModule implements Module {
     List<ProviderMethod<?>> result = Lists.newArrayList();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Provides.class)) {
+        if (isProvider(method)) {
           result.add(createProviderMethod(binder, method));
         }
       }
     }
     return result;
+  }
+
+  /**
+   * Returns true if the method is a provider.
+   *
+   * Synthetic bridge methods are excluded. Starting with JDK 8, javac copies annotations onto
+   * bridge methods (which always have erased signatures).
+   */
+  private static boolean isProvider(Method method) {
+    return !method.isBridge()
+        && !method.isSynthetic()
+        && method.isAnnotationPresent(Provides.class);
   }
 
   <T> ProviderMethod<T> createProviderMethod(Binder binder, final Method method) {

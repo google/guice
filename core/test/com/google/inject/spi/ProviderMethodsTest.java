@@ -643,4 +643,25 @@ public class ProviderMethodsTest extends TestCase implements Module {
       return ImmutableList.of("baselist");
     }
   }
+
+  interface ProviderInterface<T> {
+    T getT();
+  }
+
+  static class ModuleImpl extends AbstractModule implements ProviderInterface<String> {
+    @Override protected void configure() {}
+    @Provides public String getT() {
+      return "string";
+    }
+    @Provides public Object getObject() {
+      return new Object();
+    }
+    /* javac will synthesize a bridge method for getT with the types erased, equivalent to:
+     * @Provides public Object getT() { ... }
+     */
+  }
+
+  public void testIgnoreSyntheticBridgeMethods() {
+    Guice.createInjector(new ModuleImpl());
+  }
 }
