@@ -22,6 +22,7 @@ import com.google.inject.config.BinderTestSuite;
 import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.RehashableKeysTest;
 import com.google.inject.internal.UniqueAnnotationsTest;
+import com.google.inject.internal.WeakKeySetTest;
 import com.google.inject.internal.util.LineNumbersTest;
 import com.google.inject.matcher.MatcherTest;
 import com.google.inject.name.NamedEquivalanceTest;
@@ -107,6 +108,7 @@ public class AllTests {
     suite.addTestSuite(TypeLiteralInjectionTest.class);
     suite.addTestSuite(TypeLiteralTest.class);
     suite.addTestSuite(TypeLiteralTypeResolutionTest.class);
+    suite.addTestSuite(WeakKeySetTest.class);
 
     // internal
     suite.addTestSuite(LineNumbersTest.class);

@@ -157,7 +157,7 @@ public class ShortNameFactoryTest extends TestCase {
         new DefaultBindingTargetVisitor<Object, Void>() {
           @SuppressWarnings("unchecked") @Override
           public Void visit(ProviderInstanceBinding<?> binding) {
-            methodHolder[0] = (ProviderMethod) binding.getProviderInstance();
+            methodHolder[0] = (ProviderMethod) binding.getUserSuppliedProvider();
             return null;
           }
         });

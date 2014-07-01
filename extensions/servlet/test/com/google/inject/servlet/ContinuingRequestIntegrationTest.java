@@ -16,6 +16,7 @@
 
 package com.google.inject.servlet;
 
+import javax.servlet.http.Cookie;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -128,6 +129,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
         .andReturn("")
         .anyTimes();
     expect(request.getMethod()).andReturn("GET");
+    expect(request.getCookies()).andReturn(new Cookie[0]);
 
     FilterChain filterChain = createMock(FilterChain.class);
     expect(request.getParameter(PARAM_NAME)).andReturn(PARAM_VALUE);
@@ -171,6 +173,7 @@ public class ContinuingRequestIntegrationTest extends TestCase {
         .anyTimes();
 
     expect(request.getMethod()).andReturn("GET");
+    expect(request.getCookies()).andReturn(new Cookie[0]);
     FilterChain filterChain = createMock(FilterChain.class);
 
     replay(request, filterConfig, filterChain);

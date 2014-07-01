@@ -16,10 +16,11 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
+import com.google.inject.internal.Errors;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -142,27 +143,27 @@ public class GuiceFilter implements Filter {
     }
   }
 
-  static HttpServletRequest getOriginalRequest() {
-    return getContext().getOriginalRequest();
+  static HttpServletRequest getOriginalRequest(Key<?> key) {
+    return getContext(key).getOriginalRequest();
   }
 
-  static HttpServletRequest getRequest() {
-    return getContext().getRequest();
+  static HttpServletRequest getRequest(Key<?> key) {
+    return getContext(key).getRequest();
   }
 
-  static HttpServletResponse getResponse() {
-    return getContext().getResponse();
+  static HttpServletResponse getResponse(Key<?> key) {
+    return getContext(key).getResponse();
   }
 
   static ServletContext getServletContext() {
     return servletContext.get();
   }
 
-  private static Context getContext() {
+  private static Context getContext(Key<?> key) {
     Context context = localContext.get();
     if (context == null) {
-      throw new OutOfScopeException("Cannot access scoped object. Either we"
-          + " are not currently inside an HTTP Servlet request, or you may"
+      throw new OutOfScopeException("Cannot access scoped [" + Errors.convert(key) 
+          + "]. Either we are not currently inside an HTTP Servlet request, or you may"
           + " have forgotten to apply " + GuiceFilter.class.getName()
           + " as a servlet filter for this request.");
     }
@@ -173,7 +174,6 @@ public class GuiceFilter implements Filter {
     final HttpServletRequest originalRequest;
     final HttpServletRequest request;
     final HttpServletResponse response;
-    volatile Thread owner;
 
     Context(HttpServletRequest originalRequest, HttpServletRequest request,
         HttpServletResponse response) {
@@ -194,18 +194,14 @@ public class GuiceFilter implements Filter {
       return response;
     }
 
-    <T> T call(Callable<T> callable) throws Exception {
-      Thread oldOwner = owner;
-      Thread newOwner = Thread.currentThread();
-      Preconditions.checkState(oldOwner == null || oldOwner == newOwner,
-          "Trying to transfer request scope but original scope is still active");
-      owner = newOwner;
+    // Synchronized to prevent two threads from using the same request
+    // scope concurrently.
+    synchronized <T> T call(Callable<T> callable) throws Exception {
       Context previous = localContext.get();
       localContext.set(this);
       try {
         return callable.call();
       } finally {
-        owner = oldOwner;
         localContext.set(previous);
       }
     }

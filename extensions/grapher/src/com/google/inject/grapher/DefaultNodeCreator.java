@@ -26,6 +26,7 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
+
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.List;
@@ -120,7 +121,7 @@ final class DefaultNodeCreator implements NodeCreator {
      */
     @Override public Collection<Node> visit(ProviderInstanceBinding<?> binding) {
       return ImmutableList.<Node>of(newInterfaceNode(binding), newInstanceNode(binding,
-          binding.getProviderInstance()));
+          binding.getUserSuppliedProvider()));
     }
 
     @Override public Collection<Node> visitOther(Binding<?> binding) {

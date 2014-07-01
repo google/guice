@@ -118,7 +118,7 @@ public class SpiBindingsTest extends TestCase {
             binding.acceptTargetVisitor(new FailingTargetVisitor<T>() {
               @Override public Void visit(
                   ProviderInstanceBinding<? extends T> binding) {
-                assertSame(stringProvider, binding.getProviderInstance());
+                assertSame(stringProvider, binding.getUserSuppliedProvider());
                 return null;
               }
             });
@@ -359,7 +359,7 @@ public class SpiBindingsTest extends TestCase {
         bind(String.class).toProvider(new ProviderWithExtensionVisitor<String>() {
           public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
               ProviderInstanceBinding<? extends B> binding) {
-            assertSame(this, binding.getProviderInstance());
+            assertSame(this, binding.getUserSuppliedProvider());
             // We can't always check for FailingSpiTargetVisitor,
             // because constructing the injector visits here, and we need
             // to process the binding as normal

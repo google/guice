@@ -49,9 +49,11 @@ public class AllTests {
 
     // Multiple modules tests.
     suite.addTestSuite(MultiModuleDispatchIntegrationTest.class);
-    
+
     // Extension SPI tests.
     suite.addTestSuite(ExtensionSpiTest.class);
+
+    suite.addTestSuite(UriPatternTypeTest.class);
 
     return suite;
   }

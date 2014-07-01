@@ -251,6 +251,47 @@ public class FactoryModuleBuilderTest extends TestCase {
     assertEquals(Color.BLUE, mustang.color);
   }
 
+  public void testDuplicateBindings() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        install(new FactoryModuleBuilder()
+            .implement(Car.class, Mustang.class)
+            .build(ColoredCarFactory.class));
+        install(new FactoryModuleBuilder()
+            .implement(Car.class, Mustang.class)
+            .build(ColoredCarFactory.class));
+      }
+    });
+
+    ColoredCarFactory factory = injector.getInstance(ColoredCarFactory.class);
+
+    Mustang mustang = (Mustang) factory.create(Color.BLUE);
+    assertEquals(Color.BLUE, mustang.color);
+  }
+
+  public void testSimilarBindingsWithConflictingImplementations() {
+    try {
+      Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+          install(new FactoryModuleBuilder()
+              .implement(Car.class, Mustang.class)
+              .build(ColoredCarFactory.class));
+          install(new FactoryModuleBuilder()
+              .implement(Car.class, Golf.class)
+              .build(ColoredCarFactory.class));
+        }
+      });
+      injector.getInstance(ColoredCarFactory.class);
+      fail();
+    } catch (CreationException ce) {
+      assertContains(ce.getMessage(),
+          "A binding to " + ColoredCarFactory.class.getName() + " was already configured");
+      assertEquals(1, ce.getErrorMessages().size());
+    }
+  }
+
   public void testMultipleReturnTypes() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -344,10 +385,12 @@ public class FactoryModuleBuilderTest extends TestCase {
     static interface Factory<E> {
       Foo<E> create(Bar bar);
     }
+    @SuppressWarnings("unused")
     @Inject Foo(@Assisted Bar bar, Baz<E> baz) {}
   }
   
   public static class Bar {}
+  @SuppressWarnings("unused")
   public static class Baz<E> {}
   
   abstract static class AbstractCar implements Car {}  
@@ -397,7 +440,7 @@ public class FactoryModuleBuilderTest extends TestCase {
     boolean found = false;
     for(Element element : elements) {
       if(element instanceof Binding) {
-        Binding binding = (Binding)element;
+        Binding<?> binding = (Binding<?>) element;
         if(binding.getKey().equals(Key.get(AnimalHouse.class))) {
           found = true;
           validateDependencies(expectedKeys, binding);
@@ -411,7 +454,7 @@ public class FactoryModuleBuilderTest extends TestCase {
   private void validateDependencies(Set<Key<?>> expectedKeys, Binding<?> binding) {
     Set<Dependency<?>> dependencies = ((HasDependencies)binding).getDependencies();
     Set<Key<?>> actualKeys = new HashSet<Key<?>>();
-    for(Dependency dependency : dependencies) {
+    for (Dependency<?> dependency : dependencies) {
       actualKeys.add(dependency.getKey());
     }
     assertEquals(expectedKeys, actualKeys);
@@ -424,11 +467,13 @@ public class FactoryModuleBuilderTest extends TestCase {
   }
   
   interface Animal {}
+  @SuppressWarnings("unused")
   private static class Dog implements Animal {
     @Inject int a;
     @Inject Dog(@Assisted String a, double b) {}
     @Inject void register(@Named("dog") String a) {}
   }
+  @SuppressWarnings("unused")
   private static class Cat implements Animal {
     @Inject float a;
     @AssistedInject Cat(@Assisted String a, @Named("cat1") String b) {}
@@ -488,7 +533,7 @@ public class FactoryModuleBuilderTest extends TestCase {
   @Singleton
   static class AssistedSingleton {
     @Inject
-    public AssistedSingleton(@Assisted String string) {      
+    public AssistedSingleton(@SuppressWarnings("unused") @Assisted String string) {
     }
   }
   

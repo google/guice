@@ -52,7 +52,7 @@ public final class ProviderMethodsModule implements Module {
 
     private ProviderMethodsModule(Object delegate) {
         this.delegate = checkNotNull(delegate, "delegate");
-        this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
+        typeLiteral = TypeLiteral.get(this.delegate.getClass());
         filter = Guice.createHierarchyTraversalFilter();
     }
 
@@ -87,7 +87,7 @@ public final class ProviderMethodsModule implements Module {
         Class<?> c = delegate.getClass();
         while( filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
             for (Method method : filter.getAllMethods(Provides.class.getName(), c)) {
-                if (method.isAnnotationPresent(Provides.class)) {
+                if (isProvider(method)) {
                     result.add(createProviderMethod(binder, method));
                 }
             }
@@ -95,6 +95,18 @@ public final class ProviderMethodsModule implements Module {
         }
         return result;
     }
+
+  /**
+   * Returns true if the method is a provider.
+   *
+   * Synthetic bridge methods are excluded. Starting with JDK 8, javac copies annotations onto
+   * bridge methods (which always have erased signatures).
+   */
+  private static boolean isProvider(Method method) {
+    return !method.isBridge()
+        && !method.isSynthetic()
+        && method.isAnnotationPresent(Provides.class);
+  }
 
     <T> ProviderMethod<T> createProviderMethod(Binder binder, final Method method) {
         binder = binder.withSource(method);
@@ -116,7 +128,7 @@ public final class ProviderMethodsModule implements Module {
                 key = loggerKey;
             }
             dependencies.add(Dependency.get(key));
-            parameterProviders.add(binder.getProvider(key));        
+            parameterProviders.add(binder.getProvider(key));
         }
 
         @SuppressWarnings("unchecked") // Define T as the method's return type.
@@ -130,8 +142,8 @@ public final class ProviderMethodsModule implements Module {
             binder.addError(message);
         }
 
-        return new ProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
-                parameterProviders, scopeAnnotation);
+	    return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
+	        parameterProviders, scopeAnnotation);
     }
 
     <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {
@@ -153,7 +165,7 @@ public final class ProviderMethodsModule implements Module {
         private final String name;
 
         public LogProvider(Method method) {
-            this.name = method.getDeclaringClass().getName() + "." + method.getName();
+            name = method.getDeclaringClass().getName() + "." + method.getName();
         }
 
         public Logger get() {

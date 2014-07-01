@@ -129,7 +129,7 @@ final class LineNumbers {
     private String name;
 
     LineNumberReader() {
-      super(Opcodes.ASM4);
+      super(Opcodes.ASM5);
     }
 
     public void visit(int version, int access, String name, String signature,
@@ -179,7 +179,7 @@ final class LineNumbers {
 
     class LineNumberMethodVisitor extends MethodVisitor {
       LineNumberMethodVisitor() {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
       }
 
       public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -205,7 +205,7 @@ final class LineNumbers {
 
     class LineNumberAnnotationVisitor extends AnnotationVisitor {
       LineNumberAnnotationVisitor() {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
       }
       public AnnotationVisitor visitAnnotation(String name, String desc) {
         return this;

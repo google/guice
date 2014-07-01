@@ -53,7 +53,8 @@ final class BindingProcessor extends AbstractBindingProcessor {
     Class<?> rawType = command.getKey().getTypeLiteral().getRawType();
     if (Void.class.equals(rawType)) {
       if (command instanceof ProviderInstanceBinding
-          && ((ProviderInstanceBinding) command).getProviderInstance() instanceof ProviderMethod) {
+          && ((ProviderInstanceBinding) command).getUserSuppliedProvider()
+              instanceof ProviderMethod) {
         errors.voidProviderMethod();
       } else {
         errors.missingConstantValues();
@@ -102,10 +103,11 @@ final class BindingProcessor extends AbstractBindingProcessor {
       @Override
       public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
         prepareBinding();
-        Provider<? extends T> provider = binding.getProviderInstance();
+        javax.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
-        Initializable<Provider<? extends T>> initializable = initializer
-            .<Provider<? extends T>>requestInjection(injector, provider, null, source, injectionPoints);
+        Initializable<? extends javax.inject.Provider<? extends T>> initializable =
+            initializer.<javax.inject.Provider<? extends T>>requestInjection(
+                injector, provider, null, source, injectionPoints);
         // always visited with Binding<T>
         @SuppressWarnings("unchecked") 
         InternalFactory<T> factory = new InternalFactoryToInitializableAdapter<T>(
@@ -126,7 +128,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         @SuppressWarnings("unchecked") 
         BoundProviderFactory<T> boundProviderFactory = new BoundProviderFactory<T>(
             injector, providerKey, source, !injector.options.disableCircularProxies,
-            injector.provisionListenerStore.get((ProviderKeyBinding<T>)binding));
+            injector.provisionListenerStore.get((ProviderKeyBinding<T>) binding));
         bindingData.addCreationListener(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
             key, injector, (InternalFactory<? extends T>) boundProviderFactory, source, scoping);

@@ -16,55 +16,186 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.inject.Key;
 import com.google.inject.internal.util.SourceProvider;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Minimal set that doesn't hold strong references to the contained keys.
  *
- * @author jessewilson@google.com (Jesse Wilson)
+ * @author dweis@google.com (Daniel Weis)
  */
 final class WeakKeySet {
 
+  private Map<BlacklistKey, Multiset<Object>> backingMap;
+  
   /**
-   * We store strings rather than keys so we don't hold strong references.
-   *
-   * <p>One potential problem with this approach is that parent and child injectors cannot define
-   * keys whose class names are equal but class loaders are different. This shouldn't be an issue
-   * in practice.
+   * This is already locked externally on add and getSources but we need it to handle clean up in
+   * the evictionCache's RemovalListener.
    */
-  private Map<String, Set<Object>> backingSet;
+  private final Object lock;
 
-  public void add(Key<?> key, Object source) {
-    if (backingSet == null) {
-      backingSet = Maps.newHashMap();
+  /**
+   * Tracks child injector lifetimes and evicts blacklisted keys/sources after the child injector is
+   * garbage collected.
+   */
+  private final Cache<State, Set<KeyAndSource>> evictionCache = CacheBuilder.newBuilder()
+      .weakKeys()
+      .removalListener(
+          new RemovalListener<State, Set<KeyAndSource>>() {
+            @Override
+            public void onRemoval(RemovalNotification<State, Set<KeyAndSource>> notification) {
+              Preconditions.checkState(RemovalCause.COLLECTED.equals(notification.getCause()));
+
+              cleanUpForCollectedState(notification.getValue());
+            }
+          })
+      .build();
+
+  /**
+   * There may be multiple child injectors blacklisting a certain key so only remove the source
+   * that's relevant.
+   */
+  private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
+    synchronized (lock) {
+      for (KeyAndSource keyAndSource : keysAndSources) {
+        Multiset<Object> set = backingMap.get(keyAndSource.blacklistKey);
+        if (set != null) {
+          set.remove(keyAndSource.source);
+          if (set.isEmpty()) {
+            backingMap.remove(keyAndSource.blacklistKey);
+          }
+        }
+      }
+    }
+  }
+
+  WeakKeySet(Object lock) {
+    this.lock = lock;
+  }
+
+  public void add(Key<?> key, State state, Object source) {
+    if (backingMap == null) {
+      backingMap = Maps.newHashMap();
     }
     // if it's an instanceof Class, it was a JIT binding, which we don't
     // want to retain.
     if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
       source = null;
     }
-    String k = key.toString();
-    Set<Object> sources = backingSet.get(k);
+    BlacklistKey blacklistKey = new BlacklistKey(key);
+    Multiset<Object> sources = backingMap.get(blacklistKey);
     if (sources == null) {
-      sources = Sets.newLinkedHashSet();
-      backingSet.put(k, sources);
+      sources = LinkedHashMultiset.create();
+      backingMap.put(blacklistKey, sources);
     }
-    sources.add(Errors.convert(source));
+    Object convertedSource = Errors.convert(source);
+    sources.add(convertedSource);
+
+    // Avoid all the extra work if we can.
+    if (state.parent() != State.NONE) {
+      Set<KeyAndSource> keyAndSources = evictionCache.getIfPresent(state);
+      if (keyAndSources == null) {
+        evictionCache.put(state, keyAndSources = Sets.newHashSet());
+      }
+      keyAndSources.add(new KeyAndSource(blacklistKey, convertedSource));
+    }
   }
 
   public boolean contains(Key<?> key) {
-    // avoid calling key.toString() if the backing set is empty. toString is expensive in aggregate,
-    // and most WeakKeySets are empty in practice (because they're used by top-level injectors)
-    return backingSet != null && backingSet.containsKey(key.toString());
+    evictionCache.cleanUp();
+    return backingMap != null && backingMap.containsKey(new BlacklistKey(key));
   }
 
   public Set<Object> getSources(Key<?> key) {
-    return backingSet.get(key.toString());
+    evictionCache.cleanUp();
+    Multiset<Object> sources = (backingMap == null) ? null : backingMap.get(new BlacklistKey(key));
+    return (sources == null) ? null : sources.elementSet();
+  }
+
+  private static final class KeyAndSource {
+    final BlacklistKey blacklistKey;
+    final Object source;
+
+    KeyAndSource(BlacklistKey blacklistKey, Object source) {
+      this.blacklistKey = blacklistKey;
+      this.source = source;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(blacklistKey, source);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+
+      if (!(obj instanceof KeyAndSource)) {
+        return false;
+      }
+
+      KeyAndSource other = (KeyAndSource) obj;
+      return Objects.equal(blacklistKey, other.blacklistKey)
+          && Objects.equal(source, other.source);
+    }
+  }
+  
+  /**
+   * The key for the Map is {@link Key} for most bindings, String for multibindings.
+   * <p>
+   * Reason being that multibinding Key's annotations hold a reference to their injector, implying
+   * we'd leak memory.
+   */
+  private static final class BlacklistKey {
+    final Object delegate;
+    
+    BlacklistKey(Key<?> key) {
+      // HACK: See comment on BlacklistKey for more info. This is tested in MultibinderTest,
+      // MapBinderTest, and OptionalBinderTest in the multibinder test suite.
+      if (isMultiBinderKey(key)) {
+        delegate = key.toString();
+      } else {
+        delegate = key;
+      }
+    }
+
+    public boolean equals(Object obj) {
+      if (obj instanceof BlacklistKey) {
+        return delegate.equals(((BlacklistKey) obj).delegate);
+      } else {
+        return false;
+      }
+    }
+
+    public int hashCode() {
+      return delegate.hashCode();
+    }
+  }
+
+  /**
+   * Returns {@code true} if the {@link Key} represents a multibound element.
+   */
+  private static boolean isMultiBinderKey(Key<?> key) {
+    Annotation annotation = key.getAnnotation();
+    return annotation != null
+        // Can't depend on multibinder in core.
+        && "com.google.inject.multibindings.RealElement".equals(annotation.getClass().getName());
   }
 }

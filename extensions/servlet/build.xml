@@ -12,11 +12,10 @@
     <pathelement path="../../build/classes"/>
   </path>
 
-  <target name="jar" depends="jar.withrenameddeps, manifest" description="Build jar.">
+  <target name="jar" depends="compile, manifest" description="Build jar.">
     <jar destfile="${build.dir}/${ant.project.name}-${version}.jar"
         manifest="${build.dir}/META-INF/MANIFEST.MF">
-      <zipfileset src="${build.dir}/${ant.project.name}-with-deps.jar"
-          excludes="com/google/inject/internal/**"/>
+      <fileset dir="${build.dir}/classes" />
     </jar>
   </target>
 

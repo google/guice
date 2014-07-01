@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,7 @@ import com.google.inject.internal.util.Classes;
 public final class InjectionPoint {
 
     private static final Logger logger = Logger.getLogger(InjectionPoint.class.getName());
-    private static final HashMap<Pair<TypeLiteral<?>,Boolean>,List<InjectableMember>> cachedInjectableMembersByRawType = new HashMap<Pair<TypeLiteral<?>,Boolean>, List<InjectableMember>>();
+    private static final HashMap<Pair<TypeLiteral<?>,Boolean>,InjectableMembers> cachedInjectableMembersByRawType = new HashMap<Pair<TypeLiteral<?>,Boolean>, InjectableMembers>();
     private static HierarchyTraversalFilter filter = Guice.createHierarchyTraversalFilter();
 
     private final boolean optional;
@@ -73,22 +72,22 @@ public final class InjectionPoint {
 
 
     InjectionPoint(TypeLiteral<?> declaringType, Method method, boolean optional) {
-        this.member = method;
+        member = method;
         this.declaringType = declaringType;
         this.optional = optional;
-        this.dependencies = forMember(method, declaringType, method.getParameterAnnotations());
+        dependencies = forMember(method, declaringType, method.getParameterAnnotations());
     }
 
     InjectionPoint(TypeLiteral<?> declaringType, Constructor<?> constructor) {
-        this.member = constructor;
+        member = constructor;
         this.declaringType = declaringType;
-        this.optional = false;
-        this.dependencies = forMember(
+        optional = false;
+        dependencies = forMember(
                 constructor, declaringType, constructor.getParameterAnnotations());
     }
 
     InjectionPoint(TypeLiteral<?> declaringType, Field field, boolean optional) {
-        this.member = field;
+        member = field;
         this.declaringType = declaringType;
         this.optional = optional;
 
@@ -105,7 +104,7 @@ public final class InjectionPoint {
         }
         errors.throwConfigurationExceptionIfErrorsExist();
 
-        this.dependencies = ImmutableList.<Dependency<?>>of(
+        dependencies = ImmutableList.<Dependency<?>>of(
                 newDependency(key, Nullability.allowsNull(annotations), -1));
     }
 
@@ -170,7 +169,7 @@ public final class InjectionPoint {
 
     /**
      * Returns true if the element is annotated with {@literal @}{@link Toolable}.
-     * 
+     *
      * @since 3.0
      */
     public boolean isToolable() {
@@ -181,7 +180,7 @@ public final class InjectionPoint {
      * Returns the generic type that defines this injection point. If the member exists on a
      * parameterized type, the result will include more type information than the member's {@link
      * Member#getDeclaringClass() raw declaring class}.
-     * 
+     *
      * @since 3.0
      */
     public TypeLiteral<?> getDeclaringType() {
@@ -208,7 +207,7 @@ public final class InjectionPoint {
      * type literal.
      *
      * @param constructor any single constructor present on {@code type}.
-     * 
+     *
      * @since 3.0
      */
     public static <T> InjectionPoint forConstructor(Constructor<T> constructor) {
@@ -220,7 +219,7 @@ public final class InjectionPoint {
      *
      * @param constructor any single constructor present on {@code type}.
      * @param type the concrete type that defines {@code constructor}.
-     * 
+     *
      * @since 3.0
      */
     public static <T> InjectionPoint forConstructor(
@@ -424,6 +423,9 @@ public final class InjectionPoint {
         final TypeLiteral<?> declaringType;
         final boolean optional;
         final boolean jsr330;
+        InjectableMember previous;
+        InjectableMember next;
+
 
         InjectableMember(TypeLiteral<?> declaringType, Annotation atInject) {
             this.declaringType = declaringType;
@@ -484,6 +486,51 @@ public final class InjectionPoint {
         return a == null ? member.getAnnotation(Inject.class) : a;
     }
 
+    /**
+     * Linked list of injectable members.
+     */
+    static class InjectableMembers {
+      InjectableMember head;
+      InjectableMember tail;
+
+      void add(InjectableMember member) {
+        if (head == null) {
+          head = tail = member;
+        } else {
+          member.previous = tail;
+          tail.next = member;
+          tail = member;
+        }
+      }
+
+      void addAll(InjectableMembers members) {
+    	  InjectableMember memberToAdd = members.head;
+    	  while( memberToAdd != null ) {
+    		  add(memberToAdd);
+    		  memberToAdd = memberToAdd.next;
+    	  }
+      }
+
+      void remove(InjectableMember member) {
+        if (member.previous != null) {
+          member.previous.next = member.next;
+        }
+        if (member.next != null) {
+          member.next.previous = member.previous;
+        }
+        if (head == member) {
+          head = member.next;
+        }
+        if (tail == member) {
+          tail = member.previous;
+        }
+      }
+
+      boolean isEmpty() {
+        return head == null;
+      }
+    }
+
     /** Position in type hierarchy. */
     enum Position {
         TOP, // No need to check for overridden methods
@@ -496,11 +543,11 @@ public final class InjectionPoint {
      * Uses our position in the type hierarchy to perform optimizations.
      */
     static class OverrideIndex {
-        final LinkedList<InjectableMember> injectableMembers;
+        final InjectableMembers injectableMembers;
         Map<Signature, List<InjectableMethod>> bySignature;
         Position position = Position.TOP;
 
-        OverrideIndex(LinkedList<InjectableMember> injectableMembers) {
+        OverrideIndex(InjectableMembers injectableMembers) {
             this.injectableMembers = injectableMembers;
         }
 
@@ -513,7 +560,7 @@ public final class InjectionPoint {
          * remain backwards compatible with prior Guice versions, this will *not*
          * remove overridden methods if 'alwaysRemove' is false and the overridden
          * signature was annotated with a com.google.inject.Inject.
-         * 
+         *
          * @param method
          *          The method used to determine what is overridden and should be
          *          removed.
@@ -524,7 +571,7 @@ public final class InjectionPoint {
          *          if this method overrode any guice @Inject methods,
          *          {@link InjectableMethod#overrodeGuiceInject} is set to true
          */
-        boolean removeIfOverriddenBy(Method method, boolean alwaysRemove, 
+        boolean removeIfOverriddenBy(Method method, boolean alwaysRemove,
                 InjectableMethod injectableMethod) {
             if (position == Position.TOP) {
                 // If we're at the top of the hierarchy, there's nothing to override.
@@ -535,7 +582,8 @@ public final class InjectionPoint {
                 // We encountered a method in a subclass. Time to index the
                 // methods in the parent class.
                 bySignature = new HashMap<Signature, List<InjectableMethod>>();
-                for (InjectableMember member : injectableMembers ) {
+                for (InjectableMember member = injectableMembers.head; member != null;
+                        member = member.next) {
                     if (!(member instanceof InjectableMethod)) continue;
                     InjectableMethod im = (InjectableMethod) member;
                     if (im.isFinal()) continue;
@@ -630,18 +678,21 @@ public final class InjectionPoint {
 
     private static Set<InjectionPoint> getInjectionPoints(final TypeLiteral<?> type,
             boolean statics, Errors errors) {
-        LinkedList<InjectableMember>  injectableMembers = new LinkedList<InjectableMember>();
+
+    	InjectableMembers injectableMembers = new InjectableMembers();
         final OverrideIndex overrideIndex = new OverrideIndex(injectableMembers);
         overrideIndex.position = Position.BOTTOM; // we start at the bottom of inheritance hierarchy
-        filter.reset();
-        computeInjectableMembers(type, statics, errors, injectableMembers, overrideIndex, filter);
+
+    	filter.reset();
+    	computeInjectableMembers(type, statics, errors, injectableMembers, overrideIndex, filter);
 
         if (injectableMembers.isEmpty()) {
             return Collections.emptySet();
         }
 
         ImmutableSet.Builder<InjectionPoint> builder = ImmutableSet.builder();
-        for (InjectableMember im : injectableMembers) {
+        for (InjectableMember im = injectableMembers.head; im != null;
+                im = im.next) {
             try {
                 builder.add(im.toInjectionPoint());
             } catch (ConfigurationException ignorable) {
@@ -662,15 +713,15 @@ public final class InjectionPoint {
      * @param errors used to record errors
      */
     private static void computeInjectableMembers(final TypeLiteral<?> type,
-            boolean statics, Errors errors, List<InjectableMember> injectableMembers, OverrideIndex overrideIndex, HierarchyTraversalFilter filter) {
+            boolean statics, Errors errors, InjectableMembers injectableMembers, OverrideIndex overrideIndex, HierarchyTraversalFilter filter) {
 
         Class<?> rawType = type.getRawType();
         if( !isWorthScanning(filter, rawType) ) {
             return;
         }
         Pair<TypeLiteral<?>,Boolean> cacheKey = new Pair<TypeLiteral<?>, Boolean>(type,statics);
-        List<InjectableMember> cachedInjectableMembers = cachedInjectableMembersByRawType.get(cacheKey);
-        if( cachedInjectableMembers!=null && cachedInjectableMembers.size()>0 ) {
+        InjectableMembers cachedInjectableMembers = cachedInjectableMembersByRawType.get(cacheKey);
+        if( cachedInjectableMembers!=null && !cachedInjectableMembers.isEmpty() ) {
             injectableMembers.addAll(cachedInjectableMembers);
             return;
         }
@@ -686,53 +737,61 @@ public final class InjectionPoint {
 
         Set<Field> allFields = filter.getAllFields(Inject.class.getName(), rawType);
         if( allFields != null ) {
-            try {
-                for( Field field : allFields ) {
-                    //System.out.printf("Field %s is injectable in class %s ",field.getName(),rawType.getName());
-                    if (Modifier.isStatic(field.getModifiers()) == statics) {
-                        Annotation atInject = getAtInject(field);
-                        if (atInject != null) {
-                            //System.out.printf("Field %s is gonna be injected in class %s ",field.getName(),rawType.getName());
-                            InjectableField injectableField = new InjectableField(type, field, atInject);
-                            if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
-                                errors.cannotInjectFinalField(field);
-                            }
-                            injectableMembers.add(injectableField);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        	for( Field field : allFields ) {
+        		//System.out.printf("Field %s is injectable in class %s ",field.getName(),rawType.getName());
+        		if (Modifier.isStatic(field.getModifiers()) == statics) {
+        			Annotation atInject = getAtInject(field);
+        			if (atInject != null) {
+        				//System.out.printf("Field %s is gonna be injected in class %s ",field.getName(),rawType.getName());
+        				InjectableField injectableField = new InjectableField(type, field, atInject);
+        				if (injectableField.jsr330 && Modifier.isFinal(field.getModifiers())) {
+        					errors.cannotInjectFinalField(field);
+        				}
+        				injectableMembers.add(injectableField);
+        			}
+        		}
+        	}
         }
 
         Set<Method> allMethods = filter.getAllMethods(Inject.class.getName(), rawType);
         if(allMethods != null ) {
             for (Method method : allMethods) {
-                if (Modifier.isStatic(method.getModifiers()) == statics) {
+                if (isEligibleForInjection(method, statics)) {
                     Annotation atInject = getAtInject(method);
                     if (atInject != null) {
                         InjectableMethod injectableMethod = new InjectableMethod(
                                 type, method, atInject);
                         if (checkForMisplacedBindingAnnotations(method, errors)
                                 || !isValidMethod(injectableMethod, errors)) {
-                            boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
-                            if(removed) {
-                                logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
-                                        + "because it either has misplaced binding annotations "
-                                        + "or specifies type parameters) but is overriding a method that is valid. "
-                                        + "Because it is not valid, the method will not be injected. "
-                                        + "To fix this, make the method a valid injectable method.", method);
+                            if (overrideIndex != null) {
+                            	boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
+	                            if(removed) {
+	                                logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
+	                                        + "because it either has misplaced binding annotations "
+	                                        + "or specifies type parameters) but is overriding a method that is valid. "
+	                                        + "Because it is not valid, the method will not be injected. "
+	                                        + "To fix this, make the method a valid injectable method.", method);
+	                            }
                             }
                             continue;
                         }
                         if (statics) {
                             injectableMembers.add(injectableMethod);
                         } else {
-                            // Forcibly remove the overridden method, otherwise we'll inject
-                            // it twice.
-                            overrideIndex.removeIfOverriddenBy(method, true, injectableMethod);
-                            overrideIndex.add(injectableMethod);
+                        	if (overrideIndex == null) {
+                        		/*
+                        		 * Creating the override index lazily means that the first type in the hierarchy
+                        		 * with injectable methods (not necessarily the top most type) will be treated as
+                        		 * the TOP position and will enjoy the same optimizations (no checks for overridden
+                        		 * methods, etc.).
+                        		 */
+                        		overrideIndex = new OverrideIndex(injectableMembers);
+                        	} else {
+                        		// Forcibly remove the overriden method, otherwise we'll inject
+                        		// it twice.
+                        		overrideIndex.removeIfOverriddenBy(method, true, injectableMethod);
+                        	}
+                        	overrideIndex.add(injectableMethod);
                         }
                     } else {
                         boolean removed = overrideIndex.removeIfOverriddenBy(method, false, null);
@@ -747,13 +806,37 @@ public final class InjectionPoint {
             }
         }
 
-        cachedInjectableMembersByRawType.put(cacheKey,new ArrayList<InjectableMember>(injectableMembers));
+        cachedInjectableMembersByRawType.put(cacheKey,injectableMembers);
     }
 
     private static boolean isWorthScanning(HierarchyTraversalFilter filter, Class<?> rawType) {
         boolean worthScanning = filter.isWorthScanningForFields(Inject.class.getName(), rawType);
         //System.out.printf( "Class %s is worth %b \n", rawType.getName(), worthScanning);
         return worthScanning;
+    }
+
+    /**
+     * Returns true if the method is eligible to be injected.  This is different than
+     * {@link #isValidMethod}, because ineligibility will not drop a method
+     * from being injected if a superclass was eligible & valid.
+     * Bridge & synthetic methods are excluded from eligibility for two reasons:
+     *
+     * <p>Prior to Java8, javac would generate these methods in subclasses without
+     * annotations, which means this would accidentally stop injecting a method
+     * annotated with {@link javax.inject.Inject}, since the spec says to stop
+     * injecting if a subclass isn't annotated with it.
+     *
+     * <p>Starting at Java8, javac copies the annotations to the generated subclass
+     * method, except it leaves out the generic types.  If this considered it a valid
+     * injectable method, this would eject the parent's overridden method that had the
+     * proper generic types, and would use invalid injectable parameters as a result.
+     *
+     * <p>The fix for both is simply to ignore these synthetic bridge methods.
+     */
+    private static boolean isEligibleForInjection(Method method, boolean statics) {
+      return Modifier.isStatic(method.getModifiers()) == statics
+          && !method.isBridge()
+          && !method.isSynthetic();
     }
 
     private static boolean isValidMethod(InjectableMethod injectableMethod,
@@ -772,6 +855,16 @@ public final class InjectionPoint {
         }
         return result;
     }
+
+    private static List<TypeLiteral<?>> hierarchyFor(TypeLiteral<?> type) {
+        List<TypeLiteral<?>> hierarchy = new ArrayList<TypeLiteral<?>>();
+        TypeLiteral<?> current = type;
+        while (current.getRawType() != Object.class) {
+          hierarchy.add(current);
+          current = current.getSupertype(current.getRawType().getSuperclass());
+        }
+        return hierarchy;
+      }
 
     /**
      * Returns true if a overrides b. Assumes signatures of a and b are the same and a's declaring
@@ -800,19 +893,19 @@ public final class InjectionPoint {
         final int hash;
 
         Signature(Method method) {
-            this.name = method.getName();
-            this.parameterTypes = method.getParameterTypes();
+            name = method.getName();
+            parameterTypes = method.getParameterTypes();
 
             int h = name.hashCode();
             h = h * 31 + parameterTypes.length;
             for (Class parameterType : parameterTypes) {
                 h = h * 31 + parameterType.hashCode();
             }
-            this.hash = h;
+            hash = h;
         }
 
         @Override public int hashCode() {
-            return this.hash;
+            return hash;
         }
 
         @Override public boolean equals(Object o) {

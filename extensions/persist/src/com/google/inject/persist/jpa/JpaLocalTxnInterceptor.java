@@ -33,11 +33,12 @@ import javax.persistence.EntityTransaction;
  */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
+  // TODO(gak): Move these args to the cxtor & make these final.
   @Inject
-  private final JpaPersistService emProvider = null;
+  private JpaPersistService emProvider = null;
 
   @Inject
-  private final UnitOfWork unitOfWork = null;
+  private UnitOfWork unitOfWork = null;
 
   @Transactional
   private static class Internal {}

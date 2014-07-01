@@ -265,4 +265,80 @@ public class ServletDispatchIntegrationTest extends TestCase {
     assertEquals("Incorrect number of forwards", 1, ForwardedServlet.forwardedTo);
     verify(requestMock, responseMock);
   }
+
+  public final void testQueryInRequestUri_regex() throws Exception {
+    final Injector injector = Guice.createInjector(new ServletModule() {
+
+      @Override
+      protected void configureServlets() {
+        filterRegex("(.)*\\.html").through(TestFilter.class);
+
+        serveRegex("(.)*\\.html").with(TestServlet.class);
+      }
+    });
+
+    final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+
+    pipeline.initPipeline(null);
+
+    //create ourselves a mock request with test URI
+    HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+
+    expect(requestMock.getRequestURI())
+        .andReturn("/index.html?query=params")
+        .atLeastOnce();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
+
+    //dispatch request
+    replay(requestMock);
+
+    pipeline.dispatch(requestMock, null, createMock(FilterChain.class));
+
+    pipeline.destroyPipeline();
+
+    verify(requestMock);
+
+    assertEquals(1, doFilters);
+    assertEquals(1, services);
+  }
+
+  public final void testQueryInRequestUri() throws Exception {
+    final Injector injector = Guice.createInjector(new ServletModule() {
+
+      @Override
+      protected void configureServlets() {
+        filter("/index.html").through(TestFilter.class);
+
+        serve("/index.html").with(TestServlet.class);
+      }
+    });
+
+    final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+
+    pipeline.initPipeline(null);
+
+    //create ourselves a mock request with test URI
+    HttpServletRequest requestMock = createMock(HttpServletRequest.class);
+
+    expect(requestMock.getRequestURI())
+        .andReturn("/index.html?query=params")
+        .atLeastOnce();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
+
+    //dispatch request
+    replay(requestMock);
+
+    pipeline.dispatch(requestMock, null, createMock(FilterChain.class));
+
+    pipeline.destroyPipeline();
+
+    verify(requestMock);
+
+    assertEquals(1, doFilters);
+    assertEquals(1, services);
+  }
 }

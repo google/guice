@@ -19,6 +19,7 @@ package com.google.inject.servlet;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -102,7 +103,7 @@ public class ServletScopes {
           // {@code GuiceFilter.getRequest()}.
           //
           // This _correctly_ throws up if the thread is out of scope.
-          HttpServletRequest request = GuiceFilter.getOriginalRequest();
+          HttpServletRequest request = GuiceFilter.getOriginalRequest(key);
           if (REQUEST_CONTEXT_KEYS.contains(key)) {
             // Don't store these keys as attributes, since they are handled by
             // GuiceFilter itself.
@@ -143,11 +144,11 @@ public class ServletScopes {
    * HTTP session scope.
    */
   public static final Scope SESSION = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, final Provider<T> creator) {
+    public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       final String name = key.toString();
       return new Provider<T>() {
         public T get() {
-          HttpSession session = GuiceFilter.getRequest().getSession();
+          HttpSession session = GuiceFilter.getRequest(key).getSession();
           synchronized (session) {
             Object obj = session.getAttribute(name);
             if (NullObject.INSTANCE == obj) {
@@ -216,7 +217,8 @@ public class ServletScopes {
 
     // Snapshot the seed map and add all the instances to our continuing HTTP request.
     final ContinuingHttpServletRequest continuingRequest =
-        new ContinuingHttpServletRequest(GuiceFilter.getRequest());
+        new ContinuingHttpServletRequest(
+            GuiceFilter.getRequest(Key.get(HttpServletRequest.class)));
     for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
       Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
       continuingRequest.setAttribute(entry.getKey().toString(), value);
@@ -242,15 +244,10 @@ public class ServletScopes {
    * where you can detach the request processing thread while waiting for data,
    * and reattach to a different thread to finish processing at a later time.
    *
-   * <p>Because {@code HttpServletRequest} objects are not typically
-   * thread-safe, the callable returned by this method must not be run on a
-   * different thread until the current request scope has terminated. In other
-   * words, do not use this method to propagate the current request scope to
-   * worker threads that may run concurrently with the current thread.
-   *
-   * <p>The returned callable will throw a {@link ScopingException} when called
-   * if the request scope being transferred is still active on a different
-   * thread.
+   * <p>Because request-scoped objects are not typically thread-safe, the
+   * callable returned by this method must not be run on a different thread
+   * until the current request scope has terminated. The returned callable will
+   * block until the current thread has released the request scope.
    *
    * @param callable code to be executed in another thread, which depends on
    *     the request scope.
@@ -326,10 +323,13 @@ public class ServletScopes {
 
     // Copy the seed values into our local scope map.
     final Context context = new Context();
-    for (Map.Entry<Key<?>, Object> entry : seedMap.entrySet()) {
-      Object value = validateAndCanonicalizeValue(entry.getKey(), entry.getValue());
-      context.map.put(entry.getKey(), value);
-    }
+    Map<Key<?>, Object> validatedAndCanonicalizedMap =
+        Maps.transformEntries(seedMap, new EntryTransformer<Key<?>, Object, Object>() {
+          @Override public Object transformEntry(Key<?> key, Object value) {
+            return validateAndCanonicalizeValue(key, value);
+          }
+        });
+    context.map.putAll(validatedAndCanonicalizedMap);
 
     return new Callable<T>() {
       public T call() throws Exception {
@@ -361,20 +361,15 @@ public class ServletScopes {
 
   private static class Context {
     final Map<Key, Object> map = Maps.newHashMap();
-    volatile Thread owner;
 
-    <T> T call(Callable<T> callable) throws Exception {
-      Thread oldOwner = owner;
-      Thread newOwner = Thread.currentThread();
-      checkScopingState(oldOwner == null || oldOwner == newOwner,
-          "Trying to transfer request scope but original scope is still active");
-      owner = newOwner;
+    // Synchronized to prevent two threads from using the same request
+    // scope concurrently.
+    synchronized <T> T call(Callable<T> callable) throws Exception {
       Context previous = requestScopeContext.get();
       requestScopeContext.set(this);
       try {
         return callable.call();
       } finally {
-        owner = oldOwner;
         requestScopeContext.set(previous);
       }
     }

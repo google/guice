@@ -18,7 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.Provider;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderInstanceBinding;
 
@@ -31,10 +30,10 @@ import com.google.inject.spi.ProviderInstanceBinding;
 final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFactory<T> {
 
   private final ProvisionListenerStackCallback<T> provisionCallback;
-  private final Initializable<Provider<? extends T>> initializable;
+  private final Initializable<? extends javax.inject.Provider<? extends T>> initializable;
 
   public InternalFactoryToInitializableAdapter(
-      Initializable<Provider<? extends T>> initializable,
+      Initializable<? extends javax.inject.Provider<? extends T>> initializable,
       Object source, boolean allowProxy,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source, allowProxy);

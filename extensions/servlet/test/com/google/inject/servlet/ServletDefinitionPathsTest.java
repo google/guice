@@ -124,6 +124,10 @@ public class ServletDefinitionPathsTest extends TestCase {
         "/thing");
     pathInfoWithServletStyleMatching("/path/thing", "/path", "/thing/*", null, "/thing");
 
+    // see external issue 372
+    pathInfoWithServletStyleMatching("/path/some/path/of.jsp", "/path", "/thing/*",
+        null, "/some/path/of.jsp");
+
     // *.xx style mapping
     pathInfoWithServletStyleMatching("/path/thing.thing", "/path", "*.thing", null, "/thing.thing");
     pathInfoWithServletStyleMatching("/path///h.thing", "/path", "*.thing", null, "/h.thing");

@@ -30,18 +30,19 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
+import com.google.inject.util.Providers;
 
 import java.util.Set;
 
 final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
     implements ProviderInstanceBinding<T> {
 
-  final Provider<? extends T> providerInstance;
+  final javax.inject.Provider<? extends T> providerInstance;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
   public ProviderInstanceBindingImpl(InjectorImpl injector, Key<T> key,
       Object source, InternalFactory<? extends T> internalFactory, Scoping scoping,
-      Provider<? extends T> providerInstance,
+      javax.inject.Provider<? extends T> providerInstance,
       Set<InjectionPoint> injectionPoints) {
     super(injector, key, source, internalFactory, scoping);
     this.providerInstance = providerInstance;
@@ -49,7 +50,7 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   public ProviderInstanceBindingImpl(Object source, Key<T> key, Scoping scoping,
-      Set<InjectionPoint> injectionPoints, Provider<? extends T> providerInstance) {
+      Set<InjectionPoint> injectionPoints, javax.inject.Provider<? extends T> providerInstance) {
     super(source, key, scoping);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.providerInstance = providerInstance;
@@ -66,6 +67,10 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   }
 
   public Provider<? extends T> getProviderInstance() {
+    return Providers.guicify(providerInstance);
+  }
+  
+  public javax.inject.Provider<? extends T> getUserSuppliedProvider() {
     return providerInstance;
   }
 
@@ -99,7 +104,7 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
 
   public void applyTo(Binder binder) {
     getScoping().applyTo(
-        binder.withSource(getSource()).bind(getKey()).toProvider(getProviderInstance()));
+        binder.withSource(getSource()).bind(getKey()).toProvider(getUserSuppliedProvider()));
   }
 
   @Override

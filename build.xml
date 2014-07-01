@@ -28,38 +28,42 @@
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
-        <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/testlib/build.xml" target="distjars" inheritAll="false"/>
 
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="extensions/servlet/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/servlet/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist"> 
-      <fileset dir="extensions/spring/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/spring/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/struts2/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/struts2/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/assistedinject/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/assistedinject/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/jmx/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/jmx/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/jndi/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/jndi/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/throwingproviders/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/throwingproviders/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/multibindings/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/multibindings/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/persist/build" includes="*.jar" excludes="*-with-deps.jar"/>
+      <fileset dir="extensions/persist/build" includes="*.jar"/>
     </copy>
-        <copy toDir="${build.dir}/dist">
-          <fileset dir="extensions/grapher/build" includes="*.jar" excludes="*-with-deps.jar"/>
-        </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/grapher/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/testlib/build" includes="*.jar"/>
+    </copy>
 
     <copy toDir="${build.dir}/dist" file="COPYING"/> 
     <copy toDir="${build.dir}/dist"> 
@@ -93,7 +97,7 @@
   </target>
 
   <target name="test.dist.run"
-    depends="jar, test.compile-with-deps"
+    depends="jar, test.withdeps"
     description="Execute JUnit tests against distribution jar with the given jvmarg.">
     <java fork="true"
         classname="junit.textui.TestRunner"
@@ -102,11 +106,13 @@
       <classpath>
         <pathelement location="${build.dir}/guice-${version}-tests.jar"/>
         <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
+        <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
+        <pathelement location="lib/guava-16.0.1.jar"/>
+        <pathelement location="lib/build/guava-testlib-16.0.1.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
-        <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/build/javax.inject-tck.jar"/>
         <pathelement location="lib/build/bnd-0.0.384.jar"/>
         <pathelement location="lib/build/felix-2.0.5.jar"/>
@@ -125,16 +131,18 @@
   <property name="old.api" value="3.0"/>
   <property name="new.api" value="4.0"/>
   <target name="jdiff">
-        <property name="jdiff.home" value="lib/build/jdiff"/>
-        <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
-        <delete dir="${jdiff.tmp}"/>
-        <mkdir dir="${jdiff.tmp}"/>
-  
-        <!-- Generate API for current version. -->
+    <property name="jdiff.home" value="lib/build/jdiff"/>
+    <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
+    <delete dir="${jdiff.tmp}"/>
+    <mkdir dir="${jdiff.tmp}"/>
+
+    <!-- Generate API for current version. -->
+    <!-- TODO(cgruber) remove postProcessGeneratedJavadocs=false when ant 1.9.4 ships -->
     <javadoc packagenames="com.google.*"
-                 docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
-             maxmemory="512M"
-             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+             postProcessGeneratedJavadocs="false"
+             docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+             maxmemory="1024M"
+             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -148,10 +156,10 @@
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
-        <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${testlib.src.dir}"/>
 
-      <doclet name="jdiff.JDiff"
-              path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
+      <doclet name="jdiff.JDiff" path="${jdiff.home}/jdiff.jar:${jdiff.home}/xerces.jar">
         <param name="-apidir" value="${jdiff.tmp}" />
         <param name="-apiname" value="${new.api}" />
       </doclet>
@@ -163,7 +171,7 @@
                      docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
                  maxmemory="512M"
                      sourcefiles="${jdiff.home}/Null.java"
-                 classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+                 classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
           <doclet name="jdiff.JDiff">
                 <param name="-oldapi" value="${old.api}"/>
                 <param name="-oldapidir" value="latest-api-diffs"/>             
@@ -176,14 +184,14 @@
           </doclet>
         </javadoc>
   </target>
-  
+
   <target name="javadoc">
     <javadoc packagenames="com.google.*"
              destdir="build/docs"
              docletpath="lib/build/doclava.jar"
              bootclasspath="${java.home}/lib/rt.jar"
              maxmemory="512M"
-             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar">
+             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar{$path.separator}lib/build/jsr305.jar">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -196,7 +204,8 @@
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
-        <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${grapher.src.dir}"/>
+      <fileset dir="${testlib.src.dir}"/>
       <!-- TODO: this breaks Doclava for some reason
       <fileset dir="${struts2.src.dir}"/> -->
 
@@ -204,7 +213,7 @@
         <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
         <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
         <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
-      	<param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
+        <param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
         <param name="-apiversion" value="Guice_${new.api}"/>
         <param name="-assetsdir" value="javadoc/assets"/>
         <param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
@@ -251,7 +260,7 @@
       <arg value="-DNO_AOP" />
     </munge>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-4.2.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.1.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>]]></replacetoken>
@@ -277,6 +286,7 @@
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
     <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
     <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/testlib" antfile="build.xml" target="clean"/>
   </target>
   
 </project>

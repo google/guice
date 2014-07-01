@@ -48,4 +48,14 @@ class BindingCollector {
   public Map<Key<?>, TypeLiteral<?>> getBindings() {
     return Collections.unmodifiableMap(bindings);
   }
+
+  @Override
+  public int hashCode() {
+    return bindings.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return (obj instanceof BindingCollector) && bindings.equals(((BindingCollector) obj).bindings);
+  }
 }

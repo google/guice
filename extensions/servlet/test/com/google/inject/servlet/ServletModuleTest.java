@@ -34,6 +34,17 @@ import java.util.List;
  */
 public class ServletModuleTest extends TestCase {
   
+  public void testServletModuleCallOutsideConfigure() {
+    try {
+      new ServletModule() {{
+        serve("/*").with(DummyServlet.class);
+      }};
+      fail();
+    } catch (IllegalStateException e) {
+      // Expected.
+    }
+  }
+
   public void testServletModuleReuse() {
     Module module = new Module();
     Elements.getElements(module); // use the module once (to, say, introspect bindings)

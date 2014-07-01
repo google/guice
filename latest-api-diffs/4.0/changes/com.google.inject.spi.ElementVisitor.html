@@ -32,8 +32,8 @@ com.google.inject.spi.ElementVisitor
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="com.google.inject.spi.DefaultElementVisitor.html"><B>PREV CLASS</B></A>
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="com.google.inject.spi.Element.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="com.google.inject.spi.ExposedBinding.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.google.inject.spi.ElementVisitor.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
@@ -51,6 +51,49 @@ Interface com.google.inject.spi.<A HREF="http://google-guice.googlecode.com/git/
 </H2>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
+<p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Removed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.RequireExplicitBindingsOption)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.RequireExplicitBindingsOption)" target="_top"><tt>visit</tt></A>(<code>RequireExplicitBindingsOption</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a require explicit bindings command.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.ScopeBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ScopeBinding)" target="_top"><tt>visit</tt></A>(<code>ScopeBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a registration of a scope annotation with the scope that implements it.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.StaticInjectionRequest)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.StaticInjectionRequest)" target="_top"><tt>visit</tt></A>(<code>StaticInjectionRequest</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a request to inject the static fields and methods of type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.TypeConverterBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.TypeConverterBinding)" target="_top"><tt>visit</tt></A>(<code>TypeConverterBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a registration of type converters for matching target types.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.TypeListenerBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.TypeListenerBinding)" target="_top"><tt>visit</tt></A>(<code>TypeListenerBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit an injectable type listener binding.</TD>
+</TR>
+</TABLE>
+&nbsp;
 <p>
 <a NAME="Added"></a>
 <TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
@@ -78,6 +121,131 @@ Interface com.google.inject.spi.<A HREF="http://google-guice.googlecode.com/git/
   </TD>
   <TD VALIGN="TOP">Visit a require exact binding annotations command.</TD>
 </TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.RequireExplicitBindingsOption)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.RequireExplicitBindingsOption)" target="_top"><tt>visit</tt></A>(<code>RequireExplicitBindingsOption</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a require explicit bindings command.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ScopeBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ScopeBinding)" target="_top"><tt>visit</tt></A>(<code>ScopeBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a registration of a scope annotation with the scope that implements it.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.StaticInjectionRequest)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.StaticInjectionRequest)" target="_top"><tt>visit</tt></A>(<code>StaticInjectionRequest</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a request to inject the static fields and methods of type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.TypeConverterBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.TypeConverterBinding)" target="_top"><tt>visit</tt></A>(<code>TypeConverterBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a registration of type converters for matching target types.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.TypeListenerBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.TypeListenerBinding)" target="_top"><tt>visit</tt></A>(<code>TypeListenerBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit an injectable type listener binding.</TD>
+</TR>
+</TABLE>
+&nbsp;
+<p>
+<a NAME="Changed"></a>
+<TABLE summary="Changed Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+  <TD VALIGN="TOP" COLSPAN=3><FONT SIZE="+1"><B>Changed Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.Binding<T>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.Binding<T>)" target="_top"><tt>visit</tt></A>(<code>Binding&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a mapping from a key (type and optional annotation) to the strategy for getting
+ instances of the type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.DisableCircularProxiesOption)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.DisableCircularProxiesOption)" target="_top"><tt>visit</tt></A>(<code>DisableCircularProxiesOption</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a disable circular proxies command.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.InjectionRequest<?>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.InjectionRequest<?>)" target="_top"><tt>visit</tt></A>(<code>InjectionRequest&lt;?&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a request to inject the instance fields and methods of an instance.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.InterceptorBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.InterceptorBinding)" target="_top"><tt>visit</tt></A>(<code>InterceptorBinding</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a registration of interceptors for matching methods of matching classes.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.MembersInjectorLookup<T>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.MembersInjectorLookup<T>)" target="_top"><tt>visit</tt></A>(<code>MembersInjectorLookup&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a lookup of the members injector.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.Message)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.Message)" target="_top"><tt>visit</tt></A>(<code>Message</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit an error message and the context in which it occured.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.PrivateElements)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.PrivateElements)" target="_top"><tt>visit</tt></A>(<code>PrivateElements</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a collection of configuration elements for a <A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/lain.html"><TT>com.google.inject.PrivateBinder
+ private binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.ProviderLookup<T>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google-guice.googlecode.com/git/latest-api-diffs/4.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ProviderLookup<T>)" target="_top"><tt>visit</tt></A>(<code>ProviderLookup&lt;T&gt;</code>)  </nobr>
+  </TD>
+  <TD VALIGN="TOP" WIDTH="30%">
+Changed from non-abstract to abstract.
+  </TD>
+  <TD VALIGN="TOP">Visit a lookup of the provider for a type.</TD>
+</TR>
 </TABLE>
 &nbsp;
 <a NAME="fields"></a>
@@ -102,8 +270,8 @@ Interface com.google.inject.spi.<A HREF="http://google-guice.googlecode.com/git/
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="com.google.inject.spi.DefaultElementVisitor.html"><B>PREV CLASS</B></A>
-&nbsp;<B>NEXT CLASS</B>&nbsp;
+&nbsp;<A HREF="com.google.inject.spi.Element.html"><B>PREV CLASS</B></A>
+&nbsp;<A HREF="com.google.inject.spi.ExposedBinding.html"><B>NEXT CLASS</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
   &nbsp;<A HREF="com.google.inject.spi.ElementVisitor.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>

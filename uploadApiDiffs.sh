@@ -16,4 +16,4 @@ cp -r build/docs/javadoc latest-api-diffs/$CV/javadoc
 
 # commit changes
 git add -A latest-api-diffs
-git commit -m "Added updated $CV api diffs."  latest-api-diffs
+echo git commit -m "Added updated $CV api diffs."  latest-api-diffs

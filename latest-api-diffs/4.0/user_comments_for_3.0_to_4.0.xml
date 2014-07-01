@@ -40,6 +40,30 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Binder.addError_changed(com.google.inject.spi.Message)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.addError_changed(java.lang.String, java.lang.Object[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.addError_changed(java.lang.Throwable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bindConstant_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Binder.bindInterceptor_changed(com.google.inject.matcher.Matcher&lt;? super java.lang.Class&lt;?&gt;&gt;, com.google.inject.matcher.Matcher&lt;? super java.lang.reflect.Method&gt;, org.aopalliance.intercept.MethodInterceptor[])"/>
   <text>
     InsertCommentsHere
@@ -52,6 +76,114 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Binder.bindListener_added(com.google.inject.matcher.Matcher&lt;? super com.google.inject.TypeLiteral&lt;?&gt;&gt;, com.google.inject.spi.TypeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bindListener_removed(com.google.inject.matcher.Matcher&lt;? super com.google.inject.TypeLiteral&lt;?&gt;&gt;, com.google.inject.spi.TypeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bindScope_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;, com.google.inject.Scope)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bind_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bind_changed(com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.bind_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.convertToTypes_changed(com.google.inject.matcher.Matcher&lt;? super com.google.inject.TypeLiteral&lt;?&gt;&gt;, com.google.inject.spi.TypeConverter)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.currentStage_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.disableCircularProxies_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.getMembersInjector_changed(com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.getMembersInjector_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.getProvider_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.getProvider_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.install_changed(com.google.inject.Module)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.newPrivateBinder_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.requestInjection_changed(com.google.inject.TypeLiteral&lt;T&gt;, T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.requestInjection_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.requestStaticInjection_changed(java.lang.Class[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Binder.requireAtInjectOnConstructors_added()"/>
   <text>
     InsertCommentsHere
@@ -59,6 +191,54 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.Binder.requireExactBindingAnnotations_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.requireExplicitBindings_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.skipSources_changed(java.lang.Class[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.withSource_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binding.acceptScopingVisitor_changed(com.google.inject.spi.BindingScopingVisitor&lt;V&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binding.acceptTargetVisitor_changed(com.google.inject.spi.BindingTargetVisitor&lt;? super T, V&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binding.getKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binding.getProvider_changed()"/>
   <text>
     InsertCommentsHere
   </text>
@@ -83,6 +263,120 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.Inject"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.createChildInjector_changed(com.google.inject.Module[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.createChildInjector_changed(java.lang.Iterable&lt;? extends com.google.inject.Module&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.findBindingsByType_changed(com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getAllBindings_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getBinding_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getBinding_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getBindings_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getExistingBinding_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getInstance_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getInstance_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getMembersInjector_changed(com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getMembersInjector_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getParent_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getProvider_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getProvider_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getScopeBindings_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.getTypeConverterBindings_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Injector.injectMembers_changed(java.lang.Object)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -124,6 +418,66 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.MembersInjector"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.MembersInjector.injectMembers_changed(T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Module"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Module.configure_changed(com.google.inject.Binder)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder.expose_changed(com.google.inject.Key&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder.expose_changed(com.google.inject.TypeLiteral&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder.expose_changed(java.lang.Class&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder.skipSources_changed(java.lang.Class[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.PrivateBinder.withSource_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.PrivateModule"/>
   <text>
     InsertCommentsHere
@@ -136,7 +490,37 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Provider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Provider.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Provides"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scope"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scope.scope_changed(com.google.inject.Key&lt;T&gt;, com.google.inject.Provider&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Scope.toString_changed()"/>
   <text>
     InsertCommentsHere
   </text>
@@ -155,6 +539,300 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.Scopes.isScoped_added(com.google.inject.Binding&lt;?&gt;, com.google.inject.Scope, java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedInjectBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedInjectBinding.getAssistedMethods_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedInjectBinding.getKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedInjectTargetVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedInjectTargetVisitor.visit_changed(com.google.inject.assistedinject.AssistedInjectBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedMethod"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedMethod.getDependencies_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedMethod.getFactoryMethod_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedMethod.getImplementationConstructor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.assistedinject.AssistedMethod.getImplementationType_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedBindingBuilder.annotatedWith_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedBindingBuilder.annotatedWith_changed(java.lang.annotation.Annotation)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedConstantBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedConstantBindingBuilder.annotatedWith_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedConstantBindingBuilder.annotatedWith_changed(java.lang.annotation.Annotation)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedElementBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedElementBuilder.annotatedWith_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.AnnotatedElementBuilder.annotatedWith_changed(java.lang.annotation.Annotation)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(E extends java.lang.Enum&lt;E&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(byte)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(char)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(double)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(float)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(java.lang.Class&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ConstantBindingBuilder.to_changed(short)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toConstructor_changed(java.lang.reflect.Constructor&lt;S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toConstructor_changed(java.lang.reflect.Constructor&lt;S&gt;, com.google.inject.TypeLiteral&lt;? extends S&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toInstance_changed(T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_added(javax.inject.Provider&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_changed(com.google.inject.Key&lt;? extends javax.inject.Provider&lt;? extends T&gt;&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_changed(com.google.inject.Provider&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_changed(com.google.inject.TypeLiteral&lt;? extends javax.inject.Provider&lt;? extends T&gt;&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.toProvider_changed(java.lang.Class&lt;? extends javax.inject.Provider&lt;? extends T&gt;&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.to_changed(com.google.inject.Key&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.to_changed(com.google.inject.TypeLiteral&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.LinkedBindingBuilder.to_changed(java.lang.Class&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ScopedBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ScopedBindingBuilder.asEagerSingleton_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ScopedBindingBuilder.in_changed(com.google.inject.Scope)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.binder.ScopedBindingBuilder.in_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -496,6 +1174,42 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.grapher.NameFactory"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.NameFactory.getAnnotationName_changed(com.google.inject.Key&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.NameFactory.getClassName_changed(com.google.inject.Key&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.NameFactory.getInstanceName_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.NameFactory.getMemberName_changed(java.lang.reflect.Member)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.grapher.NameFactory.getSourceName_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.grapher.Node"/>
   <text>
     InsertCommentsHere
@@ -706,6 +1420,42 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.grapher.graphviz.PortIdFactory.getPortId_changed(java.lang.reflect.Member)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher.and_changed(com.google.inject.matcher.Matcher&lt;? super T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher.matches_changed(T)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.matcher.Matcher.or_changed(com.google.inject.matcher.Matcher&lt;? super T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.multibindings"/>
   <text>
     InsertCommentsHere
@@ -718,13 +1468,199 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.containsElement_changed(com.google.inject.spi.Element)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getEntries_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getKeyTypeLiteral_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getMapKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.getValueTypeLiteral_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MapBinderBinding.permitsDuplicates_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.multibindings.Multibinder"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.containsElement_changed(com.google.inject.spi.Element)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.getElementTypeLiteral_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.getElements_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.getSetKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibinderBinding.permitsDuplicates_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibindingsTargetVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibindingsTargetVisitor.visit_changed(com.google.inject.multibindings.MapBinderBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.MultibindingsTargetVisitor.visit_changed(com.google.inject.multibindings.MultibinderBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.PersistService"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.PersistService.start_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.PersistService.stop_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.UnitOfWork"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.UnitOfWork.begin_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.UnitOfWork.end_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.servlet"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.InstanceFilterBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.InstanceFilterBinding.getFilterInstance_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.InstanceServletBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.InstanceServletBinding.getServletInstance_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.LinkedFilterBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.LinkedFilterBinding.getLinkedKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.LinkedServletBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.LinkedServletBinding.getLinkedKey_changed()"/>
   <text>
     InsertCommentsHere
   </text>
@@ -737,6 +1673,150 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.servlet.ScopingOnly"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(Filter)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(Filter, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(com.google.inject.Key&lt;? extends Filter&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(com.google.inject.Key&lt;? extends Filter&gt;, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(java.lang.Class&lt;? extends Filter&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.through_changed(java.lang.Class&lt;? extends Filter&gt;, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(HttpServlet)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(HttpServlet, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(com.google.inject.Key&lt;? extends HttpServlet&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(com.google.inject.Key&lt;? extends HttpServlet&gt;, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(java.lang.Class&lt;? extends HttpServlet&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.with_changed(java.lang.Class&lt;? extends HttpServlet&gt;, java.util.Map&lt;java.lang.String, java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleBinding.getInitParams_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleBinding.getPattern_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleBinding.getUriPatternType_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleBinding.matchesUri_changed(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleTargetVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleTargetVisitor.visit_changed(com.google.inject.servlet.InstanceFilterBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleTargetVisitor.visit_changed(com.google.inject.servlet.InstanceServletBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleTargetVisitor.visit_changed(com.google.inject.servlet.LinkedFilterBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletModuleTargetVisitor.visit_changed(com.google.inject.servlet.LinkedServletBinding)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -778,13 +1858,145 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.BindingScopingVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingScopingVisitor.visitEagerSingleton_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingScopingVisitor.visitNoScoping_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingScopingVisitor.visitScopeAnnotation_changed(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingScopingVisitor.visitScope_changed(com.google.inject.Scope)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ConstructorBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ConvertedConstantBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ExposedBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.InstanceBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.LinkedKeyBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ProviderBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ProviderInstanceBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.ProviderKeyBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.BindingTargetVisitor.visit_changed(com.google.inject.spi.UntargettedBinding&lt;? extends T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConstructorBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConstructorBinding.getConstructor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConstructorBinding.getInjectableMembers_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConstructorBinding.getMethodInterceptors_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi.ConvertedConstantBinding"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.ConvertedConstantBinding.getDependencies_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi.ConvertedConstantBinding.getSourceKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConvertedConstantBinding.getTypeConverterBinding_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ConvertedConstantBinding.getValue_changed()"/>
   <text>
     InsertCommentsHere
   </text>
@@ -820,6 +2032,30 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.Element"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.Element.acceptVisitor_changed(com.google.inject.spi.ElementVisitor&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.Element.applyTo_changed(com.google.inject.Binder)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.Element.getSource_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi.ElementSource"/>
   <text>
     InsertCommentsHere
@@ -845,6 +2081,300 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.RequireExactBindingAnnotationsOption)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.RequireExplicitBindingsOption)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ScopeBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.StaticInjectionRequest)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.TypeConverterBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.TypeListenerBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.Binding&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.DisableCircularProxiesOption)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.InjectionRequest&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.InterceptorBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.MembersInjectorLookup&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.Message)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.PrivateElements)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.ProviderLookup&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.RequireExplicitBindingsOption)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.ScopeBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.StaticInjectionRequest)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.TypeConverterBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.TypeListenerBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ExposedBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ExposedBinding.applyTo_changed(com.google.inject.Binder)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ExposedBinding.getPrivateElements_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.HasDependencies"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.HasDependencies.getDependencies_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InjectionListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InjectionListener.afterInjection_changed(I)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InstanceBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InstanceBinding.getInjectionPoints_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InstanceBinding.getInstance_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.LinkedKeyBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.LinkedKeyBinding.getLinkedKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.Message"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.Message.ctor_added(java.lang.String, java.lang.Throwable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.PrivateElements"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.PrivateElements.getElements_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.PrivateElements.getExposedKeys_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.PrivateElements.getExposedSource_changed(com.google.inject.Key&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.PrivateElements.getInjector_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderBinding.getProvidedKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding.getInjectionPoints_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding.getProviderInstance_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderInstanceBinding.getUserSuppliedProvider_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderKeyBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderKeyBinding.getProviderKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderWithExtensionVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderWithExtensionVisitor.acceptExtensionVisitor_changed(com.google.inject.spi.BindingTargetVisitor&lt;B, V&gt;, com.google.inject.spi.ProviderInstanceBinding&lt;? extends B&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProvidesMethodBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProvidesMethodTargetVisitor"/>
   <text>
     InsertCommentsHere
   </text>
@@ -880,13 +2410,127 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.TypeConverter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeConverter.convert_changed(java.lang.String, com.google.inject.TypeLiteral&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.addError_changed(com.google.inject.spi.Message)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.addError_changed(java.lang.String, java.lang.Object[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.addError_changed(java.lang.Throwable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.bindInterceptor_changed(com.google.inject.matcher.Matcher&lt;? super java.lang.reflect.Method&gt;, org.aopalliance.intercept.MethodInterceptor[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.getMembersInjector_changed(com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.getMembersInjector_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.getProvider_changed(com.google.inject.Key&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.getProvider_changed(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.register_changed(com.google.inject.MembersInjector&lt;? super I&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeEncounter.register_changed(com.google.inject.spi.InjectionListener&lt;? super I&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeListener.hear_changed(com.google.inject.TypeLiteral&lt;I&gt;, com.google.inject.spi.TypeEncounter&lt;I&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.throwingproviders"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.throwingproviders.CheckedProvider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.throwingproviders.CheckedProvider.get_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.throwingproviders.ThrowingInject"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.throwingproviders.ThrowingProvider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.throwingproviders.ThrowingProvider.get_changed()"/>
   <text>
     InsertCommentsHere
   </text>
@@ -941,6 +2585,60 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.throwingproviders.ThrowingProviderBinder.bind_changed(java.lang.Class&lt;P&gt;, java.lang.reflect.Type)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.tools.jmx"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.tools.jmx.ManagedBindingMBean"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.tools.jmx.ManagedBindingMBean.getKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.tools.jmx.ManagedBindingMBean.getProvider_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.tools.jmx.ManagedBindingMBean.getSource_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Modules.OverriddenModuleBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Modules.OverriddenModuleBuilder.with_changed(com.google.inject.Module[])"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.util.Modules.OverriddenModuleBuilder.with_changed(java.lang.Iterable&lt;? extends com.google.inject.Module&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
