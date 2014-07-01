@@ -22,13 +22,14 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.matcher.Matchers;
 
 import junit.framework.TestCase;
 
 import java.lang.reflect.Modifier;
+
+import javax.inject.Inject;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
