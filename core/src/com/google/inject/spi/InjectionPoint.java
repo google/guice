@@ -62,7 +62,6 @@ import com.google.inject.internal.util.Classes;
 public final class InjectionPoint {
 
     private static final Logger logger = Logger.getLogger(InjectionPoint.class.getName());
-    private static final HashMap<Pair<TypeLiteral<?>,Boolean>,InjectableMembers> cachedInjectableMembersByRawType = new HashMap<Pair<TypeLiteral<?>,Boolean>, InjectableMembers>();
     private static HierarchyTraversalFilter filter = Guice.createHierarchyTraversalFilter();
 
     private final boolean optional;
@@ -719,18 +718,12 @@ public final class InjectionPoint {
         if( !isWorthScanning(filter, rawType) ) {
             return;
         }
-        Pair<TypeLiteral<?>,Boolean> cacheKey = new Pair<TypeLiteral<?>, Boolean>(type,statics);
-        InjectableMembers cachedInjectableMembers = cachedInjectableMembersByRawType.get(cacheKey);
-        if( cachedInjectableMembers!=null && !cachedInjectableMembers.isEmpty() ) {
-            injectableMembers.addAll(cachedInjectableMembers);
-            return;
-        }
 
         //recursive call on parents
         Class<?> parentRawType = rawType.getSuperclass();
         if( isWorthScanning(filter, parentRawType) ) {
-            overrideIndex.position = Position.MIDDLE;
             computeInjectableMembers(type.getSupertype(parentRawType), statics, errors, injectableMembers, overrideIndex, filter);
+            overrideIndex.position = Position.MIDDLE;
         } else {
             overrideIndex.position = Position.TOP; // we're at the top of the inheritance hierarchy
         }
@@ -763,34 +756,22 @@ public final class InjectionPoint {
                                 type, method, atInject);
                         if (checkForMisplacedBindingAnnotations(method, errors)
                                 || !isValidMethod(injectableMethod, errors)) {
-                            if (overrideIndex != null) {
-                            	boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
-	                            if(removed) {
-	                                logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
-	                                        + "because it either has misplaced binding annotations "
-	                                        + "or specifies type parameters) but is overriding a method that is valid. "
-	                                        + "Because it is not valid, the method will not be injected. "
-	                                        + "To fix this, make the method a valid injectable method.", method);
-	                            }
+                        	boolean removed = overrideIndex.removeIfOverriddenBy(method, false, injectableMethod);
+                            if(removed) {
+                                logger.log(Level.WARNING, "Method: {0} is not a valid injectable method ("
+                                        + "because it either has misplaced binding annotations "
+                                        + "or specifies type parameters) but is overriding a method that is valid. "
+                                        + "Because it is not valid, the method will not be injected. "
+                                        + "To fix this, make the method a valid injectable method.", method);
                             }
                             continue;
                         }
                         if (statics) {
                             injectableMembers.add(injectableMethod);
                         } else {
-                        	if (overrideIndex == null) {
-                        		/*
-                        		 * Creating the override index lazily means that the first type in the hierarchy
-                        		 * with injectable methods (not necessarily the top most type) will be treated as
-                        		 * the TOP position and will enjoy the same optimizations (no checks for overridden
-                        		 * methods, etc.).
-                        		 */
-                        		overrideIndex = new OverrideIndex(injectableMembers);
-                        	} else {
-                        		// Forcibly remove the overriden method, otherwise we'll inject
-                        		// it twice.
-                        		overrideIndex.removeIfOverriddenBy(method, true, injectableMethod);
-                        	}
+                    		// Forcibly remove the overriden method, otherwise we'll inject
+                    		// it twice.
+                    		overrideIndex.removeIfOverriddenBy(method, true, injectableMethod);
                         	overrideIndex.add(injectableMethod);
                         }
                     } else {
@@ -805,8 +786,6 @@ public final class InjectionPoint {
                 }
             }
         }
-
-        cachedInjectableMembersByRawType.put(cacheKey,injectableMembers);
     }
 
     private static boolean isWorthScanning(HierarchyTraversalFilter filter, Class<?> rawType) {

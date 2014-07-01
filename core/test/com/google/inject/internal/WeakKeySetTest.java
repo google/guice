@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.GcFinalization;
-import com.google.inject.AbstractModule;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -52,7 +52,7 @@ import java.util.Set;
  * Tests for {@link WeakKeySet}.
  * <p>
  * Multibinding specific tests can be found in MultibinderTest and MapBinderTest.
- * 
+ *
  * @author dweis@google.com (Daniel Weis)
  */
 public class WeakKeySetTest extends TestCase {
@@ -68,7 +68,7 @@ public class WeakKeySetTest extends TestCase {
     TestState state = new TestState();
     Key<Integer> key = Key.get(Integer.class);
     Object source = new Object();
-    
+
     WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
 
     set.add(key, state, source);
@@ -87,12 +87,12 @@ public class WeakKeySetTest extends TestCase {
     key = null;
     GcFinalization.awaitClear(weakKeyRef);
   }
-  
+
   public void testEviction_nullSource() {
     TestState state = new TestState();
     Key<Integer> key = Key.get(Integer.class);
     Object source = null;
-    
+
     WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
 
     set.add(key, state, source);
@@ -146,11 +146,11 @@ public class WeakKeySetTest extends TestCase {
     assertFalse(set.getSources(key).contains(source1));
 
     source1 = source2 = null;
-    
+
     GcFinalization.awaitClear(weakSource1Ref);
     // Key1 will be referenced as the key in the sources backingSet and won't be
     // GC'd.
-    
+
     // Should not be GC'd until state2 goes away.
     assertNotNull(weakSource2Ref.get());
 
@@ -166,7 +166,7 @@ public class WeakKeySetTest extends TestCase {
     // Now that the backing set is emptied, key1 is released.
     GcFinalization.awaitClear(weakKey1Ref);
   }
-  
+
   public void testNoEviction_keyOverlap_2x() {
     TestState state1 = new TestState();
     TestState state2 = new TestState();
@@ -235,7 +235,7 @@ public class WeakKeySetTest extends TestCase {
     // Should still have a single source.
     assertEquals(1, set.getSources(key).size());
     assertTrue(set.getSources(key1).contains(source));
-    
+
     source = null;
 
     GcFinalization.awaitClear(weakSourceRef);
@@ -254,7 +254,7 @@ public class WeakKeySetTest extends TestCase {
     // Now that the backing set is emptied, key1 is released.
     GcFinalization.awaitClear(weakKey1Ref);
   }
-  
+
   public void testEviction_keyAndSourceOverlap_nonNull() {
     TestState state1 = new TestState();
     TestState state2 = new TestState();
@@ -288,7 +288,7 @@ public class WeakKeySetTest extends TestCase {
     // Should still have a single source.
     assertEquals(1, set.getSources(key).size());
     assertTrue(set.getSources(key1).contains(source));
-    
+
     source = null;
 
     GcFinalization.awaitFullGc();
@@ -364,7 +364,7 @@ public class WeakKeySetTest extends TestCase {
     assertTrue(set.getSources(key).contains(source3));
 
     GcFinalization.awaitClear(weakKey2Ref);
-    
+
     source2 = null;
     GcFinalization.awaitClear(weakSource2Ref);
     // Key1 will be referenced as the key in the sources backingSet and won't be
@@ -398,13 +398,13 @@ public class WeakKeySetTest extends TestCase {
     });
     WeakReference<Injector> weakRef = new WeakReference<Injector>(childInjector);
     assertBlacklisted(parentInjector, Key.get(String.class));
-    
+
     // Clear the ref, GC, and ensure that we are no longer blacklisting.
     childInjector = null;
     GcFinalization.awaitClear(weakRef);
     assertNotBlacklisted(parentInjector, Key.get(String.class));
   }
-  
+
   public void testWeakKeySet_integration_multipleChildren() {
     Injector parentInjector = Guice.createInjector(new AbstractModule() {
           @Override protected void configure() {
@@ -422,7 +422,7 @@ public class WeakKeySetTest extends TestCase {
     WeakReference<Injector> weakRef1 = new WeakReference<Injector>(childInjector1);
     assertBlacklisted(parentInjector, Key.get(String.class));
     assertNotBlacklisted(parentInjector, Key.get(Long.class));
-    
+
     Injector childInjector2 = parentInjector.createChildInjector(new AbstractModule() {
       @Override protected void configure() {
         bind(Long.class).toInstance(6L);
@@ -431,7 +431,7 @@ public class WeakKeySetTest extends TestCase {
     WeakReference<Injector> weakRef2 = new WeakReference<Injector>(childInjector2);
     assertBlacklisted(parentInjector, Key.get(String.class));
     assertBlacklisted(parentInjector, Key.get(Long.class));
-    
+
     // Clear ref1, GC, and ensure that we still blacklist.
     childInjector1 = null;
     GcFinalization.awaitClear(weakRef1);
@@ -444,7 +444,7 @@ public class WeakKeySetTest extends TestCase {
     assertNotBlacklisted(parentInjector, Key.get(String.class));
     assertNotBlacklisted(parentInjector, Key.get(Long.class));
   }
-  
+
   public void testWeakKeySet_integration_multipleChildren_overlappingKeys() {
     Injector parentInjector = Guice.createInjector(new AbstractModule() {
           @Override protected void configure() {
@@ -460,7 +460,7 @@ public class WeakKeySetTest extends TestCase {
     });
     WeakReference<Injector> weakRef1 = new WeakReference<Injector>(childInjector1);
     assertBlacklisted(parentInjector, Key.get(String.class));
-    
+
     Injector childInjector2 = parentInjector.createChildInjector(new AbstractModule() {
       @Override protected void configure() {
         bind(String.class).toInstance("bar");
@@ -468,7 +468,7 @@ public class WeakKeySetTest extends TestCase {
     });
     WeakReference<Injector> weakRef2 = new WeakReference<Injector>(childInjector2);
     assertBlacklisted(parentInjector, Key.get(String.class));
-    
+
     // Clear ref1, GC, and ensure that we still blacklist.
     childInjector1 = null;
     GcFinalization.awaitClear(weakRef1);
@@ -479,11 +479,11 @@ public class WeakKeySetTest extends TestCase {
     GcFinalization.awaitClear(weakRef2);
     assertNotBlacklisted(parentInjector, Key.get(String.class));
   }
-  
+
   private static void assertBlacklisted(Injector injector, Key<?> key) {
     assertBlacklistState(injector, key, true);
   }
-  
+
   private static void assertNotBlacklisted(Injector injector, Key<?> key) {
     assertBlacklistState(injector, key, false);
   }
@@ -491,7 +491,7 @@ public class WeakKeySetTest extends TestCase {
   private static void assertBlacklistState(Injector injector, Key<?> key, boolean isBlacklisted) {
     assertEquals(isBlacklisted, ((InjectorImpl) injector).state.isBlacklisted(key));
   }
-  
+
   private static class TestState implements State {
     public State parent() {
       return new TestState();

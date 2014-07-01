@@ -34,7 +34,8 @@ public class ProviderInjectionTest extends TestCase {
 
   public void testProviderInjection() throws CreationException {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override
+	protected void configure() {
         bind(Bar.class);
         bind(SampleSingleton.class).in(Scopes.SINGLETON);
       }
@@ -83,7 +84,8 @@ public class ProviderInjectionTest extends TestCase {
    */
   public void testProvidersAreInjectedBeforeTheyAreUsed() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      public void configure() {
+      @Override
+	public void configure() {
         // should bind String to "[true]"
         bind(String.class).toProvider(new Provider<String>() {
           private String value;
@@ -120,7 +122,8 @@ public class ProviderInjectionTest extends TestCase {
    */
   public void testCreationTimeInjectionOrdering() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override
+	protected void configure() {
         // instance injection
         bind(Count.class).annotatedWith(named("a")).toInstance(new Count(0) {
           @Inject void initialize(@Named("b") Count bCount) {

@@ -20,7 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.Module;
+import com.google.inject.config.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
@@ -156,13 +156,13 @@ public final class BoundFieldModule implements Module {
         Bind bindAnnotation,
         TypeLiteral<?> fieldType) {
       this.field = field;
-      this.type = fieldType;
+      type = fieldType;
       this.bindAnnotation = bindAnnotation;
 
       field.setAccessible(true);
 
-      this.naturalType = getNaturalFieldType();
-      this.boundType = getBoundType();
+      naturalType = getNaturalFieldType();
+      boundType = getBoundType();
     }
 
     private TypeLiteral<?> getBoundType() {
@@ -171,13 +171,13 @@ public final class BoundFieldModule implements Module {
       // type is requested.
       if (bindClass == Bind.class) {
         Preconditions.checkState(naturalType != null);
-        if (!this.naturalType.isPresent()) {
+        if (!naturalType.isPresent()) {
           addErrorAndThrow(
               field,
               "Non parameterized Provider fields must have an explicit "
               + "binding class via @Bind(to = Foo.class)");
         }
-        return this.naturalType.get();
+        return naturalType.get();
       } else {
         return TypeLiteral.get(bindClass);
       }

@@ -30,7 +30,7 @@ import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
+import com.google.inject.config.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -59,23 +59,23 @@ import java.util.Set;
  * <li>It allows a framework to supply a default value that can be changed
  *     by users.
  * </ol>
- * 
+ *
  * <p>When an OptionalBinder is added, it will always supply the bindings:
  * {@code Optional<T>} and {@code Optional<Provider<T>>}.  If
  * {@link #setBinding} or {@link #setDefault} are called, it will also
  * bind {@code T}.
- * 
+ *
  * <p>{@code setDefault} is intended for use by frameworks that need a default
  * value.  User code can call {@code setBinding} to override the default.
  * <b>Warning: Even if setBinding is called, the default binding
  * will still exist in the object graph.  If it is a singleton, it will be
  * instantiated in {@code Stage.PRODUCTION}.</b>
- * 
+ *
  * <p>If setDefault or setBinding are linked to Providers, the Provider may return
  * {@code null}.  If it does, the Optional bindings will be absent.  Binding
  * setBinding to a Provider that returns null will not cause OptionalBinder
  * to fall back to the setDefault binding.
- * 
+ *
  * <p>If neither setDefault nor setBinding are called, the optionals will be
  * absent.  Otherwise, the optionals will return present if they are bound
  * to a non-null value.
@@ -84,10 +84,10 @@ import java.util.Set;
  * provider, that provider's get method will be called each time the optional
  * is injected (unless the binding is also scoped, or an optional of provider is
  * injected).
- * 
+ *
  * <p>Annotations are used to create different optionals of the same key/value
  * type. Each distinct annotation gets its own independent binding.
- *  
+ *
  * <pre><code>
  * public class FrameworkModule extends AbstractModule {
  *   protected void configure() {
@@ -98,7 +98,7 @@ import java.util.Set;
  * <p>With this module, an {@link Optional}{@code <Renamer>} can now be
  * injected.  With no other bindings, the optional will be absent.  However,
  * once a user adds a binding:
- * 
+ *
  * <pre><code>
  * public class UserRenamerModule extends AbstractModule {
  *   protected void configure() {
@@ -108,7 +108,7 @@ import java.util.Set;
  * }</code></pre>
  * .. then the {@code Optional<Renamer>} will be present and supply the
  * ReplacingRenamer.
- * 
+ *
  * <p>Default values can be supplied using:
  * <pre><code>
  * public class FrameworkModule extends AbstractModule {
@@ -136,11 +136,11 @@ public abstract class OptionalBinder<T> {
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Class<T> type) {
     return newOptionalBinder(binder, Key.get(type));
   }
-  
+
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, TypeLiteral<T> type) {
     return newOptionalBinder(binder, Key.get(type));
   }
-  
+
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Key<T> type) {
     binder = binder.skipSources(OptionalBinder.class, RealOptionalBinder.class);
     RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<T>(binder, type);
@@ -172,9 +172,9 @@ public abstract class OptionalBinder<T> {
   /**
    * Returns a binding builder used to set the default value that will be injected.
    * The binding set by this method will be ignored if {@link #setBinding} is called.
-   * 
+   *
    * <p>It is an error to call this method without also calling one of the {@code to}
-   * methods on the returned binding builder. 
+   * methods on the returned binding builder.
    */
   public abstract LinkedBindingBuilder<T> setDefault();
 
@@ -182,12 +182,12 @@ public abstract class OptionalBinder<T> {
   /**
    * Returns a binding builder used to set the actual value that will be injected.
    * This overrides any binding set by {@link #setDefault}.
-   * 
+   *
    * <p>It is an error to call this method without also calling one of the {@code to}
-   * methods on the returned binding builder. 
+   * methods on the returned binding builder.
    */
   public abstract LinkedBindingBuilder<T> setBinding();
-  
+
   enum Source { DEFAULT, ACTUAL }
 
   /**
@@ -203,7 +203,7 @@ public abstract class OptionalBinder<T> {
     private final RealMapBinder<Source, T> mapBinder;
     private final Set<Dependency<?>> dependencies;
     private final Provider<Optional<Provider<T>>> optionalProviderT;
-    
+
 
     /** the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
@@ -240,14 +240,15 @@ public abstract class OptionalBinder<T> {
           + Errors.convert(typeKey)
           + " called with different setBinding values, from bindings:\n");
     }
-    
+
     /**
      * Adds a binding for T. Multiple calls to this are safe, and will be collapsed as duplicate
      * bindings.
      */
     private void addDirectTypeBinding(Binder binder) {
       binder.bind(typeKey).toProvider(new RealOptionalBinderProviderWithDependencies<T>(typeKey) {
-        public T get() {
+        @Override
+		public T get() {
           Optional<Provider<T>> optional = optionalProviderT.get();
           if (optional.isPresent()) {
             return optional.get().get();
@@ -255,10 +256,11 @@ public abstract class OptionalBinder<T> {
           // Let Guice handle blowing up if the injection point doesn't have @Nullable
           // (If it does have @Nullable, that's fine.  This would only happen if
           //  setBinding/setDefault themselves were bound to 'null').
-          return null; 
+          return null;
         }
 
-        public Set<Dependency<?>> getDependencies() {
+        @Override
+		public Set<Dependency<?>> getDependencies() {
           return dependencies;
         }
       });
@@ -266,7 +268,7 @@ public abstract class OptionalBinder<T> {
 
     @Override public LinkedBindingBuilder<T> setDefault() {
       checkConfiguration(!isInitialized(), "already initialized");
-      
+
       addDirectTypeBinding(binder);
 
       RealElement.BindingBuilder<T> valueBinding = RealElement.addBinding(binder,
@@ -279,7 +281,7 @@ public abstract class OptionalBinder<T> {
 
     @Override public LinkedBindingBuilder<T> setBinding() {
       checkConfiguration(!isInitialized(), "already initialized");
-      
+
       addDirectTypeBinding(binder);
 
       RealElement.BindingBuilder<T> valueBinding = RealElement.addBinding(binder,
@@ -289,7 +291,7 @@ public abstract class OptionalBinder<T> {
           new ValueProvider<T>(valueKey, binder.getProvider(valueKey)));
       return valueBinding;
     }
-    
+
     /**
      * Traverses through the dependencies of the providers in order to get to the user's binding.
      */
@@ -309,7 +311,8 @@ public abstract class OptionalBinder<T> {
       return injector.getBinding(depKey);
     }
 
-    public void configure(Binder binder) {
+    @Override
+	public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "OptionalBinder was already initialized");
 
       final Provider<Map<Source, Provider<T>>> mapProvider = binder.getProvider(mapKey);
@@ -327,13 +330,13 @@ public abstract class OptionalBinder<T> {
               // ACTUAL to fallback to DEFAULT if ACTUAL's provider returns null.
               // Right now, an ACTUAL binding can convert from present -> absent
               // if it's bound to a provider that returns null.
-              optional = Optional.fromNullable(map.get(Source.ACTUAL)); 
+              optional = Optional.fromNullable(map.get(Source.ACTUAL));
             } else if (map.containsKey(Source.DEFAULT)) {
               optional = Optional.fromNullable(map.get(Source.DEFAULT));
             } else {
               optional = Optional.absent();
             }
-            
+
             // Also set up the bindings for the SPI.
             if (map.containsKey(Source.ACTUAL)) {
               actualBinding = getBindingFromMapProvider(injector, map.get(Source.ACTUAL));
@@ -343,20 +346,22 @@ public abstract class OptionalBinder<T> {
             }
           }
         }
-        
-        public Optional<Provider<T>> get() {
+
+        @Override
+		public Optional<Provider<T>> get() {
           return optional;
         }
 
-        public Set<Dependency<?>> getDependencies() {
+        @Override
+		public Set<Dependency<?>> getDependencies() {
           return dependencies;
         }
       });
-      
+
       // Optional is immutable, so it's safe to expose Optional<Provider<T>> as
       // Optional<javax.inject.Provider<T>> (since Guice provider implements javax Provider).
       @SuppressWarnings({"unchecked", "cast"})
-      Key massagedOptionalProviderKey = (Key) optionalProviderKey;
+      Key massagedOptionalProviderKey = optionalProviderKey;
       binder.bind(optionalJavaxProviderKey).to(massagedOptionalProviderKey);
 
       binder.bind(optionalKey).toProvider(new RealOptionalKeyProvider());
@@ -370,8 +375,9 @@ public abstract class OptionalBinder<T> {
       RealOptionalKeyProvider() {
         super(mapKey);
       }
-      
-      public Optional<T> get() {
+
+      @Override
+	public Optional<T> get() {
         Optional<Provider<T>> optional = optionalProviderT.get();
         if (optional.isPresent()) {
           return Optional.fromNullable(optional.get().get());
@@ -380,11 +386,13 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public Set<Dependency<?>> getDependencies() {
+      @Override
+	public Set<Dependency<?>> getDependencies() {
         return dependencies;
       }
 
-      @SuppressWarnings("unchecked")
+      @Override
+	@SuppressWarnings("unchecked")
       public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
           ProviderInstanceBinding<? extends B> binding) {
         if (visitor instanceof MultibindingsTargetVisitor) {
@@ -394,11 +402,13 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public Key<Optional<T>> getKey() {
+      @Override
+	public Key<Optional<T>> getKey() {
         return optionalKey;
       }
-      
-      public Binding<?> getActualBinding() {
+
+      @Override
+	public Binding<?> getActualBinding() {
         if (isInitialized()) {
           return actualBinding;
         } else {
@@ -406,8 +416,9 @@ public abstract class OptionalBinder<T> {
               "getActualBinding() not supported from Elements.getElements, requires an Injector.");
         }
       }
-      
-      public Binding<?> getDefaultBinding() {
+
+      @Override
+	public Binding<?> getDefaultBinding() {
         if (isInitialized()) {
           return defaultBinding;
         } else {
@@ -416,7 +427,8 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public boolean containsElement(com.google.inject.spi.Element element) {
+      @Override
+	public boolean containsElement(com.google.inject.spi.Element element) {
         if (mapBinder.containsElement(element)) {
           return true;
         } else {
@@ -437,7 +449,7 @@ public abstract class OptionalBinder<T> {
         }
       }
     }
-    
+
     /** Returns true if the key & element indicate they were bound by this OptionalBinder. */
     private boolean matchesTypeKey(com.google.inject.spi.Element element, Key<?> elementKey) {
       // Just doing .equals(typeKey) isn't enough, because the user can bind that themselves.
@@ -477,12 +489,14 @@ public abstract class OptionalBinder<T> {
         this.key = key;
         this.provider = provider;
       }
-      
-      public T get() {
+
+      @Override
+	public T get() {
         return provider.get();
       }
-      
-      public Set<Dependency<?>> getDependencies() {
+
+      @Override
+	public Set<Dependency<?>> getDependencies() {
         return ((HasDependencies) provider).getDependencies();
       }
 
