@@ -17,7 +17,6 @@ package com.google.inject.servlet;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -77,8 +76,7 @@ class ManagedServletPipeline {
   }
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {
-    Set<HttpServlet> initializedSoFar
-        = Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap());
+    Set<HttpServlet> initializedSoFar = Sets.newIdentityHashSet();
 
     for (ServletDefinition servletDefinition : servletDefinitions) {
       servletDefinition.init(servletContext, injector, initializedSoFar);
@@ -100,8 +98,7 @@ class ManagedServletPipeline {
   }
 
   public void destroy() {
-    Set<HttpServlet> destroyedSoFar
-        = Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap());
+    Set<HttpServlet> destroyedSoFar = Sets.newIdentityHashSet();
     for (ServletDefinition servletDefinition : servletDefinitions) {
       servletDefinition.destroy(destroyedSoFar);
     }

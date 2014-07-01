@@ -44,9 +44,8 @@ public class EntityManagerFactoryProvisionTest extends TestCase {
 
   public void testSessionCreateOnInjection() {
 
-    assertTrue("SINGLETON VIOLATION " + UnitOfWork.class.getName(),
-        injector.getInstance(UnitOfWork.class)
-        .equals(injector.getInstance(UnitOfWork.class)));
+    assertEquals("SINGLETON VIOLATION " + UnitOfWork.class.getName(),
+        injector.getInstance(UnitOfWork.class), injector.getInstance(UnitOfWork.class));
 
     //startup persistence
     injector.getInstance(PersistService.class).start();

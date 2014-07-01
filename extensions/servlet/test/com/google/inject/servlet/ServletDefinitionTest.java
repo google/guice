@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -83,8 +82,7 @@ public class ServletDefinitionTest extends TestCase {
 
     replay(servletContext);
 
-    servletDefinition.init(servletContext, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(servletContext, injector, Sets.<HttpServlet>newIdentityHashSet());
 
     assertNotNull(mockServlet.getServletContext());
     assertEquals(contextName, mockServlet.getServletContext().getServletContextName());

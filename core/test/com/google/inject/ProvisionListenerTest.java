@@ -587,7 +587,7 @@ public class ProvisionListenerTest extends TestCase {
       assertEquals(notifyType, provision.getBinding().getKey().getRawType());            
       assertEquals(2, provision.getDependencyChain().size());
       
-      assertEquals(null, provision.getDependencyChain().get(0).getDependency());
+      assertNull(provision.getDependencyChain().get(0).getDependency());
       assertContains(provision.getDependencyChain().get(0).getBindingSource(), firstSource);
       
       assertEquals(notifyType,

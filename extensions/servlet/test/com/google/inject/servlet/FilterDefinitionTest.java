@@ -7,7 +7,6 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -29,7 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
@@ -71,21 +69,20 @@ public class FilterDefinitionTest extends TestCase {
     String pattern = "/*";
     final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
         UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
-    filterDef.init(servletContext, injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet());
 
     assertTrue(filterDef.getFilter() instanceof MockFilter);
     final FilterConfig filterConfig = mockFilter.getConfig();
     assertTrue(null != filterConfig);
-    assertTrue(contextName.equals(filterConfig.getServletContext().getServletContextName()));
-    assertTrue(Key.get(Filter.class).toString().equals(filterConfig.getFilterName()));
+    assertEquals(filterConfig.getServletContext().getServletContextName(), contextName);
+    assertEquals(filterConfig.getFilterName(), Key.get(Filter.class).toString());
 
     final Enumeration names = filterConfig.getInitParameterNames();
     while (names.hasMoreElements()) {
       String name = (String) names.nextElement();
 
       assertTrue(initParams.containsKey(name));
-      assertTrue(initParams.get(name).equals(filterConfig.getInitParameter(name)));
+      assertEquals(filterConfig.getInitParameter(name), initParams.get(name));
     }
 
     verify(binding, injector, servletContext);
@@ -119,8 +116,7 @@ public class FilterDefinitionTest extends TestCase {
         UriPatternType.get(UriPatternType.SERVLET, pattern),
         new HashMap<String, String>(), null);
     //should fire on mockfilter now
-    filterDef.init(createMock(ServletContext.class), injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.init(createMock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
 
     assertTrue("Init did not fire", mockFilter.isInit());
@@ -138,7 +134,7 @@ public class FilterDefinitionTest extends TestCase {
 
     assertTrue("Filter did not proceed down chain", proceed[0]);
 
-    filterDef.destroy(Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.destroy(Sets.<Filter>newIdentityHashSet());
     assertTrue("Destroy did not fire", mockFilter.isDestroy());
 
     verify(injector, request);
@@ -181,8 +177,7 @@ public class FilterDefinitionTest extends TestCase {
         UriPatternType.get(UriPatternType.SERVLET, pattern),
         new HashMap<String, String>(), null);
     //should fire on mockfilter now
-    filterDef.init(createMock(ServletContext.class), injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.init(createMock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
 
 
@@ -199,9 +194,9 @@ public class FilterDefinitionTest extends TestCase {
       }
     });
 
-    assertTrue("filter did not suppress chain", !proceed[0]);
+    assertFalse("filter did not suppress chain", proceed[0]);
 
-    filterDef.destroy(Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.destroy(Sets.<Filter>newIdentityHashSet());
     assertTrue("destroy did not fire", mockFilter.isDestroy());
 
     verify(injector, request);
@@ -237,8 +232,7 @@ public class FilterDefinitionTest extends TestCase {
     expect(servletRequest.getRequestURI()).andReturn("/a_context_path/test.html");
 
     replay(servletRequest, binding, injector);
-    filterDef.init(servletContext, injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet());
     Filter filter = filterDef.getFilterIfMatching(servletRequest);
     assertSame(filter, mockFilter);
     verify(servletRequest, binding, injector);
@@ -273,8 +267,7 @@ public class FilterDefinitionTest extends TestCase {
     expect(servletRequest.getRequestURI()).andReturn("/test.html");
 
     replay(servletRequest, binding, injector);
-    filterDef.init(servletContext, injector,
-        Sets.newSetFromMap(Maps.<Filter, Boolean>newIdentityHashMap()));
+    filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet());
     Filter filter = filterDef.getFilterIfMatching(servletRequest);
     assertNull(filter);
     verify(servletRequest, binding, injector);

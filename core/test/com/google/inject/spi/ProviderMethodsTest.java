@@ -34,7 +34,6 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.google.inject.internal.InternalFlags;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
@@ -358,7 +357,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
     ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
     javax.inject.Provider provider = binding.getUserSuppliedProvider();    
-    assertTrue(ProviderMethod.class.isAssignableFrom(provider.getClass()));
+    assertTrue(provider instanceof ProviderMethod);
     assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());    
     assertSame(provider, binding.getProviderInstance());
   }

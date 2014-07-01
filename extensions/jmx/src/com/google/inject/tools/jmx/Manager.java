@@ -77,8 +77,7 @@ public class Manager {
             new ObjectName(name.toString()));
       }
       catch (MalformedObjectNameException e) {
-        throw new RuntimeException("Bad object name: "
-            + name.toString(), e);
+        throw new RuntimeException("Bad object name: " + name, e);
       }
       catch (Exception e) {
         throw new RuntimeException(e);

@@ -97,7 +97,7 @@ public class Matchers {
       Class<? extends Annotation> annotationType) {
     Retention retention = annotationType.getAnnotation(Retention.class);
     checkArgument(retention != null && retention.value() == RetentionPolicy.RUNTIME,
-        "Annotation " + annotationType.getSimpleName() + " is missing RUNTIME retention");
+        "Annotation %s is missing RUNTIME retention", annotationType.getSimpleName());
   }
 
   /**
@@ -119,7 +119,7 @@ public class Matchers {
     }
 
     public boolean matches(AnnotatedElement element) {
-      return element.getAnnotation(annotationType) != null;
+      return element.isAnnotationPresent(annotationType);
     }
 
     @Override public boolean equals(Object other) {

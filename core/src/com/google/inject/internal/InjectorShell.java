@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.Scopes.SINGLETON;
 

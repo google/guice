@@ -21,6 +21,7 @@ import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Runnables;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
@@ -73,9 +74,7 @@ public class BindingTest extends TestCase {
       bind(Object.class).to(Runnable.class).in(Scopes.SINGLETON);
 
       // Instance.
-      bind(Runnable.class).toInstance(new Runnable() {
-        public void run() {}
-      });
+      bind(Runnable.class).toInstance(Runnables.doNothing());
 
       // Provider instance.
       bind(Foo.class).toProvider(new Provider<Foo>() {

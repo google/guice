@@ -99,8 +99,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     }
 
     @Override public boolean equals(Object o) {
-      return o instanceof Assisted
-          && ((Assisted) o).value().equals("");
+      return o instanceof Assisted && ((Assisted) o).value().isEmpty();
     }
 
     @Override public int hashCode() {

@@ -39,7 +39,7 @@ public class ManyConstructorsTest extends TestCase {
     Factory factory = injector.getInstance(Factory.class);
     Foo noIndex = factory.create("no index");
     assertEquals("no index", noIndex.name);
-    assertEquals(null, noIndex.index);
+    assertNull(noIndex.index);
     Foo index = factory.create("index", 1);
     assertEquals("index", index.name);
     assertEquals(1, index.index.intValue());
@@ -55,7 +55,7 @@ public class ManyConstructorsTest extends TestCase {
     OtherFactory factory = injector.getInstance(OtherFactory.class);
     Foo noIndex = factory.create("no index");
     assertEquals("no index", noIndex.name);
-    assertEquals(null, noIndex.index);
+    assertNull(noIndex.index);
     Foo index = factory.create(1, "index");
     assertEquals("index", index.name);
     assertEquals(1, index.index.intValue());
@@ -76,7 +76,7 @@ public class ManyConstructorsTest extends TestCase {
     BarFactory factory = injector.getInstance(BarFactory.class);
     Bar noIndex = factory.create("no index");
     assertEquals("no index", noIndex.getName());
-    assertEquals(null, noIndex.getIndex());
+    assertNull(noIndex.getIndex());
     Bar index = factory.create("index", 1);
     assertEquals("index", index.getName());
     assertEquals(1, index.getIndex().intValue());
@@ -92,7 +92,7 @@ public class ManyConstructorsTest extends TestCase {
     SimpleFactory factory = injector.getInstance(SimpleFactory.class);
     Foo noIndex = factory.create("no index");
     assertEquals("no index", noIndex.name);
-    assertEquals(null, noIndex.index);
+    assertNull(noIndex.index);
     
     injector = Guice.createInjector(new AbstractModule() {
       @Override

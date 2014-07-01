@@ -231,13 +231,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       // NOTE(iqshum): I don't think this is possible, since the dispatcher-sent request would
       // perform its own wrapping.
       private boolean isPathInfoComputed() {
-        return pathInfoComputed
-            && !(null != servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST));
+        return pathInfoComputed && servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST) == null;
       }
 
       private boolean isPathComputed() {
-        return pathComputed
-            && !(null != servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST));
+        return pathComputed && servletRequest.getAttribute(REQUEST_DISPATCHER_REQUEST) == null;
       }
 
       @Override

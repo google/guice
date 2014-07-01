@@ -92,8 +92,8 @@ public class Asserts {
   public static void assertEqualsBothWays(Object expected, Object actual) {
     assertNotNull(expected);
     assertNotNull(actual);
-    assertTrue("expected.equals(actual)", expected.equals(actual));
-    assertTrue("actual.equals(expected)", actual.equals(expected));
+    assertEquals("expected.equals(actual)", actual, expected);
+    assertEquals("actual.equals(expected)", expected, actual);
     assertEquals("hashCode", expected.hashCode(), actual.hashCode());
   }
 

@@ -1290,7 +1290,7 @@ public class ElementsTest extends TestCase {
       Element element = elements.get(i);
       if (!(element instanceof Message)) {
           ElementSource source = (ElementSource) element.getSource();
-          assertTrue(source.getModuleClassNames().size() > 0);
+          assertFalse(source.getModuleClassNames().isEmpty());
           if (isIncludeStackTraceComplete()) {
             assertTrue(source.getStackTrace().length > 0);
           } else {

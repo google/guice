@@ -411,7 +411,7 @@ public class SpiBindingsTest extends TestCase {
   public void checkBindingSource(Binding binding) {
     assertContains(binding.getSource().toString(), getDeclaringSourcePart(getClass()));
     ElementSource source = (ElementSource) binding.getSource();
-    assertTrue(source.getModuleClassNames().size() > 0);
+    assertFalse(source.getModuleClassNames().isEmpty());
     if (isIncludeStackTraceComplete()) {
       assertTrue(source.getStackTrace().length > 0);
     } else {

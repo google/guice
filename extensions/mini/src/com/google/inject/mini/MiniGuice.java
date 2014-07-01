@@ -132,7 +132,7 @@ public final class MiniGuice {
     boolean hasProvidesMethods = false;
     for (Class<?> c = module.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
-        if (method.getAnnotation(com.google.inject.Provides.class) != null) {
+        if (method.isAnnotationPresent(com.google.inject.Provides.class)) {
           Key key = key(method, method.getGenericReturnType(), method.getAnnotations());
           addProviderMethodBinding(key, module, method);
           hasProvidesMethods = true;
@@ -161,7 +161,7 @@ public final class MiniGuice {
       }
     };
 
-    boolean singleton = method.getAnnotation(javax.inject.Singleton.class) != null;
+    boolean singleton = method.isAnnotationPresent(javax.inject.Singleton.class);
     putBinding(key, unscoped, singleton);
   }
 
@@ -189,7 +189,7 @@ public final class MiniGuice {
     List<Object> fieldKeysList = new ArrayList<Object>();
     for (Class<?> c = type; c != Object.class; c = c.getSuperclass()) {
       for (Field field : c.getDeclaredFields()) {
-        if (field.getAnnotation(javax.inject.Inject.class) == null) {
+        if (!field.isAnnotationPresent(javax.inject.Inject.class)) {
           continue;
         }
         field.setAccessible(true);
@@ -207,7 +207,7 @@ public final class MiniGuice {
      */
     Constructor<?> injectedConstructor = null;
     for (Constructor<?> constructor : type.getDeclaredConstructors()) {
-      if (constructor.getAnnotation(javax.inject.Inject.class) == null) {
+      if (!constructor.isAnnotationPresent(javax.inject.Inject.class)) {
         continue;
       }
       if (injectedConstructor != null) {
@@ -255,7 +255,7 @@ public final class MiniGuice {
       }
     };
 
-    boolean singleton = type.getAnnotation(javax.inject.Singleton.class) != null;
+    boolean singleton = type.isAnnotationPresent(javax.inject.Singleton.class);
     putBinding(new Key(type, null), unscoped, singleton);
   }
 
@@ -300,7 +300,7 @@ public final class MiniGuice {
   public Key key(Object subject, Type type, Annotation[] annotations) {
     Annotation bindingAnnotation = null;
     for (Annotation a : annotations) {
-      if (a.annotationType().getAnnotation(javax.inject.Qualifier.class) == null) {
+      if (!a.annotationType().isAnnotationPresent(javax.inject.Qualifier.class)) {
         continue;
       }
       if (bindingAnnotation != null) {

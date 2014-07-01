@@ -254,7 +254,7 @@ public class FactoryProvider<F> implements Provider<F>, HasDependencies {
     List<AssistedConstructor<?>> constructors = Lists.newArrayList();
 
     for (Constructor<?> constructor : implementationType.getRawType().getDeclaredConstructors()) {
-      if (constructor.getAnnotation(AssistedInject.class) != null) {
+      if (constructor.isAnnotationPresent(AssistedInject.class)) {
         AssistedConstructor<?> assistedConstructor = AssistedConstructor.create(
             constructor, implementationType.getParameterTypes(constructor));
         constructors.add(assistedConstructor);

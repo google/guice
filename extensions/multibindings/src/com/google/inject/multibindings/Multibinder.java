@@ -391,13 +391,7 @@ public abstract class Multibinder<T> {
     }
 
     @Override public String toString() {
-      return new StringBuilder()
-          .append(setName)
-          .append(setName.length() > 0 ? " " : "")
-          .append("Multibinder<")
-          .append(elementType)
-          .append(">")
-          .toString();
+      return (setName.isEmpty() ? "" : setName + " ") + "Multibinder<" + elementType + ">";
     }
   }
 

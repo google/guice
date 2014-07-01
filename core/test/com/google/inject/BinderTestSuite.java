@@ -35,7 +35,7 @@ import junit.framework.TestSuite;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -348,14 +348,14 @@ public class BinderTestSuite extends TestCase {
     }
 
     private Builder scoper(Scoper scoper) {
-      name(name + " in " + scoper.toString());
+      name(name + " in " + scoper);
       scoper.apply(this);
       return this;
     }
 
     private <T> Builder expectedValues(T... values) {
       this.expectedValues.clear();
-      this.expectedValues.addAll(Arrays.asList(values));
+      Collections.addAll(this.expectedValues, values);
       return this;
     }
 

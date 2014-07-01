@@ -17,6 +17,7 @@
 package com.google.inject.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Runnables;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -32,13 +33,6 @@ import java.util.concurrent.FutureTask;
 public abstract class AsyncService implements Service {
   private final ExecutorService executor;
 
-  /**
-   * A runnable that does nothing.
-   */
-  private static final Runnable NOOP = new Runnable() {
-    public void run() { }
-  };
-
   private volatile State state;
 
   public AsyncService(ExecutorService executor) {
@@ -51,7 +45,7 @@ public abstract class AsyncService implements Service {
 
     // Starts are idempotent.
     if (state == State.STARTED) {
-      return new FutureTask<State>(NOOP, State.STARTED);
+      return new FutureTask<State>(Runnables.doNothing(), State.STARTED);
     }
 
     return executor.submit(new Callable<State>() {
@@ -76,7 +70,7 @@ public abstract class AsyncService implements Service {
 
     // Likewise, stops are idempotent.
     if (state == State.STOPPED) {
-      return new FutureTask<State>(NOOP, State.STOPPED);
+      return new FutureTask<State>(Runnables.doNothing(), State.STOPPED);
     }
 
     return executor.submit(new Callable<State>() {

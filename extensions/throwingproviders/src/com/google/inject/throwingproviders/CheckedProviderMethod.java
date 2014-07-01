@@ -129,6 +129,6 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   }
 
   @Override public String toString() {
-    return "@CheckedProvides " + StackTraceElements.forMember(method).toString();
+    return "@CheckedProvides " + StackTraceElements.forMember(method);
   }
 }
