@@ -18,8 +18,10 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -33,6 +35,8 @@ import com.google.inject.util.Modules;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -71,6 +75,7 @@ public final class ProviderMethodsModule implements Module {
 
     return new ProviderMethodsModule(object);
   }
+
   public synchronized void configure(Binder binder) {
     for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
       providerMethod.configure(binder);
@@ -79,10 +84,42 @@ public final class ProviderMethodsModule implements Module {
 
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
     List<ProviderMethod<?>> result = Lists.newArrayList();
+    Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
     for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
       for (Method method : c.getDeclaredMethods()) {
+        // private/static methods cannot override or be overridden by other methods, so there is no
+        // point in indexing them.
+        // Skip synthetic methods and bridge methods since java will automatically generate
+        // synthetic overrides in some cases where we don't want to generate an error (e.g.
+        // increasing visibility of a subclass).
+        if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
+            && !method.isBridge() && !method.isSynthetic()) {
+          methodsBySignature.put(new Signature(method), method);
+        }
         if (isProvider(method)) {
           result.add(createProviderMethod(binder, method));
+        }
+      }
+    }
+    // we have found all the providers and now need to identify if any were overridden
+    // In the worst case this will have O(n^2) in the number of @Provides methods, but that is only
+    // assuming that every method is an override, in general it should be very quick.
+    for (ProviderMethod<?> provider : result) {
+      Method method = provider.getMethod();
+      for (Method matchingSignature : methodsBySignature.get(new Signature(method))) {
+        // matching signature is in the same class or a super class, therefore method cannot be
+        // overridding it.
+        if (matchingSignature.getDeclaringClass().isAssignableFrom(method.getDeclaringClass())) {
+          continue;
+        }
+        // now we know matching signature is in a subtype of method.getDeclaringClass()
+        if (overrides(matchingSignature, method)) {
+          binder.addError(
+              "Overriding @Provides methods is not allowed."
+                  + "\n\t@Provides method: %s\n\toverridden by: %s",
+              method,
+              matchingSignature);
+          break;
         }
       }
     }
@@ -101,7 +138,55 @@ public final class ProviderMethodsModule implements Module {
         && method.isAnnotationPresent(Provides.class);
   }
 
-  <T> ProviderMethod<T> createProviderMethod(Binder binder, final Method method) {
+  private final class Signature {
+    final Class<?>[] parameters;
+    final String name;
+    final int hashCode;
+
+    Signature(Method method) {
+      this.name = method.getName();
+      // We need to 'resolve' the parameters against the actual class type in case this method uses
+      // type parameters.  This is so we can detect overrides of generic superclass methods where
+      // the subclass specifies the type parameter.  javac implements these kinds of overrides via
+      // bridge methods, but we don't want to give errors on bridge methods (but rather the target
+      // of the bridge).
+      List<TypeLiteral<?>> resolvedParameterTypes = typeLiteral.getParameterTypes(method);
+      this.parameters = new Class<?>[resolvedParameterTypes.size()];
+      int i = 0;
+      for (TypeLiteral<?> type : resolvedParameterTypes) {
+        parameters[i] = type.getRawType();
+      }
+      this.hashCode = name.hashCode() + 31 * Arrays.hashCode(parameters);
+    }
+
+    @Override public boolean equals(Object obj) {
+      if (obj instanceof Signature) {
+        Signature other = (Signature) obj;
+        return other.name.equals(name) && Arrays.equals(parameters, other.parameters);
+      }
+      return false;
+    }
+
+    @Override public int hashCode() {
+      return hashCode;
+    }
+  }
+
+  /** Returns true if a overrides b, assumes that the signatures match */
+  private static boolean overrides(Method a, Method b) {
+    // See JLS section 8.4.8.1
+    int modifiers = b.getModifiers();
+    if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) {
+      return true;
+    }
+    if (Modifier.isPrivate(modifiers)) {
+      return false;
+    }
+    // b must be package-private
+    return a.getDeclaringClass().getPackage().equals(b.getDeclaringClass().getPackage());
+  }
+
+  private <T> ProviderMethod<T> createProviderMethod(Binder binder, Method method) {
     binder = binder.withSource(method);
     Errors errors = new Errors(method);
 
