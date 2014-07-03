@@ -22,8 +22,6 @@ import junit.framework.TestCase;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.inject.config.AbstractModule;
-
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */

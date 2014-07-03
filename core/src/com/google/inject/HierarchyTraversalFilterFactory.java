@@ -1,4 +1,4 @@
-package com.google.inject.config;
+package com.google.inject;
 
 /**
  * Creates {@link HierarchyTraversalFilter} that can be used to filter 

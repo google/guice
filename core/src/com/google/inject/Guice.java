@@ -18,12 +18,6 @@ package com.google.inject;
 
 import java.util.Arrays;
 
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.AnnotatedGuiceHierarchyTraversalFilter;
-import com.google.inject.config.AnnotationDatabaseFinder;
-import com.google.inject.config.HierarchyTraversalFilter;
-import com.google.inject.config.HierarchyTraversalFilterFactory;
-import com.google.inject.config.Module;
 import com.google.inject.internal.InternalInjectorCreator;
 
 /**

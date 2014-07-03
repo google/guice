@@ -18,7 +18,7 @@ package com.google.inject.grapher;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.config.AbstractModule;
+import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

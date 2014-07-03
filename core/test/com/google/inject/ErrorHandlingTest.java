@@ -18,8 +18,6 @@ package com.google.inject;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 

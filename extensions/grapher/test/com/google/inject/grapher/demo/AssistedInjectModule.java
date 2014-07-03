@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher.demo;
 
-import com.google.inject.config.AbstractModule;
+import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 /**

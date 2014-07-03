@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import com.google.inject.config.AbstractModule;
-
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */

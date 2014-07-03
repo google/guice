@@ -1,4 +1,4 @@
-package com.google.inject.config;
+package com.google.inject;
 
 import java.util.HashMap;
 import java.util.HashSet;

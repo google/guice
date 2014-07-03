@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.google.inject.config.AnnotationDatabase;
+import com.google.inject.AnnotationDatabase;
 import roboguice.fragment.FragmentUtil;
 
 public class AnnotationDatabaseImpl extends AnnotationDatabase {

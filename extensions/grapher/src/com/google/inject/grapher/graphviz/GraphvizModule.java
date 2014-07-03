@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher.graphviz;
 
-import com.google.inject.config.AbstractModule;
+import com.google.inject.AbstractModule;
 import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.ShortNameFactory;
 

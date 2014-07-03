@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.config;
+package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
@@ -24,6 +24,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -31,6 +32,7 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
@@ -40,8 +42,6 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
 import com.google.inject.name.Named;
 import com.google.inject.util.Providers;
 

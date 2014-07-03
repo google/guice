@@ -17,17 +17,17 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
+import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
 import java.util.Set;

@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.util.Types.listOf;
 
-import com.google.inject.config.AbstractModule;
 import com.google.inject.util.Types;
 
 import junit.framework.TestCase;

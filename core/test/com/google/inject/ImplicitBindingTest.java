@@ -17,8 +17,6 @@
 package com.google.inject;
 
 import com.google.common.collect.Iterables;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Message;

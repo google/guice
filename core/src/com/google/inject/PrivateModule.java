@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.config;
+package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.inject.Binder;
-import com.google.inject.Binding;
-import com.google.inject.Exposed;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.MembersInjector;
-import com.google.inject.PrivateBinder;
-import com.google.inject.Provider;
-import com.google.inject.Provides;
-import com.google.inject.Scope;
-import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.AnnotatedElementBuilder;

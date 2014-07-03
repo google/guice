@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject.config;
+package com.google.inject;
 
-import com.google.inject.Binder;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
 
 /**
  * A module contributes configuration information, typically interface

@@ -21,7 +21,6 @@ import static com.google.inject.name.Names.named;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
-import com.google.inject.config.AbstractModule;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;

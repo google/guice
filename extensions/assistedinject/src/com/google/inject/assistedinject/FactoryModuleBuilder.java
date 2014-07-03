@@ -16,9 +16,9 @@
 
 package com.google.inject.assistedinject;
 
-import com.google.inject.config.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.config.Module;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 

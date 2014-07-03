@@ -1,4 +1,4 @@
-package com.google.inject.config;
+package com.google.inject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

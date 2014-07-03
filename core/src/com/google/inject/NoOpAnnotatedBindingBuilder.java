@@ -1,12 +1,8 @@
-package com.google.inject.config;
+package com.google.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.Scope;
-import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;

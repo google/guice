@@ -3,11 +3,11 @@ package com.google.inject.spi;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
+import com.google.inject.Module;
 
 import junit.framework.TestCase;
 
@@ -80,7 +80,7 @@ public class ElementSourceTest extends TestCase {
                   callStack[0].getClassName());
               assertEquals("com.google.inject.spi.Elements$RecordingBinder",
                   callStack[1].getClassName());
-              assertEquals("com.google.inject.config.AbstractModule",
+              assertEquals("com.google.inject.AbstractModule",
                   callStack[2].getClassName());
               // Module C
               assertEquals("com.google.inject.spi.ElementSourceTest$C",
@@ -89,7 +89,7 @@ public class ElementSourceTest extends TestCase {
                   callStack[3].getMethodName());
               assertEquals("Unknown Source",
                   callStack[3].getFileName());
-              assertEquals("com.google.inject.config.AbstractModule",
+              assertEquals("com.google.inject.AbstractModule",
                   callStack[4].getClassName());
               assertEquals("com.google.inject.spi.Elements$RecordingBinder",
                   callStack[5].getClassName());
@@ -99,11 +99,11 @@ public class ElementSourceTest extends TestCase {
               assertEquals("com.google.inject.spi.Elements$RecordingBinder",
                   callStack[7].getClassName());
               // Module A
-              assertEquals("com.google.inject.config.AbstractModule",
+              assertEquals("com.google.inject.AbstractModule",
                   callStack[8].getClassName());
               assertEquals("com.google.inject.spi.ElementSourceTest$A",
                   callStack[9].getClassName());
-              assertEquals("com.google.inject.config.AbstractModule",
+              assertEquals("com.google.inject.AbstractModule",
                   callStack[10].getClassName());
               assertEquals("com.google.inject.spi.Elements$RecordingBinder",
                   callStack[11].getClassName());

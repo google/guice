@@ -1,8 +1,8 @@
 package com.google.inject.spi;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
+import com.google.inject.Module;
 
 import junit.framework.TestCase;
 

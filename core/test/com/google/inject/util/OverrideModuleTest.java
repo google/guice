@@ -24,20 +24,20 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Objects;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Exposed;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.Stage;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
-import com.google.inject.config.PrivateModule;
 import com.google.inject.name.Named;
 import com.google.inject.util.Modules;
 

@@ -18,7 +18,6 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 
-import com.google.inject.config.AbstractModule;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 

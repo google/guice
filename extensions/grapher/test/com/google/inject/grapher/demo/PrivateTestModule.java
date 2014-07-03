@@ -16,7 +16,7 @@
 
 package com.google.inject.grapher.demo;
 
-import com.google.inject.config.PrivateModule;
+import com.google.inject.PrivateModule;
 
 /**
  * Module to test private modules and exposed bindings.

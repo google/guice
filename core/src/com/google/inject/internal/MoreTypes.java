@@ -24,8 +24,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
+import com.google.inject.HierarchyTraversalFilter;
 import com.google.inject.TypeLiteral;
-import com.google.inject.config.HierarchyTraversalFilter;
 import com.google.inject.util.Types;
 
 import java.io.Serializable;

@@ -30,8 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.inject.config.AbstractModule;
-
 /**
  * @author crazybob@google.com (Bob Lee)
  */

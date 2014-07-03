@@ -10,8 +10,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.google.inject.config.AbstractModule;
-
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */

@@ -24,8 +24,6 @@ import junit.framework.TestCase;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 
-import com.google.inject.config.AbstractModule;
-
 /**
  * @author crazybob@google.com (Bob Lee)
  */

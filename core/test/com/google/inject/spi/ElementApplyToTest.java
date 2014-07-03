@@ -16,7 +16,7 @@
 
 package com.google.inject.spi;
 
-import com.google.inject.config.Module;
+import com.google.inject.Module;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

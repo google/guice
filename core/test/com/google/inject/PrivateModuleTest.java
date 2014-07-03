@@ -22,8 +22,6 @@ import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.PrivateModule;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;

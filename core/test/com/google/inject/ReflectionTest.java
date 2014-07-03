@@ -18,7 +18,6 @@ package com.google.inject;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.config.AbstractModule;
 import com.google.inject.spi.ElementSource;
 
 import junit.framework.TestCase;

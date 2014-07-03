@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.config;
+package com.google.inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -22,15 +22,6 @@ import static com.google.common.base.Preconditions.checkState;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import com.google.inject.Binder;
-import com.google.inject.Binding;
-import com.google.inject.Inject;
-import com.google.inject.Key;
-import com.google.inject.MembersInjector;
-import com.google.inject.Provider;
-import com.google.inject.Scope;
-import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;

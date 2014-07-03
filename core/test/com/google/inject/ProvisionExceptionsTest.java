@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.config.AbstractModule;
 import com.google.inject.internal.Errors;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;

@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.config.Module;
 import com.google.inject.spi.TypeConverterBinding;
 
 import java.lang.annotation.Annotation;

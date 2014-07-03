@@ -21,8 +21,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.PrivateModule;
 
 import junit.framework.TestCase;
 

@@ -17,8 +17,6 @@
 package com.google.inject;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.config.BinderTest;
-import com.google.inject.config.BinderTestSuite;
 import com.google.inject.internal.MoreTypesTest;
 import com.google.inject.internal.RehashableKeysTest;
 import com.google.inject.internal.UniqueAnnotationsTest;

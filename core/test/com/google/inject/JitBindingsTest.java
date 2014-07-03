@@ -25,9 +25,6 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.PrivateModule;
-
 /**
  * Some tests for {@link Binder#requireExplicitBindings()}
  * 

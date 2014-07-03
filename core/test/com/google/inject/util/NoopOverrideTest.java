@@ -16,7 +16,7 @@
 
 package com.google.inject.util;
 
-import com.google.inject.config.Module;
+import com.google.inject.Module;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.ElementsTest;
 
