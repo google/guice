@@ -33,17 +33,14 @@ import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint.Signature;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,8 +72,8 @@ public class InjectionPointTest extends TestCase {
         + getClass().getName() + ".foo", dependency.toString());
     assertEquals(fooField, dependency.getInjectionPoint().getMember());
     assertEquals(-1, dependency.getParameterIndex());
-    Assert.assertEquals(Key.get(String.class, named("a")), dependency.getKey());
-    assertEquals(false, dependency.isNullable());
+    assertEquals(Key.get(String.class, named("a")), dependency.getKey());
+    assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, fooField, false).getDependencies()));
@@ -99,7 +96,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(barMethod, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("b")), dependency.getKey());
-    assertEquals(false, dependency.isNullable());
+    assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, barMethod, false).getDependencies()));
@@ -123,7 +120,7 @@ public class InjectionPointTest extends TestCase {
     assertEquals(constructor, dependency.getInjectionPoint().getMember());
     assertEquals(0, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("c")), dependency.getKey());
-    assertEquals(false, dependency.isNullable());
+    assertFalse(dependency.isNullable());
     assertNotSerializable(dependency);
     assertEqualsBothWays(dependency,
         getOnlyElement(new InjectionPoint(typeLiteral, constructor).getDependencies()));
@@ -136,7 +133,7 @@ public class InjectionPointTest extends TestCase {
     assertNull(dependency.getInjectionPoint());
     assertEquals(-1, dependency.getParameterIndex());
     assertEquals(Key.get(String.class, named("d")), dependency.getKey());
-    assertEquals(true, dependency.isNullable());
+    assertTrue(dependency.isNullable());
     assertNotSerializable(dependency);
     assertEqualsBothWays(dependency, Dependency.get(Key.get(String.class, named("d"))));
   }

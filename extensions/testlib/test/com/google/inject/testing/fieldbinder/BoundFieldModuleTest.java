@@ -123,6 +123,24 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Number.class));
   }
 
+  public void testBindingSuperTypeAccessSubType() {
+    final Integer testValue = 1024;
+    Object instance = new Object() {
+      @Bind(to = Number.class) private Integer anInt = testValue;
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    try {
+      injector.getInstance(Integer.class);
+    } catch (ConfigurationException e) {
+      assertContains(
+          e.getMessage(),
+          "Could not find a suitable constructor in java.lang.Integer");
+    }
+  }
+
   public void testBindingIncorrectTypeProviderFails() {
     final Integer testValue = 1024;
     Object instance = new Object() {
@@ -627,7 +645,7 @@ public class BoundFieldModuleTest extends TestCase {
     };
 
     BoundFieldModule module = BoundFieldModule.of(instance);
-    Injector injector = Guice.createInjector(module);
+    Guice.createInjector(module);
 
     assertEquals(testValue, testNumberProvider.anInt);
   }

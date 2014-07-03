@@ -76,21 +76,21 @@ public class RehashableKeysTest extends TestCase {
     MutableTestAnnotation annotation = new MutableTestAnnotation(100);
     Key<?> key = Key.get(Integer.class, annotation);
     Key<?> keyCopy = rehash(key);
-    assertTrue(key.equals(keyCopy));
-    assertTrue(key.hashCode() == keyCopy.hashCode());
-    assertTrue(key.toString().equals(keyCopy.toString()));
+    assertEquals(keyCopy, key);
+    assertEquals(keyCopy.hashCode(), key.hashCode());
+    assertEquals(keyCopy.toString(), key.toString());
 
     annotation.setValue(101);
     Key<?> keyCopy2 = rehash(key);
-    assertTrue(key.equals(keyCopy2));
+    assertEquals(keyCopy2, key);
     assertFalse(key.hashCode() == keyCopy2.hashCode());
     assertFalse(key.toString().equals(keyCopy2.toString()));
 
     annotation.setValue(100);
     Key<?> keyCopy3 = rehash(keyCopy2);
-    assertTrue(key.equals(keyCopy3));
-    assertTrue(key.hashCode() == keyCopy3.hashCode());
-    assertTrue(keyCopy2.equals(keyCopy3));
+    assertEquals(keyCopy3, key);
+    assertEquals(keyCopy3.hashCode(), key.hashCode());
+    assertEquals(keyCopy3, keyCopy2);
     assertFalse(keyCopy2.hashCode() == keyCopy3.hashCode());
     assertFalse(keyCopy2.toString().equals(keyCopy3.toString()));
   }

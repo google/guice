@@ -207,7 +207,7 @@ public class VarargsServletDispatchIntegrationTest extends TestCase {
 
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
         throws IOException, ServletException {
-      assertTrue("NeverServlet was fired, when it should not have been.", false);
+      fail("NeverServlet was fired, when it should not have been.");
     }
 
     public void destroy() {

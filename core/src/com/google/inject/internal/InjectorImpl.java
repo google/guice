@@ -128,7 +128,7 @@ final class InjectorImpl implements Injector, Lookups {
     if (parent != null) {
       localContext = parent.localContext;
     } else {
-      localContext = new LocalContextThreadLocal();
+      localContext = new ThreadLocal<Object[]>();
     }
   }
 
@@ -309,7 +309,7 @@ final class InjectorImpl implements Injector, Lookups {
   /** Returns true if the key type is MembersInjector (but not a subclass of MembersInjector). */
   private static boolean isMembersInjector(Key<?> key) {
     return key.getTypeLiteral().getRawType().equals(MembersInjector.class)
-        && !(key.getAnnotationType() != null);
+        && key.getAnnotationType() == null;
   }
 
   private <T> BindingImpl<MembersInjector<T>> createMembersInjectorBinding(
@@ -1043,11 +1043,15 @@ final class InjectorImpl implements Injector, Lookups {
     return getProvider(type).get();
   }
 
-  final ThreadLocal<Object[]> localContext;
+  private final ThreadLocal<Object[]> localContext;
 
   /** Looks up thread local context. Creates (and removes) a new context if necessary. */
   <T> T callInContext(ContextualCallable<T> callable) throws ErrorsException {
     Object[] reference = localContext.get();
+    if (reference == null) {
+      reference = new Object[1];
+      localContext.set(reference);
+    }
     if (reference[0] == null) {
       reference[0] = new InternalContext();
       try {
@@ -1067,12 +1071,5 @@ final class InjectorImpl implements Injector, Lookups {
     return Objects.toStringHelper(Injector.class)
         .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
-  }
-
-  private static final class LocalContextThreadLocal extends ThreadLocal<Object[]> {
-    @Override
-    protected Object[] initialValue() {
-      return new Object[1];
-    }
   }
 }

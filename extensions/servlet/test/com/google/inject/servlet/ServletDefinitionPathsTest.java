@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -99,8 +98,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>(), null);
 
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -196,8 +194,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>(), null);
 
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
@@ -292,8 +289,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
         UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>(), null);
 
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);

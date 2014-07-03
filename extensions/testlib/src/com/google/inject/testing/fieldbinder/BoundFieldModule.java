@@ -243,10 +243,11 @@ public final class BoundFieldModule implements Module {
           field,
           "Fields annotated with both @Bind and @Inject are illegal.");
     }
-    return Optional.of(new BoundFieldInfo(
-        field,
-        bindAnnotation,
-        containingClassType.getFieldType(field)));
+    return Optional.of(
+        new BoundFieldInfo(
+            field,
+            bindAnnotation,
+            containingClassType.getFieldType(field)));
   }
 
   private LinkedBindingBuilder<?> verifyBindingAnnotations(
@@ -356,8 +357,8 @@ public final class BoundFieldModule implements Module {
           // addErrorAndThrow already called addError, so do nothing
         }
       }
-      currentClassType = currentClassType.getSupertype(
-          currentClassType.getRawType().getSuperclass());
+      currentClassType =
+          currentClassType.getSupertype(currentClassType.getRawType().getSuperclass());
     }
   }
 }

@@ -59,7 +59,7 @@ public class DynamicFinderTest extends TestCase {
 
     //obtain same em again (bound to txn)
     JpaTestEntity te = new JpaTestEntity();
-    te.setText("HIAjsOKAOSD" + new Date() + UUID.randomUUID().toString());
+    te.setText("HIAjsOKAOSD" + new Date() + UUID.randomUUID());
 
     dao.persist(te);
 

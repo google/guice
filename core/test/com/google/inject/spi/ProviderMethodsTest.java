@@ -19,19 +19,9 @@ package com.google.inject.spi;
 import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
-
-import junit.framework.TestCase;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.config.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -40,16 +30,27 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.config.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.google.inject.config.AbstractModule;
-import com.google.inject.config.Module;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.util.Types;
+
+import junit.framework.TestCase;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -210,7 +211,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testGenericProviderMethods() {
     Injector injector = Guice.createInjector(
         new ProvideTs<String>("A", "B") {}, new ProvideTs<Integer>(1, 2) {});
-
+    
     assertEquals("A", injector.getInstance(Key.get(String.class, Names.named("First"))));
     assertEquals("B", injector.getInstance(Key.get(String.class, Names.named("Second"))));
     assertEquals(ImmutableSet.of("A", "B"),
@@ -245,7 +246,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       return ImmutableSet.of(first, second);
     }
   }
-
+  
   public void testAutomaticProviderMethods() {
     Injector injector = Guice.createInjector((Module) new AbstractModule() {
       @Override protected void configure() { }
@@ -280,7 +281,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     Injector injector = Guice.createInjector(installsSelf);
     assertEquals("A5", injector.getInstance(String.class));
   }
-
+  
   public void testWildcardProviderMethods() {
     final List<String> strings = ImmutableList.of("A", "B", "C");
     final List<Number> numbers = ImmutableList.<Number>of(1, 2, 3);
@@ -356,9 +357,9 @@ public class ProviderMethodsTest extends TestCase implements Module {
         element instanceof ProviderInstanceBinding);
 
     ProviderInstanceBinding binding = (ProviderInstanceBinding) element;
-    javax.inject.Provider provider = binding.getUserSuppliedProvider();
-    assertTrue(ProviderMethod.class.isAssignableFrom(provider.getClass()));
-    assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());
+    javax.inject.Provider provider = binding.getUserSuppliedProvider();    
+    assertTrue(provider instanceof ProviderMethod);
+    assertEquals(methodsObject, ((ProviderMethod) provider).getInstance());    
     assertSame(provider, binding.getProviderInstance());
   }
 
@@ -371,29 +372,29 @@ public class ProviderMethodsTest extends TestCase implements Module {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(), 
           "1) Provider methods must return a value. Do not return void.",
           getClass().getName(), ".provideFoo(ProviderMethodsTest.java:");
     }
   }
-
+  
   public void testInjectsJustOneLogger() {
     AtomicReference<Logger> loggerRef = new AtomicReference<Logger>();
     Injector injector = Guice.createInjector(new FooModule(loggerRef));
-
+    
     assertNull(loggerRef.get());
     injector.getInstance(Integer.class);
     Logger lastLogger = loggerRef.getAndSet(null);
     assertNotNull(lastLogger);
     injector.getInstance(Integer.class);
     assertSame(lastLogger, loggerRef.get());
-
+    
     assertEquals(FooModule.class.getName() + ".foo", lastLogger.getName());
   }
-
+  
   private static class FooModule extends AbstractModule {
     private final AtomicReference<Logger> loggerRef;
-
+    
     public FooModule(AtomicReference<Logger> loggerRef) {
       this.loggerRef = loggerRef;
     }
@@ -406,7 +407,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       return 42;
     }
   }
-
+  
   public void testSpi() throws Exception {
     Module m1 = new AbstractModule() {
       @Override protected void configure() {}
@@ -417,7 +418,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       @Provides Integer provideInt(@Named("foo") String dep) { return 42; }
     };
     Injector injector = Guice.createInjector(m1, m2);
-
+    
     Binding<String> stringBinding =
         injector.getBinding(Key.get(String.class, Names.named("foo")));
     ProvidesMethodBinding<String> stringMethod =
@@ -428,7 +429,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertEquals(((HasDependencies) stringBinding).getDependencies(),
         stringMethod.getDependencies());
     assertEquals(Key.get(String.class, Names.named("foo")), stringMethod.getKey());
-
+    
     Binding<Integer> intBinding = injector.getBinding(Integer.class);
     ProvidesMethodBinding<Integer> intMethod =
         intBinding.acceptTargetVisitor(new BindingCapturer<Integer>());
@@ -438,21 +439,21 @@ public class ProviderMethodsTest extends TestCase implements Module {
     assertEquals(((HasDependencies) intBinding).getDependencies(),
         intMethod.getDependencies());
     assertEquals(Key.get(Integer.class), intMethod.getKey());
-
+    
   }
-
+  
   private static class BindingCapturer<T> extends DefaultBindingTargetVisitor<T, ProvidesMethodBinding<T>>
       implements ProvidesMethodTargetVisitor<T, ProvidesMethodBinding<T>> {
-
+    
     @SuppressWarnings("unchecked")
     public ProvidesMethodBinding<T> visit(
         ProvidesMethodBinding<? extends T> providesMethodBinding) {
       return (ProvidesMethodBinding<T>)providesMethodBinding;
     }
-
+    
     @Override protected ProvidesMethodBinding<T> visitOther(Binding<? extends T> binding) {
       throw new IllegalStateException("unexpected visit of: " + binding);
-    }
+    }    
   }
 
   public void testProvidesMethodVisibility() {
@@ -494,7 +495,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
       fail("Expected injector creation failure");
     } catch (CreationException expected) {
       // both of our super class bindings cause errors
-      assertContains(expected.getMessage(),
+      assertContains(expected.getMessage(), 
           "A binding to java.lang.Long was already configured",
           "A binding to java.lang.Integer was already configured");
     }
@@ -547,12 +548,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
     @Override protected void configure() {}
 
     @Provides @Singleton Integer foo() {
-      fooCallerClass = new Exception().getStackTrace()[1].getClassName();
+      this.fooCallerClass = new Exception().getStackTrace()[1].getClassName();
       return 42;
     }
 
     @Provides @Singleton Long bar() {
-      barCallerClass = new Exception().getStackTrace()[1].getClassName();
+      this.barCallerClass = new Exception().getStackTrace()[1].getClassName();
       return 42L;
     }
   }
@@ -560,14 +561,14 @@ public class ProviderMethodsTest extends TestCase implements Module {
   public void testShareFastClassWithSuperClass() {
     CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
     Guice.createInjector(Stage.PRODUCTION, module);
-    assertEquals("Expected provider methods in the same class to share fastclass classes",
+    assertEquals("Expected provider methods in the same class to share fastclass classes", 
         module.fooCallerClass, module.barCallerClass);
     assertFalse(
         "Did not expect provider methods in the subclasses to share fastclass classes "
             + "with their parent classes",
         module.bazCallerClass.equals(module.barCallerClass));
   }
-
+  
 
   private static class CallerInspecterSubClassModule extends CallerInspecterModule {
     String bazCallerClass;
@@ -575,72 +576,244 @@ public class ProviderMethodsTest extends TestCase implements Module {
     @Override protected void configure() {}
 
     @Provides @Singleton Double baz() {
-      bazCallerClass = new Exception().getStackTrace()[1].getClassName();
+      this.bazCallerClass = new Exception().getStackTrace()[1].getClassName();
       return 42D;
     }
   }
   /*end[AOP]*/
 
-  // Test the behavior of provider methods when they are overridden
-  public void testOverrideProviderMethod() {
-    try {
-      Guice.createInjector(new SuperClassModule() {
-        @Override
-        @Provides
-        Double normalOverrideWithProvides() {
-          return 2D;
-        }
-      });
-      fail();
-    } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
-          "A binding to java.lang.Double was already configured");
-    }
-
-    Injector injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
-      @Override Long normalOverrideWithoutProvides() {
-        return 2L;
-      }
-    });
-    assertEquals(2L, injector.getInstance(Long.class).longValue());
-
-    injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
-      @Override ImmutableSet<String> covariantReturnOverrideWithoutProvides() {
-        return ImmutableSet.of("subset");
-      }
-    });
-    assertEquals(ImmutableSet.of("subset"),
-        injector.getInstance(new Key<Collection<String>>() {}));
-    // This is super weird since two keys get bound to the same method.
-    // TODO(sameb): make this throw an exception at configure() time!
-    injector = Guice.createInjector(Stage.PRODUCTION, new SuperClassModule() {
-      @Override
-      @Provides
-      String covariantReturnOverrideWithProvides() {
-        return "sub";
-      }
-    });
-    assertEquals("sub", injector.getInstance(String.class));
-    assertEquals("sub", injector.getInstance(CharSequence.class));
-  }
-
-  private static class SuperClassModule extends AbstractModule {
+  static class SuperClassModule extends AbstractModule {
     @Override protected void configure() {}
-    @Provides Double normalOverrideWithProvides() {
+    @Provides Number providerMethod() {
       return 1D;
     }
-
-    @Provides Long normalOverrideWithoutProvides() {
-      return 1L;
+    @Provides @Named("rawlist") List rawProvider(@Named("list") List<String> f) {
+      return f;
     }
 
-    @Provides CharSequence covariantReturnOverrideWithProvides() {
-      return "base";
+    @Provides @Named("unrawlist") List<String> rawParameterProvider(@Named("rawlist") List f) {
+      return f;
     }
+    
+    @Provides @Named("list") List<String> annotatedGenericProviderMethod() {
+      return new ArrayList<String>();
+    }
+    @Provides @Named("collection") Collection<String> annotatedGenericParameterProviderMethod(
+        @Named("list") List<String> foo) {
+      return foo;
+    }
+    @Provides private String privateProviderMethod() {
+      return "hello";
+    }
+  }
 
-    @Provides Collection<String> covariantReturnOverrideWithoutProvides() {
-      return ImmutableList.of("baselist");
+  public void testOverrideProviderMethod_overrideHasProvides() {
+    class SubClassModule extends SuperClassModule {
+      @Override @Provides Number providerMethod() {
+        return 2D;
+      }
     }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_overrideHasProvides_withNewAnnotation() {
+    class SubClassModule extends SuperClassModule {
+      @Override @Provides @Named("foo") Number providerMethod() {
+        return 2D;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_overrideDoesntHaveProvides() {
+    class SubClassModule extends SuperClassModule {
+      @Override Number providerMethod() {
+        return 2D;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+  public void testOverrideProviderMethod_overrideDoesntHaveProvides_withNewAnnotation() {
+    class SubClassModule extends SuperClassModule {
+      @Override @Named("foo") Number providerMethod() {
+        return 2D;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+  
+
+  public void testOverrideProviderMethod_covariantOverrideDoesntHaveProvides() {
+    class SubClassModule extends SuperClassModule {
+      @Override Double providerMethod() {
+        return 2D;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_covariantOverrideHasProvides() {
+    class SubClassModule extends SuperClassModule {
+      @Override @Provides Double providerMethod() {
+        return 2D;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".providerMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".providerMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_fakeOverridePrivateMethod() {
+    class SubClassModule extends SuperClassModule {
+      // not actually an override, just looks like it
+      String privateProviderMethod() {
+        return "sub";
+      }
+    }
+    assertEquals("hello", Guice.createInjector(new SubClassModule()).getInstance(String.class));
+  }
+
+  public void testOverrideProviderMethod_subclassRawTypes_returnType() {
+    class SubClassModule extends SuperClassModule {
+      @Override List annotatedGenericProviderMethod() {
+        return super.annotatedGenericProviderMethod();
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(),
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName()
+              + ".annotatedGenericProviderMethod()",
+          "overridden by: " + SubClassModule.class.getName() + ".annotatedGenericProviderMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_subclassRawTypes_parameterType() {
+    class SubClassModule extends SuperClassModule {
+      @Override Collection<String> annotatedGenericParameterProviderMethod(List foo) {
+        return super.annotatedGenericParameterProviderMethod(foo);
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() 
+              + ".annotatedGenericParameterProviderMethod()",
+          "overridden by: " + SubClassModule.class.getName() 
+              + ".annotatedGenericParameterProviderMethod()");
+    }
+  }
+
+  public void testOverrideProviderMethod_superclassRawTypes_returnType() {
+    class SubClassModule extends SuperClassModule {
+      // remove the rawtype from the override
+      @Override List<String> rawProvider(List<String> f) {
+        return f;
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), 
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + SuperClassModule.class.getName() + ".rawProvider()",
+          "overridden by: " + SubClassModule.class.getName() + ".rawProvider()");
+    }
+  }
+
+  abstract static class GenericSuperModule<T> extends AbstractModule {
+    @Provides String provide(T thing) {
+      return thing.toString();
+    }
+  }
+
+  // This is a tricky case where signatures don't match, but it is an override (facilitated via a
+  // bridge method)
+  public void testOverrideProviderMethod_erasureBasedOverrides() {
+    class SubClassModule extends GenericSuperModule<Integer> {
+      @Override String provide(Integer thing) {
+        return thing.toString();
+      }
+
+      @Override protected void configure() {
+        bind(Integer.class).toInstance(3);
+      }
+    }
+    try {
+      Guice.createInjector(new SubClassModule());
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(),
+          "Overriding @Provides methods is not allowed.",
+          "@Provides method: " + GenericSuperModule.class.getName() + ".provide()",
+          "overridden by: " + SubClassModule.class.getName() + ".provide()");
+    }
+  }
+
+  class RestrictedSuper extends AbstractModule {
+    @Provides public String provideFoo() { return "foo"; }
+    @Override protected void configure() {}
+  }
+
+  public class ExposedSub extends RestrictedSuper {}
+
+  public void testOverrideProviderMethod_increasedVisibility() {
+    // ensure we don't detect the synthetic provideFoo method in ExposedSub as an override (it is,
+    // but since it is synthetic it would be annoying to throw an error on it).
+    assertEquals("foo", Guice.createInjector(new ExposedSub()).getInstance(String.class));
   }
 
   interface ProviderInterface<T> {

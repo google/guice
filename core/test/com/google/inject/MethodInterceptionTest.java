@@ -219,7 +219,7 @@ public class MethodInterceptionTest extends TestCase {
         break;
       }
     }
-    assertTrue(Arrays.asList(interceptable.lastElements).toString(), cglibFound);
+    assertTrue(Arrays.toString(interceptable.lastElements), cglibFound);
     cglibFound = false;
     
     interceptable.bar();
@@ -229,7 +229,7 @@ public class MethodInterceptionTest extends TestCase {
         break;
       }
     }
-    assertFalse(Arrays.asList(interceptable.lastElements).toString(), cglibFound);
+    assertFalse(Arrays.toString(interceptable.lastElements), cglibFound);
   }
 
   static class Foo {}

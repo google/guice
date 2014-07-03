@@ -26,7 +26,6 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -112,8 +111,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, binding, requestMock, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(
         injector)
@@ -183,8 +181,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, binding, requestMock, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);
@@ -256,8 +253,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     replay(injector, binding, mockRequest, mockResponse, mockBinding);
 
     // Have to init the Servlet before we can dispatch to it.
-    servletDefinition.init(null, injector,
-        Sets.newSetFromMap(Maps.<HttpServlet, Boolean>newIdentityHashMap()));
+    servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
 
     final RequestDispatcher dispatcher = new ManagedServletPipeline(injector)
         .getRequestDispatcher(pattern);

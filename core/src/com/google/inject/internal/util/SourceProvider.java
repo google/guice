@@ -61,11 +61,8 @@ public final class SourceProvider {
 
   /** Returns true if the className should be skipped. */
   private boolean shouldBeSkipped(String className) {
-    if ((parent != null && parent.shouldBeSkipped(className))
-        || classNamesToSkip.contains(className)) {
-      return true;
-    }
-    return false;
+    return (parent != null && parent.shouldBeSkipped(className))
+        || classNamesToSkip.contains(className);
   }
   
   /** Returns the class names as Strings */

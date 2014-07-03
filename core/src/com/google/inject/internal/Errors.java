@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Key;
@@ -49,8 +50,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
@@ -544,14 +543,12 @@ public final class Errors implements Serializable {
       return ImmutableList.of();
     }
 
-    List<Message> result = Lists.newArrayList(root.errors);
-    Collections.sort(result, new Comparator<Message>() {
+    return new Ordering<Message>() {
+      @Override
       public int compare(Message a, Message b) {
         return a.getSource().compareTo(b.getSource());
       }
-    });
-
-    return result;
+    }.sortedCopy(root.errors);
   }
 
   /** Returns the formatted message for an exception with the specified messages. */

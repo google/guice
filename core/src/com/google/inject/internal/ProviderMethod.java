@@ -171,7 +171,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   }
 
   @Override public String toString() {
-    return "@Provides " + StackTraceElements.forMember(method).toString();
+    return "@Provides " + StackTraceElements.forMember(method);
   }
   
   @Override

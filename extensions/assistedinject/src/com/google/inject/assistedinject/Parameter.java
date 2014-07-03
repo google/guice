@@ -62,15 +62,12 @@ class Parameter {
   public String toString() {
     StringBuilder result = new StringBuilder();
     if (isAssisted) {
-      result.append("@Assisted");
-      result.append(" ");
+      result.append("@Assisted ");
     }
     if (bindingAnnotation != null) {
-      result.append(bindingAnnotation.toString());
-      result.append(" ");
+      result.append(bindingAnnotation).append(" ");
     }
-    result.append(type.toString());
-    return result.toString();
+    return result.append(type).toString();
   }
 
   private boolean hasAssistedAnnotation(Annotation[] annotations) {

@@ -897,7 +897,7 @@ public class MapBinderTest extends TestCase {
     MapBinderBinding<?> map2Binding = collector.mapbinding;
   
     List<Binding<String>> bindings = injector.findBindingsByType(stringType);
-    assertEquals("should have two elements: " + bindings.toString(), 2, bindings.size());
+    assertEquals("should have two elements: " + bindings, 2, bindings.size());
     Binding<String> a = bindings.get(0);
     Binding<String> b = bindings.get(1);
     assertEquals("a", ((InstanceBinding<String>) a).getInstance());
