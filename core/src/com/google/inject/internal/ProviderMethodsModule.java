@@ -46,55 +46,55 @@ import java.util.logging.Logger;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
-    private final Object delegate;
-    private final TypeLiteral<?> typeLiteral;
-    private HierarchyTraversalFilter filter;
+  private final Object delegate;
+  private final TypeLiteral<?> typeLiteral;
+  private HierarchyTraversalFilter filter;
 
-    private ProviderMethodsModule(Object delegate) {
-        this.delegate = checkNotNull(delegate, "delegate");
-        typeLiteral = TypeLiteral.get(this.delegate.getClass());
-        filter = Guice.createHierarchyTraversalFilter();
+  private ProviderMethodsModule(Object delegate) {
+    this.delegate = checkNotNull(delegate, "delegate");
+    typeLiteral = TypeLiteral.get(this.delegate.getClass());
+    filter = Guice.createHierarchyTraversalFilter();
+  }
+
+  /**
+   * Returns a module which creates bindings for provider methods from the given module.
+   */
+  public static Module forModule(Module module) {
+    return forObject(module);
+  }
+
+  /**
+   * Returns a module which creates bindings for provider methods from the given object.
+   * This is useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
+   */
+  public static Module forObject(Object object) {
+    // avoid infinite recursion, since installing a module always installs itself
+    if (object instanceof ProviderMethodsModule) {
+      return Modules.EMPTY_MODULE;
     }
 
-    /**
-     * Returns a module which creates bindings for provider methods from the given module.
-     */
-    public static Module forModule(Module module) {
-        return forObject(module);
+    return new ProviderMethodsModule(object);
+  }
+  public synchronized void configure(Binder binder) {
+    for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
+      providerMethod.configure(binder);
     }
+  }
 
-    /**
-     * Returns a module which creates bindings for provider methods from the given object.
-     * This is useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
-     */
-    public static Module forObject(Object object) {
-        // avoid infinite recursion, since installing a module always installs itself
-        if (object instanceof ProviderMethodsModule) {
-            return Modules.EMPTY_MODULE;
+  public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
+    List<ProviderMethod<?>> result = Lists.newArrayList();
+    filter.reset();
+    Class<?> c = delegate.getClass();
+    while( filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
+      for (Method method : filter.getAllMethods(Provides.class.getName(), c)) {
+        if (isProvider(method)) {
+          result.add(createProviderMethod(binder, method));
         }
-
-        return new ProviderMethodsModule(object);
+      }
+      c = c.getSuperclass();
     }
-    public synchronized void configure(Binder binder) {
-        for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
-            providerMethod.configure(binder);
-        }
-    }
-
-    public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
-        List<ProviderMethod<?>> result = Lists.newArrayList();
-        filter.reset();
-        Class<?> c = delegate.getClass();
-        while( filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
-            for (Method method : filter.getAllMethods(Provides.class.getName(), c)) {
-                if (isProvider(method)) {
-                    result.add(createProviderMethod(binder, method));
-                }
-            }
-            c = c.getSuperclass();
-        }
-        return result;
-    }
+    return result;
+  }
 
   /**
    * Returns true if the method is a provider.
@@ -103,73 +103,73 @@ public final class ProviderMethodsModule implements Module {
    * bridge methods (which always have erased signatures).
    */
   private static boolean isProvider(Method method) {
-    return !method.isBridge()
-        && !method.isSynthetic()
-        && method.isAnnotationPresent(Provides.class);
+  return !method.isBridge()
+    && !method.isSynthetic()
+    && method.isAnnotationPresent(Provides.class);
   }
 
-    <T> ProviderMethod<T> createProviderMethod(Binder binder, final Method method) {
-        binder = binder.withSource(method);
-        Errors errors = new Errors(method);
+  <T> ProviderMethod<T> createProviderMethod(Binder binder, final Method method) {
+    binder = binder.withSource(method);
+    Errors errors = new Errors(method);
 
-        // prepare the parameter providers
-        List<Dependency<?>> dependencies = Lists.newArrayList();
-        List<Provider<?>> parameterProviders = Lists.newArrayList();
-        List<TypeLiteral<?>> parameterTypes = typeLiteral.getParameterTypes(method);
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
-            if(key.equals(Key.get(Logger.class))) {
-                // If it was a Logger, change the key to be unique & bind it to a
-                // provider that provides a logger with a proper name.
-                // This solves issue 482 (returning a new anonymous logger on every call exhausts memory)
-                Key<Logger> loggerKey = Key.get(Logger.class, UniqueAnnotations.create());
-                binder.bind(loggerKey).toProvider(new LogProvider(method));
-                key = loggerKey;
-            }
-            dependencies.add(Dependency.get(key));
-            parameterProviders.add(binder.getProvider(key));
-        }
-
-        @SuppressWarnings("unchecked") // Define T as the method's return type.
-        TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
-
-        Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
-        Class<? extends Annotation> scopeAnnotation
-        = Annotations.findScopeAnnotation(errors, method.getAnnotations());
-
-        for (Message message : errors.getMessages()) {
-            binder.addError(message);
-        }
-
-	    return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
-	        parameterProviders, scopeAnnotation);
+    // prepare the parameter providers
+    List<Dependency<?>> dependencies = Lists.newArrayList();
+    List<Provider<?>> parameterProviders = Lists.newArrayList();
+    List<TypeLiteral<?>> parameterTypes = typeLiteral.getParameterTypes(method);
+    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+    for (int i = 0; i < parameterTypes.size(); i++) {
+      Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
+      if(key.equals(Key.get(Logger.class))) {
+        // If it was a Logger, change the key to be unique & bind it to a
+        // provider that provides a logger with a proper name.
+        // This solves issue 482 (returning a new anonymous logger on every call exhausts memory)
+        Key<Logger> loggerKey = Key.get(Logger.class, UniqueAnnotations.create());
+        binder.bind(loggerKey).toProvider(new LogProvider(method));
+        key = loggerKey;
+      }
+      dependencies.add(Dependency.get(key));
+      parameterProviders.add(binder.getProvider(key));
     }
 
-    <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {
-        Annotation bindingAnnotation = Annotations.findBindingAnnotation(errors, member, annotations);
-        return bindingAnnotation == null ? Key.get(type) : Key.get(type, bindingAnnotation);
+    @SuppressWarnings("unchecked") // Define T as the method's return type.
+    TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
+
+    Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
+    Class<? extends Annotation> scopeAnnotation
+    = Annotations.findScopeAnnotation(errors, method.getAnnotations());
+
+    for (Message message : errors.getMessages()) {
+      binder.addError(message);
     }
 
-    @Override public boolean equals(Object o) {
-        return o instanceof ProviderMethodsModule
-                && ((ProviderMethodsModule) o).delegate == delegate;
+	  return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
+	    parameterProviders, scopeAnnotation);
+  }
+
+  <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {
+    Annotation bindingAnnotation = Annotations.findBindingAnnotation(errors, member, annotations);
+    return bindingAnnotation == null ? Key.get(type) : Key.get(type, bindingAnnotation);
+  }
+
+  @Override public boolean equals(Object o) {
+    return o instanceof ProviderMethodsModule
+        && ((ProviderMethodsModule) o).delegate == delegate;
+  }
+
+  @Override public int hashCode() {
+    return delegate.hashCode();
+  }
+
+  /** A provider that returns a logger based on the method name. */
+  private static final class LogProvider implements Provider<Logger> {
+    private final String name;
+
+    public LogProvider(Method method) {
+      name = method.getDeclaringClass().getName() + "." + method.getName();
     }
 
-    @Override public int hashCode() {
-        return delegate.hashCode();
+    public Logger get() {
+      return Logger.getLogger(name);
     }
-
-    /** A provider that returns a logger based on the method name. */
-    private static final class LogProvider implements Provider<Logger> {
-        private final String name;
-
-        public LogProvider(Method method) {
-            name = method.getDeclaringClass().getName() + "." + method.getName();
-        }
-
-        public Logger get() {
-            return Logger.getLogger(name);
-        }
-    }
+  }
 }
