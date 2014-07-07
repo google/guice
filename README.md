@@ -11,6 +11,6 @@ Guice helps you design better APIs, and the Guice API itself sets a good example
 
 Guice aims to make development and debugging easier and faster, not harder and slower. In that vein, Guice steers clear of surprises and magic. You should be able to understand code with or without tools, though tools can make things even easier. When errors do occur, Guice goes the extra mile to generate helpful messages.
 
-For an introduction to Guice and a comparison to new and the factory pattern, see Bob Lee's video presentation. After that, check out our [user's guide](http://code.google.com/p/google-guice/wiki/Motivation).
+For an introduction to Guice and a comparison to new and the factory pattern, see Bob Lee's video presentation. After that, check out our [user's guide](https://github.com/google/guice/wiki/Motivation).
 
 We've been running Guice in mission critical applications since 2006, and now you can, too. We hope you enjoy it as much as we do.
