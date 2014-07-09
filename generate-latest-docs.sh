@@ -24,7 +24,7 @@ if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
   cp -rf $HOME/javadoc-latest latest/javadoc
   git add -f .
   git commit -m "Lastest javadoc & api-diffs on successful travis build $TRAVIS_BUILD_NUMBER auto-pushed to gh-pages"
-  git push -fq origin gh-pages > dev/null
+  git push -fq origin gh-pages > /dev/null
 
   echo -e "Published Javadoc & JDiff to gh-pages.\n"
 fi
