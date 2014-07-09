@@ -25,6 +25,3 @@ notifications:
 branches:
   only:
     - master
-    - /.*release.*/
-    - /.*snapshot.*/
-
