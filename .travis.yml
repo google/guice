@@ -22,8 +22,8 @@ notifications:
     recipients:
       - google-guice-dev+ci@googlegroups.com
 
-secure: "fiX80bwvhhtfngYi8F2Z6D9Umbpcmmws0uZK8/Y/2eR7GOOh8qffqeA7vtqsnZJEMy1F6Hpls1BKmOwJCiNFLnBWkkJ8noCd2xK23cZSd63ZKCSis9jVdeiRh+0Cn/8ksouc571Kfp6XgSjW/cKdVlw4NYaIaEsWyovsAwTqO7A="
- 
+secure: "AaBXi4nqMo5xxFXJ9tC7zd3U1vmnb+dzooFcMFFc5uFT2dKnGyjXw3jmpLABHks54vOWsGssSeBbi1+e9k/bkRkDTswiyWX7omfgQc8stITZNbIVkP5MuoFeGntNuV+5oSTU2ZmvBM5bZGHxWNqxgBXXgb+9A2/UOJja7D33xCU="
+
 after_success:
   - ./generate-latest-docs.sh
 
