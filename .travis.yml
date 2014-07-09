@@ -1,0 +1,30 @@
+language: java
+
+jdk:
+  - oraclejdk7
+  - openjdk7
+  - openjdk6
+
+env:
+  matrix:
+    - LABEL=ant        CMD="ant dist test.dist" INSTALL="/bin/true"
+    - LABEL=ant_no_aop CMD="ant -f build/no_aop/build.xml dist test.dist" INSTALL="ant no_aop"
+    - LABEL=mvn        CMD="mvn verify -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn dependency:go-offline install clean --fail-never --quiet -DskipTests=true -Dsource.skip=true -Dmaven.javadoc.skip=true"
+
+install:
+  - ${INSTALL}
+
+script:
+  - ${CMD}
+
+notifications:
+  email:
+    recipients:
+      - google-guice-dev+ci@googlegroups.com
+ 
+branches:
+  only:
+    - master
+    - /.*release.*/
+    - /.*snapshot.*/
+
