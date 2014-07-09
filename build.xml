@@ -129,7 +129,7 @@
   </target>
 
   <property name="old.api" value="3.0"/>
-  <property name="new.api" value="4.0"/>
+  <property name="new.api" value="latest"/>
   <target name="jdiff">
     <property name="jdiff.home" value="lib/build/jdiff"/>
     <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
@@ -137,9 +137,7 @@
     <mkdir dir="${jdiff.tmp}"/>
 
     <!-- Generate API for current version. -->
-    <!-- TODO(cgruber) remove postProcessGeneratedJavadocs=false when ant 1.9.4 ships -->
     <javadoc packagenames="com.google.*"
-             postProcessGeneratedJavadocs="false"
              docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
              maxmemory="1024M"
              classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
@@ -165,24 +163,24 @@
       </doclet>
     </javadoc>
 
-        <!-- Do a diff against the previous version. -->
-        <javadoc packagenames="com.google.*"
-                 destdir="${jdiff.tmp}"
-                     docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
-                 maxmemory="512M"
-                     sourcefiles="${jdiff.home}/Null.java"
-                 classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
-          <doclet name="jdiff.JDiff">
-                <param name="-oldapi" value="${old.api}"/>
-                <param name="-oldapidir" value="latest-api-diffs"/>             
-                <param name="-javadocold" value="http://google-guice.googlecode.com/git/latest-api-diffs/${old.api}/javadoc/"/>
-                <param name="-newapi" value="${new.api}"/>
-            <param name="-newapidir" value="${jdiff.tmp}"/>
-                <param name="-javadocnew" value="http://google-guice.googlecode.com/git/latest-api-diffs/${new.api}/javadoc/"/>
-                <param name="-stats"/>
-                <param name="-docchanges"/>
-          </doclet>
-        </javadoc>
+    <!-- Do a diff against the previous version. -->
+    <javadoc packagenames="com.google.*"
+             destdir="${jdiff.tmp}"
+             docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
+             maxmemory="512M"
+             sourcefiles="${jdiff.home}/Null.java"
+            classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
+      <doclet name="jdiff.JDiff">
+        <param name="-oldapi" value="${old.api}"/>
+        <param name="-oldapidir" value="latest-api-diffs"/>             
+        <param name="-javadocold" value="http://google.github.io/guice/${old.api}/javadoc/"/>
+        <param name="-newapi" value="${new.api}"/>
+        <param name="-newapidir" value="${jdiff.tmp}"/>
+        <param name="-javadocnew" value="http://google.github.io/guice/${new.api}/javadoc/"/>
+        <param name="-stats"/>
+        <param name="-docchanges"/>
+      </doclet>
+    </javadoc>
   </target>
 
   <target name="javadoc">
