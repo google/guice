@@ -17,14 +17,12 @@
 package com.google.inject.multibindings;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
-import static com.google.inject.internal.RehashableKeys.Keys.rehash;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.util.Types.newParameterizedType;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -34,12 +32,9 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.Errors;
-import com.google.inject.multibindings.Element.Type;
-import com.google.inject.multibindings.MapBinder.RealMapBinder;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.Element;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderLookup;
 import com.google.inject.spi.ProviderWithDependencies;
@@ -47,8 +42,13 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 
-import java.util.Map;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.reflect.Type;
 import java.util.Set;
+
+import javax.inject.Qualifier;
 
 
 /**
@@ -168,6 +168,12 @@ public abstract class OptionalBinder<T> {
     return (TypeLiteral<Optional<Provider<T>>>) TypeLiteral.get(Types.newParameterizedType(
         Optional.class, newParameterizedType(Provider.class, type.getType())));
   }
+  
+  @SuppressWarnings("unchecked")
+  static <T> Key<Provider<T>> providerOf(Key<T> key) {
+    Type providerT = Types.providerOf(key.getTypeLiteral().getType());
+    return (Key<Provider<T>>) key.ofType(providerT);
+  }
 
   /**
    * Returns a binding builder used to set the default value that will be injected.
@@ -189,6 +195,18 @@ public abstract class OptionalBinder<T> {
   public abstract LinkedBindingBuilder<T> setBinding();
   
   enum Source { DEFAULT, ACTUAL }
+  
+  @Retention(RUNTIME)
+  @Qualifier
+  @interface Default {
+    String value();
+  }
+
+  @Retention(RUNTIME)
+  @Qualifier
+  @interface Actual {
+    String value();
+  }
 
   /**
    * The actual OptionalBinder plays several roles.  It implements Module to hide that
@@ -199,18 +217,21 @@ public abstract class OptionalBinder<T> {
     private final Key<Optional<T>> optionalKey;
     private final Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey;
     private final Key<Optional<Provider<T>>> optionalProviderKey;
-    private final Key<Map<Source, Provider<T>>> mapKey;
-    private final RealMapBinder<Source, T> mapBinder;
-    private final Set<Dependency<?>> dependencies;
     private final Provider<Optional<Provider<T>>> optionalProviderT;
-    
+    private final Key<T> defaultKey;
+    private final Key<T> actualKey;
 
     /** the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
     /** the default binding, for the SPI. */
-    private Binding<?> defaultBinding;
+    private Binding<T> defaultBinding;
     /** the actual binding, for the SPI */
-    private Binding<?> actualBinding;
+    private Binding<T> actualBinding;
+    
+    /** the dependencies -- initialized with defaults & overridden when tooled. */
+    private Set<Dependency<?>> dependencies;
+    /** the dependencies -- initialized with defaults & overridden when tooled. */
+    private Set<Dependency<?>> providerDependencies;
 
     private RealOptionalBinder(Binder binder, Key<T> typeKey) {
       this.binder = binder;
@@ -219,26 +240,15 @@ public abstract class OptionalBinder<T> {
       this.optionalKey = typeKey.ofType(optionalOf(literal));
       this.optionalJavaxProviderKey = typeKey.ofType(optionalOfJavaxProvider(literal));
       this.optionalProviderKey = typeKey.ofType(optionalOfProvider(literal));
-      this.mapKey =
-          typeKey.ofType(MapBinder.mapOfProviderOf(TypeLiteral.get(Source.class), literal));
-      this.dependencies = ImmutableSet.<Dependency<?>>of(Dependency.get(mapKey));
       this.optionalProviderT = binder.getProvider(optionalProviderKey);
-      if (typeKey.getAnnotation() != null) {
-        this.mapBinder = (RealMapBinder<Source, T>) MapBinder.newMapBinder(binder,
-            TypeLiteral.get(Source.class), typeKey.getTypeLiteral(), typeKey.getAnnotation());
-      } else if (typeKey.getAnnotationType() != null) {
-        this.mapBinder = (RealMapBinder<Source, T>) MapBinder.newMapBinder(binder,
-            TypeLiteral.get(Source.class), typeKey.getTypeLiteral(), typeKey.getAnnotationType());
-      } else {
-        this.mapBinder = (RealMapBinder<Source, T>) MapBinder.newMapBinder(binder,
-            TypeLiteral.get(Source.class), typeKey.getTypeLiteral());
-      }
-      mapBinder.updateDuplicateKeyMessage(Source.DEFAULT, "OptionalBinder for "
-          + Errors.convert(typeKey)
-          + " called with different setDefault values, from bindings:\n");
-      mapBinder.updateDuplicateKeyMessage(Source.ACTUAL, "OptionalBinder for "
-          + Errors.convert(typeKey)
-          + " called with different setBinding values, from bindings:\n");
+      String name = RealElement.nameOf(typeKey);
+      this.defaultKey = Key.get(typeKey.getTypeLiteral(), new DefaultImpl(name));
+      this.actualKey = Key.get(typeKey.getTypeLiteral(), new ActualImpl(name));
+      // Until the injector initializes us, we don't know what our dependencies are,
+      // so initialize to the whole Injector (like Multibinder, and MapBinder indirectly).
+      this.dependencies = ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
+      this.providerDependencies =
+          ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
     }
     
     /**
@@ -265,82 +275,49 @@ public abstract class OptionalBinder<T> {
     }
 
     @Override public LinkedBindingBuilder<T> setDefault() {
-      checkConfiguration(!isInitialized(), "already initialized");
-      
+      checkConfiguration(!isInitialized(), "already initialized");      
       addDirectTypeBinding(binder);
-
-      RealElement.BindingBuilder<T> valueBinding = RealElement.addBinding(binder,
-          Element.Type.OPTIONALBINDER, typeKey.getTypeLiteral(), RealElement.nameOf(typeKey));
-      Key<T> valueKey = Key.get(typeKey.getTypeLiteral(), valueBinding.getAnnotation());
-      mapBinder.addBinding(Source.DEFAULT).toProvider(
-          new ValueProvider<T>(valueKey, binder.getProvider(valueKey)));
-      return valueBinding;
+      return binder.bind(defaultKey);
     }
 
     @Override public LinkedBindingBuilder<T> setBinding() {
-      checkConfiguration(!isInitialized(), "already initialized");
-      
+      checkConfiguration(!isInitialized(), "already initialized");      
       addDirectTypeBinding(binder);
-
-      RealElement.BindingBuilder<T> valueBinding = RealElement.addBinding(binder,
-          Element.Type.OPTIONALBINDER, typeKey.getTypeLiteral(), RealElement.nameOf(typeKey));
-      Key<T> valueKey = Key.get(typeKey.getTypeLiteral(), valueBinding.getAnnotation());
-      mapBinder.addBinding(Source.ACTUAL).toProvider(
-          new ValueProvider<T>(valueKey, binder.getProvider(valueKey)));
-      return valueBinding;
-    }
-    
-    /**
-     * Traverses through the dependencies of the providers in order to get to the user's binding.
-     */
-    private Binding<?> getBindingFromMapProvider(Injector injector, Provider<T> mapProvider) {
-      HasDependencies deps = (HasDependencies) mapProvider;
-      Key<?> depKey = Iterables.getOnlyElement(deps.getDependencies()).getKey();
-      // The dep flow is (and will stay this way, until we change the internals) --
-      //    Key[type=Provider<java.lang.String>, annotation=@Element(type=MAPBINDER)]
-      // -> Key[type=String, annotation=@Element(type=MAPBINDER)]
-      // -> Key[type=Provider<String>, annotation=@Element(type=OPTIONALBINDER)]
-      // -> Key[type=String, annotation=@Element(type=OPTIONALBINDER)]
-      // The last one points to the user's binding.
-      for (int i = 0; i < 3; i++) {
-        deps = (HasDependencies) injector.getBinding(depKey);
-        depKey = Iterables.getOnlyElement(deps.getDependencies()).getKey();
-      }
-      return injector.getBinding(depKey);
+      return binder.bind(actualKey);
     }
 
     public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "OptionalBinder was already initialized");
 
-      final Provider<Map<Source, Provider<T>>> mapProvider = binder.getProvider(mapKey);
       binder.bind(optionalProviderKey).toProvider(
           new RealOptionalBinderProviderWithDependencies<Optional<Provider<T>>>(typeKey) {
         private Optional<Provider<T>> optional;
 
         @Toolable @Inject void initialize(Injector injector) {
           RealOptionalBinder.this.binder = null;
-          Map<Source, Provider<T>> map = mapProvider.get();
-          // Map might be null if duplicates prevented MapBinder from initializing
-          if (map != null) {
-            if (map.containsKey(Source.ACTUAL)) {
-              // TODO(sameb): Consider exposing an option that will allow
-              // ACTUAL to fallback to DEFAULT if ACTUAL's provider returns null.
-              // Right now, an ACTUAL binding can convert from present -> absent
-              // if it's bound to a provider that returns null.
-              optional = Optional.fromNullable(map.get(Source.ACTUAL)); 
-            } else if (map.containsKey(Source.DEFAULT)) {
-              optional = Optional.fromNullable(map.get(Source.DEFAULT));
-            } else {
-              optional = Optional.absent();
-            }
-            
-            // Also set up the bindings for the SPI.
-            if (map.containsKey(Source.ACTUAL)) {
-              actualBinding = getBindingFromMapProvider(injector, map.get(Source.ACTUAL));
-            }
-            if (map.containsKey(Source.DEFAULT)) {
-              defaultBinding = getBindingFromMapProvider(injector, map.get(Source.DEFAULT));
-            }
+          actualBinding = injector.getExistingBinding(actualKey);
+          defaultBinding = injector.getExistingBinding(defaultKey);
+          Binding<T> binding = null;
+          if (actualBinding != null) {
+            // TODO(sameb): Consider exposing an option that will allow
+            // ACTUAL to fallback to DEFAULT if ACTUAL's provider returns null.
+            // Right now, an ACTUAL binding can convert from present -> absent
+            // if it's bound to a provider that returns null.
+            binding = actualBinding;
+          } else if (defaultBinding != null) {
+            binding = defaultBinding;
+          }
+          
+          if (binding != null) {
+            optional = Optional.of(binding.getProvider());
+            RealOptionalBinder.this.dependencies =
+                ImmutableSet.<Dependency<?>>of(Dependency.get(binding.getKey()));
+            RealOptionalBinder.this.providerDependencies = 
+                ImmutableSet.<Dependency<?>>of(Dependency.get(providerOf(binding.getKey())));
+          } else {            
+            optional = Optional.absent();
+            RealOptionalBinder.this.dependencies = ImmutableSet.of();
+            RealOptionalBinder.this.providerDependencies = ImmutableSet.of();
           }
         }
         
@@ -349,7 +326,7 @@ public abstract class OptionalBinder<T> {
         }
 
         public Set<Dependency<?>> getDependencies() {
-          return dependencies;
+          return providerDependencies;
         }
       });
       
@@ -368,7 +345,7 @@ public abstract class OptionalBinder<T> {
             OptionalBinderBinding<Optional<T>>,
             Provider<Optional<T>> {
       RealOptionalKeyProvider() {
-        super(mapKey);
+        super(typeKey);
       }
       
       public Optional<T> get() {
@@ -416,43 +393,32 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public boolean containsElement(com.google.inject.spi.Element element) {
-        if (mapBinder.containsElement(element)) {
-          return true;
+      public boolean containsElement(Element element) {
+        Key<?> elementKey;
+        if (element instanceof Binding) {
+          elementKey = ((Binding<?>) element).getKey();
+        } else if (element instanceof ProviderLookup) {
+          elementKey = ((ProviderLookup<?>) element).getKey();
         } else {
-          Key<?> elementKey;
-          if (element instanceof Binding) {
-            elementKey = ((Binding<?>) element).getKey();
-          } else if (element instanceof ProviderLookup) {
-            elementKey = ((ProviderLookup<?>) element).getKey();
-          } else {
-            return false; // cannot match;
-          }
-
-          return elementKey.equals(optionalKey)
-              || elementKey.equals(optionalProviderKey)
-              || elementKey.equals(optionalJavaxProviderKey)
-              || matchesTypeKey(element, elementKey)
-              || matchesUserBinding(elementKey);
+          return false; // cannot match;
         }
+
+        return elementKey.equals(optionalKey)
+            || elementKey.equals(optionalProviderKey)
+            || elementKey.equals(optionalJavaxProviderKey)
+            || elementKey.equals(defaultKey)
+            || elementKey.equals(actualKey)
+            || matchesTypeKey(element, elementKey);
       }
     }
     
     /** Returns true if the key & element indicate they were bound by this OptionalBinder. */
-    private boolean matchesTypeKey(com.google.inject.spi.Element element, Key<?> elementKey) {
+    private boolean matchesTypeKey(Element element, Key<?> elementKey) {
       // Just doing .equals(typeKey) isn't enough, because the user can bind that themselves.
       return elementKey.equals(typeKey)
           && element instanceof ProviderInstanceBinding
           && (((ProviderInstanceBinding) element)
               .getUserSuppliedProvider() instanceof RealOptionalBinderProviderWithDependencies);
-    }
-
-    /** Returns true if the key indicates this is a user bound value for the optional binder. */
-    private boolean matchesUserBinding(Key<?> elementKey) {
-      return elementKey.getAnnotation() instanceof Element
-          && ((Element) elementKey.getAnnotation()).setName().equals(RealElement.nameOf(typeKey))
-          && ((Element) elementKey.getAnnotation()).type() == Type.OPTIONALBINDER
-          && elementKey.getTypeLiteral().equals(typeKey.getTypeLiteral());
     }
 
     private boolean isInitialized() {
@@ -461,59 +427,11 @@ public abstract class OptionalBinder<T> {
 
     @Override public boolean equals(Object o) {
       return o instanceof RealOptionalBinder
-          && ((RealOptionalBinder<?>) o).mapKey.equals(mapKey);
+          && ((RealOptionalBinder<?>) o).typeKey.equals(typeKey);
     }
 
     @Override public int hashCode() {
-      return mapKey.hashCode();
-    }
-
-    /** A Provider that bases equality & hashcodes off another key. */
-    private static final class ValueProvider<T> implements ProviderWithDependencies<T> {
-      private final Provider<T> provider;
-      private volatile Key<T> key;
-
-      private ValueProvider(Key<T> key, Provider<T> provider) {
-        this.key = key;
-        this.provider = provider;
-      }
-      
-      public T get() {
-        return provider.get();
-      }
-      
-      public Set<Dependency<?>> getDependencies() {
-        return ((HasDependencies) provider).getDependencies();
-      }
-
-      private Key<T> getCurrentKey() {
-        // Every time, check if the key needs rehashing.
-        // If so, update the field as an optimization for next time.
-        Key<T> currentKey = key;
-        if (needsRehashing(currentKey)) {
-          currentKey = rehash(currentKey);
-          key = currentKey;
-        }
-        return currentKey;
-      }
-
-      /**
-       * Equality is based on the key (which includes the target information, because of how
-       * RealElement works). This lets duplicate bindings collapse.
-       */
-      @Override public boolean equals(Object obj) {
-        return obj instanceof ValueProvider
-            && getCurrentKey().equals(((ValueProvider) obj).getCurrentKey());
-      }
-
-      /** We only use the hashcode of the typeliteral, which can't change. */
-      @Override public int hashCode() {
-        return key.getTypeLiteral().hashCode();
-      }
-
-      @Override public String toString() {
-        return provider.toString();
-      }
+      return typeKey.hashCode();
     }
 
     /**
@@ -538,5 +456,56 @@ public abstract class OptionalBinder<T> {
         return equality.hashCode();
       }
     }
+  }
+  
+  static class DefaultImpl extends BaseAnnotation implements Default {
+    public DefaultImpl(String value) {
+      super(Default.class, value);
+    }
+  }
+  
+  static class ActualImpl extends BaseAnnotation implements Actual {
+    public ActualImpl(String value) {
+      super(Actual.class, value);
+    }
+  }
+  
+  abstract static class BaseAnnotation implements Serializable, Annotation {
+
+    private final String value;
+    private final Class<? extends Annotation> clazz;
+
+    BaseAnnotation(Class<? extends Annotation> clazz, String value) {
+      this.clazz = checkNotNull(clazz, "clazz");
+      this.value = checkNotNull(value, "value");
+    }
+
+    public String value() {
+      return this.value;
+    }
+
+    @Override public int hashCode() {
+      // This is specified in java.lang.Annotation.
+      return (127 * "value".hashCode()) ^ value.hashCode();
+    }
+
+    @Override public boolean equals(Object o) {
+      if (!(clazz.isInstance(o))) {
+        return false;
+      }
+
+      BaseAnnotation other = (BaseAnnotation) o;
+      return value.equals(other.value());
+    }
+
+    @Override public String toString() {
+      return "@" + clazz.getName() + (value.isEmpty() ? "" : "(value=" + value + ")");
+    }
+
+    @Override public Class<? extends Annotation> annotationType() {
+      return clazz;
+    }
+
+    private static final long serialVersionUID = 0;
   }
 }
