@@ -6,7 +6,7 @@ Guice
 **Documentation:** [User Guide](https://github.com/google/guice/wiki/Motivation), [3.0 javadocs](http://google.github.io/guice/api-docs/3.0/javadoc/packages.html), [Latest javadocs](http://google.github.io/guice/api-docs/latest/javadoc/packages.html) <br/>
 **Continuous Integration:** [![Build Status](https://api.travis-ci.org/google/guice.png?branch=master)](https://travis-ci.org/google/guice) <br
 />
-**Maling Lists:** [User Mailing List](http://groups.google.com/group/google-guice), [Developer Mailing List](http://groups.google.com/group/google-guice-dev) <br/>
+**Mailing Lists:** [User Mailing List](http://groups.google.com/group/google-guice), [Developer Mailing List](http://groups.google.com/group/google-guice-dev) <br/>
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Put simply, Guice alleviates the need for factories and the use of new in your Java code. Think of Guice's @Inject as the new new. You will still need to write factories in some cases, but your code will not depend directly on them. Your code will be easier to change, unit test and reuse in other contexts.
