@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -974,7 +973,7 @@ public class OptionalBinderTest extends TestCase {
    // Clear the ref, GC, and ensure that we are no longer blacklisting.
    childInjector = null;
    
-   GcFinalization.awaitClear(weakRef);
+   WeakKeySetUtils.awaitClear(weakRef);
    WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
  }
   

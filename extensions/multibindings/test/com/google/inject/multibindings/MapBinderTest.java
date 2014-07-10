@@ -18,11 +18,11 @@ package com.google.inject.multibindings;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.multibindings.SpiUtils.assertMapVisitor;
 import static com.google.inject.multibindings.SpiUtils.instance;
 import static com.google.inject.multibindings.SpiUtils.providerInstance;
+import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
+import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
@@ -935,7 +934,7 @@ public class MapBinderTest extends TestCase {
     // Clear the ref, GC, and ensure that we are no longer blacklisting.
     childInjector = null;
     
-    GcFinalization.awaitClear(weakRef);
+    WeakKeySetUtils.awaitClear(weakRef);
     WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
   }
 }
