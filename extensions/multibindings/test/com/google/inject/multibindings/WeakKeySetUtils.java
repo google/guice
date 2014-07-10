@@ -16,11 +16,17 @@
 
 package com.google.inject.multibindings;
 
+import static junit.framework.Assert.assertSame;
+
+import com.google.common.testing.GcFinalization;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -32,6 +38,44 @@ import java.lang.reflect.Method;
 final class WeakKeySetUtils {
   
   private WeakKeySetUtils() {}
+  
+  static void awaitFullGc() {
+    // GcFinalization *should* do it, but doesn't work well in practice...
+    // so we put a second latch and wait for a ReferenceQueue to tell us.
+    ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
+    WeakReference ref = new WeakReference<Object>(new Object(), queue);
+    GcFinalization.awaitFullGc();
+    try {
+      assertSame("queue didn't return ref in time", ref, queue.remove(5000));
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  static void awaitClear(WeakReference<?> ref) {
+    // GcFinalization *should* do it, but doesn't work well in practice...
+    // so we put a second latch and wait for a ReferenceQueue to tell us.
+    Object data = ref.get();
+    ReferenceQueue<Object> queue = null;
+    WeakReference extraRef = null;
+    if (data != null) {
+      queue = new ReferenceQueue<Object>();
+      extraRef = new WeakReference<Object>(data, queue);
+      data = null;
+    }
+    GcFinalization.awaitClear(ref);
+    if (queue != null) {
+      try {
+        assertSame("queue didn't return ref in time", extraRef, queue.remove(5000));
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException(e);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
   
   static void assertBlacklisted(Injector injector, Key<?> key) {
     assertBlacklistState(injector, key, true);
