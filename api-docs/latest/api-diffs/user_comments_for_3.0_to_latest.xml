@@ -790,6 +790,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.persist"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.Transactional"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.servlet"/>
   <text>
     InsertCommentsHere
