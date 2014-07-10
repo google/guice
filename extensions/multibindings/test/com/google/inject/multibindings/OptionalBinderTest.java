@@ -43,8 +43,6 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.RehashableKeys;
-import com.google.inject.multibindings.OptionalBinder.Actual;
-import com.google.inject.multibindings.OptionalBinder.Default;
 import com.google.inject.multibindings.SpiUtils.VisitType;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -347,10 +345,11 @@ public class OptionalBinderTest extends TestCase {
     } catch (CreationException ce) {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @" 
-              + Default.class.getName() + " was already configured at "
-              + module.getClass().getName() + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "1) OptionalBinder for java.lang.String called with different setDefault values, " 
+              + "from bindings:",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + MapBinder.RealMapBinder.class.getName());
     }
   }  
   
@@ -367,10 +366,11 @@ public class OptionalBinderTest extends TestCase {
     } catch (CreationException ce) {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @" 
-              + Actual.class.getName() + " was already configured at "
-              + module.getClass().getName() + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "1) OptionalBinder for java.lang.String called with different setBinding values, " 
+              + "from bindings:",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + MapBinder.RealMapBinder.class.getName());
     }
   }  
   
@@ -387,16 +387,17 @@ public class OptionalBinderTest extends TestCase {
       Guice.createInjector(module);
       fail();
     } catch (CreationException ce) {
-      assertEquals(ce.getMessage(), 2, ce.getErrorMessages().size());      
+      assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(ce.getMessage(),
-          "1) A binding to java.lang.String annotated with @"
-              + Default.class.getName() + " was already configured at "
-              + module.getClass().getName() + ".configure(",
+          "1) OptionalBinder for java.lang.String called with different setDefault values, " 
+              + "from bindings:",
           "at " + module.getClass().getName() + ".configure(",
-          "2) A binding to java.lang.String annotated with @"
-              + Actual.class.getName() + " was already configured at "
-              + module.getClass().getName() + ".configure(",
-          "at " + module.getClass().getName() + ".configure(");
+          "at " + module.getClass().getName() + ".configure(",
+          "and OptionalBinder for java.lang.String called with different setBinding values, " 
+              + "from bindings:",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + module.getClass().getName() + ".configure(",
+          "at " + MapBinder.RealMapBinder.class.getName());
     }
   }
   
@@ -448,27 +449,17 @@ public class OptionalBinderTest extends TestCase {
   }
   
   public void testMultipleDifferentOptionals() {
-    final Key<String> bKey = Key.get(String.class, named("b"));
-    final Key<String> cKey = Key.get(String.class, named("c"));
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setDefault().toInstance("a");
         OptionalBinder.newOptionalBinder(binder(), Integer.class).setDefault().toInstance(1);
-        
-        OptionalBinder.newOptionalBinder(binder(), bKey).setDefault().toInstance("b");
-        OptionalBinder.newOptionalBinder(binder(), cKey).setDefault().toInstance("c");
       }
     };
     Injector injector = Guice.createInjector(module);
     assertEquals("a", injector.getInstance(String.class));
     assertEquals(1, injector.getInstance(Integer.class).intValue());
-    assertEquals("b", injector.getInstance(bKey));
-    assertEquals("c", injector.getInstance(cKey));
     
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 3, instance("a"), null);
-    assertOptionalVisitor(intKey, setOf(module), VisitType.BOTH, 3, instance(1), null);
-    assertOptionalVisitor(bKey, setOf(module), VisitType.BOTH, 3, instance("b"), null);
-    assertOptionalVisitor(cKey, setOf(module), VisitType.BOTH, 3, instance("c"), null);
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 1, instance("a"), null);
   }
   
   public void testOptionalIsAppropriatelyLazy() {
@@ -613,7 +604,7 @@ public class OptionalBinderTest extends TestCase {
     }
   }
 
-  public void testDependencies_both() {
+  public void testDependencies() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder<String> optionalbinder =
@@ -628,40 +619,7 @@ public class OptionalBinderTest extends TestCase {
     HasDependencies withDependencies = (HasDependencies) binding;
     Set<String> elements = Sets.newHashSet();
     elements.addAll(recurseForDependencies(injector, withDependencies));
-    assertEquals(ImmutableSet.of("B"), elements);
-  }
-
-  public void testDependencies_actual() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        OptionalBinder<String> optionalbinder =
-            OptionalBinder.newOptionalBinder(binder(), String.class);
-        optionalbinder.setBinding().to(Key.get(String.class, Names.named("b")));
-        bindConstant().annotatedWith(Names.named("b")).to("B");
-      }
-    });
-
-    Binding<String> binding = injector.getBinding(Key.get(String.class));
-    HasDependencies withDependencies = (HasDependencies) binding;
-    Set<String> elements = Sets.newHashSet();
-    elements.addAll(recurseForDependencies(injector, withDependencies));
-    assertEquals(ImmutableSet.of("B"), elements);
-  }
-
-  public void testDependencies_default() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override protected void configure() {
-        OptionalBinder<String> optionalbinder =
-            OptionalBinder.newOptionalBinder(binder(), String.class);
-        optionalbinder.setDefault().toInstance("A");
-      }
-    });
-
-    Binding<String> binding = injector.getBinding(Key.get(String.class));
-    HasDependencies withDependencies = (HasDependencies) binding;
-    Set<String> elements = Sets.newHashSet();
-    elements.addAll(recurseForDependencies(injector, withDependencies));
-    assertEquals(ImmutableSet.of("A"), elements);
+    assertEquals(ImmutableSet.of("A", "B"), elements);
   }
   
   private Set<String> recurseForDependencies(Injector injector, HasDependencies hasDependencies) {
@@ -920,6 +878,7 @@ public class OptionalBinderTest extends TestCase {
     list.add("C");
     Key<?> keyAfter = binding.getKey();
     assertSame(keyBefore, keyAfter);
+    assertTrue(RehashableKeys.Keys.needsRehashing(keyAfter));
   }
 
   @BindingAnnotation
