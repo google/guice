@@ -42,6 +42,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.RehashableKeys;
+import com.google.inject.internal.WeakKeySetUtils;
 import com.google.inject.multibindings.OptionalBinder.Actual;
 import com.google.inject.multibindings.OptionalBinder.Default;
 import com.google.inject.multibindings.SpiUtils.VisitType;
@@ -992,6 +993,25 @@ public class OptionalBinderTest extends TestCase {
    WeakKeySetUtils.awaitClear(weakRef);
    WeakKeySetUtils.assertNotBlacklisted(parentInjector, Key.get(Integer.class));
  }
+
+ public void testCompareEqualsAgainstOtherAnnotation() {
+   OptionalBinder.Actual impl1 = new OptionalBinder.ActualImpl("foo");
+   OptionalBinder.Actual other1 = Dummy.class.getAnnotation(OptionalBinder.Actual.class);
+   assertEquals(impl1, other1);
+
+   OptionalBinder.Default impl2 = new OptionalBinder.DefaultImpl("foo");
+   OptionalBinder.Default other2 = Dummy.class.getAnnotation(OptionalBinder.Default.class);
+   assertEquals(impl2, other2);
+
+   assertFalse(impl1.equals(impl2));
+   assertFalse(impl1.equals(other2));
+   assertFalse(impl2.equals(other1));
+   assertFalse(other1.equals(other2));
+ }
+
+  @OptionalBinder.Actual("foo")
+  @OptionalBinder.Default("foo")
+  static class Dummy {}
   
   @SuppressWarnings("unchecked") 
   private <V> Set<V> setOf(V... elements) {

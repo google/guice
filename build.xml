@@ -169,10 +169,10 @@
              docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
              maxmemory="512M"
              sourcefiles="${jdiff.home}/Null.java"
-            classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
+             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
       <doclet name="jdiff.JDiff">
         <param name="-oldapi" value="${old.api}"/>
-        <param name="-oldapidir" value="latest-api-diffs"/>             
+        <param name="-oldapidir" value="latest-api-diffs"/>
         <param name="-javadocold" value="http://google.github.io/guice/api-docs/${old.api}/javadoc/"/>
         <param name="-newapi" value="${new.api}"/>
         <param name="-newapidir" value="${jdiff.tmp}"/>
@@ -286,5 +286,5 @@
     <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>
     <ant dir="extensions/testlib" antfile="build.xml" target="clean"/>
   </target>
-  
+
 </project>

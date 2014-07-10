@@ -24,7 +24,8 @@ import java.lang.annotation.Target;
 
 /**
  * <p> Any method or class marked with this annotation will be considered for transactionality.
- * Consult the documentation on http://code.google.com/p/google-guice for detailed semantics.
+ * Consult the documentation on https://github.com/google/guice/wiki/GuicePersist for detailed
+ * semantics.
  * Marking a method {@code @Transactional} will start a new transaction before the method
  * executes and commit it after the method returns.
  * <p>

@@ -525,12 +525,16 @@ public abstract class OptionalBinder<T> {
     }
 
     @Override public boolean equals(Object o) {
-      if (!(clazz.isInstance(o))) {
-        return false;
+      // We check against each annotation type instead of BaseAnnotation
+      // so that we can compare against generated annotation implementations. 
+      if (o instanceof Actual && clazz == Actual.class) {
+        Actual other = (Actual) o;
+        return value.equals(other.value());
+      } else if (o instanceof Default && clazz == Default.class) {
+        Default other = (Default) o;
+        return value.equals(other.value());
       }
-
-      BaseAnnotation other = (BaseAnnotation) o;
-      return value.equals(other.value());
+      return false;
     }
 
     @Override public String toString() {

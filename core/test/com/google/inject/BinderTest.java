@@ -360,7 +360,7 @@ public class BinderTest extends TestCase {
 
   /**
    * See issue 614, Problem One
-   * http://code.google.com/p/google-guice/issues/detail?id=614
+   * https://github.com/google/guice/issues/614
    */
   public void testJitDependencyDoesntBlockOtherExplicitBindings() {
     Injector injector = Guice.createInjector(new AbstractModule() {
@@ -377,7 +377,7 @@ public class BinderTest extends TestCase {
 
   /**
    * See issue 614, Problem Two
-   * http://code.google.com/p/google-guice/issues/detail?id=614
+   * https://github.com/google/guice/issues/id=614
    */
   public void testJitDependencyCanUseExplicitDependencies() {
     Guice.createInjector(new AbstractModule() {
