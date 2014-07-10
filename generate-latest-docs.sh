@@ -18,10 +18,10 @@ if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
   git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/google/guice gh-pages > /dev/null
   
   cd gh-pages
-  git rm -rf latest/api-diffs latest/javadoc
-  mkdir latest
-  cp -rf $HOME/api-diffs-latest latest/api-diffs
-  cp -rf $HOME/javadoc-latest latest/javadoc
+  git rm -rf api-docs/latest/api-diffs api-docs/latest/javadoc
+  mkdir -p api-docs/latest
+  cp -rf $HOME/api-diffs-latest api-docs/latest/api-diffs
+  cp -rf $HOME/javadoc-latest api-docs/latest/javadoc
   git add -f .
   git commit -m "Lastest javadoc & api-diffs on successful travis build $TRAVIS_BUILD_NUMBER auto-pushed to gh-pages"
   git push -fq origin gh-pages > /dev/null
