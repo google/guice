@@ -18,7 +18,7 @@ com.google.inject Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -78,18 +78,18 @@ Similarly, documentation which was inherited from another class or interface is 
      are given.</span></blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.Guice.dmethod.createInjector(Iterable&lt;Module&gt;)"></A><a href="com.google.inject.Guice.html" class="hiddenlink">Class <b>Guice</b></a>, <a href="com.google.inject.Guice.html#com.google.inject.Guice.createInjector_changed(java.lang.Iterable<? extends com.google.inject.Module>)" class="hiddenlink">Injector <b>createInjector(Iterable&lt;Module&gt;)</b></a><br><br><blockquote>Creates an injector for the given set of modules.<span style="background: #FFFF00"> This is equivalent to
- calling <A HREF="http://google.github.io/guice/latest/javadoc/.html#createInjector(Stage, Iterable)"><TT>.createInjector(Stage, Iterable)</TT></A> with Stage.DEVELOPMENT.</span>
+ calling <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#createInjector(Stage, Iterable)"><TT>.createInjector(Stage, Iterable)</TT></A> with Stage.DEVELOPMENT.</span>
 
  @throws CreationException if one or more errors occur during injector
      creation</blockquote>
 <A NAME="com.google.inject.Guice.dmethod.createInjector(Module[])"></A><a href="com.google.inject.Guice.html" class="hiddenlink">Class <b>Guice</b></a>, <a href="com.google.inject.Guice.html#com.google.inject.Guice.createInjector_changed(com.google.inject.Module[])" class="hiddenlink">Injector <b>createInjector(Module[])</b></a><br><br><blockquote>Creates an injector for the given set of modules.<span style="background: #FFFF00"> This is equivalent to
- calling <A HREF="http://google.github.io/guice/latest/javadoc/.html#createInjector(Stage, Module...)"><TT>.createInjector(Stage, Module...)</TT></A> with Stage.DEVELOPMENT.</span>
+ calling <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#createInjector(Stage, Module...)"><TT>.createInjector(Stage, Module...)</TT></A> with Stage.DEVELOPMENT.</span>
 
  @throws CreationException if one or more errors occur during injector
      construction</blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.Inject!class"></A><a href="com.google.inject.Inject.html" class="hiddenlink">Class <b>Inject</b></a><br><br><blockquote>Annotates members of your implementation class (constructors, methods
- and fields) into which the <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/Injector.html"><TT>Injector</TT></A> should inject values.
+ and fields) into which the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/Injector.html"><TT>Injector</TT></A> should inject values.
  The Injector fulfills injection requests for:
 
  <ul>
@@ -98,14 +98,14 @@ Similarly, documentation which was inherited from another class or interface is 
  constructor taking no parameters. The Injector then proceeds to perform
  <strike>method</strike><span style="background: #FFFF00">field</span> and <strike>field</strike><span style="background: #FFFF00">method</span> injections.
  
- <li>Pre-constructed instances passed to <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/Injector.html#injectMembers"><TT>Injector.injectMembers</TT></A>,
- <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/com/google/inject/binder/LinkedBindingBuilder.html#toInstance(Object)"><TT>com.google.inject.binder.LinkedBindingBuilder.toInstance(Object)</TT></A> and
- <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/com/google/inject/binder/LinkedBindingBuilder.html#toProvider(javax.inject.Provider)"><TT>com.google.inject.binder.LinkedBindingBuilder.toProvider(<span style="background: #FFFF00">javax.inject.</span>Provider)</TT></A>.
+ <li>Pre-constructed instances passed to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/Injector.html#injectMembers"><TT>Injector.injectMembers</TT></A>,
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/com/google/inject/binder/LinkedBindingBuilder.html#toInstance(Object)"><TT>com.google.inject.binder.LinkedBindingBuilder.toInstance(Object)</TT></A> and
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/com/google/inject/binder/LinkedBindingBuilder.html#toProvider(javax.inject.Provider)"><TT>com.google.inject.binder.LinkedBindingBuilder.toProvider(<span style="background: #FFFF00">javax.inject.</span>Provider)</TT></A>.
  In this case all constructors are, of course, ignored.
 
- <li>Static fields and methods of classes which any <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/Module.html"><TT>Module</TT></A> has
+ <li>Static fields and methods of classes which any <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/Module.html"><TT>Module</TT></A> has
  specifically requested static injection for, using
- <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Inject/Binder.html#requestStaticInjection"><TT>Binder.requestStaticInjection</TT></A>.
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Inject/Binder.html#requestStaticInjection"><TT>Binder.requestStaticInjection</TT></A>.
  </ul>
 
  In all cases, a member can be injected regardless of its Java access
@@ -126,7 +126,7 @@ Similarly, documentation which was inherited from another class or interface is 
    }
  </pre>
 
- <p>{@code Key} supports generic types via subclassing just like <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Key/TypeLiteral.html"><TT>TypeLiteral</TT></A>.
+ <p>{@code Key} supports generic types via subclassing just like <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Key/TypeLiteral.html"><TT>TypeLiteral</TT></A>.
 
  <p>Keys do not differentiate between primitive types (int, char, etc.) and
  their <strike>correpsonding</strike><span style="background: #FFFF00">corresponding</span> wrapper types (Integer, Character, etc.). Primitive
@@ -163,7 +163,7 @@ Similarly, documentation which was inherited from another class or interface is 
 </span> <strike>
  </strike>@since 3.0</blockquote>
 <hr align="left" width="100%">
-<A NAME="com.google.inject.Provides!class"></A><a href="com.google.inject.Provides.html" class="hiddenlink">Class <b>Provides</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/Provides/Module.html"><TT>Module</TT></A> to create a provider method binding. The method's return
+<A NAME="com.google.inject.Provides!class"></A><a href="com.google.inject.Provides.html" class="hiddenlink">Class <b>Provides</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Provides/Module.html"><TT>Module</TT></A> to create a provider method binding. The method's return
  type is bound to <strike>it's</strike><span style="background: #FFFF00">its</span> returned value. Guice will pass dependencies to the method as parameters.
 
  @author crazybob@google.com (Bob Lee)

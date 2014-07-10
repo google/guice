@@ -18,7 +18,7 @@ com.google.inject.multibindings Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -74,7 +74,7 @@ Similarly, documentation which was inherited from another class or interface is 
    }
  }</code></pre>
 
- <p>With this binding, a <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MapBinder/Map.html"><TT>Map</TT></A>{@code <String, Snack>} can now be
+ <p>With this binding, a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MapBinder/Map.html"><TT>Map</TT></A>{@code <String, Snack>} can now be
  injected:
  <pre><code>
  class SnackMachine {
@@ -115,7 +115,7 @@ Similarly, documentation which was inherited from another class or interface is 
  type. Each distinct annotation gets its own independent map.
 
  <p><strong>Keys must be distinct.</strong> If the same key is bound more than
- once, map injection will fail. However, use <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MapBinder/.html#permitDuplicates()"><TT>.permitDuplicates()</TT></A> in
+ once, map injection will fail. However, use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MapBinder/.html#permitDuplicates()"><TT>.permitDuplicates()</TT></A> in
  order to allow duplicate keys; extra bindings to {@code Map<K, Set<V>>} and
  {@code Map<K, Set<Provider<V>>} will be added.
 
@@ -142,7 +142,7 @@ Similarly, documentation which was inherited from another class or interface is 
    }
  }</code></pre>
 
- <p>With this binding, a <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/Multibinder/Set.html"><TT>Set</TT></A>{@code <Snack>} can now be injected:
+ <p>With this binding, a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/Multibinder/Set.html"><TT>Set</TT></A>{@code <Snack>} can now be injected:
  <pre><code>
  class SnackMachine {
    {@literal @}Inject
@@ -186,8 +186,8 @@ Similarly, documentation which was inherited from another class or interface is 
 <hr align="left" width="100%">
 <A NAME="com.google.inject.multibindings.MultibindingsTargetVisitor!class"></A><a href="com.google.inject.multibindings.MultibindingsTargetVisitor.html" class="hiddenlink">Class <b>MultibindingsTargetVisitor</b></a><br><br><blockquote>A visitor for the multibinder extension.
  <p>
- If your <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/BindingTargetVisitor.html"><TT>BindingTargetVisitor</TT></A> implements this interface, bindings created by using
- <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/Multibinder.html"><TT>Multibinder</TT></A><strike> or</strike><span style="background: #FFFF00">,</span> <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/MapBinder.html"><TT>MapBinder</TT></A> <span style="background: #FFFF00">or <A HREF="http://google.github.io/guice/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/OptionalBinderBinding.html"><TT>OptionalBinderBinding</TT></A> </span>will be visited <strike>through</strike><span style="background: #FFFF00">through
+ If your <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/BindingTargetVisitor.html"><TT>BindingTargetVisitor</TT></A> implements this interface, bindings created by using
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/Multibinder.html"><TT>Multibinder</TT></A><strike> or</strike><span style="background: #FFFF00">,</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/MapBinder.html"><TT>MapBinder</TT></A> <span style="background: #FFFF00">or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MultibindingsTargetVisitor/OptionalBinderBinding.html"><TT>OptionalBinderBinding</TT></A> </span>will be visited <strike>through</strike><span style="background: #FFFF00">through
 </span> this interface.<strike>
  
 </strike><span style="background: #FFFF00">
