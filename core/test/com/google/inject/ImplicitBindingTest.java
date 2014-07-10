@@ -225,7 +225,7 @@ public class ImplicitBindingTest extends TestCase {
   static class JitValid2 {}
   
   /**
-   * Regression test for http://code.google.com/p/google-guice/issues/detail?id=319
+   * Regression test for https://github.com/google/guice/issues/319
    * 
    * The bug is that a class that asks for a provider for itself during injection time, 
    * where any one of the other types required to fulfill the object creation was bound 

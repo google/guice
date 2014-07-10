@@ -32,10 +32,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <name>Google Guice</name>
 
   <description>
-    Guice is a lightweight dependency injection framework for Java 5 and above
+    Guice is a lightweight dependency injection framework for Java 6 and above
   </description>
 
-  <url>http://code.google.com/p/google-guice/</url>
+  <url>https://github.com/google/guice</url>
   <inceptionYear>2006</inceptionYear>
 
   <organization>
@@ -61,19 +61,19 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </mailingLists>
 
   <scm>
-    <connection>scm:git:https://code.google.com/p/google-guice/</connection>
-    <developerConnection>scm:git:https://code.google.com/p/google-guice/</developerConnection>
-    <url>https://code.google.com/p/google-guice/</url>
+    <connection>scm:git:git://github.com/google/guice.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/google/guice.git</developerConnection>
+    <url>https://github.com/google/guice</url>
   </scm>
 
   <issueManagement>
     <system>Google Code</system>
-    <url>http://code.google.com/p/google-guice/issues/</url>
+    <url>https://github.com/google/guice/issues/</url>
   </issueManagement>
 
   <ciManagement>
-    <system>Hudson</system>
-    <url>https://grid.sonatype.org/ci/job/google-guice/</url>
+    <system>Travis</system>
+    <url>https://travis-ci.org/google/guice</url>
   </ciManagement>
 
   <licenses>
@@ -242,7 +242,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <module>com.google.inject</module>
               <_include>-${project.basedir}/build.properties</_include>
               <Bundle-Copyright>Copyright (C) 2006 Google Inc.</Bundle-Copyright>
-              <Bundle-DocURL>http://code.google.com/p/google-guice/</Bundle-DocURL>
+              <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
               <Bundle-Name>${project.artifactId}</Bundle-Name>
               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
               <Bundle-RequiredExecutionEnvironment>

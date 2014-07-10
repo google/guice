@@ -116,7 +116,7 @@ class Parameter {
    * appropriate for testing if a key is bound and not for injecting.
    *
    * See Guice bug 125,
-   * http://code.google.com/p/google-guice/issues/detail?id=125
+   * https://github.com/google/guice/issues/125
    */
   public Key<?> fixAnnotations(Key<?> key) {
     return key.getAnnotation() == null
