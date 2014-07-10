@@ -42,6 +42,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.RehashableKeys;
+import com.google.inject.internal.WeakKeySetUtils;
 import com.google.inject.multibindings.OptionalBinder.Actual;
 import com.google.inject.multibindings.OptionalBinder.Default;
 import com.google.inject.multibindings.SpiUtils.VisitType;

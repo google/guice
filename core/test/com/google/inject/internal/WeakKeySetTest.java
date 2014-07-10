@@ -16,6 +16,14 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.WeakKeySetUtils.assertBlacklisted;
+import static com.google.inject.internal.WeakKeySetUtils.assertInSet;
+import static com.google.inject.internal.WeakKeySetUtils.assertNotBlacklisted;
+import static com.google.inject.internal.WeakKeySetUtils.assertNotInSet;
+import static com.google.inject.internal.WeakKeySetUtils.assertSourceNotInSet;
+import static com.google.inject.internal.WeakKeySetUtils.awaitClear;
+import static com.google.inject.internal.WeakKeySetUtils.awaitFullGc;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -64,44 +72,6 @@ public class WeakKeySetTest extends TestCase {
   protected void setUp() throws Exception {
     set = new WeakKeySet(new Object());
   }
-  
-  private static void awaitFullGc() {
-    // GcFinalization *should* do it, but doesn't work well in practice...
-    // so we put a second latch and wait for a ReferenceQueue to tell us.
-    ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-    WeakReference ref = new WeakReference<Object>(new Object(), queue);
-    GcFinalization.awaitFullGc();
-    try {
-      assertSame("queue didn't return ref in time", ref, queue.remove(5000));
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
-  private static void awaitClear(WeakReference<?> ref) {
-    // GcFinalization *should* do it, but doesn't work well in practice...
-    // so we put a second latch and wait for a ReferenceQueue to tell us.
-    Object data = ref.get();
-    ReferenceQueue<Object> queue = null;
-    WeakReference extraRef = null;
-    if (data != null) {
-      queue = new ReferenceQueue<Object>();
-      extraRef = new WeakReference<Object>(data, queue);
-      data = null;
-    }
-    GcFinalization.awaitClear(ref);
-    if (queue != null) {
-      try {
-        assertSame("queue didn't return ref in time", extraRef, queue.remove(5000));
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
 
   public void testEviction() {
     TestState state = new TestState();
@@ -111,16 +81,13 @@ public class WeakKeySetTest extends TestCase {
     WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
 
     set.add(key, state, source);
-    assertTrue(set.contains(key));
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key).contains(source));
+    assertInSet(set, key, 1, source);
 
     state = null;
 
     awaitFullGc();
 
-    assertFalse(set.contains(Key.get(Integer.class)));
-    assertNull(set.getSources(Key.get(Integer.class)));
+    assertNotInSet(set, Key.get(Integer.class));
 
     // Ensure there are no hanging references.
     key = null;
@@ -135,16 +102,13 @@ public class WeakKeySetTest extends TestCase {
     WeakReference<Key<Integer>> weakKeyRef = new WeakReference<Key<Integer>>(key);
 
     set.add(key, state, source);
-    assertTrue(set.contains(key));
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key).contains(source));
+    assertInSet(set, key, 1, source);
 
     state = null;
 
     awaitFullGc();
 
-    assertFalse(set.contains(Key.get(Integer.class)));
-    assertNull(set.getSources(Key.get(Integer.class)));
+    assertNotInSet(set, Key.get(Integer.class));
 
     // Ensure there are no hanging references.
     key = null;
@@ -160,14 +124,10 @@ public class WeakKeySetTest extends TestCase {
     Object source2 = new Object();
 
     set.add(key1, state1, source1);
-    assertTrue(set.contains(key1));
-    assertEquals(1, set.getSources(key1).size());
-    assertTrue(set.getSources(key1).contains(source1));
+    assertInSet(set, key1, 1, source1);
 
     set.add(key2, state2, source2);
-    assertTrue(set.contains(key2));
-    assertEquals(2, set.getSources(key2).size());
-    assertTrue(set.getSources(key2).containsAll(Arrays.asList(source1, source2)));
+    assertInSet(set, key2, 2, source1, source2);
 
     WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
     WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
@@ -179,10 +139,8 @@ public class WeakKeySetTest extends TestCase {
 
     awaitFullGc();
 
-    assertTrue(set.contains(key));
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key).contains(source2));
-    assertFalse(set.getSources(key).contains(source1));
+    assertSourceNotInSet(set, key, source1);
+    assertInSet(set, key, 1, source2);
 
     source1 = source2 = null;
     
@@ -197,8 +155,7 @@ public class WeakKeySetTest extends TestCase {
 
     awaitFullGc();
 
-    assertFalse(set.contains(key));
-    assertNull(set.getSources(key));
+    assertNotInSet(set, key);
 
     awaitClear(weakKey2Ref);
     awaitClear(weakSource2Ref);
@@ -215,14 +172,10 @@ public class WeakKeySetTest extends TestCase {
     Object source2 = new Object();
 
     set.add(key1, state1, source1);
-    assertTrue(set.contains(key1));
-    assertEquals(1, set.getSources(key1).size());
-    assertTrue(set.getSources(key1).contains(source1));
+    assertInSet(set, key1, 1, source1);
 
     set.add(key2, state2, source2);
-    assertTrue(set.contains(key2));
-    assertEquals(2, set.getSources(key2).size());
-    assertTrue(set.getSources(key1).containsAll(Arrays.asList(source1, source2)));
+    assertInSet(set, key2, 2, source1, source2);
 
     WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
     WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
@@ -230,10 +183,7 @@ public class WeakKeySetTest extends TestCase {
     Key<Integer> key = key1 = key2 = Key.get(Integer.class);
 
     awaitFullGc();
-
-    assertTrue(set.contains(key));
-    assertEquals(2, set.getSources(key).size());
-    assertTrue(set.getSources(key1).containsAll(Arrays.asList(source1, source2)));
+    assertInSet(set, key, 2, source1, source2);
 
     // Ensure the keys don't get GC'd when states are still referenced. key1 will be present in the
     // as the map key but key2 could be GC'd if the implementation does something wrong.
@@ -249,16 +199,12 @@ public class WeakKeySetTest extends TestCase {
     Object source = null;
 
     set.add(key1, state1, source);
-    assertTrue(set.contains(key1));
-    assertEquals(1, set.getSources(key1).size());
-    assertTrue(set.getSources(key1).contains(source));
+    assertInSet(set, key1, 1, source);
 
     set.add(key2, state2, source);
-    assertTrue(set.contains(key2));
-
     // Same source so still only one value.
-    assertEquals(1, set.getSources(key2).size());
-    assertTrue(set.getSources(key1).contains(source));
+    assertInSet(set, key2, 1, source);
+    assertInSet(set, key1, 1, source);
 
     WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
     WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
@@ -268,13 +214,9 @@ public class WeakKeySetTest extends TestCase {
     state1 = null;
 
     awaitFullGc();
-
-    assertTrue(set.contains(key));
-
     // Should still have a single source.
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key1).contains(source));
-    
+    assertInSet(set, key, 1, source);
+
     source = null;
 
     awaitClear(weakSourceRef);
@@ -284,9 +226,7 @@ public class WeakKeySetTest extends TestCase {
     state2 = null;
 
     awaitFullGc();
-
-    assertFalse(set.contains(key));
-    assertNull(set.getSources(key));
+    assertNotInSet(set, key);
 
     awaitClear(weakKey2Ref);
     awaitClear(weakSourceRef);
@@ -302,16 +242,11 @@ public class WeakKeySetTest extends TestCase {
     Object source = new Object();
 
     set.add(key1, state1, source);
-    assertTrue(set.contains(key1));
-    assertEquals(1, set.getSources(key1).size());
-    assertTrue(set.getSources(key1).contains(source));
+    assertInSet(set, key1, 1, source);
 
     set.add(key2, state2, source);
-    assertTrue(set.contains(key2));
-
     // Same source so still only one value.
-    assertEquals(1, set.getSources(key2).size());
-    assertTrue(set.getSources(key1).contains(source));
+    assertInSet(set, key2, 1, source);
 
     WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
     WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
@@ -322,11 +257,9 @@ public class WeakKeySetTest extends TestCase {
 
     awaitFullGc();
 
-    assertTrue(set.contains(key));
-
-    // Should still have a single source.
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key1).contains(source));
+ // Same source so still only one value.
+    assertInSet(set, key, 1, source);
+    assertInSet(set, key1, 1, source);
     
     source = null;
 
@@ -339,8 +272,7 @@ public class WeakKeySetTest extends TestCase {
 
     awaitFullGc();
 
-    assertFalse(set.contains(key));
-    assertNull(set.getSources(key));
+    assertNotInSet(set, key);
 
     awaitClear(weakKey2Ref);
     awaitClear(weakSourceRef);
@@ -360,19 +292,13 @@ public class WeakKeySetTest extends TestCase {
     Object source3 = new Object();
 
     set.add(key1, state1, source1);
-    assertTrue(set.contains(key1));
-    assertEquals(1, set.getSources(key1).size());
-    assertTrue(set.getSources(key1).contains(source1));
+    assertInSet(set, key1, 1, source1);
 
     set.add(key2, state2, source2);
-    assertTrue(set.contains(key2));
-    assertEquals(2, set.getSources(key2).size());
-    assertTrue(set.getSources(key1).containsAll(Arrays.asList(source1, source2)));
+    assertInSet(set, key1, 2, source1, source2);
 
     set.add(key3, state3, source3);
-    assertTrue(set.contains(key3));
-    assertEquals(3, set.getSources(key3).size());
-    assertTrue(set.getSources(key1).containsAll(Arrays.asList(source1, source2, source3)));
+    assertInSet(set, key1, 3, source1, source2, source3);
 
     WeakReference<Key<Integer>> weakKey1Ref = new WeakReference<Key<Integer>>(key1);
     WeakReference<Key<Integer>> weakKey2Ref = new WeakReference<Key<Integer>>(key2);
@@ -385,10 +311,8 @@ public class WeakKeySetTest extends TestCase {
     state1 = null;
 
     awaitFullGc();
-
-    assertTrue(set.contains(key));
-    assertEquals(2, set.getSources(key).size());
-    assertTrue(set.getSources(key).containsAll(Arrays.asList(source2, source3)));
+    assertSourceNotInSet(set, key, source1);
+    assertInSet(set, key, 2, source2, source3);
 
     source1 = null;
     // Key1 will be referenced as the key in the sources backingSet and won't be
@@ -397,10 +321,8 @@ public class WeakKeySetTest extends TestCase {
 
     state2 = null;
     awaitFullGc();
-
-    assertTrue(set.contains(key));
-    assertEquals(1, set.getSources(key).size());
-    assertTrue(set.getSources(key).contains(source3));
+    assertSourceNotInSet(set, key, source2);
+    assertInSet(set, key, 1, source3);
 
     awaitClear(weakKey2Ref);
     
@@ -411,9 +333,7 @@ public class WeakKeySetTest extends TestCase {
 
     state3 = null;
     awaitFullGc();
-
-    assertFalse(set.contains(Key.get(Integer.class)));
-    assertNull(set.getSources(Key.get(Integer.class)));
+    assertNotInSet(set, key);
 
     awaitClear(weakKey3Ref);
     source3 = null;
@@ -518,19 +438,7 @@ public class WeakKeySetTest extends TestCase {
     awaitClear(weakRef2);
     assertNotBlacklisted(parentInjector, Key.get(String.class));
   }
-  
-  private static void assertBlacklisted(Injector injector, Key<?> key) {
-    assertBlacklistState(injector, key, true);
-  }
-  
-  private static void assertNotBlacklisted(Injector injector, Key<?> key) {
-    assertBlacklistState(injector, key, false);
-  }
 
-  private static void assertBlacklistState(Injector injector, Key<?> key, boolean isBlacklisted) {
-    assertEquals(isBlacklisted, ((InjectorImpl) injector).state.isBlacklisted(key));
-  }
-  
   private static class TestState implements State {
     public State parent() {
       return new TestState();

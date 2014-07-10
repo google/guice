@@ -46,6 +46,7 @@ import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.WeakKeySetUtils;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
