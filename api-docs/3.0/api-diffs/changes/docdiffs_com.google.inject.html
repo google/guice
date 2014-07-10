@@ -18,7 +18,7 @@ com.google.inject Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>3.0</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>3.0</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -62,8 +62,8 @@ Similarly, documentation which was inherited from another class or interface is 
 <hr>
 
 <A NAME="com.google.inject.Binder!class"></A><a href="com.google.inject.Binder.html" class="hiddenlink">Class <b>Binder</b></a><br><br><blockquote>Collects configuration information (primarily <i>bindings</i>) which will be
- used to create an <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Injector.html"><TT>Injector</TT></A>. Guice provides this object to your
- application's <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Module.html"><TT>Module</TT></A> implementors so they may each contribute
+ used to create an <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Injector.html"><TT>Injector</TT></A>. Guice provides this object to your
+ application's <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Module.html"><TT>Module</TT></A> implementors so they may each contribute
  their own bindings and other registrations.
 
  <h3>The Guice Binding EDSL</h3>
@@ -75,14 +75,14 @@ Similarly, documentation which was inherited from another class or interface is 
  method-level javadocs</b>.  Instead, you should consult the series of
  examples below.  To save space, these examples omit the opening
  {@code binder}, just as you will if your module extends
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/AbstractModule.html"><TT>AbstractModule</TT></A>.
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/AbstractModule.html"><TT>AbstractModule</TT></A>.
 
  <pre>
      bind(ServiceImpl.class);</pre>
 
  This statement does essentially nothing; it "binds the {@code ServiceImpl}
  class to itself" and does not change Guice's default behavior.  You may still
- want to use this if you prefer your <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Module.html"><TT>Module</TT></A> class to serve as an
+ want to use this if you prefer your <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Module.html"><TT>Module</TT></A> class to serve as an
  explicit <i>manifest</i> for the services it provides.  Also, in rare cases,
  Guice may be unable to validate a binding at injector creation time unless it
  is given explicitly.
@@ -93,7 +93,7 @@ Similarly, documentation which was inherited from another class or interface is 
  Specifies that a request for a {@code Service} instance with no binding
  annotations should be treated as if it were a request for a
  {@code ServiceImpl} instance. This <i>overrides</i> the function of any
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/ImplementedBy.html"><TT>@ImplementedBy</TT></A> or <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/ProvidedBy.html"><TT>@ProvidedBy</TT></A>
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/ImplementedBy.html"><TT>@ImplementedBy</TT></A> or <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/ProvidedBy.html"><TT>@ProvidedBy</TT></A>
  annotations found on {@code Service}, since Guice will have already
  "moved on" to {@code ServiceImpl} before it reaches the point when it starts
  looking for these annotations.
@@ -105,13 +105,13 @@ Similarly, documentation which was inherited from another class or interface is 
  {@code Provider<Service>}. This binding specifies that Guice should resolve
  an unannotated injection request for {@code Service} by first resolving an
  instance of {@code ServiceProvider} in the regular way, then calling
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Provider.html#get"><TT>get()</TT></A> on the resulting Provider instance to obtain the
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Provider.html#get"><TT>get()</TT></A> on the resulting Provider instance to obtain the
  {@code Service} instance.
 
- <p>The <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Provider.html"><TT>Provider</TT></A> you use here does not have to be a "factory"; that
+ <p>The <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Provider.html"><TT>Provider</TT></A> you use here does not have to be a "factory"; that
  is, a provider which always <i>creates</i> each instance it provides.
  However, this is generally a good practice to follow.  You can then use
- Guice's concept of <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Scope.html"><TT>scopes</TT></A> to guide when creation should happen
+ Guice's concept of <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Scope.html"><TT>scopes</TT></A> to guide when creation should happen
  -- "letting Guice work for you".
 
  <pre>
@@ -140,7 +140,7 @@ Similarly, documentation which was inherited from another class or interface is 
  <p><b>Note:</b> a scope specified in this way <i>overrides</i> any scope that
  was specified with an annotation on the {@code ServiceImpl} class.
  
- <p>Besides <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Singleton.html"><TT>Singleton</TT></A>/<A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Scopes.html#SINGLETON"><TT>Scopes.SINGLETON</TT></A>, there are
+ <p>Besides <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Singleton.html"><TT>Singleton</TT></A>/<A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Scopes.html#SINGLETON"><TT>Scopes.SINGLETON</TT></A>, there are
  servlet-specific scopes available in
  {@code com.google.inject.servlet.ServletScopes}, and your Modules can
  contribute their own custom scopes for use here as well.
@@ -165,7 +165,7 @@ Similarly, documentation which was inherited from another class or interface is 
  In this example, your module itself, <i>not Guice</i>, takes responsibility
  for obtaining a {@code ServiceImpl} instance, then asks Guice to always use
  this single instance to fulfill all {@code Service} injection requests.  When
- the <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Injector.html"><TT>Injector</TT></A> is created, it will automatically perform field
+ the <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Injector.html"><TT>Injector</TT></A> is created, it will automatically perform field
  and method injection for this instance, but any injectable constructor on
  {@code ServiceImpl} is simply ignored.  Note that using this approach results
  in "eager loading" behavior that you can't control.
@@ -175,9 +175,9 @@ Similarly, documentation which was inherited from another class or interface is 
 
  Sets up a constant binding. Constant injections must always be annotated.
  When a constant binding's value is a string, it is eligile for conversion to
- all primitive types, to <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Enum.html#valueOf(Class, String)"><TT>all enums</TT></A>, and to
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Class.html#forName"><TT>class literals</TT></A>. Conversions for other types can be
- configured using <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#convertToTypes(Matcher, TypeConverter)"><TT> convertToTypes()</TT></A>.
+ all primitive types, to <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Enum.html#valueOf(Class, String)"><TT>all enums</TT></A>, and to
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Class.html#forName"><TT>class literals</TT></A>. Conversions for other types can be
+ configured using <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#convertToTypes(Matcher, TypeConverter)"><TT> convertToTypes()</TT></A>.
 
  <pre>
    {@literal @}Color("red") Color red; // A member variable (field)
@@ -197,7 +197,7 @@ Similarly, documentation which was inherited from another class or interface is 
          .to(BlueService.class);</pre>
 
  Differentiating by names is a common enough use case that we provided a
- standard annotation, <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/com/google/inject/name/Named.html"><TT>@Named</TT></A>.  Because of
+ standard annotation, <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/com/google/inject/name/Named.html"><TT>@Named</TT></A>.  Because of
  Guice's library support, binding by name is quite easier than in the
  arbitrary binding annotation case we just saw.  However, remember that these
  names will live in a single flat namespace with all the other names used in
@@ -212,7 +212,7 @@ Similarly, documentation which was inherited from another class or interface is 
  class implementation. It means that we do not need to place {@literal @}Inject
  on any of the constructors and that Guice treats the provided constructor as though
  it were annotated so. It is useful for cases where you cannot modify existing
- classes and is a bit simpler than using a <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/Provider.html"><TT>Provider</TT></A>.
+ classes and is a bit simpler than using a <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/Provider.html"><TT>Provider</TT></A>.
 
  </span><p>The above list of examples is far from exhaustive.  If you can think of
  how the concepts of one example might coexist with the concepts from another,
@@ -221,9 +221,9 @@ Similarly, documentation which was inherited from another class or interface is 
  cases Guice will let something bogus slip by, and will then inform you of
  the problems at runtime, as soon as you try to create your Injector.
 
- <p>The other methods of Binder such as <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#bindScope"><TT>.bindScope</TT></A>,
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#bindInterceptor"><TT>.bindInterceptor</TT></A>, <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#install"><TT>.install</TT></A>, <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#requestStaticInjection"><TT>.requestStaticInjection</TT></A>,
- <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#addError"><TT>.addError</TT></A> and <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/com/google/inject/Binder/.html#currentStage"><TT>.currentStage</TT></A> are not part of the Binding EDSL;
+ <p>The other methods of Binder such as <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#bindScope"><TT>.bindScope</TT></A>,
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#bindInterceptor"><TT>.bindInterceptor</TT></A>, <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#install"><TT>.install</TT></A>, <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#requestStaticInjection"><TT>.requestStaticInjection</TT></A>,
+ <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#addError"><TT>.addError</TT></A> and <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder/.html#currentStage"><TT>.currentStage</TT></A> are not part of the Binding EDSL;
  you can learn how to use these in the usual way, from the method
  documentation.
 
@@ -231,7 +231,7 @@ Similarly, documentation which was inherited from another class or interface is 
  @author jessewilson@google.com (Jesse Wilson)
  @author kevinb@google.com (Kevin Bourrillion)</blockquote>
 <A NAME="com.google.inject.Binder.dmethod.getProvider(Key&lt;T&gt;)"></A><a href="com.google.inject.Binder.html" class="hiddenlink">Class <b>Binder</b></a>, <a href="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(com.google.inject.Key<T>)" class="hiddenlink">Provider&lt;T&gt; <b>getProvider(Key&lt;T&gt;)</b></a><br><br><blockquote>Returns the provider used to obtain instances for the given injection key.
- The returned <span style="background: #FFFF00">provider </span>will not be valid until the <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/Injector.html"><TT>Injector</TT></A> has been
+ The returned <span style="background: #FFFF00">provider </span>will not be valid until the <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/Injector.html"><TT>Injector</TT></A> has been
  created. The provider will throw an {@code IllegalStateException} if you
  try to use it beforehand.
 
@@ -277,9 +277,9 @@ Similarly, documentation which was inherited from another class or interface is 
  @since 2.0</blockquote>
 <A NAME="com.google.inject.Injector.dmethod.getBindings()"></A><a href="com.google.inject.Injector.html" class="hiddenlink">Class <b>Injector</b></a>, <a href="com.google.inject.Injector.html#com.google.inject.Injector.getBindings_changed()" class="hiddenlink">Map&lt;Key&lt;?&gt;, Binding&lt;?&gt;&gt; <b>getBindings()</b></a><br><br><blockquote>Returns <strike>all</strike><span style="background: #FFFF00">this</span> <span style="background: #FFFF00">injector's <strong></span>explicit</strong> bindings.
 
- <p>The returned map does not include bindings inherited from a <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/.html#getParent()"><TT>parent
+ <p>The returned map does not include bindings inherited from a <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/.html#getParent()"><TT>parent
  injector</TT></A>, should one exist. The returned map is guaranteed to iterate (for example, with
- its <A HREF="http://google-guice.googlecode.com/svn/trunk/latest-api-diffs/3.0/javadoc/Map.html#entrySet()"><TT><strike>java.util.</strike>Map.entrySet()</TT></A> iterator) in the order of insertion. In other words,<strike>
+ its <A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/Map.html#entrySet()"><TT><strike>java.util.</strike>Map.entrySet()</TT></A> iterator) in the order of insertion. In other words,<strike>
 </strike> the order <strike>in</strike><span style="background: #FFFF00">in
 </span> which bindings appear in user Modules.
 
