@@ -134,9 +134,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_4.0' ];
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_latest' ];
     
-    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_4.0' ];
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_latest' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -189,7 +189,7 @@
   <a href="./com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
     <li class="api apilevel-Guice_2.0">
   <a href="./com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
-    <li class="api apilevel-Guice_4.0">
+    <li class="api apilevel-Guice_latest">
   <a href="./com/google/inject/testing/fieldbinder/package-summary.html">com.google.inject.testing.fieldbinder</a></li>
     <li class="api apilevel-Guice_2.0">
   <a href="./com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
@@ -272,13 +272,13 @@
 <table class="jd-sumtable">
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/AbstractInjectorGrapher.html">AbstractInjectorGrapher</a></td>
             <td class="jd-descrcol" width="100%">Abstract injector grapher that builds the dependency graph but doesn't render it.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/AbstractInjectorGrapher.GrapherParameters.html">AbstractInjectorGrapher.GrapherParameters</a></td>
             <td class="jd-descrcol" width="100%">Parameters used to override default settings of the grapher.&nbsp;</td>
         </tr>
@@ -297,13 +297,13 @@
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/Alias.html">Alias</a></td>
             <td class="jd-descrcol" width="100%">Alias between two nodes.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/AliasCreator.html">AliasCreator</a></td>
             <td class="jd-descrcol" width="100%">Creator of node aliases.&nbsp;</td>
         </tr>
@@ -373,7 +373,7 @@
 <table class="jd-sumtable">
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/testing/fieldbinder/Bind.html">Bind</a></td>
             <td class="jd-descrcol" width="100%">Annotation used by <code><a href="./com/google/inject/testing/fieldbinder/BoundFieldModule.html">BoundFieldModule</a></code> to indicate that a field should be bound to its
  value using Guice.&nbsp;</td>
@@ -424,7 +424,7 @@
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/testing/fieldbinder/BoundFieldModule.html">BoundFieldModule</a></td>
             <td class="jd-descrcol" width="100%">Automatically creates Guice bindings for fields in an object annotated with <code><a href="./com/google/inject/testing/fieldbinder/Bind.html">Bind</a></code>.&nbsp;</td>
         </tr>
@@ -514,7 +514,7 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/DefaultRootKeySetCreator.html">DefaultRootKeySetCreator</a></td>
             <td class="jd-descrcol" width="100%">Root key set creator that starts with all types that are not Guice internal types or the
  Logger type.&nbsp;</td>
@@ -527,7 +527,7 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/DependencyAndSource.html">DependencyAndSource</a></td>
             <td class="jd-descrcol" width="100%">A combination of a <code><a href="./com/google/inject/spi/Dependency.html">Dependency</a></code> and the Binding#getSource()
  source where the dependency was bound.&nbsp;</td>
@@ -560,13 +560,13 @@
 <table class="jd-sumtable">
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/Edge.html">Edge</a></td>
             <td class="jd-descrcol" width="100%">Edge in a guice dependency graph.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/EdgeCreator.html">EdgeCreator</a></td>
             <td class="jd-descrcol" width="100%">Creator of graph edges to render.&nbsp;</td>
         </tr>
@@ -590,7 +590,7 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ElementSource.html">ElementSource</a></td>
             <td class="jd-descrcol" width="100%">Contains information about where and how an <code><a href="./com/google/inject/spi/Element.html">element</a></code> was bound.&nbsp;</td>
         </tr>
@@ -666,7 +666,7 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/graphviz/GraphvizGrapher.html">GraphvizGrapher</a></td>
             <td class="jd-descrcol" width="100%">InjectorGrapher implementation that writes out a Graphviz DOT file of the graph.&nbsp;</td>
         </tr>
@@ -787,7 +787,7 @@
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/InstanceNode.html">InstanceNode</a></td>
             <td class="jd-descrcol" width="100%">Node for instances.&nbsp;</td>
         </tr>
@@ -1007,25 +1007,25 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/Node.html">Node</a></td>
             <td class="jd-descrcol" width="100%">Node in a guice dependency graph.&nbsp;</td>
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/NodeCreator.html">NodeCreator</a></td>
             <td class="jd-descrcol" width="100%">Creator of graph nodes.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/NodeId.html">NodeId</a></td>
             <td class="jd-descrcol" width="100%">ID of a node in the graph.&nbsp;</td>
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/NodeId.NodeType.html">NodeId.NodeType</a></td>
             <td class="jd-descrcol" width="100%">Type of node.&nbsp;</td>
         </tr>
@@ -1050,13 +1050,13 @@
 <table class="jd-sumtable">
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/multibindings/OptionalBinder.html">OptionalBinder</a>&lt;T&gt;</td>
             <td class="jd-descrcol" width="100%">An API to bind optional values, optionally with a default value.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/multibindings/OptionalBinderBinding.html">OptionalBinderBinding</a>&lt;T&gt;</td>
             <td class="jd-descrcol" width="100%">A binding for a OptionalBinder.&nbsp;</td>
         </tr>
@@ -1190,13 +1190,13 @@
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ProvidesMethodBinding.html">ProvidesMethodBinding</a>&lt;T&gt;</td>
             <td class="jd-descrcol" width="100%">An @<code><a href="./com/google/inject/Provides.html">Provides</a></code> binding.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ProvidesMethodTargetVisitor.html">ProvidesMethodTargetVisitor</a>&lt;T,&nbsp;V&gt;</td>
             <td class="jd-descrcol" width="100%">A visitor for the @<code><a href="./com/google/inject/Provides.html">Provides</a></code> bindings.&nbsp;</td>
         </tr>
@@ -1208,19 +1208,19 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ProvisionListener.html">ProvisionListener</a></td>
             <td class="jd-descrcol" width="100%">Listens for provisioning of objects.&nbsp;</td>
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ProvisionListener.ProvisionInvocation.html">ProvisionListener.ProvisionInvocation</a>&lt;T&gt;</td>
             <td class="jd-descrcol" width="100%">Encapsulates a single act of provisioning.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/ProvisionListenerBinding.html">ProvisionListenerBinding</a></td>
             <td class="jd-descrcol" width="100%">Binds keys (picked using a Matcher) to a provision listener.&nbsp;</td>
         </tr>
@@ -1246,13 +1246,13 @@
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/RequireAtInjectOnConstructorsOption.html">RequireAtInjectOnConstructorsOption</a></td>
             <td class="jd-descrcol" width="100%">A request to require explicit @<code><a href="./com/google/inject/Inject.html">Inject</a></code> annotations on constructors.&nbsp;</td>
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/spi/RequireExactBindingAnnotationsOption.html">RequireExactBindingAnnotationsOption</a></td>
             <td class="jd-descrcol" width="100%">A request to require exact binding annotations.&nbsp;</td>
         </tr>
@@ -1264,7 +1264,7 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/grapher/RootKeySetCreator.html">RootKeySetCreator</a></td>
             <td class="jd-descrcol" width="100%">Creator of the default starting set of keys to graph.&nbsp;</td>
         </tr>
@@ -1307,13 +1307,13 @@
         </tr>
     
     
-        <tr class=" api apilevel-Guice_4.0" >
+        <tr class=" api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/servlet/ScopingException.html">ScopingException</a></td>
             <td class="jd-descrcol" width="100%">Exception thrown when there was a failure entering request scope.&nbsp;</td>
         </tr>
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/servlet/ScopingOnly.html">ScopingOnly</a></td>
             <td class="jd-descrcol" width="100%">Annotates a <code><a href="./com/google/inject/servlet/GuiceFilter.html">GuiceFilter</a></code> that provides scope functionality, but
  doesn't dispatch to <code><a href="./com/google/inject/servlet/ServletModule.html">ServletModule</a></code> bound servlets or filters.&nbsp;</td>
@@ -1401,7 +1401,7 @@
 <table class="jd-sumtable">
     
     
-        <tr class="alt-color api apilevel-Guice_4.0" >
+        <tr class="alt-color api apilevel-Guice_latest" >
             <td class="jd-linkcol"><a href="./com/google/inject/throwingproviders/ThrowingInject.html">ThrowingInject</a></td>
             <td class="jd-descrcol" width="100%">A version of @<code><a href="./com/google/inject/Inject.html">Inject</a></code> designed for ThrowingProviders.&nbsp;</td>
         </tr>

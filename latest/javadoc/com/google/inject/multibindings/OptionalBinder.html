@@ -85,7 +85,7 @@
 </noscript>
 </head>
 
-<body class="Guice_4.0">
+<body class="Guice_latest">
 
 <div id="header">
     <div id="headerLeft">
@@ -135,9 +135,9 @@
     </select>
   </div>
   <script>
-   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_4.0' ];
+   var SINCE_DATA = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_latest' ];
     
-    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_4.0' ];
+    var SINCE_LABELS = [ 'Guice_1.0', 'Guice_2.0', 'Guice_3.0', 'Guice_latest' ];
     buildApiLevelSelector();
     addLoadEvent(changeApiLevel);
   </script>
@@ -190,7 +190,7 @@
   <a href="../../../../com/google/inject/spi/package-summary.html">com.google.inject.spi</a></li>
     <li class="api apilevel-Guice_2.0">
   <a href="../../../../com/google/inject/spring/package-summary.html">com.google.inject.spring</a></li>
-    <li class="api apilevel-Guice_4.0">
+    <li class="api apilevel-Guice_latest">
   <a href="../../../../com/google/inject/testing/fieldbinder/package-summary.html">com.google.inject.testing.fieldbinder</a></li>
     <li class="api apilevel-Guice_2.0">
   <a href="../../../../com/google/inject/throwingproviders/package-summary.html">com.google.inject.throwingproviders</a></li>
@@ -209,7 +209,7 @@
           <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html">MapBinderBinding</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html">MultibinderBinding</a>&lt;T&gt;</li>
           <li class="api apilevel-Guice_3.0"><a href="../../../../com/google/inject/multibindings/MultibindingsTargetVisitor.html">MultibindingsTargetVisitor</a>&lt;T,&nbsp;V&gt;</li>
-          <li class="api apilevel-Guice_4.0"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html">OptionalBinderBinding</a>&lt;T&gt;</li>
+          <li class="api apilevel-Guice_latest"><a href="../../../../com/google/inject/multibindings/OptionalBinderBinding.html">OptionalBinderBinding</a>&lt;T&gt;</li>
       </ul>
     </li>
               
@@ -217,7 +217,7 @@
       <ul>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/MapBinder.html">MapBinder</a>&lt;K,&nbsp;V&gt;</li>
           <li class="api apilevel-Guice_2.0"><a href="../../../../com/google/inject/multibindings/Multibinder.html">Multibinder</a>&lt;T&gt;</li>
-          <li class="selected api apilevel-Guice_4.0"><a href="../../../../com/google/inject/multibindings/OptionalBinder.html">OptionalBinder</a>&lt;T&gt;</li>
+          <li class="selected api apilevel-Guice_latest"><a href="../../../../com/google/inject/multibindings/OptionalBinder.html">OptionalBinder</a>&lt;T&gt;</li>
       </ul>
     </li>
               
@@ -296,7 +296,7 @@ Summary:
 <div class="api-level">
   
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 
   
@@ -333,7 +333,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-Guice_4.0">
+<div id="jd-content" class="api apilevel-Guice_latest">
 <table class="jd-inheritance-table">
 
 
@@ -387,9 +387,11 @@ Summary:
  setBinding to a Provider that returns null will not cause OptionalBinder
  to fall back to the setDefault binding.
  
- <p>If neither setDefault nor setBinding are called, the optionals will be
- absent.  Otherwise, the optionals will return present if they are bound
- to a non-null value.
+ <p>If neither setDefault nor setBinding are called, it will try to link to a
+ user-supplied binding of the same type.  If no binding exists, the optionals
+ will be absent.  Otherwise, if a user-supplied binding of that type exists,
+ or if setBinding or setDefault are called, the optionals will return present
+ if they are bound to a non-null value.
 
  <p>Values are resolved at injection time. If a value is bound to a
  provider, that provider's get method will be called each time the optional
@@ -407,9 +409,18 @@ Summary:
  }</code></pre>
 
  <p>With this module, an Optional<code>&lt;Renamer&gt;</code> can now be
- injected.  With no other bindings, the optional will be absent.  However,
- once a user adds a binding:
+ injected.  With no other bindings, the optional will be absent.
+ Users can specify bindings in one of two ways:
  
+ <p>Option 1:
+ <pre><code>
+ public class UserRenamerModule extends AbstractModule {
+   protected void configure() {
+     bind(Renamer.class).to(ReplacingRenamer.class);
+   }
+ }</code></pre>
+ 
+ <p>or Option 2:
  <pre><code>
  public class UserRenamerModule extends AbstractModule {
    protected void configure() {
@@ -417,8 +428,8 @@ Summary:
          .setBinding().to(ReplacingRenamer.class);
    }
  }</code></pre>
- .. then the <code>Optional&lt;Renamer&gt;</code> will be present and supply the
- ReplacingRenamer.
+ With both options, the <code>Optional&lt;Renamer&gt;</code> will be present and supply the
+ ReplacingRenamer. 
  
  <p>Default values can be supplied using:
  <pre><code>
@@ -437,7 +448,25 @@ Summary:
          .setBinding().to(CUSTOM_LOOKUP_URL);
    }
  }</code></pre>
- ... which will override the default value.</p>
+ ... which will override the default value.
+ 
+ <p>If one module uses setDefault the only way to override the default is to use setBinding.
+ It is an error for a user to specify the binding without using OptionalBinder if
+ setDefault or setBinding are called.  For example, 
+ <pre><code>
+ public class FrameworkModule extends AbstractModule {
+   protected void configure() {
+     OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, LookupUrl.class))
+         .setDefault().to(DEFAULT_LOOKUP_URL);
+   }
+ }
+ public class UserLookupModule extends AbstractModule {
+   protected void configure() {
+     bind(Key.get(String.class, LookupUrl.class)).to(CUSTOM_LOOKUP_URL);
+   } 
+ }</code></pre>
+ ... would generate an error, because both the framework and the user are trying to bind
+ <code>@LookupUrl String</code>. </p>
 
 
 
@@ -497,7 +526,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Guice_4.0" >
+    <tr class="alt-color api apilevel-Guice_latest" >
         <td class="jd-typecol"><nobr>
             
             
@@ -513,7 +542,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-Guice_4.0" >
+    <tr class=" api apilevel-Guice_latest" >
         <td class="jd-typecol"><nobr>
             
             
@@ -529,7 +558,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Guice_4.0" >
+    <tr class="alt-color api apilevel-Guice_latest" >
         <td class="jd-typecol"><nobr>
             
             
@@ -545,7 +574,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-Guice_4.0" >
+    <tr class=" api apilevel-Guice_latest" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -563,7 +592,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-Guice_4.0" >
+    <tr class="alt-color api apilevel-Guice_latest" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -840,7 +869,7 @@ From class
 
 <A NAME="newOptionalBinder(com.google.inject.Binder, com.google.inject.Key<T>)"></A>
 
-<div class="jd-details api apilevel-Guice_4.0"> 
+<div class="jd-details api apilevel-Guice_latest"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -856,7 +885,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 </div>
         
@@ -873,7 +902,7 @@ From class
 
 <A NAME="newOptionalBinder(com.google.inject.Binder, com.google.inject.TypeLiteral<T>)"></A>
 
-<div class="jd-details api apilevel-Guice_4.0"> 
+<div class="jd-details api apilevel-Guice_latest"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -889,7 +918,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 </div>
         
@@ -906,7 +935,7 @@ From class
 
 <A NAME="newOptionalBinder(com.google.inject.Binder, java.lang.Class<T>)"></A>
 
-<div class="jd-details api apilevel-Guice_4.0"> 
+<div class="jd-details api apilevel-Guice_latest"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -922,7 +951,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 </div>
         
@@ -939,7 +968,7 @@ From class
 
 <A NAME="setBinding()"></A>
 
-<div class="jd-details api apilevel-Guice_4.0"> 
+<div class="jd-details api apilevel-Guice_latest"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -955,7 +984,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 </div>
         
@@ -977,7 +1006,7 @@ From class
 
 <A NAME="setDefault()"></A>
 
-<div class="jd-details api apilevel-Guice_4.0"> 
+<div class="jd-details api apilevel-Guice_latest"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
@@ -993,7 +1022,7 @@ From class
       <div class="api-level">
         <div>
 
-  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_4.0">API Level Guice_4.0</a>
+  Since: <a href="../../../../guide/appendix/api-levels.html#levelGuice_latest">API Level Guice_latest</a>
 
 </div>
         
