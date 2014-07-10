@@ -466,32 +466,43 @@ public class SpiUtils {
    * @param expectedOtherOptionalBindings the # of other optional bindings we expect to see.
    * @param expectedDefault the expected default binding, or null if none
    * @param expectedActual the expected actual binding, or null if none
+   * @param expectedUserLinkedActual the user binding that is the actual binding, used if
+   *        neither the default nor actual are set and a user binding existed for the type.
    */
   static <T> void assertOptionalVisitor(Key<T> keyType,
       Iterable<? extends Module> modules,
       VisitType visitType,
       int expectedOtherOptionalBindings,
       BindResult<?> expectedDefault,
-      BindResult<?> expectedActual) {
+      BindResult<?> expectedActual,
+      BindResult<?> expectedUserLinkedActual) {
     if (visitType == null) {
       fail("must test something");
     }
 
     if (visitType == BOTH || visitType == INJECTOR) {
       optionalInjectorTest(keyType, modules, expectedOtherOptionalBindings, expectedDefault,
-          expectedActual);
+          expectedActual, expectedUserLinkedActual);
     }
 
     if (visitType == BOTH || visitType == MODULE) {
       optionalModuleTest(keyType, modules, expectedOtherOptionalBindings, expectedDefault,
-          expectedActual);
+          expectedActual, expectedUserLinkedActual);
     }
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> void optionalInjectorTest(Key<T> keyType, Iterable<? extends Module> modules,
-      int expectedOtherOptionalBindings, BindResult<?> expectedDefault,
-      BindResult<?> expectedActual) {
+  private static <T> void optionalInjectorTest(Key<T> keyType,
+      Iterable<? extends Module> modules,
+      int expectedOtherOptionalBindings,
+      BindResult<?> expectedDefault,
+      BindResult<?> expectedActual,
+      BindResult<?> expectedUserLinkedActual) {
+    if (expectedUserLinkedActual != null) {
+      assertNull("cannot have actual if expecting user binding", expectedActual);
+      assertNull("cannot have default if expecting user binding", expectedDefault);
+    }
+    
     Key<Optional<T>> optionalKey =
         keyType.ofType(OptionalBinder.optionalOf(keyType.getTypeLiteral()));
     Injector injector = Guice.createInjector(modules);
@@ -510,12 +521,16 @@ public class SpiUtils {
           matches(optionalBinder.getDefaultBinding(), expectedDefault));
     }
 
-    if (expectedActual == null) {
+    if (expectedActual == null && expectedUserLinkedActual == null) {
       assertNull(optionalBinder.getActualBinding());
-    } else {
+    } else if (expectedActual != null) {
       assertTrue("expectedActual: " + expectedActual + ", actualActual: "
           + optionalBinder.getActualBinding(),
           matches(optionalBinder.getActualBinding(), expectedActual));
+    } else if (expectedUserLinkedActual != null) {
+      assertTrue("expectedUserLinkedActual: " + expectedUserLinkedActual + ", actualActual: "
+          + optionalBinder.getActualBinding(),
+          matches(optionalBinder.getActualBinding(), expectedUserLinkedActual));
     }
 
 
@@ -582,9 +597,16 @@ public class SpiUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> void optionalModuleTest(Key<T> keyType, Iterable<? extends Module> modules,
-      int expectedOtherOptionalBindings, BindResult<?> expectedDefault,
-      BindResult<?> expectedActual) {
+  private static <T> void optionalModuleTest(Key<T> keyType,
+      Iterable<? extends Module> modules,
+      int expectedOtherOptionalBindings,
+      BindResult<?> expectedDefault,
+      BindResult<?> expectedActual,
+      BindResult<?> expectedUserLinkedActual) {
+    if (expectedUserLinkedActual != null) {
+      assertNull("cannot have actual if expecting user binding", expectedActual);
+      assertNull("cannot have default if expecting user binding", expectedDefault);
+    }
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Map<Key<?>, Binding<?>> indexed = index(elements);
     Key<Optional<T>> optionalKey =

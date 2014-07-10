@@ -76,9 +76,11 @@ import javax.inject.Qualifier;
  * setBinding to a Provider that returns null will not cause OptionalBinder
  * to fall back to the setDefault binding.
  * 
- * <p>If neither setDefault nor setBinding are called, the optionals will be
- * absent.  Otherwise, the optionals will return present if they are bound
- * to a non-null value.
+ * <p>If neither setDefault nor setBinding are called, it will try to link to a
+ * user-supplied binding of the same type.  If no binding exists, the optionals
+ * will be absent.  Otherwise, if a user-supplied binding of that type exists,
+ * or if setBinding or setDefault are called, the optionals will return present
+ * if they are bound to a non-null value.
  *
  * <p>Values are resolved at injection time. If a value is bound to a
  * provider, that provider's get method will be called each time the optional
@@ -96,9 +98,18 @@ import javax.inject.Qualifier;
  * }</code></pre>
  *
  * <p>With this module, an {@link Optional}{@code <Renamer>} can now be
- * injected.  With no other bindings, the optional will be absent.  However,
- * once a user adds a binding:
+ * injected.  With no other bindings, the optional will be absent.
+ * Users can specify bindings in one of two ways:
  * 
+ * <p>Option 1:
+ * <pre><code>
+ * public class UserRenamerModule extends AbstractModule {
+ *   protected void configure() {
+ *     bind(Renamer.class).to(ReplacingRenamer.class);
+ *   }
+ * }</code></pre>
+ * 
+ * <p>or Option 2:
  * <pre><code>
  * public class UserRenamerModule extends AbstractModule {
  *   protected void configure() {
@@ -106,8 +117,8 @@ import javax.inject.Qualifier;
  *         .setBinding().to(ReplacingRenamer.class);
  *   }
  * }</code></pre>
- * .. then the {@code Optional<Renamer>} will be present and supply the
- * ReplacingRenamer.
+ * With both options, the {@code Optional<Renamer>} will be present and supply the
+ * ReplacingRenamer. 
  * 
  * <p>Default values can be supplied using:
  * <pre><code>
@@ -127,6 +138,24 @@ import javax.inject.Qualifier;
  *   }
  * }</code></pre>
  * ... which will override the default value.
+ * 
+ * <p>If one module uses setDefault the only way to override the default is to use setBinding.
+ * It is an error for a user to specify the binding without using OptionalBinder if
+ * setDefault or setBinding are called.  For example, 
+ * <pre><code>
+ * public class FrameworkModule extends AbstractModule {
+ *   protected void configure() {
+ *     OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, LookupUrl.class))
+ *         .setDefault().to(DEFAULT_LOOKUP_URL);
+ *   }
+ * }
+ * public class UserLookupModule extends AbstractModule {
+ *   protected void configure() {
+ *     bind(Key.get(String.class, LookupUrl.class)).to(CUSTOM_LOOKUP_URL);
+ *   } 
+ * }</code></pre>
+ * ... would generate an error, because both the framework and the user are trying to bind
+ * {@code @LookupUrl String}. 
  *
  * @author sameb@google.com (Sam Berlin)
  */
@@ -257,7 +286,7 @@ public abstract class OptionalBinder<T> {
      */
     private void addDirectTypeBinding(Binder binder) {
       binder.bind(typeKey).toProvider(new RealOptionalBinderProviderWithDependencies<T>(typeKey) {
-        public T get() {
+        @Override public T get() {
           Optional<Provider<T>> optional = optionalProviderT.get();
           if (optional.isPresent()) {
             return optional.get().get();
@@ -268,7 +297,7 @@ public abstract class OptionalBinder<T> {
           return null; 
         }
 
-        public Set<Dependency<?>> getDependencies() {
+        @Override public Set<Dependency<?>> getDependencies() {
           return dependencies;
         }
       });
@@ -286,7 +315,7 @@ public abstract class OptionalBinder<T> {
       return binder.bind(actualKey);
     }
 
-    public void configure(Binder binder) {
+    @Override public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "OptionalBinder was already initialized");
 
       binder.bind(optionalProviderKey).toProvider(
@@ -297,6 +326,7 @@ public abstract class OptionalBinder<T> {
           RealOptionalBinder.this.binder = null;
           actualBinding = injector.getExistingBinding(actualKey);
           defaultBinding = injector.getExistingBinding(defaultKey);
+          Binding<T> userBinding = injector.getExistingBinding(typeKey);
           Binding<T> binding = null;
           if (actualBinding != null) {
             // TODO(sameb): Consider exposing an option that will allow
@@ -306,6 +336,12 @@ public abstract class OptionalBinder<T> {
             binding = actualBinding;
           } else if (defaultBinding != null) {
             binding = defaultBinding;
+          } else if (userBinding != null) {
+            // If neither the actual or default is set, then we fallback
+            // to the value bound to the type itself and consider that the
+            // "actual binding" for the SPI.
+            binding = userBinding;
+            actualBinding = userBinding;
           }
           
           if (binding != null) {
@@ -321,11 +357,11 @@ public abstract class OptionalBinder<T> {
           }
         }
         
-        public Optional<Provider<T>> get() {
+        @Override public Optional<Provider<T>> get() {
           return optional;
         }
 
-        public Set<Dependency<?>> getDependencies() {
+        @Override public Set<Dependency<?>> getDependencies() {
           return providerDependencies;
         }
       });
@@ -348,7 +384,7 @@ public abstract class OptionalBinder<T> {
         super(typeKey);
       }
       
-      public Optional<T> get() {
+      @Override public Optional<T> get() {
         Optional<Provider<T>> optional = optionalProviderT.get();
         if (optional.isPresent()) {
           return Optional.fromNullable(optional.get().get());
@@ -357,11 +393,12 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public Set<Dependency<?>> getDependencies() {
+      @Override public Set<Dependency<?>> getDependencies() {
         return dependencies;
       }
 
       @SuppressWarnings("unchecked")
+      @Override
       public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
           ProviderInstanceBinding<? extends B> binding) {
         if (visitor instanceof MultibindingsTargetVisitor) {
@@ -371,11 +408,11 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public Key<Optional<T>> getKey() {
+      @Override public Key<Optional<T>> getKey() {
         return optionalKey;
       }
       
-      public Binding<?> getActualBinding() {
+      @Override public Binding<?> getActualBinding() {
         if (isInitialized()) {
           return actualBinding;
         } else {
@@ -384,7 +421,7 @@ public abstract class OptionalBinder<T> {
         }
       }
       
-      public Binding<?> getDefaultBinding() {
+      @Override public Binding<?> getDefaultBinding() {
         if (isInitialized()) {
           return defaultBinding;
         } else {
@@ -393,7 +430,7 @@ public abstract class OptionalBinder<T> {
         }
       }
 
-      public boolean containsElement(Element element) {
+      @Override public boolean containsElement(Element element) {
         Key<?> elementKey;
         if (element instanceof Binding) {
           elementKey = ((Binding<?>) element).getKey();
@@ -445,14 +482,12 @@ public abstract class OptionalBinder<T> {
         this.equality = equality;
       }
 
-      @Override
-      public boolean equals(Object obj) {
+      @Override public boolean equals(Object obj) {
         return this.getClass() == obj.getClass()
             && equality.equals(((RealOptionalBinderProviderWithDependencies<?>) obj).equality);
       }
 
-      @Override
-      public int hashCode() {
+      @Override public int hashCode() {
         return equality.hashCode();
       }
     }

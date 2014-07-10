@@ -126,10 +126,10 @@ public class OptionalBinderTest extends TestCase {
         injector.getInstance(Key.get(optionalOfJavaxProviderString));
     assertFalse(optionalJxP.isPresent());
     
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, null);
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, null, null);
   }
   
-  public void testAbsentWithUserBoundValue() {
+  public void testUsesUserBoundValue() {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class);
@@ -141,16 +141,22 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("foo", injector.getInstance(String.class));
     
     Optional<String> optional = injector.getInstance(Key.get(optionalOfString));
-    assertFalse(optional.isPresent());
+    assertEquals("foo", optional.get());
     
     Optional<Provider<String>> optionalP = injector.getInstance(Key.get(optionalOfProviderString));
-    assertFalse(optionalP.isPresent());
+    assertEquals("foo", optionalP.get().get());
     
     Optional<javax.inject.Provider<String>> optionalJxP =
         injector.getInstance(Key.get(optionalOfJavaxProviderString));
-    assertFalse(optionalJxP.isPresent());
+    assertEquals("foo", optionalJxP.get().get());
     
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, null);
+    assertOptionalVisitor(stringKey,
+        setOf(module),
+        VisitType.BOTH,
+        0,
+        null,
+        null,
+        providerInstance("foo"));
   }
   
   public void testSetDefault() {
@@ -175,7 +181,7 @@ public class OptionalBinderTest extends TestCase {
     assertTrue(optionalJxP.isPresent());
     assertEquals("a", optionalJxP.get().get());
 
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null);
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null, null);
   }
   
   public void testSetBinding() {
@@ -200,7 +206,7 @@ public class OptionalBinderTest extends TestCase {
     assertTrue(optionalJxP.isPresent());
     assertEquals("a", optionalJxP.get().get());
     
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"));
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"), null);
   }
   
   public void testSetBindingOverridesDefault() {
@@ -233,7 +239,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         instance("a"),
-        instance("b"));
+        instance("b"),
+        null);
   }
   
   public void testSpreadAcrossModules() {
@@ -274,7 +281,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         instance("a"),
-        instance("b"));
+        instance("b"),
+        null);
   }
   
   public void testExactSameBindingCollapses_defaults() {
@@ -302,7 +310,7 @@ public class OptionalBinderTest extends TestCase {
     assertTrue(optionalJxP.isPresent());
     assertEquals("a", optionalJxP.get().get());
 
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null);
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null, null);
   }
   
   public void testExactSameBindingCollapses_actual() {
@@ -330,7 +338,7 @@ public class OptionalBinderTest extends TestCase {
     assertTrue(optionalJxP.isPresent());
     assertEquals("a", optionalJxP.get().get());
 
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"));
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"), null);
   }
   
   public void testDifferentBindingsFail_defaults() {
@@ -443,7 +451,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         instance("a"),
-        instance("b"));
+        instance("b"),
+        null);
   }
   
   public void testMultipleDifferentOptionals() {
@@ -464,10 +473,10 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("b", injector.getInstance(bKey));
     assertEquals("c", injector.getInstance(cKey));
     
-    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 3, instance("a"), null);
-    assertOptionalVisitor(intKey, setOf(module), VisitType.BOTH, 3, instance(1), null);
-    assertOptionalVisitor(bKey, setOf(module), VisitType.BOTH, 3, instance("b"), null);
-    assertOptionalVisitor(cKey, setOf(module), VisitType.BOTH, 3, instance("c"), null);
+    assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 3, instance("a"), null, null);
+    assertOptionalVisitor(intKey, setOf(module), VisitType.BOTH, 3, instance(1), null, null);
+    assertOptionalVisitor(bKey, setOf(module), VisitType.BOTH, 3, instance("b"), null, null);
+    assertOptionalVisitor(cKey, setOf(module), VisitType.BOTH, 3, instance("c"), null, null);
   }
   
   public void testOptionalIsAppropriatelyLazy() {
@@ -533,6 +542,7 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         SpiUtils.<String>providerInstance(null),
+        null,
         null);
   }
   
@@ -563,7 +573,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         null,
-        SpiUtils.<String>providerInstance(null));
+        SpiUtils.<String>providerInstance(null),
+        null);
   }
   
   // TODO(sameb): Maybe change this?
@@ -595,7 +606,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         instance("a"),
-        SpiUtils.<String>providerInstance(null));
+        SpiUtils.<String>providerInstance(null),
+        null);
   }
 
   public void testSourceLinesInException() {
@@ -699,7 +711,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         instance("A"),
-        instance("B"));
+        instance("B"),
+        null);
   }
 
   public void testModuleOverrideRepeatedInstalls_toKey() {
@@ -726,7 +739,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         linked(aKey),
-        linked(bKey));
+        linked(bKey),
+        null);
   }
 
   public void testModuleOverrideRepeatedInstalls_toProviderInstance() {
@@ -751,7 +765,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         providerInstance("A"),
-        providerInstance("B"));
+        providerInstance("B"),
+        null);
   }
 
   private static class AStringProvider implements Provider<String> {
@@ -785,7 +800,8 @@ public class OptionalBinderTest extends TestCase {
         VisitType.BOTH,
         0,
         providerKey(Key.get(AStringProvider.class)),
-        providerKey(Key.get(BStringProvider.class)));
+        providerKey(Key.get(BStringProvider.class)),
+        null);
   }
 
   private static class StringGrabber {
