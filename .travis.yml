@@ -11,7 +11,7 @@ env:
   matrix:
     - LABEL=ant        CMD="ant dist test.dist" INSTALL="/bin/true"
     - LABEL=ant_no_aop CMD="ant -f build/no_aop/build.xml dist test.dist" INSTALL="ant no_aop"
-    - LABEL=mvn        CMD="mvn verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn dependency:go-offline install clean --fail-never --quiet -DskipTests=true -Dsource.skip=true -Dmaven.javadoc.skip=true"
+    - LABEL=mvn        CMD="mvn verify --fail-at-end -Dsource.skip=true -Dmaven.javadoc.skip=true" INSTALL="mvn dependency:go-offline test clean --fail-never -DskipTests=true"
 
 install:
   - ${INSTALL}
