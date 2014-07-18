@@ -1,8 +1,8 @@
 package com.google.inject.persist.jpa;
 
+import junit.framework.TestCase;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,10 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
-import org.junit.Before;
-import org.junit.Test;
-
-public class JpaPersistServiceTest {
+public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
@@ -26,14 +23,13 @@ public class JpaPersistServiceTest {
   private final EntityManagerFactory factory = mock(EntityManagerFactory.class);
   private final EntityManager entityManager = mock(EntityManager.class);
 
-  @Before
+  @Override
   public void setUp() throws Exception {
     when(provider.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES)).thenReturn(factory);
     when(factory.createEntityManager()).thenReturn(entityManager);
   }
 
-  @Test
-  public void givenErrorOnEntityManagerClose_whenEndIsCalled_thenEntityManagerIsRemoved() {
+  public void test_givenErrorOnEntityManagerClose_whenEndIsCalled_thenEntityManagerIsRemoved() {
     sut.start(factory);
     sut.begin();
 
