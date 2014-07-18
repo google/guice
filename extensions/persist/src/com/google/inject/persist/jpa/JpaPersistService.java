@@ -16,6 +16,7 @@
 
 package com.google.inject.persist.jpa;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -84,11 +85,20 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
       return;
     }
 
-    em.close();
-    entityManager.remove();
+    try {
+      em.close();
+    }
+    finally {
+      entityManager.remove();
+    }
   }
 
   private volatile EntityManagerFactory emFactory;
+
+  @VisibleForTesting
+  synchronized void start(EntityManagerFactory emFactory) {
+    this.emFactory = emFactory;
+  }
 
   public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");
