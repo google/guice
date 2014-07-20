@@ -1,7 +1,7 @@
 # see http://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/ for details
 
 if [ "$TRAVIS_REPO_SLUG" == "google/guice" ] && \
-   [ "$TRAVIS_JDK_VERSION" == "oraclejdk7" ] && \
+   [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ] && \
    [ "$LABEL" == "ant" ] && \
    [ "$TRAVIS_PULL_REQUEST" == "false" ] && \
    [ "$TRAVIS_BRANCH" == "master" ]; then
