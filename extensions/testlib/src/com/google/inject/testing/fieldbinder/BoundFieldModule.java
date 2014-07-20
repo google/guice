@@ -52,10 +52,11 @@ import java.lang.reflect.Type;
  * {@link Bind#to} instead of the field's actual type.
  * </li>
  * <li>
- * If a {@link BindingAnnotation} or {@link Qualifier} is present on the field, that field will be
- * bound using that annotation via {@link AnnotatedBindingBuilder#annotatedWith}. For example,
- * {@code bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}. It is an error
- * to supply more than one {@link BindingAnnotation} or {@link Qualifier}.
+ * If a {@link BindingAnnotation} or {@link javax.inject.Qualifier} is present on the field,
+ * that field will be bound using that annotation via {@link AnnotatedBindingBuilder#annotatedWith}.
+ * For example, {@code bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)}.
+ * It is an error to supply more than one {@link BindingAnnotation} or
+ * {@link javax.inject.Qualifier}.
  * </li>
  * <li>
  * If the field is of type {@link Provider}, the field's value will be bound as a {@link Provider}
