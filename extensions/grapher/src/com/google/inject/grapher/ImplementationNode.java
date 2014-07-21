@@ -21,8 +21,9 @@ import java.lang.reflect.Member;
 import java.util.Collection;
 
 /**
- * Node for types that have {@link Dependency}s and are bound to {@link InterfaceNode}s. These
- * nodes will often have fields for {@link Member}s that are {@link InjectionPoint}s.
+ * Node for types that have {@link com.google.inject.spi.Dependency}s and are
+ * bound to {@link InterfaceNode}s. These nodes will often have fields for
+ * {@link Member}s that are {@link com.google.inject.spi.InjectionPoint}s.
  *
  * @see DependencyEdge
  *

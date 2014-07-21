@@ -8,6 +8,14 @@
     <fileset dir="${lib.dir}" includes="*.jar"/>
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
   </path>
+  
+  <path id="javadoc.classpath">
+  	<path refid="compile.classpath"/>
+    <fileset dir="extensions">
+    	<include name="*/lib/*.jar"/>
+    </fileset>
+    <pathelement location="${build.dir}/classes"/>
+  </path>
 
 
   <target name="jar" depends="jar.withdeps, manifest" description="Build jar.">
@@ -130,7 +138,7 @@
 
   <property name="old.api" value="3.0"/>
   <property name="new.api" value="latest"/>
-  <target name="jdiff">
+  <target name="jdiff" depends="compile">
     <property name="jdiff.home" value="lib/build/jdiff"/>
     <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
     <delete dir="${jdiff.tmp}"/>
@@ -140,7 +148,7 @@
     <javadoc packagenames="com.google.*"
              docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
              maxmemory="1024M"
-             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
+             classpathref="javadoc.classpath">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -169,7 +177,7 @@
              docletpath="${jdiff.home}/jdiff.jar${path.separator}${jdiff.home}/xerces.jar"
              maxmemory="512M"
              sourcefiles="${jdiff.home}/Null.java"
-             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar">
+             classpathref="javadoc.classpath">
       <doclet name="jdiff.JDiff">
         <param name="-oldapi" value="${old.api}"/>
         <param name="-oldapidir" value="latest-api-diffs"/>
@@ -183,47 +191,60 @@
     </javadoc>
   </target>
 
-  <target name="javadoc">
+  <target name="javadoc" depends="compile">
     <javadoc packagenames="com.google.*"
-             destdir="build/docs"
-             docletpath="lib/build/doclava.jar"
-             bootclasspath="${java.home}/lib/rt.jar"
+             destdir="build/docs/javadoc"
              maxmemory="512M"
-             classpath="lib/javax.inject.jar${path.separator}lib/aopalliance.jar${path.separator}lib/guava-16.0.1.jar{$path.separator}lib/build/jsr305.jar">
+             classpathref="javadoc.classpath"
+             additionalparam="-Xdoclint:none"
+             windowtitle="Guice ${new.api} API"
+             author="false"
+             protected="true">
+      <group title="Guice Core" packages="com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder"/>
       <fileset dir="${src.dir}" defaultexcludes="yes">
-        <include name="com/google/**"/>
+        <include name="com/google/inject/**"/>
         <exclude name="com/google/inject/internal/**"/>
-      </fileset>
-      <fileset dir="${servlet.src.dir}"/>
-      <fileset dir="${spring.src.dir}"/>
-      <fileset dir="${assistedinject.src.dir}"/>
-      <fileset dir="${jmx.src.dir}"/>
-      <fileset dir="${jndi.src.dir}"/>
-      <fileset dir="${throwingproviders.src.dir}"/>
-      <fileset dir="${multibindings.src.dir}"/>
-      <fileset dir="${persist.src.dir}"/>
-      <fileset dir="${grapher.src.dir}"/>
-      <fileset dir="${testlib.src.dir}"/>
-      <!-- TODO: this breaks Doclava for some reason
-      <fileset dir="${struts2.src.dir}"/> -->
+      </fileset>      
 
-      <doclet name="com.google.doclava.Doclava">
-        <param name="-hdf"/> <param name="project.name"/> <param name="Guice"/>
-        <param name="-since"/> <param name="lib/build/guice-1.0.xml"/> <param name="Guice_1.0" />
-        <param name="-since"/> <param name="lib/build/guice-2.0.xml"/> <param name="Guice_2.0" />
-        <param name="-since"/> <param name="lib/build/guice-3.0.xml"/> <param name="Guice_3.0" />
-        <param name="-apiversion" value="Guice_${new.api}"/>
-        <param name="-assetsdir" value="javadoc/assets"/>
-        <param name="-apixml" value="build/docs/guice-${new.api}.xml"/>
-        <!-- TODO: fix doclava federation
-          http://aopalliance.sourceforge.net/doc
-          http://www.springframework.org/docs/api/
-          <param name="-federate"/><param name="JDK"/><param name="http://download.oracle.com/javase/6/docs/api/index.html?"/>
-          <param name="-federationxml"/><param name="JDK"/><param name="http://doclava.googlecode.com/svn/static/api/openjdk-6.xml"/>
-        -->
-      </doclet>
+      <group title="Servlet Extension" packages="com.google.inject.servlet"/>
+      <fileset dir="${servlet.src.dir}"/>
+
+      <group title="AssistedInject Extension" packages="com.google.inject.assistedinject"/>
+      <fileset dir="${assistedinject.src.dir}"/>
+      
+      <group title="Multibinder Extension" packages="com.google.inject.multibindings"/>
+      <fileset dir="${multibindings.src.dir}"/>
+
+      <group title="ThrowingProviders Extension" packages="com.google.inject.throwingproviders"/>
+      <fileset dir="${throwingproviders.src.dir}"/>
+
+      <group title="Test Libraries Extension" packages="com.google.inject.testing.*"/>
+      <fileset dir="${testlib.src.dir}"/>
+
+      <group title="Grapher Extension" packages="com.google.inject.grapher:com.google.inject.grapher.*"/>
+      <fileset dir="${grapher.src.dir}"/>
+
+      <group title="Persist Extension" packages="com.google.inject.persist:com.google.inject.persist.*"/>
+      <fileset dir="${persist.src.dir}"/>
+
+      <group title="Spring Extension" packages="com.google.inject.spring"/>
+      <fileset dir="${spring.src.dir}"/>
+
+      <group title="Struts2 Extension" packages="com.google.inject.struts2"/>
+      <fileset dir="${struts2.src.dir}"/> 
+
+      <group title="JNDI Extension" packages="com.google.inject.jndi"/>     
+      <fileset dir="${jndi.src.dir}"/>
+
+      <group title="JMX Extension" packages="com.google.inject.tools.jmx"/>
+      <fileset dir="${jmx.src.dir}"/>      
+
+      <link href="http://aopalliance.sourceforge.net/doc/"/>
+      <link href="http://docs.oracle.com/javase/7/docs/api/"/>
+      <link href="http://atinject.googlecode.com/svn/trunk/javadoc/"/>
+      <link href="http://docs.guava-libraries.googlecode.com/git/javadoc/"/>
+      <link href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/"/>
     </javadoc>
-    <move todir="build/docs/javadoc"><fileset dir="build/docs/reference"/></move>
   </target>
 
   <target name="no_aop"

@@ -8,29 +8,36 @@ import com.google.inject.internal.util.StackTraceElements.InMemoryStackTraceElem
 import java.util.List;
 
 /**
- * Contains information about where and how an {@link Element element} was bound.
- * <p> 
- * The {@link #getDeclaringSource() declaring source} refers to a location in source code that 
- * defines the Guice {@link Element element}. For example, if the element is created from a method
- * annotated by {@literal @Provides}, the declaring source of element would be the method itself. 
+ * Contains information about where and how an {@link Element element} was
+ * bound.
  * <p>
- * The {@link #getStackTrace()} refers to the sequence of calls ends at one of {@link Binder} 
- * {@code bindXXX()} methods and eventually defines the element. Note that {@link #getStackTrace()} 
- * lists {@link StackTraceElement StackTraceElements} in reverse chronological order. The first 
- * element (index zero) is the last method call and the last element is the first method invocation.
- * By default, the stack trace is not collected. The default behavior can be changed by setting the 
- * {@code guice_include_stack_traces} flag value. The value can be either {@code OFF}, {@code
- * ONLY_FOR_DECLARING_SOURCE} or {@code COMPLETE}. Note that collecting stack traces for every
- * binding can cause a performance hit when the injector is created.
+ * The {@link #getDeclaringSource() declaring source} refers to a location in
+ * source code that defines the Guice {@link Element element}. For example, if
+ * the element is created from a method annotated by {@literal @Provides}, the
+ * declaring source of element would be the method itself.
  * <p>
- * The sequence of class names of {@link Module modules} involved in the element creation can be 
- * retrieved by {@link #getModuleClassNames()}. Similar to {@link #getStackTrace()}, the order is 
- * reverse chronological. The first module (index 0) is the module that installs the {@link Element 
- * element}. The last module is the root module.
+ * The {@link #getStackTrace()} refers to the sequence of calls ends at one of
+ * {@link com.google.inject.Binder} {@code bindXXX()} methods and eventually
+ * defines the element. Note that {@link #getStackTrace()} lists
+ * {@link StackTraceElement StackTraceElements} in reverse chronological order.
+ * The first element (index zero) is the last method call and the last element
+ * is the first method invocation. By default, the stack trace is not collected.
+ * The default behavior can be changed by setting the
+ * {@code guice_include_stack_traces} flag value. The value can be either
+ * {@code OFF}, {@code ONLY_FOR_DECLARING_SOURCE} or {@code COMPLETE}. Note that
+ * collecting stack traces for every binding can cause a performance hit when
+ * the injector is created.
  * <p>
- * In order to support the cases where a Guice {@link Element element} is created from another
- * Guice {@link Element element} (original) (e.g., by {@link Element#applyTo()}), it also
- * provides a reference to the original element source ({@link #getOriginalElementSource()}).
+ * The sequence of class names of {@link com.google.inject.Module modules}
+ * involved in the element creation can be retrieved by
+ * {@link #getModuleClassNames()}. Similar to {@link #getStackTrace()}, the
+ * order is reverse chronological. The first module (index 0) is the module that
+ * installs the {@link Element element}. The last module is the root module.
+ * <p>
+ * In order to support the cases where a Guice {@link Element element} is
+ * created from another Guice {@link Element element} (original) (e.g., by
+ * {@link Element#applyTo}), it also provides a reference to the original
+ * element source ({@link #getOriginalElementSource()}).
  */
 public final class ElementSource {
 
@@ -87,8 +94,9 @@ public final class ElementSource {
   
   /**
    * Returns a single location in source code that defines the element. It can be any object
-   * such as {@link Constructor}, {@link Method}, {@link Field}, {@link StackTraceElement}, etc. For
-   * example, if the element is created from a method annotated by {@literal @Provides}, the 
+   * such as {@link java.lang.reflect.Constructor}, {@link java.lang.reflect.Method},
+   * {@link java.lang.reflect.Field}, {@link StackTraceElement}, etc. For
+   * example, if the element is created from a method annotated by {@literal @Provides}, the
    * declaring source of element would be the method itself.
    */
   public Object getDeclaringSource() {
@@ -105,9 +113,9 @@ public final class ElementSource {
   }
 
   /**
-   * Returns the position of {@link Module#configure(Binder) configure(Binder)} method call in the
-   * {@link #getStackTrace() stack trace} for modules that their classes returned by
-   * {@link #getModuleClassNames()}. For example, if the stack trace looks like the following:
+   * Returns the position of {@link com.google.inject.Module#configure configure(Binder)} method
+   * call in the {@link #getStackTrace stack trace} for modules that their classes returned by
+   * {@link #getModuleClassNames}. For example, if the stack trace looks like the following:
    * <p>
    * {@code
    *  0 - Binder.bind(),
@@ -137,12 +145,12 @@ public final class ElementSource {
   }
 
   /**
-   * Returns the sequence of method calls that ends at one of {@link Binder} {@code bindXXX()} 
-   * methods and eventually defines the element. Note that {@link #getStackTrace()} lists {@link 
-   * StackTraceElement StackTraceElements} in reverse chronological order. The first element (index 
-   * zero) is the last method call and the last element is the first method invocation. In the cases
-   * where stack trace is not available (i.e.,the stack trace was not collected), it returns an 
-   * empty array.
+   * Returns the sequence of method calls that ends at one of {@link com.google.inject.Binder}
+   * {@code bindXXX()} methods and eventually defines the element. Note that
+   * {@link #getStackTrace} lists {@link StackTraceElement StackTraceElements} in reverse
+   * chronological order. The first element (index zero) is the last method call and the last
+   * element is the first method invocation. In the cases where stack trace is not available
+   * (i.e.,the stack trace was not collected), it returns an empty array.
    */
   public StackTraceElement[] getStackTrace() {
     int modulesCallStackSize = moduleSource.getStackTraceSize();

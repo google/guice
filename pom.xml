@@ -294,6 +294,9 @@ See the Apache License Version 2.0 for the specific language governing permissio
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <additionalparam>-Xdoclint:none</additionalparam>
+          </configuration>
           <version>2.7</version>
           <executions>
             <execution>

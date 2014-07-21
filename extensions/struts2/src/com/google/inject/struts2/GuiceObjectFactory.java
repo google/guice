@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * @deprecated Use {@link com.google.inject.servlet.Struts2Factory} instead.
+ * @deprecated Use {@link com.google.inject.struts2.Struts2Factory} instead.
  */
 @Deprecated
 public class GuiceObjectFactory extends ObjectFactory {
