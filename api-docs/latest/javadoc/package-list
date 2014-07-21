@@ -13,8 +13,8 @@ com.google.inject.persist.jpa
 com.google.inject.servlet
 com.google.inject.spi
 com.google.inject.spring
+com.google.inject.struts2
 com.google.inject.testing.fieldbinder
 com.google.inject.throwingproviders
 com.google.inject.tools.jmx
 com.google.inject.util
-

@@ -76,10 +76,9 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @param  The type for node IDs.</strike></blockquote>
 <hr align="left" width="100%">
-<A NAME="com.google.inject.grapher.ImplementationNode!class"></A><a href="com.google.inject.grapher.ImplementationNode.html" class="hiddenlink">Class <b>ImplementationNode</b></a><br><br><blockquote>Node for <strike>classes</strike><span style="background: #FFFF00">types</span> <strike>and instances </strike>that have <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/Dependency.html"><TT>Dependency</TT></A>s and <strike>are
-</strike><span style="background: #FFFF00">are</span> bound to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/InterfaceNode.html"><TT>InterfaceNode</TT></A>s. <strike>These</strike><span style="background: #FFFF00">These
-</span> nodes will often have fields <strike>for
-</strike><span style="background: #FFFF00">for</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/Member.html"><TT>Member</TT></A>s that are <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/InjectionPoint.html"><TT>InjectionPoint</TT></A>s.<strike>
+<A NAME="com.google.inject.grapher.ImplementationNode!class"></A><a href="com.google.inject.grapher.ImplementationNode.html" class="hiddenlink">Class <b>ImplementationNode</b></a><br><br><blockquote>Node for <strike>classes</strike><span style="background: #FFFF00">types</span> <strike>and instances </strike>that have <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/com/google/inject/spi/Dependency.html"><TT><span style="background: #FFFF00">com.google.inject.spi.</span>Dependency</TT></A>s and are
+ bound to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/InterfaceNode.html"><TT>InterfaceNode</TT></A>s. These nodes will often have fields for
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/Member.html"><TT>Member</TT></A>s that are <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/com/google/inject/spi/InjectionPoint.html"><TT><span style="background: #FFFF00">com.google.inject.spi.</span>InjectionPoint</TT></A>s.<strike>
  
 </strike><span style="background: #FFFF00">
 
@@ -112,10 +111,19 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @param  The type for node IDs.</strike></blockquote>
 <hr align="left" width="100%">
-<A NAME="com.google.inject.grapher.TransitiveDependencyVisitor!class"></A><a href="com.google.inject.grapher.TransitiveDependencyVisitor.html" class="hiddenlink">Class <b>TransitiveDependencyVisitor</b></a><br><br><blockquote><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/BindingTargetVisitor.html"><TT>BindingTargetVisitor</TT></A> that returns a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Collection.html"><TT>Collection</TT></A> of the
- <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Key.html"><TT>Key</TT></A>s of each <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Binding.html"><TT>Binding</TT></A>'s dependencies. Used by
- <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/InjectorGrapher.html"><TT><strike>InjectorGropher</strike><span style="background: #FFFF00">InjectorGrapher</span></TT></A> to walk the dependency graph from a starting set of
- <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Binding.html"><TT>Binding</TT></A>s.
+<A NAME="com.google.inject.grapher.NameFactory!class"></A><a href="com.google.inject.grapher.NameFactory.html" class="hiddenlink">Class <b>NameFactory</b></a><br><br><blockquote>Interface for a service that provides nice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/NameFactory/String.html"><TT>String</TT></A>s that we can
+ display in the graph for the types that come up <strike>in </strike><span style="background: #FFFF00">in
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/NameFactory/com/google/inject/Binding.html"></span><TT><span style="background: #FFFF00">com.google.inject.</span>Binding</TT></A>s.
+
+ @author phopkins@gmail.com (Pete Hopkins)</blockquote>
+<hr align="left" width="100%">
+<A NAME="com.google.inject.grapher.TransitiveDependencyVisitor!class"></A><a href="com.google.inject.grapher.TransitiveDependencyVisitor.html" class="hiddenlink">Class <b>TransitiveDependencyVisitor</b></a><br><br><blockquote><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/com/google/inject/spi/BindingTargetVisitor.html"><TT><span style="background: #FFFF00">com.google.inject.spi.</span>BindingTargetVisitor</TT></A> that returns <strike>a</strike><span style="background: #FFFF00">a
+</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Collection.html"><TT>Collection</TT></A> of <strike>the
+</strike><span style="background: #FFFF00">the</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Key.html"><TT>Key</TT></A>s of each <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Binding.html"><TT>Binding</TT></A>'<strike>s</strike><span style="background: #FFFF00">s
+</span> dependencies. Used <strike>by
+</strike><span style="background: #FFFF00">by</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/InjectorGrapher.html"><TT><strike>InjectorGropher</strike><span style="background: #FFFF00">InjectorGrapher</span></TT></A> to walk the dependency <strike>graph</strike><span style="background: #FFFF00">graph
+</span> from a starting set <strike>of
+</strike><span style="background: #FFFF00">of</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/TransitiveDependencyVisitor/Binding.html"><TT>Binding</TT></A>s.
 
  @author phopkins@gmail.com (Pete Hopkins)</blockquote>
 <hr align="left" width="100%">

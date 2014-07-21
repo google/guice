@@ -32,7 +32,7 @@ com.google.inject.throwingproviders Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <A HREF="docdiffs_com.google.inject.spi.html"><B>PREV PACKAGE</B></A>  &nbsp;
+  <A HREF="docdiffs_com.google.inject.struts2.html"><B>PREV PACKAGE</B></A>  &nbsp;
   &nbsp;<B>NEXT PACKAGE</B>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
@@ -61,6 +61,21 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
+<A NAME="com.google.inject.throwingproviders.CheckedProvides!class"></A><a href="com.google.inject.throwingproviders.CheckedProvides.html" class="hiddenlink">Class <b>CheckedProvides</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/throwingproviders/CheckedProvides/com/google/inject/Module.html"><TT><span style="background: #FFFF00">com.google.inject.</span>Module</TT></A> to create <strike>a</strike><span style="background: #FFFF00">a
+</span> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/throwingproviders/CheckedProvides/CheckedProvider.html"><TT>CheckedProvider</TT></A><strike>
+</strike> method binding that can throw exceptions. <strike>The</strike><span style="background: #FFFF00">The
+</span> method's return type is <strike>bound
+</strike><span style="background: #FFFF00">bound</span> to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/throwingproviders/CheckedProvides/CheckedProvider.html"><TT>CheckedProvider</TT></A> that can <strike>be</strike><span style="background: #FFFF00">be
+</span> injected. Guice will <strike>pass
+</strike><span style="background: #FFFF00">pass</span> dependencies to the method as parameters. <strike>Install</strike><span style="background: #FFFF00">Install
+</span> {@literal @}<strike>CheckedProvides
+</strike><span style="background: #FFFF00">CheckedProvides</span> methods by using
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/throwingproviders/CheckedProvides/ThrowingProviderBinder.html#forModule(com.google.inject.Module)"><TT>ThrowingProviderBinder.forModule(com.google.inject.Module)</TT></A> on the
+ module where the methods are declared.
+ 
+ @author sameb@google.com (Sam Berlin)
+ @since 3.0</blockquote>
+<hr align="left" width="100%">
 <A NAME="com.google.inject.throwingproviders.ThrowingProviderBinder!class"></A><a href="com.google.inject.throwingproviders.ThrowingProviderBinder.html" class="hiddenlink">Class <b>ThrowingProviderBinder</b></a><br><br><blockquote><p>Builds a binding for a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/throwingproviders/ThrowingProviderBinder/CheckedProvider.html"><TT>CheckedProvider</TT></A>.
  
  <p>You can use a fluent API and custom providers:

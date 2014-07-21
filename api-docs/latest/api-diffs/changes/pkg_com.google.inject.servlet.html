@@ -74,9 +74,94 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 &nbsp;
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="GuiceFilter"></A>
+  <nobr><A HREF="com.google.inject.servlet.GuiceFilter.html">GuiceFilter</A></nobr>
+  </TD>
+  <TD VALIGN="TOP"><p>
+ Apply this filter in web.xml above all other filters (typically), to all requests where you plan
+  to use servlet scopes.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="GuiceServletContextListener"></A>
+  <nobr><A HREF="com.google.inject.servlet.GuiceServletContextListener.html">GuiceServletContextListener</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">As of Guice 2.0 you can still use (your subclasses of) {@code GuiceServletContextListener}
+ class as a logical place to create and configure your injector.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="InstanceFilterBinding"></A>
+  <nobr><A HREF="com.google.inject.servlet.InstanceFilterBinding.html"><I>InstanceFilterBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a single instance of a filter.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="InstanceServletBinding"></A>
+  <nobr><A HREF="com.google.inject.servlet.InstanceServletBinding.html"><I>InstanceServletBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding to a single instance of a servlet.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="LinkedFilterBinding"></A>
+  <nobr><A HREF="com.google.inject.servlet.LinkedFilterBinding.html"><I>LinkedFilterBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A linked binding to a filter.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="LinkedServletBinding"></A>
+  <nobr><A HREF="com.google.inject.servlet.LinkedServletBinding.html"><I>LinkedServletBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A linked binding to a servlet.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ServletModule"></A>
+  <nobr><A HREF="com.google.inject.servlet.ServletModule.html">ServletModule</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Configures the servlet scopes and creates bindings for the servlet API
+ objects so you can inject the request, response, session, etc.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ServletModule.FilterKeyBindingBuilder"></A>
+  <nobr><A HREF="com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder.html"><I>ServletModule.FilterKeyBindingBuilder</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/servlet/ServletModule/FilterKeyBindingBuilder/ServletModule.html#configureServlets()"><TT>ServletModule.configureServlets()</TT></A>
+
+ </TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ServletModule.ServletKeyBindingBuilder"></A>
+  <nobr><A HREF="com.google.inject.servlet.ServletModule.ServletKeyBindingBuilder.html"><I>ServletModule.ServletKeyBindingBuilder</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">See the EDSL examples at <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/servlet/ServletModule/ServletKeyBindingBuilder/ServletModule.html#configureServlets()"><TT>ServletModule.configureServlets()</TT></A>
+
+ </TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ServletModuleBinding"></A>
+  <nobr><A HREF="com.google.inject.servlet.ServletModuleBinding.html"><I>ServletModuleBinding</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A binding created by <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/servlet/ServletModuleBinding/ServletModule.html"><TT>ServletModule</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ServletModuleTargetVisitor"></A>
+  <nobr><A HREF="com.google.inject.servlet.ServletModuleTargetVisitor.html"><I>ServletModuleTargetVisitor</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A visitor for the servlet extension.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">

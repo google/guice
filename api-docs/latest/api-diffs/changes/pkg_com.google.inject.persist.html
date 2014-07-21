@@ -51,9 +51,24 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </H2>
 <p>
 <a NAME="Changed"></a>
-<TABLE summary="Changed Classes" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TABLE summary="Changed Classes and Interfaces" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
-  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes</B></FONT></TD>
+  <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Changed Classes and Interfaces</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PersistFilter"></A>
+  <nobr><A HREF="com.google.inject.persist.PersistFilter.html">PersistFilter</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Apply this filter to enable the HTTP Request unit of work and to have
+ guice-persist manage the lifecycle of active units of work.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="PersistService"></A>
+  <nobr><A HREF="com.google.inject.persist.PersistService.html"><I>PersistService</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Persistence provider service.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -61,6 +76,13 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
   <nobr><A HREF="com.google.inject.persist.Transactional.html">Transactional</A></nobr>
   </TD>
   <TD VALIGN="TOP"><p> Any method or class marked with this annotation will be considered for transactionality.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="UnitOfWork"></A>
+  <nobr><A HREF="com.google.inject.persist.UnitOfWork.html"><I>UnitOfWork</I></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">This interface is used to gain manual control over the unit of work.</TD>
 </TR>
 </TABLE>
 &nbsp;
