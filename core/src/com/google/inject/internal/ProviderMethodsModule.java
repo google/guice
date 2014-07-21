@@ -50,30 +50,39 @@ import java.util.logging.Logger;
 public final class ProviderMethodsModule implements Module {
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
+  private final boolean skipFastClassGeneration;
 
-  private ProviderMethodsModule(Object delegate) {
+  private ProviderMethodsModule(Object delegate, boolean skipFastClassGeneration) {
     this.delegate = checkNotNull(delegate, "delegate");
     this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
+    this.skipFastClassGeneration = skipFastClassGeneration;
   }
 
   /**
    * Returns a module which creates bindings for provider methods from the given module.
    */
   public static Module forModule(Module module) {
-    return forObject(module);
+    return forObject(module, false);
   }
 
   /**
    * Returns a module which creates bindings for provider methods from the given object.
    * This is useful notably for <a href="http://code.google.com/p/google-gin/">GIN</a>
+   *
+   * <p>This will skip bytecode generation for provider methods, since it is assumed that callers
+   * are only interested in Module metadata.
    */
   public static Module forObject(Object object) {
+    return forObject(object, true);
+  }
+
+  private static Module forObject(Object object, boolean skipFastClassGeneration) {
     // avoid infinite recursion, since installing a module always installs itself
     if (object instanceof ProviderMethodsModule) {
       return Modules.EMPTY_MODULE;
     }
 
-    return new ProviderMethodsModule(object);
+    return new ProviderMethodsModule(object, skipFastClassGeneration);
   }
 
   public synchronized void configure(Binder binder) {
@@ -221,7 +230,7 @@ public final class ProviderMethodsModule implements Module {
     }
 
     return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
-        parameterProviders, scopeAnnotation);
+        parameterProviders, scopeAnnotation, skipFastClassGeneration);
   }
 
   <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {
