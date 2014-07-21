@@ -26,9 +26,9 @@ import com.google.inject.AbstractModule;
  */
 public class Struts2GuicePluginModule extends AbstractModule {
 
-	@Override
-	protected void configure() {
-		requestStaticInjection(Struts2Factory.class);
-	}
+  @Override
+  protected void configure() {
+    requestStaticInjection(Struts2Factory.class);
+  }
 
 }
