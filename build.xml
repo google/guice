@@ -196,7 +196,7 @@
              destdir="build/docs/javadoc"
              maxmemory="512M"
              classpathref="javadoc.classpath"
-             additionalparam="-Xdoclint:none"
+             additionalparam="-Xdoclint:none -notimestamp"
              windowtitle="Guice ${new.api} API"
              author="false"
              protected="true">
