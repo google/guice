@@ -610,6 +610,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.assistedinject.FactoryModuleBuilder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.assistedinject.FactoryProvider"/>
   <text>
     InsertCommentsHere
