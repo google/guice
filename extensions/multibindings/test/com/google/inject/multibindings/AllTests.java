@@ -29,6 +29,7 @@ public class AllTests {
     suite.addTestSuite(MapBinderTest.class);
     suite.addTestSuite(MultibinderTest.class);
     suite.addTestSuite(OptionalBinderTest.class);
+    suite.addTestSuite(RealElementTest.class);
     return suite;
   }
 }

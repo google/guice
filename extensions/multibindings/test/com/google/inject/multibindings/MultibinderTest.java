@@ -48,7 +48,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.RehashableKeys;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
@@ -922,12 +921,10 @@ public class MultibinderTest extends TestCase {
         Iterables.filter(Elements.getElements(ab), InstanceBinding.class));
     Key<?> keyBefore = binding.getKey();
     assertEquals(listOfStrings, keyBefore.getTypeLiteral());
-    assertFalse(RehashableKeys.Keys.needsRehashing(keyBefore));
 
     list.add("C");
     Key<?> keyAfter = binding.getKey();
     assertSame(keyBefore, keyAfter);
-    assertTrue(RehashableKeys.Keys.needsRehashing(keyAfter));
   }
 
   /*
