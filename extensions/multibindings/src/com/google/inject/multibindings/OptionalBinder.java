@@ -285,22 +285,7 @@ public abstract class OptionalBinder<T> {
      * bindings.
      */
     private void addDirectTypeBinding(Binder binder) {
-      binder.bind(typeKey).toProvider(new RealOptionalBinderProviderWithDependencies<T>(typeKey) {
-        @Override public T get() {
-          Optional<Provider<T>> optional = optionalProviderT.get();
-          if (optional.isPresent()) {
-            return optional.get().get();
-          }
-          // Let Guice handle blowing up if the injection point doesn't have @Nullable
-          // (If it does have @Nullable, that's fine.  This would only happen if
-          //  setBinding/setDefault themselves were bound to 'null').
-          return null; 
-        }
-
-        @Override public Set<Dependency<?>> getDependencies() {
-          return dependencies;
-        }
-      });
+      binder.bind(typeKey).toProvider(new RealDirectTypeProvider());
     }
 
     @Override public LinkedBindingBuilder<T> setDefault() {
@@ -318,54 +303,8 @@ public abstract class OptionalBinder<T> {
     @Override public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "OptionalBinder was already initialized");
 
-      binder.bind(optionalProviderKey).toProvider(
-          new RealOptionalBinderProviderWithDependencies<Optional<Provider<T>>>(typeKey) {
-        private Optional<Provider<T>> optional;
+      binder.bind(optionalProviderKey).toProvider(new RealOptionalProviderProvider());
 
-        @Toolable @Inject void initialize(Injector injector) {
-          RealOptionalBinder.this.binder = null;
-          actualBinding = injector.getExistingBinding(actualKey);
-          defaultBinding = injector.getExistingBinding(defaultKey);
-          Binding<T> userBinding = injector.getExistingBinding(typeKey);
-          Binding<T> binding = null;
-          if (actualBinding != null) {
-            // TODO(sameb): Consider exposing an option that will allow
-            // ACTUAL to fallback to DEFAULT if ACTUAL's provider returns null.
-            // Right now, an ACTUAL binding can convert from present -> absent
-            // if it's bound to a provider that returns null.
-            binding = actualBinding;
-          } else if (defaultBinding != null) {
-            binding = defaultBinding;
-          } else if (userBinding != null) {
-            // If neither the actual or default is set, then we fallback
-            // to the value bound to the type itself and consider that the
-            // "actual binding" for the SPI.
-            binding = userBinding;
-            actualBinding = userBinding;
-          }
-          
-          if (binding != null) {
-            optional = Optional.of(binding.getProvider());
-            RealOptionalBinder.this.dependencies =
-                ImmutableSet.<Dependency<?>>of(Dependency.get(binding.getKey()));
-            RealOptionalBinder.this.providerDependencies = 
-                ImmutableSet.<Dependency<?>>of(Dependency.get(providerOf(binding.getKey())));
-          } else {            
-            optional = Optional.absent();
-            RealOptionalBinder.this.dependencies = ImmutableSet.of();
-            RealOptionalBinder.this.providerDependencies = ImmutableSet.of();
-          }
-        }
-        
-        @Override public Optional<Provider<T>> get() {
-          return optional;
-        }
-
-        @Override public Set<Dependency<?>> getDependencies() {
-          return providerDependencies;
-        }
-      });
-      
       // Optional is immutable, so it's safe to expose Optional<Provider<T>> as
       // Optional<javax.inject.Provider<T>> (since Guice provider implements javax Provider).
       @SuppressWarnings({"unchecked", "cast"})
@@ -375,12 +314,85 @@ public abstract class OptionalBinder<T> {
       binder.bind(optionalKey).toProvider(new RealOptionalKeyProvider());
     }
 
-    private class RealOptionalKeyProvider
+    final class RealDirectTypeProvider extends RealOptionalBinderProviderWithDependencies<T> {
+      private RealDirectTypeProvider() {
+        super(typeKey);
+      }
+
+      @Override public T get() {
+        Optional<Provider<T>> optional = optionalProviderT.get();
+        if (optional.isPresent()) {
+          return optional.get().get();
+        }
+        // Let Guice handle blowing up if the injection point doesn't have @Nullable
+        // (If it does have @Nullable, that's fine.  This would only happen if
+        //  setBinding/setDefault themselves were bound to 'null').
+        return null;
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return dependencies;
+      }
+    }
+
+    final class RealOptionalProviderProvider
+        extends RealOptionalBinderProviderWithDependencies<Optional<Provider<T>>> {
+      private Optional<Provider<T>> optional;
+
+      private RealOptionalProviderProvider() {
+        super(typeKey);
+      }
+
+      @Toolable @Inject void initialize(Injector injector) {
+        RealOptionalBinder.this.binder = null;
+        actualBinding = injector.getExistingBinding(actualKey);
+        defaultBinding = injector.getExistingBinding(defaultKey);
+        Binding<T> userBinding = injector.getExistingBinding(typeKey);
+        Binding<T> binding = null;
+        if (actualBinding != null) {
+          // TODO(sameb): Consider exposing an option that will allow
+          // ACTUAL to fallback to DEFAULT if ACTUAL's provider returns null.
+          // Right now, an ACTUAL binding can convert from present -> absent
+          // if it's bound to a provider that returns null.
+          binding = actualBinding;
+        } else if (defaultBinding != null) {
+          binding = defaultBinding;
+        } else if (userBinding != null) {
+          // If neither the actual or default is set, then we fallback
+          // to the value bound to the type itself and consider that the
+          // "actual binding" for the SPI.
+          binding = userBinding;
+          actualBinding = userBinding;
+        }
+          
+        if (binding != null) {
+          optional = Optional.of(binding.getProvider());
+          RealOptionalBinder.this.dependencies =
+              ImmutableSet.<Dependency<?>>of(Dependency.get(binding.getKey()));
+          RealOptionalBinder.this.providerDependencies =
+              ImmutableSet.<Dependency<?>>of(Dependency.get(providerOf(binding.getKey())));
+        } else {
+          optional = Optional.absent();
+          RealOptionalBinder.this.dependencies = ImmutableSet.of();
+          RealOptionalBinder.this.providerDependencies = ImmutableSet.of();
+        }
+      }
+        
+      @Override public Optional<Provider<T>> get() {
+        return optional;
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return providerDependencies;
+      }
+    }
+
+    final class RealOptionalKeyProvider
         extends RealOptionalBinderProviderWithDependencies<Optional<T>>
         implements ProviderWithExtensionVisitor<Optional<T>>,
             OptionalBinderBinding<Optional<T>>,
             Provider<Optional<T>> {
-      RealOptionalKeyProvider() {
+      private RealOptionalKeyProvider() {
         super(typeKey);
       }
       
