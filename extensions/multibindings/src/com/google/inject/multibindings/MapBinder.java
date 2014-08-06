@@ -376,87 +376,16 @@ public abstract class MapBinder<K, V> {
     @Override public void configure(Binder binder) {
       checkConfiguration(!isInitialized(), "MapBinder was already initialized");
 
-      final ImmutableSet<Dependency<?>> dependencies
+      ImmutableSet<Dependency<?>> dependencies
           = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetBinder.getSetKey()));
 
       // Binds a Map<K, Provider<V>> from a collection of Set<Entry<K, Provider<V>>.
-      final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
+      Provider<Set<Entry<K, Provider<V>>>> entrySetProvider = binder
           .getProvider(entrySetBinder.getSetKey());
-      
+
       binder.bind(providerMapKey).toProvider(
-          new RealMapBinderProviderWithDependencies<Map<K, Provider<V>>>(mapKey) {
-        private Map<K, Provider<V>> providerMap;
+          new RealProviderMapProvider(dependencies, entrySetProvider));
 
-        @Toolable @Inject void initialize(Injector injector) {
-          RealMapBinder.this.binder = null;
-          permitDuplicates = entrySetBinder.permitsDuplicates(injector);
-
-          Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
-          List<Map.Entry<K, Binding<V>>> bindingsMutable = Lists.newArrayList();
-          Indexer indexer = new Indexer(injector);
-          Multimap<K, IndexedBinding> index = HashMultimap.create();
-          Set<K> duplicateKeys = null;
-          for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-            ProviderMapEntry<K, V> providerEntry = (ProviderMapEntry<K, V>) entry;
-            Key<V> valueKey = providerEntry.getValueKey();
-            Binding<V> valueBinding = injector.getBinding(valueKey);
-            // If this isn't a dup due to an exact same binding, add it.
-            if (index.put(entry.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
-              Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
-              if (previous != null && !permitDuplicates) {
-                if (duplicateKeys == null) {
-                  duplicateKeys = Sets.newHashSet();
-                }
-                duplicateKeys.add(entry.getKey());
-              }
-              bindingsMutable.add(Maps.immutableEntry(entry.getKey(), valueBinding));
-            }
-          }
-          if (duplicateKeys != null) {
-            // Must use a ListMultimap in case more than one binding has the same source
-            // and is listed multiple times.
-            Multimap<K, String> dups = newLinkedKeyArrayValueMultimap();
-            for (Map.Entry<K, Binding<V>> entry : bindingsMutable) {
-              if (duplicateKeys.contains(entry.getKey())) {
-                dups.put(entry.getKey(), "\t at " + Errors.convert(entry.getValue().getSource()));
-              }
-            }
-            StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
-            boolean first = true;
-            for (K key : dups.keySet()) {
-              if (first) {
-                first = false;
-                if (duplicateKeyErrorMessages.containsKey(key)) {
-                  sb.setLength(0);
-                  sb.append(duplicateKeyErrorMessages.get(key));
-                } else {
-                  sb.append("\"" + key + "\", from bindings:\n");
-                }
-              } else {
-                if (duplicateKeyErrorMessages.containsKey(key)) {
-                  sb.append("\n and " + duplicateKeyErrorMessages.get(key));
-                } else {
-                  sb.append("\n and key: \"" + key + "\", from bindings:\n");
-                }
-              }
-              Joiner.on('\n').appendTo(sb, dups.get(key)).append("\n");
-            }
-            checkConfiguration(false, sb.toString());
-          }
-
-          providerMap = ImmutableMap.copyOf(providerMapMutable);
-          mapBindings = ImmutableList.copyOf(bindingsMutable);
-        }
-
-        @Override public Map<K, Provider<V>> get() {
-          return providerMap;
-        }
-
-        @Override public Set<Dependency<?>> getDependencies() {
-          return dependencies;
-        }
-      });
-      
       // The map this exposes is internally an ImmutableMap, so it's OK to massage
       // the guice Provider to javax Provider in the value (since Guice provider
       // implements javax Provider).
@@ -464,69 +393,8 @@ public abstract class MapBinder<K, V> {
       Key massagedProviderMapKey = (Key)providerMapKey;
       binder.bind(javaxProviderMapKey).to(massagedProviderMapKey);
 
-      final Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
-      binder.bind(mapKey).toProvider(new RealMapWithExtensionProvider<Map<K, V>>(mapKey) {
-        @Override public Map<K, V> get() {
-          Map<K, V> map = new LinkedHashMap<K, V>();
-          for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
-            V value = entry.getValue().get();
-            K key = entry.getKey();
-            checkConfiguration(value != null,
-                "Map injection failed due to null value for key \"%s\"", key);
-            map.put(key, value);
-          }
-          return Collections.unmodifiableMap(map);
-        }
-
-        @Override public Set<Dependency<?>> getDependencies() {
-          return dependencies;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override 
-        public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
-            ProviderInstanceBinding<? extends B> binding) {
-          if (visitor instanceof MultibindingsTargetVisitor) {
-            return ((MultibindingsTargetVisitor<Map<K, V>, R>)visitor).visit(this);
-          } else {
-            return visitor.visit(binding);
-          }
-        }
-
-        @Override public Key<Map<K, V>> getMapKey() {
-          return mapKey;
-        }
-
-        @Override public TypeLiteral<?> getKeyTypeLiteral() {
-          return keyType;
-        }
-
-        @Override public TypeLiteral<?> getValueTypeLiteral() {
-          return valueType;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override 
-        public List<Entry<?, Binding<?>>> getEntries() {
-          if (isInitialized()) {
-            return (List)mapBindings; // safe because mapBindings is immutable
-          } else {
-            throw new UnsupportedOperationException("getElements() not supported for module bindings");
-          }
-        }
-
-        @Override public boolean permitsDuplicates() {
-          if (isInitialized()) {
-            return permitDuplicates;
-          } else {
-            throw new UnsupportedOperationException("permitsDuplicates() not supported for module bindings");
-          }
-        }
-
-        @Override public boolean containsElement(Element element) {
-          return RealMapBinder.this.containsElement(element);
-        }
-      });
+      Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
+      binder.bind(mapKey).toProvider(new RealMapProvider(dependencies, mapProvider));
     }
 
     boolean containsElement(Element element) {
@@ -574,6 +442,166 @@ public abstract class MapBinder<K, V> {
       return mapKey.hashCode();
     }
 
+    final class RealProviderMapProvider
+        extends RealMapBinderProviderWithDependencies<Map<K, Provider<V>>> {
+      private final ImmutableSet<Dependency<?>> dependencies;
+      private final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider;
+      private Map<K, Provider<V>> providerMap;
+
+      private RealProviderMapProvider(
+          ImmutableSet<Dependency<?>> dependencies,
+          Provider<Set<Entry<K, Provider<V>>>> entrySetProvider) {
+        super(mapKey);
+        this.dependencies = dependencies;
+        this.entrySetProvider = entrySetProvider;
+      }
+
+      @Toolable @Inject void initialize(Injector injector) {
+        RealMapBinder.this.binder = null;
+        permitDuplicates = entrySetBinder.permitsDuplicates(injector);
+
+        Map<K, Provider<V>> providerMapMutable = new LinkedHashMap<K, Provider<V>>();
+        List<Map.Entry<K, Binding<V>>> bindingsMutable = Lists.newArrayList();
+        Indexer indexer = new Indexer(injector);
+        Multimap<K, IndexedBinding> index = HashMultimap.create();
+        Set<K> duplicateKeys = null;
+        for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+          ProviderMapEntry<K, V> providerEntry = (ProviderMapEntry<K, V>) entry;
+          Key<V> valueKey = providerEntry.getValueKey();
+          Binding<V> valueBinding = injector.getBinding(valueKey);
+          // If this isn't a dup due to an exact same binding, add it.
+          if (index.put(entry.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
+            Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
+            if (previous != null && !permitDuplicates) {
+              if (duplicateKeys == null) {
+                duplicateKeys = Sets.newHashSet();
+              }
+              duplicateKeys.add(entry.getKey());
+            }
+            bindingsMutable.add(Maps.immutableEntry(entry.getKey(), valueBinding));
+          }
+        }
+        if (duplicateKeys != null) {
+          // Must use a ListMultimap in case more than one binding has the same source
+          // and is listed multiple times.
+          Multimap<K, String> dups = newLinkedKeyArrayValueMultimap();
+          for (Map.Entry<K, Binding<V>> entry : bindingsMutable) {
+            if (duplicateKeys.contains(entry.getKey())) {
+              dups.put(entry.getKey(), "\t at " + Errors.convert(entry.getValue().getSource()));
+            }
+          }
+          StringBuilder sb = new StringBuilder("Map injection failed due to duplicated key ");
+          boolean first = true;
+          for (K key : dups.keySet()) {
+            if (first) {
+              first = false;
+              if (duplicateKeyErrorMessages.containsKey(key)) {
+                sb.setLength(0);
+                sb.append(duplicateKeyErrorMessages.get(key));
+              } else {
+                sb.append("\"" + key + "\", from bindings:\n");
+              }
+            } else {
+              if (duplicateKeyErrorMessages.containsKey(key)) {
+                sb.append("\n and " + duplicateKeyErrorMessages.get(key));
+              } else {
+                sb.append("\n and key: \"" + key + "\", from bindings:\n");
+              }
+            }
+            Joiner.on('\n').appendTo(sb, dups.get(key)).append("\n");
+          }
+          checkConfiguration(false, sb.toString());
+        }
+
+        providerMap = ImmutableMap.copyOf(providerMapMutable);
+        mapBindings = ImmutableList.copyOf(bindingsMutable);
+      }
+
+      @Override public Map<K, Provider<V>> get() {
+        return providerMap;
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return dependencies;
+      }
+    }
+
+    final class RealMapProvider extends RealMapWithExtensionProvider<Map<K, V>> {
+      private final ImmutableSet<Dependency<?>> dependencies;
+      private final Provider<Map<K, Provider<V>>> mapProvider;
+
+      private RealMapProvider(
+          ImmutableSet<Dependency<?>> dependencies,
+          Provider<Map<K, Provider<V>>> mapProvider) {
+        super(mapKey);
+        this.dependencies = dependencies;
+        this.mapProvider = mapProvider;
+      }
+
+      @Override public Map<K, V> get() {
+        Map<K, V> map = new LinkedHashMap<K, V>();
+        for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
+          V value = entry.getValue().get();
+          K key = entry.getKey();
+          checkConfiguration(value != null,
+              "Map injection failed due to null value for key \"%s\"", key);
+          map.put(key, value);
+        }
+        return Collections.unmodifiableMap(map);
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return dependencies;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <B, R> R acceptExtensionVisitor(BindingTargetVisitor<B, R> visitor,
+          ProviderInstanceBinding<? extends B> binding) {
+        if (visitor instanceof MultibindingsTargetVisitor) {
+          return ((MultibindingsTargetVisitor<Map<K, V>, R>)visitor).visit(this);
+        } else {
+          return visitor.visit(binding);
+        }
+      }
+
+      @Override public Key<Map<K, V>> getMapKey() {
+        return mapKey;
+      }
+
+      @Override public TypeLiteral<?> getKeyTypeLiteral() {
+        return keyType;
+      }
+
+      @Override public TypeLiteral<?> getValueTypeLiteral() {
+        return valueType;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public List<Entry<?, Binding<?>>> getEntries() {
+        if (isInitialized()) {
+          return (List)mapBindings; // safe because mapBindings is immutable
+        } else {
+          throw new UnsupportedOperationException(
+              "getElements() not supported for module bindings");
+        }
+      }
+
+      @Override public boolean permitsDuplicates() {
+        if (isInitialized()) {
+          return permitDuplicates;
+        } else {
+          throw new UnsupportedOperationException(
+              "permitsDuplicates() not supported for module bindings");
+        }
+      }
+
+      @Override public boolean containsElement(Element element) {
+        return RealMapBinder.this.containsElement(element);
+      }
+    }
+
     /**
      * Binds {@code Map<K, Set<V>>} and {{@code Map<K, Set<Provider<V>>>}.
      */
@@ -593,71 +621,20 @@ public abstract class MapBinder<K, V> {
       }
 
       @Override public void configure(Binder binder) {
-        final ImmutableSet<Dependency<?>> dependencies
+        ImmutableSet<Dependency<?>> dependencies
             = ImmutableSet.<Dependency<?>>of(Dependency.get(entrySetKey));
 
-        final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider =
+        Provider<Set<Entry<K, Provider<V>>>> entrySetProvider =
             binder.getProvider(entrySetKey);
         // Binds a Map<K, Set<Provider<V>>> from a collection of Map<Entry<K, Provider<V>> if
         // permitDuplicates was called.
         binder.bind(providerMultimapKey).toProvider(
-            new RealMapBinderProviderWithDependencies<Map<K, Set<Provider<V>>>>(multimapKey) {
-              private Map<K, Set<Provider<V>>> providerMultimap;
+            new RealProviderMultimapProvider(dependencies, entrySetProvider));
 
-              @SuppressWarnings("unused")
-              @Inject void initialize(Injector injector) {
-                Map<K, ImmutableSet.Builder<Provider<V>>> providerMultimapMutable =
-                    new LinkedHashMap<K, ImmutableSet.Builder<Provider<V>>>();
-                for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
-                  if (!providerMultimapMutable.containsKey(entry.getKey())) {
-                    providerMultimapMutable.put(
-                        entry.getKey(), ImmutableSet.<Provider<V>>builder());
-                  }
-                  providerMultimapMutable.get(entry.getKey()).add(entry.getValue());
-                }
-
-                ImmutableMap.Builder<K, Set<Provider<V>>> providerMultimapBuilder =
-                    ImmutableMap.builder();
-                for (Entry<K, ImmutableSet.Builder<Provider<V>>> entry
-                    : providerMultimapMutable.entrySet()) {
-                  providerMultimapBuilder.put(entry.getKey(), entry.getValue().build());
-                }
-                providerMultimap = providerMultimapBuilder.build();
-              }
-
-              @Override public Map<K, Set<Provider<V>>> get() {
-                return providerMultimap;
-              }
-
-              @Override public Set<Dependency<?>> getDependencies() {
-                return dependencies;
-              }
-            });
-
-        final Provider<Map<K, Set<Provider<V>>>> multimapProvider =
+        Provider<Map<K, Set<Provider<V>>>> multimapProvider =
             binder.getProvider(providerMultimapKey);
-        binder.bind(multimapKey).toProvider(new RealMapBinderProviderWithDependencies<Map<K, Set<V>>>(multimapKey) {
-
-          @Override public Map<K, Set<V>> get() {
-            ImmutableMap.Builder<K, Set<V>> multimapBuilder = ImmutableMap.builder();
-            for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
-              K key = entry.getKey();
-              ImmutableSet.Builder<V> valuesBuilder = ImmutableSet.builder();
-              for (Provider<V> valueProvider : entry.getValue()) {
-                V value = valueProvider.get();
-                checkConfiguration(value != null,
-                    "Multimap injection failed due to null value for key \"%s\"", key);
-                valuesBuilder.add(value);
-              }
-              multimapBuilder.put(key, valuesBuilder.build());
-            }
-            return multimapBuilder.build();
-          }
-
-          @Override public Set<Dependency<?>> getDependencies() {
-            return dependencies;
-          }
-        });
+        binder.bind(multimapKey).toProvider(
+            new RealMultimapProvider(dependencies, multimapProvider));
       }
 
       @Override public int hashCode() {
@@ -667,6 +644,83 @@ public abstract class MapBinder<K, V> {
       @Override public boolean equals(Object o) {
         return o instanceof MultimapBinder
             && ((MultimapBinder<?, ?>) o).multimapKey.equals(multimapKey);
+      }
+
+      final class RealProviderMultimapProvider
+          extends RealMapBinderProviderWithDependencies<Map<K, Set<Provider<V>>>> {
+        private final ImmutableSet<Dependency<?>> dependencies;
+        private final Provider<Set<Entry<K, Provider<V>>>> entrySetProvider;
+        private Map<K, Set<Provider<V>>> providerMultimap;
+
+        private RealProviderMultimapProvider(ImmutableSet<Dependency<?>> dependencies,
+            Provider<Set<Entry<K, Provider<V>>>> entrySetProvider) {
+          super(multimapKey);
+          this.dependencies = dependencies;
+          this.entrySetProvider = entrySetProvider;
+        }
+
+        @SuppressWarnings("unused")
+        @Inject void initialize(Injector injector) {
+          Map<K, ImmutableSet.Builder<Provider<V>>> providerMultimapMutable =
+              new LinkedHashMap<K, ImmutableSet.Builder<Provider<V>>>();
+          for (Entry<K, Provider<V>> entry : entrySetProvider.get()) {
+            if (!providerMultimapMutable.containsKey(entry.getKey())) {
+              providerMultimapMutable.put(
+                  entry.getKey(), ImmutableSet.<Provider<V>>builder());
+            }
+            providerMultimapMutable.get(entry.getKey()).add(entry.getValue());
+          }
+
+          ImmutableMap.Builder<K, Set<Provider<V>>> providerMultimapBuilder =
+              ImmutableMap.builder();
+          for (Entry<K, ImmutableSet.Builder<Provider<V>>> entry
+              : providerMultimapMutable.entrySet()) {
+            providerMultimapBuilder.put(entry.getKey(), entry.getValue().build());
+          }
+          providerMultimap = providerMultimapBuilder.build();
+        }
+
+        @Override public Map<K, Set<Provider<V>>> get() {
+          return providerMultimap;
+        }
+
+        @Override public Set<Dependency<?>> getDependencies() {
+          return dependencies;
+        }
+      }
+
+      final class RealMultimapProvider
+          extends RealMapBinderProviderWithDependencies<Map<K, Set<V>>> {
+        private final ImmutableSet<Dependency<?>> dependencies;
+        private final Provider<Map<K, Set<Provider<V>>>> multimapProvider;
+
+        RealMultimapProvider(
+            ImmutableSet<Dependency<?>> dependencies,
+            Provider<Map<K, Set<Provider<V>>>> multimapProvider) {
+          super(multimapKey);
+          this.dependencies = dependencies;
+          this.multimapProvider = multimapProvider;
+        }
+
+        @Override public Map<K, Set<V>> get() {
+          ImmutableMap.Builder<K, Set<V>> multimapBuilder = ImmutableMap.builder();
+          for (Entry<K, Set<Provider<V>>> entry : multimapProvider.get().entrySet()) {
+            K key = entry.getKey();
+            ImmutableSet.Builder<V> valuesBuilder = ImmutableSet.builder();
+            for (Provider<V> valueProvider : entry.getValue()) {
+              V value = valueProvider.get();
+              checkConfiguration(value != null,
+                  "Multimap injection failed due to null value for key \"%s\"", key);
+              valuesBuilder.add(value);
+            }
+            multimapBuilder.put(key, valuesBuilder.build());
+          }
+          return multimapBuilder.build();
+        }
+
+        @Override public Set<Dependency<?>> getDependencies() {
+          return dependencies;
+        }
       }
     }
 
