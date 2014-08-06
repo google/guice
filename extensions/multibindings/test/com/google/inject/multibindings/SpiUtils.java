@@ -197,7 +197,9 @@ public class SpiUtils {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>)b;
           if (pib.getUserSuppliedProvider() instanceof ProviderMapEntry) {
-            ProviderMapEntry<?, ?> pme = (ProviderMapEntry<?, ?>)pib.getUserSuppliedProvider();
+            // weird casting required to workaround compilation issues with jdk6
+            ProviderMapEntry<?, ?> pme =
+                (ProviderMapEntry<?, ?>) (Provider) pib.getUserSuppliedProvider();
             Binding<?> valueBinding = injector.getBinding(pme.getValueKey());
             if (indexer.isIndexable(valueBinding)
                 && !indexedEntries.put(pme.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
@@ -276,7 +278,9 @@ public class SpiUtils {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pb = (ProviderInstanceBinding<?>) b;
           if (pb.getUserSuppliedProvider() instanceof ProviderMapEntry) {
-            ProviderMapEntry<?, ?> pme = (ProviderMapEntry<?, ?>) pb.getUserSuppliedProvider();
+            // weird casting required to workaround jdk6 compilation problems
+            ProviderMapEntry<?, ?> pme =
+                (ProviderMapEntry<?, ?>) (Provider) pb.getUserSuppliedProvider();
             Binding<?> valueBinding = keyMap.get(pme.getValueKey());
             if (indexer.isIndexable(valueBinding)
                 && !indexedEntries.put(pme.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
