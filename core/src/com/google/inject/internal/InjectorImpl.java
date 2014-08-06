@@ -625,8 +625,10 @@ final class InjectorImpl implements Injector, Lookups {
       Errors errors, boolean jitBinding) throws ErrorsException {
     Class<?> rawType = key.getTypeLiteral().getRawType();
 
-    // Don't try to inject arrays, or enums.
-    if (rawType.isArray() || rawType.isEnum()) {
+    ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
+
+    // Don't try to inject arrays or enums annotated with @ImplementedBy.
+    if (rawType.isArray() || (rawType.isEnum() && implementedBy != null)) {
       throw errors.missingImplementation(key).toException();
     }
 
@@ -639,7 +641,6 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     // Handle @ImplementedBy
-    ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
     if (implementedBy != null) {
       Annotations.checkForMisplacedScopeAnnotations(rawType, source, errors);
       return createImplementedByBinding(key, scoping, implementedBy, errors);
