@@ -246,9 +246,9 @@ public class MoreTypes {
   }
 
   /**
-   * Returns the generic supertype for {@code supertype}. For example, given a class {@code
-   * IntegerSet}, the result for when supertype is {@code Set.class} is {@code Set<Integer>} and the
-   * result when the supertype is {@code Collection.class} is {@code Collection<Integer>}.
+   * Returns the generic supertype for {@code type}. For example, given a class {@code IntegerSet},
+   * the result for when supertype is {@code Set.class} is {@code Set<Integer>} and the result
+   * when the supertype is {@code Collection.class} is {@code Collection<Integer>}.
    */
   public static Type getGenericSupertype(Type type, Class<?> rawType, Class<?> toResolve) {
     if (toResolve == rawType) {

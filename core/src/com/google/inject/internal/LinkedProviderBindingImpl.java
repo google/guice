@@ -16,9 +16,6 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
-import static com.google.inject.internal.RehashableKeys.Keys.rehash;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -90,20 +87,6 @@ final class LinkedProviderBindingImpl<T>
 
   public BindingImpl<T> withKey(Key<T> key) {
     return new LinkedProviderBindingImpl<T>(getSource(), key, getScoping(), providerKey);
-  }
-
-  public BindingImpl<T> withRehashedKeys() {
-    boolean keyNeedsRehashing = needsRehashing(getKey());
-    boolean providerKeyNeedsRehashing = needsRehashing(providerKey);
-    if (keyNeedsRehashing || providerKeyNeedsRehashing) {
-      return new LinkedProviderBindingImpl<T>(
-          getSource(),
-          keyNeedsRehashing ? rehash(getKey()) : getKey(),
-          getScoping(),
-          providerKeyNeedsRehashing ? rehash(providerKey) : providerKey);
-    } else {
-      return this;
-    }
   }
 
   public void applyTo(Binder binder) {

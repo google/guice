@@ -42,6 +42,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -49,6 +53,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Indexer.IndexedBinding;
+import com.google.inject.multibindings.MapBinder.RealMapBinder.ProviderMapEntry;
 import com.google.inject.multibindings.OptionalBinder.Source;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Element;
@@ -157,6 +163,10 @@ public class SpiUtils {
     boolean mapSetProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Binding> otherMatches = Lists.newArrayList();
+    Multimap<Object, IndexedBinding> indexedEntries =
+        MultimapBuilder.hashKeys().hashSetValues().build();
+    Indexer indexer = new Indexer(injector);
+    int duplicates = 0;
     for(Binding b : injector.getAllBindings().values()) {
       boolean contains = mapbinder.containsElement(b);      
       Object visited = b.acceptTargetVisitor(visitor);
@@ -184,6 +194,19 @@ public class SpiUtils {
         // Validate that this binding is also a MultibinderBinding.
         assertTrue(b.acceptTargetVisitor(visitor) instanceof MultibinderBinding);
       } else if (contains) {
+        if (b instanceof ProviderInstanceBinding) {
+          ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>)b;
+          if (pib.getUserSuppliedProvider() instanceof ProviderMapEntry) {
+            // weird casting required to workaround compilation issues with jdk6
+            ProviderMapEntry<?, ?> pme =
+                (ProviderMapEntry<?, ?>) (Provider) pib.getUserSuppliedProvider();
+            Binding<?> valueBinding = injector.getBinding(pme.getValueKey());
+            if (indexer.isIndexable(valueBinding)
+                && !indexedEntries.put(pme.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
+              duplicates++;
+            }
+          }
+        }
         otherMatches.add(b);
       }
     }
@@ -193,7 +216,8 @@ public class SpiUtils {
       sizeOfOther--; // account for 1 duplicate binding
     }
     sizeOfOther = sizeOfOther / 2; // account for 1 value & 1 Map.Entry of each expected binding.
-    assertEquals("Incorrect other matches: " + otherMatches, mapResults.size(), sizeOfOther);
+    assertEquals("Incorrect other matches: " + otherMatches,
+        mapResults.size() + duplicates, sizeOfOther);
     assertTrue(entrySetMatch);
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
@@ -210,10 +234,14 @@ public class SpiUtils {
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Visitor<T> visitor = new Visitor<T>();
     MapBinderBinding<T> mapbinder = null;
+    Map<Key<?>, Binding<?>> keyMap = Maps.newHashMap();
     for(Element element : elements) {
-      if(element instanceof Binding && ((Binding)element).getKey().equals(mapKey)) {
-        mapbinder = (MapBinderBinding<T>)((Binding)element).acceptTargetVisitor(visitor);
-        break;
+      if(element instanceof Binding) {
+        Binding<?> binding = (Binding<?>)element;
+        keyMap.put(binding.getKey(), binding);
+        if (binding.getKey().equals(mapKey)) {
+          mapbinder = (MapBinderBinding<T>)((Binding<T>)binding).acceptTargetVisitor(visitor);
+        }
       }
     }
     assertNotNull(mapbinder);
@@ -233,6 +261,10 @@ public class SpiUtils {
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
     List<Element> otherElements = Lists.newArrayList();
+    Indexer indexer = new Indexer(null);
+    Multimap<Object, IndexedBinding> indexedEntries =
+        MultimapBuilder.hashKeys().hashSetValues().build();
+    int duplicates = 0;
     for(Element element : elements) {
       boolean contains = mapbinder.containsElement(element);
       if(!contains) {
@@ -243,6 +275,20 @@ public class SpiUtils {
       Binding b = null;
       if(element instanceof Binding) {
         b = (Binding)element;
+        if (b instanceof ProviderInstanceBinding) {
+          ProviderInstanceBinding<?> pb = (ProviderInstanceBinding<?>) b;
+          if (pb.getUserSuppliedProvider() instanceof ProviderMapEntry) {
+            // weird casting required to workaround jdk6 compilation problems
+            ProviderMapEntry<?, ?> pme =
+                (ProviderMapEntry<?, ?>) (Provider) pb.getUserSuppliedProvider();
+            Binding<?> valueBinding = keyMap.get(pme.getValueKey());
+            if (indexer.isIndexable(valueBinding)
+                && !indexedEntries.put(pme.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
+              duplicates++;
+            }
+          }
+        }
+
         key = b.getKey();
         Object visited = b.acceptTargetVisitor(visitor);
         if(visited instanceof MapBinderBinding) {
@@ -292,7 +338,7 @@ public class SpiUtils {
     }
     otherMatchesSize = otherMatchesSize / 3; // value, ProviderLookup per value, Map.Entry per value
     assertEquals("incorrect number of contains, leftover matches: " + otherMatches, mapResults
-        .size(), otherMatchesSize);
+        .size() + duplicates, otherMatchesSize);
 
     assertTrue(entrySetMatch);
     assertTrue(mapProviderMatch);
@@ -346,7 +392,8 @@ public class SpiUtils {
     assertEquals(allowDuplicates, multibinder.permitsDuplicates());
     List<Binding<?>> elements = Lists.newArrayList(multibinder.getElements());
     List<BindResult> bindResults = Lists.newArrayList(results);
-    assertEquals("wrong bind elements, expected: " + bindResults + ", but was: " + multibinder.getElements(),
+    assertEquals("wrong bind elements, expected: " + bindResults
+        + ", but was: " + multibinder.getElements(),
         bindResults.size(), elements.size());
     
     for(BindResult result : bindResults) {
@@ -367,9 +414,14 @@ public class SpiUtils {
     if(!elements.isEmpty()) {
       fail("Found all elements of: " + bindResults + ", but more were left over: " + elements);
     }
-    
+
     Set<Binding> setOfElements = new HashSet<Binding>(multibinder.getElements()); 
-    
+    Set<IndexedBinding> setOfIndexed = Sets.newHashSet();
+    Indexer indexer = new Indexer(injector);
+    for (Binding<?> oneBinding : setOfElements) {
+      setOfIndexed.add(oneBinding.acceptTargetVisitor(indexer));
+    }
+
     List<Object> otherMultibinders = Lists.newArrayList();
     List<Binding> otherContains = Lists.newArrayList();
     for(Binding b : injector.getAllBindings().values()) {
@@ -384,7 +436,9 @@ public class SpiUtils {
       } else if(setOfElements.contains(b)) {
         assertTrue(contains);
       } else if(contains) {
-        otherContains.add(b);
+        if (!indexer.isIndexable(b) || !setOfIndexed.contains(b.acceptTargetVisitor(indexer))) {
+          otherContains.add(b);
+        }
       }
     }
     
@@ -418,6 +472,9 @@ public class SpiUtils {
     List<Object> otherMultibinders = Lists.newArrayList();
     Set<Element> otherContains = new HashSet<Element>();
     List<Element> otherElements = Lists.newArrayList();
+    int duplicates = 0;
+    Set<IndexedBinding> setOfIndexed = Sets.newHashSet();
+    Indexer indexer = new Indexer(null);
     for(Element element : elements) {
       boolean contains = multibinder.containsElement(element);
       if(!contains) {
@@ -426,6 +483,11 @@ public class SpiUtils {
       boolean matched = false;
       if(element instanceof Binding) {
         Binding binding = (Binding)element;
+        if (indexer.isIndexable(binding)
+            && !setOfIndexed.add((IndexedBinding) binding.acceptTargetVisitor(indexer))) {
+          duplicates++;
+        }
+        
         Object visited = binding.acceptTargetVisitor(visitor);
         if(visited != null) {
           matched = true;
@@ -443,9 +505,11 @@ public class SpiUtils {
     }
     
     if(allowDuplicates) {
-      assertEquals("wrong contained elements: " + otherContains, bindResults.size() + 1, otherContains.size());
+      assertEquals("wrong contained elements: " + otherContains,
+          bindResults.size() + 1 + duplicates, otherContains.size());
     } else {
-      assertEquals("wrong contained elements: " + otherContains, bindResults.size(), otherContains.size());
+      assertEquals("wrong contained elements: " + otherContains,
+          bindResults.size() + duplicates, otherContains.size());
     }
      
     assertEquals("other multibindings found: " + otherMultibinders, otherMultibindings,

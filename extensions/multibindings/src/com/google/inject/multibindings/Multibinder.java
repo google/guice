@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -36,7 +37,6 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -265,7 +265,7 @@ public abstract class Multibinder<T> {
     @Override public LinkedBindingBuilder<T> addBinding() {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
-      return RealElement.addBinding(binder, MULTIBINDER, elementType, setName);
+      return binder.bind(Key.get(elementType, new RealElement(setName, MULTIBINDER, "")));
     }
 
     /**
@@ -275,13 +275,17 @@ public abstract class Multibinder<T> {
      */
     @Toolable @Inject void initialize(Injector injector) {
       List<Binding<T>> bindings = Lists.newArrayList();
+      Set<Indexer.IndexedBinding> index = Sets.newHashSet();
+      Indexer indexer = new Indexer(injector);
       List<Dependency<?>> dependencies = Lists.newArrayList();
       for (Binding<?> entry : injector.findBindingsByType(elementType)) {
         if (keyMatches(entry.getKey())) {
           @SuppressWarnings("unchecked") // protected by findBindingsByType()
           Binding<T> binding = (Binding<T>) entry;
-          bindings.add(binding);
-          dependencies.add(Dependency.get(binding.getKey()));
+          if (index.add(binding.acceptTargetVisitor(indexer))) {
+            bindings.add(binding);
+            dependencies.add(Dependency.get(binding.getKey()));
+          }
         }
       }
 

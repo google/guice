@@ -18,8 +18,6 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
-import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
-import static com.google.inject.internal.RehashableKeys.Keys.rehash;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -211,14 +209,6 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
   @Override protected BindingImpl<T> withKey(Key<T> key) {
     return new ConstructorBindingImpl<T>(
         null, key, getSource(), factory, getScoping(), factory, constructorInjectionPoint);
-  }
-
-  @Override public BindingImpl<T> withRehashedKeys() {
-    if (needsRehashing(getKey())) {
-      return withKey(rehash(getKey()));
-    } else {
-      return this;
-    }
   }
 
   @SuppressWarnings("unchecked") // the raw constructor member and declaring type always agree

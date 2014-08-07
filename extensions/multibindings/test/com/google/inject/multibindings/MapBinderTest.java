@@ -299,7 +299,7 @@ public class MapBinderTest extends TestCase {
         MapBinder.newMapBinder(binder(), String.class, Integer.class)
             .addBinding("num").toProvider(new Provider<Integer>() {
           int nextValue = 1;
-          public Integer get() {
+          @Override public Integer get() {
             return nextValue++;
           }
         });
@@ -561,7 +561,7 @@ public class MapBinderTest extends TestCase {
   public void testMapBinderProviderIsScoped() {
     final Provider<Integer> counter = new Provider<Integer>() {
       int next = 1;
-      public Integer get() {
+      @Override public Integer get() {
         return next++;
       }
     };
@@ -596,7 +596,7 @@ public class MapBinderTest extends TestCase {
   /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
   public void testMultibinderDependencies() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<Integer, String> mapBinder
             = MapBinder.newMapBinder(binder(), Integer.class, String.class);
         mapBinder.addBinding(1).toInstance("A");
@@ -622,7 +622,7 @@ public class MapBinderTest extends TestCase {
       Binding<?> binding = injector.getBinding(dependency.getKey());
       HasDependencies deps = (HasDependencies) binding;
       if (binding instanceof InstanceBinding) {
-        elements.add((String) ((InstanceBinding) binding).getInstance());
+        elements.add((String) ((InstanceBinding<?>) binding).getInstance());
       } else {
         elements.addAll(recurseForDependencies(injector, deps));
       }
@@ -633,7 +633,7 @@ public class MapBinderTest extends TestCase {
   /** We just want to make sure that mapbinder's binding depends on the underlying multibinder. */
   public void testMultibinderDependenciesInToolStage() {
     Injector injector = Guice.createInjector(Stage.TOOL, new AbstractModule() {
-        protected void configure() {
+      @Override protected void configure() {
           MapBinder<Integer, String> mapBinder
               = MapBinder.newMapBinder(binder(), Integer.class, String.class);
           mapBinder.addBinding(1).toInstance("A");
@@ -657,13 +657,13 @@ public class MapBinderTest extends TestCase {
   public void testBindOrderEqualsIterationOrder() {
     Injector injector = Guice.createInjector(
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             MapBinder<String, String> mapBinder
                 = MapBinder.newMapBinder(binder(), String.class, String.class);
             mapBinder.addBinding("leonardo").toInstance("blue");
             mapBinder.addBinding("donatello").toInstance("purple");
             install(new AbstractModule() {
-              protected void configure() {
+              @Override protected void configure() {
                 MapBinder.newMapBinder(binder(), String.class, String.class)
                     .addBinding("michaelangelo").toInstance("orange");
               }
@@ -671,7 +671,7 @@ public class MapBinderTest extends TestCase {
           }
         },
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             MapBinder.newMapBinder(binder(), String.class, String.class)
                 .addBinding("raphael").toInstance("red");
           }
@@ -690,21 +690,21 @@ public class MapBinderTest extends TestCase {
    */
   public void testModuleOverrideAndMapBindings() {
     Module ab = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("a").toInstance("A");
         multibinder.addBinding("b").toInstance("B");
       }
     };
     Module cd = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("c").toInstance("C");
         multibinder.addBinding("d").toInstance("D");
       }
     };
     Module ef = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("e").toInstance("E");
         multibinder.addBinding("f").toInstance("F");
@@ -720,12 +720,31 @@ public class MapBinderTest extends TestCase {
             "e", "E"), instance("f", "F"));
   }
   
+  public void testDeduplicateMapBindings() {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        MapBinder<String, String> mapbinder =
+            MapBinder.newMapBinder(binder(), String.class, String.class);
+        mapbinder.addBinding("a").toInstance("A");
+        mapbinder.addBinding("a").toInstance("A");
+        mapbinder.addBinding("b").toInstance("B");
+        mapbinder.addBinding("b").toInstance("B");
+        
+      }
+    };
+    Injector injector = Guice.createInjector(module);
+    assertEquals(mapOf("a", "A", "b", "B"),
+        injector.getInstance(Key.get(mapOfString)));
+    assertMapVisitor(Key.get(mapOfString), stringType, stringType, setOf(module), BOTH, false, 0,
+        instance("a", "A"), instance("b", "B"));
+  }
+  
   /**
    * With overrides, we should get the union of all map bindings.
    */
   public void testModuleOverrideAndMapBindingsWithPermitDuplicates() {
     Module abc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("a").toInstance("A");
         multibinder.addBinding("b").toInstance("B");
@@ -734,7 +753,7 @@ public class MapBinderTest extends TestCase {
       }
     };
     Module cd = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("c").toInstance("C");
         multibinder.addBinding("d").toInstance("D");
@@ -742,7 +761,7 @@ public class MapBinderTest extends TestCase {
       }
     };
     Module ef = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         MapBinder<String, String> multibinder = MapBinder.newMapBinder(binder(), String.class, String.class);
         multibinder.addBinding("e").toInstance("E");
         multibinder.addBinding("f").toInstance("F");
@@ -770,7 +789,7 @@ public class MapBinderTest extends TestCase {
       }
     };
     Module abc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         requestInjection(anObject);
         MapBinder<String, String> multibinder =
             MapBinder.newMapBinder(binder(), String.class, String.class);
@@ -793,7 +812,7 @@ public class MapBinderTest extends TestCase {
       }
     };
     Module abc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         requestInjection(anObject);
         MapBinder<String, String> multibinder =
             MapBinder.newMapBinder(binder(), String.class, String.class);
@@ -806,7 +825,7 @@ public class MapBinderTest extends TestCase {
     Guice.createInjector(abc);
     Map<String, String> map = Maps.transformValues(injectedMultimap.get(),
         new Function<Set<Provider<String>>, String>() {
-          public String apply(Set<Provider<String>> stringProvidersSet) {
+          @Override public String apply(Set<Provider<String>> stringProvidersSet) {
             return Iterables.getOnlyElement(stringProvidersSet).get();
           }
         });
@@ -830,7 +849,7 @@ public class MapBinderTest extends TestCase {
 
   @SuppressWarnings("unchecked")
   private <V> Set<V> setOf(V... elements) {
-    return new HashSet(Arrays.asList(elements));
+    return new HashSet<V>(Arrays.asList(elements));
   }
 
   @BindingAnnotation

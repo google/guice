@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.RehashableKeys.Keys.needsRehashing;
-import static com.google.inject.internal.RehashableKeys.Keys.rehash;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -92,14 +89,6 @@ final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
   public BindingImpl<T> withKey(Key<T> key) {
     return new ProviderInstanceBindingImpl<T>(
         getSource(), key, getScoping(), injectionPoints, providerInstance);
-  }
-
-  public BindingImpl<T> withRehashedKeys() {
-    if (needsRehashing(getKey())) {
-      return withKey(rehash(getKey()));
-    } else {
-      return this;
-    }
   }
 
   public void applyTo(Binder binder) {

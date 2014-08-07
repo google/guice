@@ -41,7 +41,7 @@ import java.util.Set;
  */
 final class WeakKeySet {
 
-  private Map<BlacklistKey, Multiset<Object>> backingMap;
+  private Map<Key<?>, Multiset<Object>> backingMap;
   
   /**
    * This is already locked externally on add and getSources but we need it to handle clean up in
@@ -73,11 +73,11 @@ final class WeakKeySet {
   private void cleanUpForCollectedState(Set<KeyAndSource> keysAndSources) {
     synchronized (lock) {
       for (KeyAndSource keyAndSource : keysAndSources) {
-        Multiset<Object> set = backingMap.get(keyAndSource.blacklistKey);
+        Multiset<Object> set = backingMap.get(keyAndSource.key);
         if (set != null) {
           set.remove(keyAndSource.source);
           if (set.isEmpty()) {
-            backingMap.remove(keyAndSource.blacklistKey);
+            backingMap.remove(keyAndSource.key);
           }
         }
       }
@@ -97,11 +97,10 @@ final class WeakKeySet {
     if (source instanceof Class || source == SourceProvider.UNKNOWN_SOURCE) {
       source = null;
     }
-    BlacklistKey blacklistKey = new BlacklistKey(key);
-    Multiset<Object> sources = backingMap.get(blacklistKey);
+    Multiset<Object> sources = backingMap.get(key);
     if (sources == null) {
       sources = LinkedHashMultiset.create();
-      backingMap.put(blacklistKey, sources);
+      backingMap.put(key, sources);
     }
     Object convertedSource = Errors.convert(source);
     sources.add(convertedSource);
@@ -112,33 +111,33 @@ final class WeakKeySet {
       if (keyAndSources == null) {
         evictionCache.put(state, keyAndSources = Sets.newHashSet());
       }
-      keyAndSources.add(new KeyAndSource(blacklistKey, convertedSource));
+      keyAndSources.add(new KeyAndSource(key, convertedSource));
     }
   }
 
   public boolean contains(Key<?> key) {
     evictionCache.cleanUp();
-    return backingMap != null && backingMap.containsKey(new BlacklistKey(key));
+    return backingMap != null && backingMap.containsKey(key);
   }
 
   public Set<Object> getSources(Key<?> key) {
     evictionCache.cleanUp();
-    Multiset<Object> sources = (backingMap == null) ? null : backingMap.get(new BlacklistKey(key));
+    Multiset<Object> sources = (backingMap == null) ? null : backingMap.get(key);
     return (sources == null) ? null : sources.elementSet();
   }
 
   private static final class KeyAndSource {
-    final BlacklistKey blacklistKey;
+    final Key<?> key;
     final Object source;
 
-    KeyAndSource(BlacklistKey blacklistKey, Object source) {
-      this.blacklistKey = blacklistKey;
+    KeyAndSource(Key<?> key, Object source) {
+      this.key = key;
       this.source = source;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(blacklistKey, source);
+      return Objects.hashCode(key, source);
     }
 
     @Override
@@ -152,40 +151,8 @@ final class WeakKeySet {
       }
 
       KeyAndSource other = (KeyAndSource) obj;
-      return Objects.equal(blacklistKey, other.blacklistKey)
+      return Objects.equal(key, other.key)
           && Objects.equal(source, other.source);
-    }
-  }
-  
-  /**
-   * The key for the Map is {@link Key} for most bindings, String for multibindings.
-   * <p>
-   * Reason being that multibinding Key's annotations hold a reference to their injector, implying
-   * we'd leak memory.
-   */
-  private static final class BlacklistKey {
-    final Object delegate;
-    
-    BlacklistKey(Key<?> key) {
-      // HACK: See comment on BlacklistKey for more info. This is tested in MultibinderTest,
-      // MapBinderTest, and OptionalBinderTest in the multibinder test suite.
-      if (isMultiBinderKey(key)) {
-        delegate = key.toString();
-      } else {
-        delegate = key;
-      }
-    }
-
-    public boolean equals(Object obj) {
-      if (obj instanceof BlacklistKey) {
-        return delegate.equals(((BlacklistKey) obj).delegate);
-      } else {
-        return false;
-      }
-    }
-
-    public int hashCode() {
-      return delegate.hashCode();
     }
   }
 
