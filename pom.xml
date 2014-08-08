@@ -84,6 +84,14 @@ See the Apache License Version 2.0 for the specific language governing permissio
     </license>
   </licenses>
 
+  <distributionManagement>
+    <!-- override the parent's directory to point to the canonical place, and use https. -->
+    <snapshotRepository>
+      <id>google-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <modules>
     <module>core</module>
     <module>extensions</module>
