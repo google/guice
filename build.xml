@@ -279,7 +279,7 @@
       <arg value="-DNO_AOP" />
     </munge>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.1.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.3.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.1.jar"/>]]></replacetoken>

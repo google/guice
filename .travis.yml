@@ -29,6 +29,7 @@ notifications:
 
 after_success:
   - util/generate-latest-docs.sh
+  - util/compareBuilds.sh
   - util/publish-snapshot-on-commit.sh
 
 branches:
