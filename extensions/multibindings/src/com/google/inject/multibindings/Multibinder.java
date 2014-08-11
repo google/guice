@@ -35,6 +35,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Errors;
@@ -43,12 +44,14 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProviderInstanceBinding;
+import com.google.inject.spi.ProviderWithDependencies;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +78,8 @@ import java.util.Set;
  *   {@literal @}Inject
  *   public SnackMachine(Set&lt;Snack&gt; snacks) { ... }
  * }</code></pre>
+ *
+ * If desired, {@link Collection}{@code <Provider<Snack>>} can also be injected.
  *
  * <p>Contributing multibindings from different modules is supported. For
  * example, it is okay for both {@code CandyModule} and {@code ChipsModule}
@@ -117,7 +122,7 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type)));
+        Key.get(Multibinder.<T>setOf(type)), Key.get(Multibinder.<T>collectionOfProvidersOf(type)));
     binder.install(result);
     return result;
   }
@@ -138,7 +143,8 @@ public abstract class Multibinder<T> {
       Binder binder, TypeLiteral<T> type, Annotation annotation) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type), annotation));
+        Key.get(Multibinder.<T>setOf(type), annotation),
+        Key.get(Multibinder.<T>collectionOfProvidersOf(type), annotation));
     binder.install(result);
     return result;
   }
@@ -160,7 +166,8 @@ public abstract class Multibinder<T> {
       Class<? extends Annotation> annotationType) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
     RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type), annotationType));
+        Key.get(Multibinder.<T>setOf(type), annotationType),
+        Key.get(Multibinder.<T>collectionOfProvidersOf(type), annotationType));
     binder.install(result);
     return result;
   }
@@ -178,6 +185,14 @@ public abstract class Multibinder<T> {
   static <T> TypeLiteral<Set<T>> setOf(TypeLiteral<T> elementType) {
     Type type = Types.setOf(elementType.getType());
     return (TypeLiteral<Set<T>>) TypeLiteral.get(type);
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<Collection<Provider<T>>> collectionOfProvidersOf(
+      TypeLiteral<T> elementType) {
+    Type providerType = Types.providerOf(elementType.getType());
+    Type type = Types.newParameterizedType(Collection.class, providerType);
+    return (TypeLiteral<Collection<Provider<T>>>) TypeLiteral.get(type);
   }
 
   /**
@@ -230,6 +245,7 @@ public abstract class Multibinder<T> {
     private final TypeLiteral<T> elementType;
     private final String setName;
     private final Key<Set<T>> setKey;
+    private final Key<Collection<Provider<T>>> collectionOfProvidersKey;
     private final Key<Boolean> permitDuplicatesKey;
 
     /* the target injector's binder. non-null until initialization, null afterwards */
@@ -242,10 +258,13 @@ public abstract class Multibinder<T> {
     /** whether duplicates are allowed. Possibly configured by a different instance */
     private boolean permitDuplicates;
 
-    private RealMultibinder(Binder binder, TypeLiteral<T> elementType, Key<Set<T>> setKey) {
+    private RealMultibinder(Binder binder, TypeLiteral<T> elementType, Key<Set<T>> setKey,
+        Key<Collection<Provider<T>>> collectionOfProvidersKey) {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
       this.setKey = checkNotNull(setKey, "setKey");
+      this.collectionOfProvidersKey =
+          checkNotNull(collectionOfProvidersKey, "collectionOfProviders");
       this.setName = RealElement.nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
@@ -254,10 +273,11 @@ public abstract class Multibinder<T> {
       checkConfiguration(!isInitialized(), "Multibinder was already initialized");
 
       binder.bind(setKey).toProvider(this);
+      binder.bind(collectionOfProvidersKey).toProvider(
+          new RealMultibinderCollectionOfProvidersProvider());
     }
 
-    @Override
-    public Multibinder<T> permitDuplicates() {
+    @Override public Multibinder<T> permitDuplicates() {
       binder.install(new PermitDuplicatesModule(permitDuplicatesKey));
       return this;
     }
@@ -371,7 +391,8 @@ public abstract class Multibinder<T> {
         Binding<?> binding = (Binding<?>) element;
         return keyMatches(binding.getKey())
             || binding.getKey().equals(permitDuplicatesKey)
-            || binding.getKey().equals(setKey);
+            || binding.getKey().equals(setKey)
+            || binding.getKey().equals(collectionOfProvidersKey);
       } else {
         return false;
       }
@@ -397,6 +418,46 @@ public abstract class Multibinder<T> {
     @Override public String toString() {
       return (setName.isEmpty() ? "" : setName + " ") + "Multibinder<" + elementType + ">";
     }
+
+    final class RealMultibinderCollectionOfProvidersProvider
+        implements ProviderWithDependencies<Collection<Provider<T>>> {
+      @Override public Collection<Provider<T>> get() {
+        checkConfiguration(isInitialized(), "Multibinder is not initialized");
+
+        ImmutableList.Builder<Provider<T>> resultBuilder = new ImmutableList.Builder<Provider<T>>();
+        for (Binding<T> binding : bindings) {
+          resultBuilder.add(binding.getProvider());
+        }
+        return resultBuilder.build();
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        if (!isInitialized()) {
+          return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
+        }
+        ImmutableSet.Builder<Dependency<?>> setBuilder = ImmutableSet.builder();
+        for (Dependency<?> dependency : dependencies) {
+          Key key = dependency.getKey();
+          setBuilder.add(
+              Dependency.get(key.ofType(Types.providerOf(key.getTypeLiteral().getType()))));
+        }
+        return setBuilder.build();
+      }
+
+      Key getCollectionKey() {
+        return RealMultibinder.this.collectionOfProvidersKey;
+      }
+
+      @Override public boolean equals(Object o) {
+        return o instanceof Multibinder.RealMultibinder.RealMultibinderCollectionOfProvidersProvider
+            && ((Multibinder.RealMultibinder.RealMultibinderCollectionOfProvidersProvider) o)
+                .getCollectionKey().equals(getCollectionKey());
+      }
+
+      @Override public int hashCode() {
+        return getCollectionKey().hashCode();
+      }
+    }
   }
 
   /**
@@ -411,8 +472,7 @@ public abstract class Multibinder<T> {
       this.key = key;
     }
 
-    @Override
-    protected void configure() {
+    @Override protected void configure() {
       bind(key).toInstance(true);
     }
 
