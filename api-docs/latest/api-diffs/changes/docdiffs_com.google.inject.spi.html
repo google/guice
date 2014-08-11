@@ -69,6 +69,10 @@ Similarly, documentation which was inherited from another class or interface is 
  
  @deprecated Use <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#getUserSuppliedProvider"><TT>.getUserSuppliedProvider</TT></A> instead</span>.</blockquote>
 <hr align="left" width="100%">
+<A NAME="com.google.inject.spi.TypeEncounter.dmethod.getProvider(Class&lt;T&gt;)"></A><a href="com.google.inject.spi.TypeEncounter.html" class="hiddenlink">Class <b>TypeEncounter</b></a>, <a href="com.google.inject.spi.TypeEncounter.html#com.google.inject.spi.TypeEncounter.getProvider_changed(java.lang.Class<T>)" class="hiddenlink">Provider&lt;T&gt; <b>getProvider(Class&lt;T&gt;)</b></a><br><br><blockquote>Returns the provider used to obtain instances for the given injection type. The returned
+ provider will not be valid until the <strike>injetor</strike><span style="background: #FFFF00">injector</span> has been created. The provider will throw an
+ {@code IllegalStateException} if you try to use it beforehand.</blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>
