@@ -13,7 +13,7 @@ function cleanAndBuild {
   #ant no_aop > /dev/null
   ant dist > /dev/null
   mvn package -DskipTests=true -Dmaven.javadoc.skip=true > /dev/null
-  ant -f build/no_aop/build.xml dist > /dev/null
+  #ant -f build/no_aop/build.xml dist > /dev/null
 }
 
 function findAndCompareJars {
