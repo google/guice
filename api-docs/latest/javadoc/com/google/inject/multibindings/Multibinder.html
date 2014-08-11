@@ -130,6 +130,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
    public SnackMachine(Set&lt;Snack&gt; snacks) { ... }
  }</code></pre>
 
+ If desired, <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Collection.html?is-external=true" title="class or interface in java.util"><code>Collection</code></a><code>&lt;Provider&lt;Snack&gt;&gt;</code> can also be injected.
+
  <p>Contributing multibindings from different modules is supported. For
  example, it is okay for both <code>CandyModule</code> and <code>ChipsModule</code>
  to create their own <code>Multibinder&lt;Snack&gt;</code>, and to each contribute

@@ -149,7 +149,9 @@ Similarly, documentation which was inherited from another class or interface is 
    public SnackMachine(Set&lt;Snack&gt; snacks) { ... }
  }</code></pre>
 
- <p>Contributing multibindings from different modules is supported. For
+ <span style="background: #FFFF00">If desired, <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/Multibinder/Collection.html"><TT>Collection</TT></A>{@code <Provider<Snack>>} can also be injected.
+
+ </span><p>Contributing multibindings from different modules is supported. For
  example, it is okay <strike>to have</strike><span style="background: #FFFF00">for</span> both {@code CandyModule} and {@code ChipsModule}
  to <strike>both </strike>create their own {@code Multibinder<Snack>}, and to each contribute
  bindings to the set of snacks. When that set is injected, it will contain
