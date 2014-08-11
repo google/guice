@@ -605,7 +605,7 @@ public abstract class MapBinder<K, V> {
     /**
      * Binds {@code Map<K, Set<V>>} and {{@code Map<K, Set<Provider<V>>>}.
      */
-    private static final class MultimapBinder<K, V> implements Module {
+    static final class MultimapBinder<K, V> implements Module {
 
       private final Key<Map<K, Set<V>>> multimapKey;
       private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
