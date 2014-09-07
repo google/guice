@@ -16,10 +16,10 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.CircularDependencyProxy;
 import com.google.inject.internal.InternalInjectorCreator;
 import com.google.inject.internal.LinkedBindingImpl;
 import com.google.inject.spi.BindingScopingVisitor;
+import com.google.inject.spi.CircularDependencyProxy;
 import com.google.inject.spi.ExposedBinding;
 
 import java.lang.annotation.Annotation;

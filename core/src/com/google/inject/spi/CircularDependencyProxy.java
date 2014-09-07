@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.spi;
 
 /**
+ * Marker interface indicating the instance is a circular proxy. Scope implementations
+ * should not cache instances of this and classes should never implement this directly.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface CircularDependencyProxy {
