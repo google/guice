@@ -62,7 +62,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-testlib</artifactId>
-      <version>16.0.1</version>
       <scope>test</scope>
     </dependency>
     <!--
@@ -70,21 +69,13 @@
      | in an execution that doesn't include package.
     -->
     <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <version>3.1</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>asm</groupId>
-          <artifactId>asm</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>5.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -98,7 +89,7 @@
         <artifactId>maven-remote-resources-plugin</artifactId>
       </plugin>
       <!--
-       | Enable Java5 conformance checks
+       | Enable Java6 conformance checks
       -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
