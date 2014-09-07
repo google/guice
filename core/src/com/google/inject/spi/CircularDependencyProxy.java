@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.spi;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)

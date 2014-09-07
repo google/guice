@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.spi.CircularDependencyProxy;
+
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
