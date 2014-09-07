@@ -17,6 +17,8 @@
 package com.google.inject.spi;
 
 /**
+ * Marker interface indicating the instance is a circular proxy.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public interface CircularDependencyProxy {
