@@ -48,6 +48,8 @@ import java.util.logging.Logger;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
+  private static final Key<Logger> LOGGER_KEY = Key.get(Logger.class);
+
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
   private final boolean skipFastClassGeneration;
@@ -206,7 +208,7 @@ public final class ProviderMethodsModule implements Module {
     Annotation[][] parameterAnnotations = method.getParameterAnnotations();
     for (int i = 0; i < parameterTypes.size(); i++) {
       Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
-      if(key.equals(Key.get(Logger.class))) {
+      if (key.equals(LOGGER_KEY)) {
         // If it was a Logger, change the key to be unique & bind it to a
         // provider that provides a logger with a proper name.
         // This solves issue 482 (returning a new anonymous logger on every call exhausts memory)
