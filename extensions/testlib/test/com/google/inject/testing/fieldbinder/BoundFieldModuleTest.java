@@ -27,8 +27,10 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.google.inject.util.Providers;
 
 import junit.framework.TestCase;
 
@@ -685,5 +687,46 @@ public class BoundFieldModuleTest extends TestCase {
 
     assertEquals(testValue1, injector.getInstance(Integer.class));
     assertEquals(testValue2, injector.getInstance(Number.class));
+  }
+
+  static final class LazyClass {
+    @Bind(lazy = true) Integer foo = 1;
+  }
+
+  public void testFieldBound_lazy() {
+    LazyClass asProvider = new LazyClass();
+    Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    asProvider.foo++;
+    assertEquals(2, injector.getInstance(Integer.class).intValue());
+  }
+
+  public void testFieldBound_lazy_rejectNull() {
+    LazyClass asProvider = new LazyClass();
+    Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    asProvider.foo = null;
+    try {
+      injector.getInstance(Integer.class);
+      fail();
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(),
+          "Binding to null values is not allowed. "
+          + "Use Providers.of(null) if this is your intended behavior.");
+    }
+  }
+
+  static final class LazyProviderClass {
+    @Bind(lazy = true) Provider<Integer> foo = Providers.of(null);
+  }
+
+  public void testFieldBoundAsProvider_rejectProvider() {
+    LazyProviderClass asProvider = new LazyProviderClass();
+    try {
+      Guice.createInjector(BoundFieldModule.of(asProvider));
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(), "'lazy' is incompatible with Provider valued fields");
+    }
   }
 }
