@@ -17,6 +17,7 @@
 package com.google.inject.multibindings;
 
 import static com.google.common.base.Predicates.equalTo;
+import static com.google.common.primitives.Ints.MAX_POWER_OF_TWO;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.multibindings.Element.Type.MULTIBINDER;
@@ -315,6 +316,16 @@ public abstract class Multibinder<T> {
       this.binder = null;
     }
 
+    // This is forked from com.google.common.collect.Maps.capacity 
+    private static int mapCapacity(int numBindings) {
+      if (numBindings < 3) {
+        return numBindings + 1;
+      } else  if (numBindings < MAX_POWER_OF_TWO) {
+        return (int) (numBindings / 0.75F + 1.0F);
+      }
+      return Integer.MAX_VALUE;
+    }
+
     boolean permitsDuplicates(Injector injector) {
       return injector.getBindings().containsKey(permitDuplicatesKey);
     }
@@ -333,7 +344,7 @@ public abstract class Multibinder<T> {
     public Set<T> get() {
       checkConfiguration(isInitialized(), "Multibinder is not initialized");
 
-      Map<T, Binding<T>> result = new LinkedHashMap<T, Binding<T>>();
+      Map<T, Binding<T>> result = new LinkedHashMap<T, Binding<T>>(mapCapacity(bindings.size()));
       for (Binding<T> binding : bindings) {
         final T newValue = binding.getProvider().get();
         checkConfiguration(newValue != null, "Set injection failed due to null element");
@@ -423,12 +434,13 @@ public abstract class Multibinder<T> {
         implements ProviderWithDependencies<Collection<Provider<T>>> {
       @Override public Collection<Provider<T>> get() {
         checkConfiguration(isInitialized(), "Multibinder is not initialized");
-
-        ImmutableList.Builder<Provider<T>> resultBuilder = new ImmutableList.Builder<Provider<T>>();
-        for (Binding<T> binding : bindings) {
-          resultBuilder.add(binding.getProvider());
+        int size = bindings.size();
+        @SuppressWarnings("unchecked")  // safe because we only put Provider<T> into it.
+        Provider<T>[] providers = new Provider[size];
+        for (int i = 0; i < size; i++) {
+          providers[i] = bindings.get(i).getProvider();
         }
-        return resultBuilder.build();
+        return ImmutableList.copyOf(providers);
       }
 
       @Override public Set<Dependency<?>> getDependencies() {
