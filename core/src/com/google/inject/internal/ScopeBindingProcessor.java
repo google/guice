@@ -36,8 +36,8 @@ final class ScopeBindingProcessor extends AbstractProcessor {
   }
 
   @Override public Boolean visit(ScopeBinding command) {
-    Scope scope = command.getScope();
-    Class<? extends Annotation> annotationType = command.getAnnotationType();
+    Scope scope = checkNotNull(command.getScope(), "scope");
+    Class<? extends Annotation> annotationType = checkNotNull(command.getAnnotationType(), "annotation type");
 
     if (!Annotations.isScopeAnnotation(annotationType)) {
       errors.missingScopeAnnotation(annotationType);
@@ -49,11 +49,12 @@ final class ScopeBindingProcessor extends AbstractProcessor {
       // Go ahead and bind anyway so we don't get collateral errors.
     }
 
-    ScopeBinding existing = injector.state.getScopeBinding(checkNotNull(annotationType, "annotation type"));
+    ScopeBinding existing = injector.state.getScopeBinding(annotationType);
     if (existing != null) {
-      errors.duplicateScopes(existing, annotationType, scope);
+      if (!scope.equals(existing.getScope())) {
+        errors.duplicateScopes(existing, annotationType, scope);
+      }
     } else {
-      checkNotNull(scope, "scope");
       injector.state.putScopeBinding(annotationType, command);
     }
 
