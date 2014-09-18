@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.Key;
 import com.google.inject.internal.util.SourceProvider;
 
-import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +41,7 @@ import java.util.Set;
 final class WeakKeySet {
 
   private Map<Key<?>, Multiset<Object>> backingMap;
-  
+
   /**
    * This is already locked externally on add and getSources but we need it to handle clean up in
    * the evictionCache's RemovalListener.
@@ -154,15 +153,5 @@ final class WeakKeySet {
       return Objects.equal(key, other.key)
           && Objects.equal(source, other.source);
     }
-  }
-
-  /**
-   * Returns {@code true} if the {@link Key} represents a multibound element.
-   */
-  private static boolean isMultiBinderKey(Key<?> key) {
-    Annotation annotation = key.getAnnotation();
-    return annotation != null
-        // Can't depend on multibinder in core.
-        && "com.google.inject.multibindings.RealElement".equals(annotation.getClass().getName());
   }
 }
