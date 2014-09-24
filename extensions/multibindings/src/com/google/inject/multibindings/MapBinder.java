@@ -539,15 +539,19 @@ public abstract class MapBinder<K, V> {
       }
 
       @Override public Map<K, V> get() {
-        Map<K, V> map = new LinkedHashMap<K, V>();
-        for (Entry<K, Provider<V>> entry : mapProvider.get().entrySet()) {
-          V value = entry.getValue().get();
-          K key = entry.getKey();
+        // We can initialize the internal table efficiently this way and then swap the values
+        // one by one.
+        Map<K, Object> map = new LinkedHashMap<K, Object>(mapProvider.get());
+        for (Entry<K, Object> entry : map.entrySet()) {
+          @SuppressWarnings("unchecked")  // we initialized the entries with providers
+          V value = ((Provider<V>) entry.getValue()).get();
           checkConfiguration(value != null,
-              "Map injection failed due to null value for key \"%s\"", key);
-          map.put(key, value);
+              "Map injection failed due to null value for key \"%s\"", entry.getKey());
+          entry.setValue(value);
         }
-        return Collections.unmodifiableMap(map);
+        @SuppressWarnings("unchecked")  // if we exited the loop then we replaced all Providers
+        Map<K, V> typedMap = (Map<K, V>) map;
+        return Collections.unmodifiableMap(typedMap);
       }
 
       @Override public Set<Dependency<?>> getDependencies() {

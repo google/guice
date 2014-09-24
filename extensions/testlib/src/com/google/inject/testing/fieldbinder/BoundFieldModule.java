@@ -71,6 +71,9 @@ import java.lang.reflect.Type;
  * public class TestFoo {
  *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
  *   {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
+ *   
+ *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
+ *   {@literal @}Bind(lazy = true) private String userName;
  *
  *   // bind(SuperClass.class).toInstance(aSubClass);
  *   {@literal @}Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
@@ -113,8 +116,11 @@ public final class BoundFieldModule implements Module {
   }
 
   private static class BoundFieldException extends RuntimeException {
-    BoundFieldException(String message) {
-      super(message);
+    private final Message message;
+
+    BoundFieldException(Message message) {
+      super(message.getMessage());
+      this.message = message;
     }
   }
 
@@ -148,7 +154,7 @@ public final class BoundFieldModule implements Module {
      * {@link Number}, and {@code @Bind(to = Object.class) Provider<Number> one = new Integer(1);}
      * will be {@link Number}.
      *
-     * @see getNaturalFieldType
+     * @see #getNaturalFieldType
      */
     final Optional<TypeLiteral<?>> naturalType;
 
@@ -173,7 +179,7 @@ public final class BoundFieldModule implements Module {
       if (bindClass == Bind.class) {
         Preconditions.checkState(naturalType != null);
         if (!this.naturalType.isPresent()) {
-          addErrorAndThrow(
+          throwBoundFieldException(
               field,
               "Non parameterized Provider fields must have an explicit "
               + "binding class via @Bind(to = Foo.class)");
@@ -240,7 +246,7 @@ public final class BoundFieldModule implements Module {
       return Optional.absent();
     }
     if (hasInject(field)) {
-      addErrorAndThrow(
+      throwBoundFieldException(
           field,
           "Fields annotated with both @Bind and @Inject are illegal.");
     }
@@ -282,12 +288,12 @@ public final class BoundFieldModule implements Module {
     return com.google.inject.Provider.class == clazz || javax.inject.Provider.class == clazz;
   }
 
-  private void bindField(BoundFieldInfo fieldInfo) {
+  private void bindField(final BoundFieldInfo fieldInfo) {
     if (fieldInfo.naturalType.isPresent()) {
       Class<?> naturalRawType = fieldInfo.naturalType.get().getRawType();
       Class<?> boundRawType = fieldInfo.boundType.getRawType();
       if (!boundRawType.isAssignableFrom(naturalRawType)) {
-        addErrorAndThrow(
+        throwBoundFieldException(
             fieldInfo.field,
             "Requested binding type \"%s\" is not assignable from field binding type \"%s\"",
             boundRawType.getName(),
@@ -307,37 +313,46 @@ public final class BoundFieldModule implements Module {
     @SuppressWarnings("unchecked")
     AnnotatedBindingBuilder<Object> binderUnsafe = (AnnotatedBindingBuilder<Object>) binder;
 
-    Object fieldValue = fieldInfo.getValue();
-
-    if (fieldValue == null) {
-      addErrorAndThrow(
-          fieldInfo.field,
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.",
-          fieldInfo.field.getName());
-    }
-
     if (isTransparentProvider(fieldInfo.type.getRawType())) {
+      if (fieldInfo.bindAnnotation.lazy()) {
+        // We don't support this because it is confusing about when values are captured.
+        throwBoundFieldException(fieldInfo.field, 
+            "'lazy' is incompatible with Provider valued fields");
+      }
       // This is safe because we checked that the field's type is Provider above.
       @SuppressWarnings("unchecked")
-      Provider<?> fieldValueUnsafe = (Provider<?>) fieldValue;
-
+      Provider<?> fieldValueUnsafe = (Provider<?>) getFieldValue(fieldInfo);
       binderUnsafe.toProvider(fieldValueUnsafe);
+    } else if (fieldInfo.bindAnnotation.lazy()) {
+      binderUnsafe.toProvider(new Provider<Object>() {
+        @Override public Object get() {
+          return getFieldValue(fieldInfo);
+        }
+      });
     } else {
-      binderUnsafe.toInstance(fieldValue);
+      binderUnsafe.toInstance(getFieldValue(fieldInfo));
     }
   }
 
-  private void addErrorAndThrow(Field field, String format, Object... args) {
+  private Object getFieldValue(final BoundFieldInfo fieldInfo) {
+    Object fieldValue = fieldInfo.getValue();
+    if (fieldValue == null) {
+      throwBoundFieldException(
+          fieldInfo.field,
+          "Binding to null values is not allowed. "
+              + "Use Providers.of(null) if this is your intended behavior.",
+              fieldInfo.field.getName());
+    }
+    return fieldValue;
+  }
+
+  private void throwBoundFieldException(Field field, String format, Object... args) {
     Preconditions.checkNotNull(binder);
     String source = String.format(
         "%s field %s",
         field.getDeclaringClass().getName(),
         field.getName());
-    Message messageObj = new Message(source, String.format(format, args));
-
-    binder.addError(messageObj);
-    throw new BoundFieldException(messageObj.getMessage());
+    throw new BoundFieldException(new Message(source, String.format(format, args)));
   }
 
   @Override
@@ -355,7 +370,8 @@ public final class BoundFieldModule implements Module {
             bindField(fieldInfoOpt.get());
           }
         } catch (BoundFieldException e) {
-          // addErrorAndThrow already called addError, so do nothing
+          // keep going to try to collect as many errors as possible
+          binder.addError(e.message);
         }
       }
       currentClassType =

@@ -37,4 +37,12 @@ public @interface Bind {
    * rather than to the field's actual type.
    */
   Class<?> to() default Bind.class;
+
+  /**
+   * If true, {@link BoundFieldModule} will delay retrieving the field's value until injection time
+   * rather than eagerly fetching it at configure time.
+   * 
+   * <p>This option is not supported with Provider valued fields.
+   */
+  boolean lazy() default false;
 }
