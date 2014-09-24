@@ -119,6 +119,13 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <th class="colLast" scope="col">Optional Element and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#lazy--">lazy</a></span></code>
+<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay retrieving the field's value until injection time
+ rather than eagerly fetching it at configure time.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--">to</a></span></code>
 <div class="block">If specified, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will bind the annotated field's value to this type,
@@ -143,7 +150,7 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <a name="to--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>to</h4>
 <pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;to</pre>
@@ -152,6 +159,26 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <dl>
 <dt>Default:</dt>
 <dd>com.google.inject.testing.fieldbinder.Bind.class</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="lazy--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>lazy</h4>
+<pre>public abstract&nbsp;boolean&nbsp;lazy</pre>
+<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay retrieving the field's value until injection time
+ rather than eagerly fetching it at configure time.
+ 
+ <p>This option is not supported with Provider valued fields.</div>
+<dl>
+<dt>Default:</dt>
+<dd>false</dd>
 </dl>
 </li>
 </ul>

@@ -151,6 +151,9 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
  public class TestFoo {
    // bind(new TypeLiteral<code> &lt;List&lt;Object&gt;&gt;</code>() {}).toInstance(listOfObjects);
     @Bind private List<code> &lt;Object&gt;</code> listOfObjects = Lists.of();
+   
+   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
+    @Bind(lazy = true) private String userName;
 
    // bind(SuperClass.class).toInstance(aSubClass);
     @Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
