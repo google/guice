@@ -44,12 +44,6 @@ public class ServletScopes {
 
   private ServletScopes() {}
 
-  /** Keys bound in request-scope which are handled directly by GuiceFilter. */
-  private static final ImmutableSet<Key<?>> REQUEST_CONTEXT_KEYS = ImmutableSet.of(
-      Key.get(HttpServletRequest.class),
-      Key.get(HttpServletResponse.class),
-      new Key<Map<String, String[]>>(RequestParameters.class) {});
-
   /**
    * A threadlocal scope map for non-http request scopes. The {@link #REQUEST}
    * scope falls back to this scope map if no http request is available, and
@@ -67,6 +61,13 @@ public class ServletScopes {
   public static final Scope REQUEST = new Scope() {
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
+
+        /** Keys bound in request-scope which are handled directly by GuiceFilter. */
+        private final ImmutableSet<Key<?>> REQUEST_CONTEXT_KEYS = ImmutableSet.of(
+                Key.get(HttpServletRequest.class),
+                Key.get(HttpServletResponse.class),
+                new Key<Map<String, String[]>>(RequestParameters.class) {});
+
         public T get() {
           // Check if the alternate request scope should be used, if no HTTP
           // request is in progress.
