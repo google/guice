@@ -198,6 +198,37 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <pluginManagement>
       <plugins>
         <!--
+         | Use 'mvn license:format -N' at top of project to add missing headers
+        -->
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+            <header>${project.basedir}/lib/build/header.txt</header>
+            <headerDefinitions>
+              <headerDefinition>${project.basedir}/lib/build/header-definitions.xml</headerDefinition>
+            </headerDefinitions>
+            <skipExistingHeaders>true</skipExistingHeaders>
+            <aggregate>true</aggregate>
+            <includes>
+              <include>**/*.java</include>
+            </includes>
+            <excludes>
+              <!-- avoid touching munged/lib/test/example code -->
+              <exclude>**/build/**</exclude>
+              <exclude>**/target/**</exclude>
+              <exclude>**/lib/**</exclude>
+              <exclude>**/test/**</exclude>
+              <exclude>**/example*/**</exclude>
+            </excludes>
+            <mapping>
+              <java>JAVADOC_STYLE</java>
+            </mapping>
+          </configuration>
+        </plugin>
+        <!--
          | Standard LICENSE and NOTICE files
         -->
         <plugin>
