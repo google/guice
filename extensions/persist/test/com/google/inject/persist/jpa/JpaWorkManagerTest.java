@@ -24,6 +24,7 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 
 import junit.framework.TestCase;
+import org.hibernate.HibernateException;
 
 import java.util.Date;
 
@@ -50,7 +51,11 @@ public class JpaWorkManagerTest extends TestCase {
 
   @Override
   public void tearDown() {
-    injector.getInstance(EntityManagerFactory.class).close();
+    try {
+      injector.getInstance(EntityManagerFactory.class).close();
+    } catch(HibernateException ex) {
+        // Expected if the persist service has already been stopped.
+    }
   }
 
   public void testWorkManagerInSession() {
