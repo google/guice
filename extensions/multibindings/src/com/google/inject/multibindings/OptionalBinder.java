@@ -17,11 +17,13 @@
 package com.google.inject.multibindings;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.util.Types.newParameterizedType;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -45,6 +47,8 @@ import com.google.inject.util.Types;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Set;
 
@@ -160,6 +164,30 @@ import javax.inject.Qualifier;
  * @author sameb@google.com (Sam Berlin)
  */
 public abstract class OptionalBinder<T> {
+
+  /* Reflectively capture java 8's Optional types so we can bind them if we're running in java8. */
+  private static final Class<?> JAVA_OPTIONAL_CLASS;
+  private static final Method JAVA_EMPTY_METHOD;
+  private static final Method JAVA_OF_NULLABLE_METHOD;
+  static {
+    Class<?> optional = null;
+    Method empty = null;
+    Method ofNullable = null;
+    boolean useJavaOptional = false;
+    try {
+      optional = Class.forName("java.util.Optional");
+      empty = optional.getDeclaredMethod("empty");
+      ofNullable = optional.getDeclaredMethod("ofNullable", Object.class);
+      useJavaOptional = true;
+    } catch (ClassNotFoundException ignored) {
+    } catch (NoSuchMethodException ignored) {
+    } catch (SecurityException ignored) {
+    }
+    JAVA_OPTIONAL_CLASS = useJavaOptional ? optional : null;
+    JAVA_EMPTY_METHOD = useJavaOptional ? empty : null;
+    JAVA_OF_NULLABLE_METHOD = useJavaOptional ? ofNullable : null;
+  }
+
   private OptionalBinder() {}
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Class<T> type) {
@@ -184,6 +212,12 @@ public abstract class OptionalBinder<T> {
         Types.newParameterizedType(Optional.class,  type.getType()));
   }
 
+  static <T> TypeLiteral<?> javaOptionalOf(
+      TypeLiteral<T> type) {
+    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
+    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS, type.getType()));
+  }
+
   @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<javax.inject.Provider<T>>> optionalOfJavaxProvider(
       TypeLiteral<T> type) {
@@ -192,12 +226,25 @@ public abstract class OptionalBinder<T> {
             newParameterizedType(javax.inject.Provider.class, type.getType())));
   }
 
+  static <T> TypeLiteral<?> javaOptionalOfJavaxProvider(
+      TypeLiteral<T> type) {
+    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
+    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS,
+        newParameterizedType(javax.inject.Provider.class, type.getType())));
+  }
+
   @SuppressWarnings("unchecked")
   static <T> TypeLiteral<Optional<Provider<T>>> optionalOfProvider(TypeLiteral<T> type) {
     return (TypeLiteral<Optional<Provider<T>>>) TypeLiteral.get(Types.newParameterizedType(
         Optional.class, newParameterizedType(Provider.class, type.getType())));
   }
-  
+
+  static <T> TypeLiteral<?> javaOptionalOfProvider(TypeLiteral<T> type) {
+    checkState(JAVA_OPTIONAL_CLASS != null, "java.util.Optional not found");
+    return TypeLiteral.get(Types.newParameterizedType(JAVA_OPTIONAL_CLASS,
+        newParameterizedType(Provider.class, type.getType())));
+  }
+
   @SuppressWarnings("unchecked")
   static <T> Key<Provider<T>> providerOf(Key<T> key) {
     Type providerT = Types.providerOf(key.getTypeLiteral().getType());
@@ -250,6 +297,10 @@ public abstract class OptionalBinder<T> {
     private final Key<T> defaultKey;
     private final Key<T> actualKey;
 
+    private final Key javaOptionalKey;
+    private final Key javaOptionalJavaxProviderKey;
+    private final Key javaOptionalProviderKey;
+
     /** the target injector's binder. non-null until initialization, null afterwards */
     private Binder binder;
     /** the default binding, for the SPI. */
@@ -278,8 +329,18 @@ public abstract class OptionalBinder<T> {
       this.dependencies = ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
       this.providerDependencies =
           ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)));
+
+      if (JAVA_OPTIONAL_CLASS != null) {
+        this.javaOptionalKey = typeKey.ofType(javaOptionalOf(literal));
+        this.javaOptionalJavaxProviderKey = typeKey.ofType(javaOptionalOfJavaxProvider(literal));
+        this.javaOptionalProviderKey = typeKey.ofType(javaOptionalOfProvider(literal));
+      } else {
+        this.javaOptionalKey = null;
+        this.javaOptionalJavaxProviderKey = null;
+        this.javaOptionalProviderKey = null;
+      }
     }
-    
+
     /**
      * Adds a binding for T. Multiple calls to this are safe, and will be collapsed as duplicate
      * bindings.
@@ -312,6 +373,102 @@ public abstract class OptionalBinder<T> {
       binder.bind(optionalJavaxProviderKey).to(massagedOptionalProviderKey);
 
       binder.bind(optionalKey).toProvider(new RealOptionalKeyProvider());
+
+      // Bind the java-8 types if we know them.
+      bindJava8Optional(binder);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void bindJava8Optional(Binder binder) {
+      if (JAVA_OPTIONAL_CLASS != null) {
+        binder.bind(javaOptionalKey).toProvider(new JavaOptionalProvider());
+        binder.bind(javaOptionalProviderKey).toProvider(new JavaOptionalProviderProvider());
+        // for the javax version we reuse the guice version since they're type-compatible.
+        binder.bind(javaOptionalJavaxProviderKey).to(javaOptionalProviderKey);
+      }
+    }
+
+    @SuppressWarnings("rawtypes")
+    final class JavaOptionalProvider extends RealOptionalBinderProviderWithDependencies 
+        implements ProviderWithExtensionVisitor, OptionalBinderBinding {
+      private JavaOptionalProvider() {
+        super(typeKey);
+      }
+
+      @Override public Object get() {
+        Optional<Provider<T>> optional = optionalProviderT.get();
+        try {
+          if (optional.isPresent()) {
+            return JAVA_OF_NULLABLE_METHOD.invoke(JAVA_OPTIONAL_CLASS, optional.get().get());
+          } else {
+            return JAVA_EMPTY_METHOD.invoke(JAVA_OPTIONAL_CLASS);
+          }
+        } catch (IllegalAccessException e) {
+          throw new SecurityException(e);
+        } catch (IllegalArgumentException e) {
+          throw new IllegalStateException(e);
+        } catch (InvocationTargetException e) {
+          throw Throwables.propagate(e.getCause());
+        }
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return dependencies;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override public Object acceptExtensionVisitor(BindingTargetVisitor visitor,
+          ProviderInstanceBinding binding) {
+        if (visitor instanceof MultibindingsTargetVisitor) {
+          return ((MultibindingsTargetVisitor) visitor).visit(this);
+        } else {
+          return visitor.visit(binding);
+        }
+      }
+
+      @Override public boolean containsElement(Element element) {
+        return RealOptionalBinder.this.containsElement(element);
+      }
+
+      @Override public Binding getActualBinding() {
+        return RealOptionalBinder.this.getActualBinding();
+      }
+
+      @Override public Binding getDefaultBinding() {
+        return RealOptionalBinder.this.getDefaultBinding();
+      }
+
+      @Override public Key getKey() {
+        return javaOptionalKey;
+      }
+    }
+
+    @SuppressWarnings("rawtypes")
+    final class JavaOptionalProviderProvider extends RealOptionalBinderProviderWithDependencies {
+      private JavaOptionalProviderProvider() {
+        super(typeKey);
+      }
+
+      @Override public Object get() {
+        Optional<Provider<T>> optional = optionalProviderT.get();
+        try {
+          if (optional.isPresent()) {
+            return JAVA_OF_NULLABLE_METHOD.invoke(JAVA_OPTIONAL_CLASS, optional.get());
+          } else {
+            return JAVA_EMPTY_METHOD.invoke(JAVA_OPTIONAL_CLASS);
+          }
+        } catch (IllegalAccessException e) {
+          throw new SecurityException(e);
+        } catch (IllegalArgumentException e) {
+          throw new IllegalStateException(e);
+        } catch (InvocationTargetException e) {
+          throw Throwables.propagate(e.getCause());
+        }
+      }
+
+      @Override public Set<Dependency<?>> getDependencies() {
+        return providerDependencies;
+      }
     }
 
     final class RealDirectTypeProvider extends RealOptionalBinderProviderWithDependencies<T> {
@@ -423,42 +580,64 @@ public abstract class OptionalBinder<T> {
       @Override public Key<Optional<T>> getKey() {
         return optionalKey;
       }
-      
+
       @Override public Binding<?> getActualBinding() {
-        if (isInitialized()) {
-          return actualBinding;
-        } else {
-          throw new UnsupportedOperationException(
-              "getActualBinding() not supported from Elements.getElements, requires an Injector.");
-        }
+        return RealOptionalBinder.this.getActualBinding();
       }
-      
+
       @Override public Binding<?> getDefaultBinding() {
-        if (isInitialized()) {
-          return defaultBinding;
-        } else {
-          throw new UnsupportedOperationException(
-              "getDefaultBinding() not supported from Elements.getElements, requires an Injector.");
-        }
+        return RealOptionalBinder.this.getDefaultBinding();
       }
 
       @Override public boolean containsElement(Element element) {
-        Key<?> elementKey;
-        if (element instanceof Binding) {
-          elementKey = ((Binding<?>) element).getKey();
-        } else if (element instanceof ProviderLookup) {
-          elementKey = ((ProviderLookup<?>) element).getKey();
-        } else {
-          return false; // cannot match;
-        }
-
-        return elementKey.equals(optionalKey)
-            || elementKey.equals(optionalProviderKey)
-            || elementKey.equals(optionalJavaxProviderKey)
-            || elementKey.equals(defaultKey)
-            || elementKey.equals(actualKey)
-            || matchesTypeKey(element, elementKey);
+        return RealOptionalBinder.this.containsElement(element);
       }
+    }
+
+    private Binding<?> getActualBinding() {
+      if (isInitialized()) {
+        return actualBinding;
+      } else {
+        throw new UnsupportedOperationException(
+            "getActualBinding() not supported from Elements.getElements, requires an Injector.");
+      }
+    }
+
+    private Binding<?> getDefaultBinding() {
+      if (isInitialized()) {
+        return defaultBinding;
+      } else {
+        throw new UnsupportedOperationException(
+            "getDefaultBinding() not supported from Elements.getElements, requires an Injector.");
+      }
+    }
+
+    private boolean containsElement(Element element) {
+      Key<?> elementKey;
+      if (element instanceof Binding) {
+        elementKey = ((Binding<?>) element).getKey();
+      } else if (element instanceof ProviderLookup) {
+        elementKey = ((ProviderLookup<?>) element).getKey();
+      } else {
+        return false; // cannot match;
+      }
+
+      return elementKey.equals(optionalKey)
+          || elementKey.equals(optionalProviderKey)
+          || elementKey.equals(optionalJavaxProviderKey)
+          || elementKey.equals(defaultKey)
+          || elementKey.equals(actualKey)
+          || matchesJ8Keys(elementKey)
+          || matchesTypeKey(element, elementKey);
+    }
+
+    private boolean matchesJ8Keys(Key<?> elementKey) {
+      if (JAVA_OPTIONAL_CLASS != null) {
+        return elementKey.equals(javaOptionalKey)
+            || elementKey.equals(javaOptionalProviderKey)
+            || elementKey.equals(javaOptionalJavaxProviderKey);
+      }
+      return false;
     }
     
     /** Returns true if the key & element indicate they were bound by this OptionalBinder. */
