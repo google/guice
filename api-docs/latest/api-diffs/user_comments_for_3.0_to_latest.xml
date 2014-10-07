@@ -1678,6 +1678,24 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.persist.jpa"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistModule"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.persist.jpa.JpaPersistModule.properties_changed(java.util.Map&lt;?, ?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.servlet"/>
   <text>
     InsertCommentsHere
