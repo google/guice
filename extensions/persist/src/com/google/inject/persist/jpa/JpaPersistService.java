@@ -29,7 +29,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Properties;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -43,11 +43,11 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
   private final String persistenceUnitName;
-  private final Properties persistenceProperties;
+  private final Map<?,?> persistenceProperties;
 
   @Inject
   public JpaPersistService(@Jpa String persistenceUnitName,
-      @Nullable @Jpa Properties persistenceProperties) {
+      @Nullable @Jpa Map<?,?> persistenceProperties) {
     this.persistenceUnitName = persistenceUnitName;
     this.persistenceProperties = persistenceProperties;
   }

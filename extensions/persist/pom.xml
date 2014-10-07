@@ -15,9 +15,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>persistence-api</artifactId>
-      <version>1.0</version>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.0-api</artifactId>
+      <version>1.0.0.Final</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>3.4.0.GA</version>
+      <version>4.1.7.Final</version>
       <scope>test</scope>
     </dependency>
     <dependency>

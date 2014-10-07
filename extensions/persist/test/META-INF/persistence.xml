@@ -25,5 +25,19 @@
         </properties>
     </persistence-unit>
 
+    <persistence-unit name="testProperties" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+        <class>com.google.inject.persist.jpa.JpaTestEntity</class>
+        <class>com.google.inject.persist.jpa.JpaParentTestEntity</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+            <property name="hibernate.id.new_generator_mappings" value="true"/>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+        </properties>
+    </persistence-unit>
+
 </persistence>
 
