@@ -23,6 +23,8 @@ import static com.google.inject.multibindings.MapBinder.mapOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfSetOfProviderOf;
 import static com.google.inject.multibindings.Multibinder.collectionOfProvidersOf;
 import static com.google.inject.multibindings.Multibinder.setOf;
+import static com.google.inject.multibindings.OptionalBinder.javaOptionalOfJavaxProvider;
+import static com.google.inject.multibindings.OptionalBinder.javaOptionalOfProvider;
 import static com.google.inject.multibindings.OptionalBinder.optionalOfJavaxProvider;
 import static com.google.inject.multibindings.OptionalBinder.optionalOfProvider;
 import static com.google.inject.multibindings.SpiUtils.BindType.INSTANCE;
@@ -79,6 +81,15 @@ import java.util.Set;
  * @author sameb@google.com (Sam Berlin)
  */
 public class SpiUtils {
+
+  private static final boolean HAS_JAVA_OPTIONAL;
+  static {
+    Class<?> optional = null;
+    try {
+      optional = Class.forName("java.util.Optional");
+    } catch (ClassNotFoundException ignored) {}
+    HAS_JAVA_OPTIONAL = optional != null;
+  }
 
   /** The kind of test we should perform.  A live Injector, a raw Elements (Module) test, or both. */
   enum VisitType { INJECTOR, MODULE, BOTH }
@@ -576,6 +587,11 @@ public class SpiUtils {
       fail("must test something");
     }
 
+    // if java.util.Optional is bound, there'll be twice as many as we expect.
+    if (HAS_JAVA_OPTIONAL) {
+      expectedOtherOptionalBindings *= 2;
+    }
+
     if (visitType == BOTH || visitType == INJECTOR) {
       optionalInjectorTest(keyType, modules, expectedOtherOptionalBindings, expectedDefault,
           expectedActual, expectedUserLinkedActual);
@@ -587,7 +603,7 @@ public class SpiUtils {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static <T> void optionalInjectorTest(Key<T> keyType,
       Iterable<? extends Module> modules,
       int expectedOtherOptionalBindings,
@@ -598,56 +614,100 @@ public class SpiUtils {
       assertNull("cannot have actual if expecting user binding", expectedActual);
       assertNull("cannot have default if expecting user binding", expectedDefault);
     }
-    
+
     Key<Optional<T>> optionalKey =
         keyType.ofType(OptionalBinder.optionalOf(keyType.getTypeLiteral()));
+    Key<?> javaOptionalKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(OptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
     Injector injector = Guice.createInjector(modules);
     Binding<Optional<T>> optionalBinding = injector.getBinding(optionalKey);
-    Visitor<Optional<T>> visitor = new Visitor<Optional<T>>();
-    OptionalBinderBinding<T> optionalBinder =
-        (OptionalBinderBinding<T>) optionalBinding.acceptTargetVisitor(visitor);
+    Visitor visitor = new Visitor();
+    OptionalBinderBinding<Optional<T>> optionalBinder =
+        (OptionalBinderBinding<Optional<T>>) optionalBinding.acceptTargetVisitor(visitor);
     assertNotNull(optionalBinder);
     assertEquals(optionalKey, optionalBinder.getKey());
 
+    Binding<?> javaOptionalBinding = null;
+    OptionalBinderBinding<?> javaOptionalBinder = null;
+    if (HAS_JAVA_OPTIONAL) {
+      javaOptionalBinding = injector.getBinding(javaOptionalKey);
+      javaOptionalBinder = (OptionalBinderBinding<?>) javaOptionalBinding.acceptTargetVisitor(visitor);
+      assertNotNull(javaOptionalBinder);
+      assertEquals(javaOptionalKey, javaOptionalBinder.getKey());
+    }
+
     if (expectedDefault == null) {
       assertNull("did not expect a default binding", optionalBinder.getDefaultBinding());
+      if (HAS_JAVA_OPTIONAL) {
+        assertNull("did not expect a default binding", javaOptionalBinder.getDefaultBinding());  
+      }
     } else {
       assertTrue("expectedDefault: " + expectedDefault + ", actualDefault: "
-          + optionalBinder.getDefaultBinding(),
+              + optionalBinder.getDefaultBinding(),
           matches(optionalBinder.getDefaultBinding(), expectedDefault));
+      if (HAS_JAVA_OPTIONAL) {
+        assertTrue("expectedDefault: " + expectedDefault + ", actualDefault: "
+                + javaOptionalBinder.getDefaultBinding(),
+            matches(javaOptionalBinder.getDefaultBinding(), expectedDefault));
+      }
     }
 
     if (expectedActual == null && expectedUserLinkedActual == null) {
       assertNull(optionalBinder.getActualBinding());
+      if (HAS_JAVA_OPTIONAL) {
+        assertNull(javaOptionalBinder.getActualBinding());  
+      }
     } else if (expectedActual != null) {
       assertTrue("expectedActual: " + expectedActual + ", actualActual: "
-          + optionalBinder.getActualBinding(),
+              + optionalBinder.getActualBinding(),
           matches(optionalBinder.getActualBinding(), expectedActual));
+      if (HAS_JAVA_OPTIONAL) {
+        assertTrue("expectedActual: " + expectedActual + ", actualActual: "
+                + javaOptionalBinder.getActualBinding(),
+            matches(javaOptionalBinder.getActualBinding(), expectedActual));
+      }
     } else if (expectedUserLinkedActual != null) {
       assertTrue("expectedUserLinkedActual: " + expectedUserLinkedActual + ", actualActual: "
-          + optionalBinder.getActualBinding(),
+              + optionalBinder.getActualBinding(),
           matches(optionalBinder.getActualBinding(), expectedUserLinkedActual));
+      if (HAS_JAVA_OPTIONAL) {
+        assertTrue("expectedUserLinkedActual: " + expectedUserLinkedActual + ", actualActual: "
+                + javaOptionalBinder.getActualBinding(),
+            matches(javaOptionalBinder.getActualBinding(), expectedUserLinkedActual));  
+      }
     }
 
 
     Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
         keyType.ofType(optionalOfJavaxProvider(keyType.getTypeLiteral()));
+    Key<?> javaOptionalJavaxProviderKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
     Key<Optional<Provider<T>>> optionalProviderKey =
         keyType.ofType(optionalOfProvider(keyType.getTypeLiteral()));
+    Key<?> javaOptionalProviderKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
 
     boolean keyMatch = false;
     boolean optionalKeyMatch = false;
+    boolean javaOptionalKeyMatch = false;
     boolean optionalJavaxProviderKeyMatch = false;
+    boolean javaOptionalJavaxProviderKeyMatch = false;
     boolean optionalProviderKeyMatch = false;
+    boolean javaOptionalProviderKeyMatch = false;
     boolean defaultMatch = false;
     boolean actualMatch = false;
     List<Object> otherOptionalBindings = Lists.newArrayList();
     List<Binding> otherMatches = Lists.newArrayList();
     for (Binding b : injector.getAllBindings().values()) {
       boolean contains = optionalBinder.containsElement(b);
+      if (HAS_JAVA_OPTIONAL) {
+        assertEquals(contains, javaOptionalBinder.containsElement(b));
+      }
       Object visited = b.acceptTargetVisitor(visitor);
       if (visited instanceof OptionalBinderBinding) {
         if (visited.equals(optionalBinder)) {
+          assertTrue(contains);
+        } else if (HAS_JAVA_OPTIONAL && visited.equals(javaOptionalBinder)) {
           assertTrue(contains);
         } else {
           otherOptionalBindings.add(visited);
@@ -663,12 +723,21 @@ public class SpiUtils {
       } else if (b.getKey().equals(optionalKey)) {
         assertTrue(contains);
         optionalKeyMatch = true;
+      } else if (b.getKey().equals(javaOptionalKey)) {
+        assertTrue(contains);
+        javaOptionalKeyMatch = true;
       } else if (b.getKey().equals(optionalJavaxProviderKey)) {
         assertTrue(contains);
         optionalJavaxProviderKeyMatch = true;
+      } else if (b.getKey().equals(javaOptionalJavaxProviderKey)) {
+        assertTrue(contains);
+        javaOptionalJavaxProviderKeyMatch = true;
       } else if (b.getKey().equals(optionalProviderKey)) {
         assertTrue(contains);
         optionalProviderKeyMatch = true;
+      } else if (b.getKey().equals(javaOptionalProviderKey)) {
+        assertTrue(contains);
+        javaOptionalProviderKeyMatch = true;
       } else if (expectedDefault != null && matches(b, expectedDefault)) {
         assertTrue(contains);
         defaultMatch = true;
@@ -686,13 +755,16 @@ public class SpiUtils {
     assertTrue(optionalKeyMatch);
     assertTrue(optionalJavaxProviderKeyMatch);
     assertTrue(optionalProviderKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalJavaxProviderKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalProviderKeyMatch);
     assertEquals(expectedDefault != null, defaultMatch);
     assertEquals(expectedActual != null, actualMatch);
     assertEquals("other OptionalBindings found: " + otherOptionalBindings,
         expectedOtherOptionalBindings, otherOptionalBindings.size());
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static <T> void optionalModuleTest(Key<T> keyType,
       Iterable<? extends Module> modules,
       int expectedOtherOptionalBindings,
@@ -707,13 +779,22 @@ public class SpiUtils {
     Map<Key<?>, Binding<?>> indexed = index(elements);
     Key<Optional<T>> optionalKey =
         keyType.ofType(OptionalBinder.optionalOf(keyType.getTypeLiteral()));
-    Visitor<Optional<T>> visitor = new Visitor<Optional<T>>();
-    OptionalBinderBinding<T> optionalBinder = null;
+    Key<?> javaOptionalKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(OptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
+    Visitor visitor = new Visitor();
+    OptionalBinderBinding<Optional<T>> optionalBinder = null;
+    OptionalBinderBinding<?> javaOptionalBinder = null;
     Key<?> defaultKey = null;
     Key<?> actualKey = null;
 
     Binding optionalBinding = indexed.get(optionalKey);
-    optionalBinder = (OptionalBinderBinding<T>) optionalBinding.acceptTargetVisitor(visitor);
+    optionalBinder =
+        (OptionalBinderBinding<Optional<T>>) optionalBinding.acceptTargetVisitor(visitor);
+
+    if (HAS_JAVA_OPTIONAL) {
+      Binding javaOptionalBinding = indexed.get(javaOptionalKey);
+      javaOptionalBinder = (OptionalBinderBinding) javaOptionalBinding.acceptTargetVisitor(visitor);
+    }
 
     // Locate the defaultKey & actualKey
     for (Element element : elements) {
@@ -727,17 +808,27 @@ public class SpiUtils {
       }
     }
     assertNotNull(optionalBinder);
+    if (HAS_JAVA_OPTIONAL) {
+      assertNotNull(javaOptionalBinder);
+    }
     assertEquals(expectedDefault == null, defaultKey == null);
     assertEquals(expectedActual == null, actualKey == null);
 
     Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
         keyType.ofType(optionalOfJavaxProvider(keyType.getTypeLiteral()));
+    Key<?> javaOptionalJavaxProviderKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
     Key<Optional<Provider<T>>> optionalProviderKey =
         keyType.ofType(optionalOfProvider(keyType.getTypeLiteral()));
+    Key<?> javaOptionalProviderKey = HAS_JAVA_OPTIONAL ?
+        keyType.ofType(javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
     boolean keyMatch = false;
     boolean optionalKeyMatch = false;
+    boolean javaOptionalKeyMatch = false;
     boolean optionalJavaxProviderKeyMatch = false;
+    boolean javaOptionalJavaxProviderKeyMatch = false;
     boolean optionalProviderKeyMatch = false;
+    boolean javaOptionalProviderKeyMatch = false;
     boolean defaultMatch = false;
     boolean actualMatch = false;
     List<Object> otherOptionalElements = Lists.newArrayList();
@@ -745,6 +836,9 @@ public class SpiUtils {
     List<Element> nonContainedElements = Lists.newArrayList();
     for (Element element : elements) {
       boolean contains = optionalBinder.containsElement(element);
+      if (HAS_JAVA_OPTIONAL) {
+        assertEquals(contains, javaOptionalBinder.containsElement(element));
+      }
       if (!contains) {
         nonContainedElements.add(element);
       }
@@ -756,6 +850,8 @@ public class SpiUtils {
         Object visited = b.acceptTargetVisitor(visitor);
         if (visited instanceof OptionalBinderBinding) {
           if (visited.equals(optionalBinder)) {
+            assertTrue(contains);
+          } else if (HAS_JAVA_OPTIONAL && visited.equals(javaOptionalBinder)) {
             assertTrue(contains);
           } else {
             otherOptionalElements.add(visited);
@@ -775,12 +871,21 @@ public class SpiUtils {
       } else if (key != null && key.equals(optionalKey)) {
         assertTrue(contains);
         optionalKeyMatch = true;
+      } else if (key != null && key.equals(javaOptionalKey)) {
+        assertTrue(contains);
+        javaOptionalKeyMatch = true;
       } else if (key != null && key.equals(optionalJavaxProviderKey)) {
         assertTrue(contains);
         optionalJavaxProviderKeyMatch = true;
+      } else if (key != null && key.equals(javaOptionalJavaxProviderKey)) {
+        assertTrue(contains);
+        javaOptionalJavaxProviderKeyMatch = true;
       } else if (key != null && key.equals(optionalProviderKey)) {
         assertTrue(contains);
         optionalProviderKeyMatch = true;
+      } else if (key != null && key.equals(javaOptionalProviderKey)) {
+        assertTrue(contains);
+        javaOptionalProviderKeyMatch = true;
       } else if (key != null && key.equals(defaultKey)) {
         assertTrue(contains);
         if (b != null) { // otherwise it might just be a ProviderLookup into it
@@ -804,6 +909,9 @@ public class SpiUtils {
     assertTrue(optionalKeyMatch);
     assertTrue(optionalJavaxProviderKeyMatch);
     assertTrue(optionalProviderKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalJavaxProviderKeyMatch);
+    assertEquals(HAS_JAVA_OPTIONAL, javaOptionalProviderKeyMatch);
     assertEquals(expectedDefault != null, defaultMatch);
     assertEquals(expectedActual != null, actualMatch);
     assertEquals(otherContains.toString(), 0, otherContains.size());
@@ -964,4 +1072,3 @@ public class SpiUtils {
     }
   }
 }
-

@@ -72,22 +72,52 @@ import java.util.Set;
  */
 public class OptionalBinderTest extends TestCase {
 
+  private static final boolean HAS_JAVA_OPTIONAL;
+  private static final Class<?> JAVA_OPTIONAL_CLASS;
+  private static final Method JAVA_OPTIONAL_OR_ELSE;
+  static {
+    Class<?> optional = null;
+    Method orElse = null;
+    try {
+      optional = Class.forName("java.util.Optional");
+      orElse = optional.getDeclaredMethod("orElse", Object.class);
+    } catch (ClassNotFoundException ignored) {
+    } catch (NoSuchMethodException ignored) {
+    } catch (SecurityException ignored) {
+    }
+    HAS_JAVA_OPTIONAL = optional != null;
+    JAVA_OPTIONAL_CLASS = optional;
+    JAVA_OPTIONAL_OR_ELSE = orElse;
+  }
+
   final Key<String> stringKey = Key.get(String.class);
   final TypeLiteral<Optional<String>> optionalOfString = new TypeLiteral<Optional<String>>() {};
+  final TypeLiteral<?> javaOptionalOfString =  HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOf(stringKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<Provider<String>>> optionalOfProviderString =
       new TypeLiteral<Optional<Provider<String>>>() {};
+  final TypeLiteral<?> javaOptionalOfProviderString = HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOfProvider(stringKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<javax.inject.Provider<String>>> optionalOfJavaxProviderString =
       new TypeLiteral<Optional<javax.inject.Provider<String>>>() {};
+  final TypeLiteral<?> javaOptionalOfJavaxProviderString = HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOfJavaxProvider(stringKey.getTypeLiteral()) : null;
 
   final Key<Integer> intKey = Key.get(Integer.class);
   final TypeLiteral<Optional<Integer>> optionalOfInteger = new TypeLiteral<Optional<Integer>>() {};
+  final TypeLiteral<?> javaOptionalOfInteger =  HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOf(intKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<Provider<Integer>>> optionalOfProviderInteger =
       new TypeLiteral<Optional<Provider<Integer>>>() {};
+  final TypeLiteral<?> javaOptionalOfProviderInteger = HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOfProvider(intKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<javax.inject.Provider<Integer>>> optionalOfJavaxProviderInteger =
       new TypeLiteral<Optional<javax.inject.Provider<Integer>>>() {};
-      
+  final TypeLiteral<?> javaOptionalOfJavaxProviderInteger = HAS_JAVA_OPTIONAL ?
+      OptionalBinder.javaOptionalOfJavaxProvider(intKey.getTypeLiteral()) : null;
+
   final TypeLiteral<List<String>> listOfStrings = new TypeLiteral<List<String>>() {};
-  
+
   public void testTypeNotBoundByDefault() {
     Module module = new AbstractModule() {
       @Override protected void configure() {
@@ -95,6 +125,10 @@ public class OptionalBinderTest extends TestCase {
         requireBinding(new Key<Optional<String>>() {}); // the above specifies this.
         requireBinding(String.class); // but it doesn't specify this.
         binder().requireExplicitBindings(); // need to do this, otherwise String will JIT
+
+        if (HAS_JAVA_OPTIONAL) {
+          requireBinding(Key.get(javaOptionalOfString));
+        }
       }
     };
 
@@ -108,7 +142,7 @@ public class OptionalBinderTest extends TestCase {
     }
   } 
   
-  public void testOptionalIsAbsentByDefault() {
+  public void testOptionalIsAbsentByDefault() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class);
@@ -127,9 +161,20 @@ public class OptionalBinderTest extends TestCase {
     assertFalse(optionalJxP.isPresent());
     
     assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, null, null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertFalse(optional.isPresent());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertFalse(optionalP.isPresent());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertFalse(optionalJxP.isPresent());
+    }
   }
   
-  public void testUsesUserBoundValue() {
+  public void testUsesUserBoundValue() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class);
@@ -157,9 +202,20 @@ public class OptionalBinderTest extends TestCase {
         null,
         null,
         providerInstance("foo"));
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertEquals("foo", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertEquals("foo", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertEquals("foo", optionalJxP.get().get());
+    }
   }
   
-  public void testSetDefault() {
+  public void testSetDefault() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setDefault().toInstance("a");
@@ -182,9 +238,23 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("a", optionalJxP.get().get());
 
     assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null, null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("a", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("a", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("a", optionalJxP.get().get());
+    }
   }
   
-  public void testSetBinding() {
+  public void testSetBinding() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setBinding().toInstance("a");
@@ -207,9 +277,23 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("a", optionalJxP.get().get());
     
     assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"), null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("a", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("a", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("a", optionalJxP.get().get());
+    }
   }
   
-  public void testSetBindingOverridesDefault() {
+  public void testSetBindingOverridesDefault() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder<String> optionalBinder =
@@ -241,9 +325,23 @@ public class OptionalBinderTest extends TestCase {
         instance("a"),
         instance("b"),
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("b", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("b", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("b", optionalJxP.get().get());
+    }
   }
   
-  public void testSpreadAcrossModules() {
+  public void testSpreadAcrossModules() throws Exception {
     Module module1 = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class);
@@ -283,9 +381,23 @@ public class OptionalBinderTest extends TestCase {
         instance("a"),
         instance("b"),
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("b", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("b", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("b", optionalJxP.get().get());
+    }
   }
   
-  public void testExactSameBindingCollapses_defaults() {
+  public void testExactSameBindingCollapses_defaults() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setDefault()
@@ -311,9 +423,23 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("a", optionalJxP.get().get());
 
     assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, instance("a"), null, null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("a", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("a", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("a", optionalJxP.get().get());
+    }
   }
   
-  public void testExactSameBindingCollapses_actual() {
+  public void testExactSameBindingCollapses_actual() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setBinding()
@@ -339,6 +465,20 @@ public class OptionalBinderTest extends TestCase {
     assertEquals("a", optionalJxP.get().get());
 
     assertOptionalVisitor(stringKey, setOf(module), VisitType.BOTH, 0, null, instance("a"), null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertTrue(optional.isPresent());
+      assertEquals("a", optional.get());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertEquals("a", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("a", optionalJxP.get().get());
+    }
   }
   
   public void testDifferentBindingsFail_defaults() {
@@ -407,7 +547,7 @@ public class OptionalBinderTest extends TestCase {
     }
   }
   
-  public void testQualifiedAggregatesTogether() {
+  public void testQualifiedAggregatesTogether() throws Exception {
     Module module1 = new AbstractModule() {
       @Override
       protected void configure() {
@@ -453,6 +593,22 @@ public class OptionalBinderTest extends TestCase {
         instance("a"),
         instance("b"),
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString, Names.named("foo"))));
+      assertTrue(optional.isPresent());
+      assertEquals("b", optional.get());
+
+      optionalP = toOptional(injector.getInstance
+          (Key.get(javaOptionalOfProviderString, Names.named("foo"))));
+      assertTrue(optionalP.isPresent());
+      assertEquals("b", optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(
+          Key.get(javaOptionalOfJavaxProviderString, Names.named("foo"))));
+      assertTrue(optionalJxP.isPresent());
+      assertEquals("b", optionalJxP.get().get());
+    }
   }
   
   public void testMultipleDifferentOptionals() {
@@ -479,7 +635,7 @@ public class OptionalBinderTest extends TestCase {
     assertOptionalVisitor(cKey, setOf(module), VisitType.BOTH, 3, instance("c"), null, null);
   }
   
-  public void testOptionalIsAppropriatelyLazy() {
+  public void testOptionalIsAppropriatelyLazy() throws Exception {
     Module module = new AbstractModule() {
       int nextValue = 1;
       @Override protected void configure() {
@@ -513,9 +669,27 @@ public class OptionalBinderTest extends TestCase {
     
     assertEquals(7, optionalJxP.get().get().intValue());
     assertEquals(8, optionalJxP.get().get().intValue());
+
+    // and same rules with java.util.Optional
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfInteger)));
+      assertEquals(9, optional.get().intValue());
+      assertEquals(9, optional.get().intValue());
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfInteger)));
+      assertEquals(10, optional.get().intValue());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderInteger)));
+      assertEquals(11, optionalP.get().get().intValue());
+      assertEquals(12, optionalP.get().get().intValue());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderInteger)));
+      assertEquals(13, optionalJxP.get().get().intValue());
+      assertEquals(14, optionalJxP.get().get().intValue());
+    }
   }
   
-  public void testLinkedToNullProvidersMakeAbsentValuesAndPresentProviders_default() {
+  public void testLinkedToNullProvidersMakeAbsentValuesAndPresentProviders_default()
+      throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class)
@@ -535,7 +709,7 @@ public class OptionalBinderTest extends TestCase {
     Optional<javax.inject.Provider<String>> optionalJxP =
         injector.getInstance(Key.get(optionalOfJavaxProviderString));
     assertTrue(optionalJxP.isPresent());
-    assertNull(optionalP.get().get());
+    assertNull(optionalJxP.get().get());
     
     assertOptionalVisitor(stringKey,
         setOf(module),
@@ -544,9 +718,23 @@ public class OptionalBinderTest extends TestCase {
         SpiUtils.<String>providerInstance(null),
         null,
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertFalse(optional.isPresent());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertNull(optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertNull(optionalJxP.get().get());
+    }
   }
   
-  public void testLinkedToNullProvidersMakeAbsentValuesAndPresentProviders_actual() {
+  public void testLinkedToNullProvidersMakeAbsentValuesAndPresentProviders_actual()
+      throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class)
@@ -566,7 +754,7 @@ public class OptionalBinderTest extends TestCase {
     Optional<javax.inject.Provider<String>> optionalJxP =
         injector.getInstance(Key.get(optionalOfJavaxProviderString));
     assertTrue(optionalJxP.isPresent());
-    assertNull(optionalP.get().get());
+    assertNull(optionalJxP.get().get());
     
     assertOptionalVisitor(stringKey,
         setOf(module),
@@ -575,10 +763,23 @@ public class OptionalBinderTest extends TestCase {
         null,
         SpiUtils.<String>providerInstance(null),
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertFalse(optional.isPresent());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertNull(optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertNull(optionalJxP.get().get());
+    }
   }
   
   // TODO(sameb): Maybe change this?
-  public void testLinkedToNullActualDoesntFallbackToDefault() {
+  public void testLinkedToNullActualDoesntFallbackToDefault() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         OptionalBinder.newOptionalBinder(binder(), String.class).setDefault().toInstance("a");
@@ -608,6 +809,19 @@ public class OptionalBinderTest extends TestCase {
         instance("a"),
         SpiUtils.<String>providerInstance(null),
         null);
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertFalse(optional.isPresent());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertTrue(optionalP.isPresent());
+      assertNull(optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertTrue(optionalJxP.isPresent());
+      assertNull(optionalJxP.get().get());
+    }
   }
 
   public void testSourceLinesInException() {
@@ -675,6 +889,7 @@ public class OptionalBinderTest extends TestCase {
     assertEquals(ImmutableSet.of("A"), elements);
   }
   
+  @SuppressWarnings("rawtypes")
   private Set<String> recurseForDependencies(Injector injector, HasDependencies hasDependencies) {
     Set<String> elements = Sets.newHashSet();
     for (Dependency<?> dependency : hasDependencies.getDependencies()) {
@@ -1014,5 +1229,12 @@ public class OptionalBinderTest extends TestCase {
   @SuppressWarnings("unchecked") 
   private <V> Set<V> setOf(V... elements) {
     return ImmutableSet.copyOf(elements);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Optional<T> toOptional(Object object) throws Exception {
+    assertTrue("not a java.util.Optional: " + object.getClass(),
+        JAVA_OPTIONAL_CLASS.isInstance(object));
+    return Optional.fromNullable((T) JAVA_OPTIONAL_OR_ELSE.invoke(object, (Void) null));
   }
 }
