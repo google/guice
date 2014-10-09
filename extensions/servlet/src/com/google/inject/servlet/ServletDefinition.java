@@ -26,6 +26,8 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -216,6 +218,12 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
             // then pathinfo is null.
             if (pathInfo.isEmpty() && servletPathLength > 0) {
               pathInfo = null;
+            } else {
+              try {
+                pathInfo = new URI(pathInfo).getPath();
+              } catch (URISyntaxException e) {
+                // ugh, just leave it alone then
+              }
             }
           } else {
             pathInfo = null; // we know nothing additional about the URI.
