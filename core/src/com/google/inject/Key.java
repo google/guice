@@ -143,9 +143,7 @@ public class Key<T> {
   }
 
   /**
-   * Computes the hash code for this key. This logic is duplicated in {@link
-   * com.google.inject.internal.RehashableKeys.Keys#needsRehashing}; if it is
-   * changed here, be sure to change it there also.
+   * Computes the hash code for this key.
    */
   private int computeHashCode() {
     return typeLiteral.hashCode() * 31 + annotationStrategy.hashCode();

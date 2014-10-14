@@ -105,10 +105,6 @@ public abstract class BindingImpl<T> implements Binding<T> {
     throw new AssertionError();
   }
   
-  public BindingImpl<T> withRehashedKeys() {
-    throw new AssertionError();
-  }
-
   @Override public String toString() {
     return Objects.toStringHelper(Binding.class)
         .add("key", key)

@@ -17,49 +17,39 @@
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
-      <version>1</version>
     </dependency>
     <dependency>
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
-      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>16.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava-testlib</artifactId>
-      <version>16.0.1</version>
-      <scope>test</scope>
     </dependency>
     <!--
      | CGLIB is embedded by default by the JarJar build profile
     -->
     <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <version>3.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>asm</groupId>
-          <artifactId>asm</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>5.0.1</version>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
       <optional>true</optional>
     </dependency>
+    <!--
+     | Test dependencies
+    -->
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject-tck</artifactId>
-      <version>1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -91,7 +81,7 @@
         <artifactId>maven-remote-resources-plugin</artifactId>
       </plugin>
       <!--
-       | Enable Java5 conformance checks
+       | Enable Java6 conformance checks
       -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -121,6 +111,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.artifactId}$(if;$(classes;NAMED;*.MethodAspect);; (no_aop))</Bundle-Name>
+            <Import-Package>!net.sf.cglib.*,!org.objectweb.asm.*,!com.google.inject.*,*</Import-Package>
             <Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
           </instructions>
         </configuration>
@@ -235,7 +226,7 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>jarjar-maven-plugin</artifactId>
-            <version>1.8</version>
+            <version>1.9</version>
             <executions>
               <execution>
                 <id>jarjar</id>
@@ -276,22 +267,25 @@
           </plugin>
           <plugin>
             <!--
-             | Package the original non-JarJar'd classes so extensions can compile against them
+             | Attach the original non-JarJar'd classes so extensions can compile against them
             -->
-            <artifactId>maven-jar-plugin</artifactId>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.8</version>
             <executions>
               <execution>
                 <id>classes</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>jar</goal>
+                  <goal>attach-artifact</goal>
                 </goals>
                 <configuration>
-                  <classesDirectory>${project.build.directory}/original-classes</classesDirectory>
-                  <classifier>classes</classifier>
-                  <archive>
-                    <manifestFile combine.self="override" />
-                  </archive>
+                  <artifacts>
+                    <artifact>
+                      <file>${project.build.directory}/original-${project.build.finalName}.jar</file>
+                      <classifier>classes</classifier>
+                    </artifact>
+                  </artifacts>
                 </configuration>
               </execution>
             </executions>

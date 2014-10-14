@@ -93,7 +93,7 @@ import java.lang.annotation.Annotation;
  *
  * <pre>install(new FactoryModuleBuilder()
  *     .implement(Payment.class, RealPayment.class)
- *     .build(PaymentFactory.class);</pre>
+ *     .build(PaymentFactory.class));</pre>
  *
  * As a side-effect of this binding, Guice will inject the factory to initialize it for use. The
  * factory cannot be used until the injector has been initialized.
@@ -115,7 +115,7 @@ import java.lang.annotation.Annotation;
  *     // excluding .implement for Shipment means the implementation class
  *     // will be 'Shipment' itself, which is legal if it's not an interface.
  *     .implement(Receipt.class, RealReceipt.class)
- *     .build(OrderFactory.class);</pre>
+ *     .build(OrderFactory.class));</pre>
  * </pre>
  *
  * <h3>Using the factory</h3>

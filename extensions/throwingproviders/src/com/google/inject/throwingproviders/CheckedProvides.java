@@ -24,11 +24,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to create a {@link CheckedProvider}
- * method binding that can throw exceptions. The method's return type is bound
- * to a {@link CheckedProvider} that can be injected. Guice will pass
- * dependencies to the method as parameters. Install {@literal @}CheckedProvides
- * methods by using
+ * Annotates methods of a {@link com.google.inject.Module} to create a
+ * {@link CheckedProvider} method binding that can throw exceptions. The
+ * method's return type is bound to a {@link CheckedProvider} that can be
+ * injected. Guice will pass dependencies to the method as parameters. Install
+ * {@literal @}CheckedProvides methods by using
  * {@link ThrowingProviderBinder#forModule(com.google.inject.Module)} on the
  * module where the methods are declared.
  * 

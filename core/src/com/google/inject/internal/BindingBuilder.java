@@ -41,7 +41,7 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class BindingBuilder<T> extends AbstractBindingBuilder<T>
-    implements AnnotatedBindingBuilder<T>, RehashableKeys {
+    implements AnnotatedBindingBuilder<T> {
 
   public BindingBuilder(Binder binder, List<Element> elements, Object source, Key<T> key) {
     super(binder, elements, source, key);
@@ -171,10 +171,6 @@ public class BindingBuilder<T> extends AbstractBindingBuilder<T>
     return this;
   }
   
-  public void rehashKeys() {
-    setBinding(getBinding().withRehashedKeys());
-  }
-
   @Override public String toString() {
     return "BindingBuilder<" + getBinding().getKey().getTypeLiteral() + ">";
   }

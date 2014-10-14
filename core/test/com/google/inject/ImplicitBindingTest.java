@@ -225,7 +225,7 @@ public class ImplicitBindingTest extends TestCase {
   static class JitValid2 {}
   
   /**
-   * Regression test for http://code.google.com/p/google-guice/issues/detail?id=319
+   * Regression test for https://github.com/google/guice/issues/319
    * 
    * The bug is that a class that asks for a provider for itself during injection time, 
    * where any one of the other types required to fulfill the object creation was bound 
@@ -343,5 +343,53 @@ public class ImplicitBindingTest extends TestCase {
   
   // Valid JITable binding
   static class E { }
-  
+
+  public void testProvidedByNonEmptyEnum() {
+    NonEmptyEnum cardSuit = Guice.createInjector().getInstance(NonEmptyEnum.class);
+
+    assertEquals(NonEmptyEnum.HEARTS, cardSuit);
+  }
+
+  public void testProvidedByEmptyEnum() {
+    EmptyEnum emptyEnumValue = Guice.createInjector().getInstance(EmptyEnum.class);
+    assertNull(emptyEnumValue);
+  }
+
+  @ProvidedBy(NonEmptyEnumProvider.class)
+  enum NonEmptyEnum { HEARTS, DIAMONDS, CLUBS, SPADES }
+
+  static final class NonEmptyEnumProvider implements Provider<NonEmptyEnum> {
+    @Override
+    public NonEmptyEnum get() {
+      return NonEmptyEnum.HEARTS;
+    }
+  }
+
+  @ProvidedBy(EmptyEnumProvider.class)
+  enum EmptyEnum {}
+
+  static final class EmptyEnumProvider implements Provider<EmptyEnum> {
+    @Override
+    public EmptyEnum get() {
+      return null;
+    }
+  }
+
+  // An enum cannot be implemented by anything, so it should not be possible to have a successful
+  // binding when the enum is annotated with @ImplementedBy.
+  public void testImplementedByEnum() {
+    Injector injector = Guice.createInjector();
+    try {
+      injector.getInstance(EnumWithImplementedBy.class);
+      fail("Expected failure");
+    } catch(ConfigurationException expected) {
+      Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
+      Asserts.assertContains(msg.getMessage(),
+          "No implementation for " + EnumWithImplementedBy.class.getName() + " was bound.");
+    }
+  }
+
+  @ImplementedBy(EnumWithImplementedByEnum.class)
+  enum EnumWithImplementedBy {}
+  private static class EnumWithImplementedByEnum {}
 }

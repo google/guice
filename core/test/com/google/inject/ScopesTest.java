@@ -338,6 +338,19 @@ public class ScopesTest extends TestCase {
     }
   }
 
+  public void testBindDuplicateScope() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(CustomScoped.class, Scopes.SINGLETON);
+        bindScope(CustomScoped.class, Scopes.SINGLETON);
+      }
+    });
+
+    assertSame(
+        injector.getInstance(AnnotatedCustomScoped.class),
+        injector.getInstance(AnnotatedCustomScoped.class));
+  }
+
   public void testDuplicateScopeAnnotations() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {

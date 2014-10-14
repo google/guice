@@ -52,16 +52,17 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   /**
    * Creates a {@link ProviderMethod}.
    *
-   * <p>Ideally, we will use {@link FastClass} to invoke the actual method, since it is
-   * significantly faster.  However, this will fail if the method is {@code private} or
-   * {@code protected}, since fastclass is subject to java access policies.
+   * <p>Unless {@code skipFastClassGeneration} is set, this will use {@link FastClass} to invoke
+   * the actual method, since it is significantly faster.  However, this will fail if the method is
+   * {@code private} or {@code protected}, since fastclass is subject to java access policies.
    */
   static <T> ProviderMethod<T> create(Key<T> key, Method method, Object instance,
       ImmutableSet<Dependency<?>> dependencies, List<Provider<?>> parameterProviders,
-      Class<? extends Annotation> scopeAnnotation) {
+      Class<? extends Annotation> scopeAnnotation, boolean skipFastClassGeneration) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
-    if (!Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers)) {
+    if (!skipFastClassGeneration && !Modifier.isPrivate(modifiers)
+        && !Modifier.isProtected(modifiers)) {
       try {
         // We use an index instead of FastMethod to save a stack frame.
         return new FastClassProviderMethod<T>(

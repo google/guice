@@ -35,10 +35,10 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * {@link BindingTargetVisitor} that returns a {@link Collection} of the
- * {@link Key}s of each {@link Binding}'s dependencies. Used by
- * {@link InjectorGrapher} to walk the dependency graph from a starting set of
- * {@link Binding}s.
+ * {@link com.google.inject.spi.BindingTargetVisitor} that returns a
+ * {@link Collection} of the {@link Key}s of each {@link Binding}'s
+ * dependencies. Used by {@link InjectorGrapher} to walk the dependency graph
+ * from a starting set of {@link Binding}s.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
  */

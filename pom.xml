@@ -32,10 +32,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <name>Google Guice</name>
 
   <description>
-    Guice is a lightweight dependency injection framework for Java 5 and above
+    Guice is a lightweight dependency injection framework for Java 6 and above
   </description>
 
-  <url>http://code.google.com/p/google-guice/</url>
+  <url>https://github.com/google/guice</url>
   <inceptionYear>2006</inceptionYear>
 
   <organization>
@@ -61,19 +61,19 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </mailingLists>
 
   <scm>
-    <connection>scm:git:https://code.google.com/p/google-guice/</connection>
-    <developerConnection>scm:git:https://code.google.com/p/google-guice/</developerConnection>
-    <url>https://code.google.com/p/google-guice/</url>
+    <connection>scm:git:git://github.com/google/guice.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/google/guice.git</developerConnection>
+    <url>https://github.com/google/guice</url>
   </scm>
 
   <issueManagement>
     <system>Google Code</system>
-    <url>http://code.google.com/p/google-guice/issues/</url>
+    <url>https://github.com/google/guice/issues/</url>
   </issueManagement>
 
   <ciManagement>
-    <system>Hudson</system>
-    <url>https://grid.sonatype.org/ci/job/google-guice/</url>
+    <system>Travis</system>
+    <url>https://travis-ci.org/google/guice</url>
   </ciManagement>
 
   <licenses>
@@ -83,6 +83,18 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <!-- override the parent's directory to point to the canonical place, and use https. -->
+    <repository>
+      <id>google-releases</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>google-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <modules>
     <module>blender</module>
@@ -110,6 +122,46 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <guice.with.no_aop>true</guice.with.no_aop>
     <gpg.skip>true</gpg.skip>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject-tck</artifactId>
+        <version>1</version>
+      </dependency>
+      <dependency>
+        <groupId>aopalliance</groupId>
+        <artifactId>aopalliance</artifactId>
+        <version>1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>16.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-testlib</artifactId>
+        <version>16.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>5.0.3</version>
+      </dependency>
+      <dependency>
+        <groupId>cglib</groupId>
+        <artifactId>cglib</artifactId>
+        <version>3.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -147,6 +199,37 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <pluginManagement>
       <plugins>
         <!--
+         | Use 'mvn license:format -N' at top of project to add missing headers
+        -->
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+            <header>${project.basedir}/lib/build/header.txt</header>
+            <headerDefinitions>
+              <headerDefinition>${project.basedir}/lib/build/header-definitions.xml</headerDefinition>
+            </headerDefinitions>
+            <skipExistingHeaders>true</skipExistingHeaders>
+            <aggregate>true</aggregate>
+            <includes>
+              <include>**/*.java</include>
+            </includes>
+            <excludes>
+              <!-- avoid touching munged/lib/test/example code -->
+              <exclude>**/build/**</exclude>
+              <exclude>**/target/**</exclude>
+              <exclude>**/lib/**</exclude>
+              <exclude>**/test/**</exclude>
+              <exclude>**/example*/**</exclude>
+            </excludes>
+            <mapping>
+              <java>JAVADOC_STYLE</java>
+            </mapping>
+          </configuration>
+        </plugin>
+        <!--
          | Standard LICENSE and NOTICE files
         -->
         <plugin>
@@ -166,7 +249,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
           </executions>
         </plugin>
         <!--
-         | Make sure we only use Java5 methods
+         | Make sure we only use Java6 methods
         -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -243,15 +326,13 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <module>com.google.inject</module>
               <_include>-${project.basedir}/build.properties</_include>
               <Bundle-Copyright>Copyright (C) 2006 Google Inc.</Bundle-Copyright>
-              <Bundle-DocURL>http://code.google.com/p/google-guice/</Bundle-DocURL>
+              <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
               <Bundle-Name>${project.artifactId}</Bundle-Name>
               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
-              <Bundle-RequiredExecutionEnvironment>
-                J2SE-1.5,JavaSE-1.6
-              </Bundle-RequiredExecutionEnvironment>
+              <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
               <Import-Package>!com.google.inject.*,*</Import-Package>
               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
-              <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
+              <_versionpolicy>$(version;==;$(@))</_versionpolicy>
               <_nouses>true</_nouses>
               <_removeheaders>
                 Embed-Dependency,Embed-Transitive,
@@ -351,26 +432,37 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <profiles>
     <profile>
-      <!--
-       | Deployment profile for the Sonatype Grid
-      -->
-      <id>sonatype-grid</id>
-      <properties>
-        <forgeReleaseId>forge-releases</forgeReleaseId>
-        <forgeReleaseUrl>http://repository.sonatype.org:8081/service/local/staging/deploy/maven2</forgeReleaseUrl>
-        <forgeSnapshotId>forge-snapshots</forgeSnapshotId>
-        <forgeSnapshotUrl>http://repository.sonatype.org/content/repositories/snapshots</forgeSnapshotUrl>
-      </properties>
-      <distributionManagement>
-        <repository>
-          <id>${forgeReleaseId}</id>
-          <url>${forgeReleaseUrl}</url>
-        </repository>
-        <snapshotRepository>
-          <id>${forgeSnapshotId}</id>
-          <url>${forgeSnapshotUrl}</url>
-        </snapshotRepository>
-      </distributionManagement>
+      <id>doclint-java8-disable</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+            <version>3.3</version>
+            <configuration>
+              <reportPlugins>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+                  <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                  </configuration>
+                </plugin>
+              </reportPlugins>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

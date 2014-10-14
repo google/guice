@@ -72,7 +72,7 @@ final class InternalServletModule extends AbstractModule {
           + " warned that this MAY have unexpected behavior if you have more"
           + " than one injector (with ServletModule) running in the same JVM."
           + " Please consult the Guice documentation at"
-          + " http://code.google.com/p/google-guice/wiki/Servlets for more"
+          + " https://github.com/google/guice/wiki/Servlets for more"
           + " information.");
       return GuiceFilter.getServletContext();
     }

@@ -16,6 +16,7 @@
 
 package com.google.inject.persist.jpa;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -28,7 +29,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Properties;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,11 +43,11 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
   private final String persistenceUnitName;
-  private final Properties persistenceProperties;
+  private final Map<?,?> persistenceProperties;
 
   @Inject
   public JpaPersistService(@Jpa String persistenceUnitName,
-      @Nullable @Jpa Properties persistenceProperties) {
+      @Nullable @Jpa Map<?,?> persistenceProperties) {
     this.persistenceUnitName = persistenceUnitName;
     this.persistenceProperties = persistenceProperties;
   }
@@ -84,11 +85,20 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
       return;
     }
 
-    em.close();
-    entityManager.remove();
+    try {
+      em.close();
+    }
+    finally {
+      entityManager.remove();
+    }
   }
 
   private volatile EntityManagerFactory emFactory;
+
+  @VisibleForTesting
+  synchronized void start(EntityManagerFactory emFactory) {
+    this.emFactory = emFactory;
+  }
 
   public synchronized void start() {
     Preconditions.checkState(null == emFactory, "Persistence service was already initialized.");

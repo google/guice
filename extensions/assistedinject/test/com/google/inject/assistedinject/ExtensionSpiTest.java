@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -80,53 +81,41 @@ public class ExtensionSpiTest extends TestCase {
     assertEquals(1, visitor.assistedInjectBindings.size());
 
     // Validate for each of the methods in AnimalFactory
-    validateCreateAStrangeCatAsAnimal(assistedMethods.get(0));
-    validatecreateStrangeCatWithConstructorForOwner(assistedMethods.get(1));
-    validatecreateStrangeCatWithConstructorForAge(assistedMethods.get(2));
-    validateCreateCatWithANonAssistedDependency(assistedMethods.get(3));
-    validateCreateCat(assistedMethods.get(4));
-    validateCreateASimpleCatAsAnimal(assistedMethods.get(5));
-    validateCreateCatWithNonAssistedDependencies(assistedMethods.get(6));
-
-  }
-
-  private void validateCreateAStrangeCatAsAnimal(AssistedMethod assistedMethod) {
-    validateAssistedMethod(assistedMethod, "createAStrangeCatAsAnimal",
-      StrangeCat.class, ImmutableList.<Key<?>>of());
-  }
-
-  private void validatecreateStrangeCatWithConstructorForOwner(AssistedMethod assistedMethod) {
-    validateAssistedMethod(assistedMethod, "createStrangeCatWithConstructorForOwner",
-      StrangeCat.class, ImmutableList.<Key<?>>of());
-  }
-
-  private void validatecreateStrangeCatWithConstructorForAge(AssistedMethod assistedMethod) {
-    validateAssistedMethod(assistedMethod, "createStrangeCatWithConstructorForAge",
-      StrangeCat.class, ImmutableList.<Key<?>>of());
-  }
-
-  private void validateCreateCatWithANonAssistedDependency(AssistedMethod assistedMethod)
-      throws Exception {
-    validateAssistedMethod(assistedMethod, "createCatWithANonAssistedDependency",
-        CatWithAName.class, ImmutableList.<Key<?>>of(Key.get(String.class, named("catName2"))));
-  }
-
-  private void validateCreateCat(AssistedMethod assistedMethod) throws Exception {
-    validateAssistedMethod(assistedMethod, "createCat", Cat.class, ImmutableList.<Key<?>>of());
-  }
-
-  private void validateCreateASimpleCatAsAnimal(AssistedMethod assistedMethod) {
-    validateAssistedMethod(assistedMethod, "createASimpleCatAsAnimal", SimpleCat.class,
-        ImmutableList.<Key<?>>of());
-  }
-
-  private void validateCreateCatWithNonAssistedDependencies(AssistedMethod assistedMethod) {
-    List<Key<?>> dependencyKeys = ImmutableList.<Key<?>>of(
-        Key.get(String.class, named("catName1")),
-        Key.get(String.class, named("petName")),        
-        Key.get(Integer.class, named("age")));
-    validateAssistedMethod(assistedMethod, "createCatWithNonAssistedDependencies",
-      ExplodingCat.class, dependencyKeys);
+    
+    Set<String> names = Sets.newHashSet();
+    for (AssistedMethod method : assistedMethods) {
+      String name = method.getFactoryMethod().getName();
+      names.add(name);
+      if (name.equals("createAStrangeCatAsAnimal")) {        
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());        
+      } else if (name.equals("createStrangeCatWithConstructorForOwner")) {
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());     
+      } else if (name.equals("createStrangeCatWithConstructorForAge")) {
+        validateAssistedMethod(method, name, StrangeCat.class, ImmutableList.<Key<?>>of());        
+      } else if (name.equals("createCatWithANonAssistedDependency")) {
+        validateAssistedMethod(method, name, CatWithAName.class,
+            ImmutableList.<Key<?>>of(Key.get(String.class, named("catName2"))));        
+      } else if (name.equals("createCat")) {
+        validateAssistedMethod(method, name, Cat.class, ImmutableList.<Key<?>>of());        
+      } else if (name.equals("createASimpleCatAsAnimal")) {
+        validateAssistedMethod(method, name, SimpleCat.class, ImmutableList.<Key<?>>of());
+      } else if (name.equals("createCatWithNonAssistedDependencies")) {
+        List<Key<?>> dependencyKeys = ImmutableList.<Key<?>>of(
+            Key.get(String.class, named("catName1")),
+            Key.get(String.class, named("petName")),        
+            Key.get(Integer.class, named("age")));
+        validateAssistedMethod(method, name, ExplodingCat.class, dependencyKeys);        
+      } else {
+        fail("Invalid method: " + method);
+      }
+    }
+    assertEquals(names, ImmutableSet.of("createAStrangeCatAsAnimal",
+        "createStrangeCatWithConstructorForOwner",
+        "createStrangeCatWithConstructorForAge",
+        "createCatWithANonAssistedDependency",
+        "createCat",
+        "createASimpleCatAsAnimal",
+        "createCatWithNonAssistedDependencies"));
   }
 
   private void validateAssistedMethod(AssistedMethod assistedMethod, String factoryMethodName,
