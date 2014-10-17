@@ -7,3 +7,6 @@ bin/
 *~
 *.orig
 *.new
+.idea/
+*.iml
+*.ipr
