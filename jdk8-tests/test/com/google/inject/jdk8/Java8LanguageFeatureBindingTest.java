@@ -19,6 +19,7 @@ package com.google.inject.jdk8;
 import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -28,6 +29,8 @@ import com.google.inject.TypeLiteral;
 
 import junit.framework.TestCase;
 
+import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -38,7 +41,7 @@ import java.util.function.Predicate;
  * @author cgdecker@google.com (Colin Decker)
  */
 public class Java8LanguageFeatureBindingTest extends TestCase {
-  
+
   // Some of these tests are kind of weird.
   // See https://github.com/google/guice/issues/757 for more on why they exist.
 
