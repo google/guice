@@ -99,6 +99,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <modules>
     <module>core</module>
     <module>extensions</module>
+    <!-- jdk8-tests module activated only when running under JDK8, below -->
   </modules>
 
   <prerequisites>
@@ -431,12 +432,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <profiles>
     <profile>
-      <id>doclint-java8-disable</id>
+      <id>java8</id>
       <activation>
         <jdk>[1.8,)</jdk>
       </activation>
+      <modules>
+        <!-- Activate jdk8-tests module only under JDK 8 -->
+        <module>jdk8-tests</module>
+      </modules>
       <build>
         <plugins>
+          <!-- Disable doclint under JDK 8 -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
