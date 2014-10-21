@@ -31,7 +31,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
