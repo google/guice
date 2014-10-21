@@ -55,6 +55,16 @@ See the Apache License Version 2.0 for the specific language governing permissio
           <target>8</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artiactId>maven-jar-plugin</artifactId>
+        <!--
+          Override guice-parent's maven-jar-plugin settings to use the default instead.
+          Since there are no non-test sources for this module and we aren't generating
+          a manifest file for it, there's no MANIFEST.MF file where the parent configuration
+          is expecting it.
+          -->
+        <configuration comine.self="override" />
+      </plugin>
     </plugins>
   </build>
 
