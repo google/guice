@@ -120,6 +120,10 @@ interface State {
       throw new UnsupportedOperationException();
     }
 
+    public Object singletonCreationLock() {
+      throw new UnsupportedOperationException();
+    }
+
     public Map<Class<? extends Annotation>, Scope> getScopes() {
       return ImmutableMap.of();
     }
@@ -183,6 +187,12 @@ interface State {
    * to be used when reading mutable data (ie. just-in-time bindings, and binding blacklists).
    */
   Object lock();
+
+  /**
+   * Returns the shared lock for all injector's singletons. This is a low-granularity lock
+   * to guarantee singleton creation semantics.
+   */
+  Object singletonCreationLock();
 
   /**
    * Returns all the scope bindings at this level and parent levels.
