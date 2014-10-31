@@ -636,6 +636,54 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(injector.getBinding(f)));
   }
 
+  private static void checkAsSingleton(Binding<?> binding) {
+    // check prototype binding can be made into singleton
+    Provider<?> prototypeProvider = binding.getProvider();
+    assertNotSame(prototypeProvider.get(), prototypeProvider.get());
+    Provider<?> singletonProvider = Scopes.asSingleton(binding);
+    assertSame(singletonProvider.get(), singletonProvider.get());
+  }
+
+  public void testAsSingleton() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+    final Key<String> d = Key.get(String.class, named("D"));
+    final Key<String> e = Key.get(String.class, named("E"));
+    final Key<String> f = Key.get(String.class, named("F"));
+
+    Module prototypeBindings = new AbstractModule() {
+      @Override protected void configure() {
+        bind(a).to(b);
+        bind(b).to(c);
+        bind(c).to(d).in(Scopes.NO_SCOPE);
+        bind(d).to(e).in(CustomScoped.class);
+        bindScope(CustomScoped.class, Scopes.NO_SCOPE);
+        install(new PrivateModule() {
+          @Override protected void configure() {
+            expose(f);
+          }
+
+          @Provides @Named("F") @CustomScoped String provideF() {
+            return new String("f");
+          }
+        });
+      }
+
+      @Provides @Named("E") @CustomScoped String provideE() {
+        return new String("e");
+      }
+    };
+
+    Injector injector = Guice.createInjector(prototypeBindings);
+    checkAsSingleton(injector.getBinding(a));
+    checkAsSingleton(injector.getBinding(b));
+    checkAsSingleton(injector.getBinding(c));
+    checkAsSingleton(injector.getBinding(d));
+    checkAsSingleton(injector.getBinding(e));
+    checkAsSingleton(injector.getBinding(f));
+  }
+
   public void testIsScopedPositive() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));

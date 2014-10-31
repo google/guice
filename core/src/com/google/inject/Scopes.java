@@ -115,6 +115,18 @@ public class Scopes {
   }
 
   /**
+   * Returns singleton-scoped {@link Provider} for {@code binding} regardless of original scope.
+   *
+   * @since 4.0
+   */
+  public static <T> Provider<T> asSingleton(Binding<T> binding) {
+    if (isSingleton(binding)) {
+      return binding.getProvider();
+    }
+    return SingletonScope.asSingleton(binding);
+  }
+
+  /**
 
    * Returns true if {@code binding} has the given scope. If the binding is a {@link
    * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it

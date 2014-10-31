@@ -1,5 +1,6 @@
 package com.google.inject.internal;
 
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
@@ -93,5 +94,23 @@ public class SingletonScope implements Scope {
 
   @Override public String toString() {
     return "Scopes.SINGLETON";
+  }
+
+  /**
+   * Returns singleton-scoped {@link Provider} for {@code binding} regardless of original scope.
+   */
+  public static <T> Provider<T> asSingleton(Binding<T> binding) {
+    InjectorImpl injector = null;
+    if (binding instanceof BindingImpl<?>) {
+      injector = ((BindingImpl<T>) binding).getInjector();
+    }
+    // use injector's singletonCreationLock if available, otherwise use binding for the lock
+    Object creationLock = injector != null ? injector.state.singletonCreationLock() : binding;
+    try {
+      SingletonScope.singletonCreationPerRootInjectorLock.set(creationLock);
+      return Scopes.SINGLETON.scope(binding.getKey(), binding.getProvider());
+    } finally {
+      SingletonScope.singletonCreationPerRootInjectorLock.set(null);
+    }
   }
 }
