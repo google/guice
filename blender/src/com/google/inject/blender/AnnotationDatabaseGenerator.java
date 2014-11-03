@@ -127,12 +127,4 @@ public class AnnotationDatabaseGenerator {
     public void setBindableClasses(HashSet<String> bindableClasses) {
         this.bindableClasses = bindableClasses;
     }
-
-    public boolean isUsingFragmentUtil() {
-        return isUsingFragmentUtil;
-    }
-
-    public void setUsingFragmentUtil(boolean isUsingFragmentUtil) {
-        this.isUsingFragmentUtil = isUsingFragmentUtil;
-    }
 }
