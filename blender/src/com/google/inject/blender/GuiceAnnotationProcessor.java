@@ -62,8 +62,6 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
     /** Name of the package to generate the annotation database into.*/
     private String annotationDatabasePackageName;
 
-    private boolean isUsingFragmentUtil = true;
-
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -72,12 +70,6 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
         mapAnnotationToMapClassContainingInjectionToInjectedMethodSet = new HashMap<String, Map<String,Set<String>> >();
         mapAnnotationToMapClassContainingInjectionToInjectedConstructorsSet = new HashMap<String, Map<String,Set<String>> >();
         bindableClasses = new HashSet<String>();
-        String isUsingFragmentUtilString = processingEnv.getOptions().get("guiceUsesFragmentUtil");
-        System.out.println("FragmentUtil is used: " + isUsingFragmentUtil);
-        if (isUsingFragmentUtilString!=null) {
-            isUsingFragmentUtil = Boolean.parseBoolean(isUsingFragmentUtilString);
-            System.out.println("FragmentUtil is used: " + isUsingFragmentUtil);
-        }
     }
 
     @Override

@@ -29,8 +29,6 @@ public class AnnotationDatabaseGenerator {
     private HashMap<String, Map<String, Set<String>>> mapAnnotationToMapClassWithInjectionNameToConstructorSet;
     private HashSet<String> classesContainingInjectionPointsSet;
     private HashSet<String> bindableClasses;
-    private boolean isUsingFragmentUtil;
-
 
     public void generateAnnotationDatabase(JavaFileObject jfo) throws IOException {
 
@@ -71,7 +69,6 @@ public class AnnotationDatabaseGenerator {
         context.put("mapAnnotationToMapClassWithInjectionNameToConstructorSet", mapAnnotationToMapClassWithInjectionNameToConstructorSet);
         context.put("classesContainingInjectionPointsSet", classesContainingInjectionPointsSet);
         context.put("injectedClasses", bindableClasses);
-        context.put("isUsingFragmentUtil", isUsingFragmentUtil);
         return context;
     }
 
