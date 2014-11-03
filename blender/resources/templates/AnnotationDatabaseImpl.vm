@@ -1,4 +1,4 @@
-#if( $packageName ) 
+#if( $packageName )
 package $packageName;
 #end
 
@@ -7,13 +7,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.google.inject.AnnotationDatabase;
-import roboguice.fragment.FragmentUtil;
 
 public class AnnotationDatabaseImpl extends AnnotationDatabase {
 
     public void fillAnnotationClassesAndFieldsNames(HashMap<String, Map<String, Set<String>>> mapAnnotationToMapClassWithInjectionNameToFieldSet) {
 #if( !$mapAnnotationToMapClassWithInjectionNameToFieldSet.isEmpty() )
-    
+
         String annotationClassName = null;
         Map<String, Set<String>> mapClassWithInjectionNameToFieldSet = null;
         Set<String> fieldNameSet = null;
@@ -27,9 +26,9 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
             mapAnnotationToMapClassWithInjectionNameToFieldSet.put(annotationClassName, mapClassWithInjectionNameToFieldSet);
         }
 
-#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToFieldSet.get($annotationName).keySet() ) 
+#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToFieldSet.get($annotationName).keySet() )
         fieldNameSet = new HashSet<String>();
-#foreach( $fieldName in $mapAnnotationToMapClassWithInjectionNameToFieldSet.get($annotationName).get($className) ) 
+#foreach( $fieldName in $mapAnnotationToMapClassWithInjectionNameToFieldSet.get($annotationName).get($className) )
         fieldNameSet.add("$fieldName");
 #end
         mapClassWithInjectionNameToFieldSet.put("$className", fieldNameSet);
@@ -38,7 +37,7 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
 #end
 #end
     }
-    
+
     public void fillAnnotationClassesAndMethods(HashMap<String, Map<String, Set<String>>> mapAnnotationToMapClassWithInjectionNameToMethodsSet) {
 #if( !$mapAnnotationToMapClassWithInjectionNameToMethodSet.isEmpty() )
 
@@ -55,9 +54,9 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
             mapAnnotationToMapClassWithInjectionNameToMethodsSet.put(annotationClassName, mapClassWithInjectionNameToMethodSet);
         }
 
-#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToMethodSet.get($annotationName).keySet() ) 
+#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToMethodSet.get($annotationName).keySet() )
         methodSet = new HashSet<String>();
-#foreach( $method in $mapAnnotationToMapClassWithInjectionNameToMethodSet.get($annotationName).get($className) ) 
+#foreach( $method in $mapAnnotationToMapClassWithInjectionNameToMethodSet.get($annotationName).get($className) )
         methodSet.add("$method");
 #end
         mapClassWithInjectionNameToMethodSet.put("$className", methodSet);
@@ -66,7 +65,7 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
 #end
 #end
     }
-    
+
     public void fillAnnotationClassesAndConstructors(HashMap<String, Map<String, Set<String>>> mapAnnotationToMapClassWithInjectionNameToConstructorsSet) {
 #if( !$mapAnnotationToMapClassWithInjectionNameToConstructorSet.isEmpty() )
 
@@ -83,9 +82,9 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
             mapAnnotationToMapClassWithInjectionNameToConstructorsSet.put(annotationClassName, mapClassWithInjectionNameToConstructorSet);
         }
 
-#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToConstructorSet.get($annotationName).keySet() ) 
+#foreach( $className in $mapAnnotationToMapClassWithInjectionNameToConstructorSet.get($annotationName).keySet() )
         constructorSet = new HashSet<String>();
-#foreach( $constructor in $mapAnnotationToMapClassWithInjectionNameToConstructorSet.get($annotationName).get($className) ) 
+#foreach( $constructor in $mapAnnotationToMapClassWithInjectionNameToConstructorSet.get($annotationName).get($className) )
         constructorSet.add("$constructor");
 #end
         mapClassWithInjectionNameToConstructorSet.put("$className", constructorSet);
@@ -94,26 +93,19 @@ public class AnnotationDatabaseImpl extends AnnotationDatabase {
 #end
 #end
     }
-    
+
     public void fillClassesContainingInjectionPointSet(HashSet<String> classesContainingInjectionPointsSet) {
-#foreach( $className in $classesContainingInjectionPointsSet ) 
+#foreach( $className in $classesContainingInjectionPointsSet )
         classesContainingInjectionPointsSet.add("$className");
-#end 
+#end
     }
-    
+
 
     public void fillBindableClasses(HashSet<String> injectedClasses) {
 #foreach( $className in $injectedClasses )
         injectedClasses.add("$className");
 #end
 
-        if(FragmentUtil.hasNative) {
-            injectedClasses.add("android.app.FragmentManager");
-        }
-
-        if(FragmentUtil.hasSupport) {
-            injectedClasses.add("android.support.v4.app.FragmentManager");
-        }
     }
 
 }

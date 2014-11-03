@@ -1,6 +1,7 @@
 package com.google.inject.blender;
 
 import java.io.IOException;
+import java.lang.String;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,14 +27,14 @@ import javax.tools.JavaFileObject;
 /**
  * An annotation processor that detects classes that need to receive injections.
  * @author MikeBurton
- * @author SNI  
+ * @author SNI
  */
 @SupportedAnnotationTypes({"com.google.inject.Inject", "javax.inject.Inject", "com.google.inject.Provides"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedOptions({"guiceAnnotationDatabasePackageName"})
+@SupportedOptions({"guiceAnnotationDatabasePackageName", "guiceUsesFragmentUtil"})
 public class GuiceAnnotationProcessor extends AbstractProcessor {
 
-    private AnnotationDatabaseGenerator annotationDatabaseGenerator = new AnnotationDatabaseGenerator();
+    public static final String TEMPLATE_ANNOTATION_DATABASE_PATH = "templates/AnnotationDatabaseImpl.vm";
 
     //TODO add a HashMap<String, Set<String>>
 
@@ -61,6 +62,8 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
     /** Name of the package to generate the annotation database into.*/
     private String annotationDatabasePackageName;
 
+    private boolean isUsingFragmentUtil = true;
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -69,6 +72,12 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
         mapAnnotationToMapClassContainingInjectionToInjectedMethodSet = new HashMap<String, Map<String,Set<String>> >();
         mapAnnotationToMapClassContainingInjectionToInjectedConstructorsSet = new HashMap<String, Map<String,Set<String>> >();
         bindableClasses = new HashSet<String>();
+        String isUsingFragmentUtilString = processingEnv.getOptions().get("guiceUsesFragmentUtil");
+        System.out.println("FragmentUtil is used: " + isUsingFragmentUtil);
+        if (isUsingFragmentUtilString!=null) {
+            isUsingFragmentUtil = Boolean.parseBoolean(isUsingFragmentUtilString);
+            System.out.println("FragmentUtil is used: " + isUsingFragmentUtil);
+        }
     }
 
     @Override
@@ -83,7 +92,7 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
             if( "javax.inject.Inject".equals(annotationClassName) ) {
                 annotationClassName = "com.google.inject.Inject";
             }
-            
+
             for( Element injectionPoint : roundEnv.getElementsAnnotatedWith(annotation)) {
                 if( injectionPoint.getEnclosingElement() instanceof TypeElement && injectionPoint instanceof VariableElement ) {
                     addFieldToAnnotationDatabase(annotationClassName, injectionPoint);
@@ -117,13 +126,30 @@ public class GuiceAnnotationProcessor extends AbstractProcessor {
                 className = annotationDatabasePackageName+'.'+className;
             }
             jfo = processingEnv.getFiler().createSourceFile( className );
-            annotationDatabaseGenerator.generateAnnotationDatabase(jfo, annotationDatabasePackageName, mapAnnotationToMapClassContainingInjectionToInjectedFieldSet, mapAnnotationToMapClassContainingInjectionToInjectedMethodSet, mapAnnotationToMapClassContainingInjectionToInjectedConstructorsSet, classesContainingInjectionPointsSet, bindableClasses);
+            AnnotationDatabaseGenerator annotationDatabaseGenerator = createAnnotationDatabaseGenerator();
+            configure(annotationDatabaseGenerator);
+            annotationDatabaseGenerator.generateAnnotationDatabase(jfo);
         } catch (IOException e) {
             e.printStackTrace();
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }
 
         return true;
+    }
+
+    protected AnnotationDatabaseGenerator createAnnotationDatabaseGenerator() {
+        AnnotationDatabaseGenerator annotationDatabaseGenerator = new AnnotationDatabaseGenerator();
+        return annotationDatabaseGenerator;
+    }
+
+    protected void configure(AnnotationDatabaseGenerator annotationDatabaseGenerator) {
+        annotationDatabaseGenerator.setTemplatePath(TEMPLATE_ANNOTATION_DATABASE_PATH);
+        annotationDatabaseGenerator.setPackageName(annotationDatabasePackageName);
+        annotationDatabaseGenerator.setBindableClasses(bindableClasses);
+        annotationDatabaseGenerator.setClassesContainingInjectionPointsSet(classesContainingInjectionPointsSet);
+        annotationDatabaseGenerator.setMapAnnotationToMapClassWithInjectionNameToConstructorSet(mapAnnotationToMapClassContainingInjectionToInjectedConstructorsSet);
+        annotationDatabaseGenerator.setMapAnnotationToMapClassWithInjectionNameToMethodSet(mapAnnotationToMapClassContainingInjectionToInjectedMethodSet);
+        annotationDatabaseGenerator.setMapAnnotationToMapClassWithInjectionNameToFieldSet(mapAnnotationToMapClassContainingInjectionToInjectedFieldSet);
     }
 
     private void addClassToAnnotationDatabase(Element injectionPoint) {
