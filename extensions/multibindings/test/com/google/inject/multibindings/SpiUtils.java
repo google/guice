@@ -21,6 +21,7 @@ import static com.google.inject.multibindings.MapBinder.mapOf;
 import static com.google.inject.multibindings.MapBinder.mapOfJavaxProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfSetOfProviderOf;
+import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.multibindings.Multibinder.collectionOfProvidersOf;
 import static com.google.inject.multibindings.Multibinder.setOf;
 import static com.google.inject.multibindings.OptionalBinder.javaOptionalOfJavaxProvider;
@@ -171,12 +172,15 @@ public class SpiUtils {
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
     Key<?> collectionOfProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
     boolean mapJavaxProviderMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false; 
     boolean mapSetProviderMatch = false;
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
+    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Binding> otherMatches = Lists.newArrayList();
     Multimap<Object, IndexedBinding> indexedEntries =
@@ -212,6 +216,9 @@ public class SpiUtils {
       } else if(b.getKey().equals(collectionOfProvidersOfEntryOfProvider)) {
         assertTrue(contains);
         collectionOfProvidersOfEntryOfProviderMatch = true;
+      } else if(b.getKey().equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
+        assertTrue(contains);
+        collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
       } else if (contains) {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>)b;
@@ -241,6 +248,7 @@ public class SpiUtils {
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
+    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
@@ -277,12 +285,15 @@ public class SpiUtils {
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));    
     Key<?> collectionOfProvidersOfEntry =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> collectionOfJavaxProvidersOfEntry =
+        mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
-    boolean entryProviderCollectionMatch = false;
     boolean mapProviderMatch = false;
     boolean mapJavaxProviderMatch = false;
     boolean mapSetMatch = false;
     boolean mapSetProviderMatch = false;
+    boolean collectionOfProvidersOfEntryMatch = false;
+    boolean collectionOfJavaxProvidersOfEntryMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
     List<Element> otherElements = Lists.newArrayList();
@@ -356,7 +367,11 @@ public class SpiUtils {
         } else if(key.equals(collectionOfProvidersOfEntry)) {
           matched = true;
           assertTrue(contains);
-          entryProviderCollectionMatch = true;
+          collectionOfProvidersOfEntryMatch = true;
+        } else if(key.equals(collectionOfJavaxProvidersOfEntry)) {
+          matched = true;
+          assertTrue(contains);
+          collectionOfJavaxProvidersOfEntryMatch = true;
         }
       }
       
@@ -375,9 +390,10 @@ public class SpiUtils {
         expectedSize, otherMatchesSize);
 
     assertTrue(entrySetMatch);
-    assertTrue(entryProviderCollectionMatch);
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
+    assertTrue(collectionOfProvidersOfEntryMatch);
+    assertTrue(collectionOfJavaxProvidersOfEntryMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
@@ -422,6 +438,8 @@ public class SpiUtils {
       Iterable<? extends Module> modules, boolean allowDuplicates, int otherMultibindings,
       BindResult... results) {
     Key<?> collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
+    Key<?> collectionOfJavaxProvidersKey =
+        setKey.ofType(collectionOfJavaxProvidersOf(elementType));
     Injector injector = Guice.createInjector(modules);
     Visitor<Set<T>> visitor = new Visitor<Set<T>>();
     Binding<Set<T>> binding = injector.getBinding(setKey);
@@ -465,6 +483,7 @@ public class SpiUtils {
     List<Object> otherMultibinders = Lists.newArrayList();
     List<Binding> otherContains = Lists.newArrayList();
     boolean collectionOfProvidersMatch = false;
+    boolean collectionOfJavaxProvidersMatch = false;
     for(Binding b : injector.getAllBindings().values()) {
       boolean contains = multibinder.containsElement(b);
       Key key = b.getKey();
@@ -480,6 +499,9 @@ public class SpiUtils {
       } else if (key.equals(collectionOfProvidersKey)) {
         assertTrue(contains);
         collectionOfProvidersMatch = true;
+      } else if (key.equals(collectionOfJavaxProvidersKey)) {
+        assertTrue(contains);
+        collectionOfJavaxProvidersMatch = true;
       } else if (contains) {
         if (!indexer.isIndexable(b) || !setOfIndexed.contains(b.acceptTargetVisitor(indexer))) {
           otherContains.add(b);
@@ -488,6 +510,7 @@ public class SpiUtils {
     }
 
     assertTrue(collectionOfProvidersMatch);
+    assertTrue(collectionOfJavaxProvidersMatch);
 
     if(allowDuplicates) {
       assertEquals("contained more than it should: " + otherContains, 1, otherContains.size());
@@ -504,6 +527,8 @@ public class SpiUtils {
       Iterable<? extends Module> modules, boolean allowDuplicates, int otherMultibindings,
       BindResult... results) {
     Key<?> collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
+    Key<?> collectionOfJavaxProvidersKey =
+        setKey.ofType(collectionOfJavaxProvidersOf(elementType));
     List<BindResult> bindResults = Lists.newArrayList(results);
     List<Element> elements = Elements.getElements(modules);
     Visitor<T> visitor = new Visitor<T>();
@@ -524,6 +549,7 @@ public class SpiUtils {
     Set<IndexedBinding> setOfIndexed = Sets.newHashSet();
     Indexer indexer = new Indexer(null);
     boolean collectionOfProvidersMatch = false;
+    boolean collectionOfJavaxProvidersMatch = false;
     for(Element element : elements) {
       boolean contains = multibinder.containsElement(element);
       if(!contains) {
@@ -553,6 +579,10 @@ public class SpiUtils {
         assertTrue(contains);
         assertFalse(matched);
         collectionOfProvidersMatch = true;
+      } else if (collectionOfJavaxProvidersKey.equals(key)) {
+          assertTrue(contains);
+          assertFalse(matched);
+          collectionOfJavaxProvidersMatch = true;
       } else if (!matched && contains) {
         otherContains.add(element);
       }
@@ -569,6 +599,7 @@ public class SpiUtils {
     assertEquals("other multibindings found: " + otherMultibinders, otherMultibindings,
         otherMultibinders.size());
     assertTrue(collectionOfProvidersMatch);
+    assertTrue(collectionOfJavaxProvidersMatch);
 
     // Validate that we can construct an injector out of the remaining bindings.
     Guice.createInjector(Elements.getModule(otherElements));

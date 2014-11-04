@@ -17,6 +17,7 @@
 package com.google.inject.multibindings;
 
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
 import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.multibindings.SpiUtils.assertSetVisitor;
@@ -1142,17 +1143,17 @@ public class MultibinderTest extends TestCase {
         multibinder.addBinding().toInstance("C");
       }
     };
+    Collection<String> expectedValues = ImmutableList.of("A", "B", "C");
 
     Injector injector = Guice.createInjector(module);
-    injector.getInstance(Key.get(collectionOfProvidersOfStrings));
-    Key<Collection<Provider<String>>> collectionKey = Key.get(collectionOfProvidersOfStrings);
-    Collection<Provider<String>> providers = injector.getInstance(collectionKey);
-    Collection<String> values = Lists.newArrayList();
-    for (Provider<String> provider : providers) {
-      values.add(provider.get());
-    }
-    Collection<String> expectedValues = ImmutableList.of("A", "B", "C");
-    assertEquals(expectedValues, values);
+
+    Collection<Provider<String>> providers =
+        injector.getInstance(Key.get(collectionOfProvidersOfStrings));
+    assertEquals(expectedValues, collectValues(providers));
+
+    Collection<javax.inject.Provider<String>> javaxProviders =
+        injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType)));
+    assertEquals(expectedValues, collectValues(javaxProviders));
   }
 
   public void testMultibinderCanInjectCollectionOfProvidersWithAnnotation() {
@@ -1166,15 +1167,18 @@ public class MultibinderTest extends TestCase {
         multibinder.addBinding().toInstance("C");
       }
     };
-    Injector injector = Guice.createInjector(module);
-    Key<Collection<Provider<String>>> collectionKey = Key.get(collectionOfProvidersOfStrings, ann);
-    Collection<Provider<String>> providers = injector.getInstance(collectionKey);
-    Collection<String> values = Lists.newArrayList();
-    for (Provider<String> provider : providers) {
-      values.add(provider.get());
-    }
     Collection<String> expectedValues = ImmutableList.of("A", "B", "C");
+
+    Injector injector = Guice.createInjector(module);
+
+    Collection<Provider<String>> providers =
+        injector.getInstance(Key.get(collectionOfProvidersOfStrings, ann));
+    Collection<String> values = collectValues(providers);
     assertEquals(expectedValues, values);
+
+    Collection<javax.inject.Provider<String>> javaxProviders =
+        injector.getInstance(Key.get(collectionOfJavaxProvidersOf(stringType), ann));
+    assertEquals(expectedValues, collectValues(javaxProviders));
   }
 
   public void testMultibindingProviderDependencies() {
@@ -1201,5 +1205,14 @@ public class MultibinderTest extends TestCase {
       expected.add(providerDependency);
     }
     assertEquals(expected, providerBinding.getDependencies());
+  }
+
+  private <T> Collection<T> collectValues(
+      Collection<? extends javax.inject.Provider<T>> providers) {
+    Collection<T> values = Lists.newArrayList();
+    for (javax.inject.Provider<T> provider : providers) {
+      values.add(provider.get());
+    }
+    return values;
   }
 }

@@ -193,6 +193,15 @@ public abstract class Multibinder<T> {
     return (TypeLiteral<Collection<Provider<T>>>) TypeLiteral.get(type);
   }
 
+  @SuppressWarnings("unchecked")
+  static <T> TypeLiteral<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersOf(
+      TypeLiteral<T> elementType) {
+    Type providerType =
+        Types.newParameterizedType(javax.inject.Provider.class, elementType.getType());
+    Type type = Types.newParameterizedType(Collection.class, providerType);
+    return (TypeLiteral<Collection<javax.inject.Provider<T>>>) TypeLiteral.get(type);
+  }
+
   /**
    * Configures the bound set to silently discard duplicate elements. When multiple equal values are
    * bound, the one that gets included is arbitrary. When multiple modules contribute elements to
@@ -244,6 +253,7 @@ public abstract class Multibinder<T> {
     private final String setName;
     private final Key<Set<T>> setKey;
     private final Key<Collection<Provider<T>>> collectionOfProvidersKey;
+    private final Key<Collection<javax.inject.Provider<T>>> collectionOfJavaxProvidersKey;
     private final Key<Boolean> permitDuplicatesKey;
 
     /* the target injector's binder. non-null until initialization, null afterwards */
@@ -261,6 +271,7 @@ public abstract class Multibinder<T> {
       this.elementType = checkNotNull(elementType, "elementType");
       this.setKey = checkNotNull(setKey, "setKey");
       this.collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
+      this.collectionOfJavaxProvidersKey = setKey.ofType(collectionOfJavaxProvidersOf(elementType));
       this.setName = RealElement.nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
@@ -271,6 +282,13 @@ public abstract class Multibinder<T> {
       binder.bind(setKey).toProvider(this);
       binder.bind(collectionOfProvidersKey).toProvider(
           new RealMultibinderCollectionOfProvidersProvider());
+
+      // The collection this exposes is internally an ImmutableList, so it's OK to massage
+      // the guice Provider to javax Provider in the value (since the guice Provider implements
+      // javax Provider).
+      @SuppressWarnings("unchecked")
+      Key key = (Key) collectionOfProvidersKey;
+      binder.bind(collectionOfJavaxProvidersKey).to(key);
     }
 
     @Override public Multibinder<T> permitDuplicates() {
@@ -398,7 +416,8 @@ public abstract class Multibinder<T> {
         return keyMatches(binding.getKey())
             || binding.getKey().equals(permitDuplicatesKey)
             || binding.getKey().equals(setKey)
-            || binding.getKey().equals(collectionOfProvidersKey);
+            || binding.getKey().equals(collectionOfProvidersKey)
+            || binding.getKey().equals(collectionOfJavaxProvidersKey);
       } else {
         return false;
       }
