@@ -169,11 +169,14 @@ public class SpiUtils {
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> collectionOfProvidersOfEntryOfProvider =
+        mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
     boolean mapJavaxProviderMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false; 
     boolean mapSetProviderMatch = false;
+    boolean collectionOfProvidersOfEntryOfProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Binding> otherMatches = Lists.newArrayList();
     Multimap<Object, IndexedBinding> indexedEntries =
@@ -206,6 +209,9 @@ public class SpiUtils {
         entrySetMatch = true;
         // Validate that this binding is also a MultibinderBinding.
         assertTrue(b.acceptTargetVisitor(visitor) instanceof MultibinderBinding);
+      } else if(b.getKey().equals(collectionOfProvidersOfEntryOfProvider)) {
+        assertTrue(contains);
+        collectionOfProvidersOfEntryOfProviderMatch = true;
       } else if (contains) {
         if (b instanceof ProviderInstanceBinding) {
           ProviderInstanceBinding<?> pib = (ProviderInstanceBinding<?>)b;
@@ -228,12 +234,13 @@ public class SpiUtils {
     if(allowDuplicates) {
       sizeOfOther--; // account for 1 duplicate binding
     }
-    sizeOfOther = sizeOfOther / 2; // account for 1 value & 1 Map.Entry of each expected binding.
-    assertEquals("Incorrect other matches: " + otherMatches,
-        mapResults.size() + duplicates, sizeOfOther);
+    // Multiply by two because each has a value and Map.Entry.
+    int expectedSize = 2 * (mapResults.size() + duplicates);
+    assertEquals("Incorrect other matches: " + otherMatches, expectedSize, sizeOfOther);
     assertTrue(entrySetMatch);
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
+    assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
@@ -264,6 +271,7 @@ public class SpiUtils {
     List<MapResult> mapResults = Lists.newArrayList(results);
     
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
+    Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));    
@@ -272,7 +280,8 @@ public class SpiUtils {
     boolean entrySetMatch = false;
     boolean entryProviderCollectionMatch = false;
     boolean mapProviderMatch = false;
-    boolean mapSetMatch = false; 
+    boolean mapJavaxProviderMatch = false;
+    boolean mapSetMatch = false;
     boolean mapSetProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
@@ -324,6 +333,10 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           mapProviderMatch = true;
+        } else if(key.equals(mapOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapJavaxProviderMatch = true;
         } else if(key.equals(mapOfSet)) {
           matched = true;
           assertTrue(contains);
@@ -356,13 +369,15 @@ public class SpiUtils {
     if (allowDuplicates) {
       otherMatchesSize--; // allow for 1 duplicate binding
     }
-    otherMatchesSize = otherMatchesSize / 3; // value, ProviderLookup per value, Map.Entry per value
-    assertEquals("incorrect number of contains, leftover matches: " + otherMatches, mapResults
-        .size() + duplicates, otherMatchesSize);
+    // Multiply by 3 because each has a value, ProviderLookup, and Map.Entry
+    int expectedSize = (mapResults.size() + duplicates) * 3;
+    assertEquals("incorrect number of contains, leftover matches: " + otherMatches,
+        expectedSize, otherMatchesSize);
 
     assertTrue(entrySetMatch);
     assertTrue(entryProviderCollectionMatch);
     assertTrue(mapProviderMatch);
+    assertTrue(mapJavaxProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
