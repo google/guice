@@ -69,7 +69,6 @@ import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.ProviderLookup;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -378,7 +377,6 @@ public class SpiUtils {
    * 
    * @param <T> The type of the binding
    * @param setKey The key the set belongs to.
-   * @param collectionOfProvidersKey The key to use for Collections of Providers of Elements.
    * @param elementType the TypeLiteral of the element
    * @param modules The modules that define the multibindings
    * @param visitType The kind of test we should perform.  A live Injector, a raw Elements (Module) test, or both.
@@ -386,8 +384,7 @@ public class SpiUtils {
    * @param expectedMultibindings The number of other multibinders we expect to see.
    * @param results The kind of bindings contained in the multibinder.
    */
-  static <T> void assertSetVisitor(Key<Set<T>> setKey,
-      Key<Collection<Provider<T>>> collectionOfProvidersKey, TypeLiteral<?> elementType,
+  static <T> void assertSetVisitor(Key<Set<T>> setKey, TypeLiteral<?> elementType,
       Iterable<? extends Module> modules, VisitType visitType, boolean allowDuplicates,
       int expectedMultibindings, BindResult... results) {
     if(visitType == null) {
@@ -395,21 +392,21 @@ public class SpiUtils {
     }
     
     if(visitType == BOTH || visitType == INJECTOR) {
-      setInjectorTest(setKey, collectionOfProvidersKey, elementType, modules, allowDuplicates,
+      setInjectorTest(setKey, elementType, modules, allowDuplicates,
           expectedMultibindings, results);
     }
     
     if(visitType == BOTH || visitType == MODULE) {
-      setModuleTest(setKey, collectionOfProvidersKey, elementType, modules, allowDuplicates,
+      setModuleTest(setKey, elementType, modules, allowDuplicates,
           expectedMultibindings, results);
     }
   }
   
   @SuppressWarnings("unchecked")
-  private static <T> void setInjectorTest(Key<Set<T>> setKey,
-      Key<Collection<Provider<T>>> collectionOfProvidersKey, TypeLiteral<?> elementType,
+  private static <T> void setInjectorTest(Key<Set<T>> setKey, TypeLiteral<?> elementType,
       Iterable<? extends Module> modules, boolean allowDuplicates, int otherMultibindings,
       BindResult... results) {
+    Key<?> collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
     Injector injector = Guice.createInjector(modules);
     Visitor<Set<T>> visitor = new Visitor<Set<T>>();
     Binding<Set<T>> binding = injector.getBinding(setKey);
@@ -488,10 +485,10 @@ public class SpiUtils {
   }
   
   @SuppressWarnings("unchecked")
-  private static <T> void setModuleTest(Key<Set<T>> setKey,
-      Key<Collection<Provider<T>>> collectionOfProvidersKey, TypeLiteral<?> elementType,
+  private static <T> void setModuleTest(Key<Set<T>> setKey, TypeLiteral<?> elementType,
       Iterable<? extends Module> modules, boolean allowDuplicates, int otherMultibindings,
       BindResult... results) {
+    Key<?> collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
     List<BindResult> bindResults = Lists.newArrayList(results);
     List<Element> elements = Elements.getElements(modules);
     Visitor<T> visitor = new Visitor<T>();

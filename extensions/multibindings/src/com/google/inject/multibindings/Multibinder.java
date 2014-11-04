@@ -122,8 +122,7 @@ public abstract class Multibinder<T> {
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type)), Key.get(Multibinder.<T>collectionOfProvidersOf(type)));
+    RealMultibinder<T> result = new RealMultibinder<T>(binder, type, Key.get(setOf(type)));
     binder.install(result);
     return result;
   }
@@ -143,9 +142,8 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(
       Binder binder, TypeLiteral<T> type, Annotation annotation) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type), annotation),
-        Key.get(Multibinder.<T>collectionOfProvidersOf(type), annotation));
+    RealMultibinder<T> result =
+        new RealMultibinder<T>(binder, type, Key.get(setOf(type), annotation));
     binder.install(result);
     return result;
   }
@@ -166,9 +164,8 @@ public abstract class Multibinder<T> {
   public static <T> Multibinder<T> newSetBinder(Binder binder, TypeLiteral<T> type,
       Class<? extends Annotation> annotationType) {
     binder = binder.skipSources(RealMultibinder.class, Multibinder.class);
-    RealMultibinder<T> result = new RealMultibinder<T>(binder, type,
-        Key.get(Multibinder.<T>setOf(type), annotationType),
-        Key.get(Multibinder.<T>collectionOfProvidersOf(type), annotationType));
+    RealMultibinder<T> result =
+        new RealMultibinder<T>(binder, type, Key.get(setOf(type), annotationType));
     binder.install(result);
     return result;
   }
@@ -259,13 +256,11 @@ public abstract class Multibinder<T> {
     /** whether duplicates are allowed. Possibly configured by a different instance */
     private boolean permitDuplicates;
 
-    private RealMultibinder(Binder binder, TypeLiteral<T> elementType, Key<Set<T>> setKey,
-        Key<Collection<Provider<T>>> collectionOfProvidersKey) {
+    private RealMultibinder(Binder binder, TypeLiteral<T> elementType, Key<Set<T>> setKey) {
       this.binder = checkNotNull(binder, "binder");
       this.elementType = checkNotNull(elementType, "elementType");
       this.setKey = checkNotNull(setKey, "setKey");
-      this.collectionOfProvidersKey =
-          checkNotNull(collectionOfProvidersKey, "collectionOfProviders");
+      this.collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
       this.setName = RealElement.nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
