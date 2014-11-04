@@ -97,6 +97,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
   </distributionManagement>
 
   <modules>
+    <module>bom</module>
     <module>core</module>
     <module>extensions</module>
     <!-- jdk8-tests module activated only when running under JDK8, below -->
