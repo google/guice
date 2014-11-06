@@ -115,6 +115,18 @@ public class Scopes {
   }
 
   /**
+   * Returns a caching {@link Provider} for {@code binding} that lazily caches the result.
+   *
+   * @since 4.0
+   */
+  public static <T> Provider<T> getCachingProvider(Binding<T> binding) {
+    if (isSingleton(binding)) {
+      return binding.getProvider();
+    }
+    return SingletonScope.getCachingProvider(binding);
+  }
+
+  /**
 
    * Returns true if {@code binding} has the given scope. If the binding is a {@link
    * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
