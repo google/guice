@@ -636,15 +636,15 @@ public class ScopesTest extends TestCase {
     assertFalse(Scopes.isSingleton(injector.getBinding(f)));
   }
 
-  private static void checkAsSingleton(Binding<?> binding) {
-    // check prototype binding can be made into singleton
-    Provider<?> prototypeProvider = binding.getProvider();
-    assertNotSame(prototypeProvider.get(), prototypeProvider.get());
-    Provider<?> singletonProvider = Scopes.asSingleton(binding);
-    assertSame(singletonProvider.get(), singletonProvider.get());
+  private static void checkCachingProvider(Binding<?> binding) {
+    // check binding can be made into a caching provider
+    Provider<?> originalProvider = binding.getProvider();
+    assertNotSame(originalProvider.get(), originalProvider.get());
+    Provider<?> cachingProvider = Scopes.getCachingProvider(binding);
+    assertSame(cachingProvider.get(), cachingProvider.get());
   }
 
-  public void testAsSingleton() {
+  public void testCachingProvider() {
     final Key<String> a = Key.get(String.class, named("A"));
     final Key<String> b = Key.get(String.class, named("B"));
     final Key<String> c = Key.get(String.class, named("C"));
@@ -676,12 +676,12 @@ public class ScopesTest extends TestCase {
     };
 
     Injector injector = Guice.createInjector(prototypeBindings);
-    checkAsSingleton(injector.getBinding(a));
-    checkAsSingleton(injector.getBinding(b));
-    checkAsSingleton(injector.getBinding(c));
-    checkAsSingleton(injector.getBinding(d));
-    checkAsSingleton(injector.getBinding(e));
-    checkAsSingleton(injector.getBinding(f));
+    checkCachingProvider(injector.getBinding(a));
+    checkCachingProvider(injector.getBinding(b));
+    checkCachingProvider(injector.getBinding(c));
+    checkCachingProvider(injector.getBinding(d));
+    checkCachingProvider(injector.getBinding(e));
+    checkCachingProvider(injector.getBinding(f));
   }
 
   public void testIsScopedPositive() {

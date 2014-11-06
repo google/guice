@@ -97,9 +97,9 @@ public class SingletonScope implements Scope {
   }
 
   /**
-   * Returns singleton-scoped {@link Provider} for {@code binding} regardless of original scope.
+   * Returns a caching {@link Provider} for {@code binding} that lazily caches the result.
    */
-  public static <T> Provider<T> asSingleton(Binding<T> binding) {
+  public static <T> Provider<T> getCachingProvider(Binding<T> binding) {
     InjectorImpl injector = null;
     if (binding instanceof BindingImpl<?>) {
       injector = ((BindingImpl<T>) binding).getInjector();

@@ -115,15 +115,15 @@ public class Scopes {
   }
 
   /**
-   * Returns singleton-scoped {@link Provider} for {@code binding} regardless of original scope.
+   * Returns a caching {@link Provider} for {@code binding} that lazily caches the result.
    *
    * @since 4.0
    */
-  public static <T> Provider<T> asSingleton(Binding<T> binding) {
+  public static <T> Provider<T> getCachingProvider(Binding<T> binding) {
     if (isSingleton(binding)) {
       return binding.getProvider();
     }
-    return SingletonScope.asSingleton(binding);
+    return SingletonScope.getCachingProvider(binding);
   }
 
   /**
