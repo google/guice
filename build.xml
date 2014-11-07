@@ -128,7 +128,6 @@
       <arg value="com.google.inject.AllTests"/>
       <jvmarg value="${jvmarg-value}"/>
       <syspropertyset>
-        <propertyref name="guice.custom.loader"/>
         <propertyref name="version"/>
         <propertyref name="build.dir"/>
         <propertyref name="lib.dir"/>
