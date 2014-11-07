@@ -15,17 +15,11 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.Binding;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -39,15 +33,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
- * Central routing/dispatch class handles lifecycle of managed filters, and delegates to the servlet
- * pipeline.
+ * Skeleton implementation of a central routing/dispatch class which uses a sequence of
+ * {@link FilterDefinition}s to filter requests before delegating to the servlet pipeline.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-@Singleton
-class AbstractFilterPipeline implements FilterPipeline{
-  private final FilterDefinition[] filterDefinitions;
-  private final ManagedServletPipeline servletPipeline;
+abstract class AbstractFilterPipeline implements FilterPipeline {
+
+  /**
+   * @return {@code true} if any filter mappings exist; otherwise {@code false}
+   */
+  abstract boolean hasFiltersMapped();
+
+  /**
+   * @return snapshot of the filter mappings currently defined for this pipeline
+   */
+  abstract FilterDefinition[] filterDefinitions();
+
+  private final AbstractServletPipeline servletPipeline;
   private final Provider<ServletContext> servletContext;
 
   //Unfortunately, we need the injector itself in order to create filters + servlets
@@ -55,34 +58,12 @@ class AbstractFilterPipeline implements FilterPipeline{
 
   //Guards a DCL, so needs to be volatile
   private volatile boolean initialized = false;
-  private static final TypeLiteral<FilterDefinition> FILTER_DEFS =
-      TypeLiteral.get(FilterDefinition.class);
 
-  @Inject
-  public AbstractFilterPipeline(Injector injector, ManagedServletPipeline servletPipeline,
+  protected AbstractFilterPipeline(Injector injector, AbstractServletPipeline servletPipeline,
       Provider<ServletContext> servletContext) {
     this.injector = injector;
     this.servletPipeline = servletPipeline;
     this.servletContext = servletContext;
-
-    this.filterDefinitions = collectFilterDefinitions(injector);
-  }
-
-  /**
-   * Introspects the injector and collects all instances of bound {@code List<FilterDefinition>}
-   * into a master list.
-   * 
-   * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
-   * that preserves insertion order in entry-set iterators.
-   */
-  private FilterDefinition[] collectFilterDefinitions(Injector injector) {
-    List<FilterDefinition> filterDefinitions = Lists.newArrayList();
-    for (Binding<FilterDefinition> entry : injector.findBindingsByType(FILTER_DEFS)) {
-      filterDefinitions.add(entry.getProvider().get());
-    }
-    
-    // Copy to a fixed-size array for speed of iteration.
-    return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
   }
 
   public synchronized void initPipeline(ServletContext servletContext)
@@ -95,7 +76,7 @@ class AbstractFilterPipeline implements FilterPipeline{
     // Used to prevent duplicate initialization.
     Set<Filter> initializedSoFar = Sets.newIdentityHashSet();
 
-    for (FilterDefinition filterDefinition : filterDefinitions) {
+    for (FilterDefinition filterDefinition : filterDefinitions()) {
       filterDefinition.init(servletContext, injector, initializedSoFar);
     }
 
@@ -116,7 +97,7 @@ class AbstractFilterPipeline implements FilterPipeline{
     }
 
     //obtain the servlet pipeline to dispatch against
-    new FilterChainInvocation(filterDefinitions, servletPipeline, proceedingFilterChain)
+    new FilterChainInvocation(filterDefinitions(), servletPipeline, proceedingFilterChain)
         .doFilter(withDispatcher(request, servletPipeline), response);
 
   }
@@ -134,7 +115,7 @@ class AbstractFilterPipeline implements FilterPipeline{
    */
   @SuppressWarnings({ "JavaDoc", "deprecation" })
   private ServletRequest withDispatcher(ServletRequest servletRequest,
-      final ManagedServletPipeline servletPipeline) {
+      final AbstractServletPipeline servletPipeline) {
 
     // don't wrap the request if there are no servlets mapped. This prevents us from inserting our
     // wrapper unless it's actually going to be used. This is necessary for compatibility for apps
@@ -162,7 +143,7 @@ class AbstractFilterPipeline implements FilterPipeline{
 
     //go down chain and destroy all our filters
     Set<Filter> destroyedSoFar = Sets.newIdentityHashSet();
-    for (FilterDefinition filterDefinition : filterDefinitions) {
+    for (FilterDefinition filterDefinition : filterDefinitions()) {
       filterDefinition.destroy(destroyedSoFar);
     }
   }

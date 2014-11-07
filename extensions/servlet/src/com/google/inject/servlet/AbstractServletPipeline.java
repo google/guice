@@ -16,16 +16,10 @@
 package com.google.inject.servlet;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.Binding;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -38,47 +32,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
- * A wrapping dispatcher for servlets, in much the same way as {@link ManagedFilterPipeline} is for
- * filters.
+ * Skeleton implementation of a wrapping dispatcher for servlets based on a sequence of
+ * {@link ServletDefinition}s, much like {@link AbstractFilterPipeline} is for filters.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-@Singleton
-class AbstractServletPipeline {
-  private final ServletDefinition[] servletDefinitions;
-  private static final TypeLiteral<ServletDefinition> SERVLET_DEFS =
-      TypeLiteral.get(ServletDefinition.class);
-
-  @Inject
-  public AbstractServletPipeline(Injector injector) {
-    this.servletDefinitions = collectServletDefinitions(injector);
-  }
-
-  boolean hasServletsMapped() {
-    return servletDefinitions.length > 0;
-  }
+abstract class AbstractServletPipeline {
 
   /**
-   * Introspects the injector and collects all instances of bound {@code List<ServletDefinition>}
-   * into a master list.
-   *
-   * We have a guarantee that {@link com.google.inject.Injector#getBindings()} returns a map
-   * that preserves insertion order in entry-set iterators.
+   * @return {@code true} if any servlet mappings exist; otherwise {@code false}
    */
-  private ServletDefinition[] collectServletDefinitions(Injector injector) {
-    List<ServletDefinition> servletDefinitions = Lists.newArrayList();
-    for (Binding<ServletDefinition> entry : injector.findBindingsByType(SERVLET_DEFS)) {
-        servletDefinitions.add(entry.getProvider().get());
-    }
+  abstract boolean hasServletsMapped();
 
-    // Copy to a fixed size array for speed.
-    return servletDefinitions.toArray(new ServletDefinition[servletDefinitions.size()]);
-  }
+  /**
+   * @return snapshot of the servlet mappings currently defined for this pipeline
+   */
+  abstract ServletDefinition[] servletDefinitions();
 
   public void init(ServletContext servletContext, Injector injector) throws ServletException {
     Set<HttpServlet> initializedSoFar = Sets.newIdentityHashSet();
 
-    for (ServletDefinition servletDefinition : servletDefinitions) {
+    for (ServletDefinition servletDefinition : servletDefinitions()) {
       servletDefinition.init(servletContext, injector, initializedSoFar);
     }
   }
@@ -87,7 +61,7 @@ class AbstractServletPipeline {
       throws IOException, ServletException {
 
     //stop at the first matching servlet and service
-    for (ServletDefinition servletDefinition : servletDefinitions) {
+    for (ServletDefinition servletDefinition : servletDefinitions()) {
       if (servletDefinition.service(request, response)) {
         return true;
       }
@@ -99,7 +73,7 @@ class AbstractServletPipeline {
 
   public void destroy() {
     Set<HttpServlet> destroyedSoFar = Sets.newIdentityHashSet();
-    for (ServletDefinition servletDefinition : servletDefinitions) {
+    for (ServletDefinition servletDefinition : servletDefinitions()) {
       servletDefinition.destroy(destroyedSoFar);
     }
   }
@@ -114,7 +88,7 @@ class AbstractServletPipeline {
     // TODO(dhanji): check servlet spec to see if the following is legal or not.
     // Need to strip query string if requested...
 
-    for (final ServletDefinition servletDefinition : servletDefinitions) {
+    for (final ServletDefinition servletDefinition : servletDefinitions()) {
       if (servletDefinition.shouldServe(path)) {
         return new RequestDispatcher() {
           public void forward(ServletRequest servletRequest, ServletResponse servletResponse)
