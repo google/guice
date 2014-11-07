@@ -21,9 +21,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.Scopes;
+import com.google.inject.internal.Scoping;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderWithDependencies;
@@ -152,5 +155,17 @@ public final class Providers {
     public Set<Dependency<?>> getDependencies() {
       return dependencies;
     }
+  }
+
+  /**
+   * Returns a {@link Provider} for {@code binding} that lazily caches the first result.
+   * 
+   * @param binding to cache the result of
+   * @return Provider that lazily caches the first result
+   * 
+   * @since 4.0
+   */
+  public static <T> Provider<T> cache(Binding<T> binding) {
+    return Scopes.isSingleton(binding) ? binding.getProvider() : Scoping.cache(binding);
   }
 }
