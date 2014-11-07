@@ -26,7 +26,14 @@ import java.util.regex.Pattern;
 public enum UriPatternType {
   SERVLET, REGEX;
 
-  static UriPatternMatcher get(UriPatternType type, String pattern) {
+  /**
+   * Returns the appropriate {@link UriPatternMatcher} for {@code pattern}.
+   * 
+   * @param type of pattern matching
+   * @param pattern for matching URI
+   * @return {@link UriPatternMatcher} that matches the given pattern
+   */
+  public static UriPatternMatcher get(UriPatternType type, String pattern) {
     switch (type) {
       case SERVLET:
         return new ServletStyleUriPatternMatcher(pattern);
