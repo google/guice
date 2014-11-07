@@ -40,16 +40,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 public abstract class AbstractFilterPipeline implements FilterPipeline {
 
-  /**
-   * @return {@code true} if any filter mappings exist; otherwise {@code false}
-   */
-  protected abstract boolean hasFiltersMapped();
-
-  /**
-   * @return snapshot of the filter mappings currently defined for this pipeline
-   */
-  protected abstract FilterDefinition[] filterDefinitions();
-
   private final AbstractServletPipeline servletPipeline;
   private final Provider<ServletContext> servletContext;
 
@@ -65,6 +55,16 @@ public abstract class AbstractFilterPipeline implements FilterPipeline {
     this.servletPipeline = servletPipeline;
     this.servletContext = servletContext;
   }
+
+  /**
+   * @return {@code true} if any filter mappings exist; otherwise {@code false}
+   */
+  protected abstract boolean hasFiltersMapped();
+
+  /**
+   * @return snapshot of the filter mappings currently defined for this pipeline
+   */
+  protected abstract FilterDefinition[] filterDefinitions();
 
   public synchronized void initPipeline(ServletContext servletContext)
       throws ServletException {
