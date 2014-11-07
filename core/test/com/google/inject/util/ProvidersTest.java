@@ -16,13 +16,24 @@
 
 package com.google.inject.util;
 
+import static com.google.inject.name.Names.named;
+
 import com.google.common.base.Objects;
 import com.google.common.testing.EqualsTester;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.Scopes;
 
 import junit.framework.TestCase;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Unit tests for {@link Providers}.
@@ -106,5 +117,34 @@ public class ProvidersTest extends TestCase {
     @Override public boolean equals(Object obj) {
       return (obj instanceof JavaxProviderWithDependencies);
     }
+  }
+
+  private static void checkCachingProvider(Binding<?> binding) {
+    // check binding can be made into a caching provider
+    Provider<?> originalProvider = binding.getProvider();
+    assertNotSame(originalProvider.get(), originalProvider.get());
+    Provider<?> cachingProvider = Providers.cache(binding);
+    assertSame(cachingProvider.get(), cachingProvider.get());
+  }
+
+  public void testCachingProvider() {
+    final Key<String> a = Key.get(String.class, named("A"));
+    final Key<String> b = Key.get(String.class, named("B"));
+    final Key<String> c = Key.get(String.class, named("C"));
+
+    Module prototypeBindings = new AbstractModule() {
+      @Override protected void configure() {
+        bind(a).to(b);
+        bind(b).to(c).in(Scopes.NO_SCOPE);
+      }
+      @Provides @Named("C") String c() {
+        return new String("C");
+      }
+    };
+
+    Injector injector = Guice.createInjector(prototypeBindings);
+    checkCachingProvider(injector.getBinding(a));
+    checkCachingProvider(injector.getBinding(b));
+    checkCachingProvider(injector.getBinding(c));
   }
 }

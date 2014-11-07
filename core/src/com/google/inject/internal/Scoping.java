@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.common.base.Objects;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -244,6 +245,24 @@ public abstract class Scoping {
       Provider<T> scoped
           = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
       return new InternalFactoryToProviderAdapter<T>(scoped, source);
+    } finally {
+      SingletonScope.singletonCreationPerRootInjectorLock.set(null);
+    }
+  }
+
+  /**
+   * Returns a {@link Provider} for {@code binding} that lazily caches the first result.
+   */
+  public static <T> Provider<T> cache(Binding<T> binding) {
+    InjectorImpl injector = null;
+    if (binding instanceof BindingImpl<?>) {
+      injector = ((BindingImpl<T>) binding).getInjector();
+    }
+    // use injector's singletonCreationLock if available, otherwise use binding for the lock
+    Object creationLock = injector != null ? injector.state.singletonCreationLock() : binding;
+    try {
+      SingletonScope.singletonCreationPerRootInjectorLock.set(creationLock);
+      return Scopes.SINGLETON.scope(binding.getKey(), binding.getProvider());
     } finally {
       SingletonScope.singletonCreationPerRootInjectorLock.set(null);
     }
