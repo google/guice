@@ -143,11 +143,7 @@ public abstract class MapBinder<K, V> {
   public static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
-    return newMapBinder(binder, keyType, valueType,
-        Key.get(mapOf(keyType, valueType)),
-        Key.get(mapOfProviderOf(keyType, valueType)),
-        Key.get(mapOf(keyType, setOf(valueType))),
-        Key.get(mapOfSetOfProviderOf(keyType, valueType)),
+    return newMapBinder(binder, keyType, valueType, Key.get(mapOf(keyType, valueType)),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType)));
   }
 
@@ -169,9 +165,6 @@ public abstract class MapBinder<K, V> {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, keyType, valueType,
         Key.get(mapOf(keyType, valueType), annotation),
-        Key.get(mapOfProviderOf(keyType, valueType), annotation),
-        Key.get(mapOf(keyType, setOf(valueType)), annotation),
-        Key.get(mapOfSetOfProviderOf(keyType, valueType), annotation),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotation));
   }
 
@@ -193,9 +186,6 @@ public abstract class MapBinder<K, V> {
     binder = binder.skipSources(MapBinder.class, RealMapBinder.class);
     return newMapBinder(binder, keyType, valueType,
         Key.get(mapOf(keyType, valueType), annotationType),
-        Key.get(mapOfProviderOf(keyType, valueType), annotationType),
-        Key.get(mapOf(keyType, setOf(valueType)), annotationType),
-        Key.get(mapOfSetOfProviderOf(keyType, valueType), annotationType),
         Multibinder.newSetBinder(binder, entryOfProviderOf(keyType, valueType), annotationType));
   }
 
@@ -247,13 +237,10 @@ public abstract class MapBinder<K, V> {
   }
 
   private static <K, V> MapBinder<K, V> newMapBinder(Binder binder,
-      TypeLiteral<K> keyType, TypeLiteral<V> valueType,
-      Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
-      Key<Map<K, Set<V>>> multimapKey, Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType, Key<Map<K, V>> mapKey,
       Multibinder<Entry<K, Provider<V>>> entrySetBinder) {
-    RealMapBinder<K, V> mapBinder = new RealMapBinder<K, V>(
-        binder, keyType, valueType, mapKey, providerMapKey, multimapKey,
-        providerMultimapKey, entrySetBinder);
+    RealMapBinder<K, V> mapBinder =
+        new RealMapBinder<K, V>(binder, keyType, valueType, mapKey, entrySetBinder);
     binder.install(mapBinder);
     return mapBinder;
   }
@@ -330,16 +317,14 @@ public abstract class MapBinder<K, V> {
     private ImmutableList<Map.Entry<K, Binding<V>>> mapBindings;
 
     private RealMapBinder(Binder binder, TypeLiteral<K> keyType, TypeLiteral<V> valueType,
-        Key<Map<K, V>> mapKey, Key<Map<K, Provider<V>>> providerMapKey,
-        Key<Map<K, Set<V>>> multimapKey, Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
-        Multibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
+        Key<Map<K, V>> mapKey, Multibinder<Map.Entry<K, Provider<V>>> entrySetBinder) {
       this.keyType = keyType;
       this.valueType = valueType;
       this.mapKey = mapKey;
-      this.providerMapKey = providerMapKey;
-      this.javaxProviderMapKey = providerMapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
-      this.multimapKey = multimapKey;
-      this.providerMultimapKey = providerMultimapKey;
+      this.providerMapKey = mapKey.ofType(mapOfProviderOf(keyType, valueType));
+      this.javaxProviderMapKey = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
+      this.multimapKey = mapKey.ofType(mapOf(keyType, setOf(valueType)));
+      this.providerMultimapKey = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
       this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
       this.binder = binder;
       this.duplicateKeyErrorMessages = Maps.newHashMap();

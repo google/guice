@@ -16,9 +16,12 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.internal.InternalFlags.getCustomClassLoadingOption;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.inject.internal.InternalFlags.CustomClassLoadingOption;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -116,10 +119,6 @@ public final class BytecodeGen {
   private static final String CGLIB_PACKAGE = " "; // any string that's illegal in a package name
   end[NO_AOP]*/
 
-  /** Use "-Dguice.custom.loader=false" to disable custom classloading. */
-  private static final boolean CUSTOM_LOADER_ENABLED
-      = Boolean.parseBoolean(System.getProperty("guice.custom.loader", "true"));
-
   /**
    * Weak cache of bridge class loaders that make the Guice implementation
    * classes visible to various code-generated proxies of client classes.
@@ -128,12 +127,12 @@ public final class BytecodeGen {
 
   static {
     CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().weakKeys().weakValues();
-    if (!CUSTOM_LOADER_ENABLED) {
+    if (getCustomClassLoadingOption() == CustomClassLoadingOption.OFF) {
       builder.maximumSize(0);
     }
     CLASS_LOADER_CACHE = builder.build(
         new CacheLoader<ClassLoader, ClassLoader>() {
-          public ClassLoader load(final ClassLoader typeClassLoader) {
+          @Override public ClassLoader load(final ClassLoader typeClassLoader) {
             logger.fine("Creating a bridge ClassLoader for " + typeClassLoader);
             return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
               public ClassLoader run() {
@@ -162,7 +161,7 @@ public final class BytecodeGen {
   private static ClassLoader getClassLoader(Class<?> type, ClassLoader delegate) {
 
     // simple case: do nothing!
-    if (!CUSTOM_LOADER_ENABLED) {
+    if (getCustomClassLoadingOption() == CustomClassLoadingOption.OFF) {
       return delegate;
     }
 
