@@ -22,7 +22,7 @@ package com.google.inject.servlet;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-interface UriPatternMatcher {
+public interface UriPatternMatcher {
   /**
    * @param uri A "contextual" (i.e. relative) Request URI, *not* a complete one.
    * @return Returns true if the uri matches the pattern.

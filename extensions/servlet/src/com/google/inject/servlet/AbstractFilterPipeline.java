@@ -38,17 +38,17 @@ import javax.servlet.http.HttpServletRequestWrapper;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-abstract class AbstractFilterPipeline implements FilterPipeline {
+public abstract class AbstractFilterPipeline implements FilterPipeline {
 
   /**
    * @return {@code true} if any filter mappings exist; otherwise {@code false}
    */
-  abstract boolean hasFiltersMapped();
+  protected abstract boolean hasFiltersMapped();
 
   /**
    * @return snapshot of the filter mappings currently defined for this pipeline
    */
-  abstract FilterDefinition[] filterDefinitions();
+  protected abstract FilterDefinition[] filterDefinitions();
 
   private final AbstractServletPipeline servletPipeline;
   private final Provider<ServletContext> servletContext;

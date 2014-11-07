@@ -49,12 +49,12 @@ class ManagedFilterPipeline extends AbstractFilterPipeline {
   }
 
   @Override
-  boolean hasFiltersMapped() {
+  protected boolean hasFiltersMapped() {
     return filterDefinitions.length > 0;
   }
 
   @Override
-  FilterDefinition[] filterDefinitions() {
+  protected FilterDefinition[] filterDefinitions() {
     return filterDefinitions;
   }
 

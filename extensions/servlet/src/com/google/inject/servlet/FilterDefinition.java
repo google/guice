@@ -37,11 +37,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * An internal representation of a filter definition against a particular URI pattern.
+ * Defines a filter mapped to a URI pattern and performs the request filtering for that filter.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition> {
+public class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition> {
   private final String pattern;
   private final Key<? extends Filter> filterKey;
   private final UriPatternMatcher patternMatcher;
@@ -90,7 +90,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     return uri != null && patternMatcher.matches(uri);
   }
 
-  public void init(final ServletContext servletContext, Injector injector,
+  void init(final ServletContext servletContext, Injector injector,
       Set<Filter> initializedSoFar) throws ServletException {
 
     // This absolutely must be a singleton, and so is only initialized once.
@@ -130,7 +130,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     initializedSoFar.add(filter);
   }
 
-  public void destroy(Set<Filter> destroyedSoFar) {
+  void destroy(Set<Filter> destroyedSoFar) {
     // filters are always singletons
     Filter reference = filter.get();
 
@@ -150,7 +150,7 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
     }
   }
 
-  public Filter getFilterIfMatching(HttpServletRequest request) {
+  Filter getFilterIfMatching(HttpServletRequest request) {
 
     final String path = ServletUtils.getContextRelativePath(request);
     if (shouldFilter(path)) {

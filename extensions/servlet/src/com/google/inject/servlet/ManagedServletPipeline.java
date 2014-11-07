@@ -42,12 +42,12 @@ class ManagedServletPipeline extends AbstractServletPipeline {
   }
 
   @Override
-  boolean hasServletsMapped() {
+  protected boolean hasServletsMapped() {
     return servletDefinitions.length > 0;
   }
 
   @Override
-  ServletDefinition[] servletDefinitions() {
+  protected ServletDefinition[] servletDefinitions() {
     return servletDefinitions;
   }
 

@@ -26,7 +26,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * An internal dispatcher for guice-servlet registered servlets and filters.
+ * A dispatcher abstraction for guice-servlet registered servlets and filters.
  * By default, we assume a Guice 1.0 style servlet module is in play. In other
  * words, we dispatch directly to the web.xml pipeline after setting up scopes.
  *
@@ -39,10 +39,27 @@ import javax.servlet.ServletResponse;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @ImplementedBy(DefaultFilterPipeline.class)
-interface FilterPipeline {
+public interface FilterPipeline {
+
+  /**
+   * Initializes the pipeline, putting it into service.
+   * 
+   * @param context of the web application
+   */
   void initPipeline(ServletContext context) throws ServletException;
+
+  /**
+   * Destroys the pipeline, taking it out of service.
+   */
   void destroyPipeline();
 
+  /**
+   * Dispatches a request against the pipeline.
+   * 
+   * @param request to dispatch
+   * @param response to populate
+   * @param defaultFilterChain for last resort filtering
+   */
   void dispatch(ServletRequest request, ServletResponse response,
       FilterChain defaultFilterChain) throws IOException, ServletException;
 }
