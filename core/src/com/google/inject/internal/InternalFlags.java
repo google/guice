@@ -27,11 +27,11 @@ import java.util.logging.Logger;
 public class InternalFlags {
   private final static Logger logger = Logger.getLogger(InternalFlags.class.getName());
 
-  private static final IncludeStackTraceOption INCLUDE_STACK_TRACES
-      = parseIncludeStackTraceOption();
+  private static final IncludeStackTraceOption INCLUDE_STACK_TRACES = getSystemOption(
+      "guice_include_stack_traces", IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE);
 
-  private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING
-      = parseCustomClassLoadingOption();
+  private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING = getSystemOption(
+      "guice_custom_class_loading", CustomClassLoadingOption.BRIDGE, CustomClassLoadingOption.OFF);
 
   /**
    * The options for Guice stack trace collection.
@@ -39,7 +39,7 @@ public class InternalFlags {
   public enum IncludeStackTraceOption {
     /** No stack trace collection */
     OFF,
-    /**  Minimum stack trace collection (Default) */
+    /** Minimum stack trace collection (Default) */
     ONLY_FOR_DECLARING_SOURCE,
     /** Full stack trace for everything */
     COMPLETE
@@ -63,45 +63,46 @@ public class InternalFlags {
     return CUSTOM_CLASS_LOADING;
   }
 
-  private static IncludeStackTraceOption parseIncludeStackTraceOption() {
-    String flag = null;
-    try {
-      flag = getSystemFlag("guice_include_stack_traces");
-      return (flag == null || flag.length() == 0)
-          ? IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE
-          : IncludeStackTraceOption.valueOf(flag);
-    } catch (SecurityException e) {
-      return IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE;
-    } catch (IllegalArgumentException e) {
-      logger.warning(flag
-          + " is not a valid flag value for guice_include_stack_traces. "
-          + " Values must be one of " + Arrays.asList(IncludeStackTraceOption.values()));
-      return IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE;
-    }
+  /**
+   * Gets the system option indicated by the specified key; runs as a privileged action.
+   * 
+   * @param name of the system option
+   * @param defaultValue if the option is not set
+   * 
+   * @return value of the option, defaultValue if not set
+   */
+  private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue) {
+    return getSystemOption(name, defaultValue, defaultValue);
   }
 
-  private static CustomClassLoadingOption parseCustomClassLoadingOption() {
-    String flag = null;
+  /**
+   * Gets the system option indicated by the specified key; runs as a privileged action.
+   * 
+   * @param name of the system option
+   * @param defaultValue if the option is not set
+   * @param secureValue if the security manager disallows access to the option
+   * 
+   * @return value of the option, defaultValue if not set, secureValue if no access
+   */
+  private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue,
+      T secureValue) {
+    @SuppressWarnings("unchecked")
+    Class<T> enumType = (Class<T>) defaultValue.getClass();
+    String value = null;
     try {
-      flag = getSystemFlag("guice_custom_class_loading");
-      return (flag == null || flag.length() == 0)
-          ? CustomClassLoadingOption.BRIDGE
-          : CustomClassLoadingOption.valueOf(flag);
+      value = AccessController.doPrivileged(new PrivilegedAction<String>() {
+        public String run() {
+          return System.getProperty(name);
+        }
+      });
+      return (value != null && value.length() > 0) ? Enum.valueOf(enumType, value) : defaultValue;
     } catch (SecurityException e) {
-      return CustomClassLoadingOption.OFF; // assume custom loading is also disallowed
+      return secureValue;
     } catch (IllegalArgumentException e) {
-      logger.warning(flag
-          + " is not a valid flag value for guice_custom_class_loading. "
-          + " Values must be one of " + Arrays.asList(CustomClassLoadingOption.values()));
-      return CustomClassLoadingOption.BRIDGE;
+      logger.warning(value
+          + " is not a valid flag value for " + name + ". "
+          + " Values must be one of " + Arrays.asList(enumType.getEnumConstants()));
+      return defaultValue;
     }
-  }
-
-  private static String getSystemFlag(final String name) throws SecurityException {
-    return AccessController.doPrivileged(new PrivilegedAction<String>() {
-      public String run() {
-        return System.getProperty(name);
-      }
-    });
   }
 }
