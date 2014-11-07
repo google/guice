@@ -97,7 +97,6 @@ public class InternalFlags {
    */
   private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue,
       T secureValue) {
-    @SuppressWarnings("unchecked")
     Class<T> enumType = defaultValue.getDeclaringClass();
     String value = null;
     try {
