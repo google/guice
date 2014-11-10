@@ -245,6 +245,7 @@ public final class InjectionPoint {
         Class<?> rawType = getRawType(type.getType());
         Errors errors = new Errors(rawType);
 
+        filter.reset();
         Constructor<?> injectableConstructor = null;
         if( filter.isWorthScanningForConstructors(Inject.class.getName(), rawType)) {
             for (Constructor<?> constructor : filter.getAllConstructors(Inject.class.getName(), rawType)) {
