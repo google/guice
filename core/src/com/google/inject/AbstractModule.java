@@ -52,279 +52,287 @@ import com.google.inject.spi.TypeListener;
  */
 public abstract class AbstractModule implements Module {
 
-    protected Binder binder;
+  protected Binder binder;
 
-    @SuppressWarnings("rawtypes")
-    private AnnotatedBindingBuilder noOpAnnotatedBindingBuilder = new NoOpAnnotatedBindingBuilder();
-    private AnnotationDatabaseFinder annotationDatabaseFinder;
+  @SuppressWarnings("rawtypes")
+  private AnnotatedBindingBuilder noOpAnnotatedBindingBuilder = new NoOpAnnotatedBindingBuilder();
+  private AnnotationDatabaseFinder annotationDatabaseFinder;
 
-    /**
-     * Sets the {@link AnnotationDatabaseFinder} to filter classes to bind.
-     * The {@link AnnotationDatabaseFinder} will know which classes can be injected and can't, 
-     * it also knows if a given annotation is used or not.
-     * <br/>
-     * This method <b>must</b> be called before configure to take effect.
-     * @param annotationDatabaseFinder used to filter classes to bind.
-     */
-    public void setAnnotationDatabaseFinder(AnnotationDatabaseFinder annotationDatabaseFinder) {
-        this.annotationDatabaseFinder = annotationDatabaseFinder;
+  /**
+   * Sets the {@link AnnotationDatabaseFinder} to filter classes to bind.
+   * The {@link AnnotationDatabaseFinder} will know which classes can be injected and can't,
+   * it also knows if a given annotation is used or not.
+   * <br/>
+   * This method <b>must</b> be called before configure to take effect.
+   *
+   * @param annotationDatabaseFinder used to filter classes to bind.
+   */
+  public void setAnnotationDatabaseFinder(AnnotationDatabaseFinder annotationDatabaseFinder) {
+    this.annotationDatabaseFinder = annotationDatabaseFinder;
+  }
+
+  public final synchronized void configure(Binder builder) {
+    checkState(this.binder == null, "Re-entry is not allowed.");
+
+    this.binder = checkNotNull(builder, "builder");
+    try {
+      configure();
+    } finally {
+      this.binder = null;
     }
+  }
 
-    public final synchronized void configure(Binder builder) {
-        checkState(this.binder == null, "Re-entry is not allowed.");
+  /**
+   * Configures a {@link Binder} via the exposed methods.
+   */
+  protected abstract void configure();
 
-        this.binder = checkNotNull(builder, "builder");
-        try {
-            configure();
-        }
-        finally {
-            this.binder = null;
-        }
+  /**
+   * Gets direct access to the underlying {@code Binder}.
+   */
+  protected Binder binder() {
+    checkState(binder != null, "The binder can only be used inside configure()");
+    return binder;
+  }
+
+  /**
+   * @see Binder#bindScope(Class, Scope)
+   */
+  protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
+    binder().bindScope(scopeAnnotation, scope);
+  }
+
+  /**
+   * @see Binder#bind(Key)
+   */
+  protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+    return binder().bind(key);
+  }
+
+  /**
+   * @see Binder#bind(TypeLiteral)
+   */
+  protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+    return binder().bind(typeLiteral);
+  }
+
+  /**
+   * If an {@link AnnotationDatabaseFinder} is used, this method will only bind
+   * the classes that are supposed to be injected.
+   *
+   * @see Binder#bind(Class)
+   */
+  @SuppressWarnings("unchecked")
+  protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+    if (isInjectable(clazz)) {
+      return binder.bind(clazz);
+    } else {
+      return noOpAnnotatedBindingBuilder;
     }
+  }
 
-    /**
-     * Configures a {@link Binder} via the exposed methods.
-     */
-    protected abstract void configure();
+  @SuppressWarnings("unchecked")
+  protected <T> AnnotatedBindingBuilder<T> superbind(Class<T> clazz) {
+    return binder.bind(clazz);
+  }
 
-    /**
-     * Gets direct access to the underlying {@code Binder}.
-     */
-    protected Binder binder() {
-        checkState(binder != null, "The binder can only be used inside configure()");
-        return binder;
+  /**
+   * @see Binder#bindConstant()
+   */
+  protected AnnotatedConstantBindingBuilder bindConstant() {
+    return binder().bindConstant();
+  }
+
+  /**
+   * If a module has {@link AnnotationDatabaseFinder} then it is passed
+   * to each submodule prior to installing it.
+   *
+   * @see Binder#install(Module).
+   */
+  protected void install(Module module) {
+    if (annotationDatabaseFinder != null && module instanceof AbstractModule) {
+      ((AbstractModule) module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
     }
+    binder().install(module);
+  }
 
-    /**
-     * @see Binder#bindScope(Class, Scope)
-     */
-    protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-            Scope scope) {
-        binder().bindScope(scopeAnnotation, scope);
-    }
+  /**
+   * @see Binder#addError(String, Object[])
+   */
+  protected void addError(String message, Object... arguments) {
+    binder().addError(message, arguments);
+  }
 
-    /**
-     * @see Binder#bind(Key)
-     */
-    protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-        return binder().bind(key);
-    }
+  /**
+   * @see Binder#addError(Throwable)
+   */
+  protected void addError(Throwable t) {
+    binder().addError(t);
+  }
 
-    /**
-     * @see Binder#bind(TypeLiteral)
-     */
-    protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-        return binder().bind(typeLiteral);
-    }
+  /**
+   * @see Binder#addError(Message)
+   * @since 2.0
+   */
+  protected void addError(Message message) {
+    binder().addError(message);
+  }
 
-    /**
-     * If an {@link AnnotationDatabaseFinder} is used, this method will only bind
-     * the classes that are supposed to be injected.
-     * @see Binder#bind(Class)
-     */
-    @SuppressWarnings("unchecked")
-    protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-        if( isInjectable(clazz) ) {
-            return binder.bind(clazz);
-        } else {
-            return noOpAnnotatedBindingBuilder;
-        }
-    }
+  /**
+   * @see Binder#requestInjection(Object)
+   * @since 2.0
+   */
+  protected void requestInjection(Object instance) {
+    binder().requestInjection(instance);
+  }
 
-    @SuppressWarnings("unchecked")
-    protected <T> AnnotatedBindingBuilder<T> superbind(Class<T> clazz) {
-        return binder.bind(clazz);
-    }
-
-    /**
-     * @see Binder#bindConstant()
-     */
-    protected AnnotatedConstantBindingBuilder bindConstant() {
-        return binder().bindConstant();
-    }
-
-    /**
-     * If a module has {@link AnnotationDatabaseFinder} then it is passed 
-     * to each submodule prior to installing it.
-     * @see Binder#install(Module).
-     */
-    protected void install(Module module) {
-        if( annotationDatabaseFinder != null && module instanceof AbstractModule) {
-            ((AbstractModule)module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
-        }
-        binder().install(module);
-    }
-
-    /**
-     * @see Binder#addError(String, Object[])
-     */
-    protected void addError(String message, Object... arguments) {
-        binder().addError(message, arguments);
-    }
-
-    /**
-     * @see Binder#addError(Throwable) 
-     */
-    protected void addError(Throwable t) {
-        binder().addError(t);
-    }
-
-    /**
-     * @see Binder#addError(Message)
-     * @since 2.0
-     */
-    protected void addError(Message message) {
-        binder().addError(message);
-    }
-
-    /**
-     * @see Binder#requestInjection(Object)
-     * @since 2.0
-     */
-    protected void requestInjection(Object instance) {
-        binder().requestInjection(instance);
-    }
-
-    /**
-     * @see Binder#requestStaticInjection(Class[])
-     */
-    protected void requestStaticInjection(Class<?>... types) {
-        binder().requestStaticInjection(types);
-    }
+  /**
+   * @see Binder#requestStaticInjection(Class[])
+   */
+  protected void requestStaticInjection(Class<?>... types) {
+    binder().requestStaticInjection(types);
+  }
 
     /*if[AOP]*/
-    /**
-     * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
-     *  com.google.inject.matcher.Matcher,
-     *  org.aopalliance.intercept.MethodInterceptor[])
-     */
-    protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-            Matcher<? super Method> methodMatcher,
-            org.aopalliance.intercept.MethodInterceptor... interceptors) {
-        binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
-    }
+
+  /**
+   * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
+   * com.google.inject.matcher.Matcher,
+   * org.aopalliance.intercept.MethodInterceptor[])
+   */
+  protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
+      Matcher<? super Method> methodMatcher,
+      org.aopalliance.intercept.MethodInterceptor... interceptors) {
+    binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
+  }
     /*end[AOP]*/
 
-    /**
-     * Adds a dependency from this module to {@code key}. When the injector is
-     * created, Guice will report an error if {@code key} cannot be injected.
-     * Note that this requirement may be satisfied by implicit binding, such as
-     * a public no-arguments constructor.
-     *
-     * @since 2.0
-     */
-    protected void requireBinding(Key<?> key) {
-        binder().getProvider(key);
-    }
+  /**
+   * Adds a dependency from this module to {@code key}. When the injector is
+   * created, Guice will report an error if {@code key} cannot be injected.
+   * Note that this requirement may be satisfied by implicit binding, such as
+   * a public no-arguments constructor.
+   *
+   * @since 2.0
+   */
+  protected void requireBinding(Key<?> key) {
+    binder().getProvider(key);
+  }
 
-    /**
-     * Adds a dependency from this module to {@code type}. When the injector is
-     * created, Guice will report an error if {@code type} cannot be injected.
-     * Note that this requirement may be satisfied by implicit binding, such as
-     * a public no-arguments constructor.
-     *
-     * @since 2.0
-     */
-    protected void requireBinding(Class<?> type) {
-        binder().getProvider(type);
-    }
+  /**
+   * Adds a dependency from this module to {@code type}. When the injector is
+   * created, Guice will report an error if {@code type} cannot be injected.
+   * Note that this requirement may be satisfied by implicit binding, such as
+   * a public no-arguments constructor.
+   *
+   * @since 2.0
+   */
+  protected void requireBinding(Class<?> type) {
+    binder().getProvider(type);
+  }
 
-    /**
-     * @see Binder#getProvider(Key)
-     * @since 2.0
-     */
-    protected <T> Provider<T> getProvider(Key<T> key) {
-        return binder().getProvider(key);
-    }
+  /**
+   * @see Binder#getProvider(Key)
+   * @since 2.0
+   */
+  protected <T> Provider<T> getProvider(Key<T> key) {
+    return binder().getProvider(key);
+  }
 
-    /**
-     * @see Binder#getProvider(Class)
-     * @since 2.0
-     */
-    protected <T> Provider<T> getProvider(Class<T> type) {
-        return binder().getProvider(type);
-    }
+  /**
+   * @see Binder#getProvider(Class)
+   * @since 2.0
+   */
+  protected <T> Provider<T> getProvider(Class<T> type) {
+    return binder().getProvider(type);
+  }
 
-    /**
-     * @see Binder#convertToTypes
-     * @since 2.0
-     */
-    protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
-            TypeConverter converter) {
-        binder().convertToTypes(typeMatcher, converter);
-    }
+  /**
+   * @see Binder#convertToTypes
+   * @since 2.0
+   */
+  protected void convertToTypes(Matcher<? super TypeLiteral<?>> typeMatcher,
+      TypeConverter converter) {
+    binder().convertToTypes(typeMatcher, converter);
+  }
 
-    /**
-     * @see Binder#currentStage() 
-     * @since 2.0
-     */
-    protected Stage currentStage() {
-        return binder().currentStage();
-    }
+  /**
+   * @see Binder#currentStage()
+   * @since 2.0
+   */
+  protected Stage currentStage() {
+    return binder().currentStage();
+  }
 
-    /**
-     * @see Binder#getMembersInjector(Class)
-     * @since 2.0
-     */
-    protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-        return binder().getMembersInjector(type);
-    }
+  /**
+   * @see Binder#getMembersInjector(Class)
+   * @since 2.0
+   */
+  protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+    return binder().getMembersInjector(type);
+  }
 
-    /**
-     * @see Binder#getMembersInjector(TypeLiteral)
-     * @since 2.0
-     */
-    protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
-        return binder().getMembersInjector(type);
-    }
+  /**
+   * @see Binder#getMembersInjector(TypeLiteral)
+   * @since 2.0
+   */
+  protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
+    return binder().getMembersInjector(type);
+  }
 
-    /**
-     * @see Binder#bindListener(com.google.inject.matcher.Matcher,
-     *  com.google.inject.spi.TypeListener)
-     * @since 2.0
-     */
-    protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-            TypeListener listener) {
-        binder().bindListener(typeMatcher, listener);
-    }
+  /**
+   * @see Binder#bindListener(com.google.inject.matcher.Matcher,
+   * com.google.inject.spi.TypeListener)
+   * @since 2.0
+   */
+  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
+    binder().bindListener(typeMatcher, listener);
+  }
 
-    /**
-     * @see Binder#bindListener(Matcher, ProvisionListener...)
-     * @since 4.0
-     */
-    protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
-            ProvisionListener... listener) {
-        binder().bindListener(bindingMatcher, listener);
-    }
+  /**
+   * @see Binder#bindListener(Matcher, ProvisionListener...)
+   * @since 4.0
+   */
+  protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+      ProvisionListener... listener) {
+    binder().bindListener(bindingMatcher, listener);
+  }
 
-    /**
-     * Indicates whether or not instances of a given class can possibly be injected or not.
-     * @param clazz the class whose instance are injectable or not.
-     * @return Indicates whether or not instances of a given class can possibly be injected or not
-     * according to the {@link AnnotationDatabaseFinder} used by the module. If no {@link AnnotationDatabaseFinder}
-     * is used then this method always return true.
-     */
-    @SuppressWarnings("rawtypes")
-    protected boolean isInjectable(Class clazz) {
-        return annotationDatabaseFinder == null || annotationDatabaseFinder.getBindableClassesSet().contains(clazz.getName() );
-    }
+  /**
+   * Indicates whether or not instances of a given class can possibly be injected or not.
+   *
+   * @param clazz the class whose instance are injectable or not.
+   * @return Indicates whether or not instances of a given class can possibly be injected or not
+   * according to the {@link AnnotationDatabaseFinder} used by the module. If no {@link
+   * AnnotationDatabaseFinder}
+   * is used then this method always return true.
+   */
+  @SuppressWarnings("rawtypes")
+  protected boolean isInjectable(Class clazz) {
+    return annotationDatabaseFinder == null || annotationDatabaseFinder.getBindableClassesSet()
+        .contains(clazz.getName());
+  }
 
-    /**
-     * Indicates if a given annotation is used according to the {@link AnnotationDatabaseFinder}.
-     * @param annotationClass the annotation class (like {@link Inject}).
-     * @return true or false whether this annotation is used according to the {@link AnnotationDatabaseFinder}.
-     * If no {@link AnnotationDatabaseFinder} is used, then this method always return true.
-     */
-    @SuppressWarnings("rawtypes")
-    protected boolean hasInjectionPointsForAnnotation(Class annotationClass) {
-        return annotationDatabaseFinder == null 
-                || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedConstructorSet().containsKey(annotationClass.getName())
-                || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedMethodSet().containsKey(annotationClass.getName())
-                || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedFieldSet().containsKey(annotationClass.getName());
-    }
+  /**
+   * Indicates if a given annotation is used according to the {@link AnnotationDatabaseFinder}.
+   *
+   * @param annotationClass the annotation class (like {@link Inject}).
+   * @return true or false whether this annotation is used according to the {@link
+   * AnnotationDatabaseFinder}.
+   * If no {@link AnnotationDatabaseFinder} is used, then this method always return true.
+   */
+  @SuppressWarnings("rawtypes")
+  protected boolean hasInjectionPointsForAnnotation(Class annotationClass) {
+    return annotationDatabaseFinder == null
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedConstructorSet()
+        .containsKey(annotationClass.getName())
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedMethodSet()
+        .containsKey(annotationClass.getName())
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedFieldSet()
+        .containsKey(annotationClass.getName());
+  }
 
-    public AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
-        return annotationDatabaseFinder;
-    }
-
+  public AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
+    return annotationDatabaseFinder;
+  }
 }

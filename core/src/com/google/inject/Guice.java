@@ -16,9 +16,8 @@
 
 package com.google.inject;
 
-import java.util.Arrays;
-
 import com.google.inject.internal.InternalInjectorCreator;
+import java.util.Arrays;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
@@ -49,102 +48,108 @@ import com.google.inject.internal.InternalInjectorCreator;
  */
 public final class Guice {
 
-    private static HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory = new HierarchyTraversalFilterFactory();
-    private static AnnotationDatabaseFinder annotationDatabaseFinder;
+  private static HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory =
+      new HierarchyTraversalFilterFactory();
+  private static AnnotationDatabaseFinder annotationDatabaseFinder;
 
-    private Guice() {}
+  private Guice() {
+  }
 
-    /**
-     * Creates an injector for the given set of modules. This is equivalent to
-     * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
-     *
-     * @throws CreationException if one or more errors occur during injector
-     *     construction
-     */
-    public static Injector createInjector(Module... modules) {
-        return createInjector(Arrays.asList(modules));
+  /**
+   * Creates an injector for the given set of modules. This is equivalent to
+   * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
+   *
+   * @throws CreationException if one or more errors occur during injector
+   * construction
+   */
+  public static Injector createInjector(Module... modules) {
+    return createInjector(Arrays.asList(modules));
+  }
+
+  /**
+   * Creates an injector for the given set of modules. This is equivalent to
+   * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
+   *
+   * @throws CreationException if one or more errors occur during injector
+   * creation
+   */
+  public static Injector createInjector(Iterable<? extends Module> modules) {
+    return createInjector(Stage.DEVELOPMENT, modules);
+  }
+
+  /**
+   * Creates an injector for the given set of modules, in a given development
+   * stage.
+   *
+   * @throws CreationException if one or more errors occur during injector
+   * creation.
+   */
+  public static Injector createInjector(Stage stage, Module... modules) {
+    return createInjector(stage, Arrays.asList(modules));
+  }
+
+  /**
+   * Creates an injector for the given set of modules, in a given development
+   * stage.
+   *
+   * @throws CreationException if one or more errors occur during injector
+   * construction
+   */
+  public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
+    doSetAnnotationDatabaseFinderToModules(modules);
+    return new InternalInjectorCreator().stage(stage).addModules(modules).build();
+  }
+
+  /**
+   * Creates a {@link HierarchyTraversalFilter} using the {@link #hierarchyTraversalFilterFactory}.
+   *
+   * @return a new filter that can be used to selectively prune classes traversed by Guice to find
+   * injection points.
+   */
+  public static HierarchyTraversalFilter createHierarchyTraversalFilter() {
+    HierarchyTraversalFilter hierarchyTraversalFilter =
+        hierarchyTraversalFilterFactory.createHierarchyTraversalFilter();
+    if (annotationDatabaseFinder == null) {
+      return hierarchyTraversalFilter;
+    } else {
+      return new AnnotatedGuiceHierarchyTraversalFilter(annotationDatabaseFinder,
+          hierarchyTraversalFilter);
     }
+  }
 
-    /**
-     * Creates an injector for the given set of modules. This is equivalent to
-     * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
-     *
-     * @throws CreationException if one or more errors occur during injector
-     *     creation
-     */
-    public static Injector createInjector(Iterable<? extends Module> modules) {
-        return createInjector(Stage.DEVELOPMENT, modules);
-    }
+  /**
+   * Sets a factory to create {@link HierarchyTraversalFilter} instances.
+   *
+   * @param hierarchyTraversalFilterFactory the new factory used by Guice to prune hierarchy trees
+   * when finding injection points.
+   */
+  public static void setHierarchyTraversalFilterFactory(
+      HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory) {
+    Guice.hierarchyTraversalFilterFactory = hierarchyTraversalFilterFactory;
+  }
 
-    /**
-     * Creates an injector for the given set of modules, in a given development
-     * stage.
-     *
-     * @throws CreationException if one or more errors occur during injector
-     *     creation.
-     */
-    public static Injector createInjector(Stage stage, Module... modules) {
-        return createInjector(stage, Arrays.asList(modules));
+  /**
+   * Sets the names of packages to take into account to find annotation databases.
+   *
+   * @param packageNames the names of packages to take into account to find annotation databases.
+   */
+  public static void setAnnotationDatabasePackageNames(final String[] packageNames) {
+    if (packageNames != null && packageNames.length != 0) {
+      annotationDatabaseFinder = new AnnotationDatabaseFinder(packageNames);
+    } else {
+      annotationDatabaseFinder = null;
     }
+  }
 
-    /**
-     * Creates an injector for the given set of modules, in a given development
-     * stage.
-     *
-     * @throws CreationException if one or more errors occur during injector
-     *     construction
-     */
-    public static Injector createInjector(Stage stage,
-            Iterable<? extends Module> modules) {
-        doSetAnnotationDatabaseFinderToModules(modules);
-        return new InternalInjectorCreator()
-        .stage(stage)
-        .addModules(modules)
-        .build();
-    }
+  public static AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
+    return annotationDatabaseFinder;
+  }
 
-    /**
-     * Creates a {@link HierarchyTraversalFilter} using the {@link #hierarchyTraversalFilterFactory}.
-     * @return a new filter that can be used to selectively prune classes traversed by Guice to find injection points.
-     */
-    public static HierarchyTraversalFilter createHierarchyTraversalFilter() {
-        HierarchyTraversalFilter hierarchyTraversalFilter = hierarchyTraversalFilterFactory.createHierarchyTraversalFilter();
-        if( annotationDatabaseFinder == null ) {
-            return hierarchyTraversalFilter;
-        } else {
-            return new AnnotatedGuiceHierarchyTraversalFilter(annotationDatabaseFinder, hierarchyTraversalFilter);
-        }
+  private static void doSetAnnotationDatabaseFinderToModules(Iterable<? extends Module> modules) {
+    for (Module module : modules) {
+      if (module instanceof AbstractModule) {
+        ((AbstractModule) module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
+      }
     }
-
-    /**
-     * Sets a factory to create {@link HierarchyTraversalFilter} instances.
-     * @param hierarchyTraversalFilterFactory the new factory used by Guice to prune hierarchy trees when finding injection points.
-     */
-    public static void setHierarchyTraversalFilterFactory(HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory) {
-        Guice.hierarchyTraversalFilterFactory  = hierarchyTraversalFilterFactory;
-    }
-
-    /**
-     * Sets the names of packages to take into account to find annotation databases. 
-     * @param packageNames the names of packages to take into account to find annotation databases.
-     */
-    public static void setAnnotationDatabasePackageNames(final String[] packageNames) {
-        if( packageNames != null && packageNames.length != 0 ) {
-            annotationDatabaseFinder = new AnnotationDatabaseFinder(packageNames);
-        } else {
-            annotationDatabaseFinder = null;
-        }
-    }
-
-    public static AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
-        return annotationDatabaseFinder;
-    }
-
-    private static void doSetAnnotationDatabaseFinderToModules(Iterable<? extends Module> modules) {
-        for( Module module : modules ) {
-            if( module instanceof AbstractModule ) {
-                ((AbstractModule)module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
-            }
-        }
-    }
+  }
 }
