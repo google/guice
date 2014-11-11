@@ -16,13 +16,24 @@
 
 package com.google.inject.internal;
 
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.logging.Logger;
 /**
  * Contains flags for Guice.
  */
 public class InternalFlags {
-  private final static Logger logger = Logger.getLogger(InternalFlags.class.getName());
+  private static final Logger logger = Logger.getLogger(InternalFlags.class.getName());
+
+  private static final IncludeStackTraceOption INCLUDE_STACK_TRACES
+      = parseIncludeStackTraceOption();
+
+  private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING
+      = parseCustomClassLoadingOption();
+
+
   /**
    * The options for Guice stack trace collection.
    */
@@ -35,18 +46,72 @@ public class InternalFlags {
     COMPLETE
   }
 
+  /**
+   * The options for Guice custom class loading.
+   */
+  public enum CustomClassLoadingOption {
+    /** No custom class loading */
+    OFF,
+    /** Automatically bridge between class loaders (Default) */
+    BRIDGE
+  }
 
   public static IncludeStackTraceOption getIncludeStackTraceOption() {
-    String flag = System.getProperty("guice_include_stack_traces");
+    return INCLUDE_STACK_TRACES;
+  }
+
+  public static CustomClassLoadingOption getCustomClassLoadingOption() {
+    return CUSTOM_CLASS_LOADING;
+  }
+
+  private static IncludeStackTraceOption parseIncludeStackTraceOption() {
+    return getSystemOption("guice_include_stack_traces",
+        IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE);
+  }
+
+  private static CustomClassLoadingOption parseCustomClassLoadingOption() {
+    return getSystemOption("guice_custom_class_loading",
+        CustomClassLoadingOption.BRIDGE, CustomClassLoadingOption.OFF);
+  }
+
+  /**
+   * Gets the system option indicated by the specified key; runs as a privileged action.
+   *
+   * @param name of the system option
+   * @param defaultValue if the option is not set
+   *
+   * @return value of the option, defaultValue if not set
+   */
+  private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue) {
+    return getSystemOption(name, defaultValue, defaultValue);
+  }
+
+  /**
+   * Gets the system option indicated by the specified key; runs as a privileged action.
+   *
+   * @param name of the system option
+   * @param defaultValue if the option is not set
+   * @param secureValue if the security manager disallows access to the option
+   *
+   * @return value of the option, defaultValue if not set, secureValue if no access
+   */
+  private static <T extends Enum<T>> T getSystemOption(final String name, T defaultValue,
+      T secureValue) {
+    Class<T> enumType = defaultValue.getDeclaringClass();
+    String value = null;
     try {
-      return (flag == null || flag.length() == 0)
-          ? IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE
-          : IncludeStackTraceOption.valueOf(flag);
+      value = AccessController.doPrivileged(new PrivilegedAction<String>() {
+        public String run() {
+          return System.getProperty(name);
+        }
+      });
+      return (value != null && value.length() > 0) ? Enum.valueOf(enumType, value) : defaultValue;
+    } catch (SecurityException e) {
+      return secureValue;
     } catch (IllegalArgumentException e) {
-      logger.warning(flag
-          + " is not a valid flag value for guice_include_stack_traces. "
-          + " Values must be one of " + Arrays.asList(IncludeStackTraceOption.values()));
-      return IncludeStackTraceOption.ONLY_FOR_DECLARING_SOURCE;
+      logger.warning(value + " is not a valid flag value for " + name + ". "
+          + " Values must be one of " + Arrays.asList(enumType.getEnumConstants()));
+      return defaultValue;
     }
   }
 }

@@ -27,7 +27,6 @@ import static com.google.inject.internal.WeakKeySetUtils.awaitFullGc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -50,9 +49,7 @@ import com.google.inject.spi.TypeListenerBinding;
 import junit.framework.TestCase;
 
 import java.lang.annotation.Annotation;
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -515,6 +512,10 @@ public class WeakKeySetTest extends TestCase {
     }
 
     public Object lock() {
+      throw new UnsupportedOperationException();
+    }
+
+    public Object singletonCreationLock() {
       throw new UnsupportedOperationException();
     }
 

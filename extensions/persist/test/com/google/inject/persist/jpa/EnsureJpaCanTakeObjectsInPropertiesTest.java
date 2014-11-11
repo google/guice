@@ -77,7 +77,7 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
     injector.getInstance(EntityManagerFactory.class).close();
   }
 
-  private static JDBCDataSource getDataSource() {
+  private static DataSource getDataSource() {
     final JDBCDataSource dataSource = new JDBCDataSource();
     dataSource.setDatabase("jdbc:hsqldb:mem:persistence");
     dataSource.setUser("sa");
@@ -86,14 +86,13 @@ public class EnsureJpaCanTakeObjectsInPropertiesTest extends TestCase {
   }
 
   private void startPersistService(boolean passDataSource) {
-    final JDBCDataSource dataSource = getDataSource();
+    final DataSource dataSource = getDataSource();
 
     injector = Guice.createInjector(new DBModule(dataSource, passDataSource));
 
     //startup persistence
     injector.getInstance(PersistService.class).start();
   }
-
   public void testWorksIfPassDataSource() {
     startPersistService(true);
   }

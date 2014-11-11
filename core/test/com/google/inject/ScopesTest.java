@@ -41,11 +41,19 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author crazybob@google.com (Bob Lee)
  */
 public class ScopesTest extends TestCase {
+
+  static final long DEADLOCK_TIMEOUT_SECONDS = 1;
 
   private final AbstractModule singletonsModule = new AbstractModule() {
     @Override protected void configure() {
@@ -369,17 +377,30 @@ public class ScopesTest extends TestCase {
   }
 
   public void testNullScopedAsASingleton() {
-    Provider<String> unscoped = new Provider<String>() {
-      final Iterator<String> values = Arrays.asList(null, "A").iterator();
-      public String get() {
-        return values.next();
-      }
-    };
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {}
 
-    Provider<String> scoped = Scopes.SINGLETON.scope(Key.get(String.class), unscoped);
-    assertNull(scoped.get());
-    assertNull(scoped.get());
-    assertNull(scoped.get());
+      final Iterator<String> values = Arrays.asList(null, "A").iterator();
+
+      @Provides @Singleton String provideString() {
+         return values.next();
+      }
+    });
+
+    assertNull(injector.getInstance(String.class));
+    assertNull(injector.getInstance(String.class));
+    assertNull(injector.getInstance(String.class));
+  }
+
+  public void testSingletonScopeCreationOutsideOfScopingThrows() {
+    try {
+      Scopes.SINGLETON.scope(Key.get(String.class), null);
+      fail();
+    } catch (OutOfScopeException expected) {
+      Asserts.assertContains(expected.getMessage(),
+          "Singleton scope should only be used from Injector");
+    }
   }
 
   class RememberProviderScope implements Scope {
@@ -766,5 +787,131 @@ public class ScopesTest extends TestCase {
     // should be changed
     injector.getInstance(ThrowingSingleton.class);
     assertEquals(2, ThrowingSingleton.nextInstanceId);
+  }
+
+  static interface F {}
+
+  static class FImpl implements F {}
+
+  static class FProvider implements Provider<F> {
+
+    final CyclicBarrier bothThreadsAreInProvider = new CyclicBarrier(2);
+
+    public F get() {
+      try {
+        bothThreadsAreInProvider.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      return new FImpl();
+    }
+  }
+
+  /**
+   * Tests that different injectors should not affect each other.
+   *
+   * <p>This creates a second thread to work in parallel, to create two instances of
+   * {@link F} as the same time. If the lock if not granular enough (i.e. JVM-wide)
+   * then they would block each other creating a deadlock and await timeout.
+   */
+
+  public void testInjectorsDontDeadlockOnSingletons() throws Exception {
+    final FProvider provider = new FProvider();
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(F.class).toProvider(provider).in(Scopes.SINGLETON);
+      }
+    });
+    final Injector secondInjector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(F.class).toProvider(provider).in(Scopes.SINGLETON);
+      }
+    });
+
+    Future<?> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Runnable() {
+      public void run() {
+        secondInjector.getInstance(F.class);
+      }
+    });
+
+    injector.getInstance(F.class);
+
+    // verify no thrown exceptions
+    secondThreadResult.get();
+  }
+
+  static interface G {}
+
+  static interface H {}
+
+  static class GHImpl implements G, H {}
+
+  static class GHProvider {
+
+    final CyclicBarrier bothThreadsAreInProvider = new CyclicBarrier(2);
+
+    final Provider<G> gProvider = new Provider<G>() {
+      public G get() {
+        awaitBothThreadsInProvider();
+        return new GHImpl();
+      }
+    };
+
+    final Provider<H> hProvider = new Provider<H>() {
+      public H get() {
+        awaitBothThreadsInProvider();
+        return new GHImpl();
+      }
+    };
+
+    void awaitBothThreadsInProvider() {
+      try {
+        bothThreadsAreInProvider.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        fail();
+      } catch (TimeoutException expected) {
+        // first thread to arrive should timeout as we never enter providers from both threads
+      } catch (BrokenBarrierException expected) {
+        // second thread to arrive should fail as barrier is broken by the first thread's timeout
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Tests that injectors int the same hierarchy do not create singletons in parallel.
+   *
+   * <p>This creates a second thread to work in parallel, to create instance of
+   * {@link G} and {@link H} as the same time. Both instances are created by injectors belonging
+   * to the same hierarchy. If the lock is too narrow (i.e. per Injector or per binding)
+   * instances would be created in parallel and test fail.
+   */
+
+  public void testSiblingInjectorsGettingDifferentSingletonsDontDeadlock() throws Exception {
+    final GHProvider ghProvider = new GHProvider();
+    final Injector parentInjector = Guice.createInjector();
+
+    Future<?> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Runnable() {
+      public void run() {
+        parentInjector.createChildInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(H.class).toProvider(ghProvider.hProvider).in(Scopes.SINGLETON);
+          }
+        }).getInstance(H.class);
+      }
+    });
+
+    parentInjector.createChildInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(G.class).toProvider(ghProvider.gProvider).in(Scopes.SINGLETON);
+      }
+    }).getInstance(G.class);
+
+    // verify no thrown exceptions
+    secondThreadResult.get();
   }
 }

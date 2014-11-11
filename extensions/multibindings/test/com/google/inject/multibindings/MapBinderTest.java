@@ -18,11 +18,11 @@ package com.google.inject.multibindings;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
+import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
+import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.multibindings.SpiUtils.assertMapVisitor;
 import static com.google.inject.multibindings.SpiUtils.instance;
 import static com.google.inject.multibindings.SpiUtils.providerInstance;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -53,6 +53,7 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InstanceBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
+import com.google.inject.util.Types;
 
 import junit.framework.TestCase;
 
@@ -63,7 +64,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,6 +81,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MapBinderTest extends TestCase {
 
+  private static final Set<Key<?>> FRAMEWORK_KEYS = ImmutableSet.of(
+      Key.get(java.util.logging.Logger.class),
+      Key.get(Stage.class),
+      Key.get(Injector.class)
+  );
+
   final TypeLiteral<Map<String, javax.inject.Provider<String>>> mapOfStringJavaxProvider =
       new TypeLiteral<Map<String, javax.inject.Provider<String>>>() {};
   final TypeLiteral<Map<String, Provider<String>>> mapOfStringProvider =
@@ -91,6 +100,66 @@ public class MapBinderTest extends TestCase {
       
   private final TypeLiteral<String> stringType = TypeLiteral.get(String.class);
   private final TypeLiteral<Integer> intType = TypeLiteral.get(Integer.class);
+
+  private Type javaxProviderOf(Type type) {
+    return Types.newParameterizedType(javax.inject.Provider.class, type);
+  }
+
+  private Type mapEntryOf(Type keyType, Type valueType) {
+    return Types.newParameterizedTypeWithOwner(Map.class, Map.Entry.class, keyType, valueType);
+  }
+
+  private Type collectionOf(Type type) {
+    return Types.newParameterizedType(Collection.class, type);
+  }
+
+  public void testAllBindings() {
+    Module module = new AbstractModule() {
+      @Override
+      protected void configure() {
+        MapBinder.newMapBinder(binder(), String.class, String.class).permitDuplicates();
+      }
+    };
+
+    Injector injector = Guice.createInjector(module);
+
+    Map<Key<?>, Binding<?>> bindings = injector.getBindings();
+
+    ImmutableSet<Key<?>> expectedBindings = ImmutableSet.<Key<?>>builder()
+        .add(
+            // Map<K, V>
+            Key.get(Types.mapOf(String.class, String.class)),
+            // Map<K, Provider<V>>
+            Key.get(Types.mapOf(String.class, Types.providerOf(String.class))),
+            // Map<K, javax.inject.Provider<V>>
+            Key.get(Types.mapOf(String.class, javaxProviderOf(String.class))),
+            // Map<K, Set<V>>
+            Key.get(Types.mapOf(String.class, Types.setOf(String.class))),
+            // Map<K, Set<Provider<V>>
+            Key.get(Types.mapOf(String.class, Types.setOf(Types.providerOf(String.class)))),
+            // Set<Map.Entry<K, Provider<V>>>
+            Key.get(Types.setOf(mapEntryOf(String.class, Types.providerOf(String.class)))),
+            // Collection<Provider<Map.Entry<K, Provider<V>>>>
+            Key.get(collectionOf(Types.providerOf(
+                mapEntryOf(String.class, Types.providerOf(String.class))))),
+            // Collection<javax.inject.Provider<Map.Entry<K, Provider<V>>>>
+            Key.get(collectionOf(javaxProviderOf(
+                mapEntryOf(String.class, Types.providerOf(String.class))))),
+            // @Named(...) Boolean
+            Key.get(Boolean.class,
+                named("Multibinder<java.util.Map$Entry<java.lang.String, "
+                    + "com.google.inject.Provider<java.lang.String>>> permits duplicates"))
+        )
+        .addAll(FRAMEWORK_KEYS).build();
+
+    Set<Key<?>> missingBindings = Sets.difference(expectedBindings, bindings.keySet());
+    Set<Key<?>> extraBindings = Sets.difference(bindings.keySet(), expectedBindings);
+
+    assertTrue("There should be no missing bindings. Missing: " + missingBindings,
+        missingBindings.isEmpty());
+    assertTrue("There should be no extra bindings. Extra: " + extraBindings,
+        extraBindings.isEmpty());
+  }
 
   public void testMapBinderAggregatesMultipleModules() {
     Module abc = new AbstractModule() {

@@ -100,10 +100,10 @@ public final class ProviderMethodsModule implements Module {
 
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
     List<ProviderMethod<?>> result = Lists.newArrayList();
-Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
+    Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
     filter.reset();
     Class<?> c = delegate.getClass();
-    while( filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
+    while (filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
       for (Method method : filter.getAllMethods(Provides.class.getName(), c)) {
         // private/static methods cannot override or be overridden by other methods, so there is no
         // point in indexing them.
@@ -111,7 +111,8 @@ Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
         // synthetic overrides in some cases where we don't want to generate an error (e.g.
         // increasing visibility of a subclass).
         if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
-            && !method.isBridge() && !method.isSynthetic()) {
+            && !method.isBridge()
+            && !method.isSynthetic()) {
           methodsBySignature.put(new Signature(method), method);
         }
         if (isProvider(method)) {
@@ -133,11 +134,8 @@ Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
         }
         // now we know matching signature is in a subtype of method.getDeclaringClass()
         if (overrides(matchingSignature, method)) {
-          binder.addError(
-              "Overriding @Provides methods is not allowed."
-                  + "\n\t@Provides method: %s\n\toverridden by: %s",
-              method,
-              matchingSignature);
+          binder.addError("Overriding @Provides methods is not allowed."
+                  + "\n\t@Provides method: %s\n\toverridden by: %s", method, matchingSignature);
           break;
         }
       }
@@ -152,9 +150,8 @@ Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
    * bridge methods (which always have erased signatures).
    */
   private static boolean isProvider(Method method) {
-  return !method.isBridge()
-    && !method.isSynthetic()
-    && method.isAnnotationPresent(Provides.class);
+    return !method.isBridge() && !method.isSynthetic() && method.isAnnotationPresent(
+        Provides.class);
   }
 
   private final class Signature {
@@ -229,11 +226,11 @@ Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
     }
 
     @SuppressWarnings("unchecked") // Define T as the method's return type.
-    TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
+        TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
 
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
-    Class<? extends Annotation> scopeAnnotation
-    = Annotations.findScopeAnnotation(errors, method.getAnnotations());
+    Class<? extends Annotation> scopeAnnotation =
+        Annotations.findScopeAnnotation(errors, method.getAnnotations());
 
     for (Message message : errors.getMessages()) {
       binder.addError(message);
@@ -249,8 +246,7 @@ Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
   }
 
   @Override public boolean equals(Object o) {
-    return o instanceof ProviderMethodsModule
-        && ((ProviderMethodsModule) o).delegate == delegate;
+    return o instanceof ProviderMethodsModule && ((ProviderMethodsModule) o).delegate == delegate;
   }
 
   @Override public int hashCode() {

@@ -17,8 +17,8 @@
 package com.google.inject;
 
 import com.google.inject.internal.CircularDependencyProxy;
-import com.google.inject.internal.InternalInjectorCreator;
 import com.google.inject.internal.LinkedBindingImpl;
+import com.google.inject.internal.SingletonScope;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ExposedBinding;
 
@@ -33,71 +33,10 @@ public class Scopes {
 
   private Scopes() {}
 
-  /** A sentinel value representing null. */
-  private static final Object NULL = new Object();
-
   /**
    * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
    */
-  public static final Scope SINGLETON = new Scope() {
-    public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
-      return new Provider<T>() {
-        /*
-         * The lazily initialized singleton instance. Once set, this will either have type T or will
-         * be equal to NULL.
-         */
-        private volatile Object instance;
-
-        // DCL on a volatile is safe as of Java 5, which we obviously require.
-        @SuppressWarnings("DoubleCheckedLocking")
-        public T get() {
-          if (instance == null) {
-            /*
-             * Use a pretty coarse lock. We don't want to run into deadlocks
-             * when two threads try to load circularly-dependent objects.
-             * Maybe one of these days we will identify independent graphs of
-             * objects and offer to load them in parallel.
-             *
-             * This block is re-entrant for circular dependencies.
-             */
-            synchronized (InternalInjectorCreator.class) {
-              if (instance == null) {
-                T provided = creator.get();
-
-                // don't remember proxies; these exist only to serve circular dependencies
-                if (isCircularProxy(provided)) {
-                  return provided;
-                }
-
-                Object providedOrSentinel = (provided == null) ? NULL : provided;
-                if (instance != null && instance != providedOrSentinel) {
-                  throw new ProvisionException(
-                      "Provider was reentrant while creating a singleton");
-                }
-
-                instance = providedOrSentinel;
-              }
-            }
-          }
-
-          Object localInstance = instance;
-          // This is safe because instance has type T or is equal to NULL
-          @SuppressWarnings("unchecked")
-          T returnedInstance = (localInstance != NULL) ? (T) localInstance : null;
-          return returnedInstance;
-        }
-
-        @Override
-        public String toString() {
-          return String.format("%s[%s]", creator, SINGLETON);
-        }
-      };
-    }
-
-    @Override public String toString() {
-      return "Scopes.SINGLETON";
-    }
-  };
+  public static final Scope SINGLETON = new SingletonScope();
 
   /**
    * No scope; the same as not applying any scope at all.  Each time the
