@@ -84,7 +84,7 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
         try {
           if (provisionCallback != null && provisionCallback.hasListeners()) {
             provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
-              @Override public T call() {
+              @Override public T call() throws ErrorsException {
                 injectMembers(instance, errors, context, toolableOnly);
                 return instance;
               }
@@ -124,7 +124,9 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     errors.throwIfNewErrors(numErrorsBefore);
   }
 
-  void injectMembers(T t, Errors errors, InternalContext context, boolean toolableOnly) {
+  void injectMembers(T t, Errors errors, InternalContext context, boolean toolableOnly) throws ErrorsException {
+    int numErrorsBefore = errors.size();
+
     // optimization: use manual for/each to save allocating an iterator here
     for (int i = 0, size = memberInjectors.size(); i < size; i++) {
       SingleMemberInjector injector = memberInjectors.get(i);
@@ -143,6 +145,8 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
         }
       }
     }
+
+    errors.throwIfNewErrors(numErrorsBefore);
   }
 
   @Override public String toString() {
