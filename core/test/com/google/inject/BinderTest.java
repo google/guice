@@ -187,8 +187,7 @@ public class BinderTest extends TestCase {
       fail();
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
-          "1) Binding to null instances is not allowed. Use toProvider(Providers.of(null))",
-          "2) Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+          "1) Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
     }
   }
 
@@ -541,10 +540,6 @@ public class BinderTest extends TestCase {
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
           "Binding to core guice framework type is not allowed: TypeLiteral.",
-          "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
-          asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
-
-          "Binding to core guice framework type is not allowed: Key.",
           "at " + InnerCoreModule.class.getName() + getDeclaringSourcePart(getClass()),
           asModuleChain(OuterCoreModule.class, InnerCoreModule.class));
     }

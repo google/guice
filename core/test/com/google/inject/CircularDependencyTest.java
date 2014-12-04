@@ -366,8 +366,7 @@ public class CircularDependencyTest extends TestCase {
       fail("expected exception");
     } catch(ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "Tried proxying " + A.class.getName() + " to support a circular dependency, but circular proxies are disabled", 
-          "Tried proxying " + B.class.getName() + " to support a circular dependency, but circular proxies are disabled");
+          "Tried proxying " + A.class.getName() + " to support a circular dependency, but circular proxies are disabled");
     }
   }
 
