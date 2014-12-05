@@ -92,6 +92,7 @@ final class ProvisionListenerStackCallback<T> {
   private class Provision extends ProvisionListener.ProvisionInvocation<T> {
 
     final Errors errors;
+    final int numErrorsBefore;
     final InternalContext context;
     final ProvisionCallback<T> callable;
     int index = -1;
@@ -103,6 +104,7 @@ final class ProvisionListenerStackCallback<T> {
       this.callable = callable;
       this.context = context;
       this.errors = errors;
+      this.numErrorsBefore = errors.size();
     }
 
     @Override
@@ -111,6 +113,9 @@ final class ProvisionListenerStackCallback<T> {
       if (index == listeners.length) {
         try {
           result = callable.call();
+          // Make sure we don't return the provisioned object if there were any errors
+          // injecting its field/method dependencies.
+          errors.throwIfNewErrors(numErrorsBefore);
         } catch(ErrorsException ee) {
           exceptionDuringProvision = ee;
           throw new ProvisionException(errors.merge(ee.getErrors()).getMessages());
@@ -118,7 +123,6 @@ final class ProvisionListenerStackCallback<T> {
       } else if (index < listeners.length) {
         int currentIdx = index;
         try {
-
           listeners[index].onProvision(this);
         } catch(RuntimeException re) {
           erredListener = listeners[currentIdx];
