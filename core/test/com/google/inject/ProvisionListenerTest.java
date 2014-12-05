@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests for {@link Binder#bindListener(Matcher, ProvisionListener...)}
@@ -129,6 +130,66 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
   
+  public void testExceptionInFieldProvision() throws Exception {
+    final CountAndCaptureExceptionListener listener = new CountAndCaptureExceptionListener();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bindListener(new AbstractMatcher<Binding<?>>() {
+          @Override public boolean matches(Binding<?> binding) {
+            return binding.getKey().getRawType().equals(DependsOnFooBombInField.class);
+          }
+        }, listener);
+      }
+    });
+    assertEquals(0, listener.beforeProvision);
+    String expectedMsg = null;
+    try {
+      injector.getInstance(DependsOnFooBombInField.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertEquals(1, expected.getErrorMessages().size());
+      expectedMsg = expected.getMessage();
+      assertContains(listener.capture.get().getMessage(),
+          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
+          " at " + FooBomb.class.getName(),
+          " while locating " + FooBomb.class.getName(),
+          " while locating " + DependsOnFooBombInField.class.getName());
+    }
+    assertEquals(1, listener.beforeProvision);
+    assertEquals(expectedMsg, listener.capture.get().getMessage());
+    assertEquals(0, listener.afterProvision);
+  }
+  
+  public void testExceptionInCxtorProvision() throws Exception {
+    final CountAndCaptureExceptionListener listener = new CountAndCaptureExceptionListener();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bindListener(new AbstractMatcher<Binding<?>>() {
+          @Override public boolean matches(Binding<?> binding) {
+            return binding.getKey().getRawType().equals(DependsOnFooBombInCxtor.class);
+          }
+        }, listener);
+      }
+    });
+    assertEquals(0, listener.beforeProvision);
+    String expectedMsg = null;
+    try {
+      injector.getInstance(DependsOnFooBombInCxtor.class);
+      fail();
+    } catch (ProvisionException expected) {
+      assertEquals(1, expected.getErrorMessages().size());
+      expectedMsg = expected.getMessage();
+      assertContains(listener.capture.get().getMessage(),
+          "1) Error injecting constructor, java.lang.RuntimeException: Retry, Abort, Fail",
+          " at " + FooBomb.class.getName(),
+          " while locating " + FooBomb.class.getName(),
+          " while locating " + DependsOnFooBombInCxtor.class.getName());
+    }
+    assertEquals(1, listener.beforeProvision);
+    assertEquals(expectedMsg, listener.capture.get().getMessage());
+    assertEquals(0, listener.afterProvision);
+  }
+
   public void testListenerCallsProvisionTwice() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -374,10 +435,34 @@ public class ProvisionListenerTest extends TestCase {
     }
   }
   
+  static class DependsOnFooBombInField {
+    @Inject FooBomb fooBomb;
+  }
+  
+  static class DependsOnFooBombInCxtor {
+    @Inject DependsOnFooBombInCxtor(FooBomb fooBomb) {}
+  }
+  
   private static class Counter implements ProvisionListener {
     int count = 0;
     public <T> void onProvision(ProvisionInvocation<T> provision) {
       count++;
+    }
+  }
+  
+  private static class CountAndCaptureExceptionListener implements ProvisionListener {
+    int beforeProvision = 0;
+    int afterProvision = 0;
+    AtomicReference<RuntimeException> capture = new AtomicReference<RuntimeException>();
+    public <T> void onProvision(ProvisionInvocation<T> provision) {
+      beforeProvision++;
+      try {
+        provision.provision();
+      } catch (RuntimeException re) {
+        capture.set(re);
+        throw re;
+      }
+      afterProvision++;
     }
   }
   
