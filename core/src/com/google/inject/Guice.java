@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import com.google.inject.internal.InternalInjectorCreator;
-
 import java.util.Arrays;
 
 /**
@@ -49,14 +48,19 @@ import java.util.Arrays;
  */
 public final class Guice {
 
-  private Guice() {}
+  private static HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory =
+      new HierarchyTraversalFilterFactory();
+  private static AnnotationDatabaseFinder annotationDatabaseFinder;
+
+  private Guice() {
+  }
 
   /**
    * Creates an injector for the given set of modules. This is equivalent to
    * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
    *
    * @throws CreationException if one or more errors occur during injector
-   *     construction
+   * construction
    */
   public static Injector createInjector(Module... modules) {
     return createInjector(Arrays.asList(modules));
@@ -67,7 +71,7 @@ public final class Guice {
    * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
    *
    * @throws CreationException if one or more errors occur during injector
-   *     creation
+   * creation
    */
   public static Injector createInjector(Iterable<? extends Module> modules) {
     return createInjector(Stage.DEVELOPMENT, modules);
@@ -78,7 +82,7 @@ public final class Guice {
    * stage.
    *
    * @throws CreationException if one or more errors occur during injector
-   *     creation.
+   * creation.
    */
   public static Injector createInjector(Stage stage, Module... modules) {
     return createInjector(stage, Arrays.asList(modules));
@@ -89,13 +93,63 @@ public final class Guice {
    * stage.
    *
    * @throws CreationException if one or more errors occur during injector
-   *     construction
+   * construction
    */
-  public static Injector createInjector(Stage stage,
-      Iterable<? extends Module> modules) {
-    return new InternalInjectorCreator()
-        .stage(stage)
-        .addModules(modules)
-        .build();
+  public static Injector createInjector(Stage stage, Iterable<? extends Module> modules) {
+    doSetAnnotationDatabaseFinderToModules(modules);
+    return new InternalInjectorCreator().stage(stage).addModules(modules).build();
+  }
+
+  /**
+   * Creates a {@link HierarchyTraversalFilter} using the {@link #hierarchyTraversalFilterFactory}.
+   *
+   * @return a new filter that can be used to selectively prune classes traversed by Guice to find
+   * injection points.
+   */
+  public static HierarchyTraversalFilter createHierarchyTraversalFilter() {
+    HierarchyTraversalFilter hierarchyTraversalFilter =
+        hierarchyTraversalFilterFactory.createHierarchyTraversalFilter();
+    if (annotationDatabaseFinder == null) {
+      return hierarchyTraversalFilter;
+    } else {
+      return new AnnotatedGuiceHierarchyTraversalFilter(annotationDatabaseFinder,
+          hierarchyTraversalFilter);
+    }
+  }
+
+  /**
+   * Sets a factory to create {@link HierarchyTraversalFilter} instances.
+   *
+   * @param hierarchyTraversalFilterFactory the new factory used by Guice to prune hierarchy trees
+   * when finding injection points.
+   */
+  public static void setHierarchyTraversalFilterFactory(
+      HierarchyTraversalFilterFactory hierarchyTraversalFilterFactory) {
+    Guice.hierarchyTraversalFilterFactory = hierarchyTraversalFilterFactory;
+  }
+
+  /**
+   * Sets the names of packages to take into account to find annotation databases.
+   *
+   * @param packageNames the names of packages to take into account to find annotation databases.
+   */
+  public static void setAnnotationDatabasePackageNames(final String[] packageNames) {
+    if (packageNames != null && packageNames.length != 0) {
+      annotationDatabaseFinder = new AnnotationDatabaseFinder(packageNames);
+    } else {
+      annotationDatabaseFinder = null;
+    }
+  }
+
+  public static AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
+    return annotationDatabaseFinder;
+  }
+
+  private static void doSetAnnotationDatabaseFinderToModules(Iterable<? extends Module> modules) {
+    for (Module module : modules) {
+      if (module instanceof AbstractModule) {
+        ((AbstractModule) module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
+      }
+    }
   }
 }

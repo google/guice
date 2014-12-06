@@ -163,13 +163,13 @@ public final class BoundFieldModule implements Module {
         Bind bindAnnotation,
         TypeLiteral<?> fieldType) {
       this.field = field;
-      this.type = fieldType;
+      type = fieldType;
       this.bindAnnotation = bindAnnotation;
 
       field.setAccessible(true);
 
-      this.naturalType = getNaturalFieldType();
-      this.boundType = getBoundType();
+      naturalType = getNaturalFieldType();
+      boundType = getBoundType();
     }
 
     private TypeLiteral<?> getBoundType() {
@@ -184,7 +184,7 @@ public final class BoundFieldModule implements Module {
               "Non parameterized Provider fields must have an explicit "
               + "binding class via @Bind(to = Foo.class)");
         }
-        return this.naturalType.get();
+        return naturalType.get();
       } else {
         return TypeLiteral.get(bindClass);
       }

@@ -23,7 +23,6 @@ import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOptio
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;

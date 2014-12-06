@@ -18,7 +18,6 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 

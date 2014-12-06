@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+
 /**
  * A module contributes configuration information, typically interface
  * bindings, which will be used to create an {@link Injector}. A Guice-based

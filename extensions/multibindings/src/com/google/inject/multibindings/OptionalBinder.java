@@ -22,6 +22,16 @@ import static com.google.inject.multibindings.Multibinder.checkConfiguration;
 import static com.google.inject.util.Types.newParameterizedType;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Set;
+
+import javax.inject.Qualifier;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
@@ -44,16 +54,6 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.Toolable;
 import com.google.inject.util.Types;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.inject.Qualifier;
-
 
 /**
  * An API to bind optional values, optionally with a default value.
@@ -63,37 +63,44 @@ import javax.inject.Qualifier;
  * <li>It allows a framework to supply a default value that can be changed
  *     by users.
  * </ol>
- * 
+ *
  * <p>When an OptionalBinder is added, it will always supply the bindings:
  * {@code Optional<T>} and {@code Optional<Provider<T>>}.  If
  * {@link #setBinding} or {@link #setDefault} are called, it will also
  * bind {@code T}.
- * 
+ *
  * <p>{@code setDefault} is intended for use by frameworks that need a default
  * value.  User code can call {@code setBinding} to override the default.
  * <b>Warning: Even if setBinding is called, the default binding
  * will still exist in the object graph.  If it is a singleton, it will be
  * instantiated in {@code Stage.PRODUCTION}.</b>
- * 
+ *
  * <p>If setDefault or setBinding are linked to Providers, the Provider may return
  * {@code null}.  If it does, the Optional bindings will be absent.  Binding
  * setBinding to a Provider that returns null will not cause OptionalBinder
  * to fall back to the setDefault binding.
+<<<<<<< HEAD
+ *
+ * <p>If neither setDefault nor setBinding are called, the optionals will be
+ * absent.  Otherwise, the optionals will return present if they are bound
+ * to a non-null value.
+=======
  * 
  * <p>If neither setDefault nor setBinding are called, it will try to link to a
  * user-supplied binding of the same type.  If no binding exists, the optionals
  * will be absent.  Otherwise, if a user-supplied binding of that type exists,
  * or if setBinding or setDefault are called, the optionals will return present
  * if they are bound to a non-null value.
+>>>>>>> master
  *
  * <p>Values are resolved at injection time. If a value is bound to a
  * provider, that provider's get method will be called each time the optional
  * is injected (unless the binding is also scoped, or an optional of provider is
  * injected).
- * 
+ *
  * <p>Annotations are used to create different optionals of the same key/value
  * type. Each distinct annotation gets its own independent binding.
- *  
+ *
  * <pre><code>
  * public class FrameworkModule extends AbstractModule {
  *   protected void configure() {
@@ -102,6 +109,11 @@ import javax.inject.Qualifier;
  * }</code></pre>
  *
  * <p>With this module, an {@link Optional}{@code <Renamer>} can now be
+<<<<<<< HEAD
+ * injected.  With no other bindings, the optional will be absent.  However,
+ * once a user adds a binding:
+ *
+=======
  * injected.  With no other bindings, the optional will be absent.
  * Users can specify bindings in one of two ways:
  * 
@@ -114,6 +126,7 @@ import javax.inject.Qualifier;
  * }</code></pre>
  * 
  * <p>or Option 2:
+>>>>>>> master
  * <pre><code>
  * public class UserRenamerModule extends AbstractModule {
  *   protected void configure() {
@@ -121,9 +134,15 @@ import javax.inject.Qualifier;
  *         .setBinding().to(ReplacingRenamer.class);
  *   }
  * }</code></pre>
+<<<<<<< HEAD
+ * .. then the {@code Optional<Renamer>} will be present and supply the
+ * ReplacingRenamer.
+ *
+=======
  * With both options, the {@code Optional<Renamer>} will be present and supply the
  * ReplacingRenamer. 
  * 
+>>>>>>> master
  * <p>Default values can be supplied using:
  * <pre><code>
  * public class FrameworkModule extends AbstractModule {
@@ -193,11 +212,11 @@ public abstract class OptionalBinder<T> {
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Class<T> type) {
     return newOptionalBinder(binder, Key.get(type));
   }
-  
+
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, TypeLiteral<T> type) {
     return newOptionalBinder(binder, Key.get(type));
   }
-  
+
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Key<T> type) {
     binder = binder.skipSources(OptionalBinder.class, RealOptionalBinder.class);
     RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<T>(binder, type);
@@ -254,9 +273,9 @@ public abstract class OptionalBinder<T> {
   /**
    * Returns a binding builder used to set the default value that will be injected.
    * The binding set by this method will be ignored if {@link #setBinding} is called.
-   * 
+   *
    * <p>It is an error to call this method without also calling one of the {@code to}
-   * methods on the returned binding builder. 
+   * methods on the returned binding builder.
    */
   public abstract LinkedBindingBuilder<T> setDefault();
 
@@ -264,12 +283,12 @@ public abstract class OptionalBinder<T> {
   /**
    * Returns a binding builder used to set the actual value that will be injected.
    * This overrides any binding set by {@link #setDefault}.
-   * 
+   *
    * <p>It is an error to call this method without also calling one of the {@code to}
-   * methods on the returned binding builder. 
+   * methods on the returned binding builder.
    */
   public abstract LinkedBindingBuilder<T> setBinding();
-  
+
   enum Source { DEFAULT, ACTUAL }
   
   @Retention(RUNTIME)
@@ -369,7 +388,7 @@ public abstract class OptionalBinder<T> {
       // Optional is immutable, so it's safe to expose Optional<Provider<T>> as
       // Optional<javax.inject.Provider<T>> (since Guice provider implements javax Provider).
       @SuppressWarnings({"unchecked", "cast"})
-      Key massagedOptionalProviderKey = (Key) optionalProviderKey;
+      Key massagedOptionalProviderKey = optionalProviderKey;
       binder.bind(optionalJavaxProviderKey).to(massagedOptionalProviderKey);
 
       binder.bind(optionalKey).toProvider(new RealOptionalKeyProvider());

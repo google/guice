@@ -2,7 +2,6 @@ package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
-
 import junit.framework.TestCase;
 
 import java.lang.annotation.Documented;

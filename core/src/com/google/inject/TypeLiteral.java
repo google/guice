@@ -96,7 +96,7 @@ public class TypeLiteral<T> {
    * canonical form}.
    */
   static Type getSuperclassTypeParameter(Class<?> subclass) {
-    Type superclass = subclass.getGenericSuperclass();
+    Type superclass = MoreTypes.getGenericSuperclass(subclass);
     if (superclass instanceof Class) {
       throw new RuntimeException("Missing type parameter.");
     }

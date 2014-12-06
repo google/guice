@@ -19,6 +19,9 @@ package com.google.inject;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -27,9 +30,6 @@ import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 
 /**
  * A support class for {@link Module}s which reduces repetition and results in
@@ -52,7 +52,24 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractModule implements Module {
 
-  Binder binder;
+  protected Binder binder;
+
+  @SuppressWarnings("rawtypes")
+  private AnnotatedBindingBuilder noOpAnnotatedBindingBuilder = new NoOpAnnotatedBindingBuilder();
+  private AnnotationDatabaseFinder annotationDatabaseFinder;
+
+  /**
+   * Sets the {@link AnnotationDatabaseFinder} to filter classes to bind.
+   * The {@link AnnotationDatabaseFinder} will know which classes can be injected and can't,
+   * it also knows if a given annotation is used or not.
+   * <br/>
+   * This method <b>must</b> be called before configure to take effect.
+   *
+   * @param annotationDatabaseFinder used to filter classes to bind.
+   */
+  public void setAnnotationDatabaseFinder(AnnotationDatabaseFinder annotationDatabaseFinder) {
+    this.annotationDatabaseFinder = annotationDatabaseFinder;
+  }
 
   public final synchronized void configure(Binder builder) {
     checkState(this.binder == null, "Re-entry is not allowed.");
@@ -60,8 +77,7 @@ public abstract class AbstractModule implements Module {
     this.binder = checkNotNull(builder, "builder");
     try {
       configure();
-    }
-    finally {
+    } finally {
       this.binder = null;
     }
   }
@@ -82,8 +98,7 @@ public abstract class AbstractModule implements Module {
   /**
    * @see Binder#bindScope(Class, Scope)
    */
-  protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-      Scope scope) {
+  protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
     binder().bindScope(scopeAnnotation, scope);
   }
 
@@ -102,10 +117,23 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
+   * If an {@link AnnotationDatabaseFinder} is used, this method will only bind
+   * the classes that are supposed to be injected.
+   *
    * @see Binder#bind(Class)
    */
+  @SuppressWarnings("unchecked")
   protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return binder().bind(clazz);
+    if (isInjectable(clazz)) {
+      return binder.bind(clazz);
+    } else {
+      return noOpAnnotatedBindingBuilder;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <T> AnnotatedBindingBuilder<T> superbind(Class<T> clazz) {
+    return binder.bind(clazz);
   }
 
   /**
@@ -116,9 +144,15 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#install(Module)
+   * If a module has {@link AnnotationDatabaseFinder} then it is passed
+   * to each submodule prior to installing it.
+   *
+   * @see Binder#install(Module).
    */
   protected void install(Module module) {
+    if (annotationDatabaseFinder != null && module instanceof AbstractModule) {
+      ((AbstractModule) module).setAnnotationDatabaseFinder(annotationDatabaseFinder);
+    }
     binder().install(module);
   }
 
@@ -130,7 +164,7 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#addError(Throwable) 
+   * @see Binder#addError(Throwable)
    */
   protected void addError(Throwable t) {
     binder().addError(t);
@@ -159,18 +193,19 @@ public abstract class AbstractModule implements Module {
     binder().requestStaticInjection(types);
   }
 
-  /*if[AOP]*/
+    /*if[AOP]*/
+
   /**
    * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
-   *  com.google.inject.matcher.Matcher,
-   *  org.aopalliance.intercept.MethodInterceptor[])
+   * com.google.inject.matcher.Matcher,
+   * org.aopalliance.intercept.MethodInterceptor[])
    */
   protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
       Matcher<? super Method> methodMatcher,
       org.aopalliance.intercept.MethodInterceptor... interceptors) {
     binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
   }
-  /*end[AOP]*/
+    /*end[AOP]*/
 
   /**
    * Adds a dependency from this module to {@code key}. When the injector is
@@ -222,7 +257,7 @@ public abstract class AbstractModule implements Module {
   }
 
   /**
-   * @see Binder#currentStage() 
+   * @see Binder#currentStage()
    * @since 2.0
    */
   protected Stage currentStage() {
@@ -247,14 +282,13 @@ public abstract class AbstractModule implements Module {
 
   /**
    * @see Binder#bindListener(com.google.inject.matcher.Matcher,
-   *  com.google.inject.spi.TypeListener)
+   * com.google.inject.spi.TypeListener)
    * @since 2.0
    */
-  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-      TypeListener listener) {
+  protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher, TypeListener listener) {
     binder().bindListener(typeMatcher, listener);
   }
-  
+
   /**
    * @see Binder#bindListener(Matcher, ProvisionListener...)
    * @since 4.0
@@ -262,5 +296,43 @@ public abstract class AbstractModule implements Module {
   protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
       ProvisionListener... listener) {
     binder().bindListener(bindingMatcher, listener);
+  }
+
+  /**
+   * Indicates whether or not instances of a given class can possibly be injected or not.
+   *
+   * @param clazz the class whose instance are injectable or not.
+   * @return Indicates whether or not instances of a given class can possibly be injected or not
+   * according to the {@link AnnotationDatabaseFinder} used by the module. If no {@link
+   * AnnotationDatabaseFinder}
+   * is used then this method always return true.
+   */
+  @SuppressWarnings("rawtypes")
+  protected boolean isInjectable(Class clazz) {
+    return annotationDatabaseFinder == null || annotationDatabaseFinder.getBindableClassesSet()
+        .contains(clazz.getName());
+  }
+
+  /**
+   * Indicates if a given annotation is used according to the {@link AnnotationDatabaseFinder}.
+   *
+   * @param annotationClass the annotation class (like {@link Inject}).
+   * @return true or false whether this annotation is used according to the {@link
+   * AnnotationDatabaseFinder}.
+   * If no {@link AnnotationDatabaseFinder} is used, then this method always return true.
+   */
+  @SuppressWarnings("rawtypes")
+  protected boolean hasInjectionPointsForAnnotation(Class annotationClass) {
+    return annotationDatabaseFinder == null
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedConstructorSet()
+        .containsKey(annotationClass.getName())
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedMethodSet()
+        .containsKey(annotationClass.getName())
+        || annotationDatabaseFinder.getMapAnnotationToMapClassContainingInjectionToInjectedFieldSet()
+        .containsKey(annotationClass.getName());
+  }
+
+  public AnnotationDatabaseFinder getAnnotationDatabaseFinder() {
+    return annotationDatabaseFinder;
   }
 }

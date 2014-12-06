@@ -21,7 +21,6 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.ALLOW_BINDING_PROVIDER;
 import static com.google.inject.JitBindingsTest.GetBindingCheck.FAIL_ALL;
-
 import junit.framework.TestCase;
 
 import java.util.Set;

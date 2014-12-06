@@ -18,11 +18,21 @@ package com.google.inject.internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Binder;
+import com.google.inject.Guice;
+import com.google.inject.HierarchyTraversalFilter;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -31,14 +41,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Modules;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
@@ -52,11 +54,14 @@ public final class ProviderMethodsModule implements Module {
 
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
+  private HierarchyTraversalFilter filter;
   private final boolean skipFastClassGeneration;
 
   private ProviderMethodsModule(Object delegate, boolean skipFastClassGeneration) {
     this.delegate = checkNotNull(delegate, "delegate");
-    this.typeLiteral = TypeLiteral.get(this.delegate.getClass());
+
+    typeLiteral = TypeLiteral.get(this.delegate.getClass());
+    filter = Guice.createHierarchyTraversalFilter();
     this.skipFastClassGeneration = skipFastClassGeneration;
   }
 
@@ -96,21 +101,25 @@ public final class ProviderMethodsModule implements Module {
   public List<ProviderMethod<?>> getProviderMethods(Binder binder) {
     List<ProviderMethod<?>> result = Lists.newArrayList();
     Multimap<Signature, Method> methodsBySignature = HashMultimap.create();
-    for (Class<?> c = delegate.getClass(); c != Object.class; c = c.getSuperclass()) {
-      for (Method method : c.getDeclaredMethods()) {
+    filter.reset();
+    Class<?> c = delegate.getClass();
+    while (filter.isWorthScanningForMethods(Provides.class.getName(), c)) {
+      for (Method method : filter.getAllMethods(Provides.class.getName(), c)) {
         // private/static methods cannot override or be overridden by other methods, so there is no
         // point in indexing them.
         // Skip synthetic methods and bridge methods since java will automatically generate
         // synthetic overrides in some cases where we don't want to generate an error (e.g.
         // increasing visibility of a subclass).
         if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.STATIC)) == 0)
-            && !method.isBridge() && !method.isSynthetic()) {
+            && !method.isBridge()
+            && !method.isSynthetic()) {
           methodsBySignature.put(new Signature(method), method);
         }
         if (isProvider(method)) {
           result.add(createProviderMethod(binder, method));
         }
       }
+      c = c.getSuperclass();
     }
     // we have found all the providers and now need to identify if any were overridden
     // In the worst case this will have O(n^2) in the number of @Provides methods, but that is only
@@ -125,11 +134,8 @@ public final class ProviderMethodsModule implements Module {
         }
         // now we know matching signature is in a subtype of method.getDeclaringClass()
         if (overrides(matchingSignature, method)) {
-          binder.addError(
-              "Overriding @Provides methods is not allowed."
-                  + "\n\t@Provides method: %s\n\toverridden by: %s",
-              method,
-              matchingSignature);
+          binder.addError("Overriding @Provides methods is not allowed."
+                  + "\n\t@Provides method: %s\n\toverridden by: %s", method, matchingSignature);
           break;
         }
       }
@@ -144,9 +150,8 @@ public final class ProviderMethodsModule implements Module {
    * bridge methods (which always have erased signatures).
    */
   private static boolean isProvider(Method method) {
-    return !method.isBridge()
-        && !method.isSynthetic()
-        && method.isAnnotationPresent(Provides.class);
+    return !method.isBridge() && !method.isSynthetic() && method.isAnnotationPresent(
+        Provides.class);
   }
 
   private final class Signature {
@@ -217,15 +222,15 @@ public final class ProviderMethodsModule implements Module {
         key = loggerKey;
       }
       dependencies.add(Dependency.get(key));
-      parameterProviders.add(binder.getProvider(key));        
+      parameterProviders.add(binder.getProvider(key));
     }
 
     @SuppressWarnings("unchecked") // Define T as the method's return type.
-    TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
+        TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
 
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
-    Class<? extends Annotation> scopeAnnotation
-        = Annotations.findScopeAnnotation(errors, method.getAnnotations());
+    Class<? extends Annotation> scopeAnnotation =
+        Annotations.findScopeAnnotation(errors, method.getAnnotations());
 
     for (Message message : errors.getMessages()) {
       binder.addError(message);
@@ -241,22 +246,21 @@ public final class ProviderMethodsModule implements Module {
   }
 
   @Override public boolean equals(Object o) {
-    return o instanceof ProviderMethodsModule
-        && ((ProviderMethodsModule) o).delegate == delegate;
+    return o instanceof ProviderMethodsModule && ((ProviderMethodsModule) o).delegate == delegate;
   }
 
   @Override public int hashCode() {
     return delegate.hashCode();
   }
-  
+
   /** A provider that returns a logger based on the method name. */
   private static final class LogProvider implements Provider<Logger> {
     private final String name;
-    
+
     public LogProvider(Method method) {
-      this.name = method.getDeclaringClass().getName() + "." + method.getName();
+      name = method.getDeclaringClass().getName() + "." + method.getName();
     }
-    
+
     public Logger get() {
       return Logger.getLogger(name);
     }

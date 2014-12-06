@@ -19,8 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-
 import junit.framework.TestCase;
 
 import java.io.IOException;

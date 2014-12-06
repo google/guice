@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import static com.google.inject.matcher.Matchers.any;
-
 import junit.framework.TestCase;
 
 import org.aopalliance.intercept.MethodInterceptor;

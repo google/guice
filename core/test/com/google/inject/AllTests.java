@@ -40,7 +40,6 @@ import com.google.inject.util.NoopOverrideTest;
 import com.google.inject.util.OverrideModuleTest;
 import com.google.inject.util.ProvidersTest;
 import com.google.inject.util.TypesTest;
-
 import com.googlecode.guice.GuiceTck;
 import com.googlecode.guice.Jsr330Test;
 
