@@ -50,7 +50,7 @@ class FilterChainInvocation implements FilterChain {
   
   private final FilterDefinition[] filterDefinitions;
   private final FilterChain proceedingChain;
-  private final ManagedServletPipeline servletPipeline;
+  private final AbstractServletPipeline servletPipeline;
 
   //state variable tracks current link in filterchain
   private int index = -1;
@@ -58,7 +58,7 @@ class FilterChainInvocation implements FilterChain {
   private boolean cleanedStacks = false;
 
   public FilterChainInvocation(FilterDefinition[] filterDefinitions,
-      ManagedServletPipeline servletPipeline, FilterChain proceedingChain) {
+      AbstractServletPipeline servletPipeline, FilterChain proceedingChain) {
 
     this.filterDefinitions = filterDefinitions;
     this.servletPipeline = servletPipeline;

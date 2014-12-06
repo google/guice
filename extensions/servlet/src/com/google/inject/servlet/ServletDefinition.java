@@ -46,12 +46,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * An internal representation of a servlet definition mapped to a particular URI pattern. Also
- * performs the request dispatch to that servlet. How nice and OO =)
+ * Defines a servlet mapped to a URI pattern and performs the request dispatch to that servlet.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinition> {
+public class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinition> {
   private final String pattern;
   private final Key<? extends HttpServlet> servletKey;
   private final UriPatternMatcher patternMatcher;
@@ -100,7 +99,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     return uri != null && patternMatcher.matches(uri);
   }
 
-  public void init(final ServletContext servletContext, Injector injector,
+  void init(final ServletContext servletContext, Injector injector,
       Set<HttpServlet> initializedSoFar) throws ServletException {
 
     // This absolutely must be a singleton, and so is only initialized once.
@@ -140,7 +139,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
     initializedSoFar.add(httpServlet);
   }
 
-  public void destroy(Set<HttpServlet> destroyedSoFar) {
+  void destroy(Set<HttpServlet> destroyedSoFar) {
     HttpServlet reference = httpServlet.get();
 
     // Do nothing if this Servlet was invalid (usually due to not being scoped
@@ -169,7 +168,7 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
    * @throws IOException If thrown by underlying servlet
    * @throws ServletException If thrown by underlying servlet
    */
-  public boolean service(ServletRequest servletRequest,
+  boolean service(ServletRequest servletRequest,
       ServletResponse servletResponse) throws IOException, ServletException {
 
     final HttpServletRequest request = (HttpServletRequest) servletRequest;

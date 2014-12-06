@@ -16,7 +16,6 @@
 package com.google.inject.servlet;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -24,48 +23,39 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
- * Central routing/dispatch class handles lifecycle of managed filters, and delegates to the servlet
- * pipeline.
+ * Managed implementation of a central routing/dispatch class which handles lifecycle of managed
+ * filters, and delegates to a managed servlet pipeline.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class ManagedFilterPipeline implements FilterPipeline{
+class ManagedFilterPipeline extends AbstractFilterPipeline {
   private final FilterDefinition[] filterDefinitions;
-  private final ManagedServletPipeline servletPipeline;
-  private final Provider<ServletContext> servletContext;
 
-  //Unfortunately, we need the injector itself in order to create filters + servlets
-  private final Injector injector;
-
-  //Guards a DCL, so needs to be volatile
-  private volatile boolean initialized = false;
   private static final TypeLiteral<FilterDefinition> FILTER_DEFS =
       TypeLiteral.get(FilterDefinition.class);
 
   @Inject
   public ManagedFilterPipeline(Injector injector, ManagedServletPipeline servletPipeline,
       Provider<ServletContext> servletContext) {
-    this.injector = injector;
-    this.servletPipeline = servletPipeline;
-    this.servletContext = servletContext;
+    super(injector, servletPipeline, servletContext);
 
     this.filterDefinitions = collectFilterDefinitions(injector);
+  }
+
+  @Override
+  protected boolean hasFiltersMapped() {
+    return filterDefinitions.length > 0;
+  }
+
+  @Override
+  protected FilterDefinition[] filterDefinitions() {
+    return filterDefinitions;
   }
 
   /**
@@ -83,87 +73,5 @@ class ManagedFilterPipeline implements FilterPipeline{
     
     // Copy to a fixed-size array for speed of iteration.
     return filterDefinitions.toArray(new FilterDefinition[filterDefinitions.size()]);
-  }
-
-  public synchronized void initPipeline(ServletContext servletContext)
-      throws ServletException {
-
-    //double-checked lock, prevents duplicate initialization
-    if (initialized)
-      return;
-
-    // Used to prevent duplicate initialization.
-    Set<Filter> initializedSoFar = Sets.newIdentityHashSet();
-
-    for (FilterDefinition filterDefinition : filterDefinitions) {
-      filterDefinition.init(servletContext, injector, initializedSoFar);
-    }
-
-    //next, initialize servlets...
-    servletPipeline.init(servletContext, injector);
-
-    //everything was ok...
-    initialized = true;
-  }
-
-  public void dispatch(ServletRequest request, ServletResponse response,
-      FilterChain proceedingFilterChain) throws IOException, ServletException {
-
-    //lazy init of filter pipeline (OK by the servlet specification). This is needed
-    //in order for us not to force users to create a GuiceServletContextListener subclass.
-    if (!initialized) {
-      initPipeline(servletContext.get());
-    }
-
-    //obtain the servlet pipeline to dispatch against
-    new FilterChainInvocation(filterDefinitions, servletPipeline, proceedingFilterChain)
-        .doFilter(withDispatcher(request, servletPipeline), response);
-
-  }
-
-  /**
-   * Used to create an proxy that dispatches either to the guice-servlet pipeline or the regular
-   * pipeline based on uri-path match. This proxy also provides minimal forwarding support.
-   *
-   * We cannot forward from a web.xml Servlet/JSP to a guice-servlet (because the filter pipeline
-   * is not called again). However, we can wrap requests with our own dispatcher to forward the
-   * *other* way. web.xml Servlets/JSPs can forward to themselves as per normal.
-   *
-   * This is not a problem cuz we intend for people to migrate from web.xml to guice-servlet,
-   * incrementally, but not the other way around (which, we should actively discourage).
-   */
-  @SuppressWarnings({ "JavaDoc", "deprecation" })
-  private ServletRequest withDispatcher(ServletRequest servletRequest,
-      final ManagedServletPipeline servletPipeline) {
-
-    // don't wrap the request if there are no servlets mapped. This prevents us from inserting our
-    // wrapper unless it's actually going to be used. This is necessary for compatibility for apps
-    // that downcast their HttpServletRequests to a concrete implementation.
-    if (!servletPipeline.hasServletsMapped()) {
-      return servletRequest;
-    }
-
-    HttpServletRequest request = (HttpServletRequest) servletRequest;
-    //noinspection OverlyComplexAnonymousInnerClass
-    return new HttpServletRequestWrapper(request) {
-
-      @Override
-      public RequestDispatcher getRequestDispatcher(String path) {
-        final RequestDispatcher dispatcher = servletPipeline.getRequestDispatcher(path);
-
-        return (null != dispatcher) ? dispatcher : super.getRequestDispatcher(path);
-      }
-    };
-  }
-
-  public void destroyPipeline() {
-    //destroy servlets first
-    servletPipeline.destroy();
-
-    //go down chain and destroy all our filters
-    Set<Filter> destroyedSoFar = Sets.newIdentityHashSet();
-    for (FilterDefinition filterDefinition : filterDefinitions) {
-      filterDefinition.destroy(destroyedSoFar);
-    }
   }
 }

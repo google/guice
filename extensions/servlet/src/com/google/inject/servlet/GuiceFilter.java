@@ -89,7 +89,7 @@ public class GuiceFilter implements Filter {
     this(null);
   }
 
-  @Inject GuiceFilter(FilterPipeline filterPipeline) {
+  @Inject protected GuiceFilter(FilterPipeline filterPipeline) {
     injectedPipeline = filterPipeline;
   }
 

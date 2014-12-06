@@ -15,27 +15,14 @@
  */
 package com.google.inject.servlet;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 /**
  * A wrapping dispatcher for servlets, in much the same way as {@link ManagedFilterPipeline} is for
@@ -44,7 +31,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class ManagedServletPipeline {
+class ManagedServletPipeline extends AbstractServletPipeline {
   private final ServletDefinition[] servletDefinitions;
   private static final TypeLiteral<ServletDefinition> SERVLET_DEFS =
       TypeLiteral.get(ServletDefinition.class);
@@ -54,8 +41,14 @@ class ManagedServletPipeline {
     this.servletDefinitions = collectServletDefinitions(injector);
   }
 
-  boolean hasServletsMapped() {
+  @Override
+  protected boolean hasServletsMapped() {
     return servletDefinitions.length > 0;
+  }
+
+  @Override
+  protected ServletDefinition[] servletDefinitions() {
+    return servletDefinitions;
   }
 
   /**
@@ -73,141 +66,5 @@ class ManagedServletPipeline {
 
     // Copy to a fixed size array for speed.
     return servletDefinitions.toArray(new ServletDefinition[servletDefinitions.size()]);
-  }
-
-  public void init(ServletContext servletContext, Injector injector) throws ServletException {
-    Set<HttpServlet> initializedSoFar = Sets.newIdentityHashSet();
-
-    for (ServletDefinition servletDefinition : servletDefinitions) {
-      servletDefinition.init(servletContext, injector, initializedSoFar);
-    }
-  }
-
-  public boolean service(ServletRequest request, ServletResponse response)
-      throws IOException, ServletException {
-
-    //stop at the first matching servlet and service
-    for (ServletDefinition servletDefinition : servletDefinitions) {
-      if (servletDefinition.service(request, response)) {
-        return true;
-      }
-    }
-
-    //there was no match...
-    return false;
-  }
-
-  public void destroy() {
-    Set<HttpServlet> destroyedSoFar = Sets.newIdentityHashSet();
-    for (ServletDefinition servletDefinition : servletDefinitions) {
-      servletDefinition.destroy(destroyedSoFar);
-    }
-  }
-
-  /**
-   * @return Returns a request dispatcher wrapped with a servlet mapped to
-   * the given path or null if no mapping was found.
-   */
-  RequestDispatcher getRequestDispatcher(String path) {
-    final String newRequestUri = path;
-
-    // TODO(dhanji): check servlet spec to see if the following is legal or not.
-    // Need to strip query string if requested...
-
-    for (final ServletDefinition servletDefinition : servletDefinitions) {
-      if (servletDefinition.shouldServe(path)) {
-        return new RequestDispatcher() {
-          public void forward(ServletRequest servletRequest, ServletResponse servletResponse)
-              throws ServletException, IOException {
-            Preconditions.checkState(!servletResponse.isCommitted(),
-                "Response has been committed--you can only call forward before"
-                + " committing the response (hint: don't flush buffers)");
-
-            // clear buffer before forwarding
-            servletResponse.resetBuffer();
-
-            ServletRequest requestToProcess;
-            if (servletRequest instanceof HttpServletRequest) {
-               requestToProcess = wrapRequest((HttpServletRequest)servletRequest, newRequestUri);
-            } else {
-              // This should never happen, but instead of throwing an exception
-              // we will allow a happy case pass thru for maximum tolerance to
-              // legacy (and internal) code.
-              requestToProcess = servletRequest;
-            }
-
-            // now dispatch to the servlet
-            doServiceImpl(servletDefinition, requestToProcess, servletResponse);
-          }
-
-          public void include(ServletRequest servletRequest, ServletResponse servletResponse)
-              throws ServletException, IOException {
-            // route to the target servlet
-            doServiceImpl(servletDefinition, servletRequest, servletResponse);
-          }
-
-          private void doServiceImpl(ServletDefinition servletDefinition, ServletRequest servletRequest,
-              ServletResponse servletResponse) throws ServletException, IOException {
-            servletRequest.setAttribute(REQUEST_DISPATCHER_REQUEST, Boolean.TRUE);
-
-            try {
-              servletDefinition.doService(servletRequest, servletResponse);
-            } finally {
-              servletRequest.removeAttribute(REQUEST_DISPATCHER_REQUEST);
-            }
-          }
-        };
-      }
-    }
-
-    //otherwise, can't process
-    return null;
-  }
-
-  // visible for testing
-  static HttpServletRequest wrapRequest(HttpServletRequest request, String newUri) {
-    return new RequestDispatcherRequestWrapper(request, newUri);
-  }
-
-  /**
-   * A Marker constant attribute that when present in the request indicates to Guice servlet that
-   * this request has been generated by a request dispatcher rather than the servlet pipeline.
-   * In accordance with section 8.4.2 of the Servlet 2.4 specification.
-   */
-  public static final String REQUEST_DISPATCHER_REQUEST = "javax.servlet.forward.servlet_path";
-
-  private static class RequestDispatcherRequestWrapper extends HttpServletRequestWrapper {
-    private final String newRequestUri;
-
-    public RequestDispatcherRequestWrapper(HttpServletRequest servletRequest, String newRequestUri) {
-      super(servletRequest);
-      this.newRequestUri = newRequestUri;
-    }
-
-    @Override
-    public String getRequestURI() {
-      return newRequestUri;
-    }
-
-    @Override
-    public StringBuffer getRequestURL() {
-      StringBuffer url = new StringBuffer();
-      String scheme = getScheme();
-      int port = getServerPort();
-
-      url.append(scheme);
-      url.append("://");
-      url.append(getServerName());
-      // port might be -1 in some cases (see java.net.URL.getPort)
-      if (port > 0 &&
-          (("http".equals(scheme) && (port != 80)) ||
-           ("https".equals(scheme) && (port != 443)))) {
-        url.append(':');
-        url.append(port);
-      }
-      url.append(getRequestURI());
-
-      return (url);
-    }
   }
 }
