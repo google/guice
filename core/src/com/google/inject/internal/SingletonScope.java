@@ -1,5 +1,7 @@
 package com.google.inject.internal;
 
+import javax.annotation.concurrent.GuardedBy;
+
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
@@ -45,6 +47,13 @@ public class SingletonScope implements Scope {
        */
       private volatile Object instance;
 
+      /*
+       * If a creator throws an unchecked exception, ensure that we remember the failure
+       * and don't reattempt later.
+       */
+      @GuardedBy("rootInjectorLock")
+      private RuntimeException creatorException;
+
       // DCL on a volatile is safe as of Java 5, which we obviously require.
       @SuppressWarnings("DoubleCheckedLocking")
       public T get() {
@@ -58,8 +67,17 @@ public class SingletonScope implements Scope {
            * This block is re-entrant for circular dependencies.
            */
           synchronized (rootInjectorLock) {
+            if (creatorException != null) {
+              throw creatorException;
+            }
             if (instance == null) {
-              T provided = creator.get();
+              T provided;
+              try {
+                provided = creator.get();
+              } catch (RuntimeException e) {
+                creatorException = e;
+                throw e;
+              }
 
               // don't remember proxies; these exist only to serve circular dependencies
               if (Scopes.isCircularProxy(provided)) {

@@ -527,6 +527,12 @@ public final class Errors implements Serializable {
     if (root.errors == null) {
       root.errors = Lists.newArrayList();
     }
+    // If this message has already been noted, don't add it again
+    for (Message m : root.errors) {
+      if (m.getCause() == message.getCause() && m.getMessage().equals(message.getMessage())) {
+        return this;
+      }
+    }
     root.errors.add(message);
     return this;
   }

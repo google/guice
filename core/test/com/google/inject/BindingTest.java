@@ -273,8 +273,6 @@ public class BindingTest extends TestCase {
     } catch (CreationException expected) {
       assertContains(expected.getMessage(),
           "1) T cannot be used as a key; It is not fully specified.",
-          "at " + C.class.getName() + ".<init>(BindingTest.java:",
-          "2) T cannot be used as a key; It is not fully specified.",
           "at " + C.class.getName() + ".anotherT(BindingTest.java:");
     }
   }
