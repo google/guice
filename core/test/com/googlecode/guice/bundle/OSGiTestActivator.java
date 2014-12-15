@@ -44,7 +44,7 @@ import java.util.Random;
 
   // varying visibilities to test our code-generation support
 
-  public static class _ {}
+  public static class Undefined {}
 
   public interface A {}
 
@@ -59,21 +59,21 @@ import java.util.Random;
 
     public AA() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   protected static class AB
@@ -81,21 +81,21 @@ import java.util.Random;
 
     public AB() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   static class AC
@@ -103,21 +103,21 @@ import java.util.Random;
 
     public AC() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   private static class AD
@@ -125,21 +125,21 @@ import java.util.Random;
 
     public AD() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   public static class BA
@@ -147,21 +147,21 @@ import java.util.Random;
 
     protected BA() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   protected static class BB
@@ -169,21 +169,21 @@ import java.util.Random;
 
     protected BB() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   static class BC
@@ -191,21 +191,21 @@ import java.util.Random;
 
     protected BC() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   private static class BD
@@ -213,21 +213,21 @@ import java.util.Random;
 
     protected BD() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   public static class CA
@@ -235,21 +235,21 @@ import java.util.Random;
 
     CA() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   protected static class CB
@@ -257,21 +257,21 @@ import java.util.Random;
 
     CB() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   static class CC
@@ -279,21 +279,21 @@ import java.util.Random;
 
     CC() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   private static class CD
@@ -301,21 +301,21 @@ import java.util.Random;
 
     CD() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   public static class DA
@@ -323,21 +323,21 @@ import java.util.Random;
 
     @Inject private DA() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   protected static class DB
@@ -345,21 +345,21 @@ import java.util.Random;
 
     @Inject private DB() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   static class DC
@@ -367,21 +367,21 @@ import java.util.Random;
 
     @Inject private DC() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   private static class DD
@@ -389,21 +389,21 @@ import java.util.Random;
 
     private DD() {}
 
-    @Inject public void setA(_ _) {}
+    @Inject public void setA(Undefined undefined) {}
 
-    @Inject protected void setB(_ _) {}
+    @Inject protected void setB(Undefined undefined) {}
 
-    @Inject void setC(_ _) {}
+    @Inject void setC(Undefined undefined) {}
 
-    @Inject private void setD(_ _) {}
+    @Inject private void setD(Undefined undefined) {}
 
-    @Inject public _ a;
+    @Inject public Undefined a;
 
-    @Inject protected _ b;
+    @Inject protected Undefined b;
 
-    @Inject _ c;
+    @Inject Undefined c;
 
-    @Inject private _ d;
+    @Inject private Undefined d;
   }
 
   enum Visibility {
