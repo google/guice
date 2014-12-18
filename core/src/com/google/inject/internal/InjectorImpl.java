@@ -623,6 +623,13 @@ final class InjectorImpl implements Injector, Lookups {
    */
   <T> BindingImpl<T> createUninitializedBinding(Key<T> key, Scoping scoping, Object source,
       Errors errors, boolean jitBinding) throws ErrorsException {
+    if (!scoping.isExplicitlyScoped()) {
+        BindingImpl<Scoping> scopingBinding = getExistingBinding(Key.get(Scoping.class));
+        if (scopingBinding instanceof com.google.inject.spi.InstanceBinding) {
+            scoping = (Scoping)((com.google.inject.spi.InstanceBinding<?>)scopingBinding).getInstance();
+        }
+    }
+
     Class<?> rawType = key.getTypeLiteral().getRawType();
 
     ImplementedBy implementedBy = rawType.getAnnotation(ImplementedBy.class);
