@@ -611,19 +611,21 @@ public class MapBinderTest extends TestCase {
   }
 
   public void testMapBinderMapForbidsNullValues() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
+    Module m = new AbstractModule() {
       @Override protected void configure() {
         MapBinder.newMapBinder(binder(), String.class, String.class)
             .addBinding("null").toProvider(Providers.<String>of(null));
       }
-    });
+    };
+    Injector injector = Guice.createInjector(m);
 
     try {
       injector.getInstance(Key.get(mapOfString));
       fail();
     } catch(ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Map injection failed due to null value for key \"null\"");
+          "1) Map injection failed due to null value for key \"null\", bound at: "
+          + m.getClass().getName() + ".configure(");
     }
   }
 
