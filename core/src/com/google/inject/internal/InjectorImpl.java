@@ -101,7 +101,7 @@ final class InjectorImpl implements Injector, Lookups {
     NO_JIT,
     /** allows existing just in time bindings, but does not allow new ones */
     EXISTING_JIT,
-    /** allows existing just in time bindings & allows new ones to be created */
+    /** allows existing just in time bindings & allows new ones to be created in the current injector */
     NEW_OR_EXISTING_JIT,
   }
 
@@ -779,10 +779,14 @@ final class InjectorImpl implements Injector, Lookups {
       boolean jitDisabled, JitLimitation jitType) throws ErrorsException {
     // ask the parent to create the JIT binding
     if (parent != null) {
-      try {
-        return parent.createJustInTimeBindingRecursive(key, new Errors(), jitDisabled,
-            parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
-      } catch (ErrorsException ignored) {
+      if (jitDisabled && jitType == JitLimitation.NEW_OR_EXISTING_JIT) {
+        throw errors.jitDisabledInParent(key).toException();
+      } else {
+        try {
+          return parent.createJustInTimeBindingRecursive(key, new Errors(), jitDisabled,
+              parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
+        } catch (ErrorsException ignored) {
+        }
       }
     }
 
