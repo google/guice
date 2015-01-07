@@ -101,7 +101,7 @@ final class InjectorImpl implements Injector, Lookups {
     NO_JIT,
     /** allows existing just in time bindings, but does not allow new ones */
     EXISTING_JIT,
-    /** allows existing just in time bindings & allows new ones to be created in the current injector */
+    /** allows existing just in time bindings & allows new ones to be created */
     NEW_OR_EXISTING_JIT,
   }
 

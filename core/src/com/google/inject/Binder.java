@@ -429,8 +429,8 @@ public interface Binder {
   /**
    * Instructs the Injector that bindings must be listed in a Module in order to
    * be injected. Classes that are not explicitly bound in a module cannot be
-   * injected. Bindings created through a linked binding (
-   * <code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
+   * injected. Bindings created through a linked binding
+   * (<code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
    * implicit binding (<code>FooImpl</code>) cannot be directly injected unless
    * it is also explicitly bound (<code>bind(FooImpl.class)</code>).
    * <p>
@@ -447,10 +447,11 @@ public interface Binder {
    * does, the behavior is limited only to that child or any grandchildren. No
    * siblings of the child will require explicit bindings.
    * <p>
-   * If the parent did not require explicit bindings but the child does, it is
-   * possible that a linked binding in the child may add a JIT binding to the
-   * parent. The child will not be allowed to reference the target binding
-   * directly, but the parent and other children of the parent may be able to.
+   * In the absence of an explicit binding for the target, linked bindings in
+   * child injectors create a binding for the target in the parent. Since this
+   * behavior can be surprising, it causes an error instead if explicit bindings
+   * are required. To avoid this error, add an explicit binding for the target,
+   * either in the child or the parent.
    * 
    * @since 3.0
    */
