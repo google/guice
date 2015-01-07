@@ -1480,11 +1480,11 @@ public class CheckedProviderTest extends TestCase {
               .providing(ProvisionExceptionFoo.class);
           bindScope(BadScope.class, new Scope() {
             @Override
-            public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+            public <T> Provider<T> scope(final Key<T> key, Provider<T> unscoped) {
               return new Provider<T>() {
                 @Override
                 public T get() {
-                  throw new OutOfScopeException("failure");
+                  throw new OutOfScopeException("failure: " + key.toString());
                 }
               };
             }
@@ -1498,10 +1498,10 @@ public class CheckedProviderTest extends TestCase {
     } catch(ProvisionException pe) {
       assertEquals(2, pe.getErrorMessages().size());
       List<Message> messages = Lists.newArrayList(pe.getErrorMessages());
-      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure",
-          messages.get(0).getMessage());
-      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure",
-          messages.get(1).getMessage());
+      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure: "
+          + Key.get(Unscoped1.class), messages.get(0).getMessage());
+      assertEquals("Error in custom provider, com.google.inject.OutOfScopeException: failure: "
+          + Key.get(Unscoped2.class), messages.get(1).getMessage());
     }
   }
   

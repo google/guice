@@ -16,9 +16,13 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.Equivalence;
+import com.google.common.base.Objects;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
@@ -43,18 +47,18 @@ import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.spi.TypeListenerBinding;
 
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -575,8 +579,10 @@ public final class Errors implements Serializable {
     int index = 1;
     boolean displayCauses = getOnlyCause(errorMessages) == null;
 
+    Map<Equivalence.Wrapper<Throwable>, Integer> causes = Maps.newHashMap();
     for (Message errorMessage : errorMessages) {
-      fmt.format("%s) %s%n", index++, errorMessage.getMessage());
+      int thisIdx = index++;
+      fmt.format("%s) %s%n", thisIdx, errorMessage.getMessage());
 
       List<Object> dependencies = errorMessage.getSources();
       for (int i = dependencies.size() - 1; i >= 0; i--) {
@@ -586,9 +592,15 @@ public final class Errors implements Serializable {
 
       Throwable cause = errorMessage.getCause();
       if (displayCauses && cause != null) {
-        StringWriter writer = new StringWriter();
-        cause.printStackTrace(new PrintWriter(writer));
-        fmt.format("Caused by: %s", writer.getBuffer());
+        Equivalence.Wrapper<Throwable> causeEquivalence = ThrowableEquivalence.INSTANCE.wrap(cause);
+        if (!causes.containsKey(causeEquivalence)) {
+          causes.put(causeEquivalence, thisIdx);
+          fmt.format("Caused by: %s", Throwables.getStackTraceAsString(cause));
+        } else {
+          int causeIdx = causes.get(causeEquivalence);
+          fmt.format("Caused by: %s (same stack trace as error #%s)",
+              cause.getClass().getName(), causeIdx);
+        }
       }
 
       fmt.format("%n");
@@ -662,7 +674,8 @@ public final class Errors implements Serializable {
         continue;
       }
 
-      if (onlyCause != null) {
+      if (onlyCause != null
+          && !ThrowableEquivalence.INSTANCE.equivalent(onlyCause, messageCause)) {
         return null;
       }
 
@@ -837,6 +850,21 @@ public final class Errors implements Serializable {
 
     } else {
       formatSource(formatter, injectionPoint.getMember());
+    }
+  }
+
+  static class ThrowableEquivalence extends Equivalence<Throwable> {
+    static final ThrowableEquivalence INSTANCE = new ThrowableEquivalence();
+
+    @Override protected boolean doEquivalent(Throwable a, Throwable b) {
+      return a.getClass().equals(b.getClass())
+          && Objects.equal(a.getMessage(), b.getMessage())
+          && Arrays.equals(a.getStackTrace(), b.getStackTrace())
+          && equivalent(a.getCause(), b.getCause());
+    }
+
+    @Override protected int doHash(Throwable t) {
+      return Objects.hashCode(t.getClass().hashCode(), t.getMessage(), hash(t.getCause()));
     }
   }
 }

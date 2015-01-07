@@ -25,6 +25,9 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.base.Throwables;
+import com.google.inject.spi.Message;
+
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -57,7 +60,7 @@ public class ProvisionExceptionTest extends TestCase {
   public void testExceptionsCollapsedWithScopes() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(B.class).in(Scopes.SINGLETON);
         }
       }).getInstance(A.class);
@@ -86,7 +89,7 @@ public class ProvisionExceptionTest extends TestCase {
   public void testBindToProviderInstanceExceptions() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(D.class).toProvider(new DProvider());
         }
       }).getInstance(D.class);
@@ -116,7 +119,7 @@ public class ProvisionExceptionTest extends TestCase {
   public void testProvisionExceptionsAreWrappedForBindToProviderType() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(F.class).toProvider(FProvider.class);
         }
       }).getInstance(F.class);
@@ -131,7 +134,7 @@ public class ProvisionExceptionTest extends TestCase {
   public void testProvisionExceptionsAreWrappedForBindToProviderInstance() {
     try {
       Guice.createInjector(new AbstractModule() {
-        protected void configure() {
+        @Override protected void configure() {
           bind(F.class).toProvider(new FProvider());
         }
       }).getInstance(F.class);
@@ -229,7 +232,7 @@ public class ProvisionExceptionTest extends TestCase {
 
   public void testBindingAnnotationWarningForScala() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(String.class).annotatedWith(Green.class).toInstance("lime!");
       }
     });
@@ -238,7 +241,7 @@ public class ProvisionExceptionTest extends TestCase {
 
   public void testLinkedBindings() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(D.class).to(RealD.class);
       }
     });
@@ -256,7 +259,7 @@ public class ProvisionExceptionTest extends TestCase {
 
   public void testProviderKeyBindings() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         bind(D.class).toProvider(DProvider.class);
       }
     });
@@ -271,6 +274,121 @@ public class ProvisionExceptionTest extends TestCase {
     }
   }
 
+  public void testDuplicateCausesCollapsed() {
+    final RuntimeException sharedException = new RuntimeException("fail");
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {}
+
+      @Provides Integer i() { throw sharedException; }
+
+      @Provides Double d() { throw sharedException; }
+
+    });
+
+    try{
+      injector.getInstance(DoubleFailure.class);
+      fail();
+    } catch (ProvisionException pe) {
+      assertEquals(sharedException, pe.getCause());
+      assertEquals(2, pe.getErrorMessages().size());
+      for (Message message : pe.getErrorMessages()) {
+        assertEquals(sharedException, message.getCause());
+      }
+    }
+  }
+
+  public void testMultipleDuplicates() {
+    final RuntimeException exception1 = new RuntimeException("fail");
+    final RuntimeException exception2 = new RuntimeException("abort");
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {}
+
+      @Provides Integer i() { throw exception1; }
+
+      @Provides Double d() { throw exception1; }
+
+      @Provides String s() { throw exception2; }
+
+      @Provides Number n() { throw exception2; }
+
+    });
+
+    try{
+      injector.getInstance(QuadrupleFailure.class);
+      fail();
+    } catch (ProvisionException pe) {
+      assertNull(pe.getCause());
+      assertEquals(4, pe.getErrorMessages().size());
+
+      String e1 = Throwables.getStackTraceAsString(exception1);
+      String e2 = Throwables.getStackTraceAsString(exception2);
+      assertContains(pe.getMessage(),
+          "\n1) ", e1, "\n2) ", "(same stack trace as error #1)",
+          "\n3) ", e2, "\n4) ", "(same stack trace as error #3)");
+    }
+  }
+
+  static class DoubleFailure {
+    @Inject DoubleFailure(Integer i, Double d) { }
+  }
+
+  static class QuadrupleFailure {
+    @Inject QuadrupleFailure(Integer i, Double d, String s, Number n) { }
+  }
+
+  public void testDuplicatesDifferentInstances() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {}
+
+      @Provides Integer i() { throw new RuntimeException(); }
+
+    });
+
+    try{
+      injector.getInstance(DoubleSameFailure.class);
+      fail();
+    } catch (ProvisionException pe) {
+      assertNotNull(pe.toString(), pe.getCause());
+      assertEquals(2, pe.getErrorMessages().size());
+      for (Message message : pe.getErrorMessages()) {
+        assertNotNull(message.toString(), message.getCause());
+      }
+    }
+  }
+
+  public void testMultipleDuplicatesDifferentInstaces() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {}
+
+      @Provides Integer i() { throw new RuntimeException("fail"); }
+
+      @Provides String s() { throw new RuntimeException("abort"); }
+
+    });
+
+    try{
+      injector.getInstance(QuadrupleSameFailure.class);
+      fail();
+    } catch (ProvisionException pe) {
+      assertNull(pe.getCause());
+      assertEquals(4, pe.getErrorMessages().size());
+
+      assertContains(pe.getMessage(),
+          "\n1) ", "Caused by: java.lang.RuntimeException: fail",
+          "\n2) ", "Caused by: java.lang.RuntimeException (same stack trace as error #1)",
+          "\n3) ", "Caused by: java.lang.RuntimeException: abort",
+          "\n4) ", "Caused by: java.lang.RuntimeException (same stack trace as error #3)");
+    }
+  }
+
+  static class DoubleSameFailure {
+    @Inject DoubleSameFailure(Integer i1, Integer i2) { }
+  }
+
+  static class QuadrupleSameFailure {
+    @Inject QuadrupleSameFailure(Integer i1, Integer i2, String s1, String s2) { }
+  }
+  
   private class InnerClass {}
 
   static class A {
