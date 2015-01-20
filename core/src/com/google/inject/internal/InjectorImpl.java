@@ -779,14 +779,16 @@ final class InjectorImpl implements Injector, Lookups {
       boolean jitDisabled, JitLimitation jitType) throws ErrorsException {
     // ask the parent to create the JIT binding
     if (parent != null) {
-      if (jitDisabled && jitType == JitLimitation.NEW_OR_EXISTING_JIT) {
+      if (jitType == JitLimitation.NEW_OR_EXISTING_JIT
+          && jitDisabled && !parent.options.jitDisabled) {
+        // If the binding would be forbidden here but allowed in a parent, report an error instead
         throw errors.jitDisabledInParent(key).toException();
-      } else {
-        try {
-          return parent.createJustInTimeBindingRecursive(key, new Errors(), jitDisabled,
-              parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
-        } catch (ErrorsException ignored) {
-        }
+      }
+
+      try {
+        return parent.createJustInTimeBindingRecursive(key, new Errors(), jitDisabled,
+            parent.options.jitDisabled ? JitLimitation.NO_JIT : jitType);
+      } catch (ErrorsException ignored) {
       }
     }
 

@@ -326,10 +326,10 @@ public class JitBindingsTest extends TestCase {
       @Override
       protected void configure() {
         bind(Foo.class).to(FooImpl.class);
-        bind(FooImpl.class);
       }
     });
     ensureWorks(child, Foo.class, Bar.class);
+    ensureFails(child, ALLOW_BINDING, FooImpl.class);
     ensureInChild(parent, FooImpl.class, Foo.class);
     // TODO(sameb): FooBar may or may not be in a child injector, depending on if GC has run.
     // We should fix failed child injectors to remove their contents from the parent blacklist
@@ -344,6 +344,8 @@ public class JitBindingsTest extends TestCase {
       }
     });
     ensureWorks(grandchild, FooBar.class, Foo.class, Bar.class);
+    ensureFails(grandchild, ALLOW_BINDING, FooImpl.class);
+    ensureFails(child, ALLOW_BINDING, FooImpl.class);
     ensureInChild(parent, FooImpl.class, FooBar.class, Foo.class);
   }
   
@@ -426,7 +428,6 @@ public class JitBindingsTest extends TestCase {
           public void configure() {
             bind(Foo.class).to(FooImpl.class);
             expose(Foo.class);
-            bind(FooImpl.class);
           }
         });
       }
@@ -596,7 +597,7 @@ public class JitBindingsTest extends TestCase {
       assertEquals(1, expected.getErrorMessages().size());
     }
   }
-  
+
   private void ensureWorks(Injector injector, Class<?>... classes) {
     for(int i = 0; i < classes.length; i++) {
       injector.getInstance(classes[i]);
