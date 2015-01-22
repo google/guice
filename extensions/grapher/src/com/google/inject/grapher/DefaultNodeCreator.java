@@ -37,9 +37,9 @@ import java.util.List;
  * @author bojand@google.com (Bojan Djordjevic)
  */
 final class DefaultNodeCreator implements NodeCreator {
-  @Override public Iterable<Node> getNodes(Iterable<Binding<?>> bindings) {
+  @Override public Iterable<Node> getNodes(String subname, Iterable<Binding<?>> bindings) {
     List<Node> nodes = Lists.newArrayList();
-    NodeVisitor visitor = new NodeVisitor();
+    NodeVisitor visitor = new NodeVisitor(subname);
     for (Binding<?> binding : bindings) {
       nodes.addAll(binding.acceptTargetVisitor(visitor));
     }
@@ -51,10 +51,13 @@ final class DefaultNodeCreator implements NodeCreator {
    */
   private static final class NodeVisitor
       extends DefaultBindingTargetVisitor<Object, Collection<Node>> {
-
+    String subname;
+    NodeVisitor(String subname) {
+      this.subname = subname;
+    }
     /** Returns a new interface node for the given {@link Binding}. */
-    private InterfaceNode newInterfaceNode(Binding<?> binding) {
-      return new InterfaceNode(NodeId.newTypeId(binding.getKey()), binding.getSource());
+    private InterfaceNode newInterfaceNode(String subname, Binding<?> binding) {
+      return new InterfaceNode(NodeId.newTypeId(subname, binding.getKey()), binding.getSource());
     }
 
     /**
@@ -64,9 +67,9 @@ final class DefaultNodeCreator implements NodeCreator {
      * @param members members to add to the node
      * @return implementation node for the given binding
      */
-    private ImplementationNode newImplementationNode(Binding<?> binding,
+    private ImplementationNode newImplementationNode(String subname, Binding<?> binding,
         Collection<Member> members) {
-      return new ImplementationNode(NodeId.newTypeId(binding.getKey()), binding.getSource(),
+      return new ImplementationNode(NodeId.newTypeId(subname, binding.getKey()), binding.getSource(),
           members);
     }
 
@@ -77,8 +80,8 @@ final class DefaultNodeCreator implements NodeCreator {
      * @param instance value of the instance
      * @return instance node for the given binding
      */
-    private <T extends Binding<?> & HasDependencies> InstanceNode newInstanceNode(T binding,
-        Object instance) {
+    private <T extends Binding<?> & HasDependencies> InstanceNode newInstanceNode(String subname,
+        T binding, Object instance) {
       Collection<Member> members = Lists.newArrayList();
       for (Dependency<?> dependency : binding.getDependencies()) {
         InjectionPoint injectionPoint = dependency.getInjectionPoint();
@@ -87,7 +90,7 @@ final class DefaultNodeCreator implements NodeCreator {
           members.add(injectionPoint.getMember());
         }
       }
-      return new InstanceNode(NodeId.newInstanceId(binding.getKey()), binding.getSource(), instance,
+      return new InstanceNode(NodeId.newInstanceId(subname, binding.getKey()), binding.getSource(), instance,
           members);
     }
 
@@ -102,7 +105,7 @@ final class DefaultNodeCreator implements NodeCreator {
         members.add(injectionPoint.getMember());
       }
 
-      return ImmutableList.<Node>of(newImplementationNode(binding, members));
+      return ImmutableList.<Node>of(newImplementationNode(subname, binding, members));
     }
 
     /**
@@ -111,7 +114,7 @@ final class DefaultNodeCreator implements NodeCreator {
      * itself.
      */
     @Override public Collection<Node> visit(InstanceBinding<?> binding) {
-      return ImmutableList.<Node>of(newInterfaceNode(binding), newInstanceNode(binding,
+      return ImmutableList.<Node>of(newInterfaceNode(subname, binding), newInstanceNode(subname, binding,
           binding.getInstance()));
     }
 
@@ -120,12 +123,12 @@ final class DefaultNodeCreator implements NodeCreator {
      * {@link BindingEdgeType#PROVIDER}.
      */
     @Override public Collection<Node> visit(ProviderInstanceBinding<?> binding) {
-      return ImmutableList.<Node>of(newInterfaceNode(binding), newInstanceNode(binding,
+      return ImmutableList.<Node>of(newInterfaceNode(subname, binding), newInstanceNode(subname, binding,
           binding.getUserSuppliedProvider()));
     }
 
     @Override public Collection<Node> visitOther(Binding<?> binding) {
-      return ImmutableList.<Node>of(newInterfaceNode(binding));
+      return ImmutableList.<Node>of(newInterfaceNode(subname, binding));
     }
   }
 }

@@ -29,6 +29,7 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -39,9 +40,9 @@ import java.util.List;
  */
 final class DefaultEdgeCreator implements EdgeCreator {
 
-  @Override public Iterable<Edge> getEdges(Iterable<Binding<?>> bindings) {
+  @Override public Iterable<Edge> getEdges(String subname, Iterable<Binding<?>> bindings) {
     List<Edge> edges = Lists.newArrayList();
-    EdgeVisitor visitor = new EdgeVisitor();
+    EdgeVisitor visitor = new EdgeVisitor(subname);
     for (Binding<?> binding : bindings) {
       edges.addAll(binding.acceptTargetVisitor(visitor));
     }
@@ -53,6 +54,10 @@ final class DefaultEdgeCreator implements EdgeCreator {
    */
   private static final class EdgeVisitor
       extends DefaultBindingTargetVisitor<Object, Collection<Edge>> {
+    final String subname;
+    public EdgeVisitor(String subname) {
+      this.subname = subname;
+    }
 
     /**
      * Returns a dependency edge for each {@link Dependency} in the binding. These will be from the
@@ -66,7 +71,7 @@ final class DefaultEdgeCreator implements EdgeCreator {
         NodeId nodeId, T binding) {
       ImmutableList.Builder<Edge> builder = ImmutableList.builder();
       for (Dependency<?> dependency : binding.getDependencies()) {
-        NodeId to = NodeId.newTypeId(dependency.getKey());
+        NodeId to = NodeId.newTypeId(subname, dependency.getKey());
         builder.add(new DependencyEdge(nodeId, to, dependency.getInjectionPoint()));
       }
       return builder.build();
@@ -77,7 +82,7 @@ final class DefaultEdgeCreator implements EdgeCreator {
      * satisfy injection requests.
      */
     @Override public Collection<Edge> visit(ConstructorBinding<?> binding) {
-      return newDependencyEdges(NodeId.newTypeId(binding.getKey()), binding);
+      return newDependencyEdges(NodeId.newTypeId(subname, binding.getKey()), binding);
     }
 
     /**
@@ -86,8 +91,8 @@ final class DefaultEdgeCreator implements EdgeCreator {
      * will be of a {@link String} with the same annotation.
      */
     @Override public Collection<Edge> visit(ConvertedConstantBinding<?> binding) {
-      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-          NodeId.newTypeId(binding.getSourceKey()),
+      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+          NodeId.newTypeId(subname, binding.getSourceKey()),
           BindingEdge.Type.CONVERTED_CONSTANT));
     }
 
@@ -99,10 +104,10 @@ final class DefaultEdgeCreator implements EdgeCreator {
      */
     @Override public Collection<Edge> visit(InstanceBinding<?> binding) {
       return new ImmutableList.Builder<Edge>()
-          .add(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-              NodeId.newInstanceId(binding.getKey()),
+          .add(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+              NodeId.newInstanceId(subname, binding.getKey()),
               BindingEdge.Type.NORMAL))
-          .addAll(newDependencyEdges(NodeId.newInstanceId(binding.getKey()), binding))
+          .addAll(newDependencyEdges(NodeId.newInstanceId(subname, binding.getKey()), binding))
           .build();
     }
 
@@ -112,8 +117,8 @@ final class DefaultEdgeCreator implements EdgeCreator {
      * the interface node to the node of the implementing class.
      */
     @Override public Collection<Edge> visit(LinkedKeyBinding<?> binding) {
-      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-          NodeId.newTypeId(binding.getLinkedKey()),
+      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+          NodeId.newTypeId(subname, binding.getLinkedKey()),
           BindingEdge.Type.NORMAL));
     }
 
@@ -122,8 +127,8 @@ final class DefaultEdgeCreator implements EdgeCreator {
      * {@link InjectionPoint} for the {@link Provider} interface.
      */
     @Override public Collection<Edge> visit(ProviderBinding<?> binding) {
-      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-          NodeId.newTypeId(binding.getProvidedKey()), BindingEdge.Type.PROVIDER));
+      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+          NodeId.newTypeId(subname, binding.getProvidedKey()), BindingEdge.Type.PROVIDER));
     }
 
     /**
@@ -132,9 +137,9 @@ final class DefaultEdgeCreator implements EdgeCreator {
      */
     @Override public Collection<Edge> visit(ProviderInstanceBinding<?> binding) {
       return new ImmutableList.Builder<Edge>()
-          .add(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-              NodeId.newInstanceId(binding.getKey()), BindingEdge.Type.PROVIDER))
-          .addAll(newDependencyEdges(NodeId.newInstanceId(binding.getKey()), binding))
+          .add(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+              NodeId.newInstanceId(subname, binding.getKey()), BindingEdge.Type.PROVIDER))
+          .addAll(newDependencyEdges(NodeId.newInstanceId(subname, binding.getKey()), binding))
           .build();
     }
 
@@ -143,8 +148,8 @@ final class DefaultEdgeCreator implements EdgeCreator {
      * {@link BindingEdge.Type#PROVIDER}.
      */
     @Override public Collection<Edge> visit(ProviderKeyBinding<?> binding) {
-      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(binding.getKey()),
-          NodeId.newTypeId(binding.getProviderKey()), BindingEdge.Type.PROVIDER));
+      return ImmutableList.<Edge>of(new BindingEdge(NodeId.newTypeId(subname, binding.getKey()),
+          NodeId.newTypeId(subname, binding.getProviderKey()), BindingEdge.Type.PROVIDER));
     }
 
     @Override public Collection<Edge> visitOther(Binding<?> binding) {

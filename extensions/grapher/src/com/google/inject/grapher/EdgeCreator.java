@@ -27,5 +27,5 @@ import com.google.inject.Binding;
 public interface EdgeCreator {
 
   /** Returns edges for the given dependency graph. */
-  Iterable<Edge> getEdges(Iterable<Binding<?>> bindings);
+  Iterable<Edge> getEdges(String subname, Iterable<Binding<?>> bindings);
 }
