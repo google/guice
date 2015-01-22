@@ -102,21 +102,23 @@ public class AbstractInjectorGrapherTest extends TestCase {
   private Node iaAnnNode;
   private Node stringNode;
   private Node stringInstanceNode;
+  private String subname;
 
   private FakeGrapher grapher;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
+    subname = "";
     grapher = new FakeGrapher();
     Node.ignoreSourceInComparisons = true;
-    aNode = new ImplementationNode(NodeId.newTypeId(Key.get(A.class)), null,
+    aNode = new ImplementationNode(NodeId.newTypeId(subname, Key.get(A.class)), null,
         ImmutableList.<Member>of(A.class.getConstructor(String.class)));
-    a2Node = new ImplementationNode(NodeId.newTypeId(Key.get(A2.class)), null,
+    a2Node = new ImplementationNode(NodeId.newTypeId(subname, Key.get(A2.class)), null,
         ImmutableList.<Member>of(A2.class.getConstructor(Provider.class)));
-    iaNode = new InterfaceNode(NodeId.newTypeId(Key.get(IA.class)), null);
-    iaAnnNode = new InterfaceNode(NodeId.newTypeId(Key.get(IA.class, Ann.class)), null);
-    stringNode = new InterfaceNode(NodeId.newTypeId(Key.get(String.class)), null);
-    stringInstanceNode = new InstanceNode(NodeId.newInstanceId(Key.get(String.class)), null,
+    iaNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(IA.class)), null);
+    iaAnnNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(IA.class, Ann.class)), null);
+    stringNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(String.class)), null);
+    stringInstanceNode = new InstanceNode(NodeId.newInstanceId(subname, Key.get(String.class)), null,
         TEST_STRING, ImmutableList.<Member>of());
   }
 
@@ -152,7 +154,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
         }
     }));
 
-    Node a2ProviderNode = new InstanceNode(NodeId.newInstanceId(Key.get(IA.class)), null,
+    Node a2ProviderNode = new InstanceNode(NodeId.newInstanceId(subname, Key.get(IA.class)), null,
         wrapper.value, ImmutableList.<Member>of());
     Set<Node> expectedNodes =
         ImmutableSet.<Node>of(iaNode, stringNode, a2Node, stringInstanceNode, a2ProviderNode);
