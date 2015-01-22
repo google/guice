@@ -39,8 +39,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   private final AliasCreator aliasCreator;
   private final NodeCreator nodeCreator;
   private final EdgeCreator edgeCreator;
-  private final SubgraphCreator  subCreator;
-  private final HashSet<Subgraph> foundSubs;
+  private final SubgraphCreator subgraphCreator;
+  private final Set<Subgraph> foundSubgraphs;
 
   /** Parameters used to override default settings of the grapher. */
   public static final class GrapherParameters {
@@ -48,7 +48,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     private AliasCreator aliasCreator = new ProviderAliasCreator();
     private NodeCreator nodeCreator = new DefaultNodeCreator();
     private EdgeCreator edgeCreator = new DefaultEdgeCreator();
-    private SubgraphCreator subCreator = new DefaultSubgraphCreator();
+    private SubgraphCreator subgraphCreator = new DefaultSubgraphCreator();
+
     public RootKeySetCreator getRootKeySetCreator() {
       return rootKeySetCreator;
     }
@@ -85,11 +86,12 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
       return this;
     }
 
-    public SubgraphCreator getSubCreator() {
-      return subCreator;
+    public SubgraphCreator getSubgraphCreator() {
+      return subgraphCreator;
     }
-    public GrapherParameters setSubCreator(SubgraphCreator subCreator) {
-      this.subCreator = subCreator;
+
+    public GrapherParameters setSubgraphCreator(SubgraphCreator subCreator) {
+      this.subgraphCreator = subCreator;
       return this;
     }
   }
@@ -103,8 +105,8 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     this.aliasCreator = options.getAliasCreator();
     this.nodeCreator = options.getNodeCreator();
     this.edgeCreator = options.getEdgeCreator();
-    this.subCreator = options.getSubCreator();
-    this.foundSubs = new HashSet<Subgraph>();
+    this.subgraphCreator = options.getSubgraphCreator();
+    this.foundSubgraphs = new HashSet<Subgraph>();
   }
 
   @Override public final void graph(Injector injector) throws IOException {
@@ -113,17 +115,17 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
 
   @Override public final void graph(Injector injector, Set<Key<?>> root) throws IOException {
     reset();
-    graphModule("", injector, root, 0);
+    graphModule("", injector, root);
     createSubs();
     postProcess();
   }
 
-  private void graphModule(String subname, Injector injector, Set<Key<?>> root, int level) throws IOException {
+  private void graphModule(String subname, Injector injector, Set<Key<?>> root) throws IOException {
     Iterable<Binding<?>> bindings = getBindings(injector, root);
     Map<NodeId, NodeId> aliases = resolveAliases(aliasCreator.createAliases(bindings));
-    createNodes(nodeCreator.getNodes(subname, bindings), aliases, level);
-    createEdges(edgeCreator.getEdges(subname, bindings), aliases, level);
-    appendSubs(subCreator.getSubs(bindings), aliases);
+    createNodes(nodeCreator.getNodes(subname, bindings), aliases);
+    createEdges(edgeCreator.getEdges(subname, bindings), aliases);
+    appendSubgraphs(subgraphCreator.getSubgraphs(bindings), aliases);
   }
 
   /** Resets the state of the grapher before rendering a new graph. */
@@ -147,7 +149,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   /** Performs any post processing required after all nodes and edges have been added. */
   protected abstract void postProcess() throws IOException;
 
-  private void createNodes(Iterable<Node> nodes, Map<NodeId, NodeId> aliases, int level) throws IOException {
+  private void createNodes(Iterable<Node> nodes, Map<NodeId, NodeId> aliases) throws IOException {
     for (Node node : nodes) {
       NodeId originalId = node.getId();
       NodeId resolvedId = resolveAlias(aliases, originalId);
@@ -166,7 +168,7 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     }
   }
 
-  private void createEdges(Iterable<Edge> edges, Map<NodeId, NodeId> aliases, int level) throws IOException {
+  private void createEdges(Iterable<Edge> edges, Map<NodeId, NodeId> aliases) throws IOException {
     for (Edge edge : edges) {
       edge = edge.copy(resolveAlias(aliases, edge.getFromId()),
           resolveAlias(aliases, edge.getToId()));
@@ -180,9 +182,9 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     }
   }
 
-  private void appendSubs(Iterable<Subgraph> subs, Map<NodeId, NodeId> aliases) {
-    for(Subgraph sub: subs) {
-      foundSubs.add(sub);
+  private void appendSubgraphs(Iterable<Subgraph> subs, Map<NodeId, NodeId> aliases) {
+    for (Subgraph sub : subs) {
+      foundSubgraphs.add(sub);
     }
   }
 
@@ -192,13 +194,14 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
 
   private void createSubs() throws IOException {
     Set<Key<?>> visitedKeys = Sets.newHashSet();
-    while(! foundSubs.isEmpty()) {
-      Iterator<Subgraph> iterator = foundSubs.iterator();
+    while (!foundSubgraphs.isEmpty()) {
+      Iterator<Subgraph> iterator = foundSubgraphs.iterator();
       Subgraph sub = iterator.next();
       iterator.remove();
-      if (!visitedKeys.contains(sub.key)) {
-        graphModule(sub.name , sub.injector, rootKeySetCreator.getRootKeys(sub.injector), 1);
-        visitedKeys.add(sub.key);
+      if (!visitedKeys.contains(sub.getKey())) {
+        graphModule(sub.getName(), sub.getInjector(), rootKeySetCreator.getRootKeys(
+            sub.getInjector()));
+        visitedKeys.add(sub.getKey());
       }
     }
   }

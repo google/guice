@@ -51,7 +51,7 @@ final class DefaultNodeCreator implements NodeCreator {
    */
   private static final class NodeVisitor
       extends DefaultBindingTargetVisitor<Object, Collection<Node>> {
-    String subname;
+    final String subname;
     NodeVisitor(String subname) {
       this.subname = subname;
     }

@@ -9,5 +9,5 @@ import com.google.inject.Binding;
  */
 public interface SubgraphCreator {
   /** Find subgraphs recursively for the given dependency graph. */
-  Iterable<Subgraph> getSubs(Iterable<Binding<?>> bindings);
+  Iterable<Subgraph> getSubgraphs(Iterable<Binding<?>> bindings);
 }
