@@ -24,6 +24,7 @@ import com.google.inject.BindingAnnotation;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Key;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import com.google.inject.spi.InjectionPoint;
 
@@ -95,31 +96,50 @@ public class AbstractInjectorGrapherTest extends TestCase {
   private static class A2 implements IA {
     @Inject public A2(Provider<String> strProvider) {}
   }
+  private static class A3 implements IA {
+    @Inject public A3(IB b) {}
+  }
+  private static interface IB {}
+  private static class B implements IB {
+    @Inject public B() {}
+  }
 
   private Node aNode;
   private Node a2Node;
+  private Node a3Node;
+  private Node bNode;
+  private Node ibNode;
+  private Node ibNode2;  
   private Node iaNode;
   private Node iaAnnNode;
   private Node stringNode;
   private Node stringInstanceNode;
-  private String subname;
+  private String aSubname;
+  private String bSubname;
 
   private FakeGrapher grapher;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    subname = "";
+    aSubname = "";
+    bSubname = "com.google.inject.grapher.AbstractInjectorGrapherTest$IB";
     grapher = new FakeGrapher();
     Node.ignoreSourceInComparisons = true;
-    aNode = new ImplementationNode(NodeId.newTypeId(subname, Key.get(A.class)), null,
+    aNode = new ImplementationNode(NodeId.newTypeId(aSubname, Key.get(A.class)), null,
         ImmutableList.<Member>of(A.class.getConstructor(String.class)));
-    a2Node = new ImplementationNode(NodeId.newTypeId(subname, Key.get(A2.class)), null,
+    a2Node = new ImplementationNode(NodeId.newTypeId(aSubname, Key.get(A2.class)), null,
         ImmutableList.<Member>of(A2.class.getConstructor(Provider.class)));
-    iaNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(IA.class)), null);
-    iaAnnNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(IA.class, Ann.class)), null);
-    stringNode = new InterfaceNode(NodeId.newTypeId(subname, Key.get(String.class)), null);
-    stringInstanceNode = new InstanceNode(NodeId.newInstanceId(subname, Key.get(String.class)), null,
-        TEST_STRING, ImmutableList.<Member>of());
+    a3Node = new ImplementationNode(NodeId.newTypeId(aSubname, Key.get(A3.class)), null,
+        ImmutableList.<Member>of(A3.class.getConstructor(IB.class)));
+    bNode = new ImplementationNode(NodeId.newTypeId(bSubname, Key.get(B.class)), null,
+        ImmutableList.<Member>of(B.class.getConstructor()));
+    ibNode = new InterfaceNode(NodeId.newTypeId(aSubname, Key.get(IB.class)), null);
+    ibNode2 = new InterfaceNode(NodeId.newTypeId(bSubname, Key.get(IB.class)), null);
+    iaNode = new InterfaceNode(NodeId.newTypeId(aSubname, Key.get(IA.class)), null);
+    iaAnnNode = new InterfaceNode(NodeId.newTypeId(aSubname, Key.get(IA.class, Ann.class)), null);
+    stringNode = new InterfaceNode(NodeId.newTypeId(aSubname, Key.get(String.class)), null);
+    stringInstanceNode = new InstanceNode(NodeId.newInstanceId(aSubname, Key.get(String.class)),
+        null, TEST_STRING, ImmutableList.<Member>of());
   }
 
   public void testLinkedAndInstanceBindings() throws Exception {
@@ -154,7 +174,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
         }
     }));
 
-    Node a2ProviderNode = new InstanceNode(NodeId.newInstanceId(subname, Key.get(IA.class)), null,
+    Node a2ProviderNode = new InstanceNode(NodeId.newInstanceId(aSubname, Key.get(IA.class)), null,
         wrapper.value, ImmutableList.<Member>of());
     Set<Node> expectedNodes =
         ImmutableSet.<Node>of(iaNode, stringNode, a2Node, stringInstanceNode, a2ProviderNode);
@@ -166,6 +186,36 @@ public class AbstractInjectorGrapherTest extends TestCase {
         new DependencyEdge(a2ProviderNode.getId(), a2Node.getId(), null));
     assertEquals("wrong nodes", expectedNodes, grapher.nodes);
     assertEquals("wrong edges", expectedEdges, grapher.edges);
+  }
+
+  /**
+   * Test ExposedBinding and the constructed two IBs in both subgraph:"" 
+   * and subgraph:"com.google.inject.grapher.AbstractInjectorGrapherTest$IB".
+   */
+  public void testExposeBindings() throws Exception {
+    final class BModule extends PrivateModule {
+      @Override
+      protected void configure() {
+        bind(IB.class).to(B.class);
+        expose(IB.class);
+      }
+    }
+    grapher.graph(Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          bind(IA.class).to(A3.class);
+          install(new BModule());
+        }
+    }));
+
+    Set<Node> expectedNodes = ImmutableSet.<Node>of(iaNode, a3Node, 
+        bNode, ibNode, ibNode2);
+    Set<Edge> expectedEdges = ImmutableSet.<Edge>of(
+        new BindingEdge(iaNode.getId(), a3Node.getId(), BindingEdge.Type.NORMAL),
+        new BindingEdge(ibNode2.getId(), bNode.getId(), BindingEdge.Type.NORMAL),
+        new DependencyEdge(a3Node.getId(), ibNode.getId(),
+            InjectionPoint.forConstructor(A3.class.getConstructor(IB.class))));
+    assertEquals(expectedNodes, grapher.nodes);
+    assertEquals(expectedEdges, grapher.edges);
   }
 
   public void testGraphWithGivenRoot() throws Exception {

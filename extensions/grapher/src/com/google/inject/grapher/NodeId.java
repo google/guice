@@ -75,6 +75,6 @@ public final class NodeId {
   }
 
   @Override public String toString() {
-    return "NodeId{nodeType=" + nodeType + " key=" + " subname=" + subname + key + "}";
+    return "NodeId{nodeType=" + nodeType + " key=" + key + " subname=" + subname + "}";
   }
 }
