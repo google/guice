@@ -192,6 +192,13 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
     return aliases.containsKey(nodeId) ? aliases.get(nodeId) : nodeId;
   }
 
+  /**
+   * Use a BFS alike approach to discovery all sub-graphs exposed by the
+   * ExposedBinding instances. For each sub-graph, create its nodes and edges
+   * by calling graphModule().
+   *
+   * @see graphModule
+   */
   private void createSubs() throws IOException {
     Set<Key<?>> visitedKeys = Sets.newHashSet();
     while (!foundSubgraphs.isEmpty()) {
