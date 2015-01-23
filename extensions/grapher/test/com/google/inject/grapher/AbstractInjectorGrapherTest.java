@@ -109,7 +109,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
   private Node a3Node;
   private Node bNode;
   private Node ibNode;
-  private Node ibNode2;  
+  private Node ibNode2;
   private Node iaNode;
   private Node iaAnnNode;
   private Node stringNode;
@@ -189,7 +189,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
   }
 
   /**
-   * Test ExposedBinding and the constructed two IBs in both subgraph:"" 
+   * Test ExposedBinding and the constructed two IBs in both subgraph:""
    * and subgraph:"com.google.inject.grapher.AbstractInjectorGrapherTest$IB".
    */
   public void testExposeBindings() throws Exception {
@@ -207,7 +207,7 @@ public class AbstractInjectorGrapherTest extends TestCase {
         }
     }));
 
-    Set<Node> expectedNodes = ImmutableSet.<Node>of(iaNode, a3Node, 
+    Set<Node> expectedNodes = ImmutableSet.<Node>of(iaNode, a3Node,
         bNode, ibNode, ibNode2);
     Set<Edge> expectedEdges = ImmutableSet.<Edge>of(
         new BindingEdge(iaNode.getId(), a3Node.getId(), BindingEdge.Type.NORMAL),

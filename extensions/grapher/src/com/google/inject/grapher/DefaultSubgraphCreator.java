@@ -48,7 +48,7 @@ final class DefaultSubgraphCreator implements SubgraphCreator {
   /**
    * {@link BindingTargetVisitor} that adds subgraphs to the graph based on the visited {@link Binding}.
    */
-  private static final class SubgraphVisitor extends 
+  private static final class SubgraphVisitor extends
       DefaultBindingTargetVisitor<Object, Collection<Subgraph>> {
 
     /**
@@ -62,7 +62,7 @@ final class DefaultSubgraphCreator implements SubgraphCreator {
 
     @Override public Collection<Subgraph> visitOther(Binding<?> binding) {
       return ImmutableList.of();
-    }  
+    }
 
     /**
      * Returns a new sub-graph for the exposed binding.
