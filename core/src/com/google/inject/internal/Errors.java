@@ -140,6 +140,13 @@ public final class Errors implements Serializable {
     return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
   }
 
+  public Errors jitDisabledInParent(Key<?> key) {
+    return addMessage(
+        "Explicit bindings are required and %s would be bound in a parent injector.%n"
+        + "Please add an explicit binding for it, either in the child or the parent.",
+        key);
+  }
+
   public Errors atInjectRequired(Class clazz) {
     return addMessage(
         "Explicit @Inject annotations are required on constructors,"
