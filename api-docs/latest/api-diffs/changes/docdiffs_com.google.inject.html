@@ -76,6 +76,37 @@ Similarly, documentation which was inherited from another class or interface is 
      example: {@code annotatedWith(Transactional.class)}.
  @param interceptors to bind<span style="background: #FFFF00">.  The interceptors are called in the order they
      are given.</span></blockquote>
+<A NAME="com.google.inject.Binder.dmethod.requireExplicitBindings()"></A><a href="com.google.inject.Binder.html" class="hiddenlink">Class <b>Binder</b></a>, <a href="com.google.inject.Binder.html#com.google.inject.Binder.requireExplicitBindings_changed()" class="hiddenlink">void <b>requireExplicitBindings()</b></a><br><br><blockquote>Instructs the Injector that bindings must be listed in a Module in order to
+ be injected. Classes that are not explicitly bound in a module cannot be
+ injected. Bindings created through a linked <strike>binding</strike><span style="background: #FFFF00">binding
+</span> (<strike>
+ </strike><code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
+ implicit binding (<code>FooImpl</code>) cannot be directly injected unless
+ it is also explicitly bound (<code>bind(FooImpl.class)</code>).
+ <p>
+ Tools can still retrieve bindings for implicit bindings (bindings created
+ through a linked binding) if explicit bindings are required, however
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Binding.html#getProvider"><TT>Binding.getProvider</TT></A> will fail.
+ <p>
+ By default, explicit bindings are not required.
+ <p>
+ If a parent injector requires explicit bindings, then all child injectors
+ (and private modules within that injector) also require explicit bindings.
+ If a parent does not require explicit bindings, a child injector or private
+ module may optionally declare itself as requiring explicit bindings. If it
+ does, the behavior is limited only to that child or any grandchildren. No
+ siblings of the child will require explicit bindings.
+ <p>
+ <strike>If</strike><span style="background: #FFFF00">In</span> the <strike>parent did</strike><span style="background: #FFFF00">absence</span> <strike>not require</strike><span style="background: #FFFF00">of an</span> explicit <strike>bindings</strike><span style="background: #FFFF00">binding</span> <strike>but</strike><span style="background: #FFFF00">for</span> the <strike>child does</strike><span style="background: #FFFF00">target</span>, <strike>it is
+ possible that a</strike><span style="background: #FFFF00">linked bindings in
+ child injectors</span> <strike>linked</strike><span style="background: #FFFF00">create a</span> binding <span style="background: #FFFF00">for the target </span>in the <strike>child</strike><span style="background: #FFFF00">parent.</span> <strike>may add a JIT binding</strike><span style="background: #FFFF00">Since this
+ behavior can be</span> <strike>to</strike><span style="background: #FFFF00">surprising,</span> <strike>the
+</strike><span style="background: #FFFF00">it</span> <strike>parent.</strike><span style="background: #FFFF00">causes</span> <strike>The child will not be allowed to</strike><span style="background: #FFFF00">an error instead if explicit bindings
+ are</span> <strike>reference</strike><span style="background: #FFFF00">required.</span> <strike>the target binding
+ directly</strike><span style="background: #FFFF00">To avoid this error</span>, <strike>but</strike><span style="background: #FFFF00">add</span> <strike>the parent and other children</strike><span style="background: #FFFF00">an explicit binding for the</span> <strike>of</strike><span style="background: #FFFF00">target,
+</span> <strike>the parent may be able</strike><span style="background: #FFFF00">either in the child or</span> <strike>to</strike><span style="background: #FFFF00">the parent</span>.
+ 
+ @since 3.0</blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.Guice.dmethod.createInjector(Iterable&lt;Module&gt;)"></A><a href="com.google.inject.Guice.html" class="hiddenlink">Class <b>Guice</b></a>, <a href="com.google.inject.Guice.html#com.google.inject.Guice.createInjector_changed(java.lang.Iterable<? extends com.google.inject.Module>)" class="hiddenlink">Injector <b>createInjector(Iterable&lt;Module&gt;)</b></a><br><br><blockquote>Creates an injector for the given set of modules.<span style="background: #FFFF00"> This is equivalent to
  calling <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/.html#createInjector(Stage, Iterable)"><TT>.createInjector(Stage, Iterable)</TT></A> with Stage.DEVELOPMENT.</span>
