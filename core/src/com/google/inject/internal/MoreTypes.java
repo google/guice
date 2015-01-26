@@ -329,13 +329,7 @@ public class MoreTypes {
 
     public ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
       // require an owner type if the raw type needs it
-      if (rawType instanceof Class<?>) {
-        Class rawTypeAsClass = (Class) rawType;
-        checkArgument(ownerType != null || rawTypeAsClass.getEnclosingClass() == null,
-            "No owner type for enclosed %s", rawType);
-        checkArgument(ownerType == null || rawTypeAsClass.getEnclosingClass() != null,
-            "Owner type for unenclosed %s", rawType);
-      }
+      ensureOwnerType(ownerType, rawType);
 
       this.ownerType = ownerType == null ? null : canonicalize(ownerType);
       this.rawType = canonicalize(rawType);
@@ -401,6 +395,16 @@ public class MoreTypes {
         stringBuilder.append(", ").append(typeToString(typeArguments[i]));
       }
       return stringBuilder.append(">").toString();
+    }
+
+    private static void ensureOwnerType(Type ownerType, Type rawType) {
+      if (rawType instanceof Class<?>) {
+        Class rawTypeAsClass = (Class) rawType;
+        checkArgument(ownerType != null || rawTypeAsClass.getEnclosingClass() == null,
+            "No owner type for enclosed %s", rawType);
+        checkArgument(ownerType == null || rawTypeAsClass.getEnclosingClass() != null,
+            "Owner type for unenclosed %s", rawType);
+      }
     }
 
     private static final long serialVersionUID = 0;

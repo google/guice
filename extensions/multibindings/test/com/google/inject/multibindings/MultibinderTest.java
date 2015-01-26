@@ -102,7 +102,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderAggregatesMultipleModules() {
     Module abc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
         multibinder.addBinding().toInstance("B");
@@ -110,7 +110,7 @@ public class MultibinderTest extends TestCase {
       }
     };
     Module de = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("D");
         multibinder.addBinding().toInstance("E");
@@ -129,7 +129,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderAggregationForAnnotationInstance() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder
             = Multibinder.newSetBinder(binder(), String.class, Names.named("abc"));
         multibinder.addBinding().toInstance("A");
@@ -151,7 +151,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderAggregationForAnnotationType() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder
             = Multibinder.newSetBinder(binder(), String.class, Abc.class);
         multibinder.addBinding().toInstance("A");
@@ -173,7 +173,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderWithMultipleAnnotationValueSets() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> abcMultibinder
             = Multibinder.newSetBinder(binder(), String.class, named("abc"));
         abcMultibinder.addBinding().toInstance("A");
@@ -204,7 +204,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderWithMultipleAnnotationTypeSets() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> abcMultibinder
             = Multibinder.newSetBinder(binder(), String.class, Abc.class);
         abcMultibinder.addBinding().toInstance("A");
@@ -235,7 +235,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderWithMultipleSetTypes() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class)
             .addBinding().toInstance("A");
         Multibinder.newSetBinder(binder(), Integer.class)
@@ -254,7 +254,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderWithEmptySet() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class);
       }
     };
@@ -268,7 +268,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetIsUnmodifiable() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class)
             .addBinding().toInstance("A");
       }
@@ -284,7 +284,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetIsSerializable() throws IOException, ClassNotFoundException {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class)
             .addBinding().toInstance("A");
       }
@@ -310,7 +310,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetIsLazy() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), Integer.class)
             .addBinding().toProvider(new Provider<Integer>() {
           int nextValue = 1;
@@ -331,13 +331,13 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetForbidsDuplicateElements() {
     Module module1 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toProvider(Providers.of("A"));
       }
     };
     Module module2 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
       }
@@ -384,14 +384,14 @@ public class MultibinderTest extends TestCase {
     }
 
     Module module1 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<ValueType> multibinder =
             Multibinder.newSetBinder(binder(), ValueType.class);
         multibinder.addBinding().toProvider(Providers.of(new ValueType(1, 2)));
       }
     };
     Module module2 = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<ValueType> multibinder =
             Multibinder.newSetBinder(binder(), ValueType.class);
         multibinder.addBinding().toInstance(new ValueType(1, 3));
@@ -420,14 +420,14 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetPermitDuplicateElements() {
     Module ab = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
         multibinder.addBinding().toInstance("B");
       }
     };
     Module bc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.permitDuplicates();
         multibinder.addBinding().toInstance("B");
@@ -443,7 +443,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderSetPermitDuplicateCallsToPermitDuplicates() {
     Module ab = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.permitDuplicates();
         multibinder.addBinding().toInstance("A");
@@ -451,7 +451,7 @@ public class MultibinderTest extends TestCase {
       }
     };
     Module bc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.permitDuplicates();
         multibinder.addBinding().toInstance("B");
@@ -466,19 +466,21 @@ public class MultibinderTest extends TestCase {
   }
 
   public void testMultibinderSetForbidsNullElements() {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+    Module m = new AbstractModule() {
+      @Override protected void configure() {
         Multibinder.newSetBinder(binder(), String.class)
             .addBinding().toProvider(Providers.<String>of(null));
       }
-    });
+    };
+    Injector injector = Guice.createInjector(m);
 
     try {
       injector.getInstance(Key.get(setOfString));
       fail();
     } catch(ProvisionException expected) {
       assertContains(expected.getMessage(),
-          "1) Set injection failed due to null element");
+          "1) Set injection failed due to null element bound at: "
+          + m.getClass().getName() + ".configure(");
     }
   }
 
@@ -502,7 +504,7 @@ public class MultibinderTest extends TestCase {
    */
   public void testMultibinderDependencies() {
     Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
         multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
@@ -526,13 +528,14 @@ public class MultibinderTest extends TestCase {
    */
   public void testMultibinderDependenciesInToolStage() {
     Injector injector = Guice.createInjector(Stage.TOOL, new AbstractModule() {
-        protected void configure() {
-          Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
-          multibinder.addBinding().toInstance("A");
-          multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
+      @Override protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().to(Key.get(String.class, Names.named("b")));
 
-          bindConstant().annotatedWith(Names.named("b")).to("B");
-        }});
+        bindConstant().annotatedWith(Names.named("b")).to("B");
+      }
+    });
 
     Binding<Set<String>> binding = injector.getBinding(new Key<Set<String>>() {});
     HasDependencies withDependencies = (HasDependencies) binding;
@@ -578,12 +581,12 @@ public class MultibinderTest extends TestCase {
   public void testBindOrderEqualsIterationOrder() {
     Injector injector = Guice.createInjector(
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
             multibinder.addBinding().toInstance("leonardo");
             multibinder.addBinding().toInstance("donatello");
             install(new AbstractModule() {
-              protected void configure() {
+              @Override protected void configure() {
                 Multibinder.newSetBinder(binder(), String.class)
                     .addBinding().toInstance("michaelangelo");
               }
@@ -591,7 +594,7 @@ public class MultibinderTest extends TestCase {
           }
         },
         new AbstractModule() {
-          protected void configure() {
+          @Override protected void configure() {
             Multibinder.newSetBinder(binder(), String.class).addBinding().toInstance("raphael");
           }
         });
@@ -617,21 +620,21 @@ public class MultibinderTest extends TestCase {
    */
   public void testModuleOverrideAndMultibindings() {
     Module ab = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
         multibinder.addBinding().toInstance("B");
       }
     };
     Module cd = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("C");
         multibinder.addBinding().toInstance("D");
       }
     };
     Module ef = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("E");
         multibinder.addBinding().toInstance("F");
@@ -652,7 +655,7 @@ public class MultibinderTest extends TestCase {
    */
   public void testModuleOverrideAndMultibindingsWithPermitDuplicates() {
     Module abc = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("A");
         multibinder.addBinding().toInstance("B");
@@ -661,7 +664,7 @@ public class MultibinderTest extends TestCase {
       }
     };
     Module cd = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("C");
         multibinder.addBinding().toInstance("D");
@@ -669,7 +672,7 @@ public class MultibinderTest extends TestCase {
       }
     };
     Module ef = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toInstance("E");
         multibinder.addBinding().toInstance("F");
@@ -1136,7 +1139,7 @@ public class MultibinderTest extends TestCase {
 
   public void testMultibinderCanInjectCollectionOfProviders() {
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
         multibinder.addBinding().toProvider(Providers.of("A"));
         multibinder.addBinding().toProvider(Providers.of("B"));
@@ -1159,7 +1162,7 @@ public class MultibinderTest extends TestCase {
   public void testMultibinderCanInjectCollectionOfProvidersWithAnnotation() {
     final Annotation ann = Names.named("foo");
     Module module = new AbstractModule() {
-      protected void configure() {
+      @Override protected void configure() {
         final Multibinder<String> multibinder =
             Multibinder.newSetBinder(binder(), String.class, ann);
         multibinder.addBinding().toProvider(Providers.of("A"));

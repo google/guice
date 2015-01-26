@@ -433,17 +433,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <profiles>
     <profile>
-      <id>java8</id>
+      <id>jdk8</id>
       <activation>
         <jdk>[1.8,)</jdk>
       </activation>
+      <!-- Activate jdk8-tests module only under JDK 8 -->
       <modules>
-        <!-- Activate jdk8-tests module only under JDK 8 -->
         <module>jdk8-tests</module>
       </modules>
-      <build>
+      <!-- Disable doclint under JDK 8 -->
+      <reporting>
         <plugins>
-          <!-- Disable doclint under JDK 8 -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -451,20 +451,15 @@ See the Apache License Version 2.0 for the specific language governing permissio
               <additionalparam>-Xdoclint:none</additionalparam>
             </configuration>
           </plugin>
+        </plugins>
+      </reporting>
+      <build>
+        <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-site-plugin</artifactId>
-            <version>3.3</version>
+            <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
-              <reportPlugins>
-                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-javadoc-plugin</artifactId>
-                  <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
-                  </configuration>
-                </plugin>
-              </reportPlugins>
+              <additionalparam>-Xdoclint:none</additionalparam>
             </configuration>
           </plugin>
         </plugins>

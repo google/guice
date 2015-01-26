@@ -360,7 +360,9 @@ public abstract class Multibinder<T> {
       Map<T, Binding<T>> result = new LinkedHashMap<T, Binding<T>>(mapCapacity(bindings.size()));
       for (Binding<T> binding : bindings) {
         final T newValue = binding.getProvider().get();
-        checkConfiguration(newValue != null, "Set injection failed due to null element");
+        checkConfiguration(newValue != null,
+            "Set injection failed due to null element bound at: %s",
+            binding.getSource());
         Binding<T> duplicateBinding = result.put(newValue, binding);
         if (!permitDuplicates && duplicateBinding != null) {
           throw newDuplicateValuesException(result, binding, newValue, duplicateBinding);

@@ -455,15 +455,16 @@ public abstract class MapBinder<K, V> {
           Key<V> valueKey = providerEntry.getValueKey();
           Binding<V> valueBinding = injector.getBinding(valueKey);
           // If this isn't a dup due to an exact same binding, add it.
-          if (index.put(entry.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
-            Provider<V> previous = providerMapMutable.put(entry.getKey(), entry.getValue());
+          if (index.put(providerEntry.getKey(), valueBinding.acceptTargetVisitor(indexer))) {
+            Provider<V> previous = providerMapMutable.put(providerEntry.getKey(),
+                new ValueProvider<V>(providerEntry.getValue(), valueBinding));
             if (previous != null && !permitDuplicates) {
               if (duplicateKeys == null) {
                 duplicateKeys = Sets.newHashSet();
               }
-              duplicateKeys.add(entry.getKey());
+              duplicateKeys.add(providerEntry.getKey());
             }
-            bindingsMutable.add(Maps.immutableEntry(entry.getKey(), valueBinding));
+            bindingsMutable.add(Maps.immutableEntry(providerEntry.getKey(), valueBinding));
           }
         }
         if (duplicateKeys != null) {
@@ -529,9 +530,12 @@ public abstract class MapBinder<K, V> {
         Map<K, Object> map = new LinkedHashMap<K, Object>(mapProvider.get());
         for (Entry<K, Object> entry : map.entrySet()) {
           @SuppressWarnings("unchecked")  // we initialized the entries with providers
-          V value = ((Provider<V>) entry.getValue()).get();
+          ValueProvider<V> provider = (ValueProvider<V>)entry.getValue();
+          V value = provider.get();
           checkConfiguration(value != null,
-              "Map injection failed due to null value for key \"%s\"", entry.getKey());
+              "Map injection failed due to null value for key \"%s\", bound at: %s",
+              entry.getKey(),
+              provider.getValueBinding().getSource());
           entry.setValue(value);
         }
         @SuppressWarnings("unchecked")  // if we exited the loop then we replaced all Providers
@@ -710,6 +714,24 @@ public abstract class MapBinder<K, V> {
         @Override public Set<Dependency<?>> getDependencies() {
           return dependencies;
         }
+      }
+    }
+
+    static final class ValueProvider<V> implements Provider<V> {
+      private final Provider<V> delegate;
+      private final Binding<V> binding;
+
+      ValueProvider(Provider<V> delegate, Binding<V> binding) {
+        this.delegate = delegate;
+        this.binding = binding;
+      }
+
+      @Override public V get() {
+        return delegate.get();
+      }
+
+      public Binding<V> getValueBinding() {
+        return binding;
       }
     }
 
