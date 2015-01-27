@@ -162,6 +162,22 @@ public class ScopesTest extends TestCase {
   interface A {}
   static class AImpl implements A {}
 
+  @Retention(RUNTIME)
+  @interface Component {}
+
+  @Component
+  @Singleton
+  interface ComponentAnnotationTest {}
+  static class ComponentAnnotationTestImpl implements ComponentAnnotationTest {}
+
+  public void testScopingAnnotationsOnAbstractTypeIsValidForComponent() {
+    Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bind(ComponentAnnotationTest.class).to(ComponentAnnotationTestImpl.class);
+      }
+    });
+  }
+
   public void testScopingAnnotationsOnAbstractTypeViaImplementedBy() {
     try {
       Guice.createInjector().getInstance(D.class);
