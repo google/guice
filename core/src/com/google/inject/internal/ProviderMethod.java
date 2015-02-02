@@ -24,6 +24,7 @@ import com.google.inject.Exposed;
 import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
@@ -52,21 +53,28 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   /**
    * Creates a {@link ProviderMethod}.
    *
-   * <p>Unless {@code skipFastClassGeneration} is set, this will use {@link FastClass} to invoke
-   * the actual method, since it is significantly faster.  However, this will fail if the method is
-   * {@code private} or {@code protected}, since fastclass is subject to java access policies.
+   * <p>Unless {@code skipFastClassGeneration} is set, this will use
+   * {@link net.sf.cglib.reflect.FastClass} to invoke the actual method, since it is significantly
+   * faster. However, this will fail if the method is {@code private} or {@code protected}, since
+   * fastclass is subject to java access policies.
    */
   static <T> ProviderMethod<T> create(Key<T> key, Method method, Object instance,
       ImmutableSet<Dependency<?>> dependencies, List<Provider<?>> parameterProviders,
-      Class<? extends Annotation> scopeAnnotation, boolean skipFastClassGeneration) {
+      Class<? extends Annotation> scopeAnnotation, boolean skipFastClassGeneration,
+      Annotation annotation) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
     if (!skipFastClassGeneration && !Modifier.isPrivate(modifiers)
         && !Modifier.isProtected(modifiers)) {
       try {
         // We use an index instead of FastMethod to save a stack frame.
-        return new FastClassProviderMethod<T>(
-            key, method, instance, dependencies, parameterProviders, scopeAnnotation);
+        return new FastClassProviderMethod<T>(key,
+            method,
+            instance,
+            dependencies,
+            parameterProviders,
+            scopeAnnotation,
+            annotation);
       } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
     }
     /*end[AOP]*/
@@ -76,8 +84,13 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
       method.setAccessible(true);
     }
 
-    return new ReflectionProviderMethod<T>(
-        key, method, instance, dependencies, parameterProviders, scopeAnnotation);
+    return new ReflectionProviderMethod<T>(key,
+        method,
+        instance,
+        dependencies,
+        parameterProviders,
+        scopeAnnotation,
+        annotation);
   }
 
   protected final Object instance;
@@ -88,13 +101,14 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   private final ImmutableSet<Dependency<?>> dependencies;
   private final List<Provider<?>> parameterProviders;
   private final boolean exposed;
+  private final Annotation annotation;
 
   /**
    * @param method the method to invoke. It's return type must be the same type as {@code key}.
    */
   private ProviderMethod(Key<T> key, Method method, Object instance,
       ImmutableSet<Dependency<?>> dependencies, List<Provider<?>> parameterProviders,
-      Class<? extends Annotation> scopeAnnotation) {
+      Class<? extends Annotation> scopeAnnotation, Annotation annotation) {
     this.key = key;
     this.scopeAnnotation = scopeAnnotation;
     this.instance = instance;
@@ -102,12 +116,15 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     this.method = method;
     this.parameterProviders = parameterProviders;
     this.exposed = method.isAnnotationPresent(Exposed.class);
+    this.annotation = annotation;
   }
 
+  @Override
   public Key<T> getKey() {
     return key;
   }
 
+  @Override
   public Method getMethod() {
     return method;
   }
@@ -117,8 +134,14 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     return instance;
   }
   
+  @Override
   public Object getEnclosingInstance() {
     return instance;
+  }
+  
+  @Override
+  public Annotation getAnnotation() {
+    return annotation;
   }
 
   public void configure(Binder binder) {
@@ -137,6 +160,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     }
   }
 
+  @Override
   public T get() {
     Object[] parameters = new Object[parameterProviders.size()];
     for (int i = 0; i < parameters.length; i++) {
@@ -158,10 +182,12 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   abstract Object doProvision(Object[] parameters)
       throws IllegalAccessException, InvocationTargetException;
 
+  @Override
   public Set<Dependency<?>> getDependencies() {
     return dependencies;
   }
   
+  @Override
   @SuppressWarnings("unchecked")
   public <B, V> V acceptExtensionVisitor(BindingTargetVisitor<B, V> visitor,
       ProviderInstanceBinding<? extends B> binding) {
@@ -172,15 +198,24 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   }
 
   @Override public String toString() {
-    return "@Provides " + StackTraceElements.forMember(method);
+    String annotationString = annotation.toString();
+    // Show @Provides w/o the com.google.inject prefix.
+    if (annotation.annotationType() == Provides.class) {
+      annotationString = "@Provides";
+    } else if (annotationString.endsWith("()")) {
+      // Remove the common "()" suffix if there are no values.
+      annotationString = annotationString.substring(0, annotationString.length() - 2);
+    }
+    return annotationString + " " + StackTraceElements.forMember(method);
   }
   
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof ProviderMethod) {
-      ProviderMethod o = (ProviderMethod)obj;
+      ProviderMethod<?> o = (ProviderMethod<?>) obj;
       return method.equals(o.method)
-         && instance.equals(o.instance);
+         && instance.equals(o.instance)
+         && annotation.equals(o.annotation);
     } else {
       return false;
     }
@@ -191,7 +226,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     // Avoid calling hashCode on 'instance', which is a user-object
     // that might not be expecting it.
     // (We need to call equals, so we do.  But we can avoid hashCode.)
-    return Objects.hashCode(method);
+    return Objects.hashCode(method, annotation);
   }
 
   /*if[AOP]*/
@@ -208,8 +243,15 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         List<Provider<?>> parameterProviders,
-        Class<? extends Annotation> scopeAnnotation) {
-      super(key, method, instance, dependencies, parameterProviders, scopeAnnotation);
+        Class<? extends Annotation> scopeAnnotation,
+        Annotation annotation) {
+      super(key,
+          method,
+          instance,
+          dependencies,
+          parameterProviders,
+          scopeAnnotation,
+          annotation);
       // We need to generate a FastClass for the method's class, not the object's class.
       this.fastClass =
           BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method));
@@ -241,8 +283,15 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
         List<Provider<?>> parameterProviders,
-        Class<? extends Annotation> scopeAnnotation) {
-      super(key, method, instance, dependencies, parameterProviders, scopeAnnotation);
+        Class<? extends Annotation> scopeAnnotation,
+        Annotation annotation) {
+      super(key,
+          method,
+          instance,
+          dependencies,
+          parameterProviders,
+          scopeAnnotation,
+          annotation);
     }
 
     @Override Object doProvision(Object[] parameters) throws IllegalAccessException,
