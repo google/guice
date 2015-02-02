@@ -29,6 +29,7 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Modules;
 
@@ -38,7 +39,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Creates bindings to methods annotated with {@literal @}{@link Provides}. Use the scope and
@@ -48,7 +48,6 @@ import java.util.logging.Logger;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class ProviderMethodsModule implements Module {
-  private static final Key<Logger> LOGGER_KEY = Key.get(Logger.class);
 
   private final Object delegate;
   private final TypeLiteral<?> typeLiteral;
@@ -202,35 +201,21 @@ public final class ProviderMethodsModule implements Module {
     Errors errors = new Errors(method);
 
     // prepare the parameter providers
-    List<Dependency<?>> dependencies = Lists.newArrayList();
+    InjectionPoint point = InjectionPoint.forMethod(method, typeLiteral);
+    List<Dependency<?>> dependencies = point.getDependencies();
     List<Provider<?>> parameterProviders = Lists.newArrayList();
-    List<TypeLiteral<?>> parameterTypes = typeLiteral.getParameterTypes(method);
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-    for (int i = 0; i < parameterTypes.size(); i++) {
-      Key<?> key = getKey(errors, parameterTypes.get(i), method, parameterAnnotations[i]);
-      if (key.equals(LOGGER_KEY)) {
-        // If it was a Logger, change the key to be unique & bind it to a
-        // provider that provides a logger with a proper name.
-        // This solves issue 482 (returning a new anonymous logger on every call exhausts memory)
-        Key<Logger> loggerKey = Key.get(Logger.class, UniqueAnnotations.create());
-        binder.bind(loggerKey).toProvider(new LogProvider(method));
-        key = loggerKey;
-      }
-      dependencies.add(Dependency.get(key));
-      parameterProviders.add(binder.getProvider(key));        
+    for (Dependency<?> dependency : point.getDependencies()) {
+      parameterProviders.add(binder.getProvider(dependency));
     }
 
     @SuppressWarnings("unchecked") // Define T as the method's return type.
     TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
-
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
     Class<? extends Annotation> scopeAnnotation
         = Annotations.findScopeAnnotation(errors, method.getAnnotations());
-
     for (Message message : errors.getMessages()) {
       binder.addError(message);
     }
-
     return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
         parameterProviders, scopeAnnotation, skipFastClassGeneration);
   }
@@ -247,18 +232,5 @@ public final class ProviderMethodsModule implements Module {
 
   @Override public int hashCode() {
     return delegate.hashCode();
-  }
-  
-  /** A provider that returns a logger based on the method name. */
-  private static final class LogProvider implements Provider<Logger> {
-    private final String name;
-    
-    public LogProvider(Method method) {
-      this.name = method.getDeclaringClass().getName() + "." + method.getName();
-    }
-    
-    public Logger get() {
-      return Logger.getLogger(name);
-    }
   }
 }

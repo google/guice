@@ -1000,9 +1000,9 @@ final class InjectorImpl implements Injector, Lookups {
     return getProvider(Key.get(type));
   }
 
-  <T> Provider<T> getProviderOrThrow(final Key<T> key, Errors errors) throws ErrorsException {
+  <T> Provider<T> getProviderOrThrow(final Dependency<T> dependency, Errors errors) throws ErrorsException {
+    final Key<T> key = dependency.getKey();
     final BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
-    final Dependency<T> dependency = Dependency.get(key);
 
     return new Provider<T>() {
       public T get() {
@@ -1034,7 +1034,7 @@ final class InjectorImpl implements Injector, Lookups {
   public <T> Provider<T> getProvider(final Key<T> key) {
     Errors errors = new Errors(key);
     try {
-      Provider<T> result = getProviderOrThrow(key, errors);
+      Provider<T> result = getProviderOrThrow(Dependency.get(key), errors);
       errors.throwIfNewErrors(0);
       return result;
     } catch (ErrorsException e) {
