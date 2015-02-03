@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -55,6 +56,7 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,6 +78,9 @@ import java.util.logging.Logger;
 public final class Errors implements Serializable {
 
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
+
+  private static final Set<Dependency<?>> warnedDependencies =
+      Sets.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
 
   /**
@@ -618,6 +623,10 @@ public final class Errors implements Serializable {
           case IGNORE:
             return value; // user doesn't care about injecting nulls to non-@Nullables.
           case WARN:
+            // Warn only once, otherwise we spam logs too much.
+            if (!warnedDependencies.add(dependency)) {
+              return value;
+            }
             logger.log(Level.WARNING,
                 "Guice injected null into parameter {0} of {1} (a {2}), please mark it @Nullable."
                     + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
