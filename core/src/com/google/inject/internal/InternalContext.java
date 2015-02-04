@@ -43,11 +43,11 @@ final class InternalContext {
   /**
    * Keeps track of the hierarchy of types needed during injection.
    *
-   * <p>This is a pairwise combination of dependencies and sources, with dependencies on even
-   * indices, and sources on odd indices. This structure is to avoid the memory overhead of
+   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
+   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
    * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
    */
-  private final List<Object> state = Lists.newArrayList();
+  private final DependencyStack state = new DependencyStack();
 
   @SuppressWarnings("unchecked")
   public <T> ConstructionContext<T> getConstructionContext(Object key) {
@@ -75,29 +75,41 @@ final class InternalContext {
   
   /** Pops the current state & sets the new dependency. */
   public void popStateAndSetDependency(Dependency<?> newDependency) {
-    popState();
+    state.pop();
     this.dependency = newDependency;
   }
   
   /** Adds to the state without setting the dependency. */
   public void pushState(Key<?> key, Object source) {
-    state.add(key == null ? null : Dependency.get(key));
+    state.add(key);
     state.add(source);
   }
   
   /** Pops from the state without setting a dependency. */
   public void popState() {
-    state.remove(state.size() - 1);
-    state.remove(state.size() - 1);
+    state.pop();
   }
   
   /** Returns the current dependency chain (all the state). */
   public List<DependencyAndSource> getDependencyChain() {
     ImmutableList.Builder<DependencyAndSource> builder = ImmutableList.builder();
     for (int i = 0; i < state.size(); i += 2) {
-      builder.add(new DependencyAndSource(
-          (Dependency<?>) state.get(i), state.get(i + 1)));
+      Object evenEntry = state.get(i);
+      Dependency<?> dependency;
+      if (evenEntry instanceof Key) {
+        dependency = Dependency.get((Key<?>) evenEntry);
+      } else {
+        dependency = (Dependency<?>) evenEntry;
+      }
+      builder.add(new DependencyAndSource(dependency, state.get(i + 1)));
     }
     return builder.build();
+  }
+
+  private static final class DependencyStack extends ArrayList<Object> {
+    void pop() {
+      int sz = size();
+      removeRange(sz - 2, sz);
+    }
   }
 }
