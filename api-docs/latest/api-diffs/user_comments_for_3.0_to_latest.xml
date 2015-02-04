@@ -142,13 +142,25 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Binder.getProvider_added(com.google.inject.spi.Dependency&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.Binder.getProvider_added(java.lang.Class&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Binder.getProvider_changed(com.google.inject.Key&lt;T&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="com.google.inject.Binder.getProvider_changed(java.lang.Class&lt;T&gt;)"/>
+  <identifier id="com.google.inject.Binder.getProvider_removed(java.lang.Class&lt;T&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2440,6 +2452,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.InjectionPoint"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.InjectionPoint.forMethod_added(java.lang.reflect.Method, com.google.inject.TypeLiteral&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi.InstanceBinding"/>
   <text>
     InsertCommentsHere
@@ -2477,6 +2501,12 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.Message.ctor_added(java.lang.String, java.lang.Throwable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2555,6 +2585,24 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.ProviderKeyBinding.getProviderKey_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderLookup"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderLookup.ctor_added(java.lang.Object, com.google.inject.spi.Dependency&lt;T&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ProviderLookup.getDependency_added()"/>
   <text>
     InsertCommentsHere
   </text>

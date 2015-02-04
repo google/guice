@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -141,6 +141,10 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#ProviderLookup-java.lang.Object-com.google.inject.spi.Dependency-">ProviderLookup</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source,
+              <a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;dependency)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#ProviderLookup-java.lang.Object-com.google.inject.Key-">ProviderLookup</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source,
               <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;key)</code>&nbsp;</td>
 </tr>
@@ -178,23 +182,27 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 </td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#getDependency--">getDependency</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#getKey--">getKey</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#getProvider--">getProvider</a></span>()</code>
 <div class="block">Returns the looked up provider.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#getSource--">getSource</a></span>()</code>
 <div class="block">Returns an arbitrary object containing information about the "place" where this element was
  configured.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProviderLookup.html#initializeDelegate-com.google.inject.Provider-">initializeDelegate</a></span>(<a href="../../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;delegate)</code>
 <div class="block">Sets the actual provider.</div>
@@ -225,11 +233,25 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <a name="ProviderLookup-java.lang.Object-com.google.inject.Key-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>ProviderLookup</h4>
 <pre>public&nbsp;ProviderLookup(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source,
                       <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;key)</pre>
+</li>
+</ul>
+<a name="ProviderLookup-java.lang.Object-com.google.inject.spi.Dependency-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>ProviderLookup</h4>
+<pre>public&nbsp;ProviderLookup(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source,
+                      <a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;dependency)</pre>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>4.0</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -267,6 +289,15 @@ implements <a href="../../../../com/google/inject/spi/Element.html" title="inter
 <li class="blockList">
 <h4>getKey</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;getKey()</pre>
+</li>
+</ul>
+<a name="getDependency--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getDependency</h4>
+<pre>public&nbsp;<a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;<a href="../../../../com/google/inject/spi/ProviderLookup.html" title="type parameter in ProviderLookup">T</a>&gt;&nbsp;getDependency()</pre>
 </li>
 </ul>
 <a name="acceptVisitor-com.google.inject.spi.ElementVisitor-">

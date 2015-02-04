@@ -64,6 +64,13 @@ Interface com.google.inject.<A HREF="http://google.github.io/guice/api-docs/late
   </TD>
   <TD VALIGN="TOP">Registers a listener for injectable types.</TD>
 </TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getProvider_removed(java.lang.Class<T>)"></A>
+  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/Binder.html#getProvider(java.lang.Class<T>)" target="_top"><tt>getProvider</tt></A>(<code>Class&lt;T&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection type.</TD>
+</TR>
 </TABLE>
 &nbsp;
 <p>
@@ -85,6 +92,20 @@ Interface com.google.inject.<A HREF="http://google.github.io/guice/api-docs/late
   <nobr><code>void</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html#bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)" target="_top"><tt>bindListener</tt></A>(<code>Matcher&lt;TypeLiteral&lt;?&gt;&gt;,</nobr> TypeListener<nobr><nobr></code>)</nobr>
   </TD>
   <TD VALIGN="TOP">Registers a listener for injectable types.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getProvider_added(com.google.inject.spi.Dependency<T>)"></A>
+  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html#getProvider(com.google.inject.spi.Dependency<T>)" target="_top"><tt>getProvider</tt></A>(<code>Dependency&lt;T&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.getProvider_added(java.lang.Class<T>)"></A>
+  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html#getProvider(java.lang.Class<T>)" target="_top"><tt>getProvider</tt></A>(<code>Class&lt;T&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection type.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -328,16 +349,6 @@ Changed from non-abstract to abstract.
 Changed from non-abstract to abstract.
   </TD>
   <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection key.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.google.inject.Binder.getProvider_changed(java.lang.Class<T>)"></A>
-  <nobr><code>Provider&lt;T&gt;</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html#getProvider(java.lang.Class<T>)" target="_top"><tt>getProvider</tt></A>(<code>Class&lt;T&gt;</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Changed from non-abstract to abstract.
-  </TD>
-  <TD VALIGN="TOP">Returns the provider used to obtain instances for the given injection type.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">

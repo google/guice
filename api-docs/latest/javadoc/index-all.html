@@ -270,6 +270,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#annotatedWith-java.lang.annotation.Annotation-">annotatedWith(Annotation)</a></span> - Method in class com.google.inject.throwingproviders.<a href="com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder.SecondaryBinder</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#annotationClasses--">annotationClasses()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
+<dd>
+<div class="block">Returns the annotations this should scan for.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/matcher/Matchers.html#any--">any()</a></span> - Static method in class com.google.inject.matcher.<a href="com/google/inject/matcher/Matchers.html" title="class in com.google.inject.matcher">Matchers</a></dt>
 <dd>
 <div class="block">Returns a matcher which matches any input.</div>
@@ -1023,6 +1027,15 @@
 <dd>
 <div class="block">Returns all instance method and field injection points on <code>type</code>.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionPoint.html#forMethod-java.lang.reflect.Method-com.google.inject.TypeLiteral-">forMethod(Method, TypeLiteral&lt;T&gt;)</a></span> - Static method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a></dt>
+<dd>
+<div class="block">Returns a new injection point for the specified method of <code>type</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#forModule-com.google.inject.Module-">forModule(Module)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
+<dd>
+<div class="block">Scans the module for methods and returns a module that will bind the methods
+ that match this scanner.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html#forModule-com.google.inject.Module-">forModule(Module)</a></span> - Static method in class com.google.inject.throwingproviders.<a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder</a></dt>
 <dd>
 <div class="block">Returns a module that installs @<a href="com/google/inject/throwingproviders/CheckedProvides.html" title="annotation in com.google.inject.throwingproviders"><code>CheckedProvides</code></a> methods.</div>
@@ -1129,6 +1142,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/Key.html#getAnnotation--">getAnnotation()</a></span> - Method in class com.google.inject.<a href="com/google/inject/Key.html" title="class in com.google.inject">Key</a></dt>
 <dd>
 <div class="block">Gets the annotation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvidesMethodBinding.html#getAnnotation--">getAnnotation()</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ProvidesMethodBinding.html" title="interface in com.google.inject.spi">ProvidesMethodBinding</a></dt>
+<dd>
+<div class="block">Returns the annotation that caused this binding to be created.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/NameFactory.html#getAnnotationName-com.google.inject.Key-">getAnnotationName(Key&lt;?&gt;)</a></span> - Method in interface com.google.inject.grapher.<a href="com/google/inject/grapher/NameFactory.html" title="interface in com.google.inject.grapher">NameFactory</a></dt>
 <dd>&nbsp;</dd>
@@ -1244,6 +1261,8 @@
 <dd>
 <div class="block">Returns the Dependency, if one exists.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#getDependency--">getDependency()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html#getDependencyChain--">getDependencyChain()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProvisionListener.ProvisionInvocation.html" title="class in com.google.inject.spi">ProvisionListener.ProvisionInvocation</a></dt>
 <dd>
 <div class="block">Returns the dependency chain that led to this object being provisioned.</div>
@@ -1638,6 +1657,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/AbstractModule.html#getProvider-java.lang.Class-">getProvider(Class&lt;T&gt;)</a></span> - Method in class com.google.inject.<a href="com/google/inject/AbstractModule.html" title="class in com.google.inject">AbstractModule</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/Binder.html#getProvider-com.google.inject.Key-">getProvider(Key&lt;T&gt;)</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></dt>
+<dd>
+<div class="block">Returns the provider used to obtain instances for the given injection key.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/Binder.html#getProvider-com.google.inject.spi.Dependency-">getProvider(Dependency&lt;T&gt;)</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></dt>
 <dd>
 <div class="block">Returns the provider used to obtain instances for the given injection key.</div>
 </dd>
@@ -2350,6 +2373,13 @@
 <div class="block">A module contributes configuration information, typically interface
  bindings, which will be used to create an <a href="com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a>.</div>
 </dd>
+<dt><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><span class="typeNameLink">ModuleAnnotatedMethodScanner</span></a> - Class in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
+<dd>
+<div class="block">Allows extensions to scan modules for annotated methods and bind those methods
+ as providers, similar to <code>@Provides</code> methods.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#ModuleAnnotatedMethodScanner--">ModuleAnnotatedMethodScanner()</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/inject/util/Modules.html" title="class in com.google.inject.util"><span class="typeNameLink">Modules</span></a> - Class in <a href="com/google/inject/util/package-summary.html">com.google.inject.util</a></dt>
 <dd>
 <div class="block">Static utility methods for creating and working with instances of <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a>.</div>
@@ -2681,6 +2711,10 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/graphviz/GraphvizGrapher.html#postProcess--">postProcess()</a></span> - Method in class com.google.inject.grapher.graphviz.<a href="com/google/inject/grapher/graphviz/GraphvizGrapher.html" title="class in com.google.inject.grapher.graphviz">GraphvizGrapher</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#prepareMethod-com.google.inject.Binder-java.lang.annotation.Annotation-com.google.inject.Key-com.google.inject.spi.InjectionPoint-">prepareMethod(Binder, Annotation, Key&lt;T&gt;, InjectionPoint)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
+<dd>
+<div class="block">Prepares a method for binding.</div>
+</dd>
 <dt><a href="com/google/inject/PrivateBinder.html" title="interface in com.google.inject"><span class="typeNameLink">PrivateBinder</span></a> - Interface in <a href="com/google/inject/package-summary.html">com.google.inject</a></dt>
 <dd>
 <div class="block">Returns a binder whose configuration information is hidden from its environment by default.</div>
@@ -2726,6 +2760,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#ProviderLookup-java.lang.Object-com.google.inject.Key-">ProviderLookup(Object, Key&lt;T&gt;)</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#ProviderLookup-java.lang.Object-com.google.inject.spi.Dependency-">ProviderLookup(Object, Dependency&lt;T&gt;)</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/util/Types.html#providerOf-java.lang.reflect.Type-">providerOf(Type)</a></span> - Static method in class com.google.inject.util.<a href="com/google/inject/util/Types.html" title="class in com.google.inject.util">Types</a></dt>
 <dd>
 <div class="block">Returns a type modelling a <a href="com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a> that provides elements of type
@@ -2751,7 +2787,8 @@
 </dd>
 <dt><a href="com/google/inject/spi/ProvidesMethodBinding.html" title="interface in com.google.inject.spi"><span class="typeNameLink">ProvidesMethodBinding</span></a>&lt;<a href="com/google/inject/spi/ProvidesMethodBinding.html" title="type parameter in ProvidesMethodBinding">T</a>&gt; - Interface in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>
-<div class="block">An @<a href="com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding.</div>
+<div class="block">An @<a href="com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding or binding produced by a
+ <a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a>.</div>
 </dd>
 <dt><a href="com/google/inject/spi/ProvidesMethodTargetVisitor.html" title="interface in com.google.inject.spi"><span class="typeNameLink">ProvidesMethodTargetVisitor</span></a>&lt;<a href="com/google/inject/spi/ProvidesMethodTargetVisitor.html" title="type parameter in ProvidesMethodTargetVisitor">T</a>,<a href="com/google/inject/spi/ProvidesMethodTargetVisitor.html" title="type parameter in ProvidesMethodTargetVisitor">V</a>&gt; - Interface in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>

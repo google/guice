@@ -72,10 +72,19 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ModuleAnnotatedMethodScanner"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ModuleAnnotatedMethodScanner.html" target="_top"><tt>ModuleAnnotatedMethodScanner</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Allows extensions to scan modules for annotated methods and bind those methods
+ as providers, similar to {@code @Provides} methods.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="ProvidesMethodBinding"></A>
   <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding.html" target="_top"><tt><I>ProvidesMethodBinding</I></tt></A></nobr>
   </TD>
-  <TD VALIGN="TOP">An {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding/Provides.html"><TT>Provides</TT></A> binding.</TD>
+  <TD VALIGN="TOP">An {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding/Provides.html"><TT>Provides</TT></A> binding or binding produced by a
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ProvidesMethodBinding/ModuleAnnotatedMethodScanner.html"><TT>ModuleAnnotatedMethodScanner</TT></A>.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -199,6 +208,13 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="InjectionPoint"></A>
+  <nobr><A HREF="com.google.inject.spi.InjectionPoint.html">InjectionPoint</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A constructor, field or method that can receive injections.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="InstanceBinding"></A>
   <nobr><A HREF="com.google.inject.spi.InstanceBinding.html"><I>InstanceBinding</I></A></nobr>
   </TD>
@@ -246,6 +262,13 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
   <nobr><A HREF="com.google.inject.spi.ProviderKeyBinding.html"><I>ProviderKeyBinding</I></A></nobr>
   </TD>
   <TD VALIGN="TOP">A binding to a provider key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProviderLookup"></A>
+  <nobr><A HREF="com.google.inject.spi.ProviderLookup.html">ProviderLookup</A></nobr>
+  </TD>
+  <TD VALIGN="TOP">A lookup of the provider for a type.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">

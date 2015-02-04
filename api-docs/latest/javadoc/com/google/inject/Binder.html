@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6,"i28":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -404,30 +404,36 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getProvider-com.google.inject.Key-">getProvider</a></span>(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getProvider-com.google.inject.spi.Dependency-">getProvider</a></span>(<a href="../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;T&gt;&nbsp;dependency)</code>
 <div class="block">Returns the provider used to obtain instances for the given injection key.</div>
 </td>
 </tr>
 <tr id="i18" class="altColor">
+<td class="colFirst"><code>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#getProvider-com.google.inject.Key-">getProvider</a></span>(<a href="../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
+<div class="block">Returns the provider used to obtain instances for the given injection key.</div>
+</td>
+</tr>
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#install-com.google.inject.Module-">install</a></span>(<a href="../../../com/google/inject/Module.html" title="interface in com.google.inject">Module</a>&nbsp;module)</code>
 <div class="block">Uses the given module to configure more bindings.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/PrivateBinder.html" title="interface in com.google.inject">PrivateBinder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#newPrivateBinder--">newPrivateBinder</a></span>()</code>
 <div class="block">Creates a new private child environment for bindings and other configuration.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestInjection-java.lang.Object-">requestInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;instance)</code>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject instance fields
  and methods of the given object.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestInjection-com.google.inject.TypeLiteral-T-">requestInjection</a></span>(<a href="../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type,
                 T&nbsp;instance)</code>
@@ -435,41 +441,41 @@ var activeTableTab = "activeTableTab";
  and methods of the given object.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;...&nbsp;types)</code>
 <div class="block">Upon successful creation, the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> will inject static fields
  and methods in the given classes.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requireAtInjectOnConstructors--">requireAtInjectOnConstructors</a></span>()</code>
 <div class="block">Requires that a @<a href="../../../com/google/inject/Inject.html" title="annotation in com.google.inject"><code>Inject</code></a> annotation exists on a constructor in order for
  Guice to consider it an eligible injectable class.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requireExactBindingAnnotations--">requireExactBindingAnnotations</a></span>()</code>
 <div class="block">Requires that Guice finds an exactly matching binding annotation.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#requireExplicitBindings--">requireExplicitBindings</a></span>()</code>
 <div class="block">Instructs the Injector that bindings must be listed in a Module in order to
  be injected.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">skipSources</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</code>
 <div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the
  calling code.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">withSource</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</code>
 <div class="block">Returns a binder that uses <code>source</code> as the reference location for
@@ -698,6 +704,25 @@ var activeTableTab = "activeTableTab";
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
+</dl>
+</li>
+</ul>
+<a name="getProvider-com.google.inject.spi.Dependency-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getProvider</h4>
+<pre>&lt;T&gt;&nbsp;<a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject">Provider</a>&lt;T&gt;&nbsp;getProvider(<a href="../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;T&gt;&nbsp;dependency)</pre>
+<div class="block">Returns the provider used to obtain instances for the given injection key.
+ The returned provider will be attached to the injection point and will
+ follow the nullability specified in the dependency.
+ Additionally, the returned provider will not be valid until the <a href="../../../com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> 
+ has been created. The provider will throw an <code>IllegalStateException</code> if you
+ try to use it beforehand.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>4.0</dd>
 </dl>
 </li>
 </ul>

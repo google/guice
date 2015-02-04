@@ -191,7 +191,8 @@
 <tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html" title="interface in com.google.inject.spi">ProvidesMethodBinding</a>&lt;T&gt;</td>
 <td class="colLast">
-<div class="block">An @<a href="../../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding.</div>
+<div class="block">An @<a href="../../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding or binding produced by a
+ <a href="../../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a>.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -321,60 +322,67 @@
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></td>
+<td class="colLast">
+<div class="block">Allows extensions to scan modules for annotated methods and bind those methods
+ as providers, similar to <code>@Provides</code> methods.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a>&lt;T&gt;</td>
 <td class="colLast">
 <div class="block">A lookup of the provider for a type.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/ProvisionListener.ProvisionInvocation.html" title="class in com.google.inject.spi">ProvisionListener.ProvisionInvocation</a>&lt;T&gt;</td>
 <td class="colLast">
 <div class="block">Encapsulates a single act of provisioning.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/ProvisionListenerBinding.html" title="class in com.google.inject.spi">ProvisionListenerBinding</a></td>
 <td class="colLast">
 <div class="block">Binds keys (picked using a Matcher) to a provision listener.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/RequireAtInjectOnConstructorsOption.html" title="class in com.google.inject.spi">RequireAtInjectOnConstructorsOption</a></td>
 <td class="colLast">
 <div class="block">A request to require explicit @<a href="../../../../com/google/inject/Inject.html" title="annotation in com.google.inject"><code>Inject</code></a> annotations on constructors.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/RequireExactBindingAnnotationsOption.html" title="class in com.google.inject.spi">RequireExactBindingAnnotationsOption</a></td>
 <td class="colLast">
 <div class="block">A request to require exact binding annotations.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/RequireExplicitBindingsOption.html" title="class in com.google.inject.spi">RequireExplicitBindingsOption</a></td>
 <td class="colLast">
 <div class="block">A request to require explicit bindings.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/ScopeBinding.html" title="class in com.google.inject.spi">ScopeBinding</a></td>
 <td class="colLast">
 <div class="block">Registration of a scope annotation with the scope that implements it.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/StaticInjectionRequest.html" title="class in com.google.inject.spi">StaticInjectionRequest</a></td>
 <td class="colLast">
 <div class="block">A request to inject the static fields and methods of a type.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/TypeConverterBinding.html" title="class in com.google.inject.spi">TypeConverterBinding</a></td>
 <td class="colLast">
 <div class="block">Registration of type converters for matching target types.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../../com/google/inject/spi/TypeListenerBinding.html" title="class in com.google.inject.spi">TypeListenerBinding</a></td>
 <td class="colLast">
 <div class="block">Binds types (picked using a Matcher) to an type listener.</div>

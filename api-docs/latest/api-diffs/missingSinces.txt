@@ -9,6 +9,7 @@ MISSING @SINCE TAG: com.google.inject.grapher.EdgeCreator Interface
 MISSING @SINCE TAG: com.google.inject.spi.ElementSource Class
 MISSING @SINCE TAG: com.google.inject.grapher.graphviz.GraphvizGrapher Class
 MISSING @SINCE TAG: com.google.inject.grapher.InstanceNode Class
+MISSING @SINCE TAG: com.google.inject.spi.ModuleAnnotatedMethodScanner Class
 MISSING @SINCE TAG: com.google.inject.grapher.Node Class
 MISSING @SINCE TAG: com.google.inject.grapher.NodeCreator Interface
 MISSING @SINCE TAG: com.google.inject.grapher.NodeId Class
@@ -31,6 +32,7 @@ NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Constructor (com.google.i
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Constructor (com.google.inject.grapher.NodeId, java.lang.Object, java.util.Collection<java.lang.reflect.Member>)
 NO DOC BLOCK: com.google.inject.grapher.InterfaceNode Constructor (com.google.inject.grapher.NodeId, java.lang.Object)
 OK: com.google.inject.spi.Message Constructor (java.lang.String, java.lang.Throwable)
+OK: com.google.inject.spi.ProviderLookup Constructor (java.lang.Object, com.google.inject.spi.Dependency<T>)
 NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, com.google.inject.TypeLiteral<T>)
 NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, java.lang.Class<T>)
 OK: com.google.inject.AbstractModule Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])
@@ -46,9 +48,13 @@ NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method equals(java.lang.Obje
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Method equals(java.lang.Object)
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method equals(java.lang.Object)
 NO DOC BLOCK: com.google.inject.grapher.InterfaceNode Method equals(java.lang.Object)
+OK: com.google.inject.spi.InjectionPoint Method forMethod(java.lang.reflect.Method, com.google.inject.TypeLiteral<T>)
+NO DOC BLOCK: com.google.inject.spi.ProviderLookup Method getDependency()
 NO DOC BLOCK: com.google.inject.grapher.graphviz.GraphvizNode Method getIdentifier()
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Method getInjectionPoint()
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method getMembers()
+OK: com.google.inject.Binder Method getProvider(com.google.inject.spi.Dependency<T>)
+OK: com.google.inject.Binder Method getProvider(java.lang.Class<T>)
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method getType()
 MISSING @SINCE TAG: com.google.inject.spi.ProviderInstanceBinding Method getUserSuppliedProvider()
 MISSING @SINCE TAG: com.google.inject.grapher.InjectorGrapher Method graph(com.google.inject.Injector)

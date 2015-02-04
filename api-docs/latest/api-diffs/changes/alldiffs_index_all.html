@@ -600,6 +600,9 @@ All Differences Index
 <!-- Method findBindingsByType -->
 <nobr><A HREF="com.google.inject.Injector.html#com.google.inject.Injector.findBindingsByType_changed(com.google.inject.TypeLiteral<T>)" class="hiddenlink" target="rightframe">findBindingsByType
 (<code>TypeLiteral&lt;T&gt;</code>)</A></nobr><br>
+<!-- Method forMethod -->
+<nobr><A HREF="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forMethod_added(java.lang.reflect.Method, com.google.inject.TypeLiteral<T>)" class="hiddenlink" target="rightframe"><b>forMethod</b>
+(<code>Method, TypeLiteral&lt;T&gt;</code>)</A></nobr><br>
 <!-- Method get -->
 <A NAME="G"></A>
 <br><font size="+2">G</font>&nbsp;
@@ -678,6 +681,9 @@ All Differences Index
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.spi.HasDependencies.html#com.google.inject.spi.HasDependencies.getDependencies_changed()" class="hiddenlink" target="rightframe">type&nbsp;
 ()&nbsp;in&nbsp;com.google.inject.spi.HasDependencies
 </A></nobr><br>
+<!-- Method getDependency -->
+<nobr><A HREF="com.google.inject.spi.ProviderLookup.html#com.google.inject.spi.ProviderLookup.getDependency_added()" class="hiddenlink" target="rightframe"><b>getDependency</b>
+()</A></nobr><br>
 <!-- Method getElements -->
 <i>getElements</i><br>
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.multibindings.MultibinderBinding.html#com.google.inject.multibindings.MultibinderBinding.getElements_changed()" class="hiddenlink" target="rightframe">type&nbsp;
@@ -843,12 +849,20 @@ All Differences Index
 ()</A></nobr><br>
 <!-- Method getProvider -->
 <i>getProvider</i><br>
-&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(com.google.inject.Key<T>)" class="hiddenlink" target="rightframe">type&nbsp;
-(<code>Key&lt;T&gt;</code>)&nbsp;in&nbsp;com.google.inject.Binder
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_removed(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;<strike>
+(<code>Class&lt;T&gt;</code>)</strike>&nbsp;in&nbsp;com.google.inject.Binder
 </A></nobr><br>
 <!-- Method getProvider -->
-&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;
-(<code>Class&lt;T&gt;</code>)&nbsp;in&nbsp;com.google.inject.Binder
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_added(com.google.inject.spi.Dependency<T>)" class="hiddenlink" target="rightframe">type&nbsp;<b>
+(<code>Dependency&lt;T&gt;</code>)</b>&nbsp;in&nbsp;com.google.inject.Binder
+</A></nobr><br>
+<!-- Method getProvider -->
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_added(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;<b>
+(<code>Class&lt;T&gt;</code>)</b>&nbsp;in&nbsp;com.google.inject.Binder
+</A></nobr><br>
+<!-- Method getProvider -->
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(com.google.inject.Key<T>)" class="hiddenlink" target="rightframe">type&nbsp;
+(<code>Key&lt;T&gt;</code>)&nbsp;in&nbsp;com.google.inject.Binder
 </A></nobr><br>
 <!-- Method getProvider -->
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binding.html#com.google.inject.Binding.getProvider_changed()" class="hiddenlink" target="rightframe">type&nbsp;
@@ -1083,6 +1097,8 @@ All Differences Index
 <A HREF="com.google.inject.Inject.html" class="hiddenlink" target="rightframe">Inject</A><br>
 <!-- Class InjectionListener -->
 <A HREF="com.google.inject.spi.InjectionListener.html" class="hiddenlink" target="rightframe"><i>InjectionListener</i></A><br>
+<!-- Class InjectionPoint -->
+<A HREF="com.google.inject.spi.InjectionPoint.html" class="hiddenlink" target="rightframe">InjectionPoint</A><br>
 <!-- Method injectMembers -->
 <i>injectMembers</i><br>
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.Injector.html#com.google.inject.Injector.injectMembers_changed(java.lang.Object)" class="hiddenlink" target="rightframe">type&nbsp;
@@ -1268,6 +1284,8 @@ All Differences Index
 (<code>String, Throwable</code>)</A></nobr>&nbsp;constructor<br>
 <!-- Class Module -->
 <A HREF="com.google.inject.Module.html" class="hiddenlink" target="rightframe"><i>Module</i></A><br>
+<!-- Class ModuleAnnotatedMethodScanner -->
+<A HREF="pkg_com.google.inject.spi.html#ModuleAnnotatedMethodScanner" class="hiddenlink" target="rightframe"><b>ModuleAnnotatedMethodScanner</b></A><br>
 <!-- Class Modules.OverriddenModuleBuilder -->
 <A HREF="com.google.inject.util.Modules.OverriddenModuleBuilder.html" class="hiddenlink" target="rightframe"><i>Modules.OverriddenModuleBuilder</i></A><br>
 <!-- Class Multibinder -->
@@ -1423,6 +1441,12 @@ All Differences Index
 <A HREF="com.google.inject.spi.ProviderInstanceBinding.html" class="hiddenlink" target="rightframe"><i>ProviderInstanceBinding</i></A><br>
 <!-- Class ProviderKeyBinding -->
 <A HREF="com.google.inject.spi.ProviderKeyBinding.html" class="hiddenlink" target="rightframe"><i>ProviderKeyBinding</i></A><br>
+<!-- Class ProviderLookup -->
+<i>ProviderLookup</i><br>
+&nbsp;&nbsp;<A HREF="com.google.inject.spi.ProviderLookup.html" class="hiddenlink" target="rightframe">com.google.inject.spi</A><br>
+<!-- Constructor ProviderLookup -->
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.spi.ProviderLookup.html#com.google.inject.spi.ProviderLookup.ctor_added(java.lang.Object, com.google.inject.spi.Dependency<T>)" class="hiddenlink" target="rightframe"><b>ProviderLookup</b>
+(<code>Object, Dependency&lt;T&gt;</code>)</A></nobr>&nbsp;constructor<br>
 <!-- Class ProviderWithExtensionVisitor -->
 <A HREF="com.google.inject.spi.ProviderWithExtensionVisitor.html" class="hiddenlink" target="rightframe"><i>ProviderWithExtensionVisitor</i></A><br>
 <!-- Class Provides -->

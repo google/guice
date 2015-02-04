@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -105,7 +105,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public interface <span class="typeNameLabel">ProvidesMethodBinding&lt;T&gt;</span>
 extends <a href="../../../../com/google/inject/spi/HasDependencies.html" title="interface in com.google.inject.spi">HasDependencies</a></pre>
-<div class="block">An @<a href="../../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding.</div>
+<div class="block">An @<a href="../../../../com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding or binding produced by a
+ <a href="../../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a>.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>
@@ -129,18 +130,24 @@ extends <a href="../../../../com/google/inject/spi/HasDependencies.html" title="
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html#getAnnotation--">getAnnotation</a></span>()</code>
+<div class="block">Returns the annotation that caused this binding to be created.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html#getEnclosingInstance--">getEnclosingInstance</a></span>()</code>
 <div class="block">Returns the instance of the object the method is defined in.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html" title="type parameter in ProvidesMethodBinding">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html#getKey--">getKey</a></span>()</code>
 <div class="block">Returns the key of the binding.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html#getMethod--">getMethod</a></span>()</code>
 <div class="block">Returns the method this binding uses.</div>
@@ -191,11 +198,24 @@ extends <a href="../../../../com/google/inject/spi/HasDependencies.html" title="
 <a name="getKey--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getKey</h4>
 <pre><a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;<a href="../../../../com/google/inject/spi/ProvidesMethodBinding.html" title="type parameter in ProvidesMethodBinding">T</a>&gt;&nbsp;getKey()</pre>
 <div class="block">Returns the key of the binding.</div>
+</li>
+</ul>
+<a name="getAnnotation--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getAnnotation</h4>
+<pre><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&nbsp;getAnnotation()</pre>
+<div class="block">Returns the annotation that caused this binding to be created. For <code>@Provides</code> methods,
+ this is an instance of the <code>@Provides</code> annotation. For bindings from
+ <a href="../../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a>, this is the annotation that caused the scanner to produce
+ the binding.</div>
 </li>
 </ul>
 </li>

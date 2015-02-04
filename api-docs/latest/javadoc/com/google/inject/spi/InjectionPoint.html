@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10};
+var methods = {"i0":10,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":9,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -176,53 +176,60 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </td>
 </tr>
 <tr id="i7" class="rowColor">
+<td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#forMethod-java.lang.reflect.Method-com.google.inject.TypeLiteral-">forMethod</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&nbsp;method,
+         <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type)</code>
+<div class="block">Returns a new injection point for the specified method of <code>type</code>.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>static <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util">Set</a>&lt;<a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#forStaticMethodsAndFields-java.lang.Class-">forStaticMethodsAndFields</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;?&gt;&nbsp;type)</code>
 <div class="block">Returns all static method and field injection points on <code>type</code>.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>static <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util">Set</a>&lt;<a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#forStaticMethodsAndFields-com.google.inject.TypeLiteral-">forStaticMethodsAndFields</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;&nbsp;type)</code>
 <div class="block">Returns all static method and field injection points on <code>type</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#getDeclaringType--">getDeclaringType</a></span>()</code>
 <div class="block">Returns the generic type that defines this injection point.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/util/List.html?is-external=true" title="class or interface in java.util">List</a>&lt;<a href="../../../../com/google/inject/spi/Dependency.html" title="class in com.google.inject.spi">Dependency</a>&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#getDependencies--">getDependencies</a></span>()</code>
 <div class="block">Returns the dependencies for this injection point.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Member.html?is-external=true" title="class or interface in java.lang.reflect">Member</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#getMember--">getMember</a></span>()</code>
 <div class="block">Returns the injected constructor, field, or method.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#isOptional--">isOptional</a></span>()</code>
 <div class="block">Returns true if this injection point shall be skipped if the injector cannot resolve bindings
  for all required dependencies.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#isToolable--">isToolable</a></span>()</code>
 <div class="block">Returns true if the element is annotated with @<a href="../../../../com/google/inject/spi/Toolable.html" title="annotation in com.google.inject.spi"><code>Toolable</code></a>.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/spi/InjectionPoint.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
@@ -425,6 +432,26 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <dd><code><a href="../../../../com/google/inject/ConfigurationException.html" title="class in com.google.inject">ConfigurationException</a></code> - if there is no injectable constructor, more than one injectable
      constructor, or if parameters of the injectable constructor are malformed, such as a
      parameter with multiple binding annotations.</dd>
+</dl>
+</li>
+</ul>
+<a name="forMethod-java.lang.reflect.Method-com.google.inject.TypeLiteral-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>forMethod</h4>
+<pre>public static&nbsp;&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a>&nbsp;forMethod(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Method.html?is-external=true" title="class or interface in java.lang.reflect">Method</a>&nbsp;method,
+                                           <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type)</pre>
+<div class="block">Returns a new injection point for the specified method of <code>type</code>.
+ This is useful for extensions that need to build dependency graphs from
+ arbitrary methods.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>method</code> - any single method present on <code>type</code>.</dd>
+<dd><code>type</code> - the concrete type that defines <code>method</code>.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>4.0</dd>
 </dl>
 </li>
 </ul>

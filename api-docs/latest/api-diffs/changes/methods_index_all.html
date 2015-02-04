@@ -383,6 +383,8 @@ Method Differences Index
 <br>
 <nobr><A HREF="com.google.inject.Injector.html#com.google.inject.Injector.findBindingsByType_changed(com.google.inject.TypeLiteral<T>)" class="hiddenlink" target="rightframe">findBindingsByType
 (<code>TypeLiteral&lt;T&gt;</code>)</A></nobr><br>
+<nobr><A HREF="com.google.inject.spi.InjectionPoint.html#com.google.inject.spi.InjectionPoint.forMethod_added(java.lang.reflect.Method, com.google.inject.TypeLiteral<T>)" class="hiddenlink" target="rightframe"><b>forMethod</b>
+(<code>Method, TypeLiteral&lt;T&gt;</code>)</A></nobr><br>
 <A NAME="G"></A>
 <br><font size="+2">G</font>&nbsp;
 <a href="#A"><font size="-2">A</font></a> 
@@ -443,6 +445,8 @@ Method Differences Index
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.spi.HasDependencies.html#com.google.inject.spi.HasDependencies.getDependencies_changed()" class="hiddenlink" target="rightframe">type&nbsp;
 ()&nbsp;in&nbsp;com.google.inject.spi.HasDependencies
 </A></nobr><br>
+<nobr><A HREF="com.google.inject.spi.ProviderLookup.html#com.google.inject.spi.ProviderLookup.getDependency_added()" class="hiddenlink" target="rightframe"><b>getDependency</b>
+()</A></nobr><br>
 <i>getElements</i><br>
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.multibindings.MultibinderBinding.html#com.google.inject.multibindings.MultibinderBinding.getElements_changed()" class="hiddenlink" target="rightframe">type&nbsp;
 ()&nbsp;in&nbsp;com.google.inject.multibindings.MultibinderBinding
@@ -561,11 +565,17 @@ Method Differences Index
 <nobr><A HREF="com.google.inject.spi.ProviderBinding.html#com.google.inject.spi.ProviderBinding.getProvidedKey_changed()" class="hiddenlink" target="rightframe">getProvidedKey
 ()</A></nobr><br>
 <i>getProvider</i><br>
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_removed(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;<strike>
+(<code>Class&lt;T&gt;</code>)</strike>&nbsp;in&nbsp;com.google.inject.Binder
+</A></nobr><br>
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_added(com.google.inject.spi.Dependency<T>)" class="hiddenlink" target="rightframe">type&nbsp;<b>
+(<code>Dependency&lt;T&gt;</code>)</b>&nbsp;in&nbsp;com.google.inject.Binder
+</A></nobr><br>
+&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_added(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;<b>
+(<code>Class&lt;T&gt;</code>)</b>&nbsp;in&nbsp;com.google.inject.Binder
+</A></nobr><br>
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(com.google.inject.Key<T>)" class="hiddenlink" target="rightframe">type&nbsp;
 (<code>Key&lt;T&gt;</code>)&nbsp;in&nbsp;com.google.inject.Binder
-</A></nobr><br>
-&nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binder.html#com.google.inject.Binder.getProvider_changed(java.lang.Class<T>)" class="hiddenlink" target="rightframe">type&nbsp;
-(<code>Class&lt;T&gt;</code>)&nbsp;in&nbsp;com.google.inject.Binder
 </A></nobr><br>
 &nbsp;&nbsp;<nobr><A HREF="com.google.inject.Binding.html#com.google.inject.Binding.getProvider_changed()" class="hiddenlink" target="rightframe">type&nbsp;
 ()&nbsp;in&nbsp;com.google.inject.Binding
