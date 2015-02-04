@@ -20,6 +20,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
+import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
@@ -321,6 +322,18 @@ public interface Binder {
    * @since 2.0
    */
   <T> Provider<T> getProvider(Key<T> key);
+
+  /**
+   * Returns the provider used to obtain instances for the given injection key.
+   * The returned provider will be attached to the injection point and will
+   * follow the nullability specified in the dependency.
+   * Additionally, the returned provider will not be valid until the {@link Injector} 
+   * has been created. The provider will throw an {@code IllegalStateException} if you
+   * try to use it beforehand.
+   *
+   * @since 4.0
+   */
+  <T> Provider<T> getProvider(Dependency<T> dependency);
 
   /**
    * Returns the provider used to obtain instances for the given injection type.

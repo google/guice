@@ -307,6 +307,20 @@ public final class InjectionPoint {
   }
 
   /**
+   * Returns a new injection point for the specified method of {@code type}.
+   * This is useful for extensions that need to build dependency graphs from
+   * arbitrary methods.
+   *
+   * @param method any single method present on {@code type}.
+   * @param type the concrete type that defines {@code method}.
+   *
+   * @since 4.0
+   */
+  public static <T> InjectionPoint forMethod(Method method, TypeLiteral<T> type) {
+    return new InjectionPoint(type, method, false);
+  }
+
+  /**
    * Returns all static method and field injection points on {@code type}.
    *
    * @return a possibly empty set of injection points. The set has a specified iteration order. All

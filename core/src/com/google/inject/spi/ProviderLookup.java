@@ -39,12 +39,17 @@ import java.util.Set;
  */
 public final class ProviderLookup<T> implements Element {
   private final Object source;
-  private final Key<T> key;
+  private final Dependency<T> dependency;
   private Provider<T> delegate;
 
   public ProviderLookup(Object source, Key<T> key) {
+    this(source, Dependency.get(checkNotNull(key, "key")));
+  }
+
+  /** @since 4.0 */
+  public ProviderLookup(Object source, Dependency<T> dependency) {
     this.source = checkNotNull(source, "source");
-    this.key = checkNotNull(key, "key");
+    this.dependency = checkNotNull(dependency, "dependency");
   }
 
   public Object getSource() {
@@ -52,7 +57,11 @@ public final class ProviderLookup<T> implements Element {
   }
 
   public Key<T> getKey() {
-    return key;
+    return dependency.getKey();
+  }
+
+  public Dependency<T> getDependency() {
+    return dependency;
   }
 
   public <T> T acceptVisitor(ElementVisitor<T> visitor) {
@@ -70,7 +79,7 @@ public final class ProviderLookup<T> implements Element {
   }
 
   public void applyTo(Binder binder) {
-    initializeDelegate(binder.withSource(getSource()).getProvider(key));
+    initializeDelegate(binder.withSource(getSource()).getProvider(dependency));
   }
 
   /**
@@ -93,16 +102,16 @@ public final class ProviderLookup<T> implements Element {
             "This Provider cannot be used until the Injector has been created.");
         return delegate.get();
       }
-      
+
       public Set<Dependency<?>> getDependencies() {
         // We depend on Provider<T>, not T directly.  This is an important distinction
         // for dependency analysis tools that short-circuit on providers.
-        Key<?> providerKey = key.ofType(Types.providerOf(key.getTypeLiteral().getType()));
+        Key<?> providerKey = getKey().ofType(Types.providerOf(getKey().getTypeLiteral().getType()));
         return ImmutableSet.<Dependency<?>>of(Dependency.get(providerKey));
       }
 
       @Override public String toString() {
-        return "Provider<" + key.getTypeLiteral() + ">";
+        return "Provider<" + getKey().getTypeLiteral() + ">";
       }
     };
   }

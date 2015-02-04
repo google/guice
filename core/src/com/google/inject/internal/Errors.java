@@ -20,11 +20,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
+import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
@@ -53,6 +56,9 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter, the method is
@@ -70,6 +76,11 @@ import java.util.Set;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public final class Errors implements Serializable {
+
+  private static final Logger logger = Logger.getLogger(Guice.class.getName());
+
+  private static final Set<Dependency<?>> warnedDependencies =
+      Sets.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
 
   /**
@@ -600,6 +611,33 @@ public final class Errors implements Serializable {
       throws ErrorsException {
     if (value != null || dependency.isNullable() ) {
       return value;
+    }
+
+    // Hack to allow null parameters to @Provides methods, for backwards compatibility.
+    if (dependency.getInjectionPoint().getMember() instanceof Method) {
+      Method annotated = (Method) dependency.getInjectionPoint().getMember();
+      if (annotated.isAnnotationPresent(Provides.class)) {
+        switch (InternalFlags.getNullableProvidesOption()) {
+          case ERROR:
+            break; // break out & let the below exception happen
+          case IGNORE:
+            return value; // user doesn't care about injecting nulls to non-@Nullables.
+          case WARN:
+            // Warn only once, otherwise we spam logs too much.
+            if (!warnedDependencies.add(dependency)) {
+              return value;
+            }
+            logger.log(Level.WARNING,
+                "Guice injected null into parameter {0} of {1} (a {2}), please mark it @Nullable."
+                    + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
+                    + " error.",
+                new Object[] {
+                    dependency.getParameterIndex(),
+                    convert(dependency.getInjectionPoint().getMember()),
+                    convert(dependency.getKey())});
+            return null; // log & exit.
+        }
+      }
     }
 
     int parameterIndex = dependency.getParameterIndex();

@@ -33,6 +33,9 @@ public class InternalFlags {
   private static final CustomClassLoadingOption CUSTOM_CLASS_LOADING
       = parseCustomClassLoadingOption();
 
+  private static final NullableProvidesOption NULLABLE_PROVIDES
+      = parseNullableProvidesOption(NullableProvidesOption.ERROR);
+
 
   /**
    * The options for Guice stack trace collection.
@@ -56,12 +59,25 @@ public class InternalFlags {
     BRIDGE
   }
 
+  public enum NullableProvidesOption {
+    /** Ignore null parameters to @Provides methods. */
+    IGNORE,
+    /** Warn if null parameters are passed to non-@Nullable parameters of provides methods. */
+    WARN,
+    /** Error if null parameters are passed to non-@Nullable parameters of provides parameters */
+    ERROR
+  }
+
   public static IncludeStackTraceOption getIncludeStackTraceOption() {
     return INCLUDE_STACK_TRACES;
   }
 
   public static CustomClassLoadingOption getCustomClassLoadingOption() {
     return CUSTOM_CLASS_LOADING;
+  }
+
+  public static NullableProvidesOption getNullableProvidesOption() {
+    return NULLABLE_PROVIDES;
   }
 
   private static IncludeStackTraceOption parseIncludeStackTraceOption() {
@@ -72,6 +88,11 @@ public class InternalFlags {
   private static CustomClassLoadingOption parseCustomClassLoadingOption() {
     return getSystemOption("guice_custom_class_loading",
         CustomClassLoadingOption.BRIDGE, CustomClassLoadingOption.OFF);
+  }
+
+  private static NullableProvidesOption parseNullableProvidesOption(
+      NullableProvidesOption defaultValue) {
+    return getSystemOption("guice_check_nullable_provides_params", defaultValue);
   }
 
   /**

@@ -302,7 +302,11 @@ public final class Elements {
     }
 
     public <T> Provider<T> getProvider(final Key<T> key) {
-      final ProviderLookup<T> element = new ProviderLookup<T>(getElementSource(), key);
+      return getProvider(Dependency.get(key));
+    }
+
+    public <T> Provider<T> getProvider(final Dependency<T> dependency) {
+      final ProviderLookup<T> element = new ProviderLookup<T>(getElementSource(), dependency);
       elements.add(element);
       return element.getProvider();
     }

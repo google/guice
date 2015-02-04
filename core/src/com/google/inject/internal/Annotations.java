@@ -201,6 +201,17 @@ public class Annotations {
     return found;
   }
 
+  static boolean containsComponentAnnotation(Annotation[] annotations) {
+    for (Annotation annotation : annotations) {
+      // TODO(user): Should we scope this down to dagger.Component?
+      if (annotation.annotationType().getSimpleName().equals("Component")) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   /**
    * Checks for the presence of annotations. Caches results because Android doesn't.
    */
@@ -256,7 +267,9 @@ public class Annotations {
     }
 
     Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(errors, type);
-    if (scopeAnnotation != null) {
+    if (scopeAnnotation != null
+        // We let Dagger Components through to aid migrations.
+        && !containsComponentAnnotation(type.getAnnotations())) {
       errors.withSource(type).scopeAnnotationOnAbstractType(scopeAnnotation, type, source);
     }
   }
