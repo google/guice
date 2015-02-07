@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.grapher.AbstractInjectorGrapher;
@@ -36,6 +37,7 @@ import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * {@link com.google.inject.grapher.InjectorGrapher} implementation that writes out a Graphviz DOT
@@ -46,6 +48,7 @@ import java.util.Map.Entry;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class GraphvizGrapher extends AbstractInjectorGrapher {
+  private final Map<String, Set<NodeId>> subGraphs = Maps.newHashMap();
   private final Map<NodeId, GraphvizNode> nodes = Maps.newHashMap();
   private final List<GraphvizEdge> edges = Lists.newArrayList();
   private final NameFactory nameFactory;
@@ -74,19 +77,38 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
   }
 
   @Override protected void postProcess() {
+    int subGraphNumber = 0;
     start();
     
-    for (GraphvizNode node : nodes.values()) {
-      renderNode(node);
+    for (String subName : subGraphs.keySet()) {
+      renderSubGraph(subName, subGraphNumber++);
+      for (NodeId nodeId : subGraphs.get(subName)) {
+        GraphvizNode node = nodes.get(nodeId);
+        renderNode(node);
+      }
+      renderSubGraphDone(subName);
     }
 
     for (GraphvizEdge edge : edges) {
       renderEdge(edge);
     }
-    
+
     finish();
-    
+
     out.flush();
+  }
+
+  private void renderSubGraphDone(String subName) {
+    if (!subName.equals("")) {
+      finish();
+    }
+  }
+
+  private void renderSubGraph(String subName, int subGraphNumber) {
+    if (!subName.equals("")) {
+      out.printf("subgraph cluster_%d {\n", subGraphNumber);
+      out.printf("label=\"%s\"\n", subName);
+    }
   }
 
   protected Map<String, String> getGraphAttributes() {
@@ -320,6 +342,19 @@ public class GraphvizGrapher extends AbstractInjectorGrapher {
 
   private void addNode(GraphvizNode node) {
     node.setIdentifier("x" + nodes.size());
+    addSubGraph(node.getNodeId());
     nodes.put(node.getNodeId(), node);
+  }
+
+  /**
+   * Add one entry {@link Set<NodeId>} into subGraphs, and put nodeId into it.
+   */
+  private void addSubGraph(NodeId nodeId) {
+    Set<NodeId> subNodes = subGraphs.get(nodeId.getSubname());
+    if (subNodes == null) {
+      subNodes = Sets.newHashSet();
+      subGraphs.put(nodeId.getSubname(), subNodes);
+    }
+    subNodes.add(nodeId);
   }
 }

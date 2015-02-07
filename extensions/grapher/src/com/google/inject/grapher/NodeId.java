@@ -61,6 +61,10 @@ public final class NodeId {
     return key;
   }
 
+  public String getSubname() {
+    return subname;
+  }
+
   @Override public int hashCode() {
     return Objects.hashCode(key, nodeType);
   }
