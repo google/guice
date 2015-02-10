@@ -21,6 +21,8 @@ import static com.google.inject.name.Names.named;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -124,5 +126,65 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
       return Key.get(key.getTypeLiteral(),
           Names.named(((Named) key.getAnnotation()).value() + "-munged"));
     }
+  }
+
+  public void testFailingScanner_scannerOutsideModule() {
+    try {
+      Guice.createInjector(new FailingScanner().forModule(new SomeModule()));
+      fail();
+    } catch (CreationException expected) {
+      Message m = Iterables.getOnlyElement(expected.getErrorMessages());
+      assertEquals(
+          "An exception was caught and reported. Message: Failing in the scanner.",
+          m.getMessage());
+      assertEquals(IllegalStateException.class, m.getCause().getClass());
+      ElementSource source = (ElementSource) Iterables.getOnlyElement(m.getSources());
+      assertEquals(SomeModule.class.getName(),
+          Iterables.getOnlyElement(source.getModuleClassNames()));
+      assertEquals(String.class.getName() + " " + SomeModule.class.getName() + ".aString()",
+          source.toString());
+    }
+  }
+
+  public void testFailingScanner_scannerInModule() {
+    Module module = new AbstractModule() {
+      @Override public void configure() {
+        install(new FailingScanner().forModule(new SomeModule()));
+      }
+    };
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException expected) {
+      Message m = Iterables.getOnlyElement(expected.getErrorMessages());
+      assertEquals(
+          "An exception was caught and reported. Message: Failing in the scanner.",
+          m.getMessage());
+      assertEquals(IllegalStateException.class, m.getCause().getClass());
+      ElementSource source = (ElementSource) Iterables.getOnlyElement(m.getSources());
+      assertEquals(ImmutableList.of(SomeModule.class.getName(), module.getClass().getName()),
+          source.getModuleClassNames());
+      assertEquals(String.class.getName() + " " + SomeModule.class.getName() + ".aString()",
+          source.toString());
+    }
+  }
+
+  public static class FailingScanner extends ModuleAnnotatedMethodScanner {
+    @Override public Set<? extends Class<? extends Annotation>> annotationClasses() {
+      return ImmutableSet.of(TestProvides.class);
+    }
+
+    @Override public <T> Key<T> prepareMethod(
+        Binder binder, Annotation rawAnnotation, Key<T> key, InjectionPoint injectionPoint) {
+      throw new IllegalStateException("Failing in the scanner.");
+    }
+  }
+
+  static class SomeModule extends AbstractModule {
+    @TestProvides String aString() {
+      return "Foo";
+    }
+
+    @Override protected void configure() {}
   }
 }

@@ -114,6 +114,10 @@ public final class ProviderMethodsModule implements Module {
     return new ProviderMethodsModule(object, skipFastClassGeneration, scanner);
   }
 
+  public Module getDelegateModule() {
+    return delegate instanceof Module ? (Module) delegate : null;
+  }
+
   @Override
   public synchronized void configure(Binder binder) {
     for (ProviderMethod<?> providerMethod : getProviderMethods(binder)) {
@@ -258,7 +262,11 @@ public final class ProviderMethodsModule implements Module {
     @SuppressWarnings("unchecked") // Define T as the method's return type.
     TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
-    key = scanner.prepareMethod(binder, annotation, key, point);
+    try {
+      key = scanner.prepareMethod(binder, annotation, key, point);
+    } catch(Throwable t) {
+      binder.addError(t);
+    }
     Class<? extends Annotation> scopeAnnotation
         = Annotations.findScopeAnnotation(errors, method.getAnnotations());
     for (Message message : errors.getMessages()) {

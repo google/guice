@@ -242,13 +242,27 @@ public final class Elements {
     public void install(Module module) {
       if (modules.add(module)) {
         Binder binder = this;
+        boolean unwrapModuleSource = false;
         // Update the module source for the new module
         if (!(module instanceof ProviderMethodsModule)) {
           moduleSource = getModuleSource(module);
+          unwrapModuleSource = true;
+        } else {
+          // There are two reason's we'd want to get the module source in a ProviderMethodsModule.
+          // ModuleAnnotatedMethodScanner lets users scan their own modules for @Provides-like
+          // bindings.  If they install the module at a top-level, then moduleSource can be null.
+          // Also, if they pass something other than 'this' to it, we'd have the wrong source.
+          Module delegate = ((ProviderMethodsModule) module).getDelegateModule();
+          if (delegate != null
+              && (moduleSource == null
+              || !moduleSource.getModuleClassName().equals(delegate.getClass().getName()))) {
+            moduleSource = getModuleSource(delegate);
+            unwrapModuleSource = true;
+          }
         }
         if (module instanceof PrivateModule) {
           binder = binder.newPrivateBinder();
-        }      
+        }
         try {
           module.configure(binder);
         } catch (RuntimeException e) {
@@ -261,7 +275,7 @@ public final class Elements {
         }
         binder.install(ProviderMethodsModule.forModule(module));
         // We are done with this module, so undo module source change
-        if (!(module instanceof ProviderMethodsModule)) {
+        if (unwrapModuleSource) {
           moduleSource = moduleSource.getParent();
         }
       }
