@@ -218,6 +218,11 @@ final class FactoryProvider2 <F> implements InvocationHandler,
       ImmutableMap.Builder<Method, AssistData> assistDataBuilder = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
       for (Method method : factoryRawType.getMethods()) {
+        // Skip synthetic methods that java8 may have created.
+        if (method.isBridge() || method.isSynthetic()) {
+          continue;
+        }
+        
         TypeLiteral<?> returnTypeLiteral = factoryType.getReturnType(method);
         Key<?> returnType;
         try {

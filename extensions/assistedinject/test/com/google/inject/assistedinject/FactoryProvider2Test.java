@@ -1131,4 +1131,40 @@ public class FactoryProvider2Test extends TestCase {
       this.delegate = null;
     }
   }
+  
+  static abstract class AbstractAssisted {
+    interface Factory<T extends AbstractAssisted> {
+      T create(String string);
+    }
+  }
+  
+  static class ConcreteAssisted extends AbstractAssisted { 
+    @Inject ConcreteAssisted(@SuppressWarnings("unused") @Assisted String string) {}
+  }
+  
+  static class ConcreteAssistedWithOverride extends AbstractAssisted {
+    @Inject ConcreteAssistedWithOverride(@SuppressWarnings("unused") @Assisted String string) {}
+    
+    interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithOverride> {
+      @Override ConcreteAssistedWithOverride create(String string);
+    }
+  }
+  
+  static class ConcreteAssistedWithoutOverride extends AbstractAssisted {
+    @Inject ConcreteAssistedWithoutOverride(@SuppressWarnings("unused") @Assisted String string) {}
+    interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithoutOverride> {}
+  }
+  
+  // See https://github.com/google/guice/issues/904
+  public void testIgnoresSyntheticFactoryMethods() {
+    // Validate the injector can be successfully created.
+    Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+        install(new FactoryModuleBuilder().build(ConcreteAssistedWithoutOverride.Factory.class));
+        install(new FactoryModuleBuilder().build(
+            new TypeLiteral<AbstractAssisted.Factory<ConcreteAssisted>>() {}));
+      }
+    });
+  }
 }
