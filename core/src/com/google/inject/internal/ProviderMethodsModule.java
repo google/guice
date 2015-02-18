@@ -29,10 +29,10 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.util.Modules;
 
 import java.lang.annotation.Annotation;
@@ -55,8 +55,8 @@ public final class ProviderMethodsModule implements Module {
   private static ModuleAnnotatedMethodScanner PROVIDES_BUILDER =
       new ModuleAnnotatedMethodScanner() {
         @Override
-        public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
-            InjectionPoint injectionPoint) {
+        public <T> Key<T> prepareMethod(
+            Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
           return key;
         }
 
@@ -89,7 +89,7 @@ public final class ProviderMethodsModule implements Module {
   /**
    * Returns a module which creates bindings methods in the module that match the scanner.
    */
-  public static Module forModule(Module module, ModuleAnnotatedMethodScanner scanner) {
+  public static Module forModule(Object module, ModuleAnnotatedMethodScanner scanner) {
     return forObject(module, false, scanner);
   }
 
@@ -114,8 +114,8 @@ public final class ProviderMethodsModule implements Module {
     return new ProviderMethodsModule(object, skipFastClassGeneration, scanner);
   }
 
-  public Module getDelegateModule() {
-    return delegate instanceof Module ? (Module) delegate : null;
+  public Object getDelegateModule() {
+    return delegate;
   }
 
   @Override

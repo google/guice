@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Associated to a {@link Module module}, provides the module class name, the parent module {@link
  * ModuleSource source}, and the call stack that ends just before the module {@link
- * Module#configure(Binder) configure(Binder)} method invocation.  
+ * Module#configure(Binder) configure(Binder)} method invocation.
  */
 final class ModuleSource {
 
@@ -35,16 +35,16 @@ final class ModuleSource {
    * The class name of module that this {@link ModuleSource} associated to.
    */
   private final String moduleClassName;
-  
+
   /**
    * The parent {@link ModuleSource module source}.
    */
   private final ModuleSource parent;
-  
-  /** 
-   * The chunk of call stack that starts from the parent module {@link Module#configure(Binder) 
-   * configure(Binder)} call and ends just before the module {@link Module#configure(Binder) 
-   * configure(Binder)} method invocation. For a module without a parent module the chunk starts 
+
+  /**
+   * The chunk of call stack that starts from the parent module {@link Module#configure(Binder)
+   * configure(Binder)} call and ends just before the module {@link Module#configure(Binder)
+   * configure(Binder)} method invocation. For a module without a parent module the chunk starts
    * from the bottom of call stack. The array is non-empty if stack trace collection is on.
    */
   private final InMemoryStackTraceElement[] partialCallStack;
@@ -52,32 +52,32 @@ final class ModuleSource {
   /**
    * Creates a new {@link ModuleSource} with a {@literal null} parent.
    * @param module the corresponding module
-   * @param partialCallStack the chunk of call stack that starts from the parent module {@link 
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link 
+   * @param partialCallStack the chunk of call stack that starts from the parent module {@link
+   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    * Module#configure(Binder) configure(Binder)} method invocation
    */
-  ModuleSource(Module module, StackTraceElement[] partialCallStack) {
+  ModuleSource(Object module, StackTraceElement[] partialCallStack) {
     this(null, module, partialCallStack);
-  } 
-  
+  }
+
  /**
    * Creates a new {@link ModuleSource} Object.
-   * @param parent the parent module {@link ModuleSource source} 
+   * @param parent the parent module {@link ModuleSource source}
    * @param module the corresponding module
-   * @param partialCallStack the chunk of call stack that starts from the parent module {@link 
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link 
+   * @param partialCallStack the chunk of call stack that starts from the parent module {@link
+   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    * Module#configure(Binder) configure(Binder)} method invocation
    */
   private ModuleSource(
-      /* @Nullable */ ModuleSource parent, Module module, StackTraceElement[] partialCallStack) {
+      /* @Nullable */ ModuleSource parent, Object module, StackTraceElement[] partialCallStack) {
     Preconditions.checkNotNull(module, "module cannot be null.");
     Preconditions.checkNotNull(partialCallStack, "partialCallStack cannot be null.");
     this.parent = parent;
     this.moduleClassName = module.getClass().getName();
     this.partialCallStack = StackTraceElements.convertToInMemoryStackTraceElement(partialCallStack);
   }
-  
-  /** 
+
+  /**
    * Returns the corresponding module class name.
    *
    * @see Class#getName()
@@ -95,27 +95,27 @@ final class ModuleSource {
   StackTraceElement[] getPartialCallStack() {
     return StackTraceElements.convertToStackTraceElement(partialCallStack);
   }
-  
+
   /**
    * Returns the size of partial call stack if stack trace collection is on otherwise zero.
    */
   int getPartialCallStackSize() {
     return partialCallStack.length;
   }
-  
-  /** 
+
+  /**
    * Creates and returns a child {@link ModuleSource} corresponding to the {@link Module module}.
    * @param module the corresponding module
-   * @param partialCallStack the chunk of call stack that starts from the parent module {@link 
-   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link 
+   * @param partialCallStack the chunk of call stack that starts from the parent module {@link
+   * Module#configure(Binder) configure(Binder)} call and ends just before the module {@link
    * Module#configure(Binder) configure(Binder)} method invocation
    */
-  ModuleSource createChild(Module module, StackTraceElement[] partialCallStack) {
+  ModuleSource createChild(Object module, StackTraceElement[] partialCallStack) {
     return new ModuleSource(this, module, partialCallStack);
   }
 
-  /** 
-   * Returns the parent module {@link ModuleSource source}. 
+  /**
+   * Returns the parent module {@link ModuleSource source}.
    */
   ModuleSource getParent() {
     return parent;
@@ -123,7 +123,7 @@ final class ModuleSource {
 
   /**
    * Returns the class names of modules in this module source. The first element (index 0) is filled
-   * by this object {@link #getModuleClassName()}. The second element is filled by the parent's 
+   * by this object {@link #getModuleClassName()}. The second element is filled by the parent's
    * {@link #getModuleClassName()} and so on.
    */
   List<String> getModuleClassNames() {
@@ -138,7 +138,7 @@ final class ModuleSource {
   }
 
   /**
-   * Returns the size of {@link ModuleSource ModuleSources} chain (all parents) that ends at this 
+   * Returns the size of {@link ModuleSource ModuleSources} chain (all parents) that ends at this
    * object.
    */
   int size() {
@@ -147,7 +147,7 @@ final class ModuleSource {
     }
     return parent.size() + 1;
   }
-  
+
   /**
    * Returns the size of call stack that ends just before the module {@link Module#configure(Binder)
    * configure(Binder)} method invocation (see {@link #getStackTrace()}).
@@ -170,7 +170,7 @@ final class ModuleSource {
     int cursor = 0;
     ModuleSource current = this;
     while (current != null) {
-      StackTraceElement[] chunk = 
+      StackTraceElement[] chunk =
           StackTraceElements.convertToStackTraceElement(current.partialCallStack);
       int chunkSize = chunk.length;
       System.arraycopy(chunk, 0, callStack, cursor, chunkSize);

@@ -18,6 +18,7 @@
 
   <modules>
     <module>assistedinject</module>
+    <module>dagger-adapter</module>
     <module>grapher</module>
     <module>jmx</module>
     <module>jndi</module>
