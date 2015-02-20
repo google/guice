@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package com.google.inject.multibindings;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * @author jessewilson@google.com (Jesse Wilson)
+ * Allows {@literal @}{@link ProvidesIntoMap} to specify a string map key.
  */
-public class AllTests {
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
-    suite.addTestSuite(MapBinderTest.class);
-    suite.addTestSuite(MultibinderTest.class);
-    suite.addTestSuite(OptionalBinderTest.class);
-    suite.addTestSuite(RealElementTest.class);
-    suite.addTestSuite(ProvidesIntoTest.class);
-    return suite;
-  }
+@MapKey(unwrapValue = true)
+@Documented
+@Target(METHOD)
+@Retention(RUNTIME)
+public @interface StringMapKey {
+  String value();
 }
