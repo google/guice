@@ -27,8 +27,8 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates methods of a {@link Module} to add items to a {@link Multibinder}.
- * The method's return type and binding annotation determines what Set this will
- * contributes to. For example,
+ * The method's return type and binding annotation determines what Optional this will
+ * contribute to. For example,
  *
  * <pre>
  * {@literal @}ProvidesIntoOptional(DEFAULT)

@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 /**
  * Annotates methods of a {@link Module} to add items to a {@link MapBinder}.
  * The method's return type, binding annotation and additional key annotation determines
- * what Map this will contributes to. For example,
+ * what Map this will contribute to. For example,
  *
  * <pre>
  * {@literal @}ProvidesIntoMap
