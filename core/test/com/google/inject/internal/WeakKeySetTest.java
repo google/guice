@@ -41,6 +41,7 @@ import com.google.inject.internal.MethodAspect;
 /*end[AOP]*/
 import com.google.inject.internal.State;
 import com.google.inject.internal.WeakKeySet;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -497,6 +498,14 @@ public class WeakKeySetTest extends TestCase {
     }
 
     public List<ProvisionListenerBinding> getProvisionListenerBindings() {
+      return ImmutableList.of();
+    }
+
+    public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
+      throw new UnsupportedOperationException();
+    }
+
+    public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
       return ImmutableList.of();
     }
 

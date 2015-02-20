@@ -21,6 +21,7 @@ import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOptio
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -55,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -106,6 +108,10 @@ public final class Elements {
     for (Module module : modules) {
       binder.install(module);
     }
+    binder.scanForAnnotatedMethods();
+    for (RecordingBinder child : binder.privateBinders) {
+      child.scanForAnnotatedMethods();
+    }
     // Free the memory consumed by the stack trace elements cache
     StackTraceElements.clearCache();
     return Collections.unmodifiableList(binder.elements);
@@ -138,22 +144,37 @@ public final class Elements {
     return (BindingTargetVisitor<T, T>) GET_INSTANCE_VISITOR;
   }
 
+  private static class ModuleInfo {
+    private final Binder binder;
+    private final ModuleSource moduleSource;
+
+    private ModuleInfo(Binder binder, ModuleSource moduleSource) {
+      this.binder = binder;
+      this.moduleSource = moduleSource;
+    }
+  }
+
   private static class RecordingBinder implements Binder, PrivateBinder {
     private final Stage stage;
-    private final Set<Module> modules;
+    private final Map<Module, ModuleInfo> modules;
     private final List<Element> elements;
     private final Object source;
     /** The current modules stack */
     private ModuleSource moduleSource = null;
     private final SourceProvider sourceProvider;
+    private final Set<ModuleAnnotatedMethodScanner> scanners;
 
     /** The binder where exposed bindings will be created */
     private final RecordingBinder parent;
     private final PrivateElementsImpl privateElements;
 
+    /** All children private binders, so we can scan through them. */
+    private final List<RecordingBinder> privateBinders;
+
     private RecordingBinder(Stage stage) {
       this.stage = stage;
-      this.modules = Sets.newHashSet();
+      this.modules = Maps.newLinkedHashMap();
+      this.scanners = Sets.newLinkedHashSet();
       this.elements = Lists.newArrayList();
       this.source = null;
       this.sourceProvider = SourceProvider.DEFAULT_INSTANCE.plusSkippedClasses(
@@ -161,6 +182,7 @@ public final class Elements {
           ConstantBindingBuilderImpl.class, AbstractBindingBuilder.class, BindingBuilder.class);
       this.parent = null;
       this.privateElements = null;
+      this.privateBinders = Lists.newArrayList();
     }
 
     /** Creates a recording binder that's backed by {@code prototype}. */
@@ -171,23 +193,27 @@ public final class Elements {
       this.stage = prototype.stage;
       this.modules = prototype.modules;
       this.elements = prototype.elements;
+      this.scanners = prototype.scanners;
       this.source = source;
       this.moduleSource = prototype.moduleSource;
       this.sourceProvider = sourceProvider;
       this.parent = prototype.parent;
       this.privateElements = prototype.privateElements;
+      this.privateBinders = prototype.privateBinders;
     }
 
     /** Creates a private recording binder. */
     private RecordingBinder(RecordingBinder parent, PrivateElementsImpl privateElements) {
       this.stage = parent.stage;
-      this.modules = Sets.newHashSet();
+      this.modules = Maps.newLinkedHashMap();
+      this.scanners = Sets.newLinkedHashSet(parent.scanners);
       this.elements = privateElements.getElementsMutable();
       this.source = parent.source;
       this.moduleSource = parent.moduleSource;
       this.sourceProvider = parent.sourceProvider;
       this.parent = parent;
       this.privateElements = privateElements;
+      this.privateBinders = parent.privateBinders;
     }
 
     /*if[AOP]*/
@@ -244,8 +270,34 @@ public final class Elements {
       }
     }
 
+    void scanForAnnotatedMethods() {
+      for (ModuleAnnotatedMethodScanner scanner : scanners) {
+        // Note: we must iterate over a copy of the modules because calling install(..)
+        // will mutate modules, otherwise causing a ConcurrentModificationException.
+        for (Map.Entry<Module, ModuleInfo> entry : Maps.newLinkedHashMap(modules).entrySet()) {
+          Module module = entry.getKey();
+          // If this was from a child private binder, skip it... we'll process it later.
+          if (entry.getValue().binder != this) {
+            continue;
+          }
+          moduleSource = entry.getValue().moduleSource;
+          try {
+            install(ProviderMethodsModule.forModule(module, scanner));
+          } catch(RuntimeException e) {
+            Collection<Message> messages = Errors.getMessagesFromThrowable(e);
+            if (!messages.isEmpty()) {
+              elements.addAll(messages);
+            } else {
+              addError(e);
+            }
+          }
+        }
+      }
+      moduleSource = null;
+    }
+
     public void install(Module module) {
-      if (modules.add(module)) {
+      if (!modules.containsKey(module)) {
         Binder binder = this;
         boolean unwrapModuleSource = false;
         // Update the module source for the new module
@@ -266,7 +318,12 @@ public final class Elements {
         }
         if (module instanceof PrivateModule) {
           binder = binder.newPrivateBinder();
+          // Store the module in the private binder too.
+          ((RecordingBinder) binder).modules.put(module, new ModuleInfo(binder, moduleSource));
         }
+        // Always store this in the parent binder (even if it was a private module)
+        // so that we know not to process it again, and so that scanners inherit down.
+        modules.put(module, new ModuleInfo(binder, moduleSource));
         try {
           module.configure(binder);
         } catch (RuntimeException e) {
@@ -356,6 +413,7 @@ public final class Elements {
     public PrivateBinder newPrivateBinder() {
       PrivateElementsImpl privateElements = new PrivateElementsImpl(getElementSource());
       RecordingBinder binder = new RecordingBinder(this, privateElements);
+      privateBinders.add(binder);
       elements.add(privateElements);
       return binder;
     }
@@ -381,6 +439,11 @@ public final class Elements {
     }
 
     @Override
+    public void scanModulesForAnnotatedMethods(ModuleAnnotatedMethodScanner scanner) {
+      scanners.add(scanner);
+      elements.add(new ModuleAnnotatedMethodScannerBinding(getElementSource(), scanner));
+    }
+
     public void expose(Key<?> key) {
       exposeInternal(key);
     }

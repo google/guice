@@ -22,6 +22,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.TypeConverter;
 import com.google.inject.spi.TypeListener;
@@ -507,4 +508,15 @@ public interface Binder {
    * @since 4.0
    */
   void requireExactBindingAnnotations();
+
+  /**
+   * Adds a scanner that will look in all installed modules for annotations the scanner can parse,
+   * and binds them like {@literal @}Provides methods. Scanners apply to all modules installed in
+   * the injector. Scanners installed in child injectors or private modules do not impact modules in
+   * siblings or parents, however scanners installed in parents do apply to all child injectors and
+   * private modules.
+   *
+   * @since 4.0
+   */
+  void scanModulesForAnnotatedMethods(ModuleAnnotatedMethodScanner scanner);
 }

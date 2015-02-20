@@ -26,6 +26,7 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -55,7 +56,8 @@ final class InheritingState implements State {
   private final List<MethodAspect> methodAspects = Lists.newArrayList();
   /*end[AOP]*/
   private final List<TypeListenerBinding> typeListenerBindings = Lists.newArrayList();
-  private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList(); 
+  private final List<ProvisionListenerBinding> provisionListenerBindings = Lists.newArrayList();
+  private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
   private final WeakKeySet blacklistedKeys;
   private final Object lock;
   private final Object singletonCreationLock;
@@ -138,8 +140,8 @@ final class InheritingState implements State {
 
   public List<TypeListenerBinding> getTypeListenerBindings() {
     List<TypeListenerBinding> parentBindings = parent.getTypeListenerBindings();
-    List<TypeListenerBinding> result
-        = new ArrayList<TypeListenerBinding>(parentBindings.size() + 1);
+    List<TypeListenerBinding> result =
+        Lists.newArrayListWithCapacity(parentBindings.size() + typeListenerBindings.size());
     result.addAll(parentBindings);
     result.addAll(typeListenerBindings);
     return result;
@@ -151,10 +153,23 @@ final class InheritingState implements State {
 
   public List<ProvisionListenerBinding> getProvisionListenerBindings() {
     List<ProvisionListenerBinding> parentBindings = parent.getProvisionListenerBindings();
-    List<ProvisionListenerBinding> result
-        = new ArrayList<ProvisionListenerBinding>(parentBindings.size() + 1);
+    List<ProvisionListenerBinding> result =
+        Lists.newArrayListWithCapacity(parentBindings.size() + provisionListenerBindings.size());
     result.addAll(parentBindings);
     result.addAll(provisionListenerBindings);
+    return result;
+  }
+
+  public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
+    scannerBindings.add(scanner);
+  }
+
+  public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
+    List<ModuleAnnotatedMethodScannerBinding> parentBindings = parent.getScannerBindings();
+    List<ModuleAnnotatedMethodScannerBinding> result =
+        Lists.newArrayListWithCapacity(parentBindings.size() + scannerBindings.size());
+    result.addAll(parentBindings);
+    result.addAll(scannerBindings);
     return result;
   }
 

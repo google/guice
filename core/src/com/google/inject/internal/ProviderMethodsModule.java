@@ -283,7 +283,8 @@ public final class ProviderMethodsModule implements Module {
 
   @Override public boolean equals(Object o) {
     return o instanceof ProviderMethodsModule
-        && ((ProviderMethodsModule) o).delegate == delegate;
+        && ((ProviderMethodsModule) o).delegate == delegate
+        && ((ProviderMethodsModule) o).scanner == scanner;
   }
 
   @Override public int hashCode() {
