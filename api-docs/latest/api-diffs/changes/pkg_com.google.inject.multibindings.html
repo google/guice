@@ -57,6 +57,28 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ClassMapKey"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ClassMapKey.html" target="_top"><tt>ClassMapKey</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Allows {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ClassMapKey/ProvidesIntoMap.html"><TT>ProvidesIntoMap</TT></A> to specify a class map key.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MapKey"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MapKey.html" target="_top"><tt>MapKey</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Allows users define customized key type annotations for map bindings by annotating an annotation
+ of a {@code Map}'s key type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="MultibindingsScanner"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/MultibindingsScanner.html" target="_top"><tt>MultibindingsScanner</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="OptionalBinder"></A>
   <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/OptionalBinder.html" target="_top"><tt>OptionalBinder</tt></A></nobr>
   </TD>
@@ -68,6 +90,41 @@ Package <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/googl
   <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/OptionalBinderBinding.html" target="_top"><tt><I>OptionalBinderBinding</I></tt></A></nobr>
   </TD>
   <TD VALIGN="TOP">A binding for a OptionalBinder.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoMap"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap.html" target="_top"><tt>ProvidesIntoMap</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/MapBinder.html"><TT>MapBinder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoOptional"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional.html" target="_top"><tt>ProvidesIntoOptional</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional/Multibinder.html"><TT>Multibinder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoOptional.Type"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoOptional.Type.html" target="_top"><tt>ProvidesIntoOptional.Type</tt></A></nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="ProvidesIntoSet"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoSet.html" target="_top"><tt>ProvidesIntoSet</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoSet/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoSet/Multibinder.html"><TT>Multibinder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="StringMapKey"></A>
+  <nobr><A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/StringMapKey.html" target="_top"><tt>StringMapKey</tt></A></nobr>
+  </TD>
+  <TD VALIGN="TOP">Allows {@literal @}<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/StringMapKey/ProvidesIntoMap.html"><TT>ProvidesIntoMap</TT></A> to specify a string map key.</TD>
 </TR>
 </TABLE>
 &nbsp;

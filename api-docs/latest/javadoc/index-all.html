@@ -124,6 +124,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#acceptVisitor-com.google.inject.spi.ElementVisitor-">acceptVisitor(ElementVisitor&lt;T&gt;)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#acceptVisitor-com.google.inject.spi.ElementVisitor-">acceptVisitor(ElementVisitor&lt;T&gt;)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#acceptVisitor-com.google.inject.spi.ElementVisitor-">acceptVisitor(ElementVisitor&lt;T&gt;)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvisionListenerBinding.html#acceptVisitor-com.google.inject.spi.ElementVisitor-">acceptVisitor(ElementVisitor&lt;R&gt;)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProvisionListenerBinding.html" title="class in com.google.inject.spi">ProvisionListenerBinding</a></dt>
@@ -296,6 +298,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#applyTo-com.google.inject.Binder-">applyTo(Binder)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#applyTo-com.google.inject.Binder-">applyTo(Binder)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#applyTo-com.google.inject.Binder-">applyTo(Binder)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvisionListenerBinding.html#applyTo-com.google.inject.Binder-">applyTo(Binder)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProvisionListenerBinding.html" title="class in com.google.inject.spi">ProvisionListenerBinding</a></dt>
@@ -327,6 +331,12 @@
 <dd>
 <div class="block">Instructs the <a href="com/google/inject/Injector.html" title="interface in com.google.inject"><code>Injector</code></a> to eagerly initialize this
  singleton-scoped binding upon creation.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MultibindingsScanner.html#asModule--">asModule()</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings">MultibindingsScanner</a></dt>
+<dd>
+<div class="block">Returns a module that, when installed, will scan all modules for methods with the annotations
+ @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a>, @<a href="com/google/inject/multibindings/ProvidesIntoSet.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoSet</code></a>, and
+ @<a href="com/google/inject/multibindings/ProvidesIntoOptional.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoOptional</code></a>.</div>
 </dd>
 <dt><a href="com/google/inject/assistedinject/Assisted.html" title="annotation in com.google.inject.assistedinject"><span class="typeNameLink">Assisted</span></a> - Annotation Type in <a href="com/google/inject/assistedinject/package-summary.html">com.google.inject.assistedinject</a></dt>
 <dd>
@@ -539,6 +549,10 @@
 <div class="block">Annotates methods of a <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to create a
  <a href="com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a> method binding that can throw exceptions.</div>
 </dd>
+<dt><a href="com/google/inject/multibindings/ClassMapKey.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">ClassMapKey</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Allows @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a> to specify a class map key.</div>
+</dd>
 <dt><a href="com/google/inject/package-summary.html">com.google.inject</a> - package com.google.inject</dt>
 <dd>
 <div class="block"><i>Google Guice</i> (pronounced "juice") is an ultra-lightweight dependency
@@ -553,6 +567,8 @@
 <div class="block">Interfaces which make up <a href="com/google/inject/Binder.html" title="interface in com.google.inject"><code>Binder</code></a>'s
  expression language.</div>
 </dd>
+<dt><a href="com/google/inject/daggeradapter/package-summary.html">com.google.inject.daggeradapter</a> - package com.google.inject.daggeradapter</dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a> - package com.google.inject.grapher</dt>
 <dd>&nbsp;</dd>
 <dt><a href="com/google/inject/grapher/graphviz/package-summary.html">com.google.inject.grapher.graphviz</a> - package com.google.inject.grapher.graphviz</dt>
@@ -788,6 +804,12 @@
 </a>
 <h2 class="title">D</h2>
 <dl>
+<dt><a href="com/google/inject/daggeradapter/DaggerAdapter.html" title="class in com.google.inject.daggeradapter"><span class="typeNameLink">DaggerAdapter</span></a> - Class in <a href="com/google/inject/daggeradapter/package-summary.html">com.google.inject.daggeradapter</a></dt>
+<dd>
+<div class="block">A utility to adapt classes annotated with <code>@dagger.Module</code> such that their
+ <code>@dagger.Provides</code> methods can be properly invoked by Guice to perform their
+ provision operations.</div>
+</dd>
 <dt><a href="com/google/inject/spi/DefaultBindingScopingVisitor.html" title="class in com.google.inject.spi"><span class="typeNameLink">DefaultBindingScopingVisitor</span></a>&lt;<a href="com/google/inject/spi/DefaultBindingScopingVisitor.html" title="type parameter in DefaultBindingScopingVisitor">V</a>&gt; - Class in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>
 <div class="block">No-op visitor for subclassing.</div>
@@ -1031,11 +1053,6 @@
 <dd>
 <div class="block">Returns a new injection point for the specified method of <code>type</code>.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#forModule-com.google.inject.Module-">forModule(Module)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
-<dd>
-<div class="block">Scans the module for methods and returns a module that will bind the methods
- that match this scanner.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html#forModule-com.google.inject.Module-">forModule(Module)</a></span> - Static method in class com.google.inject.throwingproviders.<a href="com/google/inject/throwingproviders/ThrowingProviderBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder</a></dt>
 <dd>
 <div class="block">Returns a module that installs @<a href="com/google/inject/throwingproviders/CheckedProvides.html" title="annotation in com.google.inject.throwingproviders"><code>CheckedProvides</code></a> methods.</div>
@@ -1047,6 +1064,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/InjectionPoint.html#forStaticMethodsAndFields-java.lang.Class-">forStaticMethodsAndFields(Class&lt;?&gt;)</a></span> - Static method in class com.google.inject.spi.<a href="com/google/inject/spi/InjectionPoint.html" title="class in com.google.inject.spi">InjectionPoint</a></dt>
 <dd>
 <div class="block">Returns all static method and field injection points on <code>type</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/daggeradapter/DaggerAdapter.html#from-java.lang.Object...-">from(Object...)</a></span> - Static method in class com.google.inject.daggeradapter.<a href="com/google/inject/daggeradapter/DaggerAdapter.html" title="class in com.google.inject.daggeradapter">DaggerAdapter</a></dt>
+<dd>
+<div class="block">Returns a guice module from a dagger module.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/persist/finder/DynamicFinder.html#from-java.lang.reflect.Method-">from(Method)</a></span> - Static method in class com.google.inject.persist.finder.<a href="com/google/inject/persist/finder/DynamicFinder.html" title="class in com.google.inject.persist.finder">DynamicFinder</a></dt>
 <dd>
@@ -1727,6 +1748,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/AbstractInjectorGrapher.GrapherParameters.html#getRootKeySetCreator--">getRootKeySetCreator()</a></span> - Method in class com.google.inject.grapher.<a href="com/google/inject/grapher/AbstractInjectorGrapher.GrapherParameters.html" title="class in com.google.inject.grapher">AbstractInjectorGrapher.GrapherParameters</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#getScanner--">getScanner()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ScopeBinding.html#getScope--">getScope()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ScopeBinding.html" title="class in com.google.inject.spi">ScopeBinding</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/Injector.html#getScopeBindings--">getScopeBindings()</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Injector.html" title="interface in com.google.inject">Injector</a></dt>
@@ -1764,6 +1787,8 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/MembersInjectorLookup.html#getSource--">getSource()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/MembersInjectorLookup.html" title="class in com.google.inject.spi">MembersInjectorLookup</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#getSource--">getSource()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#getSource--">getSource()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProviderLookup.html#getSource--">getSource()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ProviderLookup.html" title="class in com.google.inject.spi">ProviderLookup</a></dt>
 <dd>&nbsp;</dd>
@@ -2318,6 +2343,11 @@
 <dd>
 <div class="block">A binding for a MapBinder.</div>
 </dd>
+<dt><a href="com/google/inject/multibindings/MapKey.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">MapKey</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Allows users define customized key type annotations for map bindings by annotating an annotation
+ of a <code>Map</code>'s key type.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/util/Types.html#mapOf-java.lang.reflect.Type-java.lang.reflect.Type-">mapOf(Type, Type)</a></span> - Static method in class com.google.inject.util.<a href="com/google/inject/util/Types.html" title="class in com.google.inject.util">Types</a></dt>
 <dd>
 <div class="block">Returns a type modelling a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> whose keys are of type
@@ -2380,6 +2410,12 @@
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html#ModuleAnnotatedMethodScanner--">ModuleAnnotatedMethodScanner()</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi"><span class="typeNameLink">ModuleAnnotatedMethodScannerBinding</span></a> - Class in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
+<dd>
+<div class="block">Represents a call to <a href="com/google/inject/Binder.html#scanModulesForAnnotatedMethods-com.google.inject.spi.ModuleAnnotatedMethodScanner-"><code>Binder.scanModulesForAnnotatedMethods(com.google.inject.spi.ModuleAnnotatedMethodScanner)</code></a> in a module.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#ModuleAnnotatedMethodScannerBinding-java.lang.Object-com.google.inject.spi.ModuleAnnotatedMethodScanner-">ModuleAnnotatedMethodScannerBinding(Object, ModuleAnnotatedMethodScanner)</a></span> - Constructor for class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/inject/util/Modules.html" title="class in com.google.inject.util"><span class="typeNameLink">Modules</span></a> - Class in <a href="com/google/inject/util/package-summary.html">com.google.inject.util</a></dt>
 <dd>
 <div class="block">Static utility methods for creating and working with instances of <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a>.</div>
@@ -2396,6 +2432,10 @@
 <dt><a href="com/google/inject/multibindings/MultibinderBinding.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">MultibinderBinding</span></a>&lt;<a href="com/google/inject/multibindings/MultibinderBinding.html" title="type parameter in MultibinderBinding">T</a>&gt; - Interface in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
 <dd>
 <div class="block">A binding for a Multibinder.</div>
+</dd>
+<dt><a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings"><span class="typeNameLink">MultibindingsScanner</span></a> - Class in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.</div>
 </dd>
 <dt><a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">MultibindingsTargetVisitor</span></a>&lt;<a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="type parameter in MultibindingsTargetVisitor">T</a>,<a href="com/google/inject/multibindings/MultibindingsTargetVisitor.html" title="type parameter in MultibindingsTargetVisitor">V</a>&gt; - Interface in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
 <dd>
@@ -2539,6 +2579,11 @@
 <dd>
 <div class="block">Returns a new multibinder that collects instances of <code>type</code> in a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a> that is
  itself bound with <code>annotationType</code>.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-com.google.inject.Key-">newSetBinder(Binder, Key&lt;T&gt;)</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a></dt>
+<dd>
+<div class="block">Returns a new multibinder that collects instances of the key's type in a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a> that is
+ itself bound with the annotation (if any) of the key.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-java.lang.Class-java.lang.Class-">newSetBinder(Binder, Class&lt;T&gt;, Class&lt;? extends Annotation&gt;)</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a></dt>
 <dd>
@@ -2785,6 +2830,20 @@
 <dd>
 <div class="block">Annotates methods of a <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to create a provider method binding.</div>
 </dd>
+<dt><a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">ProvidesIntoMap</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Annotates methods of a <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings"><code>MapBinder</code></a>.</div>
+</dd>
+<dt><a href="com/google/inject/multibindings/ProvidesIntoOptional.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">ProvidesIntoOptional</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Annotates methods of a <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings"><code>Multibinder</code></a>.</div>
+</dd>
+<dt><a href="com/google/inject/multibindings/ProvidesIntoOptional.Type.html" title="enum in com.google.inject.multibindings"><span class="typeNameLink">ProvidesIntoOptional.Type</span></a> - Enum in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="com/google/inject/multibindings/ProvidesIntoSet.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">ProvidesIntoSet</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Annotates methods of a <a href="com/google/inject/Module.html" title="interface in com.google.inject"><code>Module</code></a> to add items to a <a href="com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings"><code>Multibinder</code></a>.</div>
+</dd>
 <dt><a href="com/google/inject/spi/ProvidesMethodBinding.html" title="interface in com.google.inject.spi"><span class="typeNameLink">ProvidesMethodBinding</span></a>&lt;<a href="com/google/inject/spi/ProvidesMethodBinding.html" title="type parameter in ProvidesMethodBinding">T</a>&gt; - Interface in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>
 <div class="block">An @<a href="com/google/inject/Provides.html" title="annotation in com.google.inject"><code>Provides</code></a> binding or binding produced by a
@@ -2944,6 +3003,17 @@
 </a>
 <h2 class="title">S</h2>
 <dl>
+<dt><span class="memberNameLink"><a href="com/google/inject/Binder.html#scanModulesForAnnotatedMethods-com.google.inject.spi.ModuleAnnotatedMethodScanner-">scanModulesForAnnotatedMethods(ModuleAnnotatedMethodScanner)</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></dt>
+<dd>
+<div class="block">Adds a scanner that will look in all installed modules for annotations the scanner can parse,
+ and binds them like @Provides methods.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/MultibindingsScanner.html#scanner--">scanner()</a></span> - Static method in class com.google.inject.multibindings.<a href="com/google/inject/multibindings/MultibindingsScanner.html" title="class in com.google.inject.multibindings">MultibindingsScanner</a></dt>
+<dd>
+<div class="block">Returns a <a href="com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi"><code>ModuleAnnotatedMethodScanner</code></a> that, when bound, will scan all modules for
+ methods with the annotations @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a>,
+ @<a href="com/google/inject/multibindings/ProvidesIntoSet.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoSet</code></a>, and @<a href="com/google/inject/multibindings/ProvidesIntoOptional.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoOptional</code></a>.</div>
+</dd>
 <dt><a href="com/google/inject/Scope.html" title="interface in com.google.inject"><span class="typeNameLink">Scope</span></a> - Interface in <a href="com/google/inject/package-summary.html">com.google.inject</a></dt>
 <dd>
 <div class="block">A scope is a level of visibility that instances provided by Guice may have.</div>
@@ -3119,6 +3189,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/persist/PersistService.html#stop--">stop()</a></span> - Method in interface com.google.inject.persist.<a href="com/google/inject/persist/PersistService.html" title="interface in com.google.inject.persist">PersistService</a></dt>
 <dd>
 <div class="block">Stops the underlying persistence engine.</div>
+</dd>
+<dt><a href="com/google/inject/multibindings/StringMapKey.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">StringMapKey</span></a> - Annotation Type in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
+<dd>
+<div class="block">Allows @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a> to specify a string map key.</div>
 </dd>
 <dt><a href="com/google/inject/struts2/Struts2Factory.html" title="class in com.google.inject.struts2"><span class="typeNameLink">Struts2Factory</span></a> - Class in <a href="com/google/inject/struts2/package-summary.html">com.google.inject.struts2</a></dt>
 <dd>
@@ -3317,6 +3391,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/Message.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/Message.html" title="class in com.google.inject.spi">Message</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/ModuleAnnotatedMethodScannerBinding.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScannerBinding</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/TypeConverterBinding.html#toString--">toString()</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/TypeConverterBinding.html" title="class in com.google.inject.spi">TypeConverterBinding</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/TypeLiteral.html#toString--">toString()</a></span> - Method in class com.google.inject.<a href="com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a></dt>
@@ -3424,6 +3500,10 @@
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/ProvidesIntoOptional.Type.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.inject.multibindings.<a href="com/google/inject/multibindings/ProvidesIntoOptional.Type.html" title="enum in com.google.inject.multibindings">ProvidesIntoOptional.Type</a></dt>
+<dd>
+<div class="block">Returns the enum constant of this type with the specified name.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/servlet/UriPatternType.html#valueOf-java.lang.String-">valueOf(String)</a></span> - Static method in enum com.google.inject.servlet.<a href="com/google/inject/servlet/UriPatternType.html" title="enum in com.google.inject.servlet">UriPatternType</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
@@ -3463,6 +3543,11 @@ the order they are declared.</div>
 the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/grapher/NodeId.NodeType.html#values--">values()</a></span> - Static method in enum com.google.inject.grapher.<a href="com/google/inject/grapher/NodeId.NodeType.html" title="enum in com.google.inject.grapher">NodeId.NodeType</a></dt>
+<dd>
+<div class="block">Returns an array containing the constants of this enum type, in
+the order they are declared.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/multibindings/ProvidesIntoOptional.Type.html#values--">values()</a></span> - Static method in enum com.google.inject.multibindings.<a href="com/google/inject/multibindings/ProvidesIntoOptional.Type.html" title="enum in com.google.inject.multibindings">ProvidesIntoOptional.Type</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
@@ -3614,6 +3699,8 @@ the order they are declared.</div>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/DefaultElementVisitor.html#visit-com.google.inject.spi.RequireExactBindingAnnotationsOption-">visit(RequireExactBindingAnnotationsOption)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/DefaultElementVisitor.html" title="class in com.google.inject.spi">DefaultElementVisitor</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/DefaultElementVisitor.html#visit-com.google.inject.spi.ModuleAnnotatedMethodScannerBinding-">visit(ModuleAnnotatedMethodScannerBinding)</a></span> - Method in class com.google.inject.spi.<a href="com/google/inject/spi/DefaultElementVisitor.html" title="class in com.google.inject.spi">DefaultElementVisitor</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ElementVisitor.html#visit-com.google.inject.Binding-">visit(Binding&lt;T&gt;)</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ElementVisitor.html" title="interface in com.google.inject.spi">ElementVisitor</a></dt>
 <dd>
 <div class="block">Visit a mapping from a key (type and optional annotation) to the strategy for getting
@@ -3678,6 +3765,10 @@ the order they are declared.</div>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ElementVisitor.html#visit-com.google.inject.spi.RequireExactBindingAnnotationsOption-">visit(RequireExactBindingAnnotationsOption)</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ElementVisitor.html" title="interface in com.google.inject.spi">ElementVisitor</a></dt>
 <dd>
 <div class="block">Visit a require exact binding annotations command.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/spi/ElementVisitor.html#visit-com.google.inject.spi.ModuleAnnotatedMethodScannerBinding-">visit(ModuleAnnotatedMethodScannerBinding)</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ElementVisitor.html" title="interface in com.google.inject.spi">ElementVisitor</a></dt>
+<dd>
+<div class="block">Visits a <a href="com/google/inject/Binder.html#scanModulesForAnnotatedMethods-com.google.inject.spi.ModuleAnnotatedMethodScanner-"><code>Binder.scanModulesForAnnotatedMethods(com.google.inject.spi.ModuleAnnotatedMethodScanner)</code></a> command.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/ProvidesMethodTargetVisitor.html#visit-com.google.inject.spi.ProvidesMethodBinding-">visit(ProvidesMethodBinding&lt;? extends T&gt;)</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/ProvidesMethodTargetVisitor.html" title="interface in com.google.inject.spi">ProvidesMethodTargetVisitor</a></dt>
 <dd>

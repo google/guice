@@ -54,7 +54,7 @@ Where <code>added</code> is the number of packages added, <code>removed</code> i
 This definition is applied recursively for the classes and their program elements, so the value for a changed package will be less than 1, unless every class in that package has changed.
 The definition ensures that if all packages are removed and all new packages are
 added, the change will be 100%. Values are rounded here, so a value of 0% indicates a percentage difference of less than 0.5%.
-<p>The overall difference between the two APIs is approximately 34%.
+<p>The overall difference between the two APIs is approximately 37%.
 </BLOCKQUOTE>
 <h3>Sections</h3>
 <a href="#packages">Packages</a> sorted by percentage difference<br>
@@ -77,12 +77,12 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
   <TD><A HREF="pkg_com.google.inject.grapher.html">com.google.inject.grapher</A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">62</TD>
-  <TD><A HREF="pkg_com.google.inject.throwingproviders.html">com.google.inject.throwingproviders</A></TD>
+  <TD ALIGN="center">71</TD>
+  <TD><A HREF="pkg_com.google.inject.multibindings.html">com.google.inject.multibindings</A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">52</TD>
-  <TD><A HREF="pkg_com.google.inject.multibindings.html">com.google.inject.multibindings</A></TD>
+  <TD ALIGN="center">62</TD>
+  <TD><A HREF="pkg_com.google.inject.throwingproviders.html">com.google.inject.throwingproviders</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">45</TD>
@@ -192,12 +192,12 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
   <TD><img alt="|" src="../black.gif" height=20 width=18.75></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">52</TD>
+  <TD ALIGN="center">62</TD>
   <TD>0.0625</TD>
   <TD><img alt="|" src="../black.gif" height=20 width=18.75></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">62</TD>
+  <TD ALIGN="center">71</TD>
   <TD>0.0625</TD>
   <TD><img alt="|" src="../black.gif" height=20 width=18.75></TD>
 </TR>
@@ -222,8 +222,8 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 39,0.0625
 43,0.0625
 45,0.0625
-52,0.0625
 62,0.0625
+71,0.0625
 83,0.0625
 96,0.0625
 END_PACKAGE_HISTOGRAM -->
@@ -337,7 +337,7 @@ com.google.inject.grapher.InterfaceNode</A></TD>
 <i>com.google.inject.PrivateBinder</i></A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">77</TD>
+  <TD ALIGN="center">78</TD>
   <TD><A HREF="com.google.inject.Binder.html">
 <i>com.google.inject.Binder</i></A></TD>
 </TR>
@@ -618,6 +618,11 @@ com.google.inject.grapher.graphviz.GraphvizNode</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">11</TD>
+  <TD><A HREF="com.google.inject.spi.DefaultElementVisitor.html">
+com.google.inject.spi.DefaultElementVisitor</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">11</TD>
   <TD><A HREF="com.google.inject.spi.ProviderLookup.html">
 com.google.inject.spi.ProviderLookup</A></TD>
 </TR>
@@ -637,11 +642,6 @@ com.google.inject.struts2.GuiceObjectFactory</A></TD>
 com.google.inject.struts2.Struts2Factory</A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">9</TD>
-  <TD><A HREF="com.google.inject.spi.DefaultElementVisitor.html">
-com.google.inject.spi.DefaultElementVisitor</A></TD>
-</TR>
-<TR>
   <TD ALIGN="center">8</TD>
   <TD><A HREF="com.google.inject.grapher.graphviz.GraphvizEdge.html">
 com.google.inject.grapher.graphviz.GraphvizEdge</A></TD>
@@ -653,13 +653,13 @@ com.google.inject.multibindings.MapBinder</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">6</TD>
-  <TD><A HREF="com.google.inject.multibindings.Multibinder.html">
-com.google.inject.multibindings.Multibinder</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">6</TD>
   <TD><A HREF="com.google.inject.servlet.ServletModule.html">
 com.google.inject.servlet.ServletModule</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">5</TD>
+  <TD><A HREF="com.google.inject.multibindings.Multibinder.html">
+com.google.inject.multibindings.Multibinder</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">4</TD>
@@ -741,17 +741,17 @@ com.google.inject.throwingproviders.CheckedProvides</A></TD>
   <TD><img alt="|" src="../black.gif" height=20 width=3.1914893617021276></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">6</TD>
-  <TD>0.031914893617021274</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=9.574468085106384></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">8</TD>
+  <TD ALIGN="center">5</TD>
   <TD>0.010638297872340425</TD>
   <TD><img alt="|" src="../black.gif" height=20 width=3.1914893617021276></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">9</TD>
+  <TD ALIGN="center">6</TD>
+  <TD>0.02127659574468085</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=6.382978723404255></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">8</TD>
   <TD>0.010638297872340425</TD>
   <TD><img alt="|" src="../black.gif" height=20 width=3.1914893617021276></TD>
 </TR>
@@ -762,8 +762,8 @@ com.google.inject.throwingproviders.CheckedProvides</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">11</TD>
-  <TD>0.02127659574468085</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=6.382978723404255></TD>
+  <TD>0.031914893617021274</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=9.574468085106384></TD>
 </TR>
 <TR>
   <TD ALIGN="center">15</TD>
@@ -807,8 +807,13 @@ com.google.inject.throwingproviders.CheckedProvides</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">77</TD>
-  <TD>0.02127659574468085</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=6.382978723404255></TD>
+  <TD>0.010638297872340425</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=3.1914893617021276></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">78</TD>
+  <TD>0.010638297872340425</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=3.1914893617021276></TD>
 </TR>
 <TR>
   <TD ALIGN="center">80</TD>
@@ -836,11 +841,11 @@ com.google.inject.throwingproviders.CheckedProvides</A></TD>
 2,0.010638297872340425
 3,0.010638297872340425
 4,0.010638297872340425
-6,0.031914893617021274
+5,0.010638297872340425
+6,0.02127659574468085
 8,0.010638297872340425
-9,0.010638297872340425
 10,0.031914893617021274
-11,0.02127659574468085
+11,0.031914893617021274
 15,0.010638297872340425
 17,0.010638297872340425
 20,0.010638297872340425
@@ -849,7 +854,8 @@ com.google.inject.throwingproviders.CheckedProvides</A></TD>
 42,0.010638297872340425
 50,0.425531914893617
 60,0.010638297872340425
-77,0.02127659574468085
+77,0.010638297872340425
+78,0.010638297872340425
 80,0.010638297872340425
 83,0.010638297872340425
 95,0.02127659574468085
@@ -877,16 +883,16 @@ The numbers of program elements (packages, classes. constructors, methods and fi
 <TR>
   <TD>Packages</TD>
   <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">1</TD>
+  <TD ALIGN="right">2</TD>
   <TD ALIGN="right">16</TD>
-  <TD ALIGN="right">17</TD>
+  <TD ALIGN="right">18</TD>
 </TR>
 <TR>
   <TD>Classes and <i>Interfaces</i></TD>
   <TD ALIGN="right">19</TD>
-  <TD ALIGN="right">29</TD>
+  <TD ALIGN="right">38</TD>
   <TD ALIGN="right">94</TD>
-  <TD ALIGN="right">142</TD>
+  <TD ALIGN="right">151</TD>
 </TR>
 <TR>
   <TD>Constructors</TD>
@@ -897,10 +903,10 @@ The numbers of program elements (packages, classes. constructors, methods and fi
 </TR>
 <TR>
   <TD>Methods</TD>
-  <TD ALIGN="right">32</TD>
-  <TD ALIGN="right">69</TD>
-  <TD ALIGN="right">222</TD>
-  <TD ALIGN="right">323</TD>
+  <TD ALIGN="right">34</TD>
+  <TD ALIGN="right">75</TD>
+  <TD ALIGN="right">220</TD>
+  <TD ALIGN="right">329</TD>
 </TR>
 <TR>
   <TD>Fields</TD>
@@ -911,10 +917,10 @@ The numbers of program elements (packages, classes. constructors, methods and fi
 </TR>
 <TR>
   <TD><b>Total</b></TD>
-  <TD ALIGN="right">52</TD>
-  <TD ALIGN="right">105</TD>
-  <TD ALIGN="right">334</TD>
-  <TD ALIGN="right">491</TD>
+  <TD ALIGN="right">54</TD>
+  <TD ALIGN="right">121</TD>
+  <TD ALIGN="right">332</TD>
+  <TD ALIGN="right">507</TD>
 </TR>
 </TABLE>
 </HTML>

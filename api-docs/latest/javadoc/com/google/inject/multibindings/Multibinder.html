@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":6};
+var methods = {"i0":6,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":6};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -47,7 +47,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/inject/multibindings/MapKey.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -212,13 +212,21 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;T&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-com.google.inject.Key-">newSetBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
+            <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</code>
+<div class="block">Returns a new multibinder that collects instances of the key's type in a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a> that is
+ itself bound with the annotation (if any) of the key.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-">newSetBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type)</code>
 <div class="block">Returns a new multibinder that collects instances of <code>type</code> in a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a> that is
  itself bound with no binding annotation.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-java.lang.annotation.Annotation-">newSetBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type,
@@ -227,7 +235,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  itself bound with <code>annotation</code>.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static &lt;T&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;T&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/Multibinder.html#newSetBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-java.lang.Class-">newSetBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;T&gt;&nbsp;type,
@@ -236,7 +244,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  itself bound with <code>annotationType</code>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>abstract <a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="type parameter in Multibinder">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/Multibinder.html#permitDuplicates--">permitDuplicates</a></span>()</code>
 <div class="block">Configures the bound set to silently discard duplicate elements.</div>
@@ -327,6 +335,18 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  itself bound with <code>annotationType</code>.</div>
 </li>
 </ul>
+<a name="newSetBinder-com.google.inject.Binder-com.google.inject.Key-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>newSetBinder</h4>
+<pre>public static&nbsp;&lt;T&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/Multibinder.html" title="class in com.google.inject.multibindings">Multibinder</a>&lt;T&gt;&nbsp;newSetBinder(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
+                                              <a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;T&gt;&nbsp;key)</pre>
+<div class="block">Returns a new multibinder that collects instances of the key's type in a <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Set.html?is-external=true" title="class or interface in java.util"><code>Set</code></a> that is
+ itself bound with the annotation (if any) of the key.</div>
+</li>
+</ul>
 <a name="newSetBinder-com.google.inject.Binder-java.lang.Class-java.lang.Class-">
 <!--   -->
 </a>
@@ -403,7 +423,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/google/inject/multibindings/MapBinderBinding.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../com/google/inject/multibindings/MapKey.html" title="annotation in com.google.inject.multibindings"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../../com/google/inject/multibindings/MultibinderBinding.html" title="interface in com.google.inject.multibindings"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

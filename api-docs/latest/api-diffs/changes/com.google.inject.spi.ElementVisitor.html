@@ -59,6 +59,21 @@ Interface com.google.inject.spi.<A HREF="http://google.github.io/guice/api-docs/
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.PrivateElements)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.PrivateElements)" target="_top"><tt>visit</tt></A>(<code>PrivateElements</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a collection of configuration elements for a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/lain.html"><TT>com.google.inject.PrivateBinder
+ private binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.ProviderLookup<T>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ProviderLookup<T>)" target="_top"><tt>visit</tt></A>(<code>ProviderLookup&lt;T&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a lookup of the provider for a type.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.RequireExplicitBindingsOption)"></A>
   <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/3.0/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.RequireExplicitBindingsOption)" target="_top"><tt>visit</tt></A>(<code>RequireExplicitBindingsOption</code>)</nobr>
   </TD>
@@ -99,6 +114,28 @@ Interface com.google.inject.spi.<A HREF="http://google.github.io/guice/api-docs/
 <TABLE summary="Added Methods" BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
 <TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
   <TD VALIGN="TOP" COLSPAN=2><FONT SIZE="+1"><B>Added Methods</B></FONT></TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ModuleAnnotatedMethodScannerBinding)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ModuleAnnotatedMethodScannerBinding)" target="_top"><tt>visit</tt></A>(<code>ModuleAnnotatedMethodScannerBinding</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visits a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Binder.html#scanModulesForAnnotatedMethods"><TT>Binder.scanModulesForAnnotatedMethods</TT></A> command.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.PrivateElements)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.PrivateElements)" target="_top"><tt>visit</tt></A>(<code>PrivateElements</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a collection of configuration elements for a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/lain.html"><TT>com.google.inject.PrivateBinder
+ private binder</TT></A>.</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ProviderLookup<T>)"></A>
+  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ProviderLookup<T>)" target="_top"><tt>visit</tt></A>(<code>ProviderLookup&lt;T&gt;</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Visit a lookup of the provider for a type.</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
@@ -224,27 +261,6 @@ Changed from non-abstract to abstract.
 Changed from non-abstract to abstract.
   </TD>
   <TD VALIGN="TOP">Visit an error message and the context in which it occured.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.PrivateElements)"></A>
-  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.PrivateElements)" target="_top"><tt>visit</tt></A>(<code>PrivateElements</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Changed from non-abstract to abstract.
-  </TD>
-  <TD VALIGN="TOP">Visit a collection of configuration elements for a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/lain.html"><TT>com.google.inject.PrivateBinder
- private binder</TT></A>.</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.ProviderLookup<T>)"></A>
-  <nobr><code>V</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/ElementVisitor.html#visit(com.google.inject.spi.ProviderLookup<T>)" target="_top"><tt>visit</tt></A>(<code>ProviderLookup&lt;T&gt;</code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-Changed from non-abstract to abstract.
-  </TD>
-  <TD VALIGN="TOP">Visit a lookup of the provider for a type.</TD>
 </TR>
 </TABLE>
 &nbsp;

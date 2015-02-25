@@ -1,6 +1,7 @@
 com.google.inject
 com.google.inject.assistedinject
 com.google.inject.binder
+com.google.inject.daggeradapter
 com.google.inject.grapher
 com.google.inject.grapher.graphviz
 com.google.inject.jndi

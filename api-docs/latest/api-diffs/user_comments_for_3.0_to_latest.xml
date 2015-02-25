@@ -214,6 +214,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.Binder.scanModulesForAnnotatedMethods_added(com.google.inject.spi.ModuleAnnotatedMethodScanner)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.Binder.skipSources_changed(java.lang.Class[])"/>
   <text>
     InsertCommentsHere
@@ -874,6 +880,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.daggeradapter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.grapher"/>
   <text>
     InsertCommentsHere
@@ -1498,6 +1510,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.ClassMapKey"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.multibindings.MapBinder"/>
   <text>
     InsertCommentsHere
@@ -1546,7 +1564,19 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.MapKey"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.multibindings.Multibinder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.Multibinder.newSetBinder_added(com.google.inject.Binder, com.google.inject.Key&lt;T&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -1588,6 +1618,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.multibindings.MultibindingsScanner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.multibindings.MultibindingsTargetVisitor"/>
   <text>
     InsertCommentsHere
@@ -1619,6 +1655,36 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.multibindings.OptionalBinderBinding"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.ProvidesIntoMap"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.ProvidesIntoOptional"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.ProvidesIntoOptional.Type"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.ProvidesIntoSet"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.multibindings.StringMapKey"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2224,6 +2290,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.spi.DefaultElementVisitor.visit_added(com.google.inject.spi.ModuleAnnotatedMethodScannerBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.spi.DefaultElementVisitor.visit_added(com.google.inject.spi.ProvisionListenerBinding)"/>
   <text>
     InsertCommentsHere
@@ -2279,6 +2351,24 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.ElementVisitor"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ModuleAnnotatedMethodScannerBinding)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.PrivateElements)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_added(com.google.inject.spi.ProviderLookup&lt;T&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2368,13 +2458,13 @@
   </text>
 </comment>
 <comment>
-  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.PrivateElements)"/>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.PrivateElements)"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="com.google.inject.spi.ElementVisitor.visit_changed(com.google.inject.spi.ProviderLookup&lt;T&gt;)"/>
+  <identifier id="com.google.inject.spi.ElementVisitor.visit_removed(com.google.inject.spi.ProviderLookup&lt;T&gt;)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -2507,6 +2597,12 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScanner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.ModuleAnnotatedMethodScannerBinding"/>
   <text>
     InsertCommentsHere
   </text>

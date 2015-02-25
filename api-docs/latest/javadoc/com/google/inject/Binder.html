@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6,"i28":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6,"i28":6,"i29":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -469,13 +469,20 @@ var activeTableTab = "activeTableTab";
 </td>
 </tr>
 <tr id="i27" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#scanModulesForAnnotatedMethods-com.google.inject.spi.ModuleAnnotatedMethodScanner-">scanModulesForAnnotatedMethods</a></span>(<a href="../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a>&nbsp;scanner)</code>
+<div class="block">Adds a scanner that will look in all installed modules for annotations the scanner can parse,
+ and binds them like @Provides methods.</div>
+</td>
+</tr>
+<tr id="i28" class="altColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#skipSources-java.lang.Class...-">skipSources</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>...&nbsp;classesToSkip)</code>
 <div class="block">Returns a binder that skips <code>classesToSkip</code> when identify the
  calling code.</div>
 </td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code><a href="../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#withSource-java.lang.Object-">withSource</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;source)</code>
 <div class="block">Returns a binder that uses <code>source</code> as the reference location for
@@ -984,7 +991,7 @@ var activeTableTab = "activeTableTab";
 <a name="requireExactBindingAnnotations--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>requireExactBindingAnnotations</h4>
 <pre>void&nbsp;requireExactBindingAnnotations()</pre>
@@ -992,6 +999,24 @@ var activeTableTab = "activeTableTab";
  error-prone feature in Guice where it can substitute a binding for
  <code>@Named Foo</code> when attempting to inject
  <code>@Named("foo") Foo</code>.</div>
+<dl>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>4.0</dd>
+</dl>
+</li>
+</ul>
+<a name="scanModulesForAnnotatedMethods-com.google.inject.spi.ModuleAnnotatedMethodScanner-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>scanModulesForAnnotatedMethods</h4>
+<pre>void&nbsp;scanModulesForAnnotatedMethods(<a href="../../../com/google/inject/spi/ModuleAnnotatedMethodScanner.html" title="class in com.google.inject.spi">ModuleAnnotatedMethodScanner</a>&nbsp;scanner)</pre>
+<div class="block">Adds a scanner that will look in all installed modules for annotations the scanner can parse,
+ and binds them like @Provides methods. Scanners apply to all modules installed in
+ the injector. Scanners installed in child injectors or private modules do not impact modules in
+ siblings or parents, however scanners installed in parents do apply to all child injectors and
+ private modules.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>4.0</dd>

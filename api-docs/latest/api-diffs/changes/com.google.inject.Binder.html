@@ -122,6 +122,14 @@ Interface com.google.inject.<A HREF="http://google.github.io/guice/api-docs/late
   </TD>
   <TD VALIGN="TOP">Requires that Guice finds an exactly matching binding annotation.</TD>
 </TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="com.google.inject.Binder.scanModulesForAnnotatedMethods_added(com.google.inject.spi.ModuleAnnotatedMethodScanner)"></A>
+  <nobr><code>void</code>&nbsp;<A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/Binder.html#scanModulesForAnnotatedMethods(com.google.inject.spi.ModuleAnnotatedMethodScanner)" target="_top"><tt>scanModulesForAnnotatedMethods</tt></A>(<code>ModuleAnnotatedMethodScanner</code>)</nobr>
+  </TD>
+  <TD VALIGN="TOP">Adds a scanner that will look in all installed modules for annotations the scanner can parse,
+ and binds them like {@literal @}Provides methods.</TD>
+</TR>
 </TABLE>
 &nbsp;
 <p>
