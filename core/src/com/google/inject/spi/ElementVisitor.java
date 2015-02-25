@@ -16,6 +16,7 @@
 
 package com.google.inject.spi;
 
+import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 
@@ -120,4 +121,11 @@ public interface ElementVisitor<V> {
    * @since 4.0
    */
   V visit(RequireExactBindingAnnotationsOption option);
+
+  /**
+   * Visits a {@link Binder#scanModulesForAnnotatedMethods} command.
+   *
+   * @since 4.0
+   */
+  V visit(ModuleAnnotatedMethodScannerBinding binding);
 }

@@ -102,4 +102,8 @@ public abstract class DefaultElementVisitor<V> implements ElementVisitor<V> {
   public V visit(RequireExactBindingAnnotationsOption option) {
     return visitOther(option);
   }
+
+  public V visit(ModuleAnnotatedMethodScannerBinding binding) {
+    return visitOther(binding);
+  }
 }

@@ -20,12 +20,15 @@ import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.name.Names.named;
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.CreationException;
 import com.google.inject.Exposed;
 import com.google.inject.Guice;
@@ -39,13 +42,18 @@ import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.Stage;
 import com.google.inject.name.Named;
-import com.google.inject.util.Modules;
+import com.google.inject.name.Names;
+import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 
 import junit.framework.TestCase;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -677,5 +685,47 @@ public class OverrideModuleTest extends TestCase {
       }
     });
     Guice.createInjector(stage, module);
+  }
+
+  public void testOverridesApplyOriginalScanners() {
+    Injector injector =
+        Guice.createInjector(Modules.override(NamedMunger.module()).with(new AbstractModule() {
+      @Override protected void configure() {}
+      @TestProvides @Named("test") String provideString() { return "foo"; }
+    }));
+
+    assertNull(injector.getExistingBinding(Key.get(String.class, named("test"))));
+    Binding<String> binding = injector.getBinding(Key.get(String.class, named("test-munged")));
+    assertEquals("foo", binding.getProvider().get());
+  }
+
+  @Documented @Target(METHOD) @Retention(RUNTIME)
+  private @interface TestProvides {}
+
+  private static class NamedMunger extends ModuleAnnotatedMethodScanner {
+    static Module module() {
+      return new AbstractModule() {
+        @Override protected void configure() {
+          binder().scanModulesForAnnotatedMethods(new NamedMunger());
+        }
+      };
+    }
+
+    @Override
+    public String toString() {
+      return "NamedMunger";
+    }
+
+    @Override
+    public Set<? extends Class<? extends Annotation>> annotationClasses() {
+      return ImmutableSet.of(TestProvides.class);
+    }
+
+    @Override
+    public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
+        InjectionPoint injectionPoint) {
+      return Key.get(key.getTypeLiteral(),
+          Names.named(((Named) key.getAnnotation()).value() + "-munged"));
+    }
   }
 }

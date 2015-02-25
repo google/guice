@@ -10,9 +10,9 @@
   </path>
   
   <path id="javadoc.classpath">
-  	<path refid="compile.classpath"/>
+    <path refid="compile.classpath"/>
     <fileset dir="extensions">
-    	<include name="*/lib/*.jar"/>
+      <include name="*/lib/*.jar"/>
     </fileset>
     <pathelement location="${build.dir}/classes"/>
   </path>
@@ -35,6 +35,7 @@
     <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
+    <ant antfile="extensions/dagger-adapter/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/testlib/build.xml" target="distjars" inheritAll="false"/>
@@ -62,6 +63,9 @@
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/multibindings/build" includes="*.jar"/>
+    </copy>
+    <copy toDir="${build.dir}/dist">
+      <fileset dir="extensions/dagger-adapter/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/persist/build" includes="*.jar"/>
@@ -159,6 +163,7 @@
       <fileset dir="${jndi.src.dir}"/>
       <fileset dir="${throwingproviders.src.dir}"/>
       <fileset dir="${multibindings.src.dir}"/>
+      <fileset dir="${daggeradapter.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
       <fileset dir="${grapher.src.dir}"/>
@@ -213,6 +218,9 @@
       
       <group title="Multibinder Extension" packages="com.google.inject.multibindings"/>
       <fileset dir="${multibindings.src.dir}"/>
+
+      <group title="Dagger Adapter" packages="com.google.inject.daggeradapter"/>
+      <fileset dir="${daggeradapter.src.dir}"/>
 
       <group title="ThrowingProviders Extension" packages="com.google.inject.throwingproviders"/>
       <fileset dir="${throwingproviders.src.dir}"/>
@@ -302,6 +310,7 @@
     <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
     <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
+    <ant dir="extensions/dagger-adapter" antfile="build.xml" target="clean"/>
     <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
     <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>
     <ant dir="extensions/testlib" antfile="build.xml" target="clean"/>

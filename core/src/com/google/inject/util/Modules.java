@@ -16,6 +16,7 @@
 
 package com.google.inject.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -33,7 +34,9 @@ import com.google.inject.internal.Errors;
 import com.google.inject.spi.DefaultBindingScopingVisitor;
 import com.google.inject.spi.DefaultElementVisitor;
 import com.google.inject.spi.Element;
+import com.google.inject.spi.ElementVisitor;
 import com.google.inject.spi.Elements;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ScopeBinding;
 
@@ -191,7 +194,9 @@ public final class Modules {
       
       final Binder binder = baseBinder.skipSources(this.getClass());
       final LinkedHashSet<Element> elements = new LinkedHashSet<Element>(baseElements);
-      final List<Element> overrideElements = Elements.getElements(currentStage(), overrides);
+      final Module scannersModule = extractScanners(elements);
+      final List<Element> overrideElements = Elements.getElements(currentStage(),
+          ImmutableList.<Module>builder().addAll(overrides).add(scannersModule).build());
 
       final Set<Key<?>> overriddenKeys = Sets.newHashSet();
       final Map<Class<? extends Annotation>, ScopeBinding> overridesScopeAnnotations =
@@ -330,5 +335,25 @@ public final class Modules {
         element.acceptVisitor(this);
       }
     }
+  }
+
+  private static Module extractScanners(Iterable<Element> elements) {
+    final List<ModuleAnnotatedMethodScannerBinding> scanners = Lists.newArrayList();
+    ElementVisitor<Void> visitor = new DefaultElementVisitor<Void>() {
+      @Override public Void visit(ModuleAnnotatedMethodScannerBinding binding) {
+        scanners.add(binding);
+        return null;
+      }
+    };
+    for (Element element : elements) {
+      element.acceptVisitor(visitor);
+    }
+    return new AbstractModule() {
+      @Override protected void configure() {
+        for (ModuleAnnotatedMethodScannerBinding scanner : scanners) {
+          scanner.applyTo(binder());
+        }
+      }
+    };
   }
 }

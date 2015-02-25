@@ -1131,4 +1131,90 @@ public class FactoryProvider2Test extends TestCase {
       this.delegate = null;
     }
   }
+
+  public static abstract class AbstractAssisted {
+    interface Factory<O extends AbstractAssisted, I extends CharSequence> {
+      O create(I string);
+    }
+  }
+
+  static class ConcreteAssisted extends AbstractAssisted {
+    @Inject ConcreteAssisted(@SuppressWarnings("unused") @Assisted String string) {}
+  }
+
+  static class ConcreteAssistedWithOverride extends AbstractAssisted {
+    @AssistedInject
+    ConcreteAssistedWithOverride(@SuppressWarnings("unused") @Assisted String string) {}
+
+    @AssistedInject
+    ConcreteAssistedWithOverride(@SuppressWarnings("unused") @Assisted StringBuilder sb) {}
+
+    interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> {
+      @Override ConcreteAssistedWithOverride create(String string);
+    }
+
+    interface Factory2 extends AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> {
+      @Override ConcreteAssistedWithOverride create(String string);
+      ConcreteAssistedWithOverride create(StringBuilder sb);
+    }
+  }
+
+  static class ConcreteAssistedWithoutOverride extends AbstractAssisted {
+    @Inject ConcreteAssistedWithoutOverride(@SuppressWarnings("unused") @Assisted String string) {}
+    interface Factory extends AbstractAssisted.Factory<ConcreteAssistedWithoutOverride, String> {}
+  }
+
+  public static class Public extends AbstractAssisted {
+    @AssistedInject Public(@SuppressWarnings("unused") @Assisted String string) {}
+    @AssistedInject Public(@SuppressWarnings("unused") @Assisted StringBuilder sb) {}
+
+    public interface Factory extends AbstractAssisted.Factory<Public, String> {
+      @Override Public create(String string);
+      Public create(StringBuilder sb);
+    }
+  }
+
+  // See https://github.com/google/guice/issues/904
+  public void testGeneratedDefaultMethodsForwardCorrectly() {
+    final Key<AbstractAssisted.Factory<ConcreteAssisted, String>> concreteKey =
+        new Key<AbstractAssisted.Factory<ConcreteAssisted, String>>() {};
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory.class));
+        install(new FactoryModuleBuilder().build(ConcreteAssistedWithOverride.Factory2.class));
+        install(new FactoryModuleBuilder().build(ConcreteAssistedWithoutOverride.Factory.class));
+        install(new FactoryModuleBuilder().build(Public.Factory.class));
+        install(new FactoryModuleBuilder().build(concreteKey));
+      }
+    });
+
+    ConcreteAssistedWithOverride.Factory factory1 =
+        injector.getInstance(ConcreteAssistedWithOverride.Factory.class);
+    factory1.create("foo");
+    AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factory1Abstract = factory1;
+    factory1Abstract.create("foo");
+
+    ConcreteAssistedWithOverride.Factory2 factory2 =
+        injector.getInstance(ConcreteAssistedWithOverride.Factory2.class);
+    factory2.create("foo");
+    factory2.create(new StringBuilder("foo"));
+    AbstractAssisted.Factory<ConcreteAssistedWithOverride, String> factory2Abstract = factory2;
+    factory2Abstract.create("foo");
+
+    ConcreteAssistedWithoutOverride.Factory factory3 =
+        injector.getInstance(ConcreteAssistedWithoutOverride.Factory.class);
+    factory3.create("foo");
+    AbstractAssisted.Factory<ConcreteAssistedWithoutOverride, String> factory3Abstract = factory3;
+    factory3Abstract.create("foo");
+
+    Public.Factory factory4 = injector.getInstance(Public.Factory.class);
+    factory4.create("foo");
+    factory4.create(new StringBuilder("foo"));
+    AbstractAssisted.Factory<Public, String> factory4Abstract = factory4;
+    factory4Abstract.create("foo");
+
+    AbstractAssisted.Factory<ConcreteAssisted, String> factory5 =
+        injector.getInstance(concreteKey);
+    factory5.create("foo");
+  }
 }

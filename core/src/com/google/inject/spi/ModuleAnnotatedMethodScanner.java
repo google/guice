@@ -18,8 +18,6 @@ package com.google.inject.spi;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.internal.ProviderMethodsModule;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -29,14 +27,6 @@ import java.util.Set;
  * as providers, similar to {@code @Provides} methods.
  */
 public abstract class ModuleAnnotatedMethodScanner {
-  
-  /**
-   * Scans the module for methods and returns a module that will bind the methods
-   * that match this scanner.
-   */
-  public final Module forModule(Module module) {
-    return ProviderMethodsModule.forModule(module, this);
-  }
 
   /**
    * Returns the annotations this should scan for. Every method in the module that has one of these

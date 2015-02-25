@@ -35,6 +35,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.PrivateElements;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.TypeListenerBinding;
@@ -131,6 +132,8 @@ final class InjectorShell {
       // bind Singleton if this is a top-level injector
       if (parent == null) {
         modules.add(0, new RootModule());
+      } else {
+        modules.add(0, new InheritedScannersModule(parent.state));
       }
       elements.addAll(Elements.getElements(stage, modules));
       
@@ -183,6 +186,9 @@ final class InjectorShell {
       new BindingProcessor(errors, initializer, bindingData).process(injector, elements);
       new UntargettedBindingProcessor(errors, bindingData).process(injector, elements);
       stopwatch.resetAndLog("Binding creation");
+
+      new ModuleAnnotatedMethodScannerProcessor(errors).process(injector, elements);
+      stopwatch.resetAndLog("Module annotated method scanners creation");
 
       List<InjectorShell> injectorShells = Lists.newArrayList();
       injectorShells.add(new InjectorShell(this, elements, injector));
@@ -287,6 +293,20 @@ final class InjectorShell {
       binder = binder.withSource(SourceProvider.UNKNOWN_SOURCE);
       binder.bindScope(Singleton.class, SINGLETON);
       binder.bindScope(javax.inject.Singleton.class, SINGLETON);
+    }
+  }
+
+  private static class InheritedScannersModule implements Module {
+    private final State state;
+
+    InheritedScannersModule(State state) {
+      this.state = state;
+    }
+
+    public void configure(Binder binder) {
+      for (ModuleAnnotatedMethodScannerBinding binding : state.getScannerBindings()) {
+        binding.applyTo(binder);
+      }
     }
   }
 }

@@ -23,6 +23,8 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
+import com.google.inject.spi.ModuleAnnotatedMethodScanner;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
 import com.google.inject.spi.TypeConverterBinding;
@@ -105,6 +107,14 @@ interface State {
       return ImmutableList.of();
     }
 
+    public void addScanner(ModuleAnnotatedMethodScannerBinding scanner) {
+      throw new UnsupportedOperationException();
+    }
+
+    public List<ModuleAnnotatedMethodScannerBinding> getScannerBindings() {
+      return ImmutableList.of();
+    }
+
     public void blacklist(Key<?> key, State state, Object source) {
     }
 
@@ -165,6 +175,10 @@ interface State {
   void addProvisionListener(ProvisionListenerBinding provisionListenerBinding);
   
   List<ProvisionListenerBinding> getProvisionListenerBindings();
+
+  void addScanner(ModuleAnnotatedMethodScannerBinding scanner);
+
+  List<ModuleAnnotatedMethodScannerBinding> getScannerBindings();
 
   /**
    * Forbids the corresponding injector from creating a binding to {@code key}. Child injectors

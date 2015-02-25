@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008 Google Inc.
+ * Copyright (C) 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 
 /**
- * @author jessewilson@google.com (Jesse Wilson)
+ * Handles {@code Binder.scanModulesForAnnotatedMethods} commands.
+ *
+ * @author sameb@google.com (Sam Berlin)
  */
-public class AllTests {
+final class ModuleAnnotatedMethodScannerProcessor extends AbstractProcessor {
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
-    suite.addTestSuite(MapBinderTest.class);
-    suite.addTestSuite(MultibinderTest.class);
-    suite.addTestSuite(OptionalBinderTest.class);
-    suite.addTestSuite(RealElementTest.class);
-    suite.addTestSuite(ProvidesIntoTest.class);
-    return suite;
+  ModuleAnnotatedMethodScannerProcessor(Errors errors) {
+    super(errors);
+  }
+
+  @Override public Boolean visit(ModuleAnnotatedMethodScannerBinding command) {
+    injector.state.addScanner(command);
+    return true;
   }
 }

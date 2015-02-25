@@ -20,11 +20,13 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -57,6 +59,7 @@ import com.google.inject.util.Providers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -183,6 +186,9 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   /** Mapping from method to the data about how the method will be assisted. */
   private final ImmutableMap<Method, AssistData> assistDataByMethod;
 
+  /** Mapping from method to method handle, for generated default methods. */
+  private final ImmutableMap<Method, MethodHandleWrapper> methodHandleByMethod;
+
   /** the hosting injector, or null if we haven't been initialized yet */
   private Injector injector;
 
@@ -214,10 +220,22 @@ final class FactoryProvider2 <F> implements InvocationHandler,
       if(!factoryRawType.isInterface()) {
         throw errors.addMessage("%s must be an interface.", factoryRawType).toException();
       }
-      
+
+      Multimap<String, Method> defaultMethods = HashMultimap.create();
+      Multimap<String, Method> otherMethods = HashMultimap.create();
       ImmutableMap.Builder<Method, AssistData> assistDataBuilder = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
       for (Method method : factoryRawType.getMethods()) {
+        // Skip default methods that java8 may have created.
+        if (isDefault(method) && (method.isBridge() || method.isSynthetic())) {
+          // Even synthetic default methods need the return type validation...
+          // unavoidable consequence of javac8. :-(
+          validateFactoryReturnType(errors, method.getReturnType(), factoryRawType);
+          defaultMethods.put(method.getName(), method);
+          continue;
+        }
+        otherMethods.put(method.getName(), method);
+
         TypeLiteral<?> returnTypeLiteral = factoryType.getReturnType(method);
         Key<?> returnType;
         try {
@@ -289,9 +307,51 @@ final class FactoryProvider2 <F> implements InvocationHandler,
           providers = providerListBuilder.build();
           optimized = true;
         }
-        assistDataBuilder.put(method,
-            new AssistData(constructor, returnType, immutableParamList, implementation,
-                method, removeAssistedDeps(deps), optimized, providers));
+
+        AssistData data = new AssistData(constructor,
+            returnType,
+            immutableParamList,
+            implementation,
+            method,
+            removeAssistedDeps(deps),
+            optimized,
+            providers);
+        assistDataBuilder.put(method, data);
+      }
+
+      factory = factoryRawType.cast(Proxy.newProxyInstance(
+          BytecodeGen.getClassLoader(factoryRawType), new Class<?>[] {factoryRawType}, this));
+
+      // Now go back through default methods. Try to use MethodHandles to make things
+      // work.  If that doesn't work, fallback to trying to find compatible method
+      // signatures.
+      Map<Method, AssistData> dataSoFar = assistDataBuilder.build();
+      ImmutableMap.Builder<Method, MethodHandleWrapper> methodHandleBuilder = ImmutableMap.builder();
+      for (Map.Entry<String, Method> entry : defaultMethods.entries()) {
+        Method defaultMethod = entry.getValue();
+        MethodHandleWrapper handle = MethodHandleWrapper.create(defaultMethod, factory);
+        if (handle != null) {
+          methodHandleBuilder.put(defaultMethod, handle);
+        } else {
+          boolean foundMatch = false;
+          for (Method otherMethod : otherMethods.get(defaultMethod.getName())) {
+            if (dataSoFar.containsKey(otherMethod) && isCompatible(defaultMethod, otherMethod)) {
+              if (foundMatch) {
+                errors.addMessage("Generated default method %s with parameters %s is"
+                    + " signature-compatible with more than one non-default method."
+                    + " Unable to create factory. As a workaround, remove the override"
+                    + " so javac stops generating a default method.",
+                    defaultMethod, Arrays.asList(defaultMethod.getParameterTypes()));
+              } else {
+                assistDataBuilder.put(defaultMethod, dataSoFar.get(otherMethod));
+                foundMatch = true;
+              }
+            }
+          }
+          if (!foundMatch) {
+            throw new IllegalStateException("Can't find method compatible with: " + defaultMethod);
+          }
+        }
       }
 
       // If we generated any errors (from finding matching constructors, for instance), throw an exception.
@@ -300,12 +360,35 @@ final class FactoryProvider2 <F> implements InvocationHandler,
       }
 
       assistDataByMethod = assistDataBuilder.build();
+      methodHandleByMethod = methodHandleBuilder.build();
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
+  }
 
-    factory = factoryRawType.cast(Proxy.newProxyInstance(BytecodeGen.getClassLoader(factoryRawType),
-        new Class[] { factoryRawType }, this));
+  static boolean isDefault(Method method) {
+    // Per the javadoc, default methods are non-abstract, public, non-static.
+    // They're also in interfaces, but we can guarantee that already since we only act
+    // on interfaces.
+    return (method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC))
+        == Modifier.PUBLIC;
+  }
+
+  private boolean isCompatible(Method src, Method dst) {
+    if (!src.getReturnType().isAssignableFrom(dst.getReturnType())) {
+      return false;
+    }
+    Class<?>[] srcParams = src.getParameterTypes();
+    Class<?>[] dstParams = dst.getParameterTypes();
+    if (srcParams.length != dstParams.length) {
+      return false;
+    }
+    for (int i = 0; i < srcParams.length; i++) {
+      if (!srcParams[i].isAssignableFrom(dstParams[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public F get() {
@@ -654,6 +737,13 @@ final class FactoryProvider2 <F> implements InvocationHandler,
    * use that to get an instance of the return type.
    */
   public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
+    // If we setup a method handle earlier for this method, call it.
+    // This is necessary for default methods that java8 creates, so we
+    // can call the default method implementation (and not our proxied version of it).
+    if (methodHandleByMethod.containsKey(method)) {
+      return methodHandleByMethod.get(method).invokeWithArguments(args);
+    }
+
     if (method.getDeclaringClass().equals(Object.class)) {
       if ("equals".equals(method.getName())) {
         return proxy == args[0];
@@ -665,6 +755,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
     }
 
     AssistData data = assistDataByMethod.get(method);
+    checkState(data != null, "No data for method: %s", method);
     Provider<?> provider;
     if(data.cachedBinding != null) { // Try to get optimized form...
       provider = data.cachedBinding.getProvider();
@@ -733,6 +824,86 @@ final class FactoryProvider2 <F> implements InvocationHandler,
       throw new IllegalStateException(
           "Cannot use optimized @Assisted provider outside the scope of the constructor."
               + " (This should never happen.  If it does, please report it.)");
+    }
+  }
+
+  /** Wrapper around MethodHandles/MethodHandle, so we can compile+run on java6. */
+  private static class MethodHandleWrapper {
+    static final int ALL_MODES = Modifier.PRIVATE
+        | Modifier.STATIC /* package */
+        | Modifier.PUBLIC
+        | Modifier.PROTECTED;
+    
+    static final Method unreflectSpecial;
+    static final Method bindTo;
+    static final Method invokeWithArguments;
+    static final Constructor<?> lookupCxtor;
+    static final boolean valid;
+
+    static {
+      Method unreflectSpecialTmp = null;
+      Method bindToTmp = null;
+      Method invokeWithArgumentsTmp = null;
+      boolean validTmp = false;
+      Constructor<?> lookupCxtorTmp = null;
+      try {
+        Class<?> lookupClass = Class.forName("java.lang.invoke.MethodHandles$Lookup");
+        unreflectSpecialTmp = lookupClass.getMethod("unreflectSpecial", Method.class, Class.class);
+        Class<?> methodHandleClass = Class.forName("java.lang.invoke.MethodHandle");
+        bindToTmp = methodHandleClass.getMethod("bindTo", Object.class);
+        invokeWithArgumentsTmp = methodHandleClass.getMethod("invokeWithArguments", Object[].class);
+        lookupCxtorTmp = lookupClass.getDeclaredConstructor(Class.class, int.class);
+        lookupCxtorTmp.setAccessible(true);
+        validTmp = true;
+      } catch (Exception invalid) {
+        // Ignore the exception, store the values & exit early in create(..) if invalid.
+      }
+
+      // Store refs to later.
+      valid = validTmp;
+      unreflectSpecial = unreflectSpecialTmp;
+      bindTo = bindToTmp;
+      invokeWithArguments = invokeWithArgumentsTmp;
+      lookupCxtor = lookupCxtorTmp;
+    }
+
+    static MethodHandleWrapper create(Method method, Object proxy) {
+      if (!valid) {
+        return null;
+      }
+      try {
+        Class<?> declaringClass = method.getDeclaringClass();
+        // Note: this isn't a public API, but we need to use it in order to call default methods.
+        Object lookup = lookupCxtor.newInstance(declaringClass, ALL_MODES);
+        method.setAccessible(true);
+        // These are part of the public API, but we use reflection since we run on java6
+        // and they were introduced in java7.
+        lookup = unreflectSpecial.invoke(lookup, method, declaringClass);
+        Object handle = bindTo.invoke(lookup, proxy);
+        return new MethodHandleWrapper(handle);
+      } catch (InvocationTargetException ite) {
+        return null;
+      } catch (IllegalAccessException iae) {
+        return null;
+      } catch (InstantiationException ie) {
+        return null;
+      }
+    }
+
+    final Object handle;
+
+    MethodHandleWrapper(Object handle) {
+      this.handle = handle;
+    }
+
+    Object invokeWithArguments(Object[] args) throws Exception {
+      // We must cast the args to an object so the Object[] is the first param,
+      // as opposed to each individual varargs param.
+      return invokeWithArguments.invoke(handle, (Object) args);
+    }
+
+    @Override public String toString() {
+      return handle.toString();
     }
   }
 }

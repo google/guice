@@ -29,10 +29,10 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.util.Modules;
 
 import java.lang.annotation.Annotation;
@@ -55,8 +55,8 @@ public final class ProviderMethodsModule implements Module {
   private static ModuleAnnotatedMethodScanner PROVIDES_BUILDER =
       new ModuleAnnotatedMethodScanner() {
         @Override
-        public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
-            InjectionPoint injectionPoint) {
+        public <T> Key<T> prepareMethod(
+            Binder binder, Annotation annotation, Key<T> key, InjectionPoint injectionPoint) {
           return key;
         }
 
@@ -89,7 +89,7 @@ public final class ProviderMethodsModule implements Module {
   /**
    * Returns a module which creates bindings methods in the module that match the scanner.
    */
-  public static Module forModule(Module module, ModuleAnnotatedMethodScanner scanner) {
+  public static Module forModule(Object module, ModuleAnnotatedMethodScanner scanner) {
     return forObject(module, false, scanner);
   }
 
@@ -112,6 +112,10 @@ public final class ProviderMethodsModule implements Module {
     }
 
     return new ProviderMethodsModule(object, skipFastClassGeneration, scanner);
+  }
+
+  public Object getDelegateModule() {
+    return delegate;
   }
 
   @Override
@@ -258,7 +262,11 @@ public final class ProviderMethodsModule implements Module {
     @SuppressWarnings("unchecked") // Define T as the method's return type.
     TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
-    key = scanner.prepareMethod(binder, annotation, key, point);
+    try {
+      key = scanner.prepareMethod(binder, annotation, key, point);
+    } catch(Throwable t) {
+      binder.addError(t);
+    }
     Class<? extends Annotation> scopeAnnotation
         = Annotations.findScopeAnnotation(errors, method.getAnnotations());
     for (Message message : errors.getMessages()) {
@@ -275,7 +283,8 @@ public final class ProviderMethodsModule implements Module {
 
   @Override public boolean equals(Object o) {
     return o instanceof ProviderMethodsModule
-        && ((ProviderMethodsModule) o).delegate == delegate;
+        && ((ProviderMethodsModule) o).delegate == delegate
+        && ((ProviderMethodsModule) o).scanner == scanner;
   }
 
   @Override public int hashCode() {

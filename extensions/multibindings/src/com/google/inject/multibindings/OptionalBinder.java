@@ -129,7 +129,7 @@ import javax.inject.Qualifier;
  * public class FrameworkModule extends AbstractModule {
  *   protected void configure() {
  *     OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, LookupUrl.class))
- *         .setDefault().to(DEFAULT_LOOKUP_URL);
+ *         .setDefault().toInstance(DEFAULT_LOOKUP_URL);
  *   }
  * }</code></pre>
  * With the above module, code can inject an {@code @LookupUrl String} and it
@@ -138,7 +138,7 @@ import javax.inject.Qualifier;
  * public class UserLookupModule extends AbstractModule {
  *   protected void configure() {
  *     OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, LookupUrl.class))
- *         .setBinding().to(CUSTOM_LOOKUP_URL);
+ *         .setBinding().toInstance(CUSTOM_LOOKUP_URL);
  *   }
  * }</code></pre>
  * ... which will override the default value.
@@ -150,12 +150,12 @@ import javax.inject.Qualifier;
  * public class FrameworkModule extends AbstractModule {
  *   protected void configure() {
  *     OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, LookupUrl.class))
- *         .setDefault().to(DEFAULT_LOOKUP_URL);
+ *         .setDefault().toInstance(DEFAULT_LOOKUP_URL);
  *   }
  * }
  * public class UserLookupModule extends AbstractModule {
  *   protected void configure() {
- *     bind(Key.get(String.class, LookupUrl.class)).to(CUSTOM_LOOKUP_URL);
+ *     bind(Key.get(String.class, LookupUrl.class)).toInstance(CUSTOM_LOOKUP_URL);
  *   } 
  * }</code></pre>
  * ... would generate an error, because both the framework and the user are trying to bind
@@ -191,14 +191,18 @@ public abstract class OptionalBinder<T> {
   private OptionalBinder() {}
 
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Class<T> type) {
-    return newOptionalBinder(binder, Key.get(type));
+    return newRealOptionalBinder(binder, Key.get(type));
   }
   
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, TypeLiteral<T> type) {
-    return newOptionalBinder(binder, Key.get(type));
+    return newRealOptionalBinder(binder, Key.get(type));
   }
   
   public static <T> OptionalBinder<T> newOptionalBinder(Binder binder, Key<T> type) {
+    return newRealOptionalBinder(binder, type);
+  }
+  
+  static <T> RealOptionalBinder<T> newRealOptionalBinder(Binder binder, Key<T> type) {
     binder = binder.skipSources(OptionalBinder.class, RealOptionalBinder.class);
     RealOptionalBinder<T> optionalBinder = new RealOptionalBinder<T>(binder, type);
     binder.install(optionalBinder);
@@ -349,16 +353,24 @@ public abstract class OptionalBinder<T> {
       binder.bind(typeKey).toProvider(new RealDirectTypeProvider());
     }
 
-    @Override public LinkedBindingBuilder<T> setDefault() {
+    Key<T> getKeyForDefaultBinding() {
       checkConfiguration(!isInitialized(), "already initialized");      
       addDirectTypeBinding(binder);
-      return binder.bind(defaultKey);
+      return defaultKey;
+    }
+
+    @Override public LinkedBindingBuilder<T> setDefault() {
+      return binder.bind(getKeyForDefaultBinding());
+    }
+    
+    Key<T> getKeyForActualBinding() {
+      checkConfiguration(!isInitialized(), "already initialized");      
+      addDirectTypeBinding(binder);
+      return actualKey;
     }
 
     @Override public LinkedBindingBuilder<T> setBinding() {
-      checkConfiguration(!isInitialized(), "already initialized");      
-      addDirectTypeBinding(binder);
-      return binder.bind(actualKey);
+      return binder.bind(getKeyForActualBinding());
     }
 
     @Override public void configure(Binder binder) {
