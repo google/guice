@@ -42,5 +42,10 @@ public @interface CheckedProvides {
    * The interface that provides this value, a subinterface of {@link CheckedProvider}.
    */
   Class<? extends CheckedProvider> value();
-  
+
+  /**
+   * Whether exceptions should be put into the Guice scope.
+   * Default behavior is that exceptions are scoped. 
+   */
+  boolean scopeExceptions() default true;  
 }

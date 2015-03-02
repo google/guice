@@ -85,6 +85,12 @@ import java.util.Set;
  */
 public class ThrowingProviderBinder {
 
+  private static final TypeLiteral<CheckedProvider<?>> CHECKED_PROVIDER_TYPE
+      = new TypeLiteral<CheckedProvider<?>>() { };
+
+  private static final TypeLiteral<CheckedProviderMethod<?>> CHECKED_PROVIDER_METHOD_TYPE
+      = new TypeLiteral<CheckedProviderMethod<?>>() { };
+
   private final Binder binder;
 
   private ThrowingProviderBinder(Binder binder) {
@@ -134,6 +140,7 @@ public class ThrowingProviderBinder {
     private Class<? extends Annotation> annotationType;
     private Annotation annotation;
     private Key<P> interfaceKey;
+    private boolean scopeExceptions = true;
 
     public SecondaryBinder(Class<P> interfaceType, Type valueType) {
       this.interfaceType = checkNotNull(interfaceType, "interfaceType");
@@ -171,6 +178,15 @@ public class ThrowingProviderBinder {
       return this;
     }
 
+    /**
+     * Determines if exceptions should be scoped. By default exceptions are scoped.
+     * @param scopeExceptions whether exceptions should be scoped.
+     */
+    public SecondaryBinder<P, T> scopeExceptions(boolean scopeExceptions) {
+      this.scopeExceptions = scopeExceptions;
+      return this;
+    }
+    
     public ScopedBindingBuilder to(P target) {
       Key<P> targetKey = Key.get(interfaceType, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
@@ -236,28 +252,32 @@ public class ThrowingProviderBinder {
         }
       };
       
-      Key<CheckedProvider> targetKey = Key.get(CheckedProvider.class, UniqueAnnotations.create());
+      Key<CheckedProvider<?>> targetKey = Key.get(CHECKED_PROVIDER_TYPE,
+          UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(checkedProvider);
       return toInternal(targetKey);
     }
     
     ScopedBindingBuilder toProviderMethod(CheckedProviderMethod<?> target) {
-      Key<CheckedProviderMethod> targetKey =
-          Key.get(CheckedProviderMethod.class, UniqueAnnotations.create());
+      Key<CheckedProviderMethod<?>> targetKey = 
+          Key.get(CHECKED_PROVIDER_METHOD_TYPE, UniqueAnnotations.create());
       binder.bind(targetKey).toInstance(target);
 
       return toInternal(targetKey);
     }
 
+    @SuppressWarnings("unchecked") // P only extends the raw type of CheckedProvider
     public ScopedBindingBuilder to(Key<? extends P> targetKey) {
       checkNotNull(targetKey, "targetKey");
-      return toInternal(targetKey);
+      return toInternal((Key<? extends CheckedProvider<?>>)targetKey);
     }
     
-    private ScopedBindingBuilder toInternal(final Key<? extends CheckedProvider> targetKey) {
+    private ScopedBindingBuilder toInternal(final Key<? extends CheckedProvider<?>> targetKey) {
       final Key<Result> resultKey = Key.get(Result.class, UniqueAnnotations.create());
+      // Note that this provider will behave like the final provider Guice creates.
+      // It will especially do scoping if the user adds that.
       final Provider<Result> resultProvider = binder.getProvider(resultKey);
-      final Provider<? extends CheckedProvider> targetProvider = binder.getProvider(targetKey);
+      final Provider<? extends CheckedProvider<?>> targetProvider = binder.getProvider(targetKey);
       interfaceKey = createKey();
 
       // don't bother binding the proxy type if this is in an invalid state.
@@ -272,31 +292,63 @@ public class ThrowingProviderBinder {
                   if (method.getDeclaringClass() == Object.class) {
                     return method.invoke(this, args);
                   }
-                  return resultProvider.get().getOrThrow();
+                  
+                  if (scopeExceptions) {
+                    return resultProvider.get().getOrThrow();
+                  } else {
+                    Result result;
+                    try {
+                      result = resultProvider.get();
+                    } catch (ProvisionException pe) {
+                      Throwable cause = pe.getCause();
+                      if (cause instanceof ResultException) {
+                        throw ((ResultException)cause).getCause();
+                      } else {
+                        throw pe;
+                      }
+                    }
+                    return result.getOrThrow();
+                  }
                 }
               }));
             
+            @Override
             public P get() {
               return instance;
             }
-            
+  
+            @Override
             public Set<Dependency<?>> getDependencies() {
               return ImmutableSet.<Dependency<?>>of(Dependency.get(resultKey));
             }
           });
       }
 
-      return binder.bind(resultKey).toProvider(new ProviderWithDependencies<Result>() {
+      // The provider is unscoped, but the user may apply a scope to it through the 
+      // ScopedBindingBuilder this returns.
+      return binder.bind(resultKey).toProvider(
+          createResultProvider(targetKey, targetProvider));
+    }
+
+    private ProviderWithDependencies<Result> createResultProvider(
+        final Key<? extends CheckedProvider<?>> targetKey,
+        final Provider<? extends CheckedProvider<?>> targetProvider) {
+      return new ProviderWithDependencies<Result>() {
+        @Override
         public Result get() {
           try {
             return Result.forValue(targetProvider.get().get());
           } catch (Exception e) {
-            for(Class<? extends Throwable> exceptionType : exceptionTypes) {
+            for (Class<? extends Throwable> exceptionType : exceptionTypes) {
               if (exceptionType.isInstance(e)) {
-                return Result.forException(e);
+                if (scopeExceptions) {
+                  return Result.forException(e);
+                } else {
+                  throw new ResultException(e);
+                }
               }
             }
-            
+
             if (e instanceof RuntimeException) {
               throw (RuntimeException) e;
             } else {
@@ -305,13 +357,14 @@ public class ThrowingProviderBinder {
             }
           }
         }
-        
+
+        @Override
         public Set<Dependency<?>> getDependencies() {
           return ImmutableSet.<Dependency<?>>of(Dependency.get(targetKey));
         }
-      });
+      };
     }
-
+    
     /**
      * Returns the exception type declared to be thrown by the get method of
      * {@code interfaceType}.
@@ -455,10 +508,12 @@ public class ThrowingProviderBinder {
   }
 
   /**
-   * Represents the returned value from a call to {@link
-   * CheckedProvider#get()}. This is the value that will be scoped by Guice.
+   * Represents the returned value from a call to {@link CheckedProvider#get()}. This is the value
+   * that will be scoped by Guice.
    */
   static class Result implements Serializable {
+    private static final long serialVersionUID = 0L;
+
     private final Object value;
     private final Exception exception;
 
@@ -474,7 +529,7 @@ public class ThrowingProviderBinder {
     public static Result forException(Exception e) {
       return new Result(null, e);
     }
-
+    
     public Object getOrThrow() throws Exception {
       if (exception != null) {
         throw exception;
@@ -482,8 +537,17 @@ public class ThrowingProviderBinder {
         return value;
       }
     }
-    
-    private static final long serialVersionUID = 0L;
+  }
+
+  /**
+   * RuntimeException class to wrap exceptions from the checked provider.
+   * The regular guice provider can throw it and the checked provider proxy extracts
+   * the underlying exception and rethrows it.
+   */
+  private static class ResultException extends RuntimeException {
+    ResultException(Exception cause) {
+      super(cause);
+    }
   }
   
   private static class NotSyntheticOrBridgePredicate implements Predicate<Method> {

@@ -50,6 +50,7 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
   private final boolean exposed;
   private final Class<? extends CheckedProvider> checkedProvider;
   private final List<TypeLiteral<?>> exceptionTypes;
+  private final boolean scopeExceptions;
 
   CheckedProviderMethod(
       Key<T> key,
@@ -59,7 +60,8 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
       List<Provider<?>> parameterProviders,
       Class<? extends Annotation> scopeAnnotation,
       Class<? extends CheckedProvider> checkedProvider,
-      List<TypeLiteral<?>> exceptionTypes) {
+      List<TypeLiteral<?>> exceptionTypes,
+      boolean scopeExceptions) {
     this.key = key;
     this.scopeAnnotation = scopeAnnotation;
     this.instance = instance;
@@ -69,6 +71,7 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     this.exposed = method.isAnnotationPresent(Exposed.class);
     this.checkedProvider = checkedProvider;
     this.exceptionTypes = exceptionTypes;
+    this.scopeExceptions = scopeExceptions;
 
     method.setAccessible(true);
   }
@@ -77,13 +80,14 @@ class CheckedProviderMethod<T> implements CheckedProvider<T>, HasDependencies {
     binder = binder.withSource(method);
 
     SecondaryBinder<?, ?> sbinder = 
-      ThrowingProviderBinder.create(binder)
-        .bind(checkedProvider, key.getTypeLiteral());
+        ThrowingProviderBinder.create(binder)
+          .bind(checkedProvider, key.getTypeLiteral());
     if(key.getAnnotation() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotation());
     } else if(key.getAnnotationType() != null) {
       sbinder = sbinder.annotatedWith(key.getAnnotationType());
-    } 
+    }
+    sbinder.scopeExceptions(scopeExceptions);
     ScopedBindingBuilder sbbuilder = sbinder.toProviderMethod(this);
     if(scopeAnnotation != null) {
       sbbuilder.in(scopeAnnotation);
