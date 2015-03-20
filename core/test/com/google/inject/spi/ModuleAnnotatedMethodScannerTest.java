@@ -75,6 +75,34 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
         foo2Binding.getProvider().toString());
   }
 
+  public void testSkipSources() throws Exception {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        binder().skipSources(getClass()).install(new AbstractModule() {
+          @Override protected void configure() {}
+
+          @TestProvides @Named("foo") String foo() { return "foo"; }
+        });
+      }
+    };
+    Injector injector = Guice.createInjector(module, NamedMunger.module());
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+  
+  public void testWithSource() throws Exception {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        binder().withSource("source").install(new AbstractModule() {
+          @Override protected void configure() {}
+
+          @TestProvides @Named("foo") String foo() { return "foo"; }
+        });
+      }
+    };
+    Injector injector = Guice.createInjector(module, NamedMunger.module());
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
   public void testMoreThanOneClaimedAnnotationFails() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {}
@@ -228,10 +256,68 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 
+  public void testPrivateModule_skipSourcesWithinPrivateModule() {
+    Injector injector = Guice.createInjector(NamedMunger.module(), new PrivateModule() {
+      @Override protected void configure() {
+        binder().skipSources(getClass()).install(new AbstractModule() {
+          @Override protected void configure() {}
+          @Exposed @TestProvides @Named("foo") String foo() {
+            return "foo";
+          }
+        });
+      }
+    });
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  public void testPrivateModule_skipSourcesForPrivateModule() {
+    Injector injector = Guice.createInjector(NamedMunger.module(), new AbstractModule() {
+      @Override protected void configure() {
+        binder().skipSources(getClass()).install(new PrivateModule() {
+          @Override protected void configure() {}
+
+          @Exposed @TestProvides @Named("foo") String foo() {
+            return "foo";
+          }
+        });
+      }});
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
   public void testPrivateModuleInheritScanner_usingPrivateBinder() {
     Injector injector = Guice.createInjector(NamedMunger.module(), new AbstractModule() {
       @Override protected void configure() {
         binder().newPrivateBinder().install(new AbstractModule() {
+          @Override protected void configure() {}
+
+          @Exposed @TestProvides @Named("foo") String foo() {
+            return "foo";
+          }
+        });
+      }
+    });
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  public void testPrivateModuleInheritScanner_skipSourcesFromPrivateBinder() {
+    Injector injector = Guice.createInjector(NamedMunger.module(), new AbstractModule() {
+      @Override protected void configure() {
+        binder().newPrivateBinder().skipSources(getClass()).install(new AbstractModule() {
+          @Override protected void configure() {}
+
+          @Exposed @TestProvides @Named("foo") String foo() {
+            return "foo";
+          }
+        });
+      }
+    });
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  public void testPrivateModuleInheritScanner_skipSourcesFromPrivateBinder2() {
+    Injector injector = Guice.createInjector(NamedMunger.module(), new AbstractModule() {
+      @Override protected void configure() {
+        binder().skipSources(getClass()).newPrivateBinder().install(new AbstractModule() {
           @Override protected void configure() {}
 
           @Exposed @TestProvides @Named("foo") String foo() {
@@ -287,6 +373,22 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
           }
         });
       }});
+    assertMungedBinding(injector, String.class, "foo", "foo");
+  }
+
+  public void testPrivateModuleWithinPrivateModule() {
+    Injector injector = Guice.createInjector(NamedMunger.module(), new PrivateModule() {
+      @Override protected void configure() {
+        expose(Key.get(String.class, named("foo-munged")));
+        install(new PrivateModule() {
+          @Override protected void configure() {}
+
+          @Exposed @TestProvides @Named("foo") String foo() {
+            return "foo";
+          }
+        });
+      }
+    });
     assertMungedBinding(injector, String.class, "foo", "foo");
   }
 }
