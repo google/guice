@@ -44,6 +44,7 @@ import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
+import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
@@ -242,13 +243,14 @@ public final class Elements {
 
     @Override
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
-      elements.add(new InjectionRequest<T>(getElementSource(), type, instance));
+      elements.add(new InjectionRequest<T>(getElementSource(), MoreTypes.canonicalizeForKey(type),
+          instance));
     }
 
     @Override
     public <T> MembersInjector<T> getMembersInjector(final TypeLiteral<T> typeLiteral) {
-      final MembersInjectorLookup<T> element
-          = new MembersInjectorLookup<T>(getElementSource(), typeLiteral);
+      final MembersInjectorLookup<T> element = new MembersInjectorLookup<T>(getElementSource(),
+          MoreTypes.canonicalizeForKey(typeLiteral));
       elements.add(element);
       return element.getMembersInjector();
     }
@@ -370,7 +372,8 @@ public final class Elements {
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-      BindingBuilder<T> builder = new BindingBuilder<T>(this, elements, getElementSource(), key);
+      BindingBuilder<T> builder =
+          new BindingBuilder<T>(this, elements, getElementSource(), MoreTypes.canonicalizeKey(key));
       return builder;
     }
 
@@ -480,7 +483,8 @@ public final class Elements {
         };
       }
 
-      ExposureBuilder<T> builder = new ExposureBuilder<T>(this, getElementSource(), key);
+      ExposureBuilder<T> builder =
+          new ExposureBuilder<T>(this, getElementSource(), MoreTypes.canonicalizeKey(key));
       privateElements.addExposureBuilder(builder);
       return builder;
     }

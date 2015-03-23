@@ -16,13 +16,13 @@
 
 package com.google.inject.internal;
 
+import static com.google.inject.Asserts.awaitClear;
+import static com.google.inject.Asserts.awaitFullGc;
 import static com.google.inject.internal.WeakKeySetUtils.assertBlacklisted;
 import static com.google.inject.internal.WeakKeySetUtils.assertInSet;
 import static com.google.inject.internal.WeakKeySetUtils.assertNotBlacklisted;
 import static com.google.inject.internal.WeakKeySetUtils.assertNotInSet;
 import static com.google.inject.internal.WeakKeySetUtils.assertSourceNotInSet;
-import static com.google.inject.internal.WeakKeySetUtils.awaitClear;
-import static com.google.inject.internal.WeakKeySetUtils.awaitFullGc;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,13 +34,6 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.BindingImpl;
-import com.google.inject.internal.Errors;
-/*if[AOP]*/
-import com.google.inject.internal.MethodAspect;
-/*end[AOP]*/
-import com.google.inject.internal.State;
-import com.google.inject.internal.WeakKeySet;
 import com.google.inject.spi.ModuleAnnotatedMethodScannerBinding;
 import com.google.inject.spi.ProvisionListenerBinding;
 import com.google.inject.spi.ScopeBinding;
