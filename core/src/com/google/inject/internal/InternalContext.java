@@ -40,13 +40,7 @@ final class InternalContext {
   /** Keeps track of the type that is currently being requested for injection. */
   private Dependency<?> dependency;
 
-  /**
-   * Keeps track of the hierarchy of types needed during injection.
-   *
-   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
-   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
-   * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
-   */
+  /** Keeps track of the hierarchy of types needed during injection. */
   private final DependencyStack state = new DependencyStack();
 
   @SuppressWarnings("unchecked")
@@ -104,6 +98,13 @@ final class InternalContext {
     return builder.build();
   }
 
+  /**
+   * Keeps track of the hierarchy of types needed during injection.
+   *
+   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
+   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
+   * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
+   */
   private static final class DependencyStack {
     private Object[] elements = new Object[10];
     private int size = 0;
