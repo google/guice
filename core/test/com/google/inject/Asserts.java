@@ -21,12 +21,14 @@ import static com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
 import static com.google.inject.internal.InternalFlags.getIncludeStackTraceOption;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.testing.GcFinalization;
 
 import junit.framework.Assert;
 
@@ -36,6 +38,8 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -157,6 +161,44 @@ public class Asserts {
       reserialize(object);
       Assert.fail();
     } catch (NotSerializableException expected) {
+    }
+  }
+
+  public static void awaitFullGc() {
+    // GcFinalization *should* do it, but doesn't work well in practice...
+    // so we put a second latch and wait for a ReferenceQueue to tell us.
+    ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
+    WeakReference ref = new WeakReference<Object>(new Object(), queue);
+    GcFinalization.awaitFullGc();
+    try {
+      assertSame("queue didn't return ref in time", ref, queue.remove(5000));
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void awaitClear(WeakReference<?> ref) {
+    // GcFinalization *should* do it, but doesn't work well in practice...
+    // so we put a second latch and wait for a ReferenceQueue to tell us.
+    Object data = ref.get();
+    ReferenceQueue<Object> queue = null;
+    WeakReference extraRef = null;
+    if (data != null) {
+      queue = new ReferenceQueue<Object>();
+      extraRef = new WeakReference<Object>(data, queue);
+      data = null;
+    }
+    GcFinalization.awaitClear(ref);
+    if (queue != null) {
+      try {
+        assertSame("queue didn't return ref in time", extraRef, queue.remove(5000));
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException(e);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

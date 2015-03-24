@@ -18,15 +18,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
-import com.google.common.testing.GcFinalization;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.util.Set;
 
 /**
@@ -37,44 +33,6 @@ import java.util.Set;
 public final class WeakKeySetUtils {
 
   private WeakKeySetUtils() {}
-
-  public static void awaitFullGc() {
-    // GcFinalization *should* do it, but doesn't work well in practice...
-    // so we put a second latch and wait for a ReferenceQueue to tell us.
-    ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-    WeakReference ref = new WeakReference<Object>(new Object(), queue);
-    GcFinalization.awaitFullGc();
-    try {
-      assertSame("queue didn't return ref in time", ref, queue.remove(5000));
-    } catch (IllegalArgumentException e) {
-      throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public static void awaitClear(WeakReference<?> ref) {
-    // GcFinalization *should* do it, but doesn't work well in practice...
-    // so we put a second latch and wait for a ReferenceQueue to tell us.
-    Object data = ref.get();
-    ReferenceQueue<Object> queue = null;
-    WeakReference extraRef = null;
-    if (data != null) {
-      queue = new ReferenceQueue<Object>();
-      extraRef = new WeakReference<Object>(data, queue);
-      data = null;
-    }
-    GcFinalization.awaitClear(ref);
-    if (queue != null) {
-      try {
-        assertSame("queue didn't return ref in time", extraRef, queue.remove(5000));
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
 
   public static void assertBlacklisted(Injector injector, Key<?> key) {
     assertBlacklistState(injector, key, true);

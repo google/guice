@@ -801,6 +801,7 @@ final class InjectorImpl implements Injector, Lookups {
       throw errors.childBindingAlreadySet(key, sources).toException();
     }
 
+    key = MoreTypes.canonicalizeKey(key); // before storing the key long-term, canonicalize it.
     BindingImpl<T> binding = createJustInTimeBinding(key, errors, jitDisabled, jitType);
     state.parent().blacklist(key, state, binding.getSource());
     jitBindings.put(key, binding);

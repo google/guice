@@ -16,6 +16,9 @@
 
 package com.google.inject.throwingproviders;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -23,6 +26,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
 import com.google.inject.Asserts;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -45,6 +49,7 @@ import com.google.inject.throwingproviders.ThrowingProviderBinder.Result;
 import junit.framework.TestCase;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -64,6 +69,8 @@ import java.util.TooManyListenersException;
  * @author sameb@google.com (Sam Berlin)
  */
 public class CheckedProviderTest extends TestCase {
+  @Target(METHOD) @Retention(RUNTIME) @BindingAnnotation
+  @interface NotExceptionScoping { };
   
   private static final Function<Dependency<?>, Key<?>> DEPENDENCY_TO_KEY =
       new Function<Dependency<?>, Key<?>>() {
@@ -95,6 +102,14 @@ public class CheckedProviderTest extends TestCase {
             .bind(RemoteProvider.class, Foo.class)
             .to(mockRemoteProvider)
             .in(testScope);
+
+        ThrowingProviderBinder.create(binder())
+            .bind(RemoteProvider.class, Foo.class)
+            .annotatedWith(NotExceptionScoping.class)
+            .scopeExceptions(false)
+            .to(mockRemoteProvider)
+            .in(testScope);
+
       }
     });  
     
@@ -111,6 +126,15 @@ public class CheckedProviderTest extends TestCase {
       Foo throwOrGet() throws RemoteException, BindException {
         return mockRemoteProvider.get();
       }
+
+      @SuppressWarnings("unused")
+      @CheckedProvides(value = RemoteProvider.class, scopeExceptions = false)
+      @NotExceptionScoping
+      @TestScope.Scoped
+      Foo notExceptionScopingThrowOrGet() throws RemoteException, BindException {
+        return mockRemoteProvider.get();
+      }    
+      
     });
     
     cxtorInjector = Guice.createInjector(new AbstractModule() {
@@ -120,6 +144,14 @@ public class CheckedProviderTest extends TestCase {
           .bind(RemoteProvider.class, Foo.class)
           .providing(MockFoo.class)
           .in(testScope);
+
+        ThrowingProviderBinder.create(binder())
+          .bind(RemoteProvider.class, Foo.class)
+          .annotatedWith(NotExceptionScoping.class)
+          .scopeExceptions(false)
+          .providing(MockFoo.class)
+          .in(testScope);
+        
       }
     });
   }
@@ -151,17 +183,28 @@ public class CheckedProviderTest extends TestCase {
   }
 
   public void testValuesScoped_Bind() throws Exception  {
-    tValuesScoped(bindInjector);
+    tValuesScoped(bindInjector, null);
   }
   
   public void testValuesScoped_Provides() throws Exception  {
-    tValuesScoped(providesInjector);
+    tValuesScoped(providesInjector, null);
   }
   
-  private void tValuesScoped(Injector injector) throws Exception {
-    RemoteProvider<Foo> remoteProvider = 
-      injector.getInstance(Key.get(remoteProviderOfFoo));
+  public void testValuesScopedWhenNotExceptionScoping_Bind() throws Exception  {
+    tValuesScoped(bindInjector, NotExceptionScoping.class);
+  }
+  
+  public void testValuesScopedWhenNotExceptionScoping_Provides() throws Exception  {
+    tValuesScoped(providesInjector, NotExceptionScoping.class);
+  }
 
+  private void tValuesScoped(Injector injector, 
+      Class<? extends Annotation> annotation) throws Exception {
+    Key<RemoteProvider<Foo>> key = annotation != null ? 
+        Key.get(remoteProviderOfFoo, annotation) :
+        Key.get(remoteProviderOfFoo);
+    RemoteProvider<Foo> remoteProvider = injector.getInstance(key);
+    
     mockRemoteProvider.setNextToReturn(new SimpleFoo("A"));
     assertEquals("A", remoteProvider.get().s());
 
@@ -215,6 +258,41 @@ public class CheckedProviderTest extends TestCase {
       fail();
     } catch (RemoteException expected) {
       assertEquals("A", expected.getMessage());
+    }
+  }
+  
+  public void testExceptionsNotScopedWhenNotExceptionScoping_Bind() throws Exception {
+    tExceptionsNotScopedWhenNotExceptionScoping(bindInjector);
+  }
+  
+  public void testExceptionsNotScopedWhenNotExceptionScoping_Provides() throws Exception {
+    tExceptionsNotScopedWhenNotExceptionScoping(providesInjector);
+  }
+  
+  public void testExceptionNotScopedWhenNotExceptionScoping_Cxtor() throws Exception {
+    tExceptionsNotScopedWhenNotExceptionScoping(cxtorInjector);
+  }
+  
+  private void tExceptionsNotScopedWhenNotExceptionScoping(Injector injector) throws Exception {
+    RemoteProvider<Foo> remoteProvider = 
+        injector.getInstance(Key.get(remoteProviderOfFoo, NotExceptionScoping.class));
+
+    mockRemoteProvider.throwOnNextGet(new RemoteException("A"));
+    MockFoo.nextToThrow = new RemoteException("A");
+    try {
+      remoteProvider.get();
+      fail();
+    } catch (RemoteException expected) {
+      assertEquals("A", expected.getMessage());
+    }
+    
+    mockRemoteProvider.throwOnNextGet(new RemoteException("B"));
+    MockFoo.nextToThrow = new RemoteException("B");
+    try {
+      remoteProvider.get();
+      fail();
+    } catch (RemoteException expected) {
+      assertEquals("B", expected.getMessage());
     }
   }
   

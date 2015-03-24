@@ -44,6 +44,7 @@ import com.google.inject.internal.ConstantBindingBuilderImpl;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ExposureBuilder;
 import com.google.inject.internal.InternalFlags.IncludeStackTraceOption;
+import com.google.inject.internal.MoreTypes;
 import com.google.inject.internal.PrivateElementsImpl;
 import com.google.inject.internal.ProviderMethodsModule;
 import com.google.inject.internal.util.SourceProvider;
@@ -147,10 +148,12 @@ public final class Elements {
   private static class ModuleInfo {
     private final Binder binder;
     private final ModuleSource moduleSource;
+    private final boolean skipScanning;
 
-    private ModuleInfo(Binder binder, ModuleSource moduleSource) {
+    private ModuleInfo(Binder binder, ModuleSource moduleSource, boolean skipScanning) {
       this.binder = binder;
       this.moduleSource = moduleSource;
+      this.skipScanning = skipScanning;
     }
   }
 
@@ -240,13 +243,14 @@ public final class Elements {
 
     @Override
     public <T> void requestInjection(TypeLiteral<T> type, T instance) {
-      elements.add(new InjectionRequest<T>(getElementSource(), type, instance));
+      elements.add(new InjectionRequest<T>(getElementSource(), MoreTypes.canonicalizeForKey(type),
+          instance));
     }
 
     @Override
     public <T> MembersInjector<T> getMembersInjector(final TypeLiteral<T> typeLiteral) {
-      final MembersInjectorLookup<T> element
-          = new MembersInjectorLookup<T>(getElementSource(), typeLiteral);
+      final MembersInjectorLookup<T> element = new MembersInjectorLookup<T>(getElementSource(),
+          MoreTypes.canonicalizeForKey(typeLiteral));
       elements.add(element);
       return element.getMembersInjector();
     }
@@ -270,19 +274,25 @@ public final class Elements {
       }
     }
 
+    /**
+     * Applies all scanners to the modules we've installed. We skip certain
+     * PrivateModules because store them in more than one Modules map and only
+     * want to process them through one of the maps.  (They're stored in both
+     * maps to prevent a module from being installed more than once.)
+     */
     void scanForAnnotatedMethods() {
       for (ModuleAnnotatedMethodScanner scanner : scanners) {
         // Note: we must iterate over a copy of the modules because calling install(..)
         // will mutate modules, otherwise causing a ConcurrentModificationException.
         for (Map.Entry<Module, ModuleInfo> entry : Maps.newLinkedHashMap(modules).entrySet()) {
           Module module = entry.getKey();
-          // If this was from a child private binder, skip it... we'll process it later.
-          if (entry.getValue().binder != this) {
+          ModuleInfo info = entry.getValue();
+          if (info.skipScanning) {
             continue;
           }
           moduleSource = entry.getValue().moduleSource;
           try {
-            install(ProviderMethodsModule.forModule(module, scanner));
+            info.binder.install(ProviderMethodsModule.forModule(module, scanner));
           } catch(RuntimeException e) {
             Collection<Message> messages = Errors.getMessagesFromThrowable(e);
             if (!messages.isEmpty()) {
@@ -298,7 +308,7 @@ public final class Elements {
 
     public void install(Module module) {
       if (!modules.containsKey(module)) {
-        Binder binder = this;
+        RecordingBinder binder = this;
         boolean unwrapModuleSource = false;
         // Update the module source for the new module
         if (module instanceof ProviderMethodsModule) {
@@ -316,14 +326,16 @@ public final class Elements {
           moduleSource = getModuleSource(module);
           unwrapModuleSource = true;
         }
+        boolean skipScanning = false;
         if (module instanceof PrivateModule) {
-          binder = binder.newPrivateBinder();
-          // Store the module in the private binder too.
-          ((RecordingBinder) binder).modules.put(module, new ModuleInfo(binder, moduleSource));
+          binder = (RecordingBinder) binder.newPrivateBinder();
+          // Store the module in the private binder too so we scan for it.
+          binder.modules.put(module, new ModuleInfo(binder, moduleSource, false));
+          skipScanning = true; // don't scan this module in the parent's module set.
         }
         // Always store this in the parent binder (even if it was a private module)
         // so that we know not to process it again, and so that scanners inherit down.
-        modules.put(module, new ModuleInfo(binder, moduleSource));
+        modules.put(module, new ModuleInfo(binder, moduleSource, skipScanning));
         try {
           module.configure(binder);
         } catch (RuntimeException e) {
@@ -360,7 +372,8 @@ public final class Elements {
     }
 
     public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-      BindingBuilder<T> builder = new BindingBuilder<T>(this, elements, getElementSource(), key);
+      BindingBuilder<T> builder =
+          new BindingBuilder<T>(this, elements, getElementSource(), MoreTypes.canonicalizeKey(key));
       return builder;
     }
 
@@ -470,7 +483,8 @@ public final class Elements {
         };
       }
 
-      ExposureBuilder<T> builder = new ExposureBuilder<T>(this, getElementSource(), key);
+      ExposureBuilder<T> builder =
+          new ExposureBuilder<T>(this, getElementSource(), MoreTypes.canonicalizeKey(key));
       privateElements.addExposureBuilder(builder);
       return builder;
     }

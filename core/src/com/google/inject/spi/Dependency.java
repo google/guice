@@ -22,6 +22,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.inject.Key;
+import com.google.inject.internal.MoreTypes;
 
 import java.util.List;
 import java.util.Set;
@@ -54,7 +55,7 @@ public final class Dependency<T> {
    * nullable.
    */
   public static <T> Dependency<T> get(Key<T> key) {
-    return new Dependency<T>(null, key, true, -1);
+    return new Dependency<T>(null, MoreTypes.canonicalizeKey(key), true, -1);
   }
 
   /**

@@ -79,7 +79,7 @@ final class CheckedProviderMethodsModule implements Module {
       for (Method method : c.getDeclaredMethods()) {
         CheckedProvides checkedProvides = method.getAnnotation(CheckedProvides.class);
         if(checkedProvides != null) {
-          result.add(createProviderMethod(binder, method, checkedProvides.value()));
+          result.add(createProviderMethod(binder, method, checkedProvides));
         }
       }
     }
@@ -87,7 +87,9 @@ final class CheckedProviderMethodsModule implements Module {
   }
 
   <T> CheckedProviderMethod<T> createProviderMethod(Binder binder, final Method method,
-      Class<? extends CheckedProvider> throwingProvider) {
+      CheckedProvides checkedProvides) {
+    @SuppressWarnings("rawtypes")
+    Class<? extends CheckedProvider> throwingProvider = checkedProvides.value();
     binder = binder.withSource(method);
     Errors errors = new Errors(method);
 
@@ -123,7 +125,8 @@ final class CheckedProviderMethodsModule implements Module {
     }
 
     return new CheckedProviderMethod<T>(key, method, delegate, ImmutableSet.copyOf(dependencies),
-        parameterProviders, scopeAnnotation, throwingProvider, exceptionTypes);
+        parameterProviders, scopeAnnotation, throwingProvider, exceptionTypes, 
+        checkedProvides.scopeExceptions()); 
   }
 
   <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {

@@ -32,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
+import com.google.inject.Asserts;
 import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ConfigurationException;
@@ -1025,7 +1026,7 @@ public class MapBinderTest extends TestCase {
     // Clear the ref, GC, and ensure that we are no longer blacklisting.
     childInjector = null;
     
-    WeakKeySetUtils.awaitClear(weakRef);
+    Asserts.awaitClear(weakRef);
     WeakKeySetUtils.assertNotBlacklisted(parentInjector, mapKey);
   }
 }
