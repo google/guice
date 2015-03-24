@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -166,14 +166,20 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#providing-com.google.inject.TypeLiteral-">providing</a></span>(<a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">T</a>&gt;&nbsp;cxtorLiteral)</code>&nbsp;</td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code><a href="../../../../com/google/inject/binder/ScopedBindingBuilder.html" title="interface in com.google.inject.binder">ScopedBindingBuilder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#to-java.lang.Class-">to</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>&gt;&nbsp;targetType)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder.SecondaryBinder</a>&lt;<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>,<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">T</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#scopeExceptions-boolean-">scopeExceptions</a></span>(boolean&nbsp;scopeExceptions)</code>
+<div class="block">Determines if exceptions should be scoped.</div>
+</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/binder/ScopedBindingBuilder.html" title="interface in com.google.inject.binder">ScopedBindingBuilder</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#to-com.google.inject.Key-">to</a></span>(<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>&gt;&nbsp;targetKey)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#to-java.lang.Class-">to</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>&gt;&nbsp;targetType)</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
+<td class="colFirst"><code><a href="../../../../com/google/inject/binder/ScopedBindingBuilder.html" title="interface in com.google.inject.binder">ScopedBindingBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#to-com.google.inject.Key-">to</a></span>(<a href="../../../../com/google/inject/Key.html" title="class in com.google.inject">Key</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>&gt;&nbsp;targetKey)</code>&nbsp;</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/google/inject/binder/ScopedBindingBuilder.html" title="interface in com.google.inject.binder">ScopedBindingBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html#to-P-">to</a></span>(<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>&nbsp;target)</code>&nbsp;</td>
 </tr>
@@ -233,6 +239,20 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <li class="blockList">
 <h4>annotatedWith</h4>
 <pre>public&nbsp;<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder.SecondaryBinder</a>&lt;<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>,<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">T</a>&gt;&nbsp;annotatedWith(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Annotation.html?is-external=true" title="class or interface in java.lang.annotation">Annotation</a>&nbsp;annotation)</pre>
+</li>
+</ul>
+<a name="scopeExceptions-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>scopeExceptions</h4>
+<pre>public&nbsp;<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="class in com.google.inject.throwingproviders">ThrowingProviderBinder.SecondaryBinder</a>&lt;<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">P</a>,<a href="../../../../com/google/inject/throwingproviders/ThrowingProviderBinder.SecondaryBinder.html" title="type parameter in ThrowingProviderBinder.SecondaryBinder">T</a>&gt;&nbsp;scopeExceptions(boolean&nbsp;scopeExceptions)</pre>
+<div class="block">Determines if exceptions should be scoped. By default exceptions are scoped.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>scopeExceptions</code> - whether exceptions should be scoped.</dd>
+</dl>
 </li>
 </ul>
 <a name="to-com.google.inject.throwingproviders.CheckedProvider-">

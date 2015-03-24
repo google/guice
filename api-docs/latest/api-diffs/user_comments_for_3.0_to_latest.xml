@@ -2986,6 +2986,12 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder.scopeExceptions_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.throwingproviders.ThrowingProviderBinder.bind_added(java.lang.Class&lt;P&gt;, com.google.inject.TypeLiteral&lt;T&gt;)"/>
   <text>
     InsertCommentsHere

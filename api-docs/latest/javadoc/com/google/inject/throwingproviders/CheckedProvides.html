@@ -68,7 +68,7 @@
 <li>Summary:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#annotation.type.required.element.summary">Required</a>&nbsp;|&nbsp;</li>
-<li>Optional</li>
+<li><a href="#annotation.type.optional.element.summary">Optional</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
@@ -133,6 +133,27 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 </table>
 </li>
 </ul>
+<!-- =========== ANNOTATION TYPE OPTIONAL MEMBER SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="annotation.type.optional.element.summary">
+<!--   -->
+</a>
+<h3>Optional Element Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Optional Element Summary table, listing optional elements, and an explanation">
+<caption><span>Optional Elements</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Optional Element and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/throwingproviders/CheckedProvides.html#scopeExceptions--">scopeExceptions</a></span></code>
+<div class="block">Whether exceptions should be put into the Guice scope.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
 </li>
 </ul>
 </div>
@@ -153,6 +174,25 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <h4>value</h4>
 <pre>public abstract&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;? extends <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders">CheckedProvider</a>&gt;&nbsp;value</pre>
 <div class="block">The interface that provides this value, a subinterface of <a href="../../../../com/google/inject/throwingproviders/CheckedProvider.html" title="interface in com.google.inject.throwingproviders"><code>CheckedProvider</code></a>.</div>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ ANNOTATION TYPE MEMBER DETAIL =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="scopeExceptions--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>scopeExceptions</h4>
+<pre>public abstract&nbsp;boolean&nbsp;scopeExceptions</pre>
+<div class="block">Whether exceptions should be put into the Guice scope.
+ Default behavior is that exceptions are scoped.</div>
+<dl>
+<dt>Default:</dt>
+<dd>true</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -209,7 +249,7 @@ public @interface <span class="memberNameLabel">CheckedProvides</span></pre>
 <li>Summary:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#annotation.type.required.element.summary">Required</a>&nbsp;|&nbsp;</li>
-<li>Optional</li>
+<li><a href="#annotation.type.optional.element.summary">Optional</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>

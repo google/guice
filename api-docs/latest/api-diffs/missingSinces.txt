@@ -81,6 +81,7 @@ NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder.Seconda
 OK: com.google.inject.Binder Method requireAtInjectOnConstructors()
 OK: com.google.inject.Binder Method requireExactBindingAnnotations()
 OK: com.google.inject.Binder Method scanModulesForAnnotatedMethods(com.google.inject.spi.ModuleAnnotatedMethodScanner)
+MISSING @SINCE TAG: com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder Method scopeExceptions(boolean)
 NO DOC BLOCK: com.google.inject.grapher.graphviz.GraphvizNode Method setIdentifier(java.lang.String)
 NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(com.google.inject.Key<? extends javax.servlet.Filter>)
 NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(com.google.inject.Key<? extends javax.servlet.Filter>, java.util.Map<java.lang.String, java.lang.String>)
