@@ -106,7 +106,7 @@ final class InternalContext {
    * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
    */
   private static final class DependencyStack {
-    private Object[] elements = new Object[10];
+    private Object[] elements = new Object[16];
     private int size = 0;
 
     public void add(Object dependencyOrKey, Object source) {
