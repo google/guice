@@ -23,7 +23,7 @@ import com.google.inject.Key;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -40,13 +40,7 @@ final class InternalContext {
   /** Keeps track of the type that is currently being requested for injection. */
   private Dependency<?> dependency;
 
-  /**
-   * Keeps track of the hierarchy of types needed during injection.
-   *
-   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
-   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
-   * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
-   */
+  /** Keeps track of the hierarchy of types needed during injection. */
   private final DependencyStack state = new DependencyStack();
 
   @SuppressWarnings("unchecked")
@@ -68,8 +62,7 @@ final class InternalContext {
   public Dependency<?> pushDependency(Dependency<?> dependency, Object source) {
     Dependency<?> previous = this.dependency;
     this.dependency = dependency;
-    state.add(dependency);
-    state.add(source);
+    state.add(dependency, source);
     return previous;
   }
   
@@ -81,8 +74,7 @@ final class InternalContext {
   
   /** Adds to the state without setting the dependency. */
   public void pushState(Key<?> key, Object source) {
-    state.add(key);
-    state.add(source);
+    state.add(key, source);
   }
   
   /** Pops from the state without setting a dependency. */
@@ -106,10 +98,36 @@ final class InternalContext {
     return builder.build();
   }
 
-  private static final class DependencyStack extends ArrayList<Object> {
-    void pop() {
-      int sz = size();
-      removeRange(sz - 2, sz);
+  /**
+   * Keeps track of the hierarchy of types needed during injection.
+   *
+   * <p>This is a pairwise combination of dependencies and sources, with dependencies or keys on
+   * even indices, and sources on odd indices. This structure is to avoid the memory overhead of
+   * DependencyAndSource objects, which can add to several tens of megabytes in large applications.
+   */
+  private static final class DependencyStack {
+    private Object[] elements = new Object[16];
+    private int size = 0;
+
+    public void add(Object dependencyOrKey, Object source) {
+      if (elements.length < size + 2) {
+        elements = Arrays.copyOf(elements, (elements.length*3)/2 + 2);
+      }
+      elements[size++] = dependencyOrKey;
+      elements[size++] = source;
+    }
+
+    public void pop() {
+      elements[--size] = null;
+      elements[--size] = null;
+    }
+
+    public Object get(int i) {
+      return elements[i];
+    }
+
+    public int size() {
+      return size;
     }
   }
 }
