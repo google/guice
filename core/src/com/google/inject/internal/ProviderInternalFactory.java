@@ -32,31 +32,26 @@ import javax.inject.Provider;
  */
 abstract class ProviderInternalFactory<T> implements InternalFactory<T> {
   
-  private final boolean allowProxy;
   protected final Object source;
   
-  ProviderInternalFactory(Object source, boolean allowProxy) {
+  ProviderInternalFactory(Object source) {
     this.source = checkNotNull(source, "source");
-    this.allowProxy = allowProxy;
   }
   
   protected T circularGet(final Provider<? extends T> provider, final Errors errors,
-      InternalContext context, final Dependency<?> dependency, boolean linked,
+      InternalContext context, final Dependency<?> dependency,
       ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {    
-    Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-      if (!allowProxy) {
-        throw errors.circularProxiesDisabled(expectedType).toException();
-      } else {
+        Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
         // TODO: if we can't proxy this object, can we proxy the other object?
         @SuppressWarnings("unchecked")
-        T proxyType = (T) constructionContext.createProxy(errors, expectedType);
+        T proxyType = (T) constructionContext.createProxy(
+            errors, context.getInjectorOptions(), expectedType);
         return proxyType;
-      }
     }
 
     // Optimization: Don't go through the callback stack if no one's listening.

@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
+
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,11 +59,11 @@ final class ConstructionContext<T> {
     invocationHandlers = null;
   }
 
-  public Object createProxy(Errors errors, Class<?> expectedType) throws ErrorsException {
-    // TODO: if I create a proxy which implements all the interfaces of
-    // the implementation type, I'll be able to get away with one proxy
-    // instance (as opposed to one per caller).
-
+  public Object createProxy(Errors errors, InjectorOptions injectorOptions,
+      Class<?> expectedType) throws ErrorsException {
+    if (injectorOptions.disableCircularProxies) {
+      throw errors.circularProxiesDisabled(expectedType).toException();
+    }
     if (!expectedType.isInterface()) {
       throw errors.cannotSatisfyCircularDependency(expectedType).toException();
     }
@@ -73,6 +75,9 @@ final class ConstructionContext<T> {
     DelegatingInvocationHandler<T> invocationHandler = new DelegatingInvocationHandler<T>();
     invocationHandlers.add(invocationHandler);
 
+    // TODO: if I create a proxy which implements all the interfaces of
+    // the implementation type, I'll be able to get away with one proxy
+    // instance (as opposed to one per caller).
     ClassLoader classLoader = BytecodeGen.getClassLoader(expectedType);
     return expectedType.cast(Proxy.newProxyInstance(classLoader,
         new Class[] { expectedType, CircularDependencyProxy.class }, invocationHandler));
@@ -83,6 +88,8 @@ final class ConstructionContext<T> {
       for (DelegatingInvocationHandler<T> handler : invocationHandlers) {
         handler.setDelegate(delegate);
       }
+      // initialization of each handler can happen no more than once
+      invocationHandlers = null;
     }
   }
 }

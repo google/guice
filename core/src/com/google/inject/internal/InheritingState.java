@@ -60,13 +60,10 @@ final class InheritingState implements State {
   private final List<ModuleAnnotatedMethodScannerBinding> scannerBindings = Lists.newArrayList();
   private final WeakKeySet blacklistedKeys;
   private final Object lock;
-  private final Object singletonCreationLock;
 
   InheritingState(State parent) {
     this.parent = checkNotNull(parent, "parent");
     this.lock = (parent == State.NONE) ? this : parent.lock();
-    this.singletonCreationLock =
-        (parent == State.NONE) ? new Object() : parent.singletonCreationLock();
     this.blacklistedKeys = new WeakKeySet(lock);
   }
 
@@ -188,10 +185,6 @@ final class InheritingState implements State {
 
   public Object lock() {
     return lock;
-  }
-
-  public Object singletonCreationLock() {
-    return singletonCreationLock;
   }
 
   public Map<Class<? extends Annotation>, Scope> getScopes() {

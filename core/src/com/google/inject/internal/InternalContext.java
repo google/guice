@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Key;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 
@@ -35,6 +36,8 @@ import java.util.Map;
  */
 final class InternalContext {
 
+  private final InjectorOptions options;
+
   private Map<Object, ConstructionContext<?>> constructionContexts = Maps.newHashMap();
 
   /** Keeps track of the type that is currently being requested for injection. */
@@ -42,6 +45,14 @@ final class InternalContext {
 
   /** Keeps track of the hierarchy of types needed during injection. */
   private final DependencyStack state = new DependencyStack();
+
+  InternalContext(InjectorOptions options) {
+    this.options = options;
+  }
+
+  public InjectorOptions getInjectorOptions() {
+    return options;
+  }
 
   @SuppressWarnings("unchecked")
   public <T> ConstructionContext<T> getConstructionContext(Object key) {
@@ -65,13 +76,13 @@ final class InternalContext {
     state.add(dependency, source);
     return previous;
   }
-  
+
   /** Pops the current state & sets the new dependency. */
   public void popStateAndSetDependency(Dependency<?> newDependency) {
     state.pop();
     this.dependency = newDependency;
   }
-  
+
   /** Adds to the state without setting the dependency. */
   public void pushState(Key<?> key, Object source) {
     state.add(key, source);
@@ -81,7 +92,7 @@ final class InternalContext {
   public void popState() {
     state.pop();
   }
-  
+
   /** Returns the current dependency chain (all the state). */
   public List<DependencyAndSource> getDependencyChain() {
     ImmutableList.Builder<DependencyAndSource> builder = ImmutableList.builder();

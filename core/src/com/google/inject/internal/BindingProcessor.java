@@ -111,7 +111,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         // always visited with Binding<T>
         @SuppressWarnings("unchecked") 
         InternalFactory<T> factory = new InternalFactoryToInitializableAdapter<T>(
-            initializable, source, !injector.options.disableCircularProxies,
+            initializable, source,
             injector.provisionListenerStore.get((ProviderInstanceBinding<T>)binding));
         InternalFactory<? extends T> scopedFactory
             = Scoping.scope(key, injector, factory, source, scoping);
@@ -127,7 +127,7 @@ final class BindingProcessor extends AbstractBindingProcessor {
         // always visited with Binding<T>
         @SuppressWarnings("unchecked") 
         BoundProviderFactory<T> boundProviderFactory = new BoundProviderFactory<T>(
-            injector, providerKey, source, !injector.options.disableCircularProxies,
+            injector, providerKey, source,
             injector.provisionListenerStore.get((ProviderKeyBinding<T>) binding));
         bindingData.addCreationListener(boundProviderFactory);
         InternalFactory<? extends T> scopedFactory = Scoping.scope(
