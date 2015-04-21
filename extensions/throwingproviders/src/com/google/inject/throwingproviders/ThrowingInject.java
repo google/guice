@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  * where CustomerImpl has a constructor annotated with ThrowingInject.
  *
  * @author sameb@google.com (Sam Berlin)
+ * @since 4.0
  */
 @Target({ CONSTRUCTOR })
 @Retention(RUNTIME)

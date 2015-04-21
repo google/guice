@@ -62,6 +62,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
    * See the EDSL examples at {@link com.google.inject.Binder}.
    *
    * @see com.google.inject.Injector#injectMembers
+   * @since 4.0
    */
   ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider);
 

@@ -27,10 +27,14 @@ import com.google.inject.Key;
  * {@link Key} and value of 42.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public final class NodeId {
 
-  /** Type of node. */
+  /**
+   * Type of node.
+   * @since 4.0
+   */
   public enum NodeType {
     /** Type or class node. */
     TYPE,

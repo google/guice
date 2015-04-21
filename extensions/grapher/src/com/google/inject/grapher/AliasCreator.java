@@ -23,6 +23,7 @@ import com.google.inject.Binding;
  * into a single node on the rendered graph.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public interface AliasCreator {
   /**

@@ -25,6 +25,8 @@ import java.lang.annotation.Target;
 
 /**
  * Allows {@literal @}{@link ProvidesIntoMap} to specify a class map key.
+ *
+ * @since 4.0
  */
 @MapKey(unwrapValue = true)
 @Documented

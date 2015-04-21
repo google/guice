@@ -25,6 +25,7 @@ import java.util.Set;
  * dependencies will be graphed.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public interface RootKeySetCreator {
 

@@ -32,6 +32,7 @@ import java.util.Set;
  * Abstract injector grapher that builds the dependency graph but doesn't render it.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   private final RootKeySetCreator rootKeySetCreator;
@@ -39,7 +40,10 @@ public abstract class AbstractInjectorGrapher implements InjectorGrapher {
   private final NodeCreator nodeCreator;
   private final EdgeCreator edgeCreator;
 
-  /** Parameters used to override default settings of the grapher. */
+  /**
+   * Parameters used to override default settings of the grapher.
+   * @since 4.0
+   */
   public static final class GrapherParameters {
     private RootKeySetCreator rootKeySetCreator = new DefaultRootKeySetCreator();
     private AliasCreator aliasCreator = new ProviderAliasCreator();

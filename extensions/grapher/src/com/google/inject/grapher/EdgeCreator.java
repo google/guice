@@ -23,6 +23,7 @@ import com.google.inject.Binding;
  * performed.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public interface EdgeCreator {
 

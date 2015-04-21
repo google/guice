@@ -124,6 +124,7 @@ public class Scopes {
    * @param binding binding to check
    * @param scope scope implementation instance
    * @param scopeAnnotation scope annotation class
+   * @since 4.0
    */
   public static boolean isScoped(Binding<?> binding, final Scope scope,
       final Class<? extends Annotation> scopeAnnotation) {
@@ -177,6 +178,8 @@ public class Scopes {
    * because the proxies are not intended for general purpose use. (They are
    * designed just to fulfill the immediate injection, not all injections.
    * Caching them can lead to IllegalArgumentExceptions or ClassCastExceptions.)
+   *
+   * @since 4.0
    */
   public static boolean isCircularProxy(Object object) {
     return object instanceof CircularDependencyProxy;

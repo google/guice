@@ -162,6 +162,7 @@ public abstract class Multibinder<T> {
   /**
    * Returns a new multibinder that collects instances of the key's type in a {@link Set} that is
    * itself bound with the annotation (if any) of the key.
+   * @since 4.0
    */
   public static <T> Multibinder<T> newSetBinder(Binder binder, Key<T> key) {
     return newRealSetBinder(binder, key);
