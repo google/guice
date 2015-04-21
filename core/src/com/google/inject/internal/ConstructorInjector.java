@@ -59,19 +59,16 @@ final class ConstructorInjector<T> {
    * it may return a proxy.
    */
   Object construct(final Errors errors, final InternalContext context,
-      Class<?> expectedType, boolean allowProxy,
+      Class<?> expectedType,
       ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
-      if(!allowProxy) {
-        throw errors.circularProxiesDisabled(expectedType).toException();
-      } else {      
-        // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
-        return constructionContext.createProxy(errors, expectedType);
-      }
+      // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
+      return constructionContext.createProxy(
+          errors, context.getInjectorOptions(), expectedType);
     }
 
     // If we're re-entering this factory while injecting fields or methods,
@@ -85,7 +82,7 @@ final class ConstructorInjector<T> {
     try {
       // Optimization: Don't go through the callback stack if we have no listeners.
       if (!provisionCallback.hasListeners()) {
-        return provision(errors, context, constructionContext);        
+        return provision(errors, context, constructionContext);
       } else {
         return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
           public T call() throws ErrorsException {

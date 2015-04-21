@@ -16,24 +16,34 @@
 
 package com.google.inject.internal;
 
+
+import com.google.common.base.Preconditions;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 class DelegatingInvocationHandler<T> implements InvocationHandler {
 
+  private volatile boolean initialized;
+
   private T delegate;
 
   public Object invoke(Object proxy, Method method, Object[] args)
       throws Throwable {
-    if (delegate == null) {
-      throw new IllegalStateException("This is a proxy used to support"
-          + " circular references. The object we're"
-          + " proxying is not constructed yet. Please wait until after"
-          + " injection has completed to use this object.");
-    }
-
     try {
+      // checking volatile field for synchronization
+      Preconditions.checkState(initialized,
+          "This is a proxy used to support"
+              + " circular references. The object we're"
+              + " proxying is not constructed yet. Please wait until after"
+              + " injection has completed to use this object.");
+      Preconditions.checkNotNull(delegate,
+          "This is a proxy used to support"
+              + " circular references. The object we're "
+              + " proxying is initialized to null."
+              + " No methods can be called.");
+
       // TODO: method.setAccessible(true); ?
       // this would fix visibility errors when we proxy a
       // non-public interface.
@@ -47,11 +57,8 @@ class DelegatingInvocationHandler<T> implements InvocationHandler {
     }
   }
 
-  public T getDelegate() {
-    return delegate;
-  }
-
   void setDelegate(T delegate) {
     this.delegate = delegate;
+    initialized = true;
   }
 }

@@ -42,9 +42,8 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
   ProvidedByInternalFactory(
       Class<?> rawType,
       Class<? extends Provider<?>> providerType,
-      Key<? extends Provider<T>> providerKey,
-      boolean allowProxy) {
-    super(providerKey, allowProxy);
+      Key<? extends Provider<T>> providerKey) {
+    super(providerKey);
     this.rawType = rawType;
     this.providerType = providerType; 
     this.providerKey = providerKey;
@@ -68,7 +67,7 @@ class ProvidedByInternalFactory<T> extends ProviderInternalFactory<T>
       errors = errors.withSource(providerKey);
       Provider<? extends T> provider = providerBinding.getInternalFactory().get(
           errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, linked, provisionCallback);
+      return circularGet(provider, errors, context, dependency, provisionCallback);
     } finally {
       context.popState();
     }

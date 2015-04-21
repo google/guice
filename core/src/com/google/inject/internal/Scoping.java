@@ -239,14 +239,9 @@ public abstract class Scoping {
 
     Scope scope = scoping.getScopeInstance();
 
-    try {
-      SingletonScope.singletonCreationPerRootInjectorLock.set(injector.state.singletonCreationLock());
-      Provider<T> scoped
-          = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
-      return new InternalFactoryToProviderAdapter<T>(scoped, source);
-    } finally {
-      SingletonScope.singletonCreationPerRootInjectorLock.set(null);
-    }
+    Provider<T> scoped
+        = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
+    return new InternalFactoryToProviderAdapter<T>(scoped, source);
   }
 
   /**

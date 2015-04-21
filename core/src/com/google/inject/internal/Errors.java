@@ -812,6 +812,9 @@ public final class Errors implements Serializable {
       Key<?> key = (Key<?>) source;
       formatter.format("  while locating %s%n", convert(key, elementSource));
 
+    } else if (source instanceof Thread) {
+      formatter.format("  in thread %s%n", source);
+
     } else {
       formatter.format("  at %s%s%n", source, modules);
     }

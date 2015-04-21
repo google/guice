@@ -38,9 +38,8 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       InjectorImpl injector,
       Key<? extends javax.inject.Provider<? extends T>> providerKey,
       Object source,
-      boolean allowProxy,
       ProvisionListenerStackCallback<T> provisionCallback) {
-    super(source, allowProxy);
+    super(source);
     this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
     this.injector = injector;
     this.providerKey = providerKey;
@@ -60,7 +59,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
     try {
       errors = errors.withSource(providerKey);
       javax.inject.Provider<? extends T> provider = providerFactory.get(errors, context, dependency, true);
-      return circularGet(provider, errors, context, dependency, linked, provisionCallback);
+      return circularGet(provider, errors, context, dependency, provisionCallback);
     } finally {
       context.popState();
     }

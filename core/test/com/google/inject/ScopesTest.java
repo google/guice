@@ -23,6 +23,7 @@ import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Element;
@@ -38,15 +39,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -409,16 +413,6 @@ public class ScopesTest extends TestCase {
     assertNull(injector.getInstance(String.class));
   }
 
-  public void testSingletonScopeCreationOutsideOfScopingThrows() {
-    try {
-      Scopes.SINGLETON.scope(Key.get(String.class), null);
-      fail();
-    } catch (OutOfScopeException expected) {
-      Asserts.assertContains(expected.getMessage(),
-          "Singleton scope should only be used from Injector");
-    }
-  }
-
   class RememberProviderScope implements Scope {
     final Map<Key<?>, Provider<?>> providers = Maps.newHashMap();
     public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
@@ -720,7 +714,8 @@ public class ScopesTest extends TestCase {
         bind(c).toProvider(Providers.of("c")).in(Scopes.NO_SCOPE);
         bind(d).toProvider(Providers.of("d")).in(Singleton.class);
         install(new PrivateModule() {
-          @Override protected void configure() {
+          @Override
+          protected void configure() {
             bind(f).toProvider(Providers.of("f")).in(Singleton.class);
             expose(f);
           }
@@ -805,21 +800,47 @@ public class ScopesTest extends TestCase {
     assertEquals(2, ThrowingSingleton.nextInstanceId);
   }
 
-  static interface F {}
+  /**
+   * Should only be created by {@link SBarrierProvider}.
+   *
+   * <p>{@code S} stands for synchronization.
+   *
+   * @see SBarrierProvider
+   */
+  static class S {
 
-  static class FImpl implements F {}
+    private S(int preventInjectionWithoutProvider) {
+    }
+  }
 
-  static class FProvider implements Provider<F> {
+  /**
+   * Provides all the instances of S simultaneously using {@link CyclicBarrier} with {@code
+   * nThreads}. Intended to be used for threads synchronization during injection.
+   */
+  static class SBarrierProvider implements Provider<S> {
 
-    final CyclicBarrier bothThreadsAreInProvider = new CyclicBarrier(2);
+    final CyclicBarrier barrier;
+    volatile boolean barrierPassed = false;
 
-    public F get() {
+    SBarrierProvider(int nThreads) {
+      barrier = new CyclicBarrier(nThreads, new Runnable() {
+        public void run() {
+          // would finish before returning from await() for any thread
+          barrierPassed = true;
+        }
+      });
+    }
+
+    public S get() {
       try {
-        bothThreadsAreInProvider.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!barrierPassed) {
+          // only if we're triggering barrier for the first time
+          barrier.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      return new FImpl();
+      return new S(0);
     }
   }
 
@@ -827,107 +848,345 @@ public class ScopesTest extends TestCase {
    * Tests that different injectors should not affect each other.
    *
    * <p>This creates a second thread to work in parallel, to create two instances of
-   * {@link F} as the same time. If the lock if not granular enough (i.e. JVM-wide)
+   * {@link S} as the same time. If the lock if not granular enough (i.e. JVM-wide)
    * then they would block each other creating a deadlock and await timeout.
    */
 
   public void testInjectorsDontDeadlockOnSingletons() throws Exception {
-    final FProvider provider = new FProvider();
+    final Provider<S> provider = new SBarrierProvider(2);
     final Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bind(F.class).toProvider(provider).in(Scopes.SINGLETON);
+        Thread.currentThread().setName("S.class[1]");
+        bind(S.class).toProvider(provider).in(Scopes.SINGLETON);
       }
     });
     final Injector secondInjector = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bind(F.class).toProvider(provider).in(Scopes.SINGLETON);
+        Thread.currentThread().setName("S.class[2]");
+        bind(S.class).toProvider(provider).in(Scopes.SINGLETON);
       }
     });
 
-    Future<?> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Runnable() {
-      public void run() {
-        secondInjector.getInstance(F.class);
+    Future<S> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<S>() {
+      public S call() {
+        return secondInjector.getInstance(S.class);
       }
     });
 
-    injector.getInstance(F.class);
+    S firstS = injector.getInstance(S.class);
+    S secondS = secondThreadResult.get();
 
-    // verify no thrown exceptions
-    secondThreadResult.get();
+    assertNotSame(firstS, secondS);
   }
 
-  static interface G {}
+  @ImplementedBy(GImpl.class)
+  interface G {
 
-  static interface H {}
+  }
 
-  static class GHImpl implements G, H {}
+  @Singleton
+  static class GImpl implements G {
 
-  static class GHProvider {
+    final H h;
 
-    final CyclicBarrier bothThreadsAreInProvider = new CyclicBarrier(2);
+    /**
+     * Relies on Guice implementation to inject S first and H later, which provides a barrier .
+     */
+    @Inject
+    GImpl(S synchronizationBarrier, H h) {
+      this.h = h;
+    }
+  }
 
-    final Provider<G> gProvider = new Provider<G>() {
-      public G get() {
-        awaitBothThreadsInProvider();
-        return new GHImpl();
-      }
-    };
+  @ImplementedBy(HImpl.class)
+  interface H {
 
-    final Provider<H> hProvider = new Provider<H>() {
-      public H get() {
-        awaitBothThreadsInProvider();
-        return new GHImpl();
-      }
-    };
+  }
 
-    void awaitBothThreadsInProvider() {
-      try {
-        bothThreadsAreInProvider.await(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        fail();
-      } catch (TimeoutException expected) {
-        // first thread to arrive should timeout as we never enter providers from both threads
-      } catch (BrokenBarrierException expected) {
-        // second thread to arrive should fail as barrier is broken by the first thread's timeout
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+  @Singleton
+  static class HImpl implements H {
+
+    final G g;
+
+    /**
+     * Relies on Guice implementation to inject S first and G later, which provides a barrier .
+     */
+    @Inject
+    HImpl(S synchronizationBarrier, G g) throws Exception {
+      this.g = g;
     }
   }
 
   /**
-   * Tests that injectors int the same hierarchy do not create singletons in parallel.
+   * Tests that injector can create two singletons with circular dependency in parallel.
    *
-   * <p>This creates a second thread to work in parallel, to create instance of
-   * {@link G} and {@link H} as the same time. Both instances are created by injectors belonging
-   * to the same hierarchy. If the lock is too narrow (i.e. per Injector or per binding)
-   * instances would be created in parallel and test fail.
+   * <p>This creates two threads to work in parallel, to create instances of
+   * {@link G} and {@link H}. Creation is synchronized by injection of {@link S},
+   * first thread would block until second would be inside a singleton creation as well.
+   *
+   * <p>Both instances are created by sibling injectors, that share singleton scope.
+   * Verifies that exactly one circular proxy object is created.
    */
 
-  public void testSiblingInjectorsGettingDifferentSingletonsDontDeadlock() throws Exception {
-    final GHProvider ghProvider = new GHProvider();
-    final Injector parentInjector = Guice.createInjector();
-
-    Future<?> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Runnable() {
-      public void run() {
-        parentInjector.createChildInjector(new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(H.class).toProvider(ghProvider.hProvider).in(Scopes.SINGLETON);
-          }
-        }).getInstance(H.class);
+  public void testSiblingInjectorGettingCircularSingletonsOneCircularProxy() throws Exception {
+    final Provider<S> provider = new SBarrierProvider(2);
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(S.class).toProvider(provider);
       }
     });
 
-    parentInjector.createChildInjector(new AbstractModule() {
+    Future<G> firstThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<G>() {
+      public G call() {
+        Thread.currentThread().setName("G.class");
+        return injector.createChildInjector().getInstance(G.class);
+      }
+    });
+    Future<H> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<H>() {
+      public H call() {
+        Thread.currentThread().setName("H.class");
+        return injector.createChildInjector().getInstance(H.class);
+      }
+    });
+
+    // using separate threads to avoid potential deadlock on the main thread
+    // waiting twice as much to be sure that both would time out in their respective barriers
+    GImpl g = (GImpl) firstThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+    HImpl h = (HImpl) secondThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+
+    // Check that G and H created are not proxied
+    assertTrue(!Scopes.isCircularProxy(g) && !Scopes.isCircularProxy(h));
+
+    // Check that we have no more than one circular proxy created
+    assertFalse(Scopes.isCircularProxy(g.h) && Scopes.isCircularProxy(h.g));
+
+    // Check that non-proxy variable points to another singleton
+    assertTrue(g.h == h || h.g == g);
+
+    // Check correct proxy initialization as default equals implementation would
+    assertEquals(g.h, h);
+    assertEquals(h.g, g);
+  }
+
+  @Singleton
+  static class I0 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    I0(I1 i) {
+    }
+  }
+
+  @Singleton
+  static class I1 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    I1(S synchronizationBarrier, I2 i) {
+    }
+  }
+
+  @Singleton
+  static class I2 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    I2(J1 j) {
+    }
+  }
+
+  @Singleton
+  static class J0 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    J0(J1 j) {
+    }
+  }
+
+  @Singleton
+  static class J1 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    J1(S synchronizationBarrier, J2 j) {
+    }
+  }
+
+  @Singleton
+  static class J2 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    J2(K1 k) {
+    }
+  }
+
+  @Singleton
+  static class K0 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    K0(K1 k) {
+    }
+  }
+
+  @Singleton
+  static class K1 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    K1(S synchronizationBarrier, K2 k) {
+    }
+  }
+
+  @Singleton
+  static class K2 {
+
+    /**
+     * Relies on Guice implementation to inject S first, which provides a barrier .
+     */
+    @Inject
+    K2(I1 i) {
+    }
+  }
+
+  /**
+   * Check that circular dependencies on non-interfaces are correctly resolved in multi-threaded
+   * case. And that an error message constructed is a good one.
+   *
+   * <p>I0 -> I1 -> I2 -> J1 and J0 -> J1 -> J2 -> K1 and K0 -> K1 -> K2,
+   * where I1, J1 and K1 are created in parallel.
+   *
+   * <p>Creation is synchronized by injection of {@link S}, first thread would block until second
+   * would be inside a singleton creation as well.
+   *
+   * <p>Verifies that provision results in an error, that spans two threads and
+   * has a dependency cycle.
+   */
+
+  public void testUnresolvableSingletonCircularDependencyErrorMessage() throws Exception {
+    final Provider<S> provider = new SBarrierProvider(3);
+    final Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bind(G.class).toProvider(ghProvider.gProvider).in(Scopes.SINGLETON);
+        bind(S.class).toProvider(provider);
       }
-    }).getInstance(G.class);
+    });
 
-    // verify no thrown exceptions
-    secondThreadResult.get();
+    Future<I0> firstThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<I0>() {
+      public I0 call() {
+        Thread.currentThread().setName("I0.class");
+        return injector.getInstance(I0.class);
+      }
+    });
+    Future<J0> secondThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<J0>() {
+      public J0 call() {
+        Thread.currentThread().setName("J0.class");
+        return injector.getInstance(J0.class);
+      }
+    });
+    Future<K0> thirdThreadResult = Executors.newSingleThreadExecutor().submit(new Callable<K0>() {
+      public K0 call() {
+        Thread.currentThread().setName("K0.class");
+        return injector.getInstance(K0.class);
+      }
+    });
+
+    // using separate threads to avoid potential deadlock on the main thread
+    // waiting twice as much to be sure that both would time out in their respective barriers
+    Throwable firstException = null;
+    Throwable secondException = null;
+    Throwable thirdException = null;
+    try {
+      firstThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+      fail();
+    } catch (ExecutionException e) {
+      firstException = e.getCause();
+    }
+    try {
+      secondThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+      fail();
+    } catch (ExecutionException e) {
+      secondException = e.getCause();
+    }
+    try {
+      thirdThreadResult.get(DEADLOCK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS);
+      fail();
+    } catch (ExecutionException e) {
+      thirdException = e.getCause();
+    }
+
+    // verification of error messages generated
+    assertEquals(firstException.getClass(), ProvisionException.class);
+    assertEquals(secondException.getClass(), ProvisionException.class);
+    assertEquals(thirdException.getClass(), ProvisionException.class);
+    List<String> errorMessages = Lists.newArrayList(
+        String.format("%s\n%s\n%s",
+            firstException.getMessage(), secondException.getMessage(), thirdException.getMessage())
+            .split("\\n\\n"));
+    Collections.sort(errorMessages, new Comparator<String>() {
+      @Override
+      public int compare(String s1, String s2) {
+        return s2.length() - s1.length();
+      }
+    });
+    // this is brittle, but turns out that second to longest message spans all threads
+    String errorMessage = errorMessages.get(1);
+    assertContains(errorMessage,
+        "Encountered circular dependency spanning several threads. Tried proxying "
+            + this.getClass().getName());
+    assertFalse("Both I0 and J0 can not be a part of a dependency cycle",
+        errorMessage.contains(I0.class.getName()) && errorMessage.contains(J0.class.getName()));
+    assertFalse("Both J0 and K0 can not be a part of a dependency cycle",
+        errorMessage.contains(J0.class.getName()) && errorMessage.contains(K0.class.getName()));
+    assertFalse("Both K0 and I0 can not be a part of a dependency cycle",
+        errorMessage.contains(K0.class.getName()) && errorMessage.contains(I0.class.getName()));
+
+    List<String> firstErrorLineForThread = new ArrayList<String>();
+    boolean addNextLine = false;
+    for (String errorLine : errorMessage.split("\\n")) {
+      if (errorLine.contains("in thread")) {
+        addNextLine = true;
+        firstErrorLineForThread.add(errorLine);
+      } else if (addNextLine) {
+        addNextLine = false;
+        firstErrorLineForThread.add(errorLine);
+      }
+    }
+    assertEquals("we expect to see [T1, $A, T2, $B, T3, $C, T1, $A]",
+        8, firstErrorLineForThread.size());
+    assertEquals("first four elements should be different",
+        6, new HashSet<String>(firstErrorLineForThread.subList(0, 6)).size());
+    assertEquals(firstErrorLineForThread.get(6), firstErrorLineForThread.get(0));
+    assertEquals(firstErrorLineForThread.get(7), firstErrorLineForThread.get(1));
+    assertFalse("K0 thread could not be blocked by J0",
+        firstErrorLineForThread.get(0).contains("J0")
+            && firstErrorLineForThread.get(2).contains("K0"));
+    assertFalse("J0 thread could not be blocked by I0",
+        firstErrorLineForThread.get(0).contains("I0")
+            && firstErrorLineForThread.get(2).contains("J0"));
+    assertFalse("I0 thread could not be blocked by K0",
+        firstErrorLineForThread.get(0).contains("K0")
+            && firstErrorLineForThread.get(2).contains("I0"));
   }
 }
