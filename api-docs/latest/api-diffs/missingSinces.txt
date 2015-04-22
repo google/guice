@@ -1,53 +1,53 @@
-MISSING @SINCE TAG: com.google.inject.grapher.AbstractInjectorGrapher Class
-MISSING @SINCE TAG: com.google.inject.grapher.AbstractInjectorGrapher.GrapherParameters Class
-MISSING @SINCE TAG: com.google.inject.grapher.Alias Class
-MISSING @SINCE TAG: com.google.inject.grapher.AliasCreator Interface
-MISSING @SINCE TAG: com.google.inject.multibindings.ClassMapKey Class
-MISSING @SINCE TAG: com.google.inject.grapher.DefaultRootKeySetCreator Class
-MISSING @SINCE TAG: com.google.inject.spi.DependencyAndSource Class
-MISSING @SINCE TAG: com.google.inject.grapher.Edge Class
-MISSING @SINCE TAG: com.google.inject.grapher.EdgeCreator Interface
-MISSING @SINCE TAG: com.google.inject.spi.ElementSource Class
-MISSING @SINCE TAG: com.google.inject.grapher.graphviz.GraphvizGrapher Class
-MISSING @SINCE TAG: com.google.inject.grapher.InstanceNode Class
-MISSING @SINCE TAG: com.google.inject.multibindings.MapKey Class
-MISSING @SINCE TAG: com.google.inject.spi.ModuleAnnotatedMethodScanner Class
+OK: com.google.inject.grapher.AbstractInjectorGrapher Class
+OK: com.google.inject.grapher.AbstractInjectorGrapher.GrapherParameters Class
+OK: com.google.inject.grapher.Alias Class
+OK: com.google.inject.grapher.AliasCreator Interface
+OK: com.google.inject.multibindings.ClassMapKey Class
+OK: com.google.inject.grapher.DefaultRootKeySetCreator Class
+OK: com.google.inject.spi.DependencyAndSource Class
+OK: com.google.inject.grapher.Edge Class
+OK: com.google.inject.grapher.EdgeCreator Interface
+OK: com.google.inject.spi.ElementSource Class
+OK: com.google.inject.grapher.graphviz.GraphvizGrapher Class
+OK: com.google.inject.grapher.InstanceNode Class
+OK: com.google.inject.multibindings.MapKey Class
+OK: com.google.inject.spi.ModuleAnnotatedMethodScanner Class
 OK: com.google.inject.spi.ModuleAnnotatedMethodScannerBinding Class
-MISSING @SINCE TAG: com.google.inject.multibindings.MultibindingsScanner Class
-MISSING @SINCE TAG: com.google.inject.grapher.Node Class
-MISSING @SINCE TAG: com.google.inject.grapher.NodeCreator Interface
-MISSING @SINCE TAG: com.google.inject.grapher.NodeId Class
-MISSING @SINCE TAG: com.google.inject.grapher.NodeId.NodeType Class
-MISSING @SINCE TAG: com.google.inject.multibindings.OptionalBinder Class
+OK: com.google.inject.multibindings.MultibindingsScanner Class
+OK: com.google.inject.grapher.Node Class
+OK: com.google.inject.grapher.NodeCreator Interface
+OK: com.google.inject.grapher.NodeId Class
+OK: com.google.inject.grapher.NodeId.NodeType Class
+OK: com.google.inject.multibindings.OptionalBinder Class
 OK: com.google.inject.multibindings.OptionalBinderBinding Interface
 OK: com.google.inject.multibindings.ProvidesIntoMap Class
 OK: com.google.inject.multibindings.ProvidesIntoOptional Class
-NO DOC BLOCK: com.google.inject.multibindings.ProvidesIntoOptional.Type Class
+OK: com.google.inject.multibindings.ProvidesIntoOptional.Type Class
 OK: com.google.inject.multibindings.ProvidesIntoSet Class
 OK: com.google.inject.spi.ProvidesMethodBinding Interface
 OK: com.google.inject.spi.ProvidesMethodTargetVisitor Interface
 OK: com.google.inject.spi.ProvisionListener Interface
-MISSING @SINCE TAG: com.google.inject.spi.ProvisionListener.ProvisionInvocation Class
+OK: com.google.inject.spi.ProvisionListener.ProvisionInvocation Class
 OK: com.google.inject.spi.ProvisionListenerBinding Class
 OK: com.google.inject.spi.RequireAtInjectOnConstructorsOption Class
 OK: com.google.inject.spi.RequireExactBindingAnnotationsOption Class
-MISSING @SINCE TAG: com.google.inject.grapher.RootKeySetCreator Interface
-MISSING @SINCE TAG: com.google.inject.servlet.ScopingException Class
-MISSING @SINCE TAG: com.google.inject.servlet.ScopingOnly Class
-MISSING @SINCE TAG: com.google.inject.multibindings.StringMapKey Class
-MISSING @SINCE TAG: com.google.inject.throwingproviders.ThrowingInject Class
+OK: com.google.inject.grapher.RootKeySetCreator Interface
+OK: com.google.inject.servlet.ScopingException Class
+OK: com.google.inject.servlet.ScopingOnly Class
+OK: com.google.inject.multibindings.StringMapKey Class
+OK: com.google.inject.throwingproviders.ThrowingInject Class
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Constructor (com.google.inject.grapher.NodeId, com.google.inject.grapher.NodeId, com.google.inject.grapher.BindingEdge.Type)
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Constructor (com.google.inject.grapher.NodeId, com.google.inject.grapher.NodeId, com.google.inject.spi.InjectionPoint)
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Constructor (com.google.inject.grapher.NodeId, java.lang.Object, java.util.Collection<java.lang.reflect.Member>)
 NO DOC BLOCK: com.google.inject.grapher.InterfaceNode Constructor (com.google.inject.grapher.NodeId, java.lang.Object)
 OK: com.google.inject.spi.Message Constructor (java.lang.String, java.lang.Throwable)
 OK: com.google.inject.spi.ProviderLookup Constructor (java.lang.Object, com.google.inject.spi.Dependency<T>)
-NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, com.google.inject.TypeLiteral<T>)
-NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, java.lang.Class<T>)
+OK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, com.google.inject.TypeLiteral<T>)
+OK: com.google.inject.throwingproviders.ThrowingProviderBinder Method bind(java.lang.Class<P>, java.lang.Class<T>)
 OK: com.google.inject.AbstractModule Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])
 OK: com.google.inject.Binder Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])
 OK: com.google.inject.Binder Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.TypeLiteral<?>>, com.google.inject.spi.TypeListener)
-MISSING @SINCE TAG: com.google.inject.PrivateModule Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])
+OK: com.google.inject.PrivateModule Method bindListener(com.google.inject.matcher.Matcher<? super com.google.inject.Binding<?>>, com.google.inject.spi.ProvisionListener[])
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method copy(com.google.inject.grapher.NodeId, com.google.inject.grapher.NodeId)
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Method copy(com.google.inject.grapher.NodeId, com.google.inject.grapher.NodeId)
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method copy(com.google.inject.grapher.NodeId)
@@ -65,23 +65,23 @@ NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method getMembers()
 OK: com.google.inject.Binder Method getProvider(com.google.inject.spi.Dependency<T>)
 OK: com.google.inject.Binder Method getProvider(java.lang.Class<T>)
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method getType()
-MISSING @SINCE TAG: com.google.inject.spi.ProviderInstanceBinding Method getUserSuppliedProvider()
-MISSING @SINCE TAG: com.google.inject.grapher.InjectorGrapher Method graph(com.google.inject.Injector)
-MISSING @SINCE TAG: com.google.inject.grapher.InjectorGrapher Method graph(com.google.inject.Injector, java.util.Set<com.google.inject.Key<?>>)
+OK: com.google.inject.spi.ProviderInstanceBinding Method getUserSuppliedProvider()
+OK: com.google.inject.grapher.InjectorGrapher Method graph(com.google.inject.Injector)
+OK: com.google.inject.grapher.InjectorGrapher Method graph(com.google.inject.Injector, java.util.Set<com.google.inject.Key<?>>)
 NO DOC BLOCK: com.google.inject.assistedinject.FactoryProvider Method hashCode()
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method hashCode()
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Method hashCode()
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method hashCode()
-MISSING @SINCE TAG: com.google.inject.Scopes Method isCircularProxy(java.lang.Object)
-MISSING @SINCE TAG: com.google.inject.servlet.ServletScopes Method isRequestScoped(com.google.inject.Binding<?>)
-MISSING @SINCE TAG: com.google.inject.Scopes Method isScoped(com.google.inject.Binding<?>, com.google.inject.Scope, java.lang.Class<? extends java.lang.annotation.Annotation>)
-MISSING @SINCE TAG: com.google.inject.multibindings.Multibinder Method newSetBinder(com.google.inject.Binder, com.google.inject.Key<T>)
+OK: com.google.inject.Scopes Method isCircularProxy(java.lang.Object)
+OK: com.google.inject.servlet.ServletScopes Method isRequestScoped(com.google.inject.Binding<?>)
+OK: com.google.inject.Scopes Method isScoped(com.google.inject.Binding<?>, com.google.inject.Scope, java.lang.Class<? extends java.lang.annotation.Annotation>)
+OK: com.google.inject.multibindings.Multibinder Method newSetBinder(com.google.inject.Binder, com.google.inject.Key<T>)
 NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder Method providing(com.google.inject.TypeLiteral<? extends T>)
 NO DOC BLOCK: com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder Method providing(java.lang.Class<? extends T>)
 OK: com.google.inject.Binder Method requireAtInjectOnConstructors()
 OK: com.google.inject.Binder Method requireExactBindingAnnotations()
 OK: com.google.inject.Binder Method scanModulesForAnnotatedMethods(com.google.inject.spi.ModuleAnnotatedMethodScanner)
-MISSING @SINCE TAG: com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder Method scopeExceptions(boolean)
+OK: com.google.inject.throwingproviders.ThrowingProviderBinder.SecondaryBinder Method scopeExceptions(boolean)
 NO DOC BLOCK: com.google.inject.grapher.graphviz.GraphvizNode Method setIdentifier(java.lang.String)
 NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(com.google.inject.Key<? extends javax.servlet.Filter>)
 NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(com.google.inject.Key<? extends javax.servlet.Filter>, java.util.Map<java.lang.String, java.lang.String>)
@@ -89,12 +89,12 @@ NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Me
 NO DOC BLOCK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(java.lang.Class<? extends javax.servlet.Filter>, java.util.Map<java.lang.String, java.lang.String>)
 OK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(javax.servlet.Filter)
 OK: com.google.inject.servlet.ServletModule.FilterKeyBindingBuilder Method through(javax.servlet.Filter, java.util.Map<java.lang.String, java.lang.String>)
-MISSING @SINCE TAG: com.google.inject.binder.LinkedBindingBuilder Method toProvider(javax.inject.Provider<? extends T>)
+OK: com.google.inject.binder.LinkedBindingBuilder Method toProvider(javax.inject.Provider<? extends T>)
 NO DOC BLOCK: com.google.inject.grapher.BindingEdge Method toString()
 NO DOC BLOCK: com.google.inject.grapher.DependencyEdge Method toString()
 NO DOC BLOCK: com.google.inject.grapher.ImplementationNode Method toString()
 NO DOC BLOCK: com.google.inject.grapher.InterfaceNode Method toString()
-MISSING @SINCE TAG: com.google.inject.servlet.ServletScopes Method transferRequest(java.util.concurrent.Callable<T>)
+OK: com.google.inject.servlet.ServletScopes Method transferRequest(java.util.concurrent.Callable<T>)
 OK: com.google.inject.multibindings.MultibindingsTargetVisitor Method visit(com.google.inject.multibindings.OptionalBinderBinding<? extends T>)
 NO DOC BLOCK: com.google.inject.spi.DefaultElementVisitor Method visit(com.google.inject.spi.ModuleAnnotatedMethodScannerBinding)
 NO DOC BLOCK: com.google.inject.spi.DefaultElementVisitor Method visit(com.google.inject.spi.ProvisionListenerBinding)
