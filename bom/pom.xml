@@ -41,6 +41,11 @@
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-dagger-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-grapher</artifactId>
         <version>${project.version}</version>
       </dependency>
