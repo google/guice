@@ -54,6 +54,8 @@ import java.util.List;
  * created from another Guice {@link Element element} (original) (e.g., by
  * {@link Element#applyTo}), it also provides a reference to the original
  * element source ({@link #getOriginalElementSource()}).
+ *
+ * @since 4.0
  */
 public final class ElementSource {
 

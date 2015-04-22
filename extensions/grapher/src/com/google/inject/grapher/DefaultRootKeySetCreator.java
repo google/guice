@@ -29,6 +29,7 @@ import java.util.logging.Logger;
  * {@link Logger} type.
  *
  * @author bojand@google.com (Bojan Djordjevic)
+ * @since 4.0
  */
 public class DefaultRootKeySetCreator implements RootKeySetCreator {
   private static final Key<Logger> loggerKey = Key.get(Logger.class);

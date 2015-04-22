@@ -162,6 +162,7 @@ import javax.inject.Qualifier;
  * {@code @LookupUrl String}. 
  *
  * @author sameb@google.com (Sam Berlin)
+ * @since 4.0
  */
 public abstract class OptionalBinder<T> {
 

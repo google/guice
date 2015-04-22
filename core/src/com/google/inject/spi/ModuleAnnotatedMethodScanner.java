@@ -25,6 +25,8 @@ import java.util.Set;
 /**
  * Allows extensions to scan modules for annotated methods and bind those methods
  * as providers, similar to {@code @Provides} methods.
+ *
+ * @since 4.0
  */
 public abstract class ModuleAnnotatedMethodScanner {
 

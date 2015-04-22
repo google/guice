@@ -49,7 +49,11 @@ public interface ProvisionListener {
    */
   <T> void onProvision(ProvisionInvocation<T> provision);
 
-  /** Encapsulates a single act of provisioning.*/ 
+  /**
+   * Encapsulates a single act of provisioning.
+   *
+   * @since 4.0
+   */ 
   public abstract static class ProvisionInvocation<T> {
 
     /**

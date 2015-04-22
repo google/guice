@@ -121,11 +121,17 @@ public class ThrowingProviderBinder {
     return new SecondaryBinder<P, Object>(interfaceType, clazz);
   }
 
+  /**
+   * @since 4.0
+   */
   public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
       bind(Class<P> interfaceType, Class<T> clazz) {
     return new SecondaryBinder<P, T>(interfaceType, clazz);
   }
   
+  /**
+   * @since 4.0
+   */
   public <P extends CheckedProvider, T> SecondaryBinder<P, T> 
       bind(Class<P> interfaceType, TypeLiteral<T> typeLiteral) {
     return new SecondaryBinder<P, T>(interfaceType, typeLiteral.getType());
@@ -181,6 +187,7 @@ public class ThrowingProviderBinder {
     /**
      * Determines if exceptions should be scoped. By default exceptions are scoped.
      * @param scopeExceptions whether exceptions should be scoped.
+     * @since 4.0
      */
     public SecondaryBinder<P, T> scopeExceptions(boolean scopeExceptions) {
       this.scopeExceptions = scopeExceptions;

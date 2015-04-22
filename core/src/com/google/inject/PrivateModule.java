@@ -297,6 +297,7 @@ public abstract class PrivateModule implements Module {
   
   /**
    * @see Binder#bindListener(Matcher, ProvisionListener...)
+   * @since 4.0
    */
   protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
       ProvisionListener... listeners) {

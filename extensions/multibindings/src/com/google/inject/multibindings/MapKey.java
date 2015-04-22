@@ -44,6 +44,8 @@ import java.lang.annotation.Target;
  * When unwrapValue is false, the annotation type will be the key type for the injected map and
  * the annotation instances will be the key values. If {@code unwrapValue=true}, the value() type
  * will be the key type for injected map and the value() instances will be the keys values.
+ *
+ * @since 4.0
  */
 @Documented
 @Target(ANNOTATION_TYPE)

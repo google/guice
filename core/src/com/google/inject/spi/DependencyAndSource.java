@@ -28,6 +28,7 @@ import java.lang.reflect.Member;
  * source} where the dependency was bound.
  * 
  * @author sameb@google.com (Sam Berlin)
+ * @since 4.0
  */
 public final class DependencyAndSource {
   private final Dependency<?> dependency;

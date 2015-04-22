@@ -50,6 +50,9 @@ import java.lang.annotation.Target;
 @Target(METHOD)
 @Retention(RUNTIME)
 public @interface ProvidesIntoOptional {
+  /**
+   * @since 4.0
+   */
   enum Type {
     /** Corresponds to {@link OptionalBinder#setBinding}. */
     ACTUAL,

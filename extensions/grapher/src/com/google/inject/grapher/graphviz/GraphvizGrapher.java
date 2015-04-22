@@ -44,6 +44,7 @@ import java.util.Map.Entry;
  * Specify the {@link PrintWriter} to output to with {@link #setOut(PrintWriter)}.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0
  */
 public class GraphvizGrapher extends AbstractInjectorGrapher {
   private final Map<NodeId, GraphvizNode> nodes = Maps.newHashMap();

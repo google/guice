@@ -29,6 +29,7 @@ import java.lang.annotation.Target;
  * doesn't dispatch to {@link ServletModule} bound servlets or filters.
  *
  * @author iqshum@google.com (Isaac Shum)
+ * @since 4.0
  */
 @Retention(RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })

@@ -39,7 +39,10 @@ public interface ProviderInstanceBinding<T> extends Binding<T>, HasDependencies 
   @Deprecated
   Provider<? extends T> getProviderInstance();
   
-  /** Returns the user-supplied, unscoped provider. */
+  /**
+   * Returns the user-supplied, unscoped provider.
+   * @since 4.0
+   */
   javax.inject.Provider<? extends T> getUserSuppliedProvider();
 
   /**

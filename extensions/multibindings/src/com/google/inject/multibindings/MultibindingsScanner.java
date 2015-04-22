@@ -32,6 +32,8 @@ import java.util.Set;
 
 /**
  * Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.
+ *
+ * @since 4.0
  */
 public class MultibindingsScanner {
 

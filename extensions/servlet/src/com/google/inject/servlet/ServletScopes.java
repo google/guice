@@ -256,6 +256,7 @@ public class ServletScopes {
    *     context available to it.
    * @throws OutOfScopeException if this method is called from a non-request
    *     thread, or if the request has completed.
+   * @since 4.0
    */
   public static <T> Callable<T> transferRequest(Callable<T> callable) {
     return (GuiceFilter.localContext.get() != null)
@@ -293,6 +294,8 @@ public class ServletScopes {
    * belongs to an injector (i. e. it was retrieved via
    * {@link Injector#getBinding Injector.getBinding()}), then this method will
    * also return true if the target binding is request-scoped.
+   *
+   * @since 4.0
    */
   public static boolean isRequestScoped(Binding<?> binding) {
     return Scopes.isScoped(binding, ServletScopes.REQUEST, RequestScoped.class);
