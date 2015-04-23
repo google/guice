@@ -18,7 +18,6 @@
 
   <modules>
     <module>assistedinject</module>
-    <!-- TODO(cgruber): Comment out dagger-adapter module if guice releases before dagger 2.x -->
     <module>dagger-adapter</module>
     <module>grapher</module>
     <module>jmx</module>
