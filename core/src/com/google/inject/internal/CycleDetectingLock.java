@@ -1,14 +1,18 @@
 package com.google.inject.internal;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -103,7 +107,7 @@ interface CycleDetectingLock<ID> {
      * Guarded by {@code this}.
      */
     private final Multimap<Long, ReentrantCycleDetectingLock> locksOwnedByThread =
-        MultimapBuilder.linkedHashKeys().linkedHashSetValues().build();
+        LinkedHashMultimap.create();
 
     /**
      * Creates new lock within this factory context. We can guarantee that locks created by
@@ -234,8 +238,14 @@ interface CycleDetectingLock<ID> {
           return ImmutableListMultimap.of();
         }
 
-        ListMultimap<Long, ID> potentialLocksCycle =
-            MultimapBuilder.linkedHashKeys().arrayListValues().build();
+        ListMultimap<Long, ID> potentialLocksCycle = Multimaps.newListMultimap(
+            new LinkedHashMap<Long, Collection<ID>>(),
+            new Supplier<List<ID>>() {
+              @Override
+              public List<ID> get() {
+                return Lists.newArrayList();
+              }
+            });
         // lock that is a part of a potential locks cycle, starts with current lock
         ReentrantCycleDetectingLock lockOwnerWaitingOn = this;
         // try to find a dependency path between lock's owner thread and a current thread
