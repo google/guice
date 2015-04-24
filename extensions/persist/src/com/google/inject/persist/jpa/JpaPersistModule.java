@@ -91,7 +91,8 @@ public final class JpaPersistModule extends PersistModule {
    * Configures the JPA persistence provider with a set of properties.
    * 
    * @param properties A set of name value pairs that configure a JPA persistence
-   * provider as per the specification.
+   *     provider as per the specification.
+   * @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})
    */
   public JpaPersistModule properties(Map<?,?> properties) {
     this.properties = properties;

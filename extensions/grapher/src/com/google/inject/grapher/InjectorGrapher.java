@@ -27,19 +27,18 @@ import java.util.Set;
  * whole dependency graph or just transitive dependencies of a given set of nodes.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0 (since 2.0 as a concrete class with a different API)
  */
 public interface InjectorGrapher {
 
   /**
    * Graphs the guice dependency graph for the given injector using default starting keys.
-   * @since 4.0
    */
   void graph(Injector injector) throws IOException;
 
   /**
    * Graphs the guice dependency graph for the given injector using the given starting keys and
    * their transitive dependencies.
-   * @since 4.0
    */
   void graph(Injector injector, Set<Key<?>> root) throws IOException;
 }

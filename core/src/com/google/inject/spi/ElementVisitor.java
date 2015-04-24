@@ -91,6 +91,8 @@ public interface ElementVisitor<V> {
   
   /**
    * Visit a provision listener binding.
+   *
+   * @since 4.0
    */
   V visit(ProvisionListenerBinding binding);
   

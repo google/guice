@@ -45,7 +45,9 @@ public @interface CheckedProvides {
 
   /**
    * Whether exceptions should be put into the Guice scope.
-   * Default behavior is that exceptions are scoped. 
+   * Default behavior is that exceptions are scoped.
+   *
+   * @since 4.0
    */
   boolean scopeExceptions() default true;  
 }

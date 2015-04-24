@@ -20,8 +20,8 @@ package com.google.inject.grapher;
  * Node for an interface type that has been bound to an implementation class or instance.
  *
  * @see BindingEdge
- *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0 (since 2.0 as an interface)
  */
 public class InterfaceNode extends Node {
   public InterfaceNode(NodeId id, Object source) {

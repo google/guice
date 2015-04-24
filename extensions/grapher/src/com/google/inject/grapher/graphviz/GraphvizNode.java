@@ -47,10 +47,12 @@ public class GraphvizNode {
   /** {@link Map} from port ID to field title */
   private Map<String, String> fields = Maps.newLinkedHashMap();
 
+  /** @since 4.0 */
   public GraphvizNode(NodeId nodeId) {
     this.nodeId = nodeId;
   }
-  
+
+  /** @since 4.0 */
   public NodeId getNodeId() {
     return nodeId;
   }
@@ -111,10 +113,12 @@ public class GraphvizNode {
     return ImmutableMap.copyOf(fields);
   }
 
+  /** @since 4.0 */
   public String getIdentifier() {
     return identifier;
   }
 
+  /** @since 4.0 */
   public void setIdentifier(String identifier) {
     this.identifier = identifier;
   }
