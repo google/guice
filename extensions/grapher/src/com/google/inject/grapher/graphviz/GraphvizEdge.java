@@ -45,6 +45,7 @@ public class GraphvizEdge {
     this.headNodeId = headNodeId;
   }
 
+  /** @since 4.0 */
   public NodeId getHeadNodeId() {
     return headNodeId;
   }
@@ -73,6 +74,7 @@ public class GraphvizEdge {
     this.arrowHead = ImmutableList.copyOf(arrowHead);
   }
 
+  /** @since 4.0 */
   public NodeId getTailNodeId() {
     return tailNodeId;
   }

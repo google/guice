@@ -26,8 +26,8 @@ import java.util.Collection;
  * {@link Member}s that are {@link com.google.inject.spi.InjectionPoint}s.
  *
  * @see DependencyEdge
- *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0 (since 2.0 as an interface)
  */
 public class ImplementationNode extends Node {
   private final Collection<Member> members;

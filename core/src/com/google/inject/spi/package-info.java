@@ -17,5 +17,4 @@
 /**
  * Guice service provider interface
  */
-
 package com.google.inject.spi;

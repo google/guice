@@ -60,6 +60,7 @@ public final class ProviderLookup<T> implements Element {
     return dependency.getKey();
   }
 
+  /** @since 4.0 */
   public Dependency<T> getDependency() {
     return dependency;
   }

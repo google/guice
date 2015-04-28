@@ -33,6 +33,7 @@ public final class NodeId {
 
   /**
    * Type of node.
+   *
    * @since 4.0
    */
   public enum NodeType {

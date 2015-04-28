@@ -186,6 +186,7 @@ public class ThrowingProviderBinder {
 
     /**
      * Determines if exceptions should be scoped. By default exceptions are scoped.
+     *
      * @param scopeExceptions whether exceptions should be scoped.
      * @since 4.0
      */
@@ -203,11 +204,13 @@ public class ThrowingProviderBinder {
     public ScopedBindingBuilder to(Class<? extends P> targetType) {
       return to(Key.get(targetType));
     }
-    
+
+    /** @since 4.0 */
     public ScopedBindingBuilder providing(Class<? extends T> cxtorClass) {
       return providing(TypeLiteral.get(cxtorClass));
     }
-    
+
+    /** @since 4.0 */
     @SuppressWarnings("unchecked") // safe because this is the cxtor of the literal
     public ScopedBindingBuilder providing(TypeLiteral<? extends T> cxtorLiteral) {     
       // Find a constructor that has @ThrowingInject.

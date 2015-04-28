@@ -43,7 +43,7 @@ import java.util.Set;
  * @author phopkins@gmail.com (Pete Hopkins)
  */
 public class TransitiveDependencyVisitor
-extends DefaultBindingTargetVisitor<Object, Collection<Key<?>>> {
+    extends DefaultBindingTargetVisitor<Object, Collection<Key<?>>> {
 
   private Collection<Key<?>> visitHasDependencies(HasDependencies hasDependencies) {
     Set<Key<?>> dependencies = Sets.newHashSet();
@@ -83,6 +83,7 @@ extends DefaultBindingTargetVisitor<Object, Collection<Key<?>>> {
     return ImmutableSet.<Key<?>>of(binding.getProviderKey());
   }
 
+  /** @since 4.0 */
   @Override public Collection<Key<?>> visitOther(Binding<?> binding) {
     return ImmutableSet.of();
   }

@@ -22,6 +22,7 @@ import com.google.common.base.Objects;
  * Edge that connects an interface to the type or instance that is bound to implement it.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0 (since 2.0 as an interface)
  */
 public class BindingEdge extends Edge {
   /**

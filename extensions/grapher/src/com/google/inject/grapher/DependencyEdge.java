@@ -24,6 +24,7 @@ import com.google.inject.spi.InjectionPoint;
  * dependency.
  *
  * @author phopkins@gmail.com (Pete Hopkins)
+ * @since 4.0 (since 2.0 as an interface)
  */
 public class DependencyEdge extends Edge {
   /**

@@ -17,5 +17,4 @@
 /**
  * <i>Guice</i> (sounds like like "juice")
  */
-
 package com.google.inject.internal;
