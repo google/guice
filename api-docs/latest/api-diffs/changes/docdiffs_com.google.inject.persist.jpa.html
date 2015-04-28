@@ -8,7 +8,7 @@
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 <TITLE>
-com.google.inject.persist Documentation Differences
+com.google.inject.persist.jpa Documentation Differences
 </TITLE>
 </HEAD>
 <BODY>
@@ -18,7 +18,7 @@ com.google.inject.persist Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/persist/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/persist/jpa/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -32,22 +32,22 @@ com.google.inject.persist Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <A HREF="docdiffs_com.google.inject.multibindings.html"><B>PREV PACKAGE</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.persist.jpa.html"><B>NEXT PACKAGE</B></A>
+  <A HREF="docdiffs_com.google.inject.persist.html"><B>PREV PACKAGE</B></A>  &nbsp;
+  &nbsp;<A HREF="docdiffs_com.google.inject.servlet.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.persist.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="docdiffs_com.google.inject.persist.jpa.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2">&nbsp;</TD>
 </TR>
 </TABLE>
 <HR>
 <!-- End of nav bar -->
 <h2>
-com.google.inject.persist Documentation Differences
+com.google.inject.persist.jpa Documentation Differences
 </h2>
 
 <blockquote>
-This file contains all the changes in documentation in the package <code>com.google.inject.persist</code> as colored differences.
+This file contains all the changes in documentation in the package <code>com.google.inject.persist.jpa</code> as colored differences.
 Deletions are shown <strike>like this</strike>, and
 additions are shown <span style="background: #FFFF00">like this</span>.
 </blockquote>
@@ -61,20 +61,11 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
-<A NAME="com.google.inject.persist.Transactional!class"></A><a href="com.google.inject.persist.Transactional.html" class="hiddenlink">Class <b>Transactional</b></a><br><br><blockquote><p> Any method or class marked with this annotation will be considered for transactionality.
- Consult the documentation on <strike>http</strike><span style="background: #FFFF00">https</span>://<strike>code.google</strike><span style="background: #FFFF00">github</span>.com/<strike>p/</strike>google<strike>-</strike><span style="background: #FFFF00">/</span>guice<span style="background: #FFFF00">/wiki/GuicePersist</span> for <strike>detailed</strike><span style="background: #FFFF00">detailed
-</span> semantics.
- Marking a method {@code @Transactional} will start a new transaction before the method
- executes and commit it after the method returns.
- <p>
- If the method throws an exception, the transaction will be rolled back <em>unless</em>
- you have specifically requested not to in the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/persist/Transactional/.html#ignore()"><TT>.ignore()</TT></A> clause.
- <p>
- Similarly, the set of exceptions that will trigger a rollback can be defined in
- the <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/persist/Transactional/.html#rollbackOn()"><TT>.rollbackOn()</TT></A> clause. By default, only unchecked exceptions trigger a
- rollback.
-
- @author Dhanji R. Prasanna (dhanji@gmail.com)</blockquote>
+<A NAME="com.google.inject.persist.jpa.JpaPersistModule.dmethod.properties(Map&lt;?, ?&gt;)"></A><a href="com.google.inject.persist.jpa.JpaPersistModule.html" class="hiddenlink">Class <b>JpaPersistModule</b></a>, <a href="com.google.inject.persist.jpa.JpaPersistModule.html#com.google.inject.persist.jpa.JpaPersistModule.properties_changed(java.util.Map<?, ?>)" class="hiddenlink">JpaPersistModule <b>properties(Map&lt;?, ?&gt;)</b></a><br><br><blockquote>Configures the JPA persistence provider with a set of properties.
+ 
+ @param properties A set of name value pairs that configure a JPA persistence
+ <span style="background: #FFFF00">    </span>provider as per the specification.<span style="background: #FFFF00">
+ @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})</span></blockquote>
 <hr align="left" width="100%">
 
 </BODY>

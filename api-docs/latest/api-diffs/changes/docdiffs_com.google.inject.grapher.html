@@ -66,7 +66,8 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @author phopkins@gmail.com (Pete Hopkins)<strike>
 
- @param  The type for node IDs.</strike></blockquote>
+</strike><span style="background: #FFFF00">
+</span> @<strike>param</strike><span style="background: #FFFF00">since</span> <span style="background: #FFFF00">4.0</span> <strike>The</strike><span style="background: #FFFF00">(since</span> <strike>type</strike><span style="background: #FFFF00">2.0</span> <strike>for node</strike><span style="background: #FFFF00">as an</span> <strike>IDs.</strike><span style="background: #FFFF00">interface)</span></blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.grapher.DependencyEdge!class"></A><a href="com.google.inject.grapher.DependencyEdge.html" class="hiddenlink">Class <b>DependencyEdge</b></a><br><br><blockquote><strike>Interface</strike><span style="background: #FFFF00">Edge</span> <strike>for an edge </strike>from a class or <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/DependencyEdge/InjectionPoint.html"><TT>InjectionPoint</TT></A> to <strike>the
 </strike><span style="background: #FFFF00">the</span> interface node that will satisfy <strike>the</strike><span style="background: #FFFF00">the
@@ -74,7 +75,8 @@ Similarly, documentation which was inherited from another class or interface is 
 
  @author phopkins@gmail.com (Pete Hopkins)<strike>
 
- @param  The type for node IDs.</strike></blockquote>
+</strike><span style="background: #FFFF00">
+</span> @<strike>param</strike><span style="background: #FFFF00">since</span> <span style="background: #FFFF00">4.0</span> <strike>The</strike><span style="background: #FFFF00">(since</span> <strike>type</strike><span style="background: #FFFF00">2.0</span> <strike>for node</strike><span style="background: #FFFF00">as an</span> <strike>IDs.</strike><span style="background: #FFFF00">interface)</span></blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.grapher.ImplementationNode!class"></A><a href="com.google.inject.grapher.ImplementationNode.html" class="hiddenlink">Class <b>ImplementationNode</b></a><br><br><blockquote>Node for <strike>classes</strike><span style="background: #FFFF00">types</span> <strike>and instances </strike>that have <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/com/google/inject/spi/Dependency.html"><TT><span style="background: #FFFF00">com.google.inject.spi.</span>Dependency</TT></A>s and are
  bound to <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/ImplementationNode/InterfaceNode.html"><TT>InterfaceNode</TT></A>s. These nodes will often have fields for
@@ -82,34 +84,39 @@ Similarly, documentation which was inherited from another class or interface is 
  
 </strike><span style="background: #FFFF00">
 
-</span> @see DependencyEdge
+</span> @see <strike>DependencyEdge
 
- @author phopkins@gmail.com (Pete Hopkins)<strike>
+</strike><span style="background: #FFFF00">DependencyEdge
+</span> @author phopkins@gmail.com (Pete Hopkins)<strike>
 
- @param  The type for node IDs.</strike></blockquote>
+</strike><span style="background: #FFFF00">
+</span> @<strike>param</strike><span style="background: #FFFF00">since</span> <span style="background: #FFFF00">4.0</span> <strike>The</strike><span style="background: #FFFF00">(since</span> <strike>type</strike><span style="background: #FFFF00">2.0</span> <strike>for node</strike><span style="background: #FFFF00">as an</span> <strike>IDs.</strike><span style="background: #FFFF00">interface)</span></blockquote>
 <hr align="left" width="100%">
-<A NAME="com.google.inject.grapher.InjectorGrapher!class"></A><a href="com.google.inject.grapher.InjectorGrapher.html" class="hiddenlink">Class <b>InjectorGrapher</b></a><br><br><blockquote><strike>Root class</strike><span style="background: #FFFF00">Guice injector</span> <strike>for graphing an Injector. Bound in GrapherModule</strike><span style="background: #FFFF00">grapher</span>.<strike>
-</strike> <strike>
-</strike><span style="background: #FFFF00">Renders</span> <strike>Use .of(Injector) to specify </strike>the <strike>Injector to</strike><span style="background: #FFFF00">guice</span> <strike>use,</strike><span style="background: #FFFF00">dependency</span> <strike>and
- graph() to </strike>graph <strike>the Injector using</strike><span style="background: #FFFF00">for</span> <strike>the</strike><span style="background: #FFFF00">an</span> <strike>currently-bound
+<A NAME="com.google.inject.grapher.InjectorGrapher!class"></A><a href="com.google.inject.grapher.InjectorGrapher.html" class="hiddenlink">Class <b>InjectorGrapher</b></a><br><br><blockquote><strike>Root</strike><span style="background: #FFFF00">Guice</span> <strike>class for graphing an Injector. Bound in GrapherModule.
+ 
+ Use</strike><span style="background: #FFFF00">injector</span> <span style="background: #FFFF00">grapher</span>.<strike>of(Injector)</strike> <strike>to</strike><span style="background: #FFFF00">Renders</span> <strike>specify </strike>the <strike>Injector to use, and
+ graph()</strike><span style="background: #FFFF00">guice</span> <strike>to</strike><span style="background: #FFFF00">dependency</span> graph <strike>the Injector using</strike><span style="background: #FFFF00">for</span> <strike>the</strike><span style="background: #FFFF00">an</span> <strike>currently-bound
  Renderer</strike><span style="background: #FFFF00">injector</span>.<strike>
  
-</strike> <strike>By</strike><span style="background: #FFFF00">It</span> <strike>default, this will graph</strike><span style="background: #FFFF00">can</span> <strike>the entire</strike><span style="background: #FFFF00">render the
+ By default,</strike> <strike>this will</strike><span style="background: #FFFF00">It can</span> <strike>graph the</strike><span style="background: #FFFF00">render</span> <strike>entire</strike><span style="background: #FFFF00">the
 </span> <strike>Injector.</strike><span style="background: #FFFF00">whole</span> <strike>Use
-</strike><span style="background: #FFFF00">dependency</span> <strike>.rootedAt(Class...)</strike><span style="background: #FFFF00">graph</span> or <strike>.rootedAt(Key...) to specify an
-</strike><span style="background: #FFFF00">just</span> <strike>initial set</strike><span style="background: #FFFF00">transitive dependencies</span> of <strike>Classes or Keys to use, and</strike><span style="background: #FFFF00">a</span> <strike>this</strike><span style="background: #FFFF00">given</span> <strike>will graph
- their transitive bindings</strike><span style="background: #FFFF00">set</span> <strike>and dependencies</strike><span style="background: #FFFF00">of nodes</span>.
+</strike><span style="background: #FFFF00">dependency</span> <strike>.rootedAt(Class...)</strike><span style="background: #FFFF00">graph</span> or <strike>.rootedAt(Key...)</strike><span style="background: #FFFF00">just</span> <strike>to specify an
+ initial</strike><span style="background: #FFFF00">transitive</span> <strike>set</strike><span style="background: #FFFF00">dependencies</span> of <strike>Classes</strike><span style="background: #FFFF00">a</span> <strike>or Keys to use, and this will graph
+ their transitive</strike><span style="background: #FFFF00">given</span> <strike>bindings and dependencies</strike><span style="background: #FFFF00">set of nodes</span>.
 
- @author phopkins@gmail.com (Pete Hopkins)</blockquote>
+ @author phopkins@gmail.com (Pete Hopkins)<span style="background: #FFFF00">
+ @since 4.0 (since 2.0 as a concrete class with a different API)</span></blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.grapher.InterfaceNode!class"></A><a href="com.google.inject.grapher.InterfaceNode.html" class="hiddenlink">Class <b>InterfaceNode</b></a><br><br><blockquote>Node for an interface <strike>class</strike><span style="background: #FFFF00">type</span> that has been bound to an implementation <strike>class
 </strike><span style="background: #FFFF00">class</span> or instance.<strike> These nodes are basically defined by a Key.</strike>
 
- @see BindingEdge
+ @see <strike>BindingEdge
 
- @author phopkins@gmail.com (Pete Hopkins)<strike>
+</strike><span style="background: #FFFF00">BindingEdge
+</span> @author phopkins@gmail.com (Pete Hopkins)<strike>
 
- @param  The type for node IDs.</strike></blockquote>
+</strike><span style="background: #FFFF00">
+</span> @<strike>param</strike><span style="background: #FFFF00">since</span> <span style="background: #FFFF00">4.0</span> <strike>The</strike><span style="background: #FFFF00">(since</span> <strike>type</strike><span style="background: #FFFF00">2.0</span> <strike>for node</strike><span style="background: #FFFF00">as an</span> <strike>IDs.</strike><span style="background: #FFFF00">interface)</span></blockquote>
 <hr align="left" width="100%">
 <A NAME="com.google.inject.grapher.NameFactory!class"></A><a href="com.google.inject.grapher.NameFactory.html" class="hiddenlink">Class <b>NameFactory</b></a><br><br><blockquote>Interface for a service that provides nice <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/grapher/NameFactory/String.html"><TT>String</TT></A>s that we can
  display in the graph for the types that come up <strike>in </strike><span style="background: #FFFF00">in
