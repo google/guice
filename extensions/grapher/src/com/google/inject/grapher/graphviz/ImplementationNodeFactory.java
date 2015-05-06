@@ -65,7 +65,7 @@ implements ImplementationNode.Factory<String, ImplementationNode<String>> {
     public GraphvizNodeAdaptor(GraphvizNode node) {
       this.node = node;
 
-      this.node.setStyle(NodeStyle.INVISIBLE);
+      this.node.setStyle(NodeStyle.SOLID);
     }
 
     public void setClassKey(Key<?> key) {
