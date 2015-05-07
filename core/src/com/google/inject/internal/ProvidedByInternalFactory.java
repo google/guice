@@ -21,9 +21,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.inject.Key;
 import com.google.inject.ProvidedBy;
-import com.google.inject.Provider;
 import com.google.inject.internal.InjectorImpl.JitLimitation;
 import com.google.inject.spi.Dependency;
+
+import javax.inject.Provider;
 
 /**
  * An {@link InternalFactory} for {@literal @}{@link ProvidedBy} bindings.
