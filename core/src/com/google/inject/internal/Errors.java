@@ -201,7 +201,7 @@ public final class Errors implements Serializable {
     return addMessage("Binding to Provider is not allowed.");
   }
 
-  public Errors subtypeNotProvided(Class<? extends Provider<?>> providerType,
+  public Errors subtypeNotProvided(Class<? extends javax.inject.Provider<?>> providerType,
       Class<?> type) {
     return addMessage("%s doesn't provide instances of %s.", providerType, type);
   }
