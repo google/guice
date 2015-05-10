@@ -76,7 +76,10 @@ public final class PersistFilter implements Filter {
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {
-    persistService.start();
+    if (filterConfig.getInitParameter("startPersistanceServiceManually") == null
+        || Boolean.parseBoolean(filterConfig.getInitParameter("startPersistanceServiceManually")) == false) {
+      persistService.start();
+    }
   }
 
   public void destroy() {
