@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
@@ -56,6 +55,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +84,7 @@ public final class Errors implements Serializable {
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
 
   private static final Set<Dependency<?>> warnedDependencies =
-      Sets.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
+      Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
 
   /**
