@@ -58,7 +58,10 @@ public class ServletScopes {
   /**
    * HTTP servlet request scope.
    */
-  public static final Scope REQUEST = new Scope() {
+  public static final Scope REQUEST = new RequestScope();
+
+  private static final class RequestScope implements Scope {
+    @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       return new Provider<T>() {
 
@@ -68,6 +71,7 @@ public class ServletScopes {
                 Key.get(HttpServletResponse.class),
                 new Key<Map<String, String[]>>(RequestParameters.class) {});
 
+        @Override
         public T get() {
           // Check if the alternate request scope should be used, if no HTTP
           // request is in progress.
@@ -139,15 +143,19 @@ public class ServletScopes {
     public String toString() {
       return "ServletScopes.REQUEST";
     }
-  };
+  }
 
   /**
    * HTTP session scope.
    */
-  public static final Scope SESSION = new Scope() {
+  public static final Scope SESSION = new SessionScope();
+
+  private static final class SessionScope implements Scope {
+    @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
       final String name = key.toString();
       return new Provider<T>() {
+        @Override
         public T get() {
           HttpSession session = GuiceFilter.getRequest(key).getSession();
           synchronized (session) {
@@ -177,7 +185,7 @@ public class ServletScopes {
     public String toString() {
       return "ServletScopes.SESSION";
     }
-  };
+  }
 
   /**
    * Wraps the given callable in a contextual callable that "continues" the
