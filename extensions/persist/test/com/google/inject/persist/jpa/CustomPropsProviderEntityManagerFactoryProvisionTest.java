@@ -25,9 +25,10 @@ import com.google.inject.persist.UnitOfWork;
 
 import junit.framework.TestCase;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,15 +37,12 @@ import javax.persistence.EntityManagerFactory;
  * @author Nik Hodgkinson (11xor6@gmail.com)
  */
 
-public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
+public class CustomPropsProviderEntityManagerFactoryProvisionTest extends TestCase {
   private Injector injector;
 
   @Override
   public void setUp() {
-    Properties props = new Properties();
-    props.put("foo", "bar");
-
-    injector = Guice.createInjector(new JpaPersistModule("testUnit").properties(props));
+    injector = Guice.createInjector(new JpaPersistModule("testUnit").properties(TestPropertiesProvider.class));
   }
 
   @Override
@@ -68,5 +66,14 @@ public class CustomPropsEntityManagerFactoryProvisionTest extends TestCase {
 
     //obtain em
     assertTrue(injector.getInstance(EntityManager.class).isOpen());
+  }
+
+  private static class TestPropertiesProvider implements Provider<Map<?, ?>> {
+    Map<Object, Object> properties = Collections.<Object, Object>singletonMap("foo", "bar");
+
+    @Override
+    public Map<?, ?> get() {
+      return properties;
+    }
   }
 }

@@ -19,15 +19,15 @@ package com.google.inject.persist.jpa;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.google.inject.Provides;
+import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.finder.DynamicFinder;
 import com.google.inject.persist.finder.Finder;
-import com.google.inject.util.Providers;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -39,6 +39,7 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -46,6 +47,7 @@ import javax.persistence.EntityManagerFactory;
  * JPA provider for guice persist.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
+ * @author Nik Hodgkinson (11xor6@gmail.com)
  */
 public final class JpaPersistModule extends PersistModule {
   private final String jpaUnit;
@@ -56,11 +58,23 @@ public final class JpaPersistModule extends PersistModule {
     this.jpaUnit = jpaUnit;
   }
 
-  private Map<?,?> properties;
+  private Provider<Map<?, ?>> propertiesProvider;
+  private Class<? extends Provider<Map<?, ?>>> propertiesProviderClass;
+
   private MethodInterceptor transactionInterceptor;
 
   @Override protected void configurePersistence() {
     bindConstant().annotatedWith(Jpa.class).to(jpaUnit);
+
+    LinkedBindingBuilder<Map<?, ?>> jpaPropertiesBinder =
+            bind(Key.get(new TypeLiteral<Map<?, ?>>() {}, Jpa.class));
+    if (propertiesProvider != null) {
+      jpaPropertiesBinder.toProvider(propertiesProvider);
+    } else if (propertiesProviderClass != null) {
+      jpaPropertiesBinder.toProvider(propertiesProviderClass);
+    } else {
+      jpaPropertiesBinder.toProvider(new JpaPropertiesProvider(null));
+    }
 
     bind(JpaPersistService.class).in(Singleton.class);
 
@@ -83,10 +97,6 @@ public final class JpaPersistModule extends PersistModule {
     return transactionInterceptor;
   }
 
-  @Provides @Jpa Map<?, ?> provideProperties() {
-    return properties;
-  }
-
   /**
    * Configures the JPA persistence provider with a set of properties.
    * 
@@ -94,8 +104,32 @@ public final class JpaPersistModule extends PersistModule {
    *     provider as per the specification.
    * @since 4.0 (since 3.0 with a parameter type of {@code java.util.Properties})
    */
-  public JpaPersistModule properties(Map<?,?> properties) {
-    this.properties = properties;
+  public JpaPersistModule properties(final Map<?,?> properties) {
+    return this.properties(new JpaPropertiesProvider(properties));
+  }
+
+  /**
+   * Configures the JPA persistence provider via a provider allowing for injection
+   * of properties from an external source at injector creation time.
+   *
+   * @param propertiesProvider A provider that supplies properties for JPA configuration.
+   */
+  public JpaPersistModule properties(Provider<Map<?, ?>> propertiesProvider) {
+    this.propertiesProvider = Preconditions.checkNotNull(propertiesProvider);
+    this.propertiesProviderClass = null;
+    return this;
+  }
+
+  /**
+   * Configures the JPA persistence provider via a provider allowing for injection
+   * of properties from an external source at injector creation time.
+   *
+   * @param propertiesProviderClass A provider class that supplies properties
+   *                                for JPA configuration.
+   */
+  public JpaPersistModule properties(Class<? extends Provider<Map<?, ?>>> propertiesProviderClass) {
+    this.propertiesProviderClass = Preconditions.checkNotNull(propertiesProviderClass);
+    this.propertiesProvider = null;
     return this;
   }
 
@@ -178,5 +212,18 @@ public final class JpaPersistModule extends PersistModule {
       }
     }
     return valid;
+  }
+
+  private final class JpaPropertiesProvider implements Provider<Map<?, ?>> {
+    private final Map<?, ?> properties;
+
+    public JpaPropertiesProvider(final Map<?, ?> properties) {
+      this.properties = properties;
+    }
+
+    @Override
+    public Map<?, ?> get() {
+      return properties;
+    }
   }
 }

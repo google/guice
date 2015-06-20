@@ -18,6 +18,7 @@ package com.google.inject.persist;
 
 import com.google.inject.persist.jpa.ClassLevelManagedLocalTransactionsTest;
 import com.google.inject.persist.jpa.CustomPropsEntityManagerFactoryProvisionTest;
+import com.google.inject.persist.jpa.CustomPropsProviderEntityManagerFactoryProvisionTest;
 import com.google.inject.persist.jpa.EntityManagerFactoryProvisionTest;
 import com.google.inject.persist.jpa.EntityManagerPerRequestProvisionTest;
 import com.google.inject.persist.jpa.EntityManagerProvisionTest;
@@ -42,6 +43,7 @@ public class AllTests {
     suite.addTestSuite(EdslTest.class);
     suite.addTestSuite(ClassLevelManagedLocalTransactionsTest.class);
     suite.addTestSuite(CustomPropsEntityManagerFactoryProvisionTest.class);
+    suite.addTestSuite(CustomPropsProviderEntityManagerFactoryProvisionTest.class);
     suite.addTestSuite(EntityManagerFactoryProvisionTest.class);
     suite.addTestSuite(EntityManagerPerRequestProvisionTest.class);
     suite.addTestSuite(EntityManagerProvisionTest.class);
