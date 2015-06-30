@@ -27,4 +27,4 @@ import java.lang.annotation.RetentionPolicy;
  */
 @BindingAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-@interface Graphviz {}
+public @interface Graphviz {}
