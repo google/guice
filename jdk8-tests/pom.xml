@@ -35,6 +35,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
       <scope>test</scope>
