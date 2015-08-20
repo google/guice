@@ -255,12 +255,28 @@ public class ServletModule extends AbstractModule {
   }
 
   /**
+   * @param urlPatterns Any Servlet-style patterns. examples: /*, /html/*, *.html, etc.
+   * @since 5.0
+   */
+  protected final FilterKeyBindingBuilder filter(Iterable<String> urlPatterns) {
+    return getFiltersModuleBuilder().filter(ImmutableList.copyOf(urlPatterns));
+  }
+
+  /**
    * @param regex Any Java-style regular expression.
    * @since 2.0
    */
   protected final FilterKeyBindingBuilder filterRegex(String regex, String... regexes) {
     return getFiltersModuleBuilder()
         .filterRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
+  }
+
+  /**
+   * @param regexes Any Java-style regular expressions.
+   * @since 5.0
+   */
+  protected final FilterKeyBindingBuilder filterRegex(Iterable<String> regexes) {
+    return getFiltersModuleBuilder().filterRegex(ImmutableList.copyOf(regexes));
   }
 
   /**
@@ -273,12 +289,28 @@ public class ServletModule extends AbstractModule {
   }
 
   /**
+   * @param urlPatterns Any Servlet-style patterns. examples: /*, /html/*, *.html, etc.
+   * @since 5.0
+   */
+  protected final ServletKeyBindingBuilder serve(Iterable<String> urlPatterns) {
+    return getServletModuleBuilder().serve(ImmutableList.copyOf(urlPatterns));
+  }
+
+  /**
    * @param regex Any Java-style regular expression.
    * @since 2.0
    */
   protected final ServletKeyBindingBuilder serveRegex(String regex, String... regexes) {
     return getServletModuleBuilder()
         .serveRegex(ImmutableList.<String>builder().add(regex).add(regexes).build());
+  }
+
+  /**
+   * @param regexes Any Java-style regular expressions.
+   * @since 5.0
+   */
+  protected final ServletKeyBindingBuilder serveRegex(Iterable<String> regexes) {
+    return getServletModuleBuilder().serveRegex(ImmutableList.copyOf(regexes));
   }
 
   /**
