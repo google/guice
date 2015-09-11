@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
@@ -62,7 +63,11 @@ final class LineNumbers {
     if (!type.isArray()) {
       InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
       if (in != null) {
-        new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+        try {
+          new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+        } finally {
+          Closeables.close(in, true);
+    	}
       }
     }
   }
