@@ -687,7 +687,7 @@ public abstract class OptionalBinder<T> {
       }
 
       @Override public boolean equals(Object obj) {
-        return this.getClass() == obj.getClass()
+        return obj != null && this.getClass() == obj.getClass()
             && equality.equals(((RealOptionalBinderProviderWithDependencies<?>) obj).equality);
       }
 

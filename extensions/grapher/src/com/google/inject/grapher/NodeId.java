@@ -69,7 +69,7 @@ public final class NodeId {
   }
 
   @Override public boolean equals(Object obj) {
-    if (!(obj.getClass().equals(NodeId.class))) {
+    if (obj == null || !(obj.getClass().equals(NodeId.class))) {
       return false;
     }
     NodeId other = (NodeId) obj;
