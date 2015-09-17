@@ -2,7 +2,6 @@ package com.google.inject.internal;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.ListMultimap;
@@ -86,9 +85,10 @@ interface CycleDetectingLock<ID> {
      * Same lock can be added for several threads in case all of them are trying to
      * take it.
      *
-     * Guarded by {@code this}.
+     * Guarded by {@code CycleDetectingLockFactory.class}.
      */
-    private Map<Long, ReentrantCycleDetectingLock> lockThreadIsWaitingOn = Maps.newHashMap();
+    private static Map<Long, ReentrantCycleDetectingLock<?>> lockThreadIsWaitingOn =
+        Maps.newHashMap();
 
     /**
      * Lists locks that thread owns.
@@ -104,28 +104,30 @@ interface CycleDetectingLock<ID> {
      * Same lock can only be present several times for the same thread as locks are
      * reentrant. Lock can not be owned by several different threads as the same time.
      *
-     * Guarded by {@code this}.
+     * Guarded by {@code CycleDetectingLockFactory.class}.
      */
-    private final Multimap<Long, ReentrantCycleDetectingLock> locksOwnedByThread =
+    private static final Multimap<Long, ReentrantCycleDetectingLock<?>> locksOwnedByThread =
         LinkedHashMultimap.create();
 
     /**
      * Creates new lock within this factory context. We can guarantee that locks created by
      * the same factory would not deadlock.
      *
-     * @param newLockId lock id that would be used to report lock cycles if detected
+     * @param userLockId lock id that would be used to report lock cycles if detected
      */
-    CycleDetectingLock<ID> create(ID newLockId) {
-      return new ReentrantCycleDetectingLock(newLockId, new ReentrantLock());
+    CycleDetectingLock<ID> create(ID userLockId) {
+      return new ReentrantCycleDetectingLock<ID>(this, userLockId, new ReentrantLock());
     }
 
     /** The implementation for {@link CycleDetectingLock}. */
-    class ReentrantCycleDetectingLock implements CycleDetectingLock<ID> {
+    static class ReentrantCycleDetectingLock<ID> implements CycleDetectingLock<ID> {
 
       /** Underlying lock used for actual waiting when no potential deadlocks are detected. */
       private final Lock lockImplementation;
       /** User id for this lock. */
       private final ID userLockId;
+      /** Factory that was used to create this lock. */
+      private final CycleDetectingLockFactory<ID> lockFactory;
       /**
        * Thread id for the thread that owned this lock. Nullable.
        * Guarded by {@code CycleDetectingLockFactory.this}.
@@ -137,7 +139,9 @@ interface CycleDetectingLock<ID> {
        */
       private int lockReentranceCount = 0;
 
-      ReentrantCycleDetectingLock(ID userLockId, Lock lockImplementation) {
+      ReentrantCycleDetectingLock(CycleDetectingLockFactory<ID> lockFactory,
+          ID userLockId, Lock lockImplementation) {
+        this.lockFactory = lockFactory;
         this.userLockId = Preconditions.checkNotNull(userLockId, "userLockId");
         this.lockImplementation = Preconditions.checkNotNull(
             lockImplementation, "lockImplementation");
@@ -145,7 +149,7 @@ interface CycleDetectingLock<ID> {
 
       @Override public ListMultimap<Long, ID> lockOrDetectPotentialLocksCycle() {
         final long currentThreadId = Thread.currentThread().getId();
-        synchronized (CycleDetectingLockFactory.this) {
+        synchronized (CycleDetectingLockFactory.class) {
           checkState();
           ListMultimap<Long, ID> locksInCycle = detectPotentialLocksCycle();
           if (!locksInCycle.isEmpty()) {
@@ -159,7 +163,7 @@ interface CycleDetectingLock<ID> {
         // this may be blocking, but we don't expect it to cause a deadlock
         lockImplementation.lock();
 
-        synchronized (CycleDetectingLockFactory.this) {
+        synchronized (CycleDetectingLockFactory.class) {
           // current thread is no longer waiting on this lock
           lockThreadIsWaitingOn.remove(currentThreadId);
           checkState();
@@ -176,7 +180,7 @@ interface CycleDetectingLock<ID> {
 
       @Override public void unlock() {
         final long currentThreadId = Thread.currentThread().getId();
-        synchronized (CycleDetectingLockFactory.this) {
+        synchronized (CycleDetectingLockFactory.class) {
           checkState();
           Preconditions.checkState(lockOwnerThreadId != null,
               "Thread is trying to unlock a lock that is not locked");
@@ -270,15 +274,20 @@ interface CycleDetectingLock<ID> {
       private List<ID> getAllLockIdsAfter(long threadId, ReentrantCycleDetectingLock lock) {
         List<ID> ids = Lists.newArrayList();
         boolean found = false;
-        Collection<ReentrantCycleDetectingLock> ownedLocks = locksOwnedByThread.get(threadId);
+        Collection<ReentrantCycleDetectingLock<?>> ownedLocks = locksOwnedByThread.get(threadId);
         Preconditions.checkNotNull(ownedLocks,
             "Internal error: No locks were found taken by a thread");
         for (ReentrantCycleDetectingLock ownedLock : ownedLocks) {
           if (ownedLock == lock) {
             found = true;
           }
-          if (found) {
-            ids.add(ownedLock.userLockId);
+          if (found && ownedLock.lockFactory == this.lockFactory) {
+            // All locks are stored in a shared map therefore there is no way to
+            // enforce type safety. We know that our cast is valid as we check for a lock's
+            // factory. If the lock was generated by the
+            // same factory it has to have same type as the current lock.
+            @SuppressWarnings("unchecked") ID userLockId = (ID) ownedLock.userLockId;
+            ids.add(userLockId);
           }
         }
         Preconditions.checkState(found, "Internal error: We can not find locks that "
@@ -289,12 +298,11 @@ interface CycleDetectingLock<ID> {
       @Override public String toString() {
         // copy is made to prevent a data race
         // no synchronization is used, potentially stale data, should be good enough
-        Long localLockOwnerThreadId = this.lockOwnerThreadId;
-        if (localLockOwnerThreadId != null) {
-          return String.format("CycleDetectingLock[%s][locked by %s]",
-              userLockId, localLockOwnerThreadId);
+        Long threadId = this.lockOwnerThreadId;
+        if (threadId != null) {
+          return String.format("%s[%s][locked by Id=%d]", super.toString(), userLockId, threadId);
         } else {
-          return String.format("CycleDetectingLock[%s][unlocked]", userLockId);
+          return String.format("%s[%s][unlocked]", super.toString(), userLockId);
         }
       }
     }
