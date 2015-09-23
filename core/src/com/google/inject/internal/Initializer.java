@@ -21,15 +21,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.spi.InjectionPoint;
 
-import java.util.Map;
+import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Manages and injects instances at injector-creation time. This is made more complicated by
@@ -39,19 +41,31 @@ import java.util.concurrent.CountDownLatch;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 final class Initializer {
-  
-  /** the only thread that we'll use to inject members. */
-  private final Thread creatingThread = Thread.currentThread();
 
-  /** zero means everything is injected. */
-  private final CountDownLatch ready = new CountDownLatch(1);
-  
-  /** Maps from instances that need injection to the MembersInjector that will inject them. */
-  private final Map<Object, MembersInjectorImpl<?>> pendingMembersInjectors =
+  /** Is set to true once {@link #validateOustandingInjections} is called. */
+  private volatile boolean validationStarted = false;
+
+  /**
+   * Allows us to detect circular dependencies. It's only used during injectable reference
+   * initialization. After initialization direct access through volatile field is used.
+   */
+  private final CycleDetectingLockFactory<Class<?>> cycleDetectingLockFactory =
+      new CycleDetectingLockFactory<Class<?>>();
+
+  /**
+   * Instances that need injection during injector creation to a source that registered them.
+   * New references added before {@link #validateOustandingInjections}.
+   * Cleared up in {@link #injectAll}.
+   */
+  private final List<InjectableReference<?>> pendingInjections = Lists.newArrayList();
+
+  /**
+   * Map that guarantees that no instance would get two references. New references added
+   * before {@link #validateOustandingInjections}. Cleared up in
+   * {@link #validateOustandingInjections}.
+   */
+  private final IdentityHashMap<Object, InjectableReference<?>> initializablesCache =
       Maps.newIdentityHashMap();
-
-  /** Maps instances that need injection to a source that registered them */
-  private final Map<Object, InjectableReference<?>> pendingInjection = Maps.newIdentityHashMap();
 
   /**
    * Registers an instance for member injection when that step is performed.
@@ -64,7 +78,8 @@ final class Initializer {
   <T> Initializable<T> requestInjection(InjectorImpl injector, T instance, Binding<T> binding,
       Object source, Set<InjectionPoint> injectionPoints) {
     checkNotNull(source);
-    
+    Preconditions.checkState(!validationStarted,
+        "Member injection could not be requested after validation is started");
     ProvisionListenerStackCallback<T> provisionCallback =
         binding == null ? null : injector.provisionListenerStore.get(binding);
 
@@ -75,10 +90,18 @@ final class Initializer {
       return Initializables.of(instance);
     }
 
-    InjectableReference<T> initializable = new InjectableReference<T>(
-        injector, instance, binding == null ? null : binding.getKey(), provisionCallback, source);
-    pendingInjection.put(instance, initializable);
-    return initializable;
+    if (initializablesCache.containsKey(instance)) {
+      @SuppressWarnings("unchecked") // Map from T to InjectableReference<T>
+      Initializable<T> cached = (Initializable<T>) initializablesCache.get(instance);
+      return cached;
+    }
+
+    InjectableReference<T> injectableReference = new InjectableReference<T>(
+        injector, instance, binding == null ? null : binding.getKey(), provisionCallback, source,
+        cycleDetectingLockFactory.create(instance.getClass()));
+    initializablesCache.put(instance, injectableReference);
+    pendingInjections.add(injectableReference);
+    return injectableReference;
   }
 
   /**
@@ -86,9 +109,11 @@ final class Initializer {
    * on the injected instances.
    */
   void validateOustandingInjections(Errors errors) {
-    for (InjectableReference<?> reference : pendingInjection.values()) {
+    validationStarted = true;
+    initializablesCache.clear();
+    for (InjectableReference<?> reference : pendingInjections) {
       try {
-        pendingMembersInjectors.put(reference.instance, reference.validate(errors));
+        reference.validate(errors);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
@@ -101,43 +126,48 @@ final class Initializer {
    * instances are codependent (directly or transitively), ordering of injection is arbitrary.
    */
   void injectAll(final Errors errors) {
-    // loop over a defensive copy since ensureInjected() mutates the set. Unfortunately, that copy
-    // is made complicated by a bug in IBM's JDK, wherein entrySet().toArray(Object[]) doesn't work
-    for (InjectableReference<?> reference : Lists.newArrayList(pendingInjection.values())) {
+    Preconditions.checkState(validationStarted, "Validation should be done before injection");
+    for (InjectableReference<?> reference : pendingInjections) {
       try {
         reference.get(errors);
       } catch (ErrorsException e) {
         errors.merge(e.getErrors());
       }
     }
-
-    if (!pendingInjection.isEmpty()) {
-      throw new AssertionError("Failed to satisfy " + pendingInjection);
-    }
-
-    ready.countDown();
+    pendingInjections.clear();
   }
 
-  private class InjectableReference<T> implements Initializable<T> {
+  private enum InjectableReferenceState { NEW, VALIDATED, INJECTING, READY }
+
+  private static class InjectableReference<T> implements Initializable<T> {
+    private volatile InjectableReferenceState state = InjectableReferenceState.NEW;
+    private volatile MembersInjectorImpl<T> membersInjector = null;
+
     private final InjectorImpl injector;
     private final T instance;
     private final Object source;
     private final Key<T> key;
     private final ProvisionListenerStackCallback<T> provisionCallback;
+    private final CycleDetectingLock<?> lock;
 
     public InjectableReference(InjectorImpl injector, T instance, Key<T> key,
-        ProvisionListenerStackCallback<T> provisionCallback, Object source) {
+        ProvisionListenerStackCallback<T> provisionCallback, Object source,
+        CycleDetectingLock<?> lock) {
       this.injector = injector;
       this.key = key; // possibly null!
       this.provisionCallback = provisionCallback; // possibly null!
       this.instance = checkNotNull(instance, "instance");
       this.source = checkNotNull(source, "source");
+      this.lock = checkNotNull(lock, "lock");
     }
 
-    public MembersInjectorImpl<T> validate(Errors errors) throws ErrorsException {
+    public void validate(Errors errors) throws ErrorsException {
       @SuppressWarnings("unchecked") // the type of 'T' is a TypeLiteral<T>
-          TypeLiteral<T> type = TypeLiteral.get((Class<T>) instance.getClass());
-      return injector.membersInjectorStore.get(type, errors.withSource(source));
+      TypeLiteral<T> type = TypeLiteral.get((Class<T>) instance.getClass());
+      membersInjector = injector.membersInjectorStore.get(type, errors.withSource(source));
+      Preconditions.checkNotNull(membersInjector,
+          "No membersInjector available for instance: %s, from key: %s", instance, key);
+      state = InjectableReferenceState.VALIDATED;
     }
 
     /**
@@ -145,30 +175,49 @@ final class Initializer {
      * method will ensure that all its members have been injected before returning.
      */
     public T get(Errors errors) throws ErrorsException {
-      if (ready.getCount() == 0) {
+      // skipping acquiring lock if initialization is already finished
+      if (state == InjectableReferenceState.READY) {
         return instance;
       }
 
-      // just wait for everything to be injected by another thread
-      if (Thread.currentThread() != creatingThread) {
-        try {
-          ready.await();
-          return instance;
-        } catch (InterruptedException e) {
-          // Give up, since we don't know if our injection is ready
-          throw new RuntimeException(e);
-        }
-      }
+      // acquire lock for current binding to initialize an instance
+      Multimap<?, ?> lockCycle = lock.lockOrDetectPotentialLocksCycle();
+      if (!lockCycle.isEmpty()) {
+        // Potential deadlock detected and creation lock is not taken.
+        // According to injectAll()'s contract return non-initialized instance.
 
-      // toInject needs injection, do it right away. we only do this once, even if it fails
-      if (pendingInjection.remove(instance) != null) {
-        // safe because we only insert a members injector for the appropriate instance
-        @SuppressWarnings("unchecked")
-        MembersInjectorImpl<T> membersInjector =
-            (MembersInjectorImpl<T>)pendingMembersInjectors.remove(instance);
-        Preconditions.checkState(membersInjector != null,
-            "No membersInjector available for instance: %s, from key: %s", instance, key);
-        
+        // This condition should not be possible under the current Guice implementation.
+        // This clause exists for defensive programming purposes.
+
+        // Reasoning:
+        // get() is called either directly from injectAll(), holds no locks and can not create
+        // a cycle, or it is called through a singleton scope, which resolves deadlocks by itself.
+        // Before calling get() object has to be requested for injection.
+        // Initializer.requestInjection() is called either for constant object bindings, which wrap
+        // creation into a Singleton scope, or from Binder.requestInjection(), which
+        // has to use Singleton scope to reuse the same InjectableReference to potentially
+        // create a lock cycle.
+        return instance;
+      }
+      try {
+        // lock acquired, current thread owns this instance initialization
+        switch (state) {
+          case READY:
+            return instance;
+          // When instance depends on itself in the same thread potential dead lock
+          // is not detected. We have to prevent a stack overflow and we use
+          // an "injecting" stage to short-circuit a call.
+          case INJECTING:
+            return instance;
+          case VALIDATED:
+            state = InjectableReferenceState.INJECTING;
+            break;
+          case NEW:
+            throw new IllegalStateException("InjectableReference is not validated yet");
+          default:
+            throw new IllegalStateException("Unknown state: " + state);
+        }
+
         // if in Stage.TOOL, we only want to inject & notify toolable injection points.
         // (otherwise we'll inject all of them)
         membersInjector.injectAndNotify(instance,
@@ -177,9 +226,14 @@ final class Initializer {
             provisionCallback,
             source,
             injector.options.stage == Stage.TOOL);
-      }
 
-      return instance;
+        // mark instance as ready to skip a lock on subsequent calls
+        state = InjectableReferenceState.READY;
+        return instance;
+      } finally {
+        // always release our creation lock, even on failures
+        lock.unlock();
+      }
     }
 
     @Override public String toString() {
