@@ -351,6 +351,22 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
+  public void testBindingJavaxProvider() {
+    final Integer testValue = 1024;
+    Object instance = new Object() {
+      @Bind private javax.inject.Provider<Integer> anInt = new javax.inject.Provider<Integer>() {
+        @Override public Integer get() {
+          return testValue;
+        }
+      };
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(testValue, injector.getInstance(Integer.class));
+  }
+
   public void testBindingNullField() {
     Object instance = new Object() {
       @Bind private Integer anInt = null;

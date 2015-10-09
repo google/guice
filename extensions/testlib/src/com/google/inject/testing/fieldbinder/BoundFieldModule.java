@@ -324,7 +324,8 @@ public final class BoundFieldModule implements Module {
       }
       // This is safe because we checked that the field's type is Provider above.
       @SuppressWarnings("unchecked")
-      Provider<?> fieldValueUnsafe = (Provider<?>) getFieldValue(fieldInfo);
+      javax.inject.Provider<?> fieldValueUnsafe =
+          (javax.inject.Provider<?>) getFieldValue(fieldInfo);
       binderUnsafe.toProvider(fieldValueUnsafe);
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(new Provider<Object>() {
