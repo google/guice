@@ -136,6 +136,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       injector.getInstance(Integer.class);
+      fail();
     } catch (ConfigurationException e) {
       assertContains(
           e.getMessage(),
@@ -314,6 +315,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(), "More than one annotation is specified for this binding.");
     }
@@ -530,6 +532,7 @@ public class BoundFieldModuleTest extends TestCase {
     BoundFieldModule module = BoundFieldModule.of(instance);
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertEquals(2, e.getErrorMessages().size());
     }
@@ -558,6 +561,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
@@ -661,6 +665,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
