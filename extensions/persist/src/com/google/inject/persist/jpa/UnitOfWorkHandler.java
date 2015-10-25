@@ -16,7 +16,7 @@ public class UnitOfWorkHandler {
   private UnitOfWork unitOfWork = null;
 
   /** Tracks if the unit of work was begun implicitly by this handler. */
-  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<Boolean>();
+  private final ThreadLocal<Integer> didWeStartWork = new ThreadLocal<Integer>();
 
   @Inject
   public UnitOfWorkHandler(JpaPersistService emProvider, UnitOfWork unitOfWork) {
@@ -27,14 +27,24 @@ public class UnitOfWorkHandler {
   public void requireUnitOfWork() {
     if (!emProvider.isWorking()) {
       unitOfWork.begin();
-      didWeStartWork.set(true);
+      didWeStartWork.set(1);
+    } else {
+      Integer level = didWeStartWork.get();
+      if ((level != null) && (level.intValue() >= 0)) {
+        didWeStartWork.set(level + 1);
+      }
     }
   }
   
   public void endRequireUnitOfWork() {
-    if (didWeStartWork.get() != null) {
-      didWeStartWork.remove();
-      unitOfWork.end();
+    Integer level = didWeStartWork.get();
+    if ((level != null) && (level.intValue() > 0)) {
+      if (level.intValue() == 1) {
+        didWeStartWork.remove();
+        unitOfWork.end();
+      } else {
+        didWeStartWork.set(level - 1);
+      }
     }
   }
   

@@ -83,6 +83,10 @@ public class RequiresUnitOfWorkTest extends TestCase {
       emProvider.get()
           .createQuery("from JpaTestEntity", JpaTestEntity.class)
           .setMaxResults(1).getResultList();
+      dataObject.runOperationInUnitOfWork();
+      emProvider.get()
+          .createQuery("from JpaTestEntity", JpaTestEntity.class)
+          .setMaxResults(1).getResultList();
     }
   }
 }
