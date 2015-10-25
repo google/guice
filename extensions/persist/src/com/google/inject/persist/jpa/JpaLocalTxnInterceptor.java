@@ -43,10 +43,28 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   @Transactional
   private static class Internal {}
 
-  // Tracks if the unit of work was begun implicitly by this transaction.
+  /** Tracks if the unit of work was begun implicitly by this transaction. */
   private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<Boolean>();
+  
+  /** Lenient mode allows interceptors not having a real Transactional annotation.
+      Interceptors created by the standard module won't be lenient. */
+  private boolean lenient;
+  
+  public JpaLocalTxnInterceptor() {
+    this.lenient = true;
+  }
+  
+  public JpaLocalTxnInterceptor(boolean lenient) {
+    this.lenient = lenient;
+  }
 
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+    
+    // Check that the method or the class have a Transactional annotation
+    Transactional transactional = readTransactionMetadata(methodInvocation);
+    if (transactional == null) {
+      return methodInvocation.proceed();
+    }
 
     // Should we start a unit of work?
     if (!emProvider.isWorking()) {
@@ -54,7 +72,6 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       didWeStartWork.set(true);
     }
 
-    Transactional transactional = readTransactionMetadata(methodInvocation);
     EntityManager em = this.emProvider.get();
 
     // Allow 'joining' of transactions if there is an enclosing @Transactional method.
@@ -105,16 +122,25 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
   private Transactional readTransactionMetadata(MethodInvocation methodInvocation) {
     Transactional transactional;
     Method method = methodInvocation.getMethod();
-    Class<?> targetClass = methodInvocation.getThis().getClass();
-
     transactional = method.getAnnotation(Transactional.class);
+    
+    Class<?> targetClass = method.getDeclaringClass();
     if (null == transactional) {
       // If none on method, try the class.
       transactional = targetClass.getAnnotation(Transactional.class);
     }
-    if (null == transactional) {
-      // If there is no transactional annotation present, use the default
-      transactional = Internal.class.getAnnotation(Transactional.class);
+
+    // Lenient mode: for backwards compatibility, try to find one
+    if (lenient && (null == transactional)) {
+      Class<?> calledClass = methodInvocation.getThis().getClass();
+      if (null == transactional) {
+        // try the called class.
+        transactional = calledClass.getAnnotation(Transactional.class);
+      }
+      if (null == transactional) {
+        // if there is no transactional annotation present, use the default
+        transactional = Internal.class.getAnnotation(Transactional.class);
+      }
     }
 
     return transactional;

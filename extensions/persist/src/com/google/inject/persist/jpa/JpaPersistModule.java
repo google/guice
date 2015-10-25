@@ -70,7 +70,7 @@ public final class JpaPersistModule extends PersistModule {
     bind(EntityManagerFactory.class)
         .toProvider(JpaPersistService.EntityManagerFactoryProvider.class);
 
-    transactionInterceptor = new JpaLocalTxnInterceptor();
+    transactionInterceptor = new JpaLocalTxnInterceptor(false);
     requestInjection(transactionInterceptor);
 
     // Bind dynamic finders.

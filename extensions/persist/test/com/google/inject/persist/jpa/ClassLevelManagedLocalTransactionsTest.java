@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
+import com.google.inject.persist.jpa.util.TrackedEntityManagerFactory;
 
 import junit.framework.TestCase;
 
@@ -30,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * This test asserts class level @Transactional annotation behavior.
@@ -145,6 +147,22 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
     assertTrue("a result was returned! rollback sure didnt happen!!!",
         result.isEmpty());
   }
+  
+  public void testTransactionalDoesntAffectObjectMethods() {
+    // Given a persist service that tracks when it's called
+    JpaPersistService persistService = injector.getInstance(JpaPersistService.class);
+    EntityManagerFactory originalEMF = injector.getInstance(EntityManagerFactory.class);
+    TrackedEntityManagerFactory trackedEMF = new TrackedEntityManagerFactory(originalEMF);
+    persistService.start(trackedEMF);
+    
+    // When toString is invoked in the transactional object
+    FakeTransactionalObject transactionalObject = injector.getInstance(FakeTransactionalObject.class);
+    transactionalObject.toString();
+
+    // No transaction was started
+    assertFalse("transaction has been started for Object method",
+        trackedEMF.hasCreatedSomeEntityManager());
+  }
 
   @Transactional
   public static class TransactionalObject {
@@ -199,6 +217,12 @@ public class ClassLevelManagedLocalTransactionsTest extends TestCase {
       session.persist(entity);
 
       throw new IOException();
+    }
+  }
+
+  @Transactional
+  public static class FakeTransactionalObject {
+    public void fakeTransactionalMethod() {
     }
   }
 }
