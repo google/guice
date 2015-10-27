@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -86,7 +87,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     @Override
     public String toString() {
-      return Objects.toStringHelper(getClass())
+      return MoreObjects.toStringHelper(getClass())
           .add("stage", stage)
           .add("jitDisabled", jitDisabled)
           .add("disableCircularProxies", disableCircularProxies)
@@ -376,7 +377,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     @Override public String toString() {
-      return Objects.toStringHelper(ProviderBinding.class)
+      return MoreObjects.toStringHelper(ProviderBinding.class)
           .add("key", getKey())
           .add("providedKey", getProvidedKey())
           .toString();
@@ -503,7 +504,7 @@ final class InjectorImpl implements Injector, Lookups {
     }
 
     @Override public String toString() {
-      return Objects.toStringHelper(ConvertedConstantBinding.class)
+      return MoreObjects.toStringHelper(ConvertedConstantBinding.class)
           .add("key", getKey())
           .add("sourceKey", getSourceKey())
           .add("value", value)
@@ -1113,7 +1114,7 @@ final class InjectorImpl implements Injector, Lookups {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(Injector.class)
+    return MoreObjects.toStringHelper(Injector.class)
         .add("bindings", state.getExplicitBindingsThisLevel().values())
         .toString();
   }

@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
@@ -51,7 +51,7 @@ public final class ExposedBindingImpl<T> extends BindingImpl<T> implements Expos
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(ExposedBinding.class)
+    return MoreObjects.toStringHelper(ExposedBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("privateElements", privateElements)

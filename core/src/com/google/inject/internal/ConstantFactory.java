@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.spi.Dependency;
 
 /**
@@ -36,7 +36,7 @@ final class ConstantFactory<T> implements InternalFactory<T> {
   }
 
   public String toString() {
-    return Objects.toStringHelper(ConstantFactory.class)
+    return MoreObjects.toStringHelper(ConstantFactory.class)
         .add("value", initializable)
         .toString();
   }
