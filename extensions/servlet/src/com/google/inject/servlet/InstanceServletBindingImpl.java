@@ -16,7 +16,7 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ class InstanceServletBindingImpl extends AbstractServletModuleBinding<HttpServle
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(InstanceServletBinding.class)
+    return MoreObjects.toStringHelper(InstanceServletBinding.class)
       .add("pattern", getPattern())
       .add("initParams", getInitParams())
       .add("uriPatternType", getUriPatternType())

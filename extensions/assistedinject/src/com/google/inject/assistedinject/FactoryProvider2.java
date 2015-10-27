@@ -19,6 +19,7 @@ package com.google.inject.assistedinject;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -153,7 +154,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
 
     @Override
     public String toString() {
-      return Objects.toStringHelper(getClass())
+      return MoreObjects.toStringHelper(getClass())
         .add("ctor", constructor)
         .add("return type", returnType)
         .add("param type", paramTypes)
