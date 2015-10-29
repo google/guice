@@ -1,0 +1,4 @@
+OK: com.google.inject.servlet.ServletModule Method filter(java.lang.Iterable<java.lang.String>)
+OK: com.google.inject.servlet.ServletModule Method filterRegex(java.lang.Iterable<java.lang.String>)
+OK: com.google.inject.servlet.ServletModule Method serve(java.lang.Iterable<java.lang.String>)
+OK: com.google.inject.servlet.ServletModule Method serveRegex(java.lang.Iterable<java.lang.String>)

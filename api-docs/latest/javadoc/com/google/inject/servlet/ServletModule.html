@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -200,27 +200,43 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.Iterable-">filter</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;urlPatterns)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#filter-java.lang.String-java.lang.String...-">filter</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;urlPattern,
       <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;morePatterns)</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#filterRegex-java.lang.Iterable-">filterRegex</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;regexes)</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#filterRegex-java.lang.String-java.lang.String...-">filterRegex</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;regex,
            <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;regexes)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>protected <a href="https://tomcat.apache.org/tomcat-5.5-doc/servletapi/javax/servlet/ServletContext.html?is-external=true" title="class or interface in javax.servlet">ServletContext</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#getServletContext--">getServletContext</a></span>()</code>
 <div class="block">This method only works if you are using the <a href="../../../../com/google/inject/servlet/GuiceServletContextListener.html" title="class in com.google.inject.servlet">GuiceServletContextListener</a> to
  create your injector.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.Iterable-">serve</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;urlPatterns)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#serve-java.lang.String-java.lang.String...-">serve</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;urlPattern,
      <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;morePatterns)</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#serveRegex-java.lang.Iterable-">serveRegex</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;regexes)</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>protected <a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/servlet/ServletModule.html#serveRegex-java.lang.String-java.lang.String...-">serveRegex</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;regex,
           <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>...&nbsp;regexes)</code>&nbsp;</td>
@@ -478,6 +494,21 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 </dl>
 </li>
 </ul>
+<a name="filter-java.lang.Iterable-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>filter</h4>
+<pre>protected final&nbsp;<a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a>&nbsp;filter(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;urlPatterns)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>urlPatterns</code> - Any Servlet-style patterns. examples: /*, /html/*, *.html, etc.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
+</dl>
+</li>
+</ul>
 <a name="filterRegex-java.lang.String-java.lang.String...-">
 <!--   -->
 </a>
@@ -491,6 +522,21 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 <dd><code>regex</code> - Any Java-style regular expression.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
+</dl>
+</li>
+</ul>
+<a name="filterRegex-java.lang.Iterable-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>filterRegex</h4>
+<pre>protected final&nbsp;<a href="../../../../com/google/inject/servlet/ServletModule.FilterKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.FilterKeyBindingBuilder</a>&nbsp;filterRegex(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;regexes)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>regexes</code> - Any Java-style regular expressions.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
 </dl>
 </li>
 </ul>
@@ -510,6 +556,21 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 </dl>
 </li>
 </ul>
+<a name="serve-java.lang.Iterable-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>serve</h4>
+<pre>protected final&nbsp;<a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a>&nbsp;serve(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;urlPatterns)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>urlPatterns</code> - Any Servlet-style patterns. examples: /*, /html/*, *.html, etc.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
+</dl>
+</li>
+</ul>
 <a name="serveRegex-java.lang.String-java.lang.String...-">
 <!--   -->
 </a>
@@ -523,6 +584,21 @@ extends <a href="../../../../com/google/inject/AbstractModule.html" title="class
 <dd><code>regex</code> - Any Java-style regular expression.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
+</dl>
+</li>
+</ul>
+<a name="serveRegex-java.lang.Iterable-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>serveRegex</h4>
+<pre>protected final&nbsp;<a href="../../../../com/google/inject/servlet/ServletModule.ServletKeyBindingBuilder.html" title="interface in com.google.inject.servlet">ServletModule.ServletKeyBindingBuilder</a>&nbsp;serveRegex(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Iterable.html?is-external=true" title="class or interface in java.lang">Iterable</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;regexes)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>regexes</code> - Any Java-style regular expressions.</dd>
+<dt><span class="simpleTagLabel">Since:</span></dt>
+<dd>5.0</dd>
 </dl>
 </li>
 </ul>
