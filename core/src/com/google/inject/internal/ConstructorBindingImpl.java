@@ -19,6 +19,7 @@ package com.google.inject.internal;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.internal.Annotations.findScopeAnnotation;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -218,7 +219,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(ConstructorBinding.class)
+    return MoreObjects.toStringHelper(ConstructorBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("scope", getScoping())

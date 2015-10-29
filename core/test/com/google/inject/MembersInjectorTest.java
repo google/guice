@@ -24,12 +24,18 @@ import com.google.inject.util.Providers;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class MembersInjectorTest extends TestCase {
+
+  private static final long DEADLOCK_TIMEOUT_SECONDS = 1;
 
   private static final A<C> uninjectableA = new A<C>() {
     @Override void doNothing() {
@@ -249,6 +255,114 @@ public class MembersInjectorTest extends TestCase {
           "1) No implementation for com.google.inject.MembersInjector<java.lang.String> "
               + "annotated with @com.google.inject.name.Named(value=foo) was bound.");
     }
+  }
+
+  /** Callback for member injection. Uses a static type to be referable by getInstance(). */
+  abstract static class AbstractParallelMemberInjectionCallback {
+
+    volatile boolean called = false;
+
+    private final Thread mainThread;
+    private final Class<? extends AbstractParallelMemberInjectionCallback> otherCallbackClass;
+
+    AbstractParallelMemberInjectionCallback(
+        Class<? extends AbstractParallelMemberInjectionCallback> otherCallbackClass) {
+      this.mainThread = Thread.currentThread();
+      this.otherCallbackClass = otherCallbackClass;
+    }
+
+    @Inject void callback(final Injector injector) throws Exception {
+      called = true;
+      if (mainThread != Thread.currentThread()) {
+        // only execute logic on the main thread
+        return;
+      }
+      // verify that other callback can be finished on a separate thread
+      AbstractParallelMemberInjectionCallback otherCallback = Executors
+          .newSingleThreadExecutor()
+          .submit(new Callable<AbstractParallelMemberInjectionCallback>() {
+            @Override
+            public AbstractParallelMemberInjectionCallback call() throws Exception {
+              return injector.getInstance(otherCallbackClass);
+            }
+          }).get(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+      assertTrue(otherCallback.called);
+
+      try {
+        // other thread would wait for callback to finish on this thread first
+        Executors.newSingleThreadExecutor()
+            .submit(new Callable<Object>() {
+              @Override
+              public Object call() throws Exception {
+                return injector.getInstance(
+                    AbstractParallelMemberInjectionCallback.this.getClass());
+              }
+            }).get(DEADLOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        fail();
+      } catch (TimeoutException expected) {
+        // recursive call from another thread should time out
+        // as it would be waiting for this thread to finish
+      }
+    }
+  }
+
+  static class ParallelMemberInjectionCallback1 extends AbstractParallelMemberInjectionCallback {
+
+    ParallelMemberInjectionCallback1() {
+      super(ParallelMemberInjectionCallback2.class);
+    }
+  }
+
+  static class ParallelMemberInjectionCallback2 extends AbstractParallelMemberInjectionCallback {
+
+    ParallelMemberInjectionCallback2() {
+      super(ParallelMemberInjectionCallback1.class);
+    }
+  }
+
+  /**
+   * Tests that member injections could happen in parallel.
+   *
+   * <p>Additional check that when member injection happen other threads would wait for
+   * it to finish to provide proper resolution order semantics.
+   */
+
+  public void testMemberInjectorParallelization() throws Exception {
+    final ParallelMemberInjectionCallback1 c1 = new ParallelMemberInjectionCallback1();
+    final ParallelMemberInjectionCallback2 c2 = new ParallelMemberInjectionCallback2();
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ParallelMemberInjectionCallback1.class).toInstance(c1);
+        bind(ParallelMemberInjectionCallback2.class).toInstance(c2);
+      }
+    });
+    assertTrue(c1.called);
+    assertTrue(c2.called);
+  }
+
+  /** Member injection callback that injects itself. */
+  static class RecursiveMemberInjection {
+    boolean called = false;
+
+    @Inject void callback(RecursiveMemberInjection recursiveMemberInjection) {
+      if (called) {
+        fail("Should not be called twice");
+      }
+      called = true;
+    }
+  }
+
+  /** Verifies that member injection injecting itself would get a non initialized instance. */
+  public void testRecursiveMemberInjector() throws Exception {
+    final RecursiveMemberInjection rmi = new RecursiveMemberInjection();
+    Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(RecursiveMemberInjection.class).toInstance(rmi);
+      }
+    });
+    assertTrue("Member injection should happen", rmi.called);
   }
 
   static class A<T> {

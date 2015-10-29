@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -89,7 +90,7 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(InstanceBinding.class)
+    return MoreObjects.toStringHelper(InstanceBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("instance", instance)

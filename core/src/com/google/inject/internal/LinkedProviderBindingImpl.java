@@ -16,6 +16,7 @@
 
 package com.google.inject.internal;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
@@ -95,7 +96,7 @@ final class LinkedProviderBindingImpl<T>
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(ProviderKeyBinding.class)
+    return MoreObjects.toStringHelper(ProviderKeyBinding.class)
         .add("key", getKey())
         .add("source", getSource())
         .add("scope", getScoping())

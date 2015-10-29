@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -106,7 +106,7 @@ public abstract class BindingImpl<T> implements Binding<T> {
   }
   
   @Override public String toString() {
-    return Objects.toStringHelper(Binding.class)
+    return MoreObjects.toStringHelper(Binding.class)
         .add("key", key)
         .add("scope", scoping)
         .add("source", source)

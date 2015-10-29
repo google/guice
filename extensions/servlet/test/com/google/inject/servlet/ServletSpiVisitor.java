@@ -16,6 +16,7 @@
 
 package com.google.inject.servlet;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -141,7 +142,7 @@ class ServletSpiVisitor
 
     @Override
     public String toString() {
-      return Objects.toStringHelper(Params.class)
+      return MoreObjects.toStringHelper(Params.class)
         .add("pattern", pattern)
         .add("keyOrInstance", keyOrInstance)
         .add("initParams", params)

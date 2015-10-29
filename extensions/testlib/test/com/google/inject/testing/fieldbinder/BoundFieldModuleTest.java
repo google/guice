@@ -136,6 +136,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       injector.getInstance(Integer.class);
+      fail();
     } catch (ConfigurationException e) {
       assertContains(
           e.getMessage(),
@@ -314,6 +315,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(), "More than one annotation is specified for this binding.");
     }
@@ -337,6 +339,22 @@ public class BoundFieldModuleTest extends TestCase {
     final Integer testValue = 1024;
     Object instance = new Object() {
       @Bind private Provider<Integer> anInt = new Provider<Integer>() {
+        @Override public Integer get() {
+          return testValue;
+        }
+      };
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertEquals(testValue, injector.getInstance(Integer.class));
+  }
+
+  public void testBindingJavaxProvider() {
+    final Integer testValue = 1024;
+    Object instance = new Object() {
+      @Bind private javax.inject.Provider<Integer> anInt = new javax.inject.Provider<Integer>() {
         @Override public Integer get() {
           return testValue;
         }
@@ -530,6 +548,7 @@ public class BoundFieldModuleTest extends TestCase {
     BoundFieldModule module = BoundFieldModule.of(instance);
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertEquals(2, e.getErrorMessages().size());
     }
@@ -558,6 +577,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),
@@ -661,6 +681,7 @@ public class BoundFieldModuleTest extends TestCase {
 
     try {
       Guice.createInjector(module);
+      fail();
     } catch (CreationException e) {
       assertContains(
           e.getMessage(),

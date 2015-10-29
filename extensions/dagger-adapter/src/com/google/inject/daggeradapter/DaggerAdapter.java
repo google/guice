@@ -15,7 +15,7 @@
  */
 package com.google.inject.daggeradapter;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.internal.ProviderMethodsModule;
@@ -80,7 +80,7 @@ public final class DaggerAdapter {
     }
 
     @Override public String toString() {
-      return Objects.toStringHelper(this)
+      return MoreObjects.toStringHelper(this)
           .add("modules", Arrays.asList(daggerModuleObjects))
           .toString();
     }

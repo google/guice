@@ -16,7 +16,7 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Key;
 
 import java.util.Map;
@@ -41,7 +41,7 @@ class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extend
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(LinkedServletBinding.class)
+    return MoreObjects.toStringHelper(LinkedServletBinding.class)
       .add("pattern", getPattern())
       .add("initParams", getInitParams())
       .add("uriPatternType", getUriPatternType())

@@ -283,6 +283,9 @@ public final class BoundFieldModule implements Module {
    * other words, subclasses of {@link Provider} are not transparent. As a special case, if a
    * {@link Provider} has no parameterized type but is otherwise transparent, then it is considered
    * transparent.
+   *
+   * <p>Subclasses of {@link Provider} are not considered transparent in order to allow users to
+   * bind those subclasses directly, enabling them to inject the providers themselves.
    */
   private static boolean isTransparentProvider(Class<?> clazz) {
     return com.google.inject.Provider.class == clazz || javax.inject.Provider.class == clazz;
@@ -321,7 +324,8 @@ public final class BoundFieldModule implements Module {
       }
       // This is safe because we checked that the field's type is Provider above.
       @SuppressWarnings("unchecked")
-      Provider<?> fieldValueUnsafe = (Provider<?>) getFieldValue(fieldInfo);
+      javax.inject.Provider<?> fieldValueUnsafe =
+          (javax.inject.Provider<?>) getFieldValue(fieldInfo);
       binderUnsafe.toProvider(fieldValueUnsafe);
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(new Provider<Object>() {

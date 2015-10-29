@@ -16,7 +16,7 @@
 
 package com.google.inject.servlet;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> imp
   }
   
   @Override public String toString() {
-    return Objects.toStringHelper(InstanceFilterBinding.class)
+    return MoreObjects.toStringHelper(InstanceFilterBinding.class)
       .add("pattern", getPattern())
       .add("initParams", getInitParams())
       .add("uriPatternType", getUriPatternType())

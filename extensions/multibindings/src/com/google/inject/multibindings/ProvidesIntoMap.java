@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * {@literal @}ProvidesIntoMap
  * {@literal @}StringMapKey("Foo")
  * {@literal @}Named("plugins")
- * Plugin provideFooUrl(FooManager fm) { returm fm.getPlugin(); }
+ * Plugin provideFooUrl(FooManager fm) { return fm.getPlugin(); }
  *
  * {@literal @}ProvidesIntoMap
  * {@literal @}StringMapKey("Bar")
