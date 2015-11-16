@@ -25,6 +25,8 @@ import com.google.inject.internal.Errors;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -127,13 +129,13 @@ public class GuiceFilter implements Filter {
     HttpServletRequest originalRequest
         = (previous != null) ? previous.getOriginalRequest() : request;
     try {
-      new Context(originalRequest, request, response).call(new Callable<Void>() {
-        @Override public Void call() throws Exception {
-          //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
-          filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
-          return null;
-        }
-      });
+      RequestScoper.CloseableScope scope = new Context(originalRequest, request, response).open();
+      try {
+        //dispatch across the servlet pipeline, ensuring web.xml's filterchain is honored
+        filterPipeline.dispatch(servletRequest, servletResponse, filterChain);
+      } finally {
+        scope.close();
+      }
     } catch (IOException e) {
       throw e;
     } catch (ServletException e) {
@@ -170,10 +172,14 @@ public class GuiceFilter implements Filter {
     return context;
   }
 
-  static class Context {
+  static class Context implements RequestScoper {
     final HttpServletRequest originalRequest;
     final HttpServletRequest request;
     final HttpServletResponse response;
+
+    // Synchronized to prevent two threads from using the same request
+    // scope concurrently.
+    final Lock lock = new ReentrantLock();
 
     Context(HttpServletRequest originalRequest, HttpServletRequest request,
         HttpServletResponse response) {
@@ -194,16 +200,16 @@ public class GuiceFilter implements Filter {
       return response;
     }
 
-    // Synchronized to prevent two threads from using the same request
-    // scope concurrently.
-    synchronized <T> T call(Callable<T> callable) throws Exception {
-      Context previous = localContext.get();
+    @Override public CloseableScope open() {
+      lock.lock();
+      final Context previous = localContext.get();
       localContext.set(this);
-      try {
-        return callable.call();
-      } finally {
-        localContext.set(previous);
-      }
+      return new CloseableScope() {
+        @Override public void close() {
+          localContext.set(previous);
+          lock.unlock();
+        }
+      };
     }
   }
 

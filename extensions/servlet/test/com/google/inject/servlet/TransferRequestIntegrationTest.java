@@ -59,6 +59,13 @@ public class TransferRequestIntegrationTest extends TestCase {
     } catch (OutOfScopeException expected) {}
   }
 
+  public void testTransferNonHttp_outOfScope_closeable() {
+    try {
+      ServletScopes.transferRequest();
+      fail();
+    } catch (OutOfScopeException expected) {}
+  }
+
   public void testTransferNonHttpRequest() throws Exception {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       @Override protected void configure() {
@@ -89,6 +96,44 @@ public class TransferRequestIntegrationTest extends TestCase {
     executor.shutdownNow();
   }
 
+  public void testTransferNonHttpRequest_closeable() throws Exception {
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {
+        bindScope(RequestScoped.class, ServletScopes.REQUEST);
+      }
+
+      @Provides @RequestScoped Object provideObject() {
+        return new Object();
+      }
+    });
+
+    class Data {
+      Object object;
+      RequestScoper scoper;
+    }
+
+    Callable<Data> callable = new Callable<Data>() {
+      @Override public Data call() {
+        Data data = new Data();
+        data.object = injector.getInstance(Object.class);
+        data.scoper = ServletScopes.transferRequest();
+        return data;
+      }
+    };
+
+    ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
+    Data data = ServletScopes.scopeRequest(callable, seedMap).call();
+
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    RequestScoper.CloseableScope scope = data.scoper.open();
+    try {
+      assertSame(data.object, injector.getInstance(Object.class));
+    } finally {
+      scope.close();
+      executor.shutdownNow();
+    }
+  }
+
   public void testTransferNonHttpRequest_concurrentUseBlocks() throws Exception {
     Callable<Boolean> callable = new Callable<Boolean>() {
       @Override public Boolean call() throws Exception {
@@ -110,10 +155,57 @@ public class TransferRequestIntegrationTest extends TestCase {
     assertTrue(ServletScopes.scopeRequest(callable, seedMap).call());
   }
 
+  public void testTransferNonHttpRequest_concurrentUseBlocks_closeable() throws Exception {
+    Callable<Boolean> callable = new Callable<Boolean>() {
+      @Override public Boolean call() throws Exception {
+        final RequestScoper scoper = ServletScopes.transferRequest();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+          Future<Boolean> future = executor.submit(new Callable<Boolean>() {
+            @Override public Boolean call() {
+              RequestScoper.CloseableScope scope = scoper.open();
+              try {
+                return false;
+              } finally {
+                scope.close();
+              }
+            }
+          });
+          try {
+            return future.get(100, TimeUnit.MILLISECONDS);
+          } catch (TimeoutException e) {
+            return true;
+          }
+        } finally {
+          executor.shutdownNow();
+        }
+      }
+    };
+
+    ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
+    assertTrue(ServletScopes.scopeRequest(callable, seedMap).call());
+  }
+
   public void testTransferNonHttpRequest_concurrentUseSameThreadOk() throws Exception {
     Callable<Boolean> callable = new Callable<Boolean>() {
       @Override public Boolean call() throws Exception {
         return ServletScopes.transferRequest(FALSE_CALLABLE).call();
+      }
+    };
+
+    ImmutableMap<Key<?>, Object> seedMap = ImmutableMap.of();
+    assertFalse(ServletScopes.scopeRequest(callable, seedMap).call());
+  }
+
+  public void testTransferNonHttpRequest_concurrentUseSameThreadOk_closeable() throws Exception {
+    Callable<Boolean> callable = new Callable<Boolean>() {
+      @Override public Boolean call() throws Exception {
+        RequestScoper.CloseableScope scope = ServletScopes.transferRequest().open();
+        try {
+          return false;
+        } finally {
+          scope.close();
+        }
       }
     };
 
