@@ -17,7 +17,6 @@
 package com.google.inject.internal;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Exposed;
@@ -25,7 +24,6 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
-import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -64,8 +62,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
       Annotation annotation) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
-    if (!skipFastClassGeneration && !Modifier.isPrivate(modifiers)
-        && !Modifier.isProtected(modifiers)) {
+    if (!skipFastClassGeneration && BytecodeGen.isFastClassable(method)) {
       try {
         // We use an index instead of FastMethod to save a stack frame.
         return new FastClassProviderMethod<T>(key,
@@ -253,18 +250,8 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
           scopeAnnotation,
           annotation);
       // We need to generate a FastClass for the method's class, not the object's class.
-      this.fastClass =
-          BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method));
-      // Use the Signature overload of getIndex because it properly uses return types to identify
-      // particular methods.  This is normally irrelevant, except in the case of covariant overrides
-      // which java implements with a compiler generated bridge method to implement the override.
-      this.methodIndex = fastClass.getIndex(
-          new net.sf.cglib.core.Signature(
-              method.getName(), org.objectweb.asm.Type.getMethodDescriptor(method)));
-      Preconditions.checkArgument(this.methodIndex >= 0, 
-          "Could not find method %s in fast class for class %s", 
-          method, 
-          method.getDeclaringClass());
+      this.fastClass = BytecodeGen.newFastClass(method.getDeclaringClass());
+      this.methodIndex = fastClass.getMethod(method).getIndex();
     }
 
     @Override public Object doProvision(Object[] parameters)

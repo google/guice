@@ -16,7 +16,6 @@
 
 package com.google.inject.internal;
 
-import com.google.inject.internal.BytecodeGen.Visibility;
 import com.google.inject.internal.InjectorImpl.MethodInvoker;
 import com.google.inject.spi.InjectionPoint;
 
@@ -42,25 +41,24 @@ final class SingleMethodInjector implements SingleMemberInjector {
 
   private MethodInvoker createMethodInvoker(final Method method) {
 
-    // We can't use FastMethod if the method is private.
-    int modifiers = method.getModifiers();
-    if (!Modifier.isPrivate(modifiers) && !Modifier.isProtected(modifiers)) {
-      /*if[AOP]*/
+    /*if[AOP]*/
+    if (BytecodeGen.isFastClassable(method)) {
       try {
-      final net.sf.cglib.reflect.FastMethod fastMethod
-          = BytecodeGen.newFastClass(method.getDeclaringClass(), Visibility.forMember(method))
-              .getMethod(method);
+        final net.sf.cglib.reflect.FastClass fastClass =
+            BytecodeGen.newFastClass(method.getDeclaringClass());
+        final int index = fastClass.getMethod(method).getIndex();
 
-      return new MethodInvoker() {
-        public Object invoke(Object target, Object... parameters)
-            throws IllegalAccessException, InvocationTargetException {
-          return fastMethod.invoke(target, parameters);
-        }
-      };
+        return new MethodInvoker() {
+          public Object invoke(Object target, Object... parameters)
+              throws IllegalAccessException, InvocationTargetException {
+            return fastClass.invoke(index, target, parameters);
+          }
+        };
       } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
-      /*end[AOP]*/
     }
+    /*end[AOP]*/
 
+    int modifiers = method.getModifiers();
     if (!Modifier.isPublic(modifiers) ||
         !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
       method.setAccessible(true);

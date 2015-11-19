@@ -392,4 +392,12 @@ public class ImplicitBindingTest extends TestCase {
   @ImplementedBy(EnumWithImplementedByEnum.class)
   enum EnumWithImplementedBy {}
   private static class EnumWithImplementedByEnum {}
+
+  public void testImplicitJdkBindings() {
+    Injector injector = Guice.createInjector();
+    // String has a public nullary constructor, so Guice will call it.
+    assertEquals("", injector.getInstance(String.class));
+    // InetAddress has a package private constructor.  We probably shouldn't be calling it :(
+    assertNotNull(injector.getInstance(java.net.InetAddress.class));
+  }
 }

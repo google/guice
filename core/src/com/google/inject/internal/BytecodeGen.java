@@ -48,8 +48,8 @@ import java.util.logging.Logger;
  * <p>For each generated class, there's multiple class loaders involved:
  * <ul>
  *    <li><strong>The related class's class loader.</strong> Every generated class services exactly
- *        one user-supplied class. This class loader must be used to access members with private and
- *        package visibility.
+ *        one user-supplied class. This class loader must be used to access members with protected
+ *        and package visibility.
  *    <li><strong>Guice's class loader.</strong>
  *    <li><strong>Our bridge class loader.</strong> This is a child of the user's class loader. It
  *        selectively delegates to either the user's class loader (for user classes) or the Guice
@@ -192,16 +192,32 @@ public final class BytecodeGen {
 
   /*if[AOP]*/
   // use fully-qualified names so imports don't need preprocessor statements 
-  public static net.sf.cglib.reflect.FastClass newFastClass(Class<?> type, Visibility visibility) {
+  public static net.sf.cglib.reflect.FastClass newFastClass(Class<?> type) {
     net.sf.cglib.reflect.FastClass.Generator generator
         = new net.sf.cglib.reflect.FastClass.Generator();
     generator.setType(type);
-    if (visibility == Visibility.PUBLIC) {
-      generator.setClassLoader(getClassLoader(type));
-    }
     generator.setNamingPolicy(FASTCLASS_NAMING_POLICY);
     logger.fine("Loading " + type + " FastClass with " + generator.getClassLoader());
     return generator.create();
+  }
+  
+  /**
+   * Checks if the member is accessibly via a FastClass proxy.
+   *
+   * <p>FastClass works by generating a class (not a subclass) in the same package as the member
+   * which allows it to access package private and protectected members as long as it can generate
+   * the type into the same classloader.  The main time when this is not the case is for JDK types.
+   * JDK types are loaded by the 'bootstrap classloader' which is not acccessible to user code and
+   * cglib cannot generate classes in it.  This is mostly a non-issue since Guice doesn't typically
+   * inject JDK classes, but some do have package private nullary constructors (e.g.
+   * {@code java.net.InetAddress}) and Guice may attempt to generate JIT bindings for them if
+   * {@code Binder.requireAtInjectOnConstructors()} is not set.
+   */
+  public static boolean isFastClassable(Member member) {
+    // This is the same rule that FastClass itself uses to decide whether or not to index a method.
+    // See FastClassEmitter
+    return new net.sf.cglib.core.VisibilityPredicate(member.getDeclaringClass(), false)
+        .evaluate(member);
   }
 
   public static net.sf.cglib.proxy.Enhancer newEnhancer(Class<?> type, Visibility visibility) {
