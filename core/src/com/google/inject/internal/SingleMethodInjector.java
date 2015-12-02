@@ -42,10 +42,10 @@ final class SingleMethodInjector implements SingleMemberInjector {
   private MethodInvoker createMethodInvoker(final Method method) {
 
     /*if[AOP]*/
-    if (BytecodeGen.isFastClassable(method)) {
-      try {
-        final net.sf.cglib.reflect.FastClass fastClass =
-            BytecodeGen.newFastClass(method.getDeclaringClass());
+    try {
+    final net.sf.cglib.reflect.FastClass fastClass =
+        BytecodeGen.newFastClassForMember(method);
+      if (fastClass != null) {
         final int index = fastClass.getMethod(method).getIndex();
 
         return new MethodInvoker() {
@@ -54,8 +54,8 @@ final class SingleMethodInjector implements SingleMemberInjector {
             return fastClass.invoke(index, target, parameters);
           }
         };
-      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
-    }
+      }
+    } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
     /*end[AOP]*/
 
     int modifiers = method.getModifiers();

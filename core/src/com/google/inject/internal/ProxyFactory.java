@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.BytecodeGen.newFastClass;
+import static com.google.inject.internal.BytecodeGen.newFastClassForMember;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -254,8 +254,7 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       this.constructor = (Constructor<T>) injectionPoint.getMember();
       this.callbacks = callbacks;
       this.methodInterceptors = methodInterceptors;
-
-      this.fastClass = newFastClass(enhanced);
+      this.fastClass = newFastClassForMember(enhanced, constructor);
       this.constructorIndex = fastClass.getIndex(constructor.getParameterTypes());
     }
 

@@ -48,21 +48,19 @@ final class DefaultConstructionProxyFactory<T> implements ConstructionProxyFacto
     final Constructor<T> constructor = (Constructor<T>) injectionPoint.getMember();
 
     /*if[AOP]*/
-    if (BytecodeGen.isFastClassable(constructor)) {
-      try {
-        Class<T> classToConstruct = constructor.getDeclaringClass();
-        net.sf.cglib.reflect.FastClass fc =
-            BytecodeGen.newFastClass(classToConstruct);
+    try {
+      net.sf.cglib.reflect.FastClass fc =
+          BytecodeGen.newFastClassForMember(constructor);
+      if (fc != null) {
         int index = fc.getIndex(constructor.getParameterTypes());
         // We could just fall back to reflection in this case but I believe this should actually
         // be impossible.
         Preconditions.checkArgument(index >= 0,
-            "Could not find constructor %s in fast class for class %s", 
-            constructor, 
-            classToConstruct);
+            "Could not find constructor %s in fast class",
+            constructor);
         return new FastClassProxy<T>(injectionPoint, constructor, fc, index);
-      } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
-    }
+      }
+    } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
     /*end[AOP]*/
 
     return new ReflectiveProxy<T>(injectionPoint, constructor);

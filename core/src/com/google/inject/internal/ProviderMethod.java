@@ -62,16 +62,19 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
       Annotation annotation) {
     int modifiers = method.getModifiers();
     /*if[AOP]*/
-    if (!skipFastClassGeneration && BytecodeGen.isFastClassable(method)) {
+    if (!skipFastClassGeneration) {
       try {
-        // We use an index instead of FastMethod to save a stack frame.
-        return new FastClassProviderMethod<T>(key,
-            method,
-            instance,
-            dependencies,
-            parameterProviders,
-            scopeAnnotation,
-            annotation);
+        net.sf.cglib.reflect.FastClass fc = BytecodeGen.newFastClassForMember(method);
+        if (fc != null) {
+          return new FastClassProviderMethod<T>(key,
+              fc,
+              method,
+              instance,
+              dependencies,
+              parameterProviders,
+              scopeAnnotation,
+              annotation);
+        }
       } catch (net.sf.cglib.core.CodeGenerationException e) {/* fall-through */}
     }
     /*end[AOP]*/
@@ -236,6 +239,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     final int methodIndex;
 
     FastClassProviderMethod(Key<T> key,
+        net.sf.cglib.reflect.FastClass fc, 
         Method method,
         Object instance,
         ImmutableSet<Dependency<?>> dependencies,
@@ -249,9 +253,8 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
           parameterProviders,
           scopeAnnotation,
           annotation);
-      // We need to generate a FastClass for the method's class, not the object's class.
-      this.fastClass = BytecodeGen.newFastClass(method.getDeclaringClass());
-      this.methodIndex = fastClass.getMethod(method).getIndex();
+      this.fastClass = fc;
+      this.methodIndex = fc.getMethod(method).getIndex();
     }
 
     @Override public Object doProvision(Object[] parameters)
