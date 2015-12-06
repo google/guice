@@ -34,7 +34,7 @@ public interface TypeListener {
 
   /**
    * Invoked when Guice encounters a new type eligible for constructor or members injection.
-   * Called during injector creation (or afterwords if Guice encounters a type at run time and
+   * Called during injector creation (or afterwards if Guice encounters a type at run time and
    * creates a JIT binding).
    *
    * @param type encountered by Guice
