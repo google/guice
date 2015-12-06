@@ -8,7 +8,7 @@
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 <TITLE>
-com.google.inject.multibindings Documentation Differences
+com.google.inject.spi Documentation Differences
 </TITLE>
 </HEAD>
 <BODY>
@@ -18,7 +18,7 @@ com.google.inject.multibindings Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -32,22 +32,22 @@ com.google.inject.multibindings Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <B>PREV PACKAGE</B>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.spi.html"><B>NEXT PACKAGE</B></A>
+  <A HREF="docdiffs_com.google.inject.multibindings.html"><B>PREV PACKAGE</B></A>  &nbsp;
+  &nbsp;<B>NEXT PACKAGE</B>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.multibindings.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="docdiffs_com.google.inject.spi.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2">&nbsp;</TD>
 </TR>
 </TABLE>
 <HR>
 <!-- End of nav bar -->
 <h2>
-com.google.inject.multibindings Documentation Differences
+com.google.inject.spi Documentation Differences
 </h2>
 
 <blockquote>
-This file contains all the changes in documentation in the package <code>com.google.inject.multibindings</code> as colored differences.
+This file contains all the changes in documentation in the package <code>com.google.inject.spi</code> as colored differences.
 Deletions are shown <strike>like this</strike>, and
 additions are shown <span style="background: #FFFF00">like this</span>.
 </blockquote>
@@ -61,32 +61,15 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
-<A NAME="com.google.inject.multibindings.ProvidesIntoMap!class"></A><a href="com.google.inject.multibindings.ProvidesIntoMap.html" class="hiddenlink">Class <b>ProvidesIntoMap</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/MapBinder.html"><TT>MapBinder</TT></A>.
- The method's return type, binding annotation and additional key annotation determines
- what Map this will contribute to. For example,
+<A NAME="com.google.inject.spi.TypeListener.dmethod.hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)"></A><a href="com.google.inject.spi.TypeListener.html" class="hiddenlink">Class <b>TypeListener</b></a>, <a href="com.google.inject.spi.TypeListener.html#com.google.inject.spi.TypeListener.hear_changed(com.google.inject.TypeLiteral<I>, com.google.inject.spi.TypeEncounter<I>)" class="hiddenlink">void <b>hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)</b></a><br><br><blockquote>Invoked when Guice encounters a new type eligible for constructor or members injection.
+ Called during injector creation (or <strike>afterwords</strike><span style="background: #FFFF00">afterwards</span> if Guice encounters a type at run time and
+ creates a JIT binding).
 
- <pre>
- {@literal @}ProvidesIntoMap
- {@literal @}StringMapKey("Foo")
- {@literal @}Named("plugins")
- Plugin provideFooUrl(FooManager fm) { <strike>returm</strike><span style="background: #FFFF00">return</span> fm.getPlugin(); }
+ @param type encountered by Guice
+ @param encounter context of this encounter, enables reporting errors, registering injection
+     listeners and binding method interceptors for {@code type}.
 
- {@literal @}ProvidesIntoMap
- {@literal @}StringMapKey("Bar")
- {@literal @}Named("urls")
- Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
- </pre>
-
- will add two items to the {@code @Named("urls") Map<String, Plugin>} map. The key 'Foo'
- will map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method.
- The values are bound as providers and will be evaluated at injection time.
-
- <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive
- types and annotation instances are supported as keys.
-
- @author sameb@google.com (Sam Berlin)
- @since 4.0</blockquote>
-<hr align="left" width="100%">
+ @param <I> the injectable type</blockquote>
 
 </BODY>
 </HTML>

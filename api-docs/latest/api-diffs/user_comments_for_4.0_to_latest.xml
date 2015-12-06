@@ -63,5 +63,23 @@
     InsertCommentsHere
   </text>
 </comment>
+<comment>
+  <identifier id="com.google.inject.spi"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.spi.TypeListener.hear_changed(com.google.inject.TypeLiteral&lt;I&gt;, com.google.inject.spi.TypeEncounter&lt;I&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
 
 </comments>
