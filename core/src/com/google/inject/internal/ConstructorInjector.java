@@ -17,6 +17,7 @@
 package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.InjectorImpl.InjectorOptions;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.InjectionPoint;
 
@@ -63,19 +64,23 @@ final class ConstructorInjector<T> {
       ProvisionListenerStackCallback<T> provisionCallback)
       throws ErrorsException {
     final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
+    InjectorOptions options = context.getInjectorOptions();
 
     // We have a circular reference between constructors. Return a proxy.
     if (constructionContext.isConstructing()) {
       // TODO (crazybob): if we can't proxy this object, can we proxy the other object?
-      return constructionContext.createProxy(
-          errors, context.getInjectorOptions(), expectedType);
+      return constructionContext.createProxy(errors, options, expectedType);
     }
 
     // If we're re-entering this factory while injecting fields or methods,
     // return the same instance. This prevents infinite loops.
     T t = constructionContext.getCurrentReference();
     if (t != null) {
-      return t;
+      if (options.disableCircularProxies) {
+        throw errors.circularDependenciesDisabled(expectedType).toException();
+      } else {
+        return t;
+      }
     }
 
     constructionContext.startConstruction();
@@ -85,6 +90,7 @@ final class ConstructorInjector<T> {
         return provision(errors, context, constructionContext);
       } else {
         return provisionCallback.provision(errors, context, new ProvisionCallback<T>() {
+          @Override
           public T call() throws ErrorsException {
             return provision(errors, context, constructionContext);
           }

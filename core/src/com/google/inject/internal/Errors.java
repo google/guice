@@ -450,15 +450,15 @@ public final class Errors implements Serializable {
     return addMessage("Cannot inject a TypeLiteral that has no type parameter");
   }
 
-  public Errors cannotSatisfyCircularDependency(Class<?> expectedType) {
+  public Errors cannotProxyClass(Class<?> expectedType) {
     return addMessage(
         "Tried proxying %s to support a circular dependency, but it is not an interface.",
         expectedType);
   }
 
-  public Errors circularProxiesDisabled(Class<?> expectedType) {
+  public Errors circularDependenciesDisabled(Class<?> expectedType) {
     return addMessage(
-        "Tried proxying %s to support a circular dependency, but circular proxies are disabled.",
+        "Found a circular dependency involving %s, and circular dependencies are disabled.",
         expectedType);
   }
 

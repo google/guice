@@ -472,16 +472,15 @@ public interface Binder {
   void requireExplicitBindings();
   
   /**
-   * Prevents Guice from constructing a {@link Proxy} when a circular dependency
-   * is found.  By default, circular proxies are not disabled.
+   * Prevents Guice from injecting dependencies that form a cycle, unless broken by a
+   * {@link Provider}. By default, circular dependencies are not disabled.
    * <p>
-   * If a parent injector disables circular proxies, then all child injectors
-   * (and private modules within that injector) also disable circular proxies.
-   * If a parent does not disable circular proxies, a child injector or private
-   * module may optionally declare itself as disabling circular proxies. If it
-   * does, the behavior is limited only to that child or any grandchildren. No
-   * siblings of the child will disable circular proxies.
-   * 
+   * If a parent injector disables circular dependencies, then all child injectors (and private
+   * modules within that injector) also disable circular dependencies. If a parent does not disable
+   * circular dependencies, a child injector or private module may optionally declare itself as
+   * disabling circular dependencies. If it does, the behavior is limited only to that child or any
+   * grandchildren. No siblings of the child will disable circular dependencies.
+   *
    * @since 3.0
    */
   void disableCircularProxies();

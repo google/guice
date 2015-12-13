@@ -62,10 +62,10 @@ final class ConstructionContext<T> {
   public Object createProxy(Errors errors, InjectorOptions injectorOptions,
       Class<?> expectedType) throws ErrorsException {
     if (injectorOptions.disableCircularProxies) {
-      throw errors.circularProxiesDisabled(expectedType).toException();
+      throw errors.circularDependenciesDisabled(expectedType).toException();
     }
     if (!expectedType.isInterface()) {
-      throw errors.cannotSatisfyCircularDependency(expectedType).toException();
+      throw errors.cannotProxyClass(expectedType).toException();
     }
 
     if (invocationHandlers == null) {
