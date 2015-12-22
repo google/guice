@@ -108,7 +108,7 @@ public final class Message implements Serializable, Element {
   }
 
   @Override public int hashCode() {
-    return message.hashCode();
+    return Objects.hashCode(message, cause, sources);
   }
 
   @Override public boolean equals(Object o) {
