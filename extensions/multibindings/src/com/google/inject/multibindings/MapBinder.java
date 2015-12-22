@@ -831,7 +831,7 @@ public abstract class MapBinder<K, V> {
 
       @Override
       public boolean equals(Object obj) {
-        return this.getClass() == obj.getClass() &&
+        return obj != null && this.getClass() == obj.getClass() &&
           equality.equals(((RealMapBinderProviderWithDependencies<?>)obj).equality);
       }
 
