@@ -378,8 +378,8 @@ var activeTableTab = "activeTableTab";
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../com/google/inject/Binder.html#disableCircularProxies--">disableCircularProxies</a></span>()</code>
-<div class="block">Prevents Guice from constructing a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Proxy.html?is-external=true" title="class or interface in java.lang.reflect"><code>Proxy</code></a> when a circular dependency
- is found.</div>
+<div class="block">Prevents Guice from injecting dependencies that form a cycle, unless broken by a
+ <a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>.</div>
 </td>
 </tr>
 <tr id="i14" class="altColor">
@@ -953,15 +953,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>disableCircularProxies</h4>
 <pre>void&nbsp;disableCircularProxies()</pre>
-<div class="block">Prevents Guice from constructing a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Proxy.html?is-external=true" title="class or interface in java.lang.reflect"><code>Proxy</code></a> when a circular dependency
- is found.  By default, circular proxies are not disabled.
+<div class="block">Prevents Guice from injecting dependencies that form a cycle, unless broken by a
+ <a href="../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>. By default, circular dependencies are not disabled.
  <p>
- If a parent injector disables circular proxies, then all child injectors
- (and private modules within that injector) also disable circular proxies.
- If a parent does not disable circular proxies, a child injector or private
- module may optionally declare itself as disabling circular proxies. If it
- does, the behavior is limited only to that child or any grandchildren. No
- siblings of the child will disable circular proxies.</div>
+ If a parent injector disables circular dependencies, then all child injectors (and private
+ modules within that injector) also disable circular dependencies. If a parent does not disable
+ circular dependencies, a child injector or private module may optionally declare itself as
+ disabling circular dependencies. If it does, the behavior is limited only to that child or any
+ grandchildren. No siblings of the child will disable circular dependencies.</div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>3.0</dd>

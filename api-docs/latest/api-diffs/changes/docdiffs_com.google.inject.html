@@ -8,7 +8,7 @@
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 <TITLE>
-com.google.inject.multibindings Documentation Differences
+com.google.inject Documentation Differences
 </TITLE>
 </HEAD>
 <BODY>
@@ -18,7 +18,7 @@ com.google.inject.multibindings Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -32,22 +32,22 @@ com.google.inject.multibindings Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <A HREF="docdiffs_com.google.inject.html"><B>PREV PACKAGE</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.spi.html"><B>NEXT PACKAGE</B></A>
+  <B>PREV PACKAGE</B>  &nbsp;
+  &nbsp;<A HREF="docdiffs_com.google.inject.multibindings.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.multibindings.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="docdiffs_com.google.inject.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2">&nbsp;</TD>
 </TR>
 </TABLE>
 <HR>
 <!-- End of nav bar -->
 <h2>
-com.google.inject.multibindings Documentation Differences
+com.google.inject Documentation Differences
 </h2>
 
 <blockquote>
-This file contains all the changes in documentation in the package <code>com.google.inject.multibindings</code> as colored differences.
+This file contains all the changes in documentation in the package <code>com.google.inject</code> as colored differences.
 Deletions are shown <strike>like this</strike>, and
 additions are shown <span style="background: #FFFF00">like this</span>.
 </blockquote>
@@ -61,31 +61,24 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
-<A NAME="com.google.inject.multibindings.ProvidesIntoMap!class"></A><a href="com.google.inject.multibindings.ProvidesIntoMap.html" class="hiddenlink">Class <b>ProvidesIntoMap</b></a><br><br><blockquote>Annotates methods of a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/Module.html"><TT>Module</TT></A> to add items to a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/multibindings/ProvidesIntoMap/MapBinder.html"><TT>MapBinder</TT></A>.
- The method's return type, binding annotation and additional key annotation determines
- what Map this will contribute to. For example,
+<A NAME="com.google.inject.Binder.dmethod.disableCircularProxies()"></A><a href="com.google.inject.Binder.html" class="hiddenlink">Class <b>Binder</b></a>, <a href="com.google.inject.Binder.html#com.google.inject.Binder.disableCircularProxies_changed()" class="hiddenlink">void <b>disableCircularProxies()</b></a><br><br><blockquote>Prevents Guice from <strike>constructing a</strike><span style="background: #FFFF00">injecting dependencies</span> <strike>Proxy</strike><span style="background: #FFFF00">that</span> <strike>when</strike><span style="background: #FFFF00">form</span> a <strike>circular</strike><span style="background: #FFFF00">cycle,</span> <strike>dependency
+ is</strike><span style="background: #FFFF00">unless broken</span> <strike>found.</strike><span style="background: #FFFF00">by</span> <span style="background: #FFFF00">a
+ <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/Provider.html"><TT>Provider</TT></A>.</span> By default, circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span> are not disabled.
+ <p>
+ If a parent injector disables circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span>, then all child <strike>injectors
+</strike><span style="background: #FFFF00">injectors</span> (and <strike>private</strike><span style="background: #FFFF00">private
+</span> modules within that injector) also disable circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span>.<strike>
+</strike> If a parent does not <strike>disable</strike><span style="background: #FFFF00">disable
+</span> circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span>, a child injector or <strike>private
+</strike><span style="background: #FFFF00">private</span> module may optionally declare itself <strike>as</strike><span style="background: #FFFF00">as
+</span> disabling circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span>. If <strike>it
+</strike><span style="background: #FFFF00">it</span> does, the behavior is limited only to that child or <strike>any</strike><span style="background: #FFFF00">any
+</span> grandchildren. <strike>No
+</strike><span style="background: #FFFF00">No</span> siblings of the child will disable circular <strike>proxies</strike><span style="background: #FFFF00">dependencies</span>.<strike>
+ 
+</strike><span style="background: #FFFF00">
 
- <pre>
- {@literal @}ProvidesIntoMap
- {@literal @}StringMapKey("Foo")
- {@literal @}Named("plugins")
- Plugin provideFooUrl(FooManager fm) { <strike>returm</strike><span style="background: #FFFF00">return</span> fm.getPlugin(); }
-
- {@literal @}ProvidesIntoMap
- {@literal @}StringMapKey("Bar")
- {@literal @}Named("urls")
- Plugin provideBarUrl(BarManager bm) { return bm.getPlugin(); }
- </pre>
-
- will add two items to the {@code @Named("urls") Map<String, Plugin>} map. The key 'Foo'
- will map to the provideFooUrl method, and the key 'Bar' will map to the provideBarUrl method.
- The values are bound as providers and will be evaluated at injection time.
-
- <p>Because the key is specified as an annotation, only Strings, Classes, enums, primitive
- types and annotation instances are supported as keys.
-
- @author sameb@google.com (Sam Berlin)
- @since 4.0</blockquote>
+</span> @since 3.0</blockquote>
 <hr align="left" width="100%">
 
 </BODY>

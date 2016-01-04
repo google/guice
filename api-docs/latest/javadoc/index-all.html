@@ -858,8 +858,8 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/Binder.html#disableCircularProxies--">disableCircularProxies()</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></dt>
 <dd>
-<div class="block">Prevents Guice from constructing a <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/reflect/Proxy.html?is-external=true" title="class or interface in java.lang.reflect"><code>Proxy</code></a> when a circular dependency
- is found.</div>
+<div class="block">Prevents Guice from injecting dependencies that form a cycle, unless broken by a
+ <a href="com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>.</div>
 </dd>
 <dt><a href="com/google/inject/spi/DisableCircularProxiesOption.html" title="class in com.google.inject.spi"><span class="typeNameLink">DisableCircularProxiesOption</span></a> - Class in <a href="com/google/inject/spi/package-summary.html">com.google.inject.spi</a></dt>
 <dd>
