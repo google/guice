@@ -316,7 +316,7 @@ public class BytecodeGenTest extends TestCase {
 
   // This tests for a situation where a osgi bundle contains a version of guice.  When guice
   // generates a fast class it will use a bridge classloader
-  public void testFastClassUsesBridgeClassloader() throws Exception {
+  public void testFastClassUsesBridgeClassloader() throws Throwable {
     Injector injector = Guice.createInjector();
     // These classes are all in the same classloader as guice itself, so other than the private one
     // they can all be fast class invoked
@@ -400,16 +400,16 @@ public class BytecodeGenTest extends TestCase {
       this.caller = new Throwable();
     }
 
-    void assertIsFastClassInvoked() {
+    void assertIsFastClassInvoked() throws Throwable {
       // 2 because the first 2 elements are
       // LogCreator.<init>()
       // Subclass.<init>()
       if (!caller.getStackTrace()[2].getClassName().contains("$$FastClassByGuice$$")) {
-        throw new AssertionError("Caller was not FastClass", caller);
+        throw new AssertionError("Caller was not FastClass").initCause(caller);
       }
     }
 
-    void assertIsReflectionInvoked() {
+    void assertIsReflectionInvoked() throws Throwable {
       // Scan for a call to Constructor.newInstance, but stop if we see the test itself.
       for (StackTraceElement element : caller.getStackTrace()) {
         if (element.getClassName().equals(BytecodeGenTest.class.getName())) {
@@ -421,7 +421,7 @@ public class BytecodeGenTest extends TestCase {
           return;
         }
       }
-      throw new AssertionError("Caller was not Constructor.newInstance", caller);
+      throw new AssertionError("Caller was not Constructor.newInstance").initCause(caller);
     }
   }
 
