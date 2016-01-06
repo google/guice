@@ -16,7 +16,7 @@
 
 package com.google.inject.internal;
 
-import static com.google.inject.internal.BytecodeGen.newFastClass;
+import static com.google.inject.internal.BytecodeGen.newFastClassForMember;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +30,6 @@ import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -243,8 +242,9 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
     final Constructor<T> constructor;
     final Callback[] callbacks;
 
-    final FastConstructor fastConstructor;
+    final int constructorIndex;
     final ImmutableMap<Method, List<MethodInterceptor>> methodInterceptors;
+    final FastClass fastClass;
 
     @SuppressWarnings("unchecked") // the constructor promises to construct 'T's
     ProxyConstructor(Enhancer enhancer, InjectionPoint injectionPoint, Callback[] callbacks,
@@ -254,16 +254,15 @@ final class ProxyFactory<T> implements ConstructionProxyFactory<T> {
       this.constructor = (Constructor<T>) injectionPoint.getMember();
       this.callbacks = callbacks;
       this.methodInterceptors = methodInterceptors;
-
-      FastClass fastClass = newFastClass(enhanced, BytecodeGen.Visibility.forMember(constructor));
-      this.fastConstructor = fastClass.getConstructor(constructor.getParameterTypes());
+      this.fastClass = newFastClassForMember(enhanced, constructor);
+      this.constructorIndex = fastClass.getIndex(constructor.getParameterTypes());
     }
 
     @SuppressWarnings("unchecked") // the constructor promises to produce 'T's
     public T newInstance(Object... arguments) throws InvocationTargetException {
       Enhancer.registerCallbacks(enhanced, callbacks);
       try {
-        return (T) fastConstructor.newInstance(arguments);
+        return (T) fastClass.newInstance(constructorIndex, arguments);
       } finally {
         Enhancer.registerCallbacks(enhanced, null);
       }

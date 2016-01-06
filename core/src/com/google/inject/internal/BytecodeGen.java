@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -48,8 +49,8 @@ import java.util.logging.Logger;
  * <p>For each generated class, there's multiple class loaders involved:
  * <ul>
  *    <li><strong>The related class's class loader.</strong> Every generated class services exactly
- *        one user-supplied class. This class loader must be used to access members with private and
- *        package visibility.
+ *        one user-supplied class. This class loader must be used to access members with protected
+ *        and package visibility.
  *    <li><strong>Guice's class loader.</strong>
  *    <li><strong>Our bridge class loader.</strong> This is a child of the user's class loader. It
  *        selectively delegates to either the user's class loader (for user classes) or the Guice
@@ -191,17 +192,104 @@ public final class BytecodeGen {
   }
 
   /*if[AOP]*/
-  // use fully-qualified names so imports don't need preprocessor statements 
-  public static net.sf.cglib.reflect.FastClass newFastClass(Class<?> type, Visibility visibility) {
+  // use fully-qualified names so imports don't need preprocessor statements
+  /**
+   * Returns a FastClass proxy for invoking the given member or {@code null} if access rules 
+   * disallow it.
+   * 
+   * @see #newFastClassForMember(Class, Member) for a full description
+   */
+  public static net.sf.cglib.reflect.FastClass newFastClassForMember(Member member) {
+    return newFastClassForMember(member.getDeclaringClass(), member);
+  }
+
+  /**
+   * Returns a FastClass proxy for invoking the given member or {@code null} if access rules 
+   * disallow it.
+   * 
+   * <p>FastClass works by generating a type in the same package as the target {@code type}. This
+   * may or may not work depending on the access level of the class/member. It breaks down into the
+   * following cases depending on accessibility:
+   * <ul>
+   *   <li>Public: This always works since we can generate the type into the 
+   *   {@link BridgeClassLoader} which ensures there are no versioning issues.
+   *   <li>Package private and Protected: This works as long as:
+   *   <ul> 
+   *     <li>We can generate into the same classloader as the type.  This is not possible for JDK
+   *     types which use the 'bootstrap' loader.
+   *     <li>The classloader of the type has the same version of {@code FastClass} as we do.  This
+   *     may be violated when running in OSGI bundles.
+   *   </ul>
+   *   <li>Private: This never works.
+   * </ul>
+   * 
+   * If we are unable to generate the type, then we return null and callers should work around by
+   * using normal java reflection.
+   */
+  public static net.sf.cglib.reflect.FastClass newFastClassForMember(Class<?> type, Member member) {
+    if (!new net.sf.cglib.core.VisibilityPredicate(type, false).evaluate(member)) {
+      // the member cannot be indexed by fast class.  Bail out.
+      return null;
+    }
+
+    boolean publiclyCallable = isPubliclyCallable(member);
+    if (!publiclyCallable && !hasSameVersionOfCglib(type.getClassLoader())) {
+      // The type is in a classloader with a different version of cglib and is not publicly visible
+      // (so we can't use the bridge classloader to work around).  Bail out.
+      return null;
+    }
     net.sf.cglib.reflect.FastClass.Generator generator
         = new net.sf.cglib.reflect.FastClass.Generator();
-    generator.setType(type);
-    if (visibility == Visibility.PUBLIC) {
+    if (publiclyCallable) {
+      // Use the bridge classloader if we can
       generator.setClassLoader(getClassLoader(type));
     }
+    generator.setType(type);
     generator.setNamingPolicy(FASTCLASS_NAMING_POLICY);
-    logger.fine("Loading " + type + " FastClass with " + generator.getClassLoader());
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Loading " + type + " FastClass with " + generator.getClassLoader());
+    }
     return generator.create();
+  }
+
+  /**
+   * Returns true if the types classloader has the same version of cglib that BytecodeGen has.  This
+   * only returns false in strange OSGI situations, but it prevents us from using FastClass for non
+   * public members.
+   */
+  private static boolean hasSameVersionOfCglib(ClassLoader classLoader) {
+    Class<?> fc = net.sf.cglib.reflect.FastClass.class;
+    try {
+      return classLoader.loadClass(fc.getName()) == fc;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Returns true if the member can be called by a fast class generated in a different classloader.
+   */
+  private static boolean isPubliclyCallable(Member member) {
+    if (!Modifier.isPublic(member.getModifiers())) {
+      return false;
+    }
+    Class<?>[] parameterTypes;
+    if (member instanceof Constructor) {
+      parameterTypes = ((Constructor) member).getParameterTypes();
+    } else {
+      Method method = (Method) member;
+      if (!Modifier.isPublic(method.getReturnType().getModifiers())) {
+        return false;
+      }
+      parameterTypes = method.getParameterTypes();
+    }
+
+    for (Class<?> type : parameterTypes) {
+      if (!Modifier.isPublic(type.getModifiers())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static net.sf.cglib.proxy.Enhancer newEnhancer(Class<?> type, Visibility visibility) {

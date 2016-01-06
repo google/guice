@@ -141,7 +141,7 @@ public class MethodInterceptionTest extends TestCase {
     } catch(ConfigurationException ce) {
       assertEquals("Unable to method intercept: " + NotInterceptable.class.getName(),
           Iterables.getOnlyElement(ce.getErrorMessages()).getMessage().toString());
-      assertEquals("Cannot subclass final class class " + NotInterceptable.class.getName(),
+      assertEquals("Cannot subclass final class " + NotInterceptable.class.getName(),
           ce.getCause().getMessage());
     }
   }

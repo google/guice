@@ -159,7 +159,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>cglib</groupId>
         <artifactId>cglib</artifactId>
-        <version>3.1</version>
+        <version>3.2.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

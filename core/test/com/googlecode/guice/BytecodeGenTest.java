@@ -23,6 +23,8 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+
+import com.googlecode.guice.BytecodeGenTest.LogCreator;
 import com.googlecode.guice.PackageVisibilityTestModule.PublicUserOfPackagePrivate;
 
 import junit.framework.TestCase;
@@ -30,15 +32,13 @@ import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
-import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.concurrent.TimeoutException;
+
+import javax.inject.Inject;
 
 /**
  * This test is in a separate package so we can test package-level visibility
@@ -97,27 +97,15 @@ public class BytecodeGenTest extends TestCase {
   static class TestVisibilityClassLoader
       extends URLClassLoader {
 
-    boolean hideInternals;
+    final boolean hideInternals;
 
-    public TestVisibilityClassLoader(boolean hideInternals) {
-      super(new URL[0]);
+    TestVisibilityClassLoader(boolean hideInternals) {
+      this((URLClassLoader) TestVisibilityClassLoader.class.getClassLoader(), hideInternals);
+    }
 
+    TestVisibilityClassLoader(URLClassLoader classloader, boolean hideInternals) {
+      super(classloader.getURLs(), classloader);
       this.hideInternals = hideInternals;
-
-      final String[] classpath = System.getProperty("java.class.path").split(File.pathSeparator);
-      for (final String element : classpath) {
-        try {
-          // is it a remote/local URL?
-          addURL(new URL(element));
-        } catch (final MalformedURLException e1) {
-          try {
-            // nope - perhaps it's a filename?
-            addURL(new File(element).toURI().toURL());
-          } catch (final MalformedURLException e2) {
-            throw new RuntimeException(e1);
-          }
-        }
-      }
     }
 
     /**
@@ -193,7 +181,7 @@ public class BytecodeGenTest extends TestCase {
    * Note: this class must be marked as public or protected so that the Guice
    * custom classloader will intercept it. Private and implementation classes
    * are not intercepted by the custom classloader.
-   * 
+   *
    * @see com.google.inject.internal.BytecodeGen.Visibility
    */
   public static class ProxyTestImpl implements ProxyTest {
@@ -324,5 +312,132 @@ public class BytecodeGenTest extends TestCase {
     // don't use bridging for proxies with private return types
     Object o2 = injector.getInstance(hiddenMethodReturnClass);
     o2.getClass().getDeclaredMethod("method").invoke(o2);
+  }
+
+  // This tests for a situation where a osgi bundle contains a version of guice.  When guice
+  // generates a fast class it will use a bridge classloader
+  public void testFastClassUsesBridgeClassloader() throws Throwable {
+    Injector injector = Guice.createInjector();
+    // These classes are all in the same classloader as guice itself, so other than the private one
+    // they can all be fast class invoked
+    injector.getInstance(PublicInject.class).assertIsFastClassInvoked();
+    injector.getInstance(ProtectedInject.class).assertIsFastClassInvoked();
+    injector.getInstance(PackagePrivateInject.class).assertIsFastClassInvoked();
+    injector.getInstance(PrivateInject.class).assertIsReflectionInvoked();
+
+    // This classloader will load the types in an loader with a different version of guice/cglib
+    // this prevents the use of fastclass for all but the public types (where the bridge
+    // classloader can be used).
+    MultipleVersionsOfGuiceClassLoader fakeLoader = new MultipleVersionsOfGuiceClassLoader();
+    injector.getInstance(fakeLoader.loadLogCreatorType(PublicInject.class))
+        .assertIsFastClassInvoked();
+    injector.getInstance(fakeLoader.loadLogCreatorType(ProtectedInject.class))
+        .assertIsReflectionInvoked();
+    injector.getInstance(fakeLoader.loadLogCreatorType(PackagePrivateInject.class))
+        .assertIsReflectionInvoked();
+    injector.getInstance(fakeLoader.loadLogCreatorType(PrivateInject.class))
+        .assertIsReflectionInvoked();
+  }
+
+  // This classloader simulates an OSGI environment where a bundle has a conflicting definition of
+  // cglib (or guice).  This is sort of the opposite of the BridgeClassloader and is meant to test
+  // its use.
+  static class MultipleVersionsOfGuiceClassLoader extends URLClassLoader  {
+    MultipleVersionsOfGuiceClassLoader() {
+      this((URLClassLoader) MultipleVersionsOfGuiceClassLoader.class.getClassLoader());
+    }
+
+    MultipleVersionsOfGuiceClassLoader(URLClassLoader classloader) {
+      super(classloader.getURLs(), classloader);
+    }
+
+    public Class<? extends LogCreator> loadLogCreatorType(Class<? extends LogCreator> cls)
+        throws ClassNotFoundException {
+      return loadClass(cls.getName()).asSubclass(LogCreator.class);
+    }
+
+    /**
+     * Classic parent-delegating classloaders are meant to override findClass.
+     * However, non-delegating classloaders (as used in OSGi) instead override
+     * loadClass to provide support for "class-space" separation.
+     */
+    @Override
+    protected Class<?> loadClass(final String name, final boolean resolve)
+        throws ClassNotFoundException {
+
+      synchronized (this) {
+        // check our local cache to avoid duplicates
+        final Class<?> clazz = findLoadedClass(name);
+        if (clazz != null) {
+          return clazz;
+        }
+      }
+
+      if (name.startsWith("java.")
+          || name.startsWith("javax.")
+          || name.equals(LogCreator.class.getName())
+          || (!name.startsWith("com.google.inject.")
+              && !name.contains(".cglib.")
+              && !name.startsWith("com.googlecode.guice"))) {
+
+        // standard parent delegation
+        return super.loadClass(name, resolve);
+
+      } else {
+        // load a new copy of the class
+        final Class<?> clazz = findClass(name);
+        if (resolve) {
+          resolveClass(clazz);
+        }
+        return clazz;
+      }
+    }
+  }
+
+  public static class LogCreator {
+    final Throwable caller;
+    public LogCreator() {
+      this.caller = new Throwable();
+    }
+
+    void assertIsFastClassInvoked() throws Throwable {
+      // 2 because the first 2 elements are
+      // LogCreator.<init>()
+      // Subclass.<init>()
+      if (!caller.getStackTrace()[2].getClassName().contains("$$FastClassByGuice$$")) {
+        throw new AssertionError("Caller was not FastClass").initCause(caller);
+      }
+    }
+
+    void assertIsReflectionInvoked() throws Throwable {
+      // Scan for a call to Constructor.newInstance, but stop if we see the test itself.
+      for (StackTraceElement element : caller.getStackTrace()) {
+        if (element.getClassName().equals(BytecodeGenTest.class.getName())) {
+          // break when we hit the test method.
+          break;
+        }
+        if (element.getClassName().equals(Constructor.class.getName())
+            && element.getMethodName().equals("newInstance")) {
+          return;
+        }
+      }
+      throw new AssertionError("Caller was not Constructor.newInstance").initCause(caller);
+    }
+  }
+
+  public static class PublicInject extends LogCreator {
+    @Inject public PublicInject() {}
+  }
+
+  static class PackagePrivateInject extends LogCreator {
+    @Inject PackagePrivateInject() {}
+  }
+
+  protected static class ProtectedInject extends LogCreator {
+    @Inject protected ProtectedInject() {}
+  }
+
+  private static class PrivateInject extends LogCreator {
+    @Inject private PrivateInject() {}
   }
 }
