@@ -1,4 +1,9 @@
 language: java
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.m2
 
 jdk:
   - oraclejdk8
@@ -21,11 +26,6 @@ install:
 
 script:
   - ${CMD}
-
-notifications:
-  email:
-    recipients:
-      - google-guice-dev+ci@googlegroups.com
 
 after_success:
   - util/generate-latest-docs.sh
