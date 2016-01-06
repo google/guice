@@ -553,6 +553,8 @@
 <dd>
 <div class="block">Allows @<a href="com/google/inject/multibindings/ProvidesIntoMap.html" title="annotation in com.google.inject.multibindings"><code>ProvidesIntoMap</code></a> to specify a class map key.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/servlet/RequestScoper.CloseableScope.html#close--">close()</a></span> - Method in interface com.google.inject.servlet.<a href="com/google/inject/servlet/RequestScoper.CloseableScope.html" title="interface in com.google.inject.servlet">RequestScoper.CloseableScope</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="com/google/inject/package-summary.html">com.google.inject</a> - package com.google.inject</dt>
 <dd>
 <div class="block"><i>Google Guice</i> (pronounced "juice") is an ultra-lightweight dependency
@@ -713,8 +715,9 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/servlet/ServletScopes.html#continueRequest-java.util.concurrent.Callable-java.util.Map-">continueRequest(Callable&lt;T&gt;, Map&lt;Key&lt;?&gt;, Object&gt;)</a></span> - Static method in class com.google.inject.servlet.<a href="com/google/inject/servlet/ServletScopes.html" title="class in com.google.inject.servlet">ServletScopes</a></dt>
 <dd>
-<div class="block">Wraps the given callable in a contextual callable that "continues" the
- HTTP request in another thread.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="block"><span class="deprecationComment">You probably want to use <code>transferRequest</code> instead</span></div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/spi/TypeConverter.html#convert-java.lang.String-com.google.inject.TypeLiteral-">convert(String, TypeLiteral&lt;?&gt;)</a></span> - Method in interface com.google.inject.spi.<a href="com/google/inject/spi/TypeConverter.html" title="interface in com.google.inject.spi">TypeConverter</a></dt>
 <dd>
@@ -2667,6 +2670,10 @@
 <dd>
 <div class="block">Invoked by Guice when an object requires provisioning.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/servlet/RequestScoper.html#open--">open()</a></span> - Method in interface com.google.inject.servlet.<a href="com/google/inject/servlet/RequestScoper.html" title="interface in com.google.inject.servlet">RequestScoper</a></dt>
+<dd>
+<div class="block">Opens up the request scope until the returned object is closed.</div>
+</dd>
 <dt><a href="com/google/inject/multibindings/OptionalBinder.html" title="class in com.google.inject.multibindings"><span class="typeNameLink">OptionalBinder</span></a>&lt;<a href="com/google/inject/multibindings/OptionalBinder.html" title="type parameter in OptionalBinder">T</a>&gt; - Class in <a href="com/google/inject/multibindings/package-summary.html">com.google.inject.multibindings</a></dt>
 <dd>
 <div class="block">An API to bind optional values, optionally with a default value.</div>
@@ -2936,6 +2943,14 @@
 <dd>
 <div class="block">Apply this to implementation classes when you want one instance per request.</div>
 </dd>
+<dt><a href="com/google/inject/servlet/RequestScoper.html" title="interface in com.google.inject.servlet"><span class="typeNameLink">RequestScoper</span></a> - Interface in <a href="com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></dt>
+<dd>
+<div class="block">Object that can be used to apply a request scope to a block of code.</div>
+</dd>
+<dt><a href="com/google/inject/servlet/RequestScoper.CloseableScope.html" title="interface in com.google.inject.servlet"><span class="typeNameLink">RequestScoper.CloseableScope</span></a> - Interface in <a href="com/google/inject/servlet/package-summary.html">com.google.inject.servlet</a></dt>
+<dd>
+<div class="block">Closeable subclass that does not throw any exceptions from close.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/AbstractModule.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection(Class&lt;?&gt;...)</a></span> - Method in class com.google.inject.<a href="com/google/inject/AbstractModule.html" title="class in com.google.inject">AbstractModule</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="com/google/inject/Binder.html#requestStaticInjection-java.lang.Class...-">requestStaticInjection(Class&lt;?&gt;...)</a></span> - Method in interface com.google.inject.<a href="com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a></dt>
@@ -3045,6 +3060,10 @@
 <dt><span class="memberNameLink"><a href="com/google/inject/servlet/ServletScopes.html#scopeRequest-java.util.concurrent.Callable-java.util.Map-">scopeRequest(Callable&lt;T&gt;, Map&lt;Key&lt;?&gt;, Object&gt;)</a></span> - Static method in class com.google.inject.servlet.<a href="com/google/inject/servlet/ServletScopes.html" title="class in com.google.inject.servlet">ServletScopes</a></dt>
 <dd>
 <div class="block">Scopes the given callable inside a request scope.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/servlet/ServletScopes.html#scopeRequest-java.util.Map-">scopeRequest(Map&lt;Key&lt;?&gt;, Object&gt;)</a></span> - Static method in class com.google.inject.servlet.<a href="com/google/inject/servlet/ServletScopes.html" title="class in com.google.inject.servlet">ServletScopes</a></dt>
+<dd>
+<div class="block">Returns an object that will apply request scope to a block of code.</div>
 </dd>
 <dt><a href="com/google/inject/Scopes.html" title="class in com.google.inject"><span class="typeNameLink">Scopes</span></a> - Class in <a href="com/google/inject/package-summary.html">com.google.inject</a></dt>
 <dd>
@@ -3417,6 +3436,10 @@
 <dd>
 <div class="block">Wraps the given callable in a contextual callable that "transfers" the
  request to another thread.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="com/google/inject/servlet/ServletScopes.html#transferRequest--">transferRequest()</a></span> - Static method in class com.google.inject.servlet.<a href="com/google/inject/servlet/ServletScopes.html" title="class in com.google.inject.servlet">ServletScopes</a></dt>
+<dd>
+<div class="block">Returns an object that "transfers" the request to another thread.</div>
 </dd>
 <dt><a href="com/google/inject/grapher/TransitiveDependencyVisitor.html" title="class in com.google.inject.grapher"><span class="typeNameLink">TransitiveDependencyVisitor</span></a> - Class in <a href="com/google/inject/grapher/package-summary.html">com.google.inject.grapher</a></dt>
 <dd>

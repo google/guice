@@ -1,4 +1,8 @@
+MISSING @SINCE TAG: com.google.inject.servlet.RequestScoper Interface
+MISSING @SINCE TAG: com.google.inject.servlet.RequestScoper.CloseableScope Interface
 OK: com.google.inject.servlet.ServletModule Method filter(java.lang.Iterable<java.lang.String>)
 OK: com.google.inject.servlet.ServletModule Method filterRegex(java.lang.Iterable<java.lang.String>)
+OK: com.google.inject.servlet.ServletScopes Method scopeRequest(java.util.Map<com.google.inject.Key<?>, java.lang.Object>)
 OK: com.google.inject.servlet.ServletModule Method serve(java.lang.Iterable<java.lang.String>)
 OK: com.google.inject.servlet.ServletModule Method serveRegex(java.lang.Iterable<java.lang.String>)
+OK: com.google.inject.servlet.ServletScopes Method transferRequest()

@@ -8,7 +8,7 @@
 <meta name="keywords" content="diff, jdiff, javadiff, java diff, java difference, API difference, difference between two APIs, API diff, Javadoc, doclet">
 <LINK REL="stylesheet" TYPE="text/css" HREF="../stylesheet-jdiff.css" TITLE="Style">
 <TITLE>
-com.google.inject.spi Documentation Differences
+com.google.inject.servlet Documentation Differences
 </TITLE>
 </HEAD>
 <BODY>
@@ -18,7 +18,7 @@ com.google.inject.spi Documentation Differences
 <TD COLSPAN=2 BGCOLOR="#EEEEFF" CLASS="NavBarCell1">
   <TABLE summary="Navigation bar" BORDER="0" CELLPADDING="0" CELLSPACING="3">
     <TR ALIGN="center" VALIGN="top">
-      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/spi/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
+      <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/com/google/inject/servlet/package-summary.html" target="_top"><FONT CLASS="NavBarFont1"><B><tt>latest</tt></B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> <A HREF="changes-summary.html"><FONT CLASS="NavBarFont1"><B>Overview</B></FONT></A>&nbsp;</TD>
       <TD BGCOLOR="#EEEEFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Package</FONT>&nbsp;</TD>
       <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell1"> &nbsp;<FONT CLASS="NavBarFont1">Class</FONT>&nbsp;</TD>
@@ -32,22 +32,22 @@ com.google.inject.spi Documentation Differences
 </TR>
 <TR>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2"><FONT SIZE="-2">
-  <A HREF="docdiffs_com.google.inject.servlet.html"><B>PREV PACKAGE</B></A>  &nbsp;
-  &nbsp;<B>NEXT PACKAGE</B>
+  <A HREF="docdiffs_com.google.inject.multibindings.html"><B>PREV PACKAGE</B></A>  &nbsp;
+  &nbsp;<A HREF="docdiffs_com.google.inject.spi.html"><B>NEXT PACKAGE</B></A>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <A HREF="../changes.html" TARGET="_top"><B>FRAMES</B></A>  &nbsp;
-  &nbsp;<A HREF="docdiffs_com.google.inject.spi.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
+  &nbsp;<A HREF="docdiffs_com.google.inject.servlet.html" TARGET="_top"><B>NO FRAMES</B></A></FONT></TD>
   <TD BGCOLOR="#FFFFFF" CLASS="NavBarCell2">&nbsp;</TD>
 </TR>
 </TABLE>
 <HR>
 <!-- End of nav bar -->
 <h2>
-com.google.inject.spi Documentation Differences
+com.google.inject.servlet Documentation Differences
 </h2>
 
 <blockquote>
-This file contains all the changes in documentation in the package <code>com.google.inject.spi</code> as colored differences.
+This file contains all the changes in documentation in the package <code>com.google.inject.servlet</code> as colored differences.
 Deletions are shown <strike>like this</strike>, and
 additions are shown <span style="background: #FFFF00">like this</span>.
 </blockquote>
@@ -61,15 +61,38 @@ Similarly, documentation which was inherited from another class or interface is 
 </blockquote>
 <hr>
 
-<A NAME="com.google.inject.spi.TypeListener.dmethod.hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)"></A><a href="com.google.inject.spi.TypeListener.html" class="hiddenlink">Class <b>TypeListener</b></a>, <a href="com.google.inject.spi.TypeListener.html#com.google.inject.spi.TypeListener.hear_changed(com.google.inject.TypeLiteral<I>, com.google.inject.spi.TypeEncounter<I>)" class="hiddenlink">void <b>hear(TypeLiteral&lt;I&gt;, TypeEncounter&lt;I&gt;)</b></a><br><br><blockquote>Invoked when Guice encounters a new type eligible for constructor or members injection.
- Called during injector creation (or <strike>afterwords</strike><span style="background: #FFFF00">afterwards</span> if Guice encounters a type at run time and
- creates a JIT binding).
+<A NAME="com.google.inject.servlet.ServletScopes.dmethod.continueRequest(Callable&lt;T&gt;, Map&lt;Key&lt;?&gt;, Object&gt;)"></A><a href="com.google.inject.servlet.ServletScopes.html" class="hiddenlink">Class <b>ServletScopes</b></a>, <a href="com.google.inject.servlet.ServletScopes.html#com.google.inject.servlet.ServletScopes.continueRequest_changed(java.util.concurrent.Callable<T>, java.util.Map<com.google.inject.Key<?>, java.lang.Object>)" class="hiddenlink">Callable&lt;T&gt; <b>continueRequest(Callable&lt;T&gt;, Map&lt;Key&lt;?&gt;, Object&gt;)</b></a><br><br><blockquote>Wraps the given callable in a contextual callable that "continues" the
+ HTTP request in another thread. This acts as a way of transporting
+ request context data from the request processing thread to to worker
+ threads.
+ <p>
+ There are some limitations:
+ <ul>
+   <li>Derived objects (i.e. anything marked @RequestScoped will not be
+      transported.</li>
+   <li>State changes to the HttpServletRequest after this method is called
+      will not be seen in the continued thread.</li>
+   <li>Only the HttpServletRequest, ServletContext and request parameter
+      map are available in the continued thread. The response and session
+      are not available.</li>
+ </ul>
 
- @param type encountered by Guice
- @param encounter context of this encounter, enables reporting errors, registering injection
-     listeners and binding method interceptors for {@code type}.
+ <p>The returned callable will throw a <A HREF="http://google.github.io/guice/api-docs/latest/javadoc/ScopingException.html"><TT>ScopingException</TT></A> when called
+ if the HTTP request scope is still active on the current thread.
 
- @param <I> the injectable type</blockquote>
+ @param callable code to be executed in another thread, which depends on
+     the request scope.
+ @param seedMap the initial set of scoped instances for Guice to seed the
+     request scope with.  To seed a key with null, use {@code null} as
+     the value.
+ @return a callable that will invoke the given callable, making the request
+     context available to it.
+ @throws OutOfScopeException if this method is called from a non-request
+     thread, or if the request has completed.
+ 
+ @since 3.<strike>0</strike><span style="background: #FFFF00">0
+ @deprecated You probably want to use {@code transferRequest} instead</span></blockquote>
+<hr align="left" width="100%">
 
 </BODY>
 </HTML>

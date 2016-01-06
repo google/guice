@@ -52,6 +52,18 @@
   </text>
 </comment>
 <comment>
+  <identifier id="com.google.inject.servlet.RequestScoper"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.RequestScoper.CloseableScope"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="com.google.inject.servlet.ServletModule"/>
   <text>
     InsertCommentsHere
@@ -77,6 +89,30 @@
 </comment>
 <comment>
   <identifier id="com.google.inject.servlet.ServletModule.serve_added(java.lang.Iterable&lt;java.lang.String&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletScopes"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletScopes.continueRequest_changed(java.util.concurrent.Callable&lt;T&gt;, java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletScopes.scopeRequest_added(java.util.Map&lt;com.google.inject.Key&lt;?&gt;, java.lang.Object&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="com.google.inject.servlet.ServletScopes.transferRequest_added()"/>
   <text>
     InsertCommentsHere
   </text>
