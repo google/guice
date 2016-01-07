@@ -39,8 +39,8 @@ public interface UnitOfWork {
 
   /**
    * Starts a Unit Of Work. Underneath, causes a session to the data layer to be opened. If there
-   * is already one open, the invocation will do nothing. In this way, you can define arbitrary
-   * units-of-work that nest within one another safely.
+   * is already one opened, the invocation will throw an {@code IllegalStateException} to prevent
+   * unbalanced calls between end() and begin().
    *
    * Transaction semantics are not affected.
    */
