@@ -62,7 +62,13 @@ final class LineNumbers {
     if (!type.isArray()) {
       InputStream in = type.getResourceAsStream("/" + type.getName().replace('.', '/') + ".class");
       if (in != null) {
-        new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+        try {
+          new ClassReader(in).accept(new LineNumberReader(), ClassReader.SKIP_FRAMES);
+        } finally {
+          try {
+            in.close();
+          } catch (IOException ignored) {}
+        }
       }
     }
   }
