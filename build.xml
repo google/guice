@@ -122,7 +122,7 @@
         <pathelement location="lib/aopalliance.jar"/>
         <pathelement location="lib/guava-18.0.jar"/>
         <pathelement location="lib/build/guava-testlib-18.0.jar"/>
-        <pathelement location="lib/build/junit.jar"/>
+        <pathelement location="lib/build/junit-4.12.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
         <pathelement location="lib/build/javax.inject-tck.jar"/>
