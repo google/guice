@@ -219,7 +219,7 @@ public class BytecodeGenTest extends TestCase {
     }
   }
 
-  private WeakReference<Class<?>> getWeakReference() {
+  public void testProxyClassUnloading() {
     Object testObject = Guice.createInjector(interceptorModule, testModule)
         .getInstance(proxyTestClass);
     assertNotNull(testObject.getClass().getClassLoader());
@@ -232,11 +232,16 @@ public class BytecodeGenTest extends TestCase {
 
     // null the proxy
     testObject = null;
-    return clazzRef;
-  }
 
-  public void testProxyClassUnloading() {
-    GcFinalization.awaitClear(getWeakReference());
+    /*
+     * this should be enough to queue the weak reference
+     * unless something is holding onto it accidentally.
+     */
+    GcFinalization.awaitClear(clazzRef);
+
+    // This test could be somewhat flaky when the GC isn't working.
+    // If it fails, run the test again to make sure it's failing reliably.
+    assertNull("Proxy class was not unloaded.", clazzRef.get());
   }
 
   public void testProxyingPackagePrivateMethods() {
