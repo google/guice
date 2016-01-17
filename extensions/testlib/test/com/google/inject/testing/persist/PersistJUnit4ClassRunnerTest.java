@@ -65,13 +65,13 @@ public class PersistJUnit4ClassRunnerTest {
 
 	@Test
 	public void testSimpleTransaction() {
-		this.injector.getInstance(JpaTestEntityDao.class).runOperationInTxn();
+		this.injector.getInstance(JpaPersistTestEntityDao.class).runOperationInTxn();
 
 		EntityManager em = this.injector.getInstance(EntityManager.class);
 		Assert.assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
 
 		//test that the data has been stored
-		Object result = em.createQuery("from JpaTestEntity where text = :text")
+		Object result = em.createQuery("from JpaPersistTestEntity where text = :text")
 				.setParameter("text", UNIQUE_TEXT).getSingleResult();
 
 		Assert.assertTrue("odd result returned fatal", result instanceof JpaPersistTestEntity);
@@ -85,11 +85,11 @@ public class PersistJUnit4ClassRunnerTest {
 		EntityManager em = this.injector.getInstance(EntityManager.class);
 
 		Assert.assertFalse("txn was active", em.getTransaction().isActive());
-		this.injector.getInstance(JpaTestEntityDao.class).runOperationInNonTxn();
+		this.injector.getInstance(JpaPersistTestEntityDao.class).runOperationInNonTxn();
 
 		Assert.assertFalse("txn was not closed by transactional service", em.getTransaction().isActive());
 
-		Object result = em.createQuery("from JpaTestEntity where text = :text")
+		Object result = em.createQuery("from JpaPersistTestEntity where text = :text")
 				.setParameter("text", TRANSIENT_UNIQUE_TEXT).getSingleResult();
 	}
 
@@ -97,7 +97,7 @@ public class PersistJUnit4ClassRunnerTest {
 
 	}
 
-	public static class JpaTestEntityDao {
+	public static class JpaPersistTestEntityDao {
 
 		@Inject
 		private EntityManager em;
