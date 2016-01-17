@@ -10,3 +10,4 @@ bin/
 .idea/
 *.iml
 *.ipr
+extensions/**/build/
