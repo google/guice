@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.inject.persist.junit;
+package com.google.inject.testing.persist;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.jpa.JpaTestEntity;
+import com.google.inject.testing.persist.jpa.JpaTestEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

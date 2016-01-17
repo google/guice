@@ -17,4 +17,4 @@
 /**
  * Junit classes for guice persist.
  */
-package com.google.inject.persist.junit;
+package com.google.inject.testing.persist;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.inject.persist.junit;
+package com.google.inject.testing.persist;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -23,7 +23,6 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.inject.persist.junit.PersistJUnit4Context.PersistJUnit4ContextHelper.getPersistJUnit4Context;
 
 /**
  * JUnit 4 JPA provider for guice persist.
@@ -52,7 +51,7 @@ public class PersistJUnit4Module extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		configure(getPersistJUnit4Context(this.testClass));
+		configure(PersistJUnit4Context.PersistJUnit4ContextHelper.getPersistJUnit4Context(this.testClass));
 	}
 
 	/**

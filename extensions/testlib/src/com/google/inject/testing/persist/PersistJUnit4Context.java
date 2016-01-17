@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.inject.persist.junit;
+package com.google.inject.testing.persist;
 
-import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import java.lang.annotation.Retention;
