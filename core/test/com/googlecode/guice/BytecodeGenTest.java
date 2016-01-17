@@ -18,6 +18,7 @@ package com.googlecode.guice;
 
 import static com.google.inject.matcher.Matchers.any;
 
+import com.google.common.testing.GcFinalization;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
@@ -225,7 +226,7 @@ public class BytecodeGenTest extends TestCase {
     assertNotSame(testObject.getClass().getClassLoader(), systemClassLoader);
 
     // take a weak reference to the generated proxy class
-    Reference<Class<?>> clazzRef = new WeakReference<Class<?>>(testObject.getClass());
+    WeakReference<Class<?>> clazzRef = new WeakReference<Class<?>>(testObject.getClass());
 
     assertNotNull(clazzRef.get());
 
@@ -236,17 +237,7 @@ public class BytecodeGenTest extends TestCase {
      * this should be enough to queue the weak reference
      * unless something is holding onto it accidentally.
      */
-    final int MAX_COUNT = 100;
-    String[] buf;
-    System.gc();
-    //TODO(cgruber): Use com.google.common.testing.GcFinalization and a countdown latch to un-flake.
-    for (int count = 0 ; clazzRef.get() != null ; count++) {
-      buf = new String[8 * 1024 * 1024];
-      buf = null;
-      System.gc();
-      assertTrue("Timeout waiting for class to be unloaded.  This may be a flaky result.",
-          count <= MAX_COUNT);
-    }
+    GcFinalization.awaitClear(clazzRef);
 
     // This test could be somewhat flaky when the GC isn't working.
     // If it fails, run the test again to make sure it's failing reliably.
