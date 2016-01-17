@@ -8,7 +8,7 @@
     <persistence-unit name="testUnit" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
         
-        <class>com.google.inject.testing.persist.jpa.JpaTestEntity</class>
+        <class>com.google.inject.testing.persist.jpa.JpaPersistTestEntity</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

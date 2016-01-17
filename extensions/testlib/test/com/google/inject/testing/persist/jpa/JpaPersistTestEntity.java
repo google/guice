@@ -20,9 +20,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-/** @author Dhanji R. Prasanna (dhanji@gmail.com) */
+/**
+ *  @author Dhanji R. Prasanna (dhanji@gmail.com)
+ *  @author jccarrillo@acm.org (JC Carrillo)
+ **/
 @Entity
-public class JpaTestEntity {
+public class JpaPersistTestEntity {
   private Long id;
   private String text;
 
@@ -52,7 +55,7 @@ public class JpaTestEntity {
       return false;
     }
 
-    JpaTestEntity that = (JpaTestEntity) o;
+    JpaPersistTestEntity that = (JpaPersistTestEntity) o;
 
     if (id != null ? !id.equals(that.id) : that.id != null) {
       return false;

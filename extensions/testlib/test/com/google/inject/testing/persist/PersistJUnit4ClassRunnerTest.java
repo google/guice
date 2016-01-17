@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.Transactional;
-import com.google.inject.testing.persist.jpa.JpaTestEntity;
+import com.google.inject.testing.persist.jpa.JpaPersistTestEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,10 +74,10 @@ public class PersistJUnit4ClassRunnerTest {
 		Object result = em.createQuery("from JpaTestEntity where text = :text")
 				.setParameter("text", UNIQUE_TEXT).getSingleResult();
 
-		Assert.assertTrue("odd result returned fatal", result instanceof JpaTestEntity);
+		Assert.assertTrue("odd result returned fatal", result instanceof JpaPersistTestEntity);
 
 		Assert.assertEquals("queried entity did not match--did automatic txn fail?",
-				UNIQUE_TEXT, ((JpaTestEntity) result).getText());
+				UNIQUE_TEXT, ((JpaPersistTestEntity) result).getText());
 	}
 
 	@Test(expected = NoResultException.class)
@@ -104,13 +104,13 @@ public class PersistJUnit4ClassRunnerTest {
 
 		@Transactional
 		public void runOperationInTxn() {
-			JpaTestEntity entity = new JpaTestEntity();
+			JpaPersistTestEntity entity = new JpaPersistTestEntity();
 			entity.setText(UNIQUE_TEXT);
 			em.persist(entity);
 		}
 
 		public void runOperationInNonTxn() {
-			JpaTestEntity entity = new JpaTestEntity();
+			JpaPersistTestEntity entity = new JpaPersistTestEntity();
 			entity.setText(TRANSIENT_UNIQUE_TEXT);
 			em.persist(entity);
 		}
