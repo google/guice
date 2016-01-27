@@ -9,21 +9,25 @@ import com.google.inject.Inject;
 import com.google.inject.persist.RequiresUnitOfWork;
 
 public class RequiresUnitOfWorkInterceptor implements MethodInterceptor {
-  @Inject
-  private UnitOfWorkHandler unitOfWorkHandler;
 
+  @Inject
+  private UnitOfWorkService unitOfWork;
+
+  @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+
     RequiresUnitOfWork annotation = readAnnotationMetadata(methodInvocation);
+
     if (annotation == null) {
       // Avoid creating the unit of work in Object class methods
       return methodInvocation.proceed();
-      
+
     } else {
-      unitOfWorkHandler.requireUnitOfWork();
+      unitOfWork.requireUnitOfWork();
       try {
         return methodInvocation.proceed();
       } finally {
-        unitOfWorkHandler.endRequireUnitOfWork();
+        unitOfWork.endRequireUnitOfWork();
       }
     }
   }

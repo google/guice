@@ -1,29 +1,18 @@
 /**
  * Copyright (C) 2010 Google, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.google.inject.persist.jpa;
-
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.persist.PersistService;
-import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
-
-import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -35,6 +24,15 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.persist.PersistService;
+import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
+
+import junit.framework.TestCase;
 
 /**
  * Test of methods with nested Transactional annotations.
@@ -49,7 +47,7 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
-    //startup persistence
+    // startup persistence
     injector.getInstance(PersistService.class).start();
   }
 
@@ -69,7 +67,7 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
   public void testCommittedTransactionWithUnitOfWorkStarted() {
     UnitOfWork uow = injector.getInstance(UnitOfWork.class);
     uow.begin();
-    
+
     newTransactionalObject().runNestedOperationInTxn();
 
     assertUnitOfWorkNotClosed();
@@ -80,16 +78,19 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
 
   public void testCommittedTransactionWithUnitOfWorkAndTransactionStarted() {
     JpaPersistService persistService = injector.getInstance(JpaPersistService.class);
-    persistService.begin();
+
+    UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
+    unitOfWork.begin();
+
     EntityTransaction transaction = persistService.get().getTransaction();
     transaction.begin();
-    
+
     newTransactionalObject().runNestedOperationInTxn();
 
     assertUnitOfWorkNotClosed();
     assertTrue(transaction.isActive());
     transaction.commit();
-    persistService.end();
+    unitOfWork.end();
     assertStoredTextsAre(TEXT_BEFORE_NEST, NESTED_TEXT, TEXT_AFTER_NEST);
   }
 
@@ -106,7 +107,7 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
   public void testInnerRolledbackTransactionWithUnitOfWorkStarted() {
     UnitOfWork uow = injector.getInstance(UnitOfWork.class);
     uow.begin();
-    
+
     try {
       newTransactionalObject().runNestedOperationInTxnThrowingInnerUnchecked();
     } catch (RuntimeException e) {
@@ -131,7 +132,7 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
   public void testOuterRolledbackTransactionWithUnitOfWorkStarted() {
     UnitOfWork uow = injector.getInstance(UnitOfWork.class);
     uow.begin();
-    
+
     try {
       newTransactionalObject().runNestedOperationInTxnThrowingOuterUnchecked();
     } catch (RuntimeException e) {
@@ -146,19 +147,19 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
   private TransactionalObject newTransactionalObject() {
     return injector.getInstance(TransactionalObject.class);
   }
-  
-  private void assertStoredTextsAre(String ... texts) {
+
+  private void assertStoredTextsAre(String... texts) {
     UnitOfWork uow = injector.getInstance(UnitOfWork.class);
     uow.begin();
     try {
       EntityManager em = injector.getInstance(EntityManager.class);
-      List<String> result = em.createQuery(
-          "select text from JpaTestEntity", String.class).getResultList();
-      
+      List<String> result =
+          em.createQuery("select text from JpaTestEntity", String.class).getResultList();
+
       Set<String> currentTextsSet = new HashSet<String>(result);
       Set<String> expectedTextsSet = new HashSet<String>(Arrays.asList(texts));
       assertEquals(expectedTextsSet, currentTextsSet);
-      
+
     } finally {
       uow.end();
     }
@@ -169,11 +170,11 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
     persistService.begin();
     try {
       EntityManager em = injector.getInstance(EntityManager.class);
-      long textCount = em.createQuery(
-          "select count(*) from JpaTestEntity", Long.class).getSingleResult();
-      
+      long textCount =
+          em.createQuery("select count(*) from JpaTestEntity", Long.class).getSingleResult();
+
       assertEquals("No text should have been saved", 0, textCount);
-      
+
     } finally {
       persistService.end();
     }
@@ -222,13 +223,13 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
       runOperationInTxnThrowingUnchecked();
       saveText(TEXT_AFTER_NEST);
     }
-    
+
     @Transactional
     public void runOperationInTxnThrowingUnchecked() {
       saveText(NESTED_TEXT);
       throw new IllegalStateException();
     }
-    
+
     @Transactional
     public void runNestedOperationInTxnThrowingOuterUnchecked() {
       saveText(TEXT_BEFORE_NEST);
@@ -236,7 +237,7 @@ public class ManagedLocalNestedTransactionsTest extends TestCase {
       saveText(TEXT_AFTER_NEST);
       throw new IllegalStateException();
     }
-    
+
     private void saveText(String text) {
       JpaTestEntity entity = new JpaTestEntity();
       entity.setText(text);
