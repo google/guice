@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  */
 public final class BytecodeGen {
 
-  static final Logger logger = Logger.getLogger(BytecodeGen.class.getName());
+  private static final Logger logger = Logger.getLogger(BytecodeGen.class.getName());
 
   static final ClassLoader GUICE_CLASS_LOADER = canonicalize(BytecodeGen.class.getClassLoader());
 

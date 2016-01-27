@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class LoggerInjectionTest extends TestCase {
 
-  @Inject Logger logger;
+  @Inject private Logger logger;
 
   public void testLoggerWithMember() {
     Injector injector = Guice.createInjector();
@@ -30,7 +30,7 @@ public class LoggerInjectionTest extends TestCase {
   }
   
   private static class Foo {
-    Logger logger;
+    private Logger logger;
     @SuppressWarnings("unused")
     @Inject Foo(Logger logger) {
       this.logger = logger;

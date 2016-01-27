@@ -90,7 +90,7 @@ final class FactoryProvider2 <F> implements InvocationHandler,
   static final Annotation RETURN_ANNOTATION = UniqueAnnotations.create();
 
   // use the logger under a well-known name, not FactoryProvider2
-  static final Logger logger = Logger.getLogger(AssistedInject.class.getName());
+  private static final Logger logger = Logger.getLogger(AssistedInject.class.getName());
 
   /** if a factory method parameter isn't annotated, it gets this annotation. */
   static final Assisted DEFAULT_ANNOTATION = new Assisted() {
