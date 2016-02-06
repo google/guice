@@ -26,10 +26,10 @@ See the Apache License Version 2.0 for the specific language governing permissio
   <packaging>pom</packaging>
 
   <groupId>com.google.inject</groupId>
-  <artifactId>guice-parent</artifactId>
+  <artifactId>guice-build</artifactId>
   <version>4.0.1-SNAPSHOT</version>
 
-  <name>Google Guice</name>
+  <name>Google Guice - Build</name>
 
   <description>
     Guice is a lightweight dependency injection framework for Java 6 and above
@@ -98,6 +98,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
 
   <modules>
     <module>bom</module>
+    <module>parent</module>
     <module>core</module>
     <module>extensions</module>
     <!-- jdk8-tests module activated only when running under JDK8, below -->
@@ -123,59 +124,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <guice.with.no_aop>true</guice.with.no_aop>
     <gpg.skip>true</gpg.skip>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject-tck</artifactId>
-        <version>1</version>
-      </dependency>
-      <dependency>
-        <groupId>aopalliance</groupId>
-        <artifactId>aopalliance</artifactId>
-        <version>1.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>18.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava-testlib</artifactId>
-        <version>18.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ow2.asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>5.0.3</version>
-      </dependency>
-      <dependency>
-        <groupId>cglib</groupId>
-        <artifactId>cglib</artifactId>
-        <version>3.2.0</version>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.11</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-  </dependencies>
 
   <build>
     <!--
