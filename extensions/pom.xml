@@ -38,6 +38,109 @@
 -->
   </modules>
 
+  <properties>
+    <google-dagger.version>2.0</google-dagger.version>
+    <org.hibernate.javax.persistence.version>1.0.0.Final</org.hibernate.javax.persistence.version>
+    <hibernate-entitymanager.version>4.1.7.Final</hibernate-entitymanager.version>
+    <servlet-api.version>2.5</servlet-api.version>
+    <slf4j-simple.version>1.6.1</slf4j-simple.version>
+    <commons-logging.version>1.1.1</commons-logging.version>
+    <hsqldb-j5.version>2.0.0</hsqldb-j5.version>
+    <asm.version>5.0.3</asm.version>
+    <struts2-core.version>2.2.1</struts2-core.version>
+    <org.hamcrest.version>1.3</org.hamcrest.version>
+    <mockito-core.version>1.9.5</mockito-core.version>
+    <easymock.version>3.0</easymock.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Google -->
+      <!-- Google Guice Extensions -->
+      <dependency>
+        <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-assistedinject</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-servlet</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-multibindings</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!-- Google Dagger -->
+      <dependency>
+        <groupId>com.google.dagger</groupId>
+        <artifactId>dagger</artifactId>
+        <version>${google-dagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.javax.persistence</groupId>
+        <artifactId>hibernate-jpa-2.0-api</artifactId>
+        <version>${org.hibernate.javax.persistence.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>${hibernate-entitymanager.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>${servlet-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j-simple.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons-logging.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb-j5</artifactId>
+        <version>${hsqldb-j5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-library</artifactId>
+        <version>${org.hamcrest.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>${org.hamcrest.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>${easymock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.struts</groupId>
+        <artifactId>struts2-core</artifactId>
+        <version>${struts2-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>${asm.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!--
      | All extensions depend on the core
@@ -45,40 +148,6 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <!--
-     | Some extension tests depend on the core tests
-    -->
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency>
-    <!--
-     | Some extension tests depend on guava test libs which are not inherited
-     | from test scope.
-    -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava-testlib</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!--
-     | Some extension tests depend on cglib which is not embedded
-     | in an execution that doesn't include package.
-    -->
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

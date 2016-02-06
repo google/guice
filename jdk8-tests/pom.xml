@@ -31,14 +31,11 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-assistedinject</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
@@ -48,7 +45,6 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-testlib</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

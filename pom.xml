@@ -122,49 +122,98 @@ See the Apache License Version 2.0 for the specific language governing permissio
     -->
     <guice.with.no_aop>true</guice.with.no_aop>
     <gpg.skip>true</gpg.skip>
+    <guava.version>18.0</guava.version>
+    <google-dagger.version>2.0</google-dagger.version>
+    <javax.inject.version>1</javax.inject.version>
+    <aopalliance.version>1.0</aopalliance.version>
+    <struts2-core.version>2.2.1</struts2-core.version>
+    <cglib.version>3.2.0</cglib.version>
+    <junit.version>4.11</junit.version>
+    <org.apache.felix.version>3.0.5</org.apache.felix.version>
+    <biz.aQute-bnd.version>0.0.384</biz.aQute-bnd.version>
+    <spring.version>3.0.5.RELEASE</spring.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Google -->
+      <!-- Google Guice -->
       <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!-- Google Guice Extensions -->
+      <dependency>
+        <groupId>com.google.inject.extensions</groupId>
+        <artifactId>guice-assistedinject</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- Third Party -->
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.framework</artifactId>
+        <version>${org.apache.felix.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>biz.aQute</groupId>
+        <artifactId>bnd</artifactId>
+        <version>${biz.aQute-bnd.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>${spring.version}</version>
       </dependency>
       <dependency>
         <groupId>javax.inject</groupId>
         <artifactId>javax.inject-tck</artifactId>
-        <version>1</version>
+        <version>${javax.inject.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>${javax.inject.version}</version>
       </dependency>
       <dependency>
         <groupId>aopalliance</groupId>
         <artifactId>aopalliance</artifactId>
-        <version>1.0</version>
+        <version>${aopalliance.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>${guava.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>18.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ow2.asm</groupId>
-        <artifactId>asm</artifactId>
-        <version>5.0.3</version>
+        <version>${guava.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>cglib</groupId>
         <artifactId>cglib</artifactId>
-        <version>3.2.0</version>
+        <version>${cglib.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
