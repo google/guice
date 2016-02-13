@@ -13,4 +13,11 @@
 
   <name>Google Guice - Extensions - AssistedInject</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <classifier>tests</classifier>
+    </dependency>
+  </dependencies>
 </project>

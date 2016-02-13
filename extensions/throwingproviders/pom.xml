@@ -13,6 +13,18 @@
 
   <name>Google Guice - Extensions - ThrowingProviders</name>
 
+  <dependencies>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <classifier>tests</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
