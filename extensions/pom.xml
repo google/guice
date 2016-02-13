@@ -41,7 +41,7 @@
   <properties>
     <google-dagger.version>2.0</google-dagger.version>
     <org.hibernate.javax.persistence.version>1.0.0.Final</org.hibernate.javax.persistence.version>
-    <hibernate-entitymanager.version>4.1.7.Final</hibernate-entitymanager.version>
+    <hibernate.version>4.1.7.Final</hibernate.version>
     <servlet-api.version>2.5</servlet-api.version>
     <slf4j-simple.version>1.6.1</slf4j-simple.version>
     <commons-logging.version>1.1.1</commons-logging.version>
@@ -77,6 +77,13 @@
         <groupId>com.google.dagger</groupId>
         <artifactId>dagger</artifactId>
         <version>${google-dagger.version}</version>
+        <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.hibernate.javax.persistence</groupId>
@@ -86,7 +93,38 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
-        <version>${hibernate-entitymanager.version}</version>
+        <version>${hibernate.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.jboss.spec.javax.transaction</groupId>
+            <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.hibernate.common</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernate.version}</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
@@ -97,6 +135,7 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${slf4j-simple.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
@@ -122,6 +161,12 @@
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>${easymock.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -132,6 +177,24 @@
         <groupId>org.apache.struts</groupId>
         <artifactId>struts2-core</artifactId>
         <version>${struts2-core.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>ognl</groupId>
+            <artifactId>ognl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
