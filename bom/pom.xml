@@ -5,7 +5,7 @@
 
   <parent>
     <groupId>com.google.inject</groupId>
-    <artifactId>guice-parent</artifactId>
+    <artifactId>guice-build</artifactId>
     <version>4.0.1-SNAPSHOT</version>
   </parent>
 
@@ -15,84 +15,89 @@
 
   <name>Google Guice - Bill of Materials</name>
 
+  <properties>
+    <guice.version>${project.version}</guice.version>
+    <guice-exentions.version>${project.version}</guice-exentions.version>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
-        <version>${project.version}</version>
+        <version>${guice.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
-        <version>${project.version}</version>
+        <version>${guice.version}</version>
         <classifier>no_aop</classifier>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
-        <version>${project.version}</version>
-        <classifier>classes</classifier>
+        <version>${guice.version}</version>
+        <classifier>tests</classifier>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-assistedinject</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-dagger-adapter</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-grapher</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-jmx</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-jndi</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-multibindings</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-persist</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-servlet</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-spring</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-struts2</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-testlib</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject.extensions</groupId>
         <artifactId>guice-throwingproviders</artifactId>
-        <version>${project.version}</version>
+        <version>${guice-exentions.version}</version>
       </dependency>
 <!--
  |  not yet promoted...
