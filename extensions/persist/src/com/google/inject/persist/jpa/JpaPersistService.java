@@ -40,7 +40,7 @@ import javax.persistence.Persistence;
  */
 @Singleton
 class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
-  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibitImplicitEntityManagerInjection";
+  private static final String SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT = "com.google.inject.persist.jpa.prohibitEntityManagerInjectionOutsideWorkUnit";
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
   private final String persistenceUnitName;
@@ -55,7 +55,7 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
 
   public EntityManager get() {
     if (!isWorking()) {
-      Preconditions.checkState(!isImplicitEntityManagerInjectionProhibited(),
+      Preconditions.checkState(!isEntityManagerInjectionOutsideWorkUnitProhibited(),
               "Requested EntityManager outside work unit. "
                       + "Try calling UnitOfWork.begin() first, or use a PersistFilter if you "
                       + "are inside a servlet environment.");
@@ -70,8 +70,8 @@ class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistS
     return em;
   }
 
-  private static boolean isImplicitEntityManagerInjectionProhibited() {
-    return Boolean.valueOf(System.getProperty(SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION));
+  private static boolean isEntityManagerInjectionOutsideWorkUnitProhibited() {
+    return Boolean.valueOf(System.getProperty(SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT));
   }
 
   public boolean isWorking() {

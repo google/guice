@@ -33,7 +33,7 @@ public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
-  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibitImplicitEntityManagerInjection";
+  private static final String SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT = "com.google.inject.persist.jpa.prohibitEntityManagerInjectionOutsideWorkUnit";
 
   private final JpaPersistService sut = new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
@@ -61,8 +61,8 @@ public class JpaPersistServiceTest extends TestCase {
     }
   }
 
-  public void test_givenImplicitEntityManagerInjectionProhibited_whenEntityManagerAboutToInject_thenExceptionIsThrown() {
-    System.setProperty(SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION, "true");
+  public void test_givenEntityManagerInjectionOutsideWorkUnitProhibited_whenEntityManagerAboutToInject_thenExceptionIsThrown() {
+    System.setProperty(SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT, "true");
     sut.start(factory);
 
     try {
@@ -74,7 +74,7 @@ public class JpaPersistServiceTest extends TestCase {
     }
   }
 
-  public void test_givenImplicitEntityManagerInjectionNotProhibited_whenEntityManagerAboutToInject_thenNothingHappens() {
+  public void test_givenEntityManagerInjectionOutsideWorkUnitProhibited_whenEntityManagerAboutToInject_thenInjectionSucceeds() {
     sut.start(factory);
 
     assertNotNull(sut.get());
@@ -82,7 +82,7 @@ public class JpaPersistServiceTest extends TestCase {
 
   @Override
   public void tearDown() throws Exception {
-    System.clearProperty(SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION);
+    System.clearProperty(SYSTEM_PROPERTY_PROHIBIT_EM_INJECTION_OUTSIDE_WORK_UNIT);
   }
 
   private class SimulatedException extends RuntimeException {
