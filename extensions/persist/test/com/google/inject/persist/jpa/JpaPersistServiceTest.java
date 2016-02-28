@@ -74,7 +74,7 @@ public class JpaPersistServiceTest extends TestCase {
     }
   }
 
-  public void test_givenEntityManagerInjectionOutsideWorkUnitProhibited_whenEntityManagerAboutToInject_thenInjectionSucceeds() {
+  public void test_givenEntityManagerInjectionOutsideWorkUnitNotProhibited_whenEntityManagerAboutToInject_thenInjectionSucceeds() {
     sut.start(factory);
 
     assertNotNull(sut.get());
