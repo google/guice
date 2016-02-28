@@ -33,6 +33,7 @@ public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
+  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.guice.prohibit_implicit_em_injection";
 
   private final JpaPersistService sut = new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);
@@ -58,6 +59,30 @@ public class JpaPersistServiceTest extends TestCase {
     catch (SimulatedException expected) {
       assertThat(sut.isWorking(), is(false));
     }
+  }
+
+  public void test_givenImplicitEntityManagerInjectionProhibited_whenEntityManagerAboutToInject_thenExceptionIsThrown() {
+    System.setProperty(SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION, "true");
+    sut.start(factory);
+
+    try {
+      sut.get();
+      fail("Exception expected");
+    }
+    catch (IllegalStateException expected) {
+      // nop
+    }
+  }
+
+  public void test_givenImplicitEntityManagerInjectionNotProhibited_whenEntityManagerAboutToInject_thenNothingHappens() {
+    sut.start(factory);
+
+    assertNotNull(sut.get());
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    System.clearProperty(SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION);
   }
 
   private class SimulatedException extends RuntimeException {
