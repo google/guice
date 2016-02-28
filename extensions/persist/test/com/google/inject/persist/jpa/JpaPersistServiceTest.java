@@ -33,7 +33,7 @@ public class JpaPersistServiceTest extends TestCase {
 
   private static final String PERSISTENCE_UNIT_NAME = "test_persistence_unit_name";
   private static final Properties PERSISTENCE_PROPERTIES = new Properties();
-  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibit_implicit_em_injection";
+  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibitImplicitEntityManagerInjection";
 
   private final JpaPersistService sut = new JpaPersistService(PERSISTENCE_UNIT_NAME, PERSISTENCE_PROPERTIES);
   private final PersistenceProvider provider = mock(PersistenceProvider.class);

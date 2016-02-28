@@ -40,7 +40,7 @@ import javax.persistence.Persistence;
  */
 @Singleton
 class JpaPersistService implements Provider<EntityManager>, UnitOfWork, PersistService {
-  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibit_implicit_em_injection";
+  private static final String SYSTEM_PROPERTY_PROHIBIT_IMPLICIT_EM_INJECTION = "com.google.inject.persist.jpa.prohibitImplicitEntityManagerInjection";
   private final ThreadLocal<EntityManager> entityManager = new ThreadLocal<EntityManager>();
 
   private final String persistenceUnitName;
