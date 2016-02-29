@@ -21,8 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.Annotations.generateAnnotation;
 import static com.google.inject.internal.Annotations.isAllDefaultMethods;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
 
@@ -58,7 +56,10 @@ public class Key<T> {
 
   private final TypeLiteral<T> typeLiteral;
   private final int hashCode;
-  private final Supplier<String> toStringSupplier;
+  // This field is updated using the 'Data-Race-Ful' lazy intialization pattern
+  // See http://jeremymanson.blogspot.com/2008/12/benign-data-races-in-java.html for a detailed
+  // explanation.
+  private String toString;
 
   /**
    * Constructs a new key. Derives the type from this class's type parameter.
@@ -78,7 +79,6 @@ public class Key<T> {
     this.typeLiteral = MoreTypes.canonicalizeForKey(
         (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
-    this.toStringSupplier = createToStringSupplier();
   }
 
   /**
@@ -100,7 +100,6 @@ public class Key<T> {
     this.typeLiteral = MoreTypes.canonicalizeForKey(
         (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
-    this.toStringSupplier = createToStringSupplier();
   }
 
   /**
@@ -120,7 +119,6 @@ public class Key<T> {
     this.typeLiteral = MoreTypes.canonicalizeForKey(
         (TypeLiteral<T>) TypeLiteral.fromSuperclassTypeParameter(getClass()));
     this.hashCode = computeHashCode();
-    this.toStringSupplier = createToStringSupplier();
   }
 
   /**
@@ -131,7 +129,6 @@ public class Key<T> {
     this.annotationStrategy = annotationStrategy;
     this.typeLiteral = MoreTypes.canonicalizeForKey((TypeLiteral<T>) TypeLiteral.get(type));
     this.hashCode = computeHashCode();
-    this.toStringSupplier = createToStringSupplier();
   }
 
   /** Constructs a key from a manually specified type. */
@@ -139,7 +136,6 @@ public class Key<T> {
     this.annotationStrategy = annotationStrategy;
     this.typeLiteral = MoreTypes.canonicalizeForKey(typeLiteral);
     this.hashCode = computeHashCode();
-    this.toStringSupplier = createToStringSupplier();
   }
 
   /**
@@ -149,19 +145,6 @@ public class Key<T> {
     return typeLiteral.hashCode() * 31 + annotationStrategy.hashCode();
   }
 
-  /**
-   * @return a {@link Supplier} which memoizes the value for lazy initialization.
-   */
-  private Supplier<String> createToStringSupplier() {
-    // The performance hit on access is acceptable since the intended use is for non-performance-
-    // critical applications such as debugging and logging.
-    return Suppliers.memoize(new Supplier<String>() {
-      @Override public String get() {
-        return "Key[type=" + typeLiteral + ", annotation=" + annotationStrategy + "]";
-      }
-    });
-  }
-  
   /**
    * Gets the key type.
    */
@@ -225,7 +208,14 @@ public class Key<T> {
   }
 
   @Override public final String toString() {
-    return toStringSupplier.get();
+    // Note: to not introduce dangerous data races the field should only be read once in this
+    // method.
+    String local = toString;
+    if (local == null) {
+      local = "Key[type=" + typeLiteral + ", annotation=" + annotationStrategy + "]";
+      toString = local;
+    }
+    return local;
   }
 
   /**
