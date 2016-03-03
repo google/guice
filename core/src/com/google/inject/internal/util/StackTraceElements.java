@@ -19,12 +19,12 @@ package com.google.inject.internal.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.MapMaker;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Creates stack trace elements for members.
@@ -52,7 +52,7 @@ public class StackTraceElements {
           });
   /*end[AOP]*/
 
-  private static Map<Object, Object> cache = new MapMaker().makeMap();
+  private static Map<Object, Object> cache = new ConcurrentHashMap<Object, Object>();
   private static final String UNKNOWN_SOURCE = "Unknown Source";
 
   public static Object forMember(Member member) {
