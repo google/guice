@@ -146,7 +146,9 @@ public class Asserts {
   public static <E> E reserialize(E original) throws IOException {
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
-      new ObjectOutputStream(out).writeObject(original);
+      ObjectOutputStream objectoutputstream = new ObjectOutputStream(out);
+      objectoutputstream.writeObject(original);
+      objectoutputstream.flush();
       ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
       @SuppressWarnings("unchecked") // the reserialized type is assignable
       E reserialized = (E) new ObjectInputStream(in).readObject();
