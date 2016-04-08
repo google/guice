@@ -71,14 +71,14 @@ import java.lang.reflect.Type;
  * public class TestFoo {
  *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
  *   {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
- *   
+ *
  *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
  *   {@literal @}Bind(lazy = true) private String userName;
  *
  *   // bind(SuperClass.class).toInstance(aSubClass);
  *   {@literal @}Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
  *
- *   // bind(Object.class).annotatedWith(MyBindingAnnotation.class).toInstance(object2);
+ *   // bind(String.class).annotatedWith(MyBindingAnnotation.class).toInstance(myString);
  *   {@literal @}Bind
  *   {@literal @}MyBindingAnnotation
  *   private String myString = "hello";
