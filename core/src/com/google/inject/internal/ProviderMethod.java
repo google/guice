@@ -24,10 +24,12 @@ import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
+import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 import com.google.inject.spi.ProvidesMethodBinding;
@@ -168,9 +170,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
     }
 
     try {
-      @SuppressWarnings({ "unchecked", "UnnecessaryLocalVariable" })
-      T result = (T) doProvision(parameters);
-      return result;
+      return doProvision(parameters);
     } catch (IllegalAccessException e) {
       throw new AssertionError(e);
     } catch (InvocationTargetException e) {
@@ -179,7 +179,7 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
   }
 
   /** Extension point for our subclasses to implement the provisioning strategy. */
-  abstract Object doProvision(Object[] parameters)
+  abstract T doProvision(Object[] parameters)
       throws IllegalAccessException, InvocationTargetException;
 
   @Override
@@ -257,9 +257,11 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
       this.methodIndex = fc.getMethod(method).getIndex();
     }
 
-    @Override public Object doProvision(Object[] parameters)
+    @SuppressWarnings("unchecked")
+    @Override
+    public T doProvision(Object[] parameters)
         throws IllegalAccessException, InvocationTargetException {
-      return fastClass.invoke(methodIndex, instance, parameters);
+      return (T) fastClass.invoke(methodIndex, instance, parameters);
     }
   }
   /*end[AOP]*/
@@ -284,9 +286,138 @@ public abstract class ProviderMethod<T> implements ProviderWithExtensionVisitor<
           annotation);
     }
 
-    @Override Object doProvision(Object[] parameters) throws IllegalAccessException,
-        InvocationTargetException {
-      return method.invoke(instance, parameters);
+    @SuppressWarnings("unchecked")
+    @Override
+    T doProvision(Object[] parameters) throws IllegalAccessException, InvocationTargetException {
+      return (T) method.invoke(instance, parameters);
+    }
+  }
+
+  static <T> BindingImpl<T> createBinding(
+      InjectorImpl injector,
+      Key<T> key,
+      ProviderMethod<T> providerMethod,
+      Object source,
+      Scoping scoping) {
+    Factory<T> factory = new Factory<T>(source, providerMethod);
+    InternalFactory<? extends T> scopedFactory =
+        Scoping.scope(key, injector, factory, source, scoping);
+    return new ProviderMethodProviderInstanceBindingImpl<T>(
+        injector, key, source, scopedFactory, scoping, providerMethod, factory);
+  }
+
+  private static final class ProviderMethodProviderInstanceBindingImpl<T>
+      extends ProviderInstanceBindingImpl<T> implements DelayedInitialize {
+    final Factory<T> factory;
+
+    ProviderMethodProviderInstanceBindingImpl(
+        InjectorImpl injector,
+        Key<T> key,
+        Object source,
+        InternalFactory<? extends T> internalFactory,
+        Scoping scoping,
+        // TODO(lukes): it is a little strange that we expose the ProviderMethod as the
+        // userProvider.  Maybe we should expose BindingImpl.getProvider() and then we could drop
+        // the ProviderLookups stored by ProviderMethod.  It probably isn't a big deal either way
+        // but having 2 ways to invoke the method is kind of weird.
+        ProviderMethod<T> providerInstance,
+        Factory<T> factory) {
+      super(
+          injector,
+          key,
+          source,
+          internalFactory,
+          scoping,
+          providerInstance,
+          ImmutableSet.<InjectionPoint>of());
+      this.factory = factory;
+    }
+
+    @Override
+    public void initialize(InjectorImpl injector, Errors errors) throws ErrorsException {
+      factory.parameterInjectors =
+          injector.getParametersInjectors(factory.providerMethod.dependencies.asList(), errors);
+      factory.provisionCallback = injector.provisionListenerStore.get(this);
+    }
+  }
+
+  private static final class Factory<T> implements InternalFactory<T> {
+    private final Object source;
+    private final ProviderMethod<T> providerMethod;
+    private ProvisionListenerStackCallback<T> provisionCallback;
+    private SingleParameterInjector<?>[] parameterInjectors;
+
+    Factory(Object source, ProviderMethod<T> providerMethod) {
+      this.source = source;
+      this.providerMethod = providerMethod;
+    }
+
+    @Override
+    public T get(
+        final Errors errors,
+        final InternalContext context,
+        final Dependency<?> dependency,
+        boolean linked)
+        throws ErrorsException {
+      final ConstructionContext<T> constructionContext = context.getConstructionContext(this);
+      // We have a circular reference between bindings. Return a proxy.
+      if (constructionContext.isConstructing()) {
+        Class<?> expectedType = dependency.getKey().getTypeLiteral().getRawType();
+        // TODO: if we can't proxy this object, can we proxy the other object?
+        @SuppressWarnings("unchecked")
+        T proxyType =
+            (T) constructionContext.createProxy(errors, context.getInjectorOptions(), expectedType);
+        return proxyType;
+      }
+      // Optimization: Don't go through the callback stack if no one's listening.
+      constructionContext.startConstruction();
+      try {
+        if (!provisionCallback.hasListeners()) {
+          return provision(errors, dependency, context, constructionContext);
+        } else {
+          return provisionCallback.provision(
+              errors,
+              context,
+              new ProvisionCallback<T>() {
+                @Override
+                public T call() throws ErrorsException {
+                  return provision(errors, dependency, context, constructionContext);
+                }
+              });
+        }
+      } finally {
+        constructionContext.removeCurrentReference();
+        constructionContext.finishConstruction();
+      }
+    }
+
+    T provision(
+        Errors errors,
+        Dependency<?> dependency,
+        InternalContext context,
+        ConstructionContext<T> constructionContext)
+        throws ErrorsException {
+      try {
+        T t = providerMethod.doProvision(
+            SingleParameterInjector.getAll(errors, context, parameterInjectors));
+        errors.checkForNull(t, providerMethod.getMethod(), dependency);
+        constructionContext.setProxyDelegates(t);
+        return t;
+      } catch (IllegalAccessException e) {
+        throw new AssertionError(e);
+      } catch (InvocationTargetException userException) {
+        Throwable cause =
+            userException.getCause() != null ? userException.getCause() : userException;
+        throw errors
+            .withSource(source)
+            .errorInProvider(cause)
+            .toException();
+      }
+    }
+    
+    @Override
+    public String toString() {
+      return providerMethod.toString();
     }
   }
 }

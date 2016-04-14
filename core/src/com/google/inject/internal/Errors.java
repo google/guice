@@ -375,8 +375,8 @@ public final class Errors implements Serializable {
     return errorInUserCode(cause, "Error injecting constructor, %s", cause);
   }
 
-  public Errors errorInProvider(RuntimeException runtimeException) {
-    Throwable unwrapped = unwrap(runtimeException);
+  public Errors errorInProvider(Throwable cause) {
+    Throwable unwrapped = unwrap(cause);
     return errorInUserCode(unwrapped, "Error in custom provider, %s", unwrapped);
   }
 
@@ -426,7 +426,7 @@ public final class Errors implements Serializable {
     }
   }
 
-  private Throwable unwrap(RuntimeException runtimeException) {
+  private Throwable unwrap(Throwable runtimeException) {
    if(runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
      return runtimeException.getCause();
    } else {
@@ -616,7 +616,7 @@ public final class Errors implements Serializable {
   }
 
   /**
-   * Returns {@code value} if it is non-null allowed to be null. Otherwise a message is added and
+   * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
    * an {@code ErrorsException} is thrown.
    */
   public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
