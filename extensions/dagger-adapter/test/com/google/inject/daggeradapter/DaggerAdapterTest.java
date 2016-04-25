@@ -28,6 +28,8 @@ import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
 
+import dagger.multibindings.IntoSet;
+
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -65,7 +67,9 @@ public class DaggerAdapterTest extends TestCase {
   }
 
   @dagger.Module static class SetBindingDaggerModule1 {
-    @dagger.Provides(type=SET) Integer anInteger() {
+    @dagger.Provides
+    @IntoSet
+    Integer anInteger() {
       return 5;
     }
   }

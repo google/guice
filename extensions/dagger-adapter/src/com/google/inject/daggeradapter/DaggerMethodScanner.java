@@ -24,6 +24,9 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
+import dagger.multibindings.ElementsIntoSet;
+import dagger.multibindings.IntoMap;
 import dagger.Provides.Type;
 
 import java.lang.annotation.Annotation;
@@ -46,12 +49,24 @@ final class DaggerMethodScanner extends ModuleAnnotatedMethodScanner {
       Binder binder, Annotation rawAnnotation, Key<T> key, InjectionPoint injectionPoint) {
     Method providesMethod = (Method) injectionPoint.getMember();
     Provides annotation = (Provides) rawAnnotation;
+    if (providesMethod.isAnnotationPresent(IntoSet.class)) {
+      return processSetBinding(binder, key);
+    } else if (providesMethod.isAnnotationPresent(ElementsIntoSet.class)) {
+      binder.addError("@ElementsIntoSet contributions are not suppored by Guice.", providesMethod);
+      return key;
+    } else if (providesMethod.isAnnotationPresent(IntoMap.class)) {
+      /* TODO(cgruber) implement map bindings */
+      binder.addError("Map bindings are not yet supported.");
+      return key;
+    }
+
     switch (annotation.type()) {
       case UNIQUE:
         return key;
       case MAP:
         /* TODO(cgruber) implement map bindings */
         binder.addError("Map bindings are not yet supported.");
+        return key;
       case SET:
         return processSetBinding(binder, key);
       case SET_VALUES:
