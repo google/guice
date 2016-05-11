@@ -1052,8 +1052,21 @@ final class InjectorImpl implements Injector, Lookups {
     return getProvider(type).get();
   }
 
-  /** @see #getGlobalInternalContext */
+  /**
+   * Holds Object[] as a mutable wrapper, rather than InternalContext, since array operations are
+   * faster than ThreadLocal.set() / .get() operations.
+   *
+   * Holds Object[] rather than InternalContext[], since localContext never gets cleaned up at any
+   * point. This could lead to problems when, for example, an OSGI application is reloaded,
+   * the InjectorImpl is destroyed, but the thread that the injector runs on is kept alive.
+   * In such a case, ThreadLocal itself would hold on to a reference to localContext,
+   * which would hold on to the old InternalContext.class object, which would hold on to the
+   * old classloader that loaded that class, and so on.
+   *
+   * @see #getGlobalInternalContext
+   **/
   private final ThreadLocal<Object[]> localContext;
+
   /**
    * Synchronization: map value is modified only for the current thread,
    * it's ok to read map values of other threads. It can change between your
