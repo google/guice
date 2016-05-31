@@ -38,6 +38,7 @@ import java.lang.annotation.Retention;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
 /** Unit tests for {@link BoundFieldModule}. */
@@ -367,7 +368,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
-  public void testBindingNullField() {
+  public void testBindingNonNullableNullField() {
     Object instance = new Object() {
       @Bind private Integer anInt = null;
     };
@@ -379,9 +380,17 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
+  }
+
+  public void testBindingNullableNullField() {
+    Object instance = new Object() {
+      @Bind @Nullable private Integer anInt = null;
+    };
+
+    Injector injector = Guice.createInjector(BoundFieldModule.of(instance));
+    assertNull(injector.getInstance(Integer.class));
   }
 
   public void testBindingNullProvider() {
@@ -396,8 +405,25 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
+    }
+  }
+
+  public void testBindingNullProviderAnnotatedNullable() {
+    Object instance = new Object() {
+      @Bind @Nullable private Provider<Integer> anIntProvider = null;
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(),
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
     }
   }
 
@@ -722,7 +748,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(2, injector.getInstance(Integer.class).intValue());
   }
 
-  public void testFieldBound_lazy_rejectNull() {
+  public void testNonNullableFieldBound_lazy_rejectNull() {
     LazyClass asProvider = new LazyClass();
     Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
     assertEquals(1, injector.getInstance(Integer.class).intValue());
@@ -732,9 +758,20 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
+  }
+
+  static final class LazyClassNullable {
+    @Bind(lazy = true) @Nullable Integer foo = 1;
+  }
+
+  public void testNullableFieldBound_lazy_allowNull() {
+    LazyClassNullable asProvider = new LazyClassNullable();
+    Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    asProvider.foo = null;
+    assertNull(injector.getInstance(Integer.class));
   }
 
   static final class LazyProviderClass {

@@ -26,6 +26,9 @@ import java.lang.annotation.Target;
  * Annotation used by {@link BoundFieldModule} to indicate that a field should be bound to its
  * value using Guice.
  *
+ * <p>Binding to {@code null} is only allowed for fields that are annotated {@code @Nullable}. See
+ * <a href="https://github.com/google/guice/wiki/UseNullable">https://github.com/google/guice/wiki/UseNullable</a>
+ *
  * @see BoundFieldModule
  * @author eatnumber1@google.com (Russ Harmon)
  */
@@ -41,7 +44,7 @@ public @interface Bind {
   /**
    * If true, {@link BoundFieldModule} will delay retrieving the field's value until injection time
    * rather than eagerly fetching it at configure time.
-   * 
+   *
    * <p>This option is not supported with Provider valued fields.
    */
   boolean lazy() default false;
