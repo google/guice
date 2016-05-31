@@ -229,6 +229,12 @@ public final class BoundFieldModule implements Module {
         throw new AssertionError(e);
       }
     }
+
+    /** Returns whether a binding supports null values. */
+    boolean allowsNull() {
+      return !isTransparentProvider(type.getRawType())
+          && Nullability.allowsNull(field.getAnnotations());
+    }
   }
 
   private static boolean hasInject(Field field) {
@@ -328,9 +334,9 @@ public final class BoundFieldModule implements Module {
       }
       // This is safe because we checked that the field's type is Provider above.
       @SuppressWarnings("unchecked")
-      javax.inject.Provider<?> fieldProviderUnsafe =
-          (javax.inject.Provider<?>) getFieldProvider(fieldInfo);
-      binderUnsafe.toProvider(fieldProviderUnsafe);
+      javax.inject.Provider<?> fieldValueUnsafe =
+          (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+      binderUnsafe.toProvider(fieldValueUnsafe);
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(
           new Provider<Object>() {
@@ -350,28 +356,26 @@ public final class BoundFieldModule implements Module {
     }
   }
 
-  /** Returns a provider to bind for fields that are "transparent providers". */
-  private Object getFieldProvider(final BoundFieldInfo fieldInfo) {
-    Object fieldProvider = fieldInfo.getValue();
-    if (fieldProvider == null) {
-      throwBoundFieldException(
-          fieldInfo.field,
-          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
-              + "behavior.",
-          fieldInfo.field.getName());
-    }
-    return fieldProvider;
-  }
-
-  /** Returns a field value to bind, throwing for non-{@code @Nullable} fields with null values. */
+  /**
+   * Returns the field value to bind, throwing for non-{@code @Nullable} fields with null values,
+   * and for null "transparent providers".
+   */
   @Nullable
   private Object getFieldValue(final BoundFieldInfo fieldInfo) {
     Object fieldValue = fieldInfo.getValue();
-    if (fieldValue == null && !Nullability.allowsNull(fieldInfo.field.getAnnotations())) {
-      throwBoundFieldException(
-          fieldInfo.field,
-          "Binding to null values is only allowed for fields that are annotated @Nullable.",
-          fieldInfo.field.getName());
+    if (fieldValue == null && !fieldInfo.allowsNull()) {
+      if (isTransparentProvider(fieldInfo.type.getRawType())) {
+        throwBoundFieldException(
+            fieldInfo.field,
+            "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+                + "behavior.",
+            fieldInfo.field.getName());
+      } else {
+        throwBoundFieldException(
+            fieldInfo.field,
+            "Binding to null values is only allowed for fields that are annotated @Nullable.",
+            fieldInfo.field.getName());
+      }
     }
     return fieldValue;
   }

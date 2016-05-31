@@ -410,7 +410,7 @@ public class BoundFieldModuleTest extends TestCase {
     }
   }
 
-  public void testBindingNullProviderAnnotatedNullable() {
+  public void testBindingNullableNullProvider() {
     Object instance = new Object() {
       @Bind @Nullable private Provider<Integer> anIntProvider = null;
     };
@@ -466,6 +466,17 @@ public class BoundFieldModuleTest extends TestCase {
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "Could not find a suitable constructor in java.lang.Integer.");
     }
+  }
+
+  public void testNullableProviderSubclassesAllowNull() {
+    Object instance = new Object() {
+      @Bind @Nullable private IntegerProvider anIntProvider = null;
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
   }
 
   private static class ParameterizedObject<T> {
