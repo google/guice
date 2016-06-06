@@ -38,7 +38,6 @@ import java.lang.annotation.Retention;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.inject.Qualifier;
 
 /** Unit tests for {@link BoundFieldModule}. */
@@ -383,6 +382,9 @@ public class BoundFieldModuleTest extends TestCase {
           "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
   }
+
+  @Retention(RUNTIME)
+  private @interface Nullable {}
 
   public void testBindingNullableNullField() {
     Object instance = new Object() {

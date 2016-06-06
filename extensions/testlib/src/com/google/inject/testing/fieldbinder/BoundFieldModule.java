@@ -35,8 +35,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.annotation.Nullable;
-
 /**
  * Automatically creates Guice bindings for fields in an object annotated with {@link Bind}.
  *
@@ -341,7 +339,7 @@ public final class BoundFieldModule implements Module {
       binderUnsafe.toProvider(
           new Provider<Object>() {
             @Override
-            @Nullable
+            // @Nullable
             public Object get() {
               return getFieldValue(fieldInfo);
             }
@@ -356,11 +354,11 @@ public final class BoundFieldModule implements Module {
     }
   }
 
+  // @Nullable
   /**
    * Returns the field value to bind, throwing for non-{@code @Nullable} fields with null values,
    * and for null "transparent providers".
    */
-  @Nullable
   private Object getFieldValue(final BoundFieldInfo fieldInfo) {
     Object fieldValue = fieldInfo.getValue();
     if (fieldValue == null && !fieldInfo.allowsNull()) {
