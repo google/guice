@@ -103,7 +103,7 @@ public class MapBinderTest extends TestCase {
   private final TypeLiteral<Integer> intType = TypeLiteral.get(Integer.class);
 
   private Type javaxProviderOf(Type type) {
-    return Types.newParameterizedType(javax.inject.Provider.class, type);
+    return Types.javaxProviderOf(type);
   }
 
   private Type mapEntryOf(Type keyType, Type valueType) {
@@ -138,13 +138,22 @@ public class MapBinderTest extends TestCase {
             Key.get(Types.mapOf(String.class, Types.setOf(String.class))),
             // Map<K, Set<Provider<V>>
             Key.get(Types.mapOf(String.class, Types.setOf(Types.providerOf(String.class)))),
+            // Map<K, Set<javax.inject.Provider<V>>
+            Key.get(Types.mapOf(String.class, Types.setOf(Types.javaxProviderOf(String.class)))),
+            // Map<K, Collection<Provider<V>>
+            Key.get(Types.mapOf(String.class, Types.collectionOf(Types.providerOf(String.class)))),
+            // Map<K, Collection<javax.inject.Provider<V>>
+            Key.get(Types.mapOf(String.class, 
+                Types.collectionOf(Types.javaxProviderOf(String.class)))),
             // Set<Map.Entry<K, Provider<V>>>
             Key.get(Types.setOf(mapEntryOf(String.class, Types.providerOf(String.class)))),
+            // Set<Map.Entry<K, javax.inject.Provider<V>>>
+            Key.get(Types.setOf(mapEntryOf(String.class, Types.javaxProviderOf(String.class)))),
             // Collection<Provider<Map.Entry<K, Provider<V>>>>
             Key.get(collectionOf(Types.providerOf(
                 mapEntryOf(String.class, Types.providerOf(String.class))))),
             // Collection<javax.inject.Provider<Map.Entry<K, Provider<V>>>>
-            Key.get(collectionOf(javaxProviderOf(
+            Key.get(collectionOf(Types.javaxProviderOf(
                 mapEntryOf(String.class, Types.providerOf(String.class))))),
             // @Named(...) Boolean
             Key.get(Boolean.class,

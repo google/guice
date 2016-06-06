@@ -229,11 +229,47 @@ public abstract class MapBinder<K, V> {
         Types.mapOf(keyType.getType(), Types.setOf(Types.providerOf(valueType.getType()))));
   }
 
+  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
+  static <K, V> TypeLiteral<Map<K, Set<javax.inject.Provider<V>>>> mapOfSetOfJavaxProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, Set<javax.inject.Provider<V>>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(), Types.setOf(Types.javaxProviderOf(valueType.getType()))));
+  }
+
+  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
+  static <K, V> TypeLiteral<Map<K, Collection<Provider<V>>>> mapOfCollectionOfProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, Collection<Provider<V>>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(), Types.collectionOf(Types.providerOf(valueType.getType()))));
+  }
+
+  @SuppressWarnings("unchecked") // a provider map <K, Set<V>> is safely a Map<K, Set<Provider<V>>>
+  static <K, V> TypeLiteral<Map<K, Collection<javax.inject.Provider<V>>>> mapOfCollectionOfJavaxProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Map<K, Collection<javax.inject.Provider<V>>>>) TypeLiteral.get(
+        Types.mapOf(keyType.getType(), 
+            Types.collectionOf(Types.javaxProviderOf(valueType.getType()))));
+  }
+
   @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
   static <K, V> TypeLiteral<Map.Entry<K, Provider<V>>> entryOfProviderOf(
       TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
     return (TypeLiteral<Entry<K, Provider<V>>>) TypeLiteral.get(newParameterizedTypeWithOwner(
         Map.class, Entry.class, keyType.getType(), Types.providerOf(valueType.getType())));
+  }
+  
+  @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
+  static <K, V> TypeLiteral<Map.Entry<K, Provider<V>>> entryOfJavaxProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Entry<K, Provider<V>>>) TypeLiteral.get(newParameterizedTypeWithOwner(
+        Map.class, Entry.class, keyType.getType(), Types.javaxProviderOf(valueType.getType())));
+  }
+
+  @SuppressWarnings("unchecked") // a provider entry <K, V> is safely a Map.Entry<K, Provider<V>>
+  static <K, V> TypeLiteral<Set<Map.Entry<K, javax.inject.Provider<V>>>> setOfEntryOfJavaxProviderOf(
+      TypeLiteral<K> keyType, TypeLiteral<V> valueType) {
+    return (TypeLiteral<Set<Entry<K, javax.inject.Provider<V>>>>)
+        TypeLiteral.get(Types.setOf(entryOfJavaxProviderOf(keyType, valueType).getType()));
   }
 
   // Note: We use valueTypeAndAnnotation effectively as a Pair<TypeLiteral, Annotation|Class>
@@ -318,7 +354,11 @@ public abstract class MapBinder<K, V> {
     private final Key<Map<K, javax.inject.Provider<V>>> javaxProviderMapKey;
     private final Key<Map<K, Provider<V>>> providerMapKey;
     private final Key<Map<K, Set<V>>> multimapKey;
-    private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
+    private final Key<Map<K, Set<Provider<V>>>> providerSetMultimapKey;
+    private final Key<Map<K, Set<javax.inject.Provider<V>>>> javaxProviderSetMultimapKey;
+    private final Key<Map<K, Collection<Provider<V>>>> providerCollectionMultimapKey;
+    private final Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey;
+    private final Key<Set<Map.Entry<K, javax.inject.Provider<V>>>> entrySetJavaxProviderKey;
     private final RealMultibinder<Map.Entry<K, Provider<V>>> entrySetBinder;
     private final Map<K, String> duplicateKeyErrorMessages;
 
@@ -336,7 +376,11 @@ public abstract class MapBinder<K, V> {
       this.providerMapKey = mapKey.ofType(mapOfProviderOf(keyType, valueType));
       this.javaxProviderMapKey = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
       this.multimapKey = mapKey.ofType(mapOf(keyType, setOf(valueType)));
-      this.providerMultimapKey = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+      this.providerSetMultimapKey = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+      this.javaxProviderSetMultimapKey = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
+      this.providerCollectionMultimapKey = mapKey.ofType(mapOfCollectionOfProviderOf(keyType, valueType));
+      this.javaxProviderCollectionMultimapKey = mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
+      this.entrySetJavaxProviderKey = mapKey.ofType(setOfEntryOfJavaxProviderOf(keyType, valueType));
       this.entrySetBinder = (RealMultibinder<Entry<K, Provider<V>>>) entrySetBinder;
       this.binder = binder;
       this.duplicateKeyErrorMessages = Maps.newHashMap();
@@ -351,7 +395,7 @@ public abstract class MapBinder<K, V> {
     public MapBinder<K, V> permitDuplicates() {
       entrySetBinder.permitDuplicates();
       binder.install(new MultimapBinder<K, V>(
-          multimapKey, providerMultimapKey, entrySetBinder.getSetKey()));
+          multimapKey, providerSetMultimapKey, javaxProviderSetMultimapKey, providerCollectionMultimapKey, javaxProviderCollectionMultimapKey, entrySetBinder.getSetKey()));
       return this;
     }
     
@@ -396,6 +440,13 @@ public abstract class MapBinder<K, V> {
 
       Provider<Map<K, Provider<V>>> mapProvider = binder.getProvider(providerMapKey);
       binder.bind(mapKey).toProvider(new RealMapProvider(dependencies, mapProvider));
+
+      // The Map.Entries are all ProviderMapEntry instances which do not allow setValue, so it is
+      // safe to massage the return type like this
+      @SuppressWarnings("unchecked")
+      Key<Set<Entry<K,javax.inject.Provider<V>>>> massagedEntrySetProviderKey =
+          (Key) entrySetBinder.getSetKey();
+      binder.bind(entrySetJavaxProviderKey).to(massagedEntrySetProviderKey);
     }
 
     boolean containsElement(Element element) {
@@ -415,8 +466,12 @@ public abstract class MapBinder<K, V> {
             || key.equals(providerMapKey)
             || key.equals(javaxProviderMapKey)
             || key.equals(multimapKey)
-            || key.equals(providerMultimapKey)
+            || key.equals(providerSetMultimapKey)
+            || key.equals(javaxProviderSetMultimapKey)
+            || key.equals(providerCollectionMultimapKey)
+            || key.equals(javaxProviderCollectionMultimapKey)
             || key.equals(entrySetBinder.getSetKey())
+            || key.equals(entrySetJavaxProviderKey)
             || matchesValueKey(key);
         }
     }
@@ -618,14 +673,23 @@ public abstract class MapBinder<K, V> {
 
       private final Key<Map<K, Set<V>>> multimapKey;
       private final Key<Map<K, Set<Provider<V>>>> providerMultimapKey;
+      private final Key<Map<K, Set<javax.inject.Provider<V>>>> javaxProviderMultimapKey;
       private final Key<Set<Entry<K,Provider<V>>>> entrySetKey;
+      private final Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey;
+      private final Key<Map<K, Collection<Provider<V>>>> providerCollectionMultimapKey;
 
       public MultimapBinder(
           Key<Map<K, Set<V>>> multimapKey,
-          Key<Map<K, Set<Provider<V>>>> providerMultimapKey,
+          Key<Map<K, Set<Provider<V>>>> providerSetMultimapKey,
+          Key<Map<K, Set<javax.inject.Provider<V>>>> javaxProviderSetMultimapKey,
+          Key<Map<K, Collection<Provider<V>>>> providerCollectionMultimapKey,
+          Key<Map<K, Collection<javax.inject.Provider<V>>>> javaxProviderCollectionMultimapKey,
           Key<Set<Entry<K,Provider<V>>>> entrySetKey) {
         this.multimapKey = multimapKey;
-        this.providerMultimapKey = providerMultimapKey;
+        this.providerMultimapKey = providerSetMultimapKey;
+        this.javaxProviderMultimapKey = javaxProviderSetMultimapKey;
+        this.providerCollectionMultimapKey = providerCollectionMultimapKey;
+        this.javaxProviderCollectionMultimapKey = javaxProviderCollectionMultimapKey;
         this.entrySetKey = entrySetKey;
       }
 
@@ -644,6 +708,17 @@ public abstract class MapBinder<K, V> {
             binder.getProvider(providerMultimapKey);
         binder.bind(multimapKey).toProvider(
             new RealMultimapProvider(dependencies, multimapProvider));
+        
+        linkKeys(binder);
+      }
+
+      // Provide links from a few different public keys to the providerMultimapKey.  In each case
+      // this is safe because the Map and Set instances are unmodifiable by consumers.
+      @SuppressWarnings("unchecked")
+      private void linkKeys(Binder binder) {
+        binder.bind(javaxProviderMultimapKey).to((Key) providerMultimapKey);
+        binder.bind(javaxProviderCollectionMultimapKey).to((Key) providerMultimapKey);
+        binder.bind(providerCollectionMultimapKey).to((Key) providerMultimapKey);
       }
 
       @Override public int hashCode() {

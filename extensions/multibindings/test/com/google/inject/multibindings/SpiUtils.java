@@ -16,10 +16,14 @@
 
 package com.google.inject.multibindings;
 
+import static com.google.inject.multibindings.MapBinder.entryOfJavaxProviderOf;
 import static com.google.inject.multibindings.MapBinder.entryOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOf;
+import static com.google.inject.multibindings.MapBinder.mapOfCollectionOfJavaxProviderOf;
+import static com.google.inject.multibindings.MapBinder.mapOfCollectionOfProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfJavaxProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfProviderOf;
+import static com.google.inject.multibindings.MapBinder.mapOfSetOfJavaxProviderOf;
 import static com.google.inject.multibindings.MapBinder.mapOfSetOfProviderOf;
 import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
 import static com.google.inject.multibindings.Multibinder.collectionOfProvidersOf;
@@ -42,6 +46,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -168,17 +173,25 @@ public class SpiUtils {
     Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfProvider = mapKey.ofType(mapOfCollectionOfProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJavaxProvider = mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
     Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
     Key<?> collectionOfProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
     Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
+    boolean javaxEntrySetMatch = false;
     boolean mapJavaxProviderMatch = false;
     boolean mapProviderMatch = false;
     boolean mapSetMatch = false; 
     boolean mapSetProviderMatch = false;
+    boolean mapSetJavaxProviderMatch = false;
+    boolean mapCollectionProviderMatch = false;
+    boolean mapCollectionJavaxProviderMatch = false;
     boolean collectionOfProvidersOfEntryOfProviderMatch = false;
     boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
@@ -208,11 +221,23 @@ public class SpiUtils {
       } else if(b.getKey().equals(mapOfSetOfProvider)) {
         assertTrue(contains);
         mapSetProviderMatch = true;
+      } else if(b.getKey().equals(mapOfSetOfJavaxProvider)) {
+        assertTrue(contains);
+        mapSetJavaxProviderMatch = true;
+      } else if(b.getKey().equals(mapOfCollectionOfProvider)) {
+        assertTrue(contains);
+        mapCollectionProviderMatch = true;
+      } else if(b.getKey().equals(mapOfCollectionOfJavaxProvider)) {
+        assertTrue(contains);
+        mapCollectionJavaxProviderMatch = true;
       } else if(b.getKey().equals(setOfEntry)) {
         assertTrue(contains);
         entrySetMatch = true;
         // Validate that this binding is also a MultibinderBinding.
         assertTrue(b.acceptTargetVisitor(visitor) instanceof MultibinderBinding);
+      } else if(b.getKey().equals(setOfJavaxEntry)) {
+        assertTrue(contains);
+        javaxEntrySetMatch = true;
       } else if(b.getKey().equals(collectionOfProvidersOfEntryOfProvider)) {
         assertTrue(contains);
         collectionOfProvidersOfEntryOfProviderMatch = true;
@@ -243,14 +268,19 @@ public class SpiUtils {
     }
     // Multiply by two because each has a value and Map.Entry.
     int expectedSize = 2 * (mapResults.size() + duplicates);
-    assertEquals("Incorrect other matches: " + otherMatches, expectedSize, sizeOfOther);
+    assertEquals("Incorrect other matches:\n\t" + Joiner.on("\n\t").join(otherMatches), 
+        expectedSize, sizeOfOther);
     assertTrue(entrySetMatch);
+    assertTrue(javaxEntrySetMatch);
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
     assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
     assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
+    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
         otherMapBindings.size());
   }
@@ -281,19 +311,27 @@ public class SpiUtils {
     Key<?> mapOfProvider = mapKey.ofType(mapOfProviderOf(keyType, valueType));
     Key<?> mapOfJavaxProvider = mapKey.ofType(mapOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSetOfProvider = mapKey.ofType(mapOfSetOfProviderOf(keyType, valueType));
+    Key<?> mapOfSetOfJavaxProvider = mapKey.ofType(mapOfSetOfJavaxProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfProvider = mapKey.ofType(mapOfCollectionOfProviderOf(keyType, valueType));
+    Key<?> mapOfCollectionOfJavaxProvider = mapKey.ofType(mapOfCollectionOfJavaxProviderOf(keyType, valueType));
     Key<?> mapOfSet = mapKey.ofType(mapOf(keyType, setOf(valueType)));
-    Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));    
-    Key<?> collectionOfProvidersOfEntry =
+    Key<?> setOfEntry = mapKey.ofType(setOf(entryOfProviderOf(keyType, valueType)));
+    Key<?> setOfJavaxEntry = mapKey.ofType(setOf(entryOfJavaxProviderOf(keyType, valueType)));
+    Key<?> collectionOfProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfProvidersOf(entryOfProviderOf(keyType, valueType)));
-    Key<?> collectionOfJavaxProvidersOfEntry =
+    Key<?> collectionOfJavaxProvidersOfEntryOfProvider =
         mapKey.ofType(collectionOfJavaxProvidersOf(entryOfProviderOf(keyType, valueType)));
     boolean entrySetMatch = false;
+    boolean entrySetJavaxMatch = false;
     boolean mapProviderMatch = false;
     boolean mapJavaxProviderMatch = false;
     boolean mapSetMatch = false;
     boolean mapSetProviderMatch = false;
-    boolean collectionOfProvidersOfEntryMatch = false;
-    boolean collectionOfJavaxProvidersOfEntryMatch = false;
+    boolean mapSetJavaxProviderMatch = false;
+    boolean mapCollectionProviderMatch = false;
+    boolean mapCollectionJavaxProviderMatch = false;
+    boolean collectionOfProvidersOfEntryOfProviderMatch = false;
+    boolean collectionOfJavaxProvidersOfEntryOfProviderMatch = false;
     List<Object> otherMapBindings = Lists.newArrayList();
     List<Element> otherMatches = Lists.newArrayList();
     List<Element> otherElements = Lists.newArrayList();
@@ -356,6 +394,18 @@ public class SpiUtils {
           matched = true;
           assertTrue(contains);
           mapSetProviderMatch = true;
+        } else if(key.equals(mapOfSetOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapSetJavaxProviderMatch = true;
+        } else if(key.equals(mapOfCollectionOfProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapCollectionProviderMatch = true;
+        } else if(key.equals(mapOfCollectionOfJavaxProvider)) {
+          matched = true;
+          assertTrue(contains);
+          mapCollectionJavaxProviderMatch = true;
         } else if(key.equals(setOfEntry)) {
           matched = true;
           assertTrue(contains);
@@ -364,14 +414,18 @@ public class SpiUtils {
           if(b != null) {
             assertTrue(b.acceptTargetVisitor(visitor) instanceof MultibinderBinding);
           }
-        } else if(key.equals(collectionOfProvidersOfEntry)) {
+        } else if(key.equals(setOfJavaxEntry)) {
           matched = true;
           assertTrue(contains);
-          collectionOfProvidersOfEntryMatch = true;
-        } else if(key.equals(collectionOfJavaxProvidersOfEntry)) {
+          entrySetJavaxMatch = true;
+        } else if(key.equals(collectionOfProvidersOfEntryOfProvider)) {
           matched = true;
           assertTrue(contains);
-          collectionOfJavaxProvidersOfEntryMatch = true;
+          collectionOfProvidersOfEntryOfProviderMatch = true;
+        } else if(key.equals(collectionOfJavaxProvidersOfEntryOfProvider)) {
+          matched = true;
+          assertTrue(contains);
+          collectionOfJavaxProvidersOfEntryOfProviderMatch = true;
         }
       }
       
@@ -386,16 +440,20 @@ public class SpiUtils {
     }
     // Multiply by 3 because each has a value, ProviderLookup, and Map.Entry
     int expectedSize = (mapResults.size() + duplicates) * 3;
-    assertEquals("incorrect number of contains, leftover matches: " + otherMatches,
+    assertEquals("incorrect number of contains, leftover matches:\n" + Joiner.on("\n\t").join(otherMatches),
         expectedSize, otherMatchesSize);
 
     assertTrue(entrySetMatch);
+    assertTrue(entrySetJavaxMatch);
     assertTrue(mapProviderMatch);
     assertTrue(mapJavaxProviderMatch);
-    assertTrue(collectionOfProvidersOfEntryMatch);
-    assertTrue(collectionOfJavaxProvidersOfEntryMatch);
+    assertTrue(collectionOfProvidersOfEntryOfProviderMatch);
+    assertTrue(collectionOfJavaxProvidersOfEntryOfProviderMatch);
     assertEquals(allowDuplicates, mapSetMatch);
     assertEquals(allowDuplicates, mapSetProviderMatch);
+    assertEquals(allowDuplicates, mapSetJavaxProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionProviderMatch);
+    assertEquals(allowDuplicates, mapCollectionJavaxProviderMatch);
     assertEquals("other MapBindings found: " + otherMapBindings, expectedMapBindings,
         otherMapBindings.size());
     
