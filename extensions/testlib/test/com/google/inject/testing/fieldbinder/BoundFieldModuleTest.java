@@ -830,7 +830,7 @@ public class BoundFieldModuleTest extends TestCase {
     try {
       injector.getInstance(Integer.class);
       fail();
-    } catch (ProvisionException expected) {
+    } catch (ConfigurationException expected) {
       // expected because we don't interpret IntegerProvider as a Provider<Integer>
     }
   }
