@@ -132,11 +132,11 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
  <a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#to--"><code>Bind.to()</code></a> instead of the field's actual type.
  </li>
  <li>
- If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <a href="http://atinject.googlecode.com/svn/trunk/javadoc/javax/inject/Qualifier.html?is-external=true" title="class or interface in javax.inject"><code>Qualifier</code></a> is present on the field,
+ If a <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or <code>Qualifier</code> is present on the field,
  that field will be bound using that annotation via <a href="../../../../../com/google/inject/binder/AnnotatedBindingBuilder.html#annotatedWith-java.lang.Class-"><code>AnnotatedBindingBuilder.annotatedWith(java.lang.Class&lt;? extends java.lang.annotation.Annotation&gt;)</code></a>.
  For example, <code>bind(Foo.class).annotatedWith(BarAnnotation.class).toInstance(theValue)</code>.
  It is an error to supply more than one <a href="../../../../../com/google/inject/BindingAnnotation.html" title="annotation in com.google.inject"><code>BindingAnnotation</code></a> or
- <a href="http://atinject.googlecode.com/svn/trunk/javadoc/javax/inject/Qualifier.html?is-external=true" title="class or interface in javax.inject"><code>Qualifier</code></a>.
+ <code>Qualifier</code>.
  </li>
  <li>
  If the field is of type <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>, the field's value will be bound as a <a href="../../../../../com/google/inject/Provider.html" title="interface in com.google.inject"><code>Provider</code></a>
@@ -151,14 +151,14 @@ implements <a href="../../../../../com/google/inject/Module.html" title="interfa
  public class TestFoo {
    // bind(new TypeLiteral<code> &lt;List&lt;Object&gt;&gt;</code>() {}).toInstance(listOfObjects);
     @Bind private List<code> &lt;Object&gt;</code> listOfObjects = Lists.of();
-   
+
    // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
     @Bind(lazy = true) private String userName;
 
    // bind(SuperClass.class).toInstance(aSubClass);
     @Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
 
-   // bind(Object.class).annotatedWith(MyBindingAnnotation.class).toInstance(object2);
+   // bind(String.class).annotatedWith(MyBindingAnnotation.class).toInstance(myString);
     @Bind
     @MyBindingAnnotation
    private String myString = "hello";

@@ -54,7 +54,7 @@ Where <code>added</code> is the number of packages added, <code>removed</code> i
 This definition is applied recursively for the classes and their program elements, so the value for a changed package will be less than 1, unless every class in that package has changed.
 The definition ensures that if all packages are removed and all new packages are
 added, the change will be 100%. Values are rounded here, so a value of 0% indicates a percentage difference of less than 0.5%.
-<p>The overall difference between the two APIs is approximately 0%.
+<p>The overall difference between the two APIs is approximately 3%.
 </BLOCKQUOTE>
 <h3>Sections</h3>
 <a href="#packages">Packages</a> sorted by percentage difference<br>
@@ -69,12 +69,20 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
   <TD ALIGN="center" bgcolor="#EEEEFF"><FONT size="+1"><b>Package</b></FONT></TD>
 </TR>
 <TR>
+  <TD ALIGN="center">62</TD>
+  <TD><A HREF="pkg_com.google.inject.testing.fieldbinder.html">com.google.inject.testing.fieldbinder</A></TD>
+</TR>
+<TR>
   <TD ALIGN="center">7</TD>
   <TD><A HREF="pkg_com.google.inject.servlet.html">com.google.inject.servlet</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">6</TD>
   <TD><A HREF="pkg_com.google.inject.multibindings.html">com.google.inject.multibindings</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">2</TD>
+  <TD><A HREF="pkg_com.google.inject.util.html">com.google.inject.util</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">1</TD>
@@ -95,29 +103,41 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 </TR>
 <TR>
   <TD ALIGN="center">0</TD>
-  <TD>0.25</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=75.0></TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
 </TR>
 <TR>
   <TD ALIGN="center">1</TD>
-  <TD>0.25</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=75.0></TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">2</TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
 </TR>
 <TR>
   <TD ALIGN="center">6</TD>
-  <TD>0.25</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=75.0></TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
 </TR>
 <TR>
   <TD ALIGN="center">7</TD>
-  <TD>0.25</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=75.0></TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">62</TD>
+  <TD>0.16666666666666666</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=50.0></TD>
 </TR>
 <!-- START_PACKAGE_HISTOGRAM
-0,0.25
-1,0.25
-6,0.25
-7,0.25
+0,0.16666666666666666
+1,0.16666666666666666
+2,0.16666666666666666
+6,0.16666666666666666
+7,0.16666666666666666
+62,0.16666666666666666
 END_PACKAGE_HISTOGRAM -->
 </TABLE>
 <hr>
@@ -134,6 +154,11 @@ END_PACKAGE_HISTOGRAM -->
 <i>com.google.inject.spi.TypeListener</i></A></TD>
 </TR>
 <TR>
+  <TD ALIGN="center">25</TD>
+  <TD><A HREF="com.google.inject.testing.fieldbinder.BoundFieldModule.html">
+com.google.inject.testing.fieldbinder.BoundFieldModule</A></TD>
+</TR>
+<TR>
   <TD ALIGN="center">21</TD>
   <TD><A HREF="com.google.inject.servlet.ServletScopes.html">
 com.google.inject.servlet.ServletScopes</A></TD>
@@ -144,6 +169,11 @@ com.google.inject.servlet.ServletScopes</A></TD>
 com.google.inject.servlet.ServletModule</A></TD>
 </TR>
 <TR>
+  <TD ALIGN="center">10</TD>
+  <TD><A HREF="com.google.inject.util.Types.html">
+com.google.inject.util.Types</A></TD>
+</TR>
+<TR>
   <TD ALIGN="center">1</TD>
   <TD><A HREF="com.google.inject.Binder.html">
 <i>com.google.inject.Binder</i></A></TD>
@@ -152,6 +182,11 @@ com.google.inject.servlet.ServletModule</A></TD>
   <TD ALIGN="center">&lt;1</TD>
   <TD><A HREF="com.google.inject.multibindings.ProvidesIntoMap.html">
 com.google.inject.multibindings.ProvidesIntoMap</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">&lt;1</TD>
+  <TD><A HREF="com.google.inject.testing.fieldbinder.Bind.html">
+com.google.inject.testing.fieldbinder.Bind</A></TD>
 </TR>
 </TABLE>
 <hr>
@@ -164,35 +199,47 @@ com.google.inject.multibindings.ProvidesIntoMap</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">0</TD>
-  <TD>0.2</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=60.0></TD>
+  <TD>0.25</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=75.0></TD>
 </TR>
 <TR>
   <TD ALIGN="center">1</TD>
-  <TD>0.2</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=60.0></TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">10</TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
 </TR>
 <TR>
   <TD ALIGN="center">20</TD>
-  <TD>0.2</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=60.0></TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
 </TR>
 <TR>
   <TD ALIGN="center">21</TD>
-  <TD>0.2</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=60.0></TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">25</TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
 </TR>
 <TR>
   <TD ALIGN="center">50</TD>
-  <TD>0.2</TD>
-  <TD><img alt="|" src="../black.gif" height=20 width=60.0></TD>
+  <TD>0.125</TD>
+  <TD><img alt="|" src="../black.gif" height=20 width=37.5></TD>
 </TR>
 <!-- START_CLASS_HISTOGRAM
-0,0.2
-1,0.2
-20,0.2
-21,0.2
-50,0.2
+0,0.25
+1,0.125
+10,0.125
+20,0.125
+21,0.125
+25,0.125
+50,0.125
 END_CLASS_HISTOGRAM -->
 </TABLE>
 <hr>
@@ -217,15 +264,15 @@ The numbers of program elements (packages, classes. constructors, methods and fi
   <TD>Packages</TD>
   <TD ALIGN="right">0</TD>
   <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">4</TD>
-  <TD ALIGN="right">4</TD>
+  <TD ALIGN="right">6</TD>
+  <TD ALIGN="right">6</TD>
 </TR>
 <TR>
   <TD>Classes and <i>Interfaces</i></TD>
   <TD ALIGN="right">0</TD>
   <TD ALIGN="right">2</TD>
-  <TD ALIGN="right">5</TD>
-  <TD ALIGN="right">7</TD>
+  <TD ALIGN="right">8</TD>
+  <TD ALIGN="right">10</TD>
 </TR>
 <TR>
   <TD>Constructors</TD>
@@ -237,9 +284,9 @@ The numbers of program elements (packages, classes. constructors, methods and fi
 <TR>
   <TD>Methods</TD>
   <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">6</TD>
+  <TD ALIGN="right">8</TD>
   <TD ALIGN="right">3</TD>
-  <TD ALIGN="right">9</TD>
+  <TD ALIGN="right">11</TD>
 </TR>
 <TR>
   <TD>Fields</TD>
@@ -251,9 +298,9 @@ The numbers of program elements (packages, classes. constructors, methods and fi
 <TR>
   <TD><b>Total</b></TD>
   <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">8</TD>
-  <TD ALIGN="right">12</TD>
-  <TD ALIGN="right">20</TD>
+  <TD ALIGN="right">10</TD>
+  <TD ALIGN="right">17</TD>
+  <TD ALIGN="right">27</TD>
 </TR>
 </TABLE>
 </HTML>

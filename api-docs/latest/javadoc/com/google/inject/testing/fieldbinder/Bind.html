@@ -95,7 +95,10 @@
  <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true" title="class or interface in java.lang.annotation">@Target</a>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html?is-external=true#value--" title="class or interface in java.lang.annotation">value</a>=<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/annotation/ElementType.html?is-external=true#FIELD" title="class or interface in java.lang.annotation">FIELD</a>)
 public @interface <span class="memberNameLabel">Bind</span></pre>
 <div class="block">Annotation used by <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> to indicate that a field should be bound to its
- value using Guice.</div>
+ value using Guice.
+
+ <p>Binding to <code>null</code> is only allowed for fields that are annotated <code>@Nullable</code>. See
+ <a href="https://github.com/google/guice/wiki/UseNullable">https://github.com/google/guice/wiki/UseNullable</a></div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a></dd>
@@ -121,8 +124,8 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/google/inject/testing/fieldbinder/Bind.html#lazy--">lazy</a></span></code>
-<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay retrieving the field's value until injection time
- rather than eagerly fetching it at configure time.</div>
+<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay reading the field until injection time
+ rather than eagerly reading it at configure time.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -172,10 +175,12 @@ public @interface <span class="memberNameLabel">Bind</span></pre>
 <li class="blockList">
 <h4>lazy</h4>
 <pre>public abstract&nbsp;boolean&nbsp;lazy</pre>
-<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay retrieving the field's value until injection time
- rather than eagerly fetching it at configure time.
- 
- <p>This option is not supported with Provider valued fields.</div>
+<div class="block">If true, <a href="../../../../../com/google/inject/testing/fieldbinder/BoundFieldModule.html" title="class in com.google.inject.testing.fieldbinder"><code>BoundFieldModule</code></a> will delay reading the field until injection time
+ rather than eagerly reading it at configure time.
+
+ <p>When used with Provider valued fields, the provider will be read from the field and
+ <code>.get()</code> will be called for each provision.  This may be useful for testing provision
+ failures.</div>
 <dl>
 <dt>Default:</dt>
 <dd>false</dd>
