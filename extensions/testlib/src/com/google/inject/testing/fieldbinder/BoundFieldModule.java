@@ -326,15 +326,25 @@ public final class BoundFieldModule implements Module {
 
     if (isTransparentProvider(fieldInfo.type.getRawType())) {
       if (fieldInfo.bindAnnotation.lazy()) {
-        // We don't support this because it is confusing about when values are captured.
-        throwBoundFieldException(fieldInfo.field,
-            "'lazy' is incompatible with Provider valued fields");
+        binderUnsafe.toProvider(
+            new Provider<Object>() {
+              @Override
+              // @Nullable
+              public Object get() {
+                // This is safe because we checked that the field's type is Provider above.
+                @SuppressWarnings("unchecked")
+                javax.inject.Provider<?> provider =
+                    (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+                return provider.get();
+              }
+            });
+      } else {
+        // This is safe because we checked that the field's type is Provider above.
+        @SuppressWarnings("unchecked")
+        javax.inject.Provider<?> fieldValueUnsafe =
+            (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+        binderUnsafe.toProvider(fieldValueUnsafe);
       }
-      // This is safe because we checked that the field's type is Provider above.
-      @SuppressWarnings("unchecked")
-      javax.inject.Provider<?> fieldValueUnsafe =
-          (javax.inject.Provider<?>) getFieldValue(fieldInfo);
-      binderUnsafe.toProvider(fieldValueUnsafe);
     } else if (fieldInfo.bindAnnotation.lazy()) {
       binderUnsafe.toProvider(
           new Provider<Object>() {

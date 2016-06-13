@@ -42,10 +42,12 @@ public @interface Bind {
   Class<?> to() default Bind.class;
 
   /**
-   * If true, {@link BoundFieldModule} will delay retrieving the field's value until injection time
-   * rather than eagerly fetching it at configure time.
+   * If true, {@link BoundFieldModule} will delay reading the field until injection time
+   * rather than eagerly reading it at configure time.
    *
-   * <p>This option is not supported with Provider valued fields.
+   * <p>When used with Provider valued fields, the provider will be read from the field and
+   * {@code .get()} will be called for each provision.  This may be useful for testing provision
+   * failures.
    */
   boolean lazy() default false;
 }

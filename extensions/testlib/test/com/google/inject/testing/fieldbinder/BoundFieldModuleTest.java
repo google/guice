@@ -791,13 +791,47 @@ public class BoundFieldModuleTest extends TestCase {
     @Bind(lazy = true) Provider<Integer> foo = Providers.of(null);
   }
 
-  public void testFieldBoundAsProvider_rejectProvider() {
+  public void testFieldBoundAsProvider_lazy() {
     LazyProviderClass asProvider = new LazyProviderClass();
+    Provider<Integer> provider =
+        Guice.createInjector(BoundFieldModule.of(asProvider)).getProvider(Integer.class);
+    assertNull(provider.get());
+    asProvider.foo = Providers.of(1);
+    assertEquals(1, provider.get().intValue());
+    asProvider.foo =
+        new Provider<Integer>() {
+          @Override
+          public Integer get() {
+            throw new RuntimeException("boom");
+          }
+        };
     try {
-      Guice.createInjector(BoundFieldModule.of(asProvider));
+      provider.get();
       fail();
-    } catch (CreationException e) {
-      assertContains(e.getMessage(), "'lazy' is incompatible with Provider valued fields");
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(), "boom");
+    }
+  }
+
+  private static final class LazyNonTransparentProvider {
+    @Bind(lazy = true)
+    @Nullable
+    private IntegerProvider anIntProvider = null;
+  }
+
+  public void testFieldBoundAsNonTransparentProvider_lazy() {
+    LazyNonTransparentProvider instance = new LazyNonTransparentProvider();
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
+    instance.anIntProvider = new IntegerProvider(3);
+    assertEquals(3, injector.getInstance(IntegerProvider.class).get().intValue());
+    try {
+      injector.getInstance(Integer.class);
+      fail();
+    } catch (ProvisionException expected) {
+      // expected because we don't interpret IntegerProvider as a Provider<Integer>
     }
   }
 }
