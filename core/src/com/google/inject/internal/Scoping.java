@@ -28,6 +28,7 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.ScopeBinding;
 
 import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 
 /**
  * References a scope, either directly (as a scope instance), or indirectly (as a scope annotation).
@@ -239,6 +240,8 @@ public abstract class Scoping {
 
     Scope scope = scoping.getScopeInstance();
 
+    // SingletonScope needs access to the injector's thread-specific InternalContext
+    SingletonScope.currentInjector.set(new WeakReference<InjectorImpl>(injector));
     Provider<T> scoped
         = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(scoped, source);

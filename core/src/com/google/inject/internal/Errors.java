@@ -82,10 +82,9 @@ import java.util.logging.Logger;
 public final class Errors implements Serializable {
 
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
-
+  
   private static final Set<Dependency<?>> warnedDependencies =
       Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
-
 
   /**
    * The root errors object. Used to access the list of error messages.
@@ -150,7 +149,7 @@ public final class Errors implements Serializable {
   public Errors missingImplementation(Key key) {
     return addMessage("No implementation for %s was bound.", key);
   }
-
+  
   public Errors jitDisabled(Key key) {
     return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
   }
@@ -296,7 +295,7 @@ public final class Errors implements Serializable {
     return addMessage("%s has more than one annotation annotated with @BindingAnnotation: "
         + "%s and %s", member, a, b);
   }
-
+  
   public Errors staticInjectionOnInterface(Class<?> clazz) {
     return addMessage("%s is an interface, but interfaces have no static injection points.", clazz);
   }
@@ -329,7 +328,7 @@ public final class Errors implements Serializable {
   public Errors bindingAlreadySet(Key<?> key, Object source) {
     return addMessage("A binding to %s was already configured at %s.", key, convert(source));
   }
-
+  
   public Errors jitBindingAlreadySet(Key<?> key) {
     return addMessage("A just-in-time binding to %s was already configured on a parent injector.", key);
   }
@@ -354,7 +353,7 @@ public final class Errors implements Serializable {
 
   public Errors errorCheckingDuplicateBinding(Key<?> key, Object source, Throwable t) {
     return addMessage(
-        "A binding to %s was already configured at %s and an error was thrown "
+        "A binding to %s was already configured at %s and an error was thrown " 
       + "while checking duplicate bindings.  Error: %s",
         key, convert(source), t);
   }
@@ -375,8 +374,8 @@ public final class Errors implements Serializable {
     return errorInUserCode(cause, "Error injecting constructor, %s", cause);
   }
 
-  public Errors errorInProvider(RuntimeException runtimeException) {
-    Throwable unwrapped = unwrap(runtimeException);
+  public Errors errorInProvider(Throwable cause) {
+    Throwable unwrapped = unwrap(cause);
     return errorInUserCode(unwrapped, "Error in custom provider, %s", unwrapped);
   }
 
@@ -395,11 +394,11 @@ public final class Errors implements Serializable {
   public Errors exposedButNotBound(Key<?> key) {
     return addMessage("Could not expose() %s, it must be explicitly bound.", key);
   }
-
+  
   public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
     return addMessage("%s cannot be used as a key; It is not fully specified.", typeLiteral);
   }
-
+  
   public Errors errorEnhancingClass(Class<?> clazz, Throwable cause) {
     return errorInUserCode(cause, "Unable to method intercept: %s", clazz);
   }
@@ -425,8 +424,8 @@ public final class Errors implements Serializable {
       return addMessage(cause, messageFormat, arguments);
     }
   }
-
-  private Throwable unwrap(RuntimeException runtimeException) {
+  
+  private Throwable unwrap(Throwable runtimeException) {
    if(runtimeException instanceof Exceptions.UnhandledCheckedUserException) {
      return runtimeException.getCause();
    } else {
@@ -616,12 +615,12 @@ public final class Errors implements Serializable {
   }
 
   /**
-   * Returns {@code value} if it is non-null allowed to be null. Otherwise a message is added and
+   * Returns {@code value} if it is non-null or allowed to be null. Otherwise a message is added and
    * an {@code ErrorsException} is thrown.
    */
   public <T> T checkForNull(T value, Object source, Dependency<?> dependency)
       throws ErrorsException {
-    if (value != null || dependency.isNullable() ) {
+    if (value != null || dependency.isNullable()) {
       return value;
     }
 
@@ -674,7 +673,7 @@ public final class Errors implements Serializable {
         continue;
       }
 
-      if (onlyCause != null
+      if (onlyCause != null 
           && !ThrowableEquivalence.INSTANCE.equivalent(onlyCause, messageCause)) {
         return null;
       }
@@ -734,11 +733,11 @@ public final class Errors implements Serializable {
     ElementSource source = null;
     if (o instanceof ElementSource) {
       source = (ElementSource)o;
-      o = source.getDeclaringSource();
+      o = source.getDeclaringSource(); 
     }
     return convert(o, source);
   }
-
+  
   public static Object convert(Object o, ElementSource source) {
     for (Converter<?> converter : converters) {
       if (converter.appliesTo(o)) {
@@ -747,7 +746,7 @@ public final class Errors implements Serializable {
     }
     return appendModules(o, source);
   }
-
+  
   private static Object appendModules(Object source, ElementSource elementSource) {
     String modules = moduleSourceString(elementSource);
     if (modules.length() == 0) {
@@ -756,7 +755,7 @@ public final class Errors implements Serializable {
       return source + modules;
     }
   }
-
+  
   private static String moduleSourceString(ElementSource elementSource) {
     // if we only have one module (or don't know what they are), then don't bother
     // reporting it, because the source already is going to report exactly that module.
@@ -772,7 +771,7 @@ public final class Errors implements Serializable {
     if (modules.size() <= 1) {
       return "";
     }
-
+    
     // Ideally we'd do:
     //    return Joiner.on(" -> ")
     //        .appendTo(new StringBuilder(" (via modules: "), Lists.reverse(modules))
@@ -783,7 +782,7 @@ public final class Errors implements Serializable {
       builder.append(modules.get(i));
       if (i != 0) {
         builder.append(" -> ");
-      }
+      }      
     }
     builder.append(")");
     return builder.toString();
@@ -797,7 +796,7 @@ public final class Errors implements Serializable {
     }
     formatSource(formatter, source, elementSource);
   }
-
+  
   public static void formatSource(Formatter formatter, Object source, ElementSource elementSource) {
     String modules = moduleSourceString(elementSource);
     if (source instanceof Dependency) {

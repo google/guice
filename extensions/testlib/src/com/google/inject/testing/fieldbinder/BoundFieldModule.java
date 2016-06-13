@@ -26,7 +26,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.internal.Annotations;
+import com.google.inject.internal.Nullability;
 import com.google.inject.spi.Message;
+import com.google.inject.util.Providers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -71,14 +73,14 @@ import java.lang.reflect.Type;
  * public class TestFoo {
  *   // bind(new TypeLiteral{@code <List<Object>>}() {}).toInstance(listOfObjects);
  *   {@literal @}Bind private List{@code <Object>} listOfObjects = Lists.of();
- *   
+ *
  *   // bind(String.class).toProvider(new Provider() { public String get() { return userName; }});
  *   {@literal @}Bind(lazy = true) private String userName;
  *
  *   // bind(SuperClass.class).toInstance(aSubClass);
  *   {@literal @}Bind(to = SuperClass.class) private SubClass aSubClass = new SubClass();
  *
- *   // bind(Object.class).annotatedWith(MyBindingAnnotation.class).toInstance(object2);
+ *   // bind(String.class).annotatedWith(MyBindingAnnotation.class).toInstance(myString);
  *   {@literal @}Bind
  *   {@literal @}MyBindingAnnotation
  *   private String myString = "hello";
@@ -225,6 +227,12 @@ public final class BoundFieldModule implements Module {
         throw new AssertionError(e);
       }
     }
+
+    /** Returns whether a binding supports null values. */
+    boolean allowsNull() {
+      return !isTransparentProvider(type.getRawType())
+          && Nullability.allowsNull(field.getAnnotations());
+    }
   }
 
   private static boolean hasInject(Field field) {
@@ -318,34 +326,64 @@ public final class BoundFieldModule implements Module {
 
     if (isTransparentProvider(fieldInfo.type.getRawType())) {
       if (fieldInfo.bindAnnotation.lazy()) {
-        // We don't support this because it is confusing about when values are captured.
-        throwBoundFieldException(fieldInfo.field, 
-            "'lazy' is incompatible with Provider valued fields");
+        binderUnsafe.toProvider(
+            new Provider<Object>() {
+              @Override
+              // @Nullable
+              public Object get() {
+                // This is safe because we checked that the field's type is Provider above.
+                @SuppressWarnings("unchecked")
+                javax.inject.Provider<?> provider =
+                    (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+                return provider.get();
+              }
+            });
+      } else {
+        // This is safe because we checked that the field's type is Provider above.
+        @SuppressWarnings("unchecked")
+        javax.inject.Provider<?> fieldValueUnsafe =
+            (javax.inject.Provider<?>) getFieldValue(fieldInfo);
+        binderUnsafe.toProvider(fieldValueUnsafe);
       }
-      // This is safe because we checked that the field's type is Provider above.
-      @SuppressWarnings("unchecked")
-      javax.inject.Provider<?> fieldValueUnsafe =
-          (javax.inject.Provider<?>) getFieldValue(fieldInfo);
-      binderUnsafe.toProvider(fieldValueUnsafe);
     } else if (fieldInfo.bindAnnotation.lazy()) {
-      binderUnsafe.toProvider(new Provider<Object>() {
-        @Override public Object get() {
-          return getFieldValue(fieldInfo);
-        }
-      });
+      binderUnsafe.toProvider(
+          new Provider<Object>() {
+            @Override
+            // @Nullable
+            public Object get() {
+              return getFieldValue(fieldInfo);
+            }
+          });
     } else {
-      binderUnsafe.toInstance(getFieldValue(fieldInfo));
+      Object fieldValue = getFieldValue(fieldInfo);
+      if (fieldValue == null) {
+        binderUnsafe.toProvider(Providers.of(null));
+      } else {
+        binderUnsafe.toInstance(fieldValue);
+      }
     }
   }
 
+  // @Nullable
+  /**
+   * Returns the field value to bind, throwing for non-{@code @Nullable} fields with null values,
+   * and for null "transparent providers".
+   */
   private Object getFieldValue(final BoundFieldInfo fieldInfo) {
     Object fieldValue = fieldInfo.getValue();
-    if (fieldValue == null) {
-      throwBoundFieldException(
-          fieldInfo.field,
-          "Binding to null values is not allowed. "
-              + "Use Providers.of(null) if this is your intended behavior.",
-              fieldInfo.field.getName());
+    if (fieldValue == null && !fieldInfo.allowsNull()) {
+      if (isTransparentProvider(fieldInfo.type.getRawType())) {
+        throwBoundFieldException(
+            fieldInfo.field,
+            "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+                + "behavior.",
+            fieldInfo.field.getName());
+      } else {
+        throwBoundFieldException(
+            fieldInfo.field,
+            "Binding to null values is only allowed for fields that are annotated @Nullable.",
+            fieldInfo.field.getName());
+      }
     }
     return fieldValue;
   }

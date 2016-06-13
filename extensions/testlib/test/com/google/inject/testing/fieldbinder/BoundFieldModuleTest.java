@@ -367,7 +367,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(testValue, injector.getInstance(Integer.class));
   }
 
-  public void testBindingNullField() {
+  public void testBindingNonNullableNullField() {
     Object instance = new Object() {
       @Bind private Integer anInt = null;
     };
@@ -379,9 +379,20 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
+  }
+
+  @Retention(RUNTIME)
+  private @interface Nullable {}
+
+  public void testBindingNullableNullField() {
+    Object instance = new Object() {
+      @Bind @Nullable private Integer anInt = null;
+    };
+
+    Injector injector = Guice.createInjector(BoundFieldModule.of(instance));
+    assertNull(injector.getInstance(Integer.class));
   }
 
   public void testBindingNullProvider() {
@@ -396,8 +407,25 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (CreationException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
+    }
+  }
+
+  public void testBindingNullableNullProvider() {
+    Object instance = new Object() {
+      @Bind @Nullable private Provider<Integer> anIntProvider = null;
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+
+    try {
+      Guice.createInjector(module);
+      fail();
+    } catch (CreationException e) {
+      assertContains(e.getMessage(),
+          "Binding to null is not allowed. Use Providers.of(null) if this is your intended "
+              + "behavior.");
     }
   }
 
@@ -440,6 +468,17 @@ public class BoundFieldModuleTest extends TestCase {
     } catch (ConfigurationException e) {
       assertContains(e.getMessage(), "Could not find a suitable constructor in java.lang.Integer.");
     }
+  }
+
+  public void testNullableProviderSubclassesAllowNull() {
+    Object instance = new Object() {
+      @Bind @Nullable private IntegerProvider anIntProvider = null;
+    };
+
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
   }
 
   private static class ParameterizedObject<T> {
@@ -722,7 +761,7 @@ public class BoundFieldModuleTest extends TestCase {
     assertEquals(2, injector.getInstance(Integer.class).intValue());
   }
 
-  public void testFieldBound_lazy_rejectNull() {
+  public void testNonNullableFieldBound_lazy_rejectNull() {
     LazyClass asProvider = new LazyClass();
     Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
     assertEquals(1, injector.getInstance(Integer.class).intValue());
@@ -732,22 +771,67 @@ public class BoundFieldModuleTest extends TestCase {
       fail();
     } catch (ProvisionException e) {
       assertContains(e.getMessage(),
-          "Binding to null values is not allowed. "
-          + "Use Providers.of(null) if this is your intended behavior.");
+          "Binding to null values is only allowed for fields that are annotated @Nullable.");
     }
+  }
+
+  static final class LazyClassNullable {
+    @Bind(lazy = true) @Nullable Integer foo = 1;
+  }
+
+  public void testNullableFieldBound_lazy_allowNull() {
+    LazyClassNullable asProvider = new LazyClassNullable();
+    Injector injector = Guice.createInjector(BoundFieldModule.of(asProvider));
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    asProvider.foo = null;
+    assertNull(injector.getInstance(Integer.class));
   }
 
   static final class LazyProviderClass {
     @Bind(lazy = true) Provider<Integer> foo = Providers.of(null);
   }
 
-  public void testFieldBoundAsProvider_rejectProvider() {
+  public void testFieldBoundAsProvider_lazy() {
     LazyProviderClass asProvider = new LazyProviderClass();
+    Provider<Integer> provider =
+        Guice.createInjector(BoundFieldModule.of(asProvider)).getProvider(Integer.class);
+    assertNull(provider.get());
+    asProvider.foo = Providers.of(1);
+    assertEquals(1, provider.get().intValue());
+    asProvider.foo =
+        new Provider<Integer>() {
+          @Override
+          public Integer get() {
+            throw new RuntimeException("boom");
+          }
+        };
     try {
-      Guice.createInjector(BoundFieldModule.of(asProvider));
+      provider.get();
       fail();
-    } catch (CreationException e) {
-      assertContains(e.getMessage(), "'lazy' is incompatible with Provider valued fields");
+    } catch (ProvisionException e) {
+      assertContains(e.getMessage(), "boom");
+    }
+  }
+
+  private static final class LazyNonTransparentProvider {
+    @Bind(lazy = true)
+    @Nullable
+    private IntegerProvider anIntProvider = null;
+  }
+
+  public void testFieldBoundAsNonTransparentProvider_lazy() {
+    LazyNonTransparentProvider instance = new LazyNonTransparentProvider();
+    BoundFieldModule module = BoundFieldModule.of(instance);
+    Injector injector = Guice.createInjector(module);
+
+    assertNull(injector.getInstance(IntegerProvider.class));
+    instance.anIntProvider = new IntegerProvider(3);
+    assertEquals(3, injector.getInstance(IntegerProvider.class).get().intValue());
+    try {
+      injector.getInstance(Integer.class);
+      fail();
+    } catch (ConfigurationException expected) {
+      // expected because we don't interpret IntegerProvider as a Provider<Integer>
     }
   }
 }

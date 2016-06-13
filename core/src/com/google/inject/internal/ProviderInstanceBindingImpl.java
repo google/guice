@@ -32,8 +32,7 @@ import com.google.inject.util.Providers;
 
 import java.util.Set;
 
-final class ProviderInstanceBindingImpl<T> extends BindingImpl<T>
-    implements ProviderInstanceBinding<T> {
+class ProviderInstanceBindingImpl<T> extends BindingImpl<T> implements ProviderInstanceBinding<T> {
 
   final javax.inject.Provider<? extends T> providerInstance;
   final ImmutableSet<InjectionPoint> injectionPoints;

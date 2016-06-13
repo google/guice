@@ -199,7 +199,7 @@ public abstract class Multibinder<T> {
   static <T> TypeLiteral<Collection<Provider<T>>> collectionOfProvidersOf(
       TypeLiteral<T> elementType) {
     Type providerType = Types.providerOf(elementType.getType());
-    Type type = Types.newParameterizedType(Collection.class, providerType);
+    Type type = Types.collectionOf(providerType);
     return (TypeLiteral<Collection<Provider<T>>>) TypeLiteral.get(type);
   }
 
@@ -208,7 +208,7 @@ public abstract class Multibinder<T> {
       TypeLiteral<T> elementType) {
     Type providerType =
         Types.newParameterizedType(javax.inject.Provider.class, elementType.getType());
-    Type type = Types.newParameterizedType(Collection.class, providerType);
+    Type type = Types.collectionOf(providerType);
     return (TypeLiteral<Collection<javax.inject.Provider<T>>>) TypeLiteral.get(type);
   }
 

@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Default {@link Injector} implementation.
@@ -130,6 +129,9 @@ final class InjectorImpl implements Injector, Lookups {
     if (parent != null) {
       localContext = parent.localContext;
     } else {
+      // No ThreadLocal.initialValue(), as that would cause classloader leaks. See
+      // https://github.com/google/guice/issues/288#issuecomment-48216933,
+      // https://github.com/google/guice/issues/288#issuecomment-48216944
       localContext = new ThreadLocal<Object[]>();
     }
   }
@@ -1052,30 +1054,22 @@ final class InjectorImpl implements Injector, Lookups {
     return getProvider(type).get();
   }
 
-  /** @see #getGlobalInternalContext */
+  /**
+   * Holds Object[] as a mutable wrapper, rather than InternalContext, since array operations are
+   * faster than ThreadLocal.set() / .get() operations.
+   *
+   * Holds Object[] rather than InternalContext[], since localContext never gets cleaned up at any
+   * point. This could lead to problems when, for example, an OSGI application is reloaded,
+   * the InjectorImpl is destroyed, but the thread that the injector runs on is kept alive.
+   * In such a case, ThreadLocal itself would hold on to a reference to localContext,
+   * which would hold on to the old InternalContext.class object, which would hold on to the
+   * old classloader that loaded that class, and so on.
+   **/
   private final ThreadLocal<Object[]> localContext;
-  /**
-   * Synchronization: map value is modified only for the current thread,
-   * it's ok to read map values of other threads. It can change between your
-   * calls.
-   *
-   * @see #getGlobalInternalContext
-   */
-  private static final ConcurrentMap<Thread, InternalContext> globalInternalContext =
-      Maps.newConcurrentMap();
 
-  /**
-   * Provides access to the internal context for the current injector of all threads.
-   * One does not need to use this from Guice source code as context could be passed on the stack.
-   * It is required for custom scopes which are called from Guice and sometimes do require
-   * access to current internal context, but it is not passed in. Contrary to {@link #localContext}
-   * it is not used to store injector-specific state, but to provide easy access to the current
-   * state.
-   *
-   * @return unmodifiable map
-   */
-  static Map<Thread, InternalContext> getGlobalInternalContext() {
-    return Collections.unmodifiableMap(globalInternalContext);
+  /** Only to be called by the {@link SingletonScope} provider. */
+  InternalContext getLocalContext() {
+    return (InternalContext) localContext.get()[0];
   }
 
   /** Looks up thread local context. Creates (and removes) a new context if necessary. */
@@ -1085,30 +1079,17 @@ final class InjectorImpl implements Injector, Lookups {
       reference = new Object[1];
       localContext.set(reference);
     }
-    Thread currentThread = Thread.currentThread();
     if (reference[0] == null) {
       reference[0] = new InternalContext(options);
-      globalInternalContext.put(currentThread, (InternalContext) reference[0]);
       try {
         return callable.call((InternalContext) reference[0]);
       } finally {
         // Only clear contexts if this call created them.
         reference[0] = null;
-        globalInternalContext.remove(currentThread);
       }
     } else {
-      Object previousGlobalInternalContext = globalInternalContext.get(currentThread);
-      globalInternalContext.put(currentThread, (InternalContext) reference[0]);
-      try {
-        // Someone else will clean up this local context.
-        return callable.call((InternalContext) reference[0]);
-      } finally {
-        if (previousGlobalInternalContext != null) {
-          globalInternalContext.put(currentThread, (InternalContext) previousGlobalInternalContext);
-        } else {
-          globalInternalContext.remove(currentThread);
-        }
-      }
+      // Someone else will clean up this local context.
+      return callable.call((InternalContext) reference[0]);
     }
   }
 

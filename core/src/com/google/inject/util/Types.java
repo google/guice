@@ -27,6 +27,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,6 +102,16 @@ public final class Types {
   }
 
   /**
+   * Returns a type modelling a {@link Collection} whose elements are of type
+   * {@code elementType}.
+   *
+   * @return a {@link java.io.Serializable serializable} parameterized type.
+   */
+  public static ParameterizedType collectionOf(Type elementType) {
+    return newParameterizedType(Collection.class, elementType);
+  }
+
+  /**
    * Returns a type modelling a {@link Set} whose elements are of type
    * {@code elementType}.
    *
@@ -130,5 +141,15 @@ public final class Types {
    */
   public static ParameterizedType providerOf(Type providedType) {
     return newParameterizedType(Provider.class, providedType);
+  }
+
+  /**
+   * Returns a type modelling a {@link javax.inject.Provider} that provides elements of type
+   * {@code elementType}.
+   *
+   * @return a {@link java.io.Serializable serializable} parameterized type.
+   */
+  public static Type javaxProviderOf(Type type) {
+    return Types.newParameterizedType(javax.inject.Provider.class, type);
   }
 }

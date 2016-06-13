@@ -104,6 +104,14 @@ final class BindingProcessor extends AbstractBindingProcessor {
       public Boolean visit(ProviderInstanceBinding<? extends T> binding) {
         prepareBinding();
         javax.inject.Provider<? extends T> provider = binding.getUserSuppliedProvider();
+        // TODO(lukes): add support for multibinder/mapbinder/optionalbinder here as well
+        // this may require extracting some generic interface instead of testing for specific
+        // implementations.
+        if (provider instanceof ProviderMethod) {
+          @SuppressWarnings("unchecked")
+          ProviderMethod<T> asProviderMethod = (ProviderMethod<T>) provider;
+          return visitProviderMethod(asProviderMethod);
+        }
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<? extends javax.inject.Provider<? extends T>> initializable =
             initializer.<javax.inject.Provider<? extends T>>requestInjection(
@@ -151,6 +159,15 @@ final class BindingProcessor extends AbstractBindingProcessor {
             = Scoping.scope(key, injector, factory, source, scoping);
         putBinding(
             new LinkedBindingImpl<T>(injector, key, source, scopedFactory, scoping, linkedKey));
+        return true;
+      }
+      
+      /** Handle ProviderMethods specially. */
+      private Boolean visitProviderMethod(ProviderMethod<T> provider) {
+        BindingImpl<T> binding = 
+            ProviderMethod.createBinding(injector, key, provider, source, scoping);
+        scheduleInitialization(binding);
+        putBinding(binding);
         return true;
       }
 

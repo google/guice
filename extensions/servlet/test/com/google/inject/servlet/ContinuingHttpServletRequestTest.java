@@ -65,7 +65,7 @@ public class ContinuingHttpServletRequestTest extends TestCase {
 
     try {
       assertCookieArraysEqual(cookies, continuingRequest.getCookies());
-      fail();
+      throw new Error();
     } catch (AssertionFailedError e) {
       // Expected.
     }

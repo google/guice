@@ -15,8 +15,6 @@
  */
 package com.google.inject.daggeradapter;
 
-import static dagger.Provides.Type.SET;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -27,6 +25,8 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
+
+import dagger.multibindings.IntoSet;
 
 import junit.framework.TestCase;
 
@@ -65,13 +65,17 @@ public class DaggerAdapterTest extends TestCase {
   }
 
   @dagger.Module static class SetBindingDaggerModule1 {
-    @dagger.Provides(type=SET) Integer anInteger() {
+    @dagger.Provides
+    @IntoSet
+    Integer anInteger() {
       return 5;
     }
   }
 
   @dagger.Module static class SetBindingDaggerModule2 {
-    @dagger.Provides(type=SET) Integer anInteger() {
+    @dagger.Provides
+    @IntoSet
+    Integer anInteger() {
       return 3;
     }
   }

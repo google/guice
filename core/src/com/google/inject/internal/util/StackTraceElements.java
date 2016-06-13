@@ -19,12 +19,12 @@ package com.google.inject.internal.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.MapMaker;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Creates stack trace elements for members.
@@ -52,7 +52,11 @@ public class StackTraceElements {
           });
   /*end[AOP]*/
 
-  private static Map<Object, Object> cache = new MapMaker().makeMap();
+  private static final ConcurrentMap<InMemoryStackTraceElement, InMemoryStackTraceElement>
+      elementCache = new ConcurrentHashMap<InMemoryStackTraceElement, InMemoryStackTraceElement>();
+  private static final ConcurrentMap<String, String> stringCache =
+      new ConcurrentHashMap<String, String>();
+
   private static final String UNKNOWN_SOURCE = "Unknown Source";
 
   public static Object forMember(Member member) {
@@ -96,7 +100,8 @@ public class StackTraceElements {
    * Clears the internal cache for {@link StackTraceElement StackTraceElements}.
    */
   public static void clearCache() {
-    cache.clear();
+    elementCache.clear();
+    stringCache.clear();
   }
   
   /**
@@ -138,8 +143,7 @@ public class StackTraceElements {
   
   private static InMemoryStackTraceElement weakIntern(
       InMemoryStackTraceElement inMemoryStackTraceElement) {
-    InMemoryStackTraceElement cached = 
-        (InMemoryStackTraceElement) cache.get(inMemoryStackTraceElement);
+    InMemoryStackTraceElement cached = elementCache.get(inMemoryStackTraceElement);
     if (cached != null) {
       return cached;
     }
@@ -147,17 +151,17 @@ public class StackTraceElements {
         weakIntern(inMemoryStackTraceElement.getClassName()), 
         weakIntern(inMemoryStackTraceElement.getMethodName()), 
         inMemoryStackTraceElement.getLineNumber());
-    cache.put(inMemoryStackTraceElement, inMemoryStackTraceElement);
+    elementCache.put(inMemoryStackTraceElement, inMemoryStackTraceElement);
     return inMemoryStackTraceElement;
   }
   
   private static String weakIntern(String s) {
-    String cached = (String) cache.get(s);
+    String cached = stringCache.get(s);
     if (cached != null) {
       return cached;
     }
-    cache.put(s, s);
-    return s;  
+    stringCache.put(s, s);
+    return s;
   }
   
   /**
