@@ -31,9 +31,11 @@ import javax.servlet.http.HttpServlet;
 class LinkedServletBindingImpl extends AbstractServletModuleBinding<Key<? extends HttpServlet>>
     implements LinkedServletBinding {
 
-  LinkedServletBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends HttpServlet> target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  LinkedServletBindingImpl(
+      Map<String, String> initParams,
+      Key<? extends HttpServlet> target,
+      UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
   public Key<? extends HttpServlet> getLinkedKey() {

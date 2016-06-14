@@ -19,6 +19,7 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,21 +42,37 @@ class FiltersModuleBuilder {
   }
 
   public ServletModule.FilterKeyBindingBuilder filter(List<String> patterns) {
-    return new FilterKeyBindingBuilderImpl(patterns, UriPatternType.SERVLET);
+    return new FilterKeyBindingBuilderImpl(parsePatterns(UriPatternType.SERVLET, patterns));
   }
 
   public ServletModule.FilterKeyBindingBuilder filterRegex(List<String> regexes) {
-    return new FilterKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
+    return new FilterKeyBindingBuilderImpl(parsePatterns(UriPatternType.REGEX, regexes));
+  }
+
+  private List<UriPatternMatcher> parsePatterns(UriPatternType type, List<String> patterns) {
+    List<UriPatternMatcher> patternMatchers = new ArrayList<UriPatternMatcher>();
+    for (String pattern : patterns) {
+      UriPatternMatcher matcher = null;
+      try {
+        matcher = UriPatternType.get(type, pattern);
+      } catch (IllegalArgumentException iae) {
+        binder
+            .skipSources(ServletModule.class, FiltersModuleBuilder.class)
+            .addError("%s", iae.getMessage());
+      }
+      if (matcher != null) {
+        patternMatchers.add(matcher);
+      }
+    }
+    return patternMatchers;
   }
 
   //non-static inner class so it can access state of enclosing module class
   class FilterKeyBindingBuilderImpl implements ServletModule.FilterKeyBindingBuilder {
-    private final List<String> uriPatterns;
-    private final UriPatternType uriPatternType;
+    private final List<UriPatternMatcher> uriPatterns;
 
-    private FilterKeyBindingBuilderImpl(List<String> uriPatterns, UriPatternType uriPatternType) {
+    private FilterKeyBindingBuilderImpl(List<UriPatternMatcher> uriPatterns) {
       this.uriPatterns = uriPatterns;
-      this.uriPatternType = uriPatternType;
     }
 
     public void through(Class<? extends Filter> filterKey) {
@@ -85,10 +102,11 @@ class FiltersModuleBuilder {
     private void through(Key<? extends Filter> filterKey,
         Map<String, String> initParams,
         Filter filterInstance) {
-      for (String pattern : uriPatterns) {
-        binder.bind(FilterDefinition.class).annotatedWith(UniqueAnnotations.create()).toProvider(
-            new FilterDefinition(pattern, filterKey, UriPatternType.get(uriPatternType, pattern),
-                initParams, filterInstance));
+      for (UriPatternMatcher pattern : uriPatterns) {
+        binder
+            .bind(FilterDefinition.class)
+            .annotatedWith(UniqueAnnotations.create())
+            .toProvider(new FilterDefinition(filterKey, pattern, initParams, filterInstance));
       }
     }
 

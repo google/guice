@@ -64,9 +64,12 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
   public final void testIncludeManagedServlet() throws IOException, ServletException {
     String pattern = "blah.html";
-    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
@@ -127,9 +130,12 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
 
   public final void testForwardToManagedServlet() throws IOException, ServletException {
     String pattern = "blah.html";
-    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);
@@ -210,9 +216,12 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   public final void forwardToManagedServletFailureOnCommittedBuffer()
       throws IOException, ServletException {
     String pattern = "blah.html";
-    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
 
     final Injector injector = createMock(Injector.class);
     final Binding binding = createMock(Binding.class);

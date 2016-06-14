@@ -52,7 +52,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinition> {
-  private final String pattern;
   private final Key<? extends HttpServlet> servletKey;
   private final UriPatternMatcher patternMatcher;
   private final Map<String, String> initParams;
@@ -62,9 +61,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
   //always set in init, our servlet is always presumed to be a singleton
   private final AtomicReference<HttpServlet> httpServlet = new AtomicReference<HttpServlet>();
 
-  public ServletDefinition(String pattern, Key<? extends HttpServlet> servletKey,
-      UriPatternMatcher patternMatcher, Map<String, String> initParams, HttpServlet servletInstance) {
-    this.pattern = pattern;
+  public ServletDefinition(
+      Key<? extends HttpServlet> servletKey,
+      UriPatternMatcher patternMatcher,
+      Map<String, String> initParams,
+      HttpServlet servletInstance) {
     this.servletKey = servletKey;
     this.patternMatcher = patternMatcher;
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
@@ -81,13 +82,11 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       if(servletInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new InstanceServletBindingImpl(initParams,
-                pattern,
                 servletInstance,
                 patternMatcher));
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedServletBindingImpl(initParams,
-                pattern,
                 servletKey,
                 patternMatcher));
       }
@@ -292,9 +291,5 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
 
   String getKey() {
     return servletKey.toString();
-  }
-
-  String getPattern() {
-    return pattern;
   }
 }

@@ -17,6 +17,8 @@
 
 package com.google.inject.servlet;
 
+import static junit.framework.Assert.fail;
+
 import junit.framework.TestCase;
 
 public class UriPatternTypeTest extends TestCase {
@@ -55,5 +57,14 @@ public class UriPatternTypeTest extends TestCase {
     assertTrue(pattern.matches("/path/foo?val=1"));
     assertFalse(pattern.matches("/foo"));
     assertFalse(pattern.matches("/foo?val=1"));
+  }
+
+  public void testPatternWithPercentEncodedChars_servlet() {
+    try {
+      UriPatternType.get(UriPatternType.SERVLET, "/foo/%2f/*");
+      fail();
+    } catch (IllegalArgumentException iae) {
+      assertTrue(iae.getMessage().contains("Servlet patterns cannot contain escape patterns."));
+    }
   }
 }

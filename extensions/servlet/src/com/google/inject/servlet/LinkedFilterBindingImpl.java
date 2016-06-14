@@ -31,9 +31,11 @@ import javax.servlet.Filter;
 class LinkedFilterBindingImpl extends AbstractServletModuleBinding<Key<? extends Filter>>
     implements LinkedFilterBinding {
 
-  LinkedFilterBindingImpl(Map<String, String> initParams, String pattern,
-      Key<? extends Filter> target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  LinkedFilterBindingImpl(
+      Map<String, String> initParams,
+      Key<? extends Filter> target,
+      UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
   public Key<? extends Filter> getLinkedKey() {

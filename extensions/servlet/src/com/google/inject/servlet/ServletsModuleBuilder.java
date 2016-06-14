@@ -20,6 +20,7 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.internal.UniqueAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,21 +46,43 @@ class ServletsModuleBuilder {
 
   //the first level of the EDSL--
   public ServletModule.ServletKeyBindingBuilder serve(List<String> urlPatterns) {
-    return new ServletKeyBindingBuilderImpl(urlPatterns, UriPatternType.SERVLET);
+    return new ServletKeyBindingBuilderImpl(parsePatterns(UriPatternType.SERVLET, urlPatterns));
   }
 
   public ServletModule.ServletKeyBindingBuilder serveRegex(List<String> regexes) {
-    return new ServletKeyBindingBuilderImpl(regexes, UriPatternType.REGEX);
+    return new ServletKeyBindingBuilderImpl(parsePatterns(UriPatternType.REGEX, regexes));
+  }
+
+  private List<UriPatternMatcher> parsePatterns(UriPatternType type, List<String> patterns) {
+    List<UriPatternMatcher> patternMatchers = new ArrayList<UriPatternMatcher>();
+    for (String pattern : patterns) {
+      if (!servletUris.add(pattern)) {
+        binder
+            .skipSources(ServletModule.class, ServletsModuleBuilder.class)
+            .addError("More than one servlet was mapped to the same URI pattern: " + pattern);
+      } else {
+        UriPatternMatcher matcher = null;
+        try {
+          matcher = UriPatternType.get(type, pattern);
+        } catch (IllegalArgumentException iae) {
+          binder
+              .skipSources(ServletModule.class, ServletsModuleBuilder.class)
+              .addError("%s", iae.getMessage());
+        }
+        if (matcher != null) {
+          patternMatchers.add(matcher);
+        }
+      }
+    }
+    return patternMatchers;
   }
 
   //non-static inner class so it can access state of enclosing module class
   class ServletKeyBindingBuilderImpl implements ServletModule.ServletKeyBindingBuilder {
-    private final List<String> uriPatterns;
-    private final UriPatternType uriPatternType;
+    private final List<UriPatternMatcher> uriPatterns;
 
-    private ServletKeyBindingBuilderImpl(List<String> uriPatterns, UriPatternType uriPatternType) {
+    private ServletKeyBindingBuilderImpl(List<UriPatternMatcher> uriPatterns) {
       this.uriPatterns = uriPatterns;
-      this.uriPatternType = uriPatternType;
     }
 
     public void with(Class<? extends HttpServlet> servletKey) {
@@ -86,15 +109,10 @@ class ServletsModuleBuilder {
 
     private void with(Key<? extends HttpServlet> servletKey, Map<String, String> initParams,
         HttpServlet servletInstance) {
-      for (String pattern : uriPatterns) {
-        // Ensure two servlets aren't bound to the same pattern.
-        if (!servletUris.add(pattern)) {
-          binder.addError("More than one servlet was mapped to the same URI pattern: " + pattern);
-        } else {
-          binder.bind(Key.get(ServletDefinition.class, UniqueAnnotations.create())).toProvider(
-              new ServletDefinition(pattern, servletKey, UriPatternType
-                  .get(uriPatternType, pattern), initParams, servletInstance));
-        }
+      for (UriPatternMatcher pattern : uriPatterns) {
+        binder
+            .bind(Key.get(ServletDefinition.class, UniqueAnnotations.create()))
+            .toProvider(new ServletDefinition(servletKey, pattern, initParams, servletInstance));
       }
     }
 
