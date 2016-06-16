@@ -58,7 +58,7 @@ public class OSGiContainerTest
   static final String AOPALLIANCE_JAR = System.getProperty("aopalliance.jar", "lib/aopalliance.jar");
 /*end[AOP]*/
   static final String JAVAX_INJECT_JAR = System.getProperty("javax.inject.jar", "lib/javax.inject.jar");
-  static final String GUAVA_JAR = System.getProperty("guava.jar", "lib/guava-18.0.jar");
+  static final String GUAVA_JAR = System.getProperty("guava.jar", "lib/guava-19.0.jar");
 
   // dynamically build test bundles
   @Override protected void setUp()
