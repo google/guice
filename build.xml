@@ -140,7 +140,7 @@
   </target>
 
   <property name="old.api" value="4.0"/>
-  <property name="new.api" value="latest"/>
+  <property name="new.api" value="4.1"/>
   <target name="jdiff" depends="compile">
     <property name="jdiff.home" value="lib/build/jdiff"/>
     <property name="jdiff.tmp" value="build/docs/latest-api-diffs"/>
