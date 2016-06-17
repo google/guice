@@ -30,9 +30,9 @@ import javax.servlet.Filter;
 class InstanceFilterBindingImpl extends AbstractServletModuleBinding<Filter> implements
     InstanceFilterBinding {
 
-  InstanceFilterBindingImpl(Map<String, String> initParams, String pattern,
-      Filter target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  InstanceFilterBindingImpl(
+      Map<String, String> initParams, Filter target, UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
   public Filter getFilterInstance() {

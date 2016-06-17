@@ -72,8 +72,12 @@ public class ServletDefinitionTest extends TestCase {
       .put("ahssd", "asdasd124ok").build();
 
     String pattern = "/*";
-    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
+    final ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            initParams,
+            null);
 
     ServletContext servletContext = createMock(ServletContext.class);
     final String contextName = "thing__!@@44__SRV" + getClass();
@@ -108,9 +112,12 @@ public class ServletDefinitionTest extends TestCase {
         .put("ahssd", "asdasd124ok")
         .build();
 
-    final ServletDefinition servletDefinition = new ServletDefinition(pattern,
-        Key.get(HttpServlet.class), UriPatternType.get(UriPatternType.SERVLET, pattern),
-        initParams, null);
+    final ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            initParams,
+            null);
     HttpServletResponse servletResponse = createMock(HttpServletResponse.class);
     HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
 

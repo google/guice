@@ -18,6 +18,7 @@ package com.google.inject.servlet;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binding;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
@@ -63,6 +64,24 @@ public class ServletModuleTest extends TestCase {
         1, visitor.instanceServlets.size());
     assertEquals("wrong instance filters: " + visitor.instanceFilters,
         1, visitor.instanceFilters.size());
+  }
+
+  public void testServletModule_badPattern() {
+    try {
+      Guice.createInjector(
+          new ServletModule() {
+            @Override
+            protected void configureServlets() {
+              serve("/%2E/*").with(new DummyServlet());
+              serveRegex("/(foo|bar/").with(new DummyServlet());
+              filter("/%2E/*").through(new DummyFilterImpl());
+              filterRegex("/(foo|bar/").through(new DummyFilterImpl());
+            }
+          });
+      fail();
+    } catch (CreationException e) {
+      assertEquals(4, e.getErrorMessages().size());
+    }
   }
 
   private static class Module extends ServletModule {

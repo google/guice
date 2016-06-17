@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServlet;
 class InstanceServletBindingImpl extends AbstractServletModuleBinding<HttpServlet> implements
     InstanceServletBinding {
 
-  InstanceServletBindingImpl(Map<String, String> initParams, String pattern,
-      HttpServlet target, UriPatternMatcher patternMatcher) {
-    super(initParams, pattern, target, patternMatcher);
+  InstanceServletBindingImpl(
+      Map<String, String> initParams, HttpServlet target, UriPatternMatcher patternMatcher) {
+    super(initParams, target, patternMatcher);
   }
 
   public HttpServlet getServletInstance() {

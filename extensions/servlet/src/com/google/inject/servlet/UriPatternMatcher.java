@@ -24,7 +24,7 @@ package com.google.inject.servlet;
  */
 interface UriPatternMatcher {
   /**
-   * @param uri A "contextual" (i.e. relative) Request URI, *not* a complete one.
+   * @param uri A "contextual" (i.e. relative) and "normalized" Request URI, *not* a complete one.
    * @return Returns true if the uri matches the pattern.
    */
   boolean matches(String uri);
@@ -41,4 +41,7 @@ interface UriPatternMatcher {
   
   /** Returns the type of pattern this is. */
   UriPatternType getPatternType();
+
+  /** Returns the original pattern that was registered. */
+  String getOriginalPattern();
 }

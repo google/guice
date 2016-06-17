@@ -45,10 +45,12 @@ public class LineNumbersTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
-          "for parameter 0 at " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
+          "for the 1st parameter of " + A.class.getName() + ".<init>(LineNumbersTest.java:",
+          "at " + LineNumbersTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -74,10 +76,12 @@ public class LineNumbersTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
-          "for parameter 0 at " + A.class.getName() + ".<init>(LineNumbersTest.java:",
-          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
+          "for the 1st parameter of " + A.class.getName() + ".<init>(LineNumbersTest.java:",
+          "at " + LineNumbersTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
 
@@ -124,10 +128,12 @@ public class LineNumbersTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) No implementation for " + B.class.getName() + " was bound.",
-          "for parameter 0 at " + GeneratingClassLoader.name + ".<init>(Unknown Source)",
-          "at " + LineNumbersTest.class.getName(), getDeclaringSourcePart(getClass()));
+          "for the 1st parameter of " + GeneratingClassLoader.name + ".<init>(Unknown Source)",
+          "at " + LineNumbersTest.class.getName(),
+          getDeclaringSourcePart(getClass()));
     }
   }
   

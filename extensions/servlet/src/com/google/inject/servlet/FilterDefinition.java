@@ -42,7 +42,6 @@ import javax.servlet.http.HttpServletRequest;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition> {
-  private final String pattern;
   private final Key<? extends Filter> filterKey;
   private final UriPatternMatcher patternMatcher;
   private final Map<String, String> initParams;
@@ -52,9 +51,11 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
   // always set after init is called.
   private final AtomicReference<Filter> filter = new AtomicReference<Filter>();
 
-  public FilterDefinition(String pattern, Key<? extends Filter> filterKey,
-      UriPatternMatcher patternMatcher, Map<String, String> initParams, Filter filterInstance) {
-    this.pattern = pattern;
+  public FilterDefinition(
+      Key<? extends Filter> filterKey,
+      UriPatternMatcher patternMatcher,
+      Map<String, String> initParams,
+      Filter filterInstance) {
     this.filterKey = filterKey;
     this.patternMatcher = patternMatcher;
     this.initParams = Collections.unmodifiableMap(new HashMap<String, String>(initParams));
@@ -71,13 +72,11 @@ class FilterDefinition implements ProviderWithExtensionVisitor<FilterDefinition>
       if(filterInstance != null) {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new InstanceFilterBindingImpl(initParams,
-                pattern,
                 filterInstance,
                 patternMatcher));
       } else {
         return ((ServletModuleTargetVisitor<B, V>)visitor).visit(
             new LinkedFilterBindingImpl(initParams,
-                pattern,
                 filterKey,
                 patternMatcher));
       }

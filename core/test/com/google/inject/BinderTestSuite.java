@@ -610,8 +610,10 @@ public class BinderTestSuite extends TestCase {
         nextId.set(-1);
         newInjector().getInstance(injectsKey);
       } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), "Illegal value: -1",
-            "for parameter 0 at " + injectsKey.getName() + ".inject");
+        assertContains(
+            expected.getMessage(),
+            "Illegal value: -1",
+            "for the 1st parameter of " + injectsKey.getName() + ".inject");
       }
 
       nextId.set(201);
@@ -620,8 +622,10 @@ public class BinderTestSuite extends TestCase {
         nextId.set(-1);
         newInjector().injectMembers(injectable);
       } catch (ProvisionException expected) {
-        assertContains(expected.getMessage(), "Illegal value: -1",
-            "for parameter 0 at " + injectsKey.getName() + ".inject");
+        assertContains(
+            expected.getMessage(),
+            "Illegal value: -1",
+            "for the 1st parameter of " + injectsKey.getName() + ".inject");
       }
 
       nextId.set(201);

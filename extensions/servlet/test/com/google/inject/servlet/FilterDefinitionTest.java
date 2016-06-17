@@ -67,8 +67,12 @@ public class FilterDefinitionTest extends TestCase {
     replay(servletContext);
 
     String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern), initParams, null);
+    final FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            initParams,
+            null);
     filterDef.init(servletContext, injector, Sets.<Filter>newIdentityHashSet());
 
     assertTrue(filterDef.getFilter() instanceof MockFilter);
@@ -112,9 +116,12 @@ public class FilterDefinitionTest extends TestCase {
     replay(injector, binding, request);
 
     String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
@@ -173,9 +180,12 @@ public class FilterDefinitionTest extends TestCase {
     replay(injector, binding, request);
 
     String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
     //should fire on mockfilter now
     filterDef.init(createMock(ServletContext.class), injector, Sets.<Filter>newIdentityHashSet());
     assertTrue(filterDef.getFilter() instanceof MockFilter);
@@ -205,9 +215,12 @@ public class FilterDefinitionTest extends TestCase {
 
   public void testGetFilterIfMatching() throws ServletException {
     String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
     HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
     ServletContext servletContext = createMock(ServletContext.class);
     Injector injector = createMock(Injector.class);
@@ -240,9 +253,12 @@ public class FilterDefinitionTest extends TestCase {
 
   public void testGetFilterIfMatchingNotMatching() throws ServletException {
     String pattern = "/*";
-    final FilterDefinition filterDef = new FilterDefinition(pattern, Key.get(Filter.class),
-        UriPatternType.get(UriPatternType.SERVLET, pattern),
-        new HashMap<String, String>(), null);
+    final FilterDefinition filterDef =
+        new FilterDefinition(
+            Key.get(Filter.class),
+            UriPatternType.get(UriPatternType.SERVLET, pattern),
+            new HashMap<String, String>(),
+            null);
     HttpServletRequest servletRequest = createMock(HttpServletRequest.class);
     ServletContext servletContext = createMock(ServletContext.class);
     Injector injector = createMock(Injector.class);

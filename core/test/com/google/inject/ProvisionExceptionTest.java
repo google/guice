@@ -46,10 +46,12 @@ public class ProvisionExceptionTest extends TestCase {
       fail(); 
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
-      assertContains(e.getMessage(), "Error injecting constructor",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
+      assertContains(
+          e.getMessage(),
+          "Error injecting constructor",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$C.setD",
           "for field at com.google.inject.ProvisionExceptionTest$B.c",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$A");
     }
   }
 
@@ -68,10 +70,12 @@ public class ProvisionExceptionTest extends TestCase {
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof UnsupportedOperationException);
       assertFalse(e.getMessage().contains("custom provider"));
-      assertContains(e.getMessage(), "Error injecting constructor",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
+      assertContains(
+          e.getMessage(),
+          "Error injecting constructor",
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$C.setD",
           "for field at com.google.inject.ProvisionExceptionTest$B.c",
-          "for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
+          "for the 1st parameter of com.google.inject.ProvisionExceptionTest$A");
     }
   }
 

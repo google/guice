@@ -120,8 +120,8 @@
         <pathelement location="${build.dir}/dist/guice-${version}.jar"/>
         <pathelement location="lib/javax.inject.jar"/>
         <pathelement location="lib/aopalliance.jar"/>
-        <pathelement location="lib/guava-18.0.jar"/>
-        <pathelement location="lib/build/guava-testlib-18.0.jar"/>
+        <pathelement location="lib/guava-19.0.jar"/>
+        <pathelement location="lib/build/guava-testlib-19.0.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
@@ -289,10 +289,10 @@
       <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/asm-5.0.3.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.3.jar"/>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.jar"/>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value="">
-      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.3.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>]]></replacetoken>
+      <replacetoken><![CDATA[<zipfileset src="${common.basedir}/lib/build/cglib-3.2.jar"><include name="LICENSE"/><include name="NOTICE"/></zipfileset>]]></replacetoken>
     </replace>
     <replace file="build/no_aop/common.xml" value='Bundle-Name" value="$${ant.project.name} (no_aop)'>
       <replacetoken><![CDATA[Bundle-Name" value="${ant.project.name}]]></replacetoken>

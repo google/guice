@@ -230,6 +230,56 @@ public class FilterDispatchIntegrationTest extends TestCase {
     }
   }
 
+  public final void testFilterBypass() throws ServletException,
+      IOException {
+
+    final Injector injector = Guice.createInjector(new ServletModule() {
+      @Override
+      protected void configureServlets() {
+        filter("/protected/*").through(TestFilter.class);
+      }
+    });
+
+    final FilterPipeline pipeline = injector.getInstance(FilterPipeline.class);
+    pipeline.initPipeline(null);
+    assertEquals(1, inits);
+
+    runRequestForPath(pipeline, "/./protected/resource", true);
+    runRequestForPath(pipeline, "/protected/../resource", false);
+    runRequestForPath(pipeline, "/protected/../protected/resource", true);
+
+    assertEquals(0, destroys);
+    pipeline.destroyPipeline();
+    assertEquals(1, destroys);
+  }
+
+
+  private void runRequestForPath(FilterPipeline pipeline, String value, boolean matches)
+      throws IOException, ServletException {
+    assertEquals(0, doFilters);
+    //create ourselves a mock request with test URI
+    HttpServletRequest requestMock = control.createMock(HttpServletRequest.class);
+    expect(requestMock.getRequestURI())
+            .andReturn(value)
+            .anyTimes();
+    expect(requestMock.getContextPath())
+        .andReturn("")
+        .anyTimes();
+    // dispatch request
+    FilterChain filterChain = control.createMock(FilterChain.class);
+    filterChain.doFilter(requestMock, null);
+    control.replay();
+    pipeline.dispatch(requestMock, null, filterChain);
+    control.verify();
+    control.reset();
+    if (matches) {
+      assertEquals("filter was not run", 1, doFilters);
+      doFilters = 0;
+    } else {
+      assertEquals("filter was run", 0, doFilters);
+    }
+  }
+
   @Singleton
   public static class TestServlet extends HttpServlet {
     public static final String FORWARD_FROM = "/index.html";

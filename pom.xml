@@ -144,12 +144,12 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>19.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
-        <version>18.0</version>
+        <version>19.0</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
@@ -159,7 +159,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
       <dependency>
         <groupId>cglib</groupId>
         <artifactId>cglib</artifactId>
-        <version>3.2.3</version>
+        <version>3.2.0</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>

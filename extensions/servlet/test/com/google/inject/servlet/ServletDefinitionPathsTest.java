@@ -95,8 +95,12 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     replay(injector, binding, request);
 
-    ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>(), null);
+    ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, mapping),
+            new HashMap<String, String>(),
+            null);
 
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);
@@ -195,8 +199,12 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     replay(injector, binding, request);
 
-    ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.SERVLET, mapping), new HashMap<String, String>(), null);
+    ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.SERVLET, mapping),
+            new HashMap<String, String>(),
+            null);
 
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);
@@ -295,8 +303,12 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     replay(injector, binding, request);
 
-    ServletDefinition servletDefinition = new ServletDefinition(mapping, Key.get(HttpServlet.class),
-        UriPatternType.get(UriPatternType.REGEX, mapping), new HashMap<String, String>(), null);
+    ServletDefinition servletDefinition =
+        new ServletDefinition(
+            Key.get(HttpServlet.class),
+            UriPatternType.get(UriPatternType.REGEX, mapping),
+            new HashMap<String, String>(),
+            null);
 
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
     servletDefinition.doService(request, response);

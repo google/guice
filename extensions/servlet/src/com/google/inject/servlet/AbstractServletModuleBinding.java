@@ -26,14 +26,12 @@ import java.util.Map;
 class AbstractServletModuleBinding<T> implements ServletModuleBinding {
   
   private final Map<String, String> initParams;
-  private final String pattern;
   private final T target;
   private final UriPatternMatcher patternMatcher;
 
-  AbstractServletModuleBinding(Map<String, String> initParams, String pattern, T target,
-      UriPatternMatcher patternMatcher) {
+  AbstractServletModuleBinding(
+      Map<String, String> initParams, T target, UriPatternMatcher patternMatcher) {
     this.initParams = initParams;
-    this.pattern = pattern;
     this.target = target;
     this.patternMatcher = patternMatcher;
   }
@@ -43,7 +41,7 @@ class AbstractServletModuleBinding<T> implements ServletModuleBinding {
   }
 
   public String getPattern() {
-    return pattern;
+    return patternMatcher.getOriginalPattern();
   }
 
   protected T getTarget() {
