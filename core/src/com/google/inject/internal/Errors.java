@@ -16,6 +16,8 @@
 
 package com.google.inject.internal;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Equivalence;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
@@ -29,7 +31,6 @@ import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
@@ -638,25 +639,23 @@ public final class Errors implements Serializable {
             if (!warnedDependencies.add(dependency)) {
               return value;
             }
-            logger.log(Level.WARNING,
-                "Guice injected null into parameter {0} of {1} (a {2}), please mark it @Nullable."
+            logger.log(
+                Level.WARNING,
+                "Guice injected null into {0} (a {1}), please mark it @Nullable."
                     + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
                     + " error.",
-                new Object[] {
-                    dependency.getParameterIndex(),
-                    convert(dependency.getInjectionPoint().getMember()),
-                    convert(dependency.getKey())});
+                new Object[] {formatParameter(dependency), convert(dependency.getKey())});
             return null; // log & exit.
         }
       }
     }
 
-    int parameterIndex = dependency.getParameterIndex();
-    String parameterName = (parameterIndex != -1)
-        ? "parameter " + parameterIndex + " of "
-        : "";
-    addMessage("null returned by binding at %s%n but %s%s is not @Nullable",
-        source, parameterName, dependency.getInjectionPoint().getMember());
+    Object formattedDependency =
+        (dependency.getParameterIndex() != -1)
+            ? formatParameter(dependency)
+            : StackTraceElements.forMember(dependency.getInjectionPoint().getMember());
+    addMessage(
+        "null returned by binding at %s%n but %s is not @Nullable", source, formattedDependency);
 
     throw toException();
   }
@@ -844,11 +843,46 @@ public final class Errors implements Serializable {
 
     } else if (dependency != null) {
       formatter.format("  while locating %s%n", convert(dependency.getKey(), elementSource));
-      formatter.format("    for parameter %s at %s%n",
-          dependency.getParameterIndex(), StackTraceElements.forMember(member));
+      formatter.format("    for %s%n", formatParameter(dependency));
 
     } else {
       formatSource(formatter, injectionPoint.getMember());
+    }
+  }
+  
+  private static String formatParameter(Dependency<?> dependency) {
+    int ordinal = dependency.getParameterIndex() + 1;
+    return String.format(
+        "the %s%s parameter of %s",
+        ordinal,
+        getOrdinalSuffix(ordinal),
+        StackTraceElements.forMember(dependency.getInjectionPoint().getMember()));
+  }
+
+  /**
+   * Maps {@code 1} to the string {@code "1st"} ditto for all non-negative numbers
+   * 
+   * @see <a href="https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers">
+   *     https://en.wikipedia.org/wiki/English_numerals#Ordinal_numbers</a>
+   */
+  private static String getOrdinalSuffix(int ordinal) {
+    // negative ordinals don't make sense, we allow zero though because we are programmers
+    checkArgument(ordinal >= 0);
+    if ((ordinal / 10) % 10 == 1) {
+      // all the 'teens' are weird
+      return "th";
+    } else {
+      // could use a lookup table? any better?
+      switch (ordinal % 10) {
+        case 1:
+          return "st";
+        case 2:
+          return "nd";
+        case 3:
+          return "rd";
+        default:
+          return "th";
+      }
     }
   }
 

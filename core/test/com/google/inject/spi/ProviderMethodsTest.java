@@ -902,11 +902,13 @@ public class ProviderMethodsTest extends TestCase implements Module {
       injector.getInstance(Integer.class);
       fail();
     } catch (ProvisionException expected) {
-      assertContains(expected.getMessage(),
+      assertContains(
+          expected.getMessage(),
           "1) null returned by binding at " + module.getClass().getName() + ".configure(",
-          "but parameter 0 of " + module.getClass().getName() + ".fail() is not @Nullable",
+          "but the 1st parameter of " + module.getClass().getName() + ".fail(",
+          "is not @Nullable",
           "while locating java.lang.String",
-          "for parameter 0 at " + module.getClass().getName() + ".fail(",
+          "for the 1st parameter of " + module.getClass().getName() + ".fail(",
           "while locating java.lang.Integer");
 
       assertEquals(1, expected.getErrorMessages().size());
@@ -934,14 +936,11 @@ public class ProviderMethodsTest extends TestCase implements Module {
       injector.getInstance(Integer.class); // no exception, but assert it does log.
       LogRecord record = Iterables.getOnlyElement(logRecords);
       assertEquals(
-          "Guice injected null into parameter {0} of {1} (a {2}), please mark it @Nullable."
+          "Guice injected null into {0} (a {1}), please mark it @Nullable."
               + " Use -Dguice_check_nullable_provides_params=ERROR to turn this into an"
               + " error.",
           record.getMessage());
-      assertEquals(dependency.getParameterIndex(), record.getParameters()[0]);
-      assertEquals(Errors.convert(dependency.getInjectionPoint().getMember()),
-          record.getParameters()[1]);
-      assertEquals(Errors.convert(dependency.getKey()), record.getParameters()[2]);
+      assertEquals(Errors.convert(dependency.getKey()), record.getParameters()[1]);
     } finally {
       Logger.getLogger(Guice.class.getName()).removeHandler(fakeHandler);
     }
