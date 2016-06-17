@@ -297,7 +297,7 @@ public class ServletScopes {
    * @return an object that when opened will initiate the request scope
    * @throws OutOfScopeException if this method is called from a non-request
    *     thread, or if the request has completed.
-   * @since 5.0
+   * @since 4.1
    */
   public static RequestScoper transferRequest() {
     return (GuiceFilter.localContext.get() != null)
@@ -372,7 +372,7 @@ public class ServletScopes {
    *     request scope with.  To seed a key with null, use {@code null} as
    *     the value.
    * @return an object that when opened will initiate the request scope
-   * @since 5.0
+   * @since 4.1
    */
   public static RequestScoper scopeRequest(Map<Key<?>, Object> seedMap) {
     Preconditions.checkArgument(null != seedMap,
