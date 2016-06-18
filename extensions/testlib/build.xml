@@ -7,6 +7,7 @@
   <path id="compile.classpath">
     <fileset dir="${lib.dir}" includes="*.jar"/>
     <fileset dir="${lib.dir}/build" includes="*.jar"/>
+    <fileset dir="${persist.src.dir}" includes="*.jar"/>
     <pathelement path="../../build/classes"/>
   </path>
 
