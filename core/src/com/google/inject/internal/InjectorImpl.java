@@ -633,7 +633,7 @@ final class InjectorImpl implements Injector, Lookups {
 
     // Don't try to inject arrays or enums annotated with @ImplementedBy.
     if (rawType.isArray() || (rawType.isEnum() && implementedBy != null)) {
-      throw errors.missingImplementation(key).toException();
+      throw errors.missingImplementationWithHint(key, this).toException();
     }
 
     // Handle TypeLiteral<T> by binding the inner type
@@ -878,7 +878,7 @@ final class InjectorImpl implements Injector, Lookups {
           // throw with a more appropriate message below
         }
       }
-      throw errors.missingImplementation(key).toException();
+      throw errors.missingImplementationWithHint(key, this).toException();
     }
 
     Object source = key.getTypeLiteral().getRawType();

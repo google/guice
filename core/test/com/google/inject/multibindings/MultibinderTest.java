@@ -493,7 +493,8 @@ public class MultibinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.Integer",
+      assertContains(expected.getMessage(), true,
+          "No implementation for java.lang.Integer",
           "at " + getClass().getName());
     }
   }

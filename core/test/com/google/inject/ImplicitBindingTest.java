@@ -161,8 +161,8 @@ public class ImplicitBindingTest extends TestCase {
       fail("Shouldn't have been able to get binding of: " + clazz);
     } catch(ConfigurationException expected) {
       Message msg = Iterables.getOnlyElement(expected.getErrorMessages());
-      assertEquals("No implementation for " + InvalidInterface.class.getName() + " was bound.",
-          msg.getMessage());
+      Asserts.assertContains(msg.getMessage(),
+          "No implementation for " + InvalidInterface.class.getName() + " was bound.");
       List<Object> sources = msg.getSources();
       // Assert that the first item in the sources if the key for the class we're looking up,
       // ensuring that each lookup is "new".

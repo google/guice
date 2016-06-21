@@ -41,11 +41,11 @@ class UntargettedBindingProcessor extends AbstractBindingProcessor {
         // We can't assume abstract types aren't injectable. They may have an
         // @ImplementedBy annotation or something.
         if (key.getAnnotationType() != null) {
-          errors.missingImplementation(key);
+          errors.missingImplementationWithHint(key, injector);
           putBinding(invalidBinding(injector, key, source));
           return true;
         }
-    
+
         // This cast is safe after the preceeding check.
         try {
           BindingImpl<T> binding = injector.createUninitializedBinding(

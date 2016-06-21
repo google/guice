@@ -84,7 +84,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
     // We can't inject abstract classes.
     if (Modifier.isAbstract(rawType.getModifiers())) {
-      errors.missingImplementation(key);
+      errors.missingImplementationWithHint(key, injector);
     }
 
     // Error: Inner class.
