@@ -6,9 +6,9 @@ import com.google.inject.Injector;
 import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.ShortNameFactory;
 import com.google.inject.grapher.demo.BackToTheFutureModule;
+import com.google.inject.grapher.general.test.DefaultSimpleInterface;
 import com.google.inject.grapher.general.test.SimpleInterface;
 import com.google.inject.grapher.general.test.SimpleInterfaceProvider;
-import com.google.inject.grapher.general.test.TestSimpleInterface;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
 import junit.framework.TestCase;
@@ -42,7 +42,7 @@ public class VisJsGrapherTest extends TestCase {
   public void testSimpleBinding() throws Exception {
     //Before
     final String node1 = "\t{id: 0, label: 'SimpleInterface', color:'#7BE141'},";
-    final String node2 = "\t{id: 1, label: 'TestSimpleInterface', color:'#6E6EFD'},";
+    final String node2 = "\t{id: 1, label: 'DefaultSimpleInterface', color:'#6E6EFD'},";
 
     final String edge1 = "\t{from: 0, to: 1, color:'#97C2FC', arrows:'to' },";
 
@@ -50,7 +50,7 @@ public class VisJsGrapherTest extends TestCase {
         new AbstractModule() {
           @Override
           protected void configure() {
-            bind(SimpleInterface.class).to(TestSimpleInterface.class);
+            bind(SimpleInterface.class).to(DefaultSimpleInterface.class);
           }
         };
     final Injector injector = Guice.createInjector(testModule);
@@ -106,7 +106,7 @@ public class VisJsGrapherTest extends TestCase {
         new AbstractModule() {
           @Override
           protected void configure() {
-            bind(SimpleInterface.class).toInstance(new TestSimpleInterface());
+            bind(SimpleInterface.class).toInstance(new DefaultSimpleInterface());
           }
         };
     final Injector injector = Guice.createInjector(testModule);
@@ -164,9 +164,9 @@ public class VisJsGrapherTest extends TestCase {
    *
    * @return constructor
    */
-  private Constructor<TestSimpleInterface> getConstructor() {
+  private Constructor<DefaultSimpleInterface> getConstructor() {
     try {
-      return TestSimpleInterface.class.getConstructor();
+      return DefaultSimpleInterface.class.getConstructor();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     }

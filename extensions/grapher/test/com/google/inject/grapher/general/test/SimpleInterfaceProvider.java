@@ -8,6 +8,6 @@ import javax.inject.Provider;
 public class SimpleInterfaceProvider implements Provider<SimpleInterface> {
   @Override
   public SimpleInterface get() {
-    return new TestSimpleInterface();
+    return new DefaultSimpleInterface();
   }
 }

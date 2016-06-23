@@ -6,9 +6,9 @@ import com.google.inject.Injector;
 import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.ShortNameFactory;
 import com.google.inject.grapher.demo.BackToTheFutureModule;
+import com.google.inject.grapher.general.test.DefaultSimpleInterface;
 import com.google.inject.grapher.general.test.SimpleInterface;
 import com.google.inject.grapher.general.test.SimpleInterfaceProvider;
-import com.google.inject.grapher.general.test.TestSimpleInterface;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
 import junit.framework.TestCase;
@@ -48,15 +48,15 @@ public class XmlGrapherTest extends TestCase {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<graph>\n"
             + "<node id=\"0\" name=\"SimpleInterface\" annotation=\"\" type=\"TYPE\"/>\n"
-            + "<node id=\"1\" name=\"TestSimpleInterface\" annotation=\"\" type=\"INSTANCE\"/>\n"
-            + "<edge head_id=\"0\" tail_id=\"1\" head_name=\"SimpleInterface\" tail_name=\"TestSimpleInterface\" type=\"BINDING\" binding_type=\"NORMAL\"/> \n"
+            + "<node id=\"1\" name=\"DefaultSimpleInterface\" annotation=\"\" type=\"INSTANCE\"/>\n"
+            + "<edge head_id=\"0\" tail_id=\"1\" head_name=\"SimpleInterface\" tail_name=\"DefaultSimpleInterface\" type=\"BINDING\" binding_type=\"NORMAL\"/> \n"
             + "</graph>\n";
 
     final AbstractModule testModule =
         new AbstractModule() {
           @Override
           protected void configure() {
-            bind(SimpleInterface.class).to(TestSimpleInterface.class);
+            bind(SimpleInterface.class).to(DefaultSimpleInterface.class);
           }
         };
     final Injector injector = Guice.createInjector(testModule);
@@ -110,7 +110,7 @@ public class XmlGrapherTest extends TestCase {
         new AbstractModule() {
           @Override
           protected void configure() {
-            bind(SimpleInterface.class).toInstance(new TestSimpleInterface());
+            bind(SimpleInterface.class).toInstance(new DefaultSimpleInterface());
           }
         };
     final Injector injector = Guice.createInjector(testModule);
@@ -166,9 +166,9 @@ public class XmlGrapherTest extends TestCase {
    *
    * @return constructor
    */
-  private Constructor<TestSimpleInterface> getConstructor() {
+  private Constructor<DefaultSimpleInterface> getConstructor() {
     try {
-      return TestSimpleInterface.class.getConstructor();
+      return DefaultSimpleInterface.class.getConstructor();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     }
