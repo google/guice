@@ -13,6 +13,7 @@ import com.google.inject.grapher.general.GeneralNode;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -65,7 +66,8 @@ public class VisJsGrapher extends GeneralGrapher {
     final List<GeneralNode> nodes = Lists.newArrayList(this.nodes.values());
 
     // we sort it since we want deterministic behaviour, could sort it by number (toInteger)
-    nodes.sort(
+    Collections.sort(
+        nodes,
         new Comparator<GeneralNode>() {
           @Override
           public int compare(final GeneralNode generalNode1, GeneralNode generalNode2) {
