@@ -12,8 +12,6 @@ import com.google.inject.grapher.general.test.TestSimpleInterface;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
 import junit.framework.TestCase;
-import org.easymock.internal.ReflectionUtils;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -44,16 +42,16 @@ public class GeneralGrapherTest extends TestCase {
         new GeneralGrapher(nameFactory, portIdFactory) {
           @Override
           protected void postProcess() throws IOException {
-            Assert.assertEquals(19, nodes.size());
-            Assert.assertEquals(22, edges.size());
+            assertEquals(19, nodes.size());
+            assertEquals(22, edges.size());
           }
 
           @Override
           protected void reset() {
             super.reset();
 
-            Assert.assertEquals(0, nodes.size());
-            Assert.assertEquals(0, edges.size());
+            assertEquals(0, nodes.size());
+            assertEquals(0, edges.size());
           }
         };
 
@@ -70,8 +68,8 @@ public class GeneralGrapherTest extends TestCase {
         new GeneralGrapher(nameFactory, portIdFactory) {
           @Override
           protected void postProcess() throws IOException {
-            Assert.assertEquals(2, nodes.size());
-            Assert.assertEquals(1, edges.size());
+            assertEquals(2, nodes.size());
+            assertEquals(1, edges.size());
           }
         };
 
@@ -94,8 +92,8 @@ public class GeneralGrapherTest extends TestCase {
         new GeneralGrapher(nameFactory, portIdFactory) {
           @Override
           protected void postProcess() throws IOException {
-            Assert.assertEquals(2, nodes.size());
-            Assert.assertEquals(1, edges.size());
+            assertEquals(2, nodes.size());
+            assertEquals(1, edges.size());
           }
         };
 
@@ -118,8 +116,8 @@ public class GeneralGrapherTest extends TestCase {
         new GeneralGrapher(nameFactory, portIdFactory) {
           @Override
           protected void postProcess() throws IOException {
-            Assert.assertEquals(2, nodes.size());
-            Assert.assertEquals(1, edges.size());
+            assertEquals(2, nodes.size());
+            assertEquals(1, edges.size());
           }
         };
 
@@ -142,8 +140,8 @@ public class GeneralGrapherTest extends TestCase {
         new GeneralGrapher(nameFactory, portIdFactory) {
           @Override
           protected void postProcess() throws IOException {
-            Assert.assertEquals(1, nodes.size());
-            Assert.assertEquals(0, edges.size());
+            assertEquals(1, nodes.size());
+            assertEquals(0, edges.size());
           }
         };
 
@@ -167,7 +165,7 @@ public class GeneralGrapherTest extends TestCase {
    */
   private Constructor<TestSimpleInterface> getConstructor() {
     try {
-      return ReflectionUtils.getConstructor(TestSimpleInterface.class);
+      return TestSimpleInterface.class.getConstructor();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     }

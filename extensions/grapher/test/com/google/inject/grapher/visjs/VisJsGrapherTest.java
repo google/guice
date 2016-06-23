@@ -12,8 +12,6 @@ import com.google.inject.grapher.general.test.TestSimpleInterface;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
 import junit.framework.TestCase;
-import org.easymock.internal.ReflectionUtils;
-import org.junit.Assert;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -61,12 +59,12 @@ public class VisJsGrapherTest extends TestCase {
     grapher.graph(injector);
 
     //Then
-    Assert.assertEquals(2, grapher.getNodesContent().size());
-    Assert.assertEquals(node1, grapher.getNodesContent().get(0));
-    Assert.assertEquals(node2, grapher.getNodesContent().get(1));
+    assertEquals(2, grapher.getNodesContent().size());
+    assertEquals(node1, grapher.getNodesContent().get(0));
+    assertEquals(node2, grapher.getNodesContent().get(1));
 
-    Assert.assertEquals(1, grapher.getEdgesContent().size());
-    Assert.assertEquals(edge1, grapher.getEdgesContent().get(0));
+    assertEquals(1, grapher.getEdgesContent().size());
+    assertEquals(edge1, grapher.getEdgesContent().get(0));
   }
 
   public void testSimpleProvider() throws Exception {
@@ -89,12 +87,12 @@ public class VisJsGrapherTest extends TestCase {
     grapher.graph(injector);
 
     //Then
-    Assert.assertEquals(2, grapher.getNodesContent().size());
-    Assert.assertEquals(node1, grapher.getNodesContent().get(0));
-    Assert.assertEquals(node2, grapher.getNodesContent().get(1));
+    assertEquals(2, grapher.getNodesContent().size());
+    assertEquals(node1, grapher.getNodesContent().get(0));
+    assertEquals(node2, grapher.getNodesContent().get(1));
 
-    Assert.assertEquals(1, grapher.getEdgesContent().size());
-    Assert.assertEquals(edge1, grapher.getEdgesContent().get(0));
+    assertEquals(1, grapher.getEdgesContent().size());
+    assertEquals(edge1, grapher.getEdgesContent().get(0));
   }
 
   public void testSimpleValue() throws Exception {
@@ -117,12 +115,12 @@ public class VisJsGrapherTest extends TestCase {
     grapher.graph(injector);
 
     //Then
-    Assert.assertEquals(2, grapher.getNodesContent().size());
-    Assert.assertEquals(node1, grapher.getNodesContent().get(0));
-    Assert.assertEquals(node2, grapher.getNodesContent().get(1));
+    assertEquals(2, grapher.getNodesContent().size());
+    assertEquals(node1, grapher.getNodesContent().get(0));
+    assertEquals(node2, grapher.getNodesContent().get(1));
 
-    Assert.assertEquals(1, grapher.getEdgesContent().size());
-    Assert.assertEquals(edge1, grapher.getEdgesContent().get(0));
+    assertEquals(1, grapher.getEdgesContent().size());
+    assertEquals(edge1, grapher.getEdgesContent().get(0));
   }
 
   public void testSimpleConstructor() throws Exception {
@@ -142,10 +140,10 @@ public class VisJsGrapherTest extends TestCase {
     grapher.graph(injector);
 
     //Then
-    Assert.assertEquals(1, grapher.getNodesContent().size());
-    Assert.assertEquals(node1, grapher.getNodesContent().get(0));
+    assertEquals(1, grapher.getNodesContent().size());
+    assertEquals(node1, grapher.getNodesContent().get(0));
 
-    Assert.assertEquals(0, grapher.getEdgesContent().size());
+    assertEquals(0, grapher.getEdgesContent().size());
   }
 
   public void testVizJsOutput() throws Exception {
@@ -158,7 +156,7 @@ public class VisJsGrapherTest extends TestCase {
     final String actual = stringWriter.toString();
 
     //Then
-    Assert.assertNotNull(actual);
+    assertNotNull(actual);
   }
 
   /**
@@ -168,7 +166,7 @@ public class VisJsGrapherTest extends TestCase {
    */
   private Constructor<TestSimpleInterface> getConstructor() {
     try {
-      return ReflectionUtils.getConstructor(TestSimpleInterface.class);
+      return TestSimpleInterface.class.getConstructor();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     }

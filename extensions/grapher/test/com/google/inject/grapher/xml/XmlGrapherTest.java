@@ -12,8 +12,6 @@ import com.google.inject.grapher.general.test.TestSimpleInterface;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
 import junit.framework.TestCase;
-import org.easymock.internal.ReflectionUtils;
-import org.junit.Assert;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -68,7 +66,7 @@ public class XmlGrapherTest extends TestCase {
     final String actual = stringWriter.toString();
 
     //Then
-    Assert.assertEquals(result, actual);
+    assertEquals(result, actual);
   }
 
   public void testSimpleProvider() throws Exception {
@@ -95,7 +93,7 @@ public class XmlGrapherTest extends TestCase {
     final String actual = stringWriter.toString();
 
     //Then
-    Assert.assertEquals(result, actual);
+    assertEquals(result, actual);
   }
 
   public void testSimpleValue() throws Exception {
@@ -122,7 +120,7 @@ public class XmlGrapherTest extends TestCase {
     final String actual = stringWriter.toString();
 
     //Then
-    Assert.assertEquals(result, actual);
+    assertEquals(result, actual);
   }
 
   public void testSimpleConstructor() throws Exception {
@@ -147,7 +145,7 @@ public class XmlGrapherTest extends TestCase {
     final String actual = stringWriter.toString();
 
     //Then
-    Assert.assertEquals(result, actual);
+    assertEquals(result, actual);
   }
 
   public void testXmlOutputBackToTheFuture() throws Exception {
@@ -159,8 +157,8 @@ public class XmlGrapherTest extends TestCase {
     xmlGrapher.graph(injector);
 
     //Then
-    Assert.assertEquals(19, xmlGrapher.getNodesContent().size());
-    Assert.assertEquals(22, xmlGrapher.getEdgesContent().size());
+    assertEquals(19, xmlGrapher.getNodesContent().size());
+    assertEquals(22, xmlGrapher.getEdgesContent().size());
   }
 
   /**
@@ -170,7 +168,7 @@ public class XmlGrapherTest extends TestCase {
    */
   private Constructor<TestSimpleInterface> getConstructor() {
     try {
-      return ReflectionUtils.getConstructor(TestSimpleInterface.class);
+      return TestSimpleInterface.class.getConstructor();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     }
