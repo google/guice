@@ -16,6 +16,9 @@
 
 package com.google.inject.grapher;
 
+import com.google.inject.grapher.general.GeneralGrapherTest;
+import com.google.inject.grapher.visjs.VisJsGrapherTest;
+import com.google.inject.grapher.xml.XmlGrapherTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -29,6 +32,9 @@ public class AllTests {
     suite.addTestSuite(AbstractInjectorGrapherTest.class);
     suite.addTestSuite(ShortNameFactoryTest.class);
     suite.addTestSuite(TransitiveDependencyVisitorTest.class);
+    suite.addTestSuite(GeneralGrapherTest.class);
+    suite.addTestSuite(XmlGrapherTest.class);
+    suite.addTestSuite(VisJsGrapherTest.class);
     return suite;
   }
 }

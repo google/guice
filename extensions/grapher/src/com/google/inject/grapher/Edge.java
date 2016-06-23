@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.inject.grapher;
 
 import com.google.common.base.Objects;
@@ -25,6 +24,12 @@ import com.google.common.base.Objects;
  * @since 4.0
  */
 public abstract class Edge {
+
+  public enum Type {
+    BINDING,
+    DEPENDENCY
+  }
+
   private final NodeId fromId;
   private final NodeId toId;
 
@@ -41,7 +46,8 @@ public abstract class Edge {
     return toId;
   }
 
-  @Override public boolean equals(Object obj) {
+  @Override
+  public boolean equals(Object obj) {
     if (!(obj instanceof Edge)) {
       return false;
     }
@@ -49,7 +55,8 @@ public abstract class Edge {
     return Objects.equal(fromId, other.fromId) && Objects.equal(toId, other.toId);
   }
 
-  @Override public int hashCode() {
+  @Override
+  public int hashCode() {
     return Objects.hashCode(fromId, toId);
   }
 
