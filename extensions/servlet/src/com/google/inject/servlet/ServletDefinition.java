@@ -261,6 +261,9 @@ class ServletDefinition implements ProviderWithExtensionVisitor<ServletDefinitio
       private String computePath() {
         if (!isPathComputed()) {
           String servletPath = super.getServletPath();
+          if(servletPath.isEmpty()) {
+              servletPath = super.getRequestURI().substring(getContextPath().length());
+          }
           path = patternMatcher.extractPath(servletPath);
           pathComputed = true;
 

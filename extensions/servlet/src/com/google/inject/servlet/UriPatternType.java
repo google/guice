@@ -168,7 +168,7 @@ public enum UriPatternType {
       }
       return null;
     }
-    
+
     public UriPatternType getPatternType() {
       return UriPatternType.REGEX;
     }

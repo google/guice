@@ -93,6 +93,12 @@ public class ServletDefinitionPathsTest extends TestCase {
     expect(request.getServletPath())
         .andReturn(requestPath);
 
+    // computePath()
+    if(requestPath.isEmpty()) {
+        expect(request.getRequestURI()).andReturn(requestPath);
+        expect(request.getContextPath()).andReturn("");
+    }
+
     replay(injector, binding, request);
 
     ServletDefinition servletDefinition =
@@ -192,6 +198,13 @@ public class ServletDefinitionPathsTest extends TestCase {
         .andReturn(servletPath)
         .anyTimes();
 
+    // computePath()
+    if(servletPath.isEmpty()) {
+        expect(request.getRequestURI()).andReturn(requestUri);
+        expect(request.getContextPath())
+        .andReturn(contextPath);
+    }
+
     expect(request.getContextPath())
         .andReturn(contextPath);
 
@@ -216,35 +229,39 @@ public class ServletDefinitionPathsTest extends TestCase {
 
   // Data-driven test.
   public final void testPathInfoWithRegexMatching() throws IOException, ServletException {
+
     // first a mapping of /*
-    pathInfoWithRegexMatching("/path/index.html", "/path", "/(.)*", "/index.html", "");
-    pathInfoWithRegexMatching("/path//hulaboo///index.html", "/path", "/(.)*",
+    pathInfoWithRegexMatching("/path/index.html", "/path", "(/).*", "/index.html", "");
+    pathInfoWithRegexMatching("/path//hulaboo///index.html", "/path", "(/).*",
         "/hulaboo/index.html", "");
-    pathInfoWithRegexMatching("/path/", "/path", "/(.)*", "/", "");
-    pathInfoWithRegexMatching("/path////////", "/path", "/(.)*", "/", "");
+    pathInfoWithRegexMatching("/path/", "/path", "(/).*", "/", "");
+    pathInfoWithRegexMatching("/path////////", "/path", "(/).*", "/", "");
 
     // a servlet mapping of /thing/*
     pathInfoWithRegexMatching("/path/thing////////", "/path", "/thing/(.)*", "/", "/thing");
-    pathInfoWithRegexMatching("/path/thing/stuff", "/path", "/thing/(.)*", "/stuff", "/thing");
-    pathInfoWithRegexMatching("/path/thing/stuff.html", "/path", "/thing/(.)*", "/stuff.html",
+    pathInfoWithRegexMatching("/path/thing/stuff", "/path", "/thing(/).*", "/stuff", "/thing");
+    pathInfoWithRegexMatching("/path/thing/stuff.html", "/path", "/thing(/).*", "/stuff.html",
         "/thing");
-    pathInfoWithRegexMatching("/path/thing", "/path", "/thing/(.)*", null, "/thing");
+    pathInfoWithRegexMatching("/path/thing", "/path", "/thing(/).*", null, "/thing");
 
     // *.xx style mapping
-    pathInfoWithRegexMatching("/path/thing.thing", "/path", ".*\\.thing", null, "/thing.thing");
-    pathInfoWithRegexMatching("/path///h.thing", "/path", ".*\\.thing", null, "/h.thing");
-    pathInfoWithRegexMatching("/path///...//h.thing", "/path", ".*\\.thing", null,
+    //FIXME: what sense make the regex here anyway?
+    pathInfoWithRegexMatching("/path/thing.thing", "/path", "", null, "/thing.thing");
+    pathInfoWithRegexMatching("/path///h.thing", "/path", "", null, "/h.thing");
+    pathInfoWithRegexMatching("/path///...//h.thing", "/path", "", null,
         "/.../h.thing");
-    pathInfoWithRegexMatching("/path/my/h.thing", "/path", ".*\\.thing", null, "/my/h.thing");
+    pathInfoWithRegexMatching("/path/my/h.thing", "/path", "", null, "/my/h.thing");
 
     // path
     pathInfoWithRegexMatching("/path/test.com/com.test.MyServletModule", "", "/path/[^/]+/(.*)",
         "com.test.MyServletModule", "/path/test.com/com.test.MyServletModule");
+    pathInfoWithRegexMatching("/path/test.com/com.test.MyServletModule", "/path", "/[^/]+/(.*)",
+            "com.test.MyServletModule", "/test.com/com.test.MyServletModule");
 
     // Encoded URLs
-    pathInfoWithRegexMatching("/path/index%2B.html", "/path", "/(.)*", "/index+.html", "");
-    pathInfoWithRegexMatching("/path/a%20file%20with%20spaces%20in%20name.html", "/path", "/(.)*", "/a file with spaces in name.html", "");
-    pathInfoWithRegexMatching("/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "/(.)*", "/Tamás nem más.html", "");
+    pathInfoWithRegexMatching("/path/index%2B.html", "/path", "(/).*", "/index+.html", "");
+    pathInfoWithRegexMatching("/path/a%20file%20with%20spaces%20in%20name.html", "/path", "(/).*", "/a file with spaces in name.html", "");
+    pathInfoWithRegexMatching("/path/Tam%C3%A1s%20nem%20m%C3%A1s.html", "/path", "(/).*", "/Tamás nem más.html", "");
   }
 
   public final void pathInfoWithRegexMatching(final String requestUri, final String contextPath,
@@ -296,6 +313,13 @@ public class ServletDefinitionPathsTest extends TestCase {
         .andReturn(servletPath)
         .anyTimes();
 
+    // computePath()
+    if(servletPath.isEmpty()) {
+        expect(request.getRequestURI()).andReturn(requestUri);
+        expect(request.getContextPath())
+        .andReturn(contextPath);
+    }
+
     expect(request.getContextPath())
         .andReturn(contextPath);
 
@@ -314,7 +338,7 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
-    
+
     verify(injector, binding, request);
   }
 }
