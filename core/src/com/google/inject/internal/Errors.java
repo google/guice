@@ -581,7 +581,18 @@ public final class Errors implements Serializable {
   private Message merge(Message message) {
     List<Object> sources = Lists.newArrayList();
     sources.addAll(getSources());
-    sources.addAll(message.getSources());
+    List<Object> messageSources = message.getSources();
+    // It is possible that the end of getSources() and the beginning of message.getSources() are 
+    // equivalent, in this case we should drop the repeated source when joining the lists.  The
+    // most likely scenario where this would happen is when a scoped binding throws an exception,
+    // due to the fact that InternalFactoryToProviderAdapter applies the binding source when 
+    // merging errors.
+    if (!sources.isEmpty() && !messageSources.isEmpty() 
+        && Objects.equal(messageSources.get(0), sources.get(sources.size() - 1))) {
+      messageSources = messageSources.subList(1, messageSources.size());
+    }
+    sources.addAll(messageSources);
+
     return new Message(sources, message.getMessage(), message.getCause());
   }
 
