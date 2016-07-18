@@ -11,11 +11,6 @@
   <name>Google Guice - Extensions - Dagger Adapter</name>
   <dependencies>
     <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-multibindings</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.dagger</groupId>
       <artifactId>dagger</artifactId>
       <version>2.4</version>
