@@ -108,11 +108,11 @@ final class InternalContext {
 
   /** Pops from the state without setting a dependency. */
   void popState() {
-    Object[] localElements = dependencyStack;
-    int localSize = dependencyStackSize;
-    localElements[--localSize] = null;
-    localElements[--localSize] = null;
-    dependencyStackSize = localSize;
+    // N.B. we don't null out the array entries.  It isn't necessary since all the objects in the
+    // array (Key, Dependency, or Binding source objects) are all tied to the lifetime of the
+    // injector, which is greater than the lifetime of this object.  So removing them from the array
+    // doesn't matter.
+    dependencyStackSize -= 2;
   }
 
   /** Returns the current dependency chain (all the state stored in the dependencyStack). */
