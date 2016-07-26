@@ -167,6 +167,17 @@ See the Apache License Version 2.0 for the specific language governing permissio
         <version>4.11</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>com.google.truth</groupId>
+        <artifactId>truth</artifactId>
+        <version>0.28</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>3.0.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
