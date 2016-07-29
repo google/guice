@@ -489,7 +489,8 @@ public class ScopesTest extends TestCase {
     final int instanceId = nextInstanceId++;
   }
 
-  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error for testing
+  // suppress compiler error for testing
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass", "multiple-scope"})
   @Singleton
   @CustomScoped
   static class SingletonAndCustomScoped {}
