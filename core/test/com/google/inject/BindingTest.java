@@ -19,7 +19,6 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.name.Names.named;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
@@ -222,9 +221,13 @@ public class BindingTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("inject-constructors")
   static class TooManyConstructors {
-    @Inject TooManyConstructors(Injector i) {}
-    @Inject TooManyConstructors() {}
+    @Inject
+    TooManyConstructors(Injector i) {}
+
+    @Inject
+    TooManyConstructors() {}
   }
 
   public void testToConstructorBinding() throws NoSuchMethodException {
