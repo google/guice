@@ -164,8 +164,14 @@ final class BindingProcessor extends AbstractBindingProcessor {
       
       /** Handle ProviderMethods specially. */
       private Boolean visitProviderMethod(ProviderMethod<T> provider) {
-        BindingImpl<T> binding = 
-            ProviderMethod.createBinding(injector, key, provider, source, scoping);
+        ProviderWithExtensionsBindingImpl<T> binding = 
+            new ProviderWithExtensionsBindingImpl<T>(
+                injector,
+                key, 
+                source,
+                provider,
+                Scoping.scope(key, injector, provider, source, scoping),
+                scoping);
         scheduleInitialization(binding);
         putBinding(binding);
         return true;

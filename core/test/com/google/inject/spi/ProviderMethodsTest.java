@@ -910,6 +910,35 @@ public class ProviderMethodsTest extends TestCase implements Module {
     injector.getInstance(Long.class);
   }
 
+  public void testModuleBindings() throws Exception {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {}
+
+          @Provides
+          Integer fail() {
+            return 1;
+          }
+        };
+    // sanity check that the injector works
+    Injector injector = Guice.createInjector(module);
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    ProviderInstanceBinding injectorBinding =
+        (ProviderInstanceBinding) injector.getBinding(Integer.class);
+    assertEquals(1, injectorBinding.getUserSuppliedProvider().get());
+
+    ProviderInstanceBinding moduleBinding =
+        (ProviderInstanceBinding) Iterables.getOnlyElement(Elements.getElements(module));
+    try {
+      moduleBinding.getUserSuppliedProvider().get();
+      fail();
+    } catch (IllegalStateException ise) {
+      assertEquals(
+          "This Provider cannot be used until the Injector has been created.", ise.getMessage());
+    }
+  }
+
   private void runNullableTest(Injector injector, Dependency<?> dependency, Module module) {
     switch (InternalFlags.getNullableProvidesOption()) {
       case ERROR:

@@ -26,15 +26,12 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.Dependency;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.google.inject.util.Modules;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -253,12 +250,6 @@ public final class ProviderMethodsModule implements Module {
 
     // prepare the parameter providers
     InjectionPoint point = InjectionPoint.forMethod(method, typeLiteral);
-    List<Dependency<?>> dependencies = point.getDependencies();
-    List<Provider<?>> parameterProviders = Lists.newArrayList();
-    for (Dependency<?> dependency : point.getDependencies()) {
-      parameterProviders.add(binder.getProvider(dependency));
-    }
-
     @SuppressWarnings("unchecked") // Define T as the method's return type.
     TypeLiteral<T> returnType = (TypeLiteral<T>) typeLiteral.getReturnType(method);
     Key<T> key = getKey(errors, returnType, method, method.getAnnotations());
@@ -272,8 +263,14 @@ public final class ProviderMethodsModule implements Module {
     for (Message message : errors.getMessages()) {
       binder.addError(message);
     }
-    return ProviderMethod.create(key, method, delegate, ImmutableSet.copyOf(dependencies),
-        parameterProviders, scopeAnnotation, skipFastClassGeneration, annotation);
+    return ProviderMethod.create(
+        key,
+        method,
+        delegate,
+        ImmutableSet.copyOf(point.getDependencies()),
+        scopeAnnotation,
+        skipFastClassGeneration,
+        annotation);
   }
 
   <T> Key<T> getKey(Errors errors, TypeLiteral<T> type, Member member, Annotation[] annotations) {
