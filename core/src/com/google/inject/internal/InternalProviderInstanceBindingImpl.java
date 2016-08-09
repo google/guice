@@ -7,21 +7,21 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.internal.ProvisionListenerStackCallback.ProvisionCallback;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderWithExtensionVisitor;
 
 /**
- * A {@link ProviderInstanceBindingImpl} for implementing 'native' guice extensions based on the
- * {@link ProviderWithExtensionVisitor} SPI interfaces.
+ * A {@link ProviderInstanceBindingImpl} for implementing 'native' guice extensions.
  *
  * <p>Beyond the normal binding contract that is mostly handled by our baseclass, this also
  * implements {@link DelayedInitialize} in order to initialize factory state.
  */
-final class ProviderWithExtensionsBindingImpl<T> extends ProviderInstanceBindingImpl<T>
+final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindingImpl<T>
     implements DelayedInitialize {
   private final Factory<T> originalFactory;
 
-  ProviderWithExtensionsBindingImpl(
+  InternalProviderInstanceBindingImpl(
       InjectorImpl injector,
       Key<T> key,
       Object source,
@@ -50,13 +50,13 @@ final class ProviderWithExtensionsBindingImpl<T> extends ProviderInstanceBinding
   }
 
   /**
-   * An base factory implementation that can be extended to provide a specialized implementation of
-   * a {@link ProviderWithExtensionVisitor} and also implements {@link InternalFactory}
+   * A base factory implementation. Any Factories that delegate to other bindings should use the
+   * {@code CyclicFactory} subclass, but trivial factories can use this one.
    */
-  abstract static class Factory<T> implements InternalFactory<T>, ProviderWithExtensionVisitor<T> {
+  abstract static class Factory<T> implements InternalFactory<T>, Provider<T>, HasDependencies {
     private Object source;
     private Provider<T> delegateProvider;
-    private ProvisionListenerStackCallback<T> provisionCallback;
+    ProvisionListenerStackCallback<T> provisionCallback;
 
     /**
      * The binding source.
@@ -77,6 +77,34 @@ final class ProviderWithExtensionsBindingImpl<T> extends ProviderInstanceBinding
      */
     abstract void initialize(InjectorImpl injector, Errors errors) throws ErrorsException;
 
+    @Override
+    public final T get() {
+      Provider<T> local = delegateProvider;
+      checkState(local != null,
+          "This Provider cannot be used until the Injector has been created.");
+      return local.get();
+    }
+
+    @Override public T get(
+        final Errors errors,
+        final InternalContext context,
+        final Dependency<?> dependency,
+        boolean linked)
+        throws ErrorsException {
+      if (!provisionCallback.hasListeners()) {
+          return doProvision(errors, context, dependency);
+        } else {
+          return provisionCallback.provision(
+              errors,
+              context,
+              new ProvisionCallback<T>() {
+                @Override
+                public T call() throws ErrorsException {
+                  return doProvision(errors, context, dependency);
+                }
+              });
+        }
+    }
     /**
      * Creates an object to be injected.
      *
@@ -85,14 +113,14 @@ final class ProviderWithExtensionsBindingImpl<T> extends ProviderInstanceBinding
      */
     protected abstract T doProvision(
         Errors errors, InternalContext context, Dependency<?> dependency) throws ErrorsException;
+  }
 
-    @Override
-    public final T get() {
-      Provider<T> local = delegateProvider;
-      checkState(local != null,
-          "This Provider cannot be used until the Injector has been created.");
-      return local.get();
-    }
+  /**
+   * An base factory implementation that can be extended to provide a specialized implementation of
+   * a {@link ProviderWithExtensionVisitor} and also implements {@link InternalFactory}
+   */
+  abstract static class CyclicFactory<T> extends Factory<T> {
+
 
     @Override
     public final T get(
@@ -145,7 +173,7 @@ final class ProviderWithExtensionsBindingImpl<T> extends ProviderInstanceBinding
       } catch (ErrorsException ee) {
         throw ee;
       } catch (Throwable t) {
-        throw errors.withSource(source).errorInProvider(t).toException();
+        throw errors.withSource(getSource()).errorInProvider(t).toException();
       }
     }
   }
