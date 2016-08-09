@@ -39,6 +39,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.Annotations;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -282,7 +283,7 @@ public abstract class Multibinder<T> {
       this.setKey = checkNotNull(setKey, "setKey");
       this.collectionOfProvidersKey = setKey.ofType(collectionOfProvidersOf(elementType));
       this.collectionOfJavaxProvidersKey = setKey.ofType(collectionOfJavaxProvidersOf(elementType));
-      this.setName = RealElement.nameOf(setKey);
+      this.setName = Annotations.nameOf(setKey);
       this.permitDuplicatesKey = Key.get(Boolean.class, named(toString() + " permits duplicates"));
     }
 

@@ -34,6 +34,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.internal.Annotations;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.Element;
@@ -326,7 +327,7 @@ public abstract class OptionalBinder<T> {
       this.optionalJavaxProviderKey = typeKey.ofType(optionalOfJavaxProvider(literal));
       this.optionalProviderKey = typeKey.ofType(optionalOfProvider(literal));
       this.optionalProviderT = binder.getProvider(optionalProviderKey);
-      String name = RealElement.nameOf(typeKey);
+      String name = Annotations.nameOf(typeKey);
       this.defaultKey = Key.get(typeKey.getTypeLiteral(), new DefaultImpl(name));
       this.actualKey = Key.get(typeKey.getTypeLiteral(), new ActualImpl(name));
       // Until the injector initializes us, we don't know what our dependencies are,
