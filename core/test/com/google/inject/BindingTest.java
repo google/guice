@@ -221,7 +221,7 @@ public class BindingTest extends TestCase {
     }
   }
 
-  @SuppressWarnings("inject-constructors")
+  @SuppressWarnings("InjectMultipleAtInjectConstructors")
   static class TooManyConstructors {
     @Inject
     TooManyConstructors(Injector i) {}
