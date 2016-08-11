@@ -18,7 +18,6 @@ import com.google.inject.internal.CycleDetectingLock.CycleDetectingLockFactory;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.Message;
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,25 +74,6 @@ public class SingletonScope implements Scope {
 
   /** A sentinel value representing null. */
   private static final Object NULL = new Object();
-
-  /**
-   * SingletonScope needs the owning injector's thread-specific InternalContext object during
-   * singleton instantiation, to look up type information on the singleton instance, and to
-   * determine whether circular proxy creation is enabled within InjectorOptions.
-   *
-   * For additional complications: the owning injector's InternalContext can change between
-   * provider creation and actually instantiating the singleton, via calls to
-   * {@link InjectorImpl#callInContext}.
-   *
-   * A thread-specific reference to the owning injector is stored here, so that the singleton
-   * provider can access the correct InternalContext for the given thread during provider.get().
-   *
-   * The ThreadLocal stores WeakReference, so that the references here and inside the singleton
-   * provider do not interfere with garbage collection and post-collection cleanup of child
-   * injectors, happening in {@link WeakKeySet}.
-   */
-  static final ThreadLocal<WeakReference<InjectorImpl>> currentInjector =
-      new ThreadLocal<WeakReference<InjectorImpl>>();
 
   /**
    * A map of thread running singleton instantiation, to the InternalContext that is relevant
@@ -163,8 +143,12 @@ public class SingletonScope implements Scope {
       /* @Nullable */ final InjectorImpl injector;
 
       {
-        WeakReference<InjectorImpl> ref = currentInjector.get();
-        injector = ref == null ? null : ref.get();
+        // If we are getting called by Scoping
+        if (creator instanceof ProviderToInternalFactoryAdapter) {
+          injector = ((ProviderToInternalFactoryAdapter)creator).getInjector();
+        } else {
+          injector = null;
+        }
       }
 
       @SuppressWarnings("DoubleCheckedLocking")

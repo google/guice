@@ -52,6 +52,11 @@ final class ProviderToInternalFactoryAdapter<T> implements Provider<T> {
       throw new ProvisionException(errors.merge(e.getErrors()).getMessages());
     }
   }
+  
+  /** Exposed for SingletonScope. */
+  InjectorImpl getInjector() {
+    return injector;
+  }
 
   @Override public String toString() {
     return internalFactory.toString();

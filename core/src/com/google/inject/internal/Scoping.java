@@ -240,8 +240,9 @@ public abstract class Scoping {
 
     Scope scope = scoping.getScopeInstance();
 
-    // SingletonScope needs access to the injector's thread-specific InternalContext
-    SingletonScope.currentInjector.set(new WeakReference<InjectorImpl>(injector));
+    // NOTE: SingletonScope relies on the fact that we are passing a 
+    // ProviderToInternalFactoryAdapter here.  If you change the type make sure to update 
+    // SingletonScope as well.
     Provider<T> scoped
         = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
     return new InternalFactoryToProviderAdapter<T>(scoped, source);
