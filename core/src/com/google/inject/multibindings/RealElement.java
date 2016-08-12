@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.multibindings;
 
 import com.google.inject.Key;
-import com.google.inject.internal.Element.Type;
+import com.google.inject.internal.Annotations;
+
 import java.lang.annotation.Annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 

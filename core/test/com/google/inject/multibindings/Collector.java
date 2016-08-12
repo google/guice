@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.multibindings;
 
-import com.google.inject.multibindings.MapBinderBinding;
-import com.google.inject.multibindings.MultibinderBinding;
-import com.google.inject.multibindings.MultibindingsTargetVisitor;
-import com.google.inject.multibindings.OptionalBinderBinding;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 
 class Collector extends DefaultBindingTargetVisitor<Object, Object> implements

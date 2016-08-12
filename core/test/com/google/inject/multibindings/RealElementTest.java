@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.internal;
+package com.google.inject.multibindings;
 
-import com.google.inject.internal.Element;
-import com.google.inject.internal.RealElement;
-import com.google.inject.internal.Element.Type;
+import com.google.inject.multibindings.Element.Type;
+
 import junit.framework.TestCase;
 
 /**
