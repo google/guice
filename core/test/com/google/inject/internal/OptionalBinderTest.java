@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.multibindings.SpiUtils.assertOptionalVisitor;
-import static com.google.inject.multibindings.SpiUtils.instance;
-import static com.google.inject.multibindings.SpiUtils.linked;
-import static com.google.inject.multibindings.SpiUtils.providerInstance;
-import static com.google.inject.multibindings.SpiUtils.providerKey;
+import static com.google.inject.internal.SpiUtils.assertOptionalVisitor;
+import static com.google.inject.internal.SpiUtils.instance;
+import static com.google.inject.internal.SpiUtils.linked;
+import static com.google.inject.internal.SpiUtils.providerInstance;
+import static com.google.inject.internal.SpiUtils.providerKey;
 import static com.google.inject.name.Names.named;
 
 import com.google.common.base.Optional;
@@ -42,10 +42,9 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.WeakKeySetUtils;
-import com.google.inject.multibindings.OptionalBinder.Actual;
-import com.google.inject.multibindings.OptionalBinder.Default;
-import com.google.inject.multibindings.SpiUtils.VisitType;
+import com.google.inject.internal.RealOptionalBinder;
+import com.google.inject.internal.SpiUtils.VisitType;
+import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
@@ -94,28 +93,28 @@ public class OptionalBinderTest extends TestCase {
   final Key<String> stringKey = Key.get(String.class);
   final TypeLiteral<Optional<String>> optionalOfString = new TypeLiteral<Optional<String>>() {};
   final TypeLiteral<?> javaOptionalOfString =  HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOf(stringKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOf(stringKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<Provider<String>>> optionalOfProviderString =
       new TypeLiteral<Optional<Provider<String>>>() {};
   final TypeLiteral<?> javaOptionalOfProviderString = HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOfProvider(stringKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOfProvider(stringKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<javax.inject.Provider<String>>> optionalOfJavaxProviderString =
       new TypeLiteral<Optional<javax.inject.Provider<String>>>() {};
   final TypeLiteral<?> javaOptionalOfJavaxProviderString = HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOfJavaxProvider(stringKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOfJavaxProvider(stringKey.getTypeLiteral()) : null;
 
   final Key<Integer> intKey = Key.get(Integer.class);
   final TypeLiteral<Optional<Integer>> optionalOfInteger = new TypeLiteral<Optional<Integer>>() {};
   final TypeLiteral<?> javaOptionalOfInteger =  HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOf(intKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOf(intKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<Provider<Integer>>> optionalOfProviderInteger =
       new TypeLiteral<Optional<Provider<Integer>>>() {};
   final TypeLiteral<?> javaOptionalOfProviderInteger = HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOfProvider(intKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOfProvider(intKey.getTypeLiteral()) : null;
   final TypeLiteral<Optional<javax.inject.Provider<Integer>>> optionalOfJavaxProviderInteger =
       new TypeLiteral<Optional<javax.inject.Provider<Integer>>>() {};
   final TypeLiteral<?> javaOptionalOfJavaxProviderInteger = HAS_JAVA_OPTIONAL ?
-      OptionalBinder.javaOptionalOfJavaxProvider(intKey.getTypeLiteral()) : null;
+      RealOptionalBinder.javaOptionalOfJavaxProvider(intKey.getTypeLiteral()) : null;
 
   final TypeLiteral<List<String>> listOfStrings = new TypeLiteral<List<String>>() {};
 
@@ -496,7 +495,7 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(ce.getMessage(),
           "1) A binding to java.lang.String annotated with @" 
-              + Default.class.getName() + " was already configured at "
+              + RealOptionalBinder.Default.class.getName() + " was already configured at "
               + module.getClass().getName() + ".configure(",
           "at " + module.getClass().getName() + ".configure(");
     }
@@ -516,7 +515,7 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 1, ce.getErrorMessages().size());
       assertContains(ce.getMessage(),
           "1) A binding to java.lang.String annotated with @" 
-              + Actual.class.getName() + " was already configured at "
+              + RealOptionalBinder.Actual.class.getName() + " was already configured at "
               + module.getClass().getName() + ".configure(",
           "at " + module.getClass().getName() + ".configure(");
     }
@@ -538,11 +537,11 @@ public class OptionalBinderTest extends TestCase {
       assertEquals(ce.getMessage(), 2, ce.getErrorMessages().size());      
       assertContains(ce.getMessage(),
           "1) A binding to java.lang.String annotated with @"
-              + Default.class.getName() + " was already configured at "
+              + RealOptionalBinder.Default.class.getName() + " was already configured at "
               + module.getClass().getName() + ".configure(",
           "at " + module.getClass().getName() + ".configure(",
           "2) A binding to java.lang.String annotated with @"
-              + Actual.class.getName() + " was already configured at "
+              + RealOptionalBinder.Actual.class.getName() + " was already configured at "
               + module.getClass().getName() + ".configure(",
           "at " + module.getClass().getName() + ".configure(");
     }
@@ -1209,12 +1208,12 @@ public class OptionalBinderTest extends TestCase {
  }
 
  public void testCompareEqualsAgainstOtherAnnotation() {
-   OptionalBinder.Actual impl1 = new OptionalBinder.ActualImpl("foo");
-   OptionalBinder.Actual other1 = Dummy.class.getAnnotation(OptionalBinder.Actual.class);
+   RealOptionalBinder.Actual impl1 = new RealOptionalBinder.ActualImpl("foo");
+   RealOptionalBinder.Actual other1 = Dummy.class.getAnnotation(RealOptionalBinder.Actual.class);
    assertEquals(impl1, other1);
 
-   OptionalBinder.Default impl2 = new OptionalBinder.DefaultImpl("foo");
-   OptionalBinder.Default other2 = Dummy.class.getAnnotation(OptionalBinder.Default.class);
+   RealOptionalBinder.Default impl2 = new RealOptionalBinder.DefaultImpl("foo");
+   RealOptionalBinder.Default other2 = Dummy.class.getAnnotation(RealOptionalBinder.Default.class);
    assertEquals(impl2, other2);
 
    assertFalse(impl1.equals(impl2));
@@ -1223,8 +1222,8 @@ public class OptionalBinderTest extends TestCase {
    assertFalse(other1.equals(other2));
  }
 
-  @OptionalBinder.Actual("foo")
-  @OptionalBinder.Default("foo")
+  @RealOptionalBinder.Actual("foo")
+  @RealOptionalBinder.Default("foo")
   static class Dummy {}
   
   @SuppressWarnings("unchecked") 

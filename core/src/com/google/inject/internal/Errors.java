@@ -94,6 +94,32 @@ public final class Errors implements Serializable {
   /** When a binding is not found, show at most this many bindings that have some similarities */
   private static final int MAX_RELATED_TYPES_REPORTED = 3;
 
+  /** 
+   * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given 
+   * reference is {@code null}. 
+   */
+  static <T> T checkNotNull(T reference, String name) {
+    if (reference != null) {
+      return reference;
+    }
+
+    NullPointerException npe = new NullPointerException(name);
+    throw new ConfigurationException(ImmutableSet.of(
+        new Message(npe.toString(), npe)));
+  }
+
+  /**
+   * Throws a ConfigurationException with a formatted {@link Message} if this condition is 
+   * {@code false}.
+   */
+  static void checkConfiguration(boolean condition, String format, Object... args) {
+    if (condition) {
+      return;
+    }
+
+    throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
+  }
+
  /**
    * If the key is unknown and it is one of these types, it generally means there is
    * a missing annotation.

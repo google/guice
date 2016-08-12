@@ -15,7 +15,7 @@
  */
 
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -35,8 +35,7 @@ import java.lang.annotation.Retention;
 
   enum Type {
     MAPBINDER,
-    MULTIBINDER,
-    OPTIONALBINDER;
+    MULTIBINDER;
   }
 
   String setName();

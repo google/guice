@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import static com.google.inject.Asserts.asModuleChain;
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
-import static com.google.inject.multibindings.SpiUtils.assertMapVisitor;
-import static com.google.inject.multibindings.SpiUtils.instance;
-import static com.google.inject.multibindings.SpiUtils.providerInstance;
+import static com.google.inject.internal.SpiUtils.assertMapVisitor;
+import static com.google.inject.internal.SpiUtils.instance;
+import static com.google.inject.internal.SpiUtils.providerInstance;
+import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
+import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -47,7 +47,9 @@ import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.internal.WeakKeySetUtils;
+import com.google.inject.internal.RealMapBinder;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.MapBinderBinding;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
@@ -459,7 +461,7 @@ public class MapBinderTest extends TestCase {
           asModuleChain(Main.class, Module2.class),
           asModuleChain(Main.class, Module3.class),
           "at " + Main.class.getName() + ".configure(",
-          asModuleChain(Main.class, MapBinder.RealMapBinder.class));
+          asModuleChain(Main.class, RealMapBinder.class));
       assertEquals(1, ce.getErrorMessages().size());
     }
   }

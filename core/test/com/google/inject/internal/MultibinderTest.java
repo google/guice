@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
-import static com.google.inject.multibindings.SpiUtils.assertSetVisitor;
-import static com.google.inject.multibindings.SpiUtils.instance;
-import static com.google.inject.multibindings.SpiUtils.providerInstance;
+import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
+import static com.google.inject.internal.SpiUtils.assertSetVisitor;
+import static com.google.inject.internal.SpiUtils.instance;
+import static com.google.inject.internal.SpiUtils.providerInstance;
+import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
+import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -49,6 +49,9 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
