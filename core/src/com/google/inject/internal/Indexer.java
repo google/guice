@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import com.google.common.base.Objects;
 import com.google.inject.Binding;

@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
-import static com.google.inject.multibindings.MapBinder.entryOfJavaxProviderOf;
-import static com.google.inject.multibindings.MapBinder.entryOfProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOf;
-import static com.google.inject.multibindings.MapBinder.mapOfCollectionOfJavaxProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOfCollectionOfProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOfJavaxProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOfProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOfSetOfJavaxProviderOf;
-import static com.google.inject.multibindings.MapBinder.mapOfSetOfProviderOf;
-import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
-import static com.google.inject.multibindings.Multibinder.collectionOfProvidersOf;
-import static com.google.inject.multibindings.Multibinder.setOf;
-import static com.google.inject.multibindings.OptionalBinder.javaOptionalOfJavaxProvider;
-import static com.google.inject.multibindings.OptionalBinder.javaOptionalOfProvider;
-import static com.google.inject.multibindings.OptionalBinder.optionalOfJavaxProvider;
-import static com.google.inject.multibindings.OptionalBinder.optionalOfProvider;
-import static com.google.inject.multibindings.SpiUtils.BindType.INSTANCE;
-import static com.google.inject.multibindings.SpiUtils.BindType.LINKED;
-import static com.google.inject.multibindings.SpiUtils.BindType.PROVIDER_INSTANCE;
-import static com.google.inject.multibindings.SpiUtils.BindType.PROVIDER_KEY;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.INJECTOR;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
+import static com.google.inject.internal.RealMapBinder.entryOfJavaxProviderOf;
+import static com.google.inject.internal.RealMapBinder.entryOfProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOf;
+import static com.google.inject.internal.RealMapBinder.mapOfCollectionOfJavaxProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOfCollectionOfProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOfJavaxProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOfProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOfSetOfJavaxProviderOf;
+import static com.google.inject.internal.RealMapBinder.mapOfSetOfProviderOf;
+import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
+import static com.google.inject.internal.RealMultibinder.collectionOfProvidersOf;
+import static com.google.inject.internal.RealMultibinder.setOf;
+import static com.google.inject.internal.SpiUtils.BindType.INSTANCE;
+import static com.google.inject.internal.SpiUtils.BindType.LINKED;
+import static com.google.inject.internal.SpiUtils.BindType.PROVIDER_INSTANCE;
+import static com.google.inject.internal.SpiUtils.BindType.PROVIDER_KEY;
+import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
+import static com.google.inject.internal.SpiUtils.VisitType.INJECTOR;
+import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -63,9 +59,14 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.Indexer.IndexedBinding;
-import com.google.inject.multibindings.MapBinder.RealMapBinder.ProviderMapEntry;
-import com.google.inject.multibindings.OptionalBinder.Source;
+import com.google.inject.internal.Indexer;
+import com.google.inject.internal.RealOptionalBinder;
+import com.google.inject.internal.Indexer.IndexedBinding;
+import com.google.inject.internal.RealMapBinder.ProviderMapEntry;
+import com.google.inject.multibindings.MapBinderBinding;
+import com.google.inject.multibindings.MultibinderBinding;
+import com.google.inject.multibindings.MultibindingsTargetVisitor;
+import com.google.inject.multibindings.OptionalBinderBinding;
 import com.google.inject.spi.DefaultBindingTargetVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
@@ -74,7 +75,6 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProviderKeyBinding;
 import com.google.inject.spi.ProviderLookup;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -717,9 +717,9 @@ public class SpiUtils {
     }
 
     Key<Optional<T>> optionalKey =
-        keyType.ofType(OptionalBinder.optionalOf(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOf(keyType.getTypeLiteral()));
     Key<?> javaOptionalKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(OptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
     Injector injector = Guice.createInjector(modules);
     Binding<Optional<T>> optionalBinding = injector.getBinding(optionalKey);
     Visitor visitor = new Visitor();
@@ -780,13 +780,13 @@ public class SpiUtils {
 
 
     Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
-        keyType.ofType(optionalOfJavaxProvider(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOfJavaxProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalJavaxProviderKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
     Key<Optional<Provider<T>>> optionalProviderKey =
-        keyType.ofType(optionalOfProvider(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOfProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalProviderKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
 
     boolean keyMatch = false;
     boolean optionalKeyMatch = false;
@@ -879,9 +879,9 @@ public class SpiUtils {
     Set<Element> elements = ImmutableSet.copyOf(Elements.getElements(modules));
     Map<Key<?>, Binding<?>> indexed = index(elements);
     Key<Optional<T>> optionalKey =
-        keyType.ofType(OptionalBinder.optionalOf(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOf(keyType.getTypeLiteral()));
     Key<?> javaOptionalKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(OptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOf(keyType.getTypeLiteral())) : null;
     Visitor visitor = new Visitor();
     OptionalBinderBinding<Optional<T>> optionalBinder = null;
     OptionalBinderBinding<?> javaOptionalBinder = null;
@@ -901,9 +901,9 @@ public class SpiUtils {
     for (Element element : elements) {
       if (optionalBinder.containsElement(element) && element instanceof Binding) {
         Binding binding = (Binding) element;
-        if (isSourceEntry(binding, Source.DEFAULT)) {
+        if (isSourceEntry(binding, RealOptionalBinder.Source.DEFAULT)) {
           defaultKey = binding.getKey();
-        } else if (isSourceEntry(binding, Source.ACTUAL)) {
+        } else if (isSourceEntry(binding, RealOptionalBinder.Source.ACTUAL)) {
           actualKey = binding.getKey();
         }
       }
@@ -916,13 +916,13 @@ public class SpiUtils {
     assertEquals(expectedActual == null, actualKey == null);
 
     Key<Optional<javax.inject.Provider<T>>> optionalJavaxProviderKey =
-        keyType.ofType(optionalOfJavaxProvider(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOfJavaxProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalJavaxProviderKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOfJavaxProvider(keyType.getTypeLiteral())) : null;
     Key<Optional<Provider<T>>> optionalProviderKey =
-        keyType.ofType(optionalOfProvider(keyType.getTypeLiteral()));
+        keyType.ofType(RealOptionalBinder.optionalOfProvider(keyType.getTypeLiteral()));
     Key<?> javaOptionalProviderKey = HAS_JAVA_OPTIONAL ?
-        keyType.ofType(javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
+        keyType.ofType(RealOptionalBinder.javaOptionalOfProvider(keyType.getTypeLiteral())) : null;
     boolean keyMatch = false;
     boolean optionalKeyMatch = false;
     boolean javaOptionalKeyMatch = false;
@@ -1023,12 +1023,12 @@ public class SpiUtils {
     Guice.createInjector(Elements.getModule(nonContainedElements));
   }
 
-  private static boolean isSourceEntry(Binding b, Source type) {
+  private static boolean isSourceEntry(Binding b, RealOptionalBinder.Source type) {
     switch(type) {
       case ACTUAL:
-        return b.getKey().getAnnotation() instanceof OptionalBinder.Actual;
+        return b.getKey().getAnnotation() instanceof RealOptionalBinder.Actual;
       case DEFAULT:
-        return b.getKey().getAnnotation() instanceof OptionalBinder.Default;
+        return b.getKey().getAnnotation() instanceof RealOptionalBinder.Default;
       default:
         throw new IllegalStateException("invalid type: " + type);
     }
