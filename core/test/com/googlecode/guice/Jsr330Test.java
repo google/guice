@@ -33,18 +33,15 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.util.Providers;
-
-import junit.framework.TestCase;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
+import junit.framework.TestCase;
 
 public class Jsr330Test extends TestCase {
 
@@ -454,6 +451,7 @@ public class Jsr330Test extends TestCase {
   }
 
   static class M extends AbstractM {
+    @SuppressWarnings("OverridesJavaxInjectableMethod")
     void setB(B b) {}
   }
 
