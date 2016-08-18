@@ -146,6 +146,11 @@ public final class InternalInjectorCreator {
     }
     stopwatch.resetAndLog("Provider verification");
 
+    // This needs to come late since some user bindings rely on requireBinding calls to create
+    // jit bindings during the LookupProcessor.
+    bindingData.initializeDelayedBindings();
+    stopwatch.resetAndLog("Delayed Binding initialization");
+
     for (InjectorShell shell : shells) {
       if (!shell.getElements().isEmpty()) {
         throw new AssertionError("Failed to execute " + shell.getElements());

@@ -35,6 +35,7 @@ import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -66,6 +67,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author sameb@google.com (Sam Berlin)
@@ -214,7 +216,110 @@ public class OptionalBinderTest extends TestCase {
       assertEquals("foo", optionalJxP.get().get());
     }
   }
+
+  public void testUsesUserBoundValueNullProvidersMakeAbsent() throws Exception {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        OptionalBinder.newOptionalBinder(binder(), String.class);
+      }
+      @Provides String provideString() { return null; }
+    };
+
+    Injector injector = Guice.createInjector(module);
+    assertEquals(null, injector.getInstance(String.class));
+    
+    Optional<String> optional = injector.getInstance(Key.get(optionalOfString));
+    assertFalse(optional.isPresent());
+    
+    Optional<Provider<String>> optionalP = injector.getInstance(Key.get(optionalOfProviderString));
+    assertEquals(null, optionalP.get().get());
+    
+    Optional<javax.inject.Provider<String>> optionalJxP =
+        injector.getInstance(Key.get(optionalOfJavaxProviderString));
+    assertEquals(null, optionalJxP.get().get());
+    
+    assertOptionalVisitor(stringKey,
+        setOf(module),
+        VisitType.BOTH,
+        0,
+        null,
+        null,
+        providerInstance(null));
+
+    if (HAS_JAVA_OPTIONAL) {
+      optional = toOptional(injector.getInstance(Key.get(javaOptionalOfString)));
+      assertFalse(optional.isPresent());
+
+      optionalP = toOptional(injector.getInstance(Key.get(javaOptionalOfProviderString)));
+      assertEquals(null, optionalP.get().get());
+
+      optionalJxP = toOptional(injector.getInstance(Key.get(javaOptionalOfJavaxProviderString)));
+      assertEquals(null, optionalJxP.get().get());
+    }
+  }
   
+  private static class JitBinding {
+    @Inject JitBinding() {}
+  }
+  
+  private static class DependsOnJitBinding {
+    @Inject DependsOnJitBinding(JitBinding jitBinding) {}
+  }
+
+  // A previous version of OptionalBinder would fail to find jit dependendencies that were created
+  // by other bindings
+  public void testOptionalBinderDependsOnJitBinding() {
+    Module module = new AbstractModule() {
+      @Override protected void configure() {
+        OptionalBinder.newOptionalBinder(binder(), JitBinding.class);
+      }
+    };
+
+    // Everything should be absent since nothing triggered discovery of the jit binding
+    Injector injector = Guice.createInjector(module);
+    assertFalse(injector.getInstance(optionalKey(JitBinding.class)).isPresent());
+    assertNull(injector.getExistingBinding(Key.get(JitBinding.class)));
+    
+    // in this case, because jit bindings are allowed in this injector, the DependsOnJitBinding
+    // binding will get initialized and create jit bindings for its dependency. The optionalbinder
+    // should then pick it up
+    module = new AbstractModule() {
+      @Override protected void configure() {
+        OptionalBinder.newOptionalBinder(binder(), JitBinding.class);
+        bind(DependsOnJitBinding.class);
+      }
+    };
+    injector = Guice.createInjector(module);
+    assertTrue(injector.getInstance(optionalKey(JitBinding.class)).isPresent());
+    assertNotNull(injector.getExistingBinding(Key.get(JitBinding.class)));
+    
+    // in this case, because the jit binding is discovered dynamically, the optionalbinder won't
+    // find it.  In prior implementations of OptionalBinder this would depend on the exact 
+    // sequencing of the installation of OptionalBinder vs. these injection points that trigger
+    // dynamic injection.  In the current implementation it will consistently not find it.
+    module = new AbstractModule() {
+      @Override protected void configure() {
+        bind(Object.class).toProvider(new Provider<Object>() {
+          @Inject void setter(Injector injector) {
+            injector.getInstance(JitBinding.class);
+          }
+          @Override
+          public Object get() {
+            return null;
+          }
+        });
+        OptionalBinder.newOptionalBinder(binder(), JitBinding.class);
+      }
+    };
+    injector = Guice.createInjector(module);
+    assertFalse(injector.getInstance(optionalKey(JitBinding.class)).isPresent());
+    assertNotNull(injector.getExistingBinding(Key.get(JitBinding.class)));
+  }
+
+  public <T> Key<Optional<T>> optionalKey(Class<T> type) {
+    return Key.get(RealOptionalBinder.optionalOf(TypeLiteral.get(type)));
+  }
+
   public void testSetDefault() throws Exception {
     Module module = new AbstractModule() {
       @Override protected void configure() {

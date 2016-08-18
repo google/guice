@@ -153,8 +153,25 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
       scoping = Scoping.makeInjectable(scoping, injector, errors);
     }
 
-    protected void scheduleInitialization(final BindingImpl<?> binding) {
-      bindingData.addUninitializedBinding(new Runnable() {
+    /**
+     * Schedule initialization of this binding to occur immediately after all bindings have been
+     * initialially processed.
+     */
+    protected void scheduleInitialization(BindingImpl<?> binding) {
+      bindingData.addUninitializedBinding(asRunnable(binding));
+    }
+
+    /**
+     * Schedule initialization for this binding to occur after all other static initialization of
+     * bindings.
+     */
+    protected void scheduleDelayedInitialization(BindingImpl<?> binding) {
+      bindingData.addDelayedUninitializedBinding(asRunnable(binding));
+    }
+
+    private Runnable asRunnable(final BindingImpl<?> binding) {
+      return new Runnable() {
+        @Override
         public void run() {
           try {
             binding.getInjector().initializeBinding(binding, errors.withSource(source));
@@ -162,7 +179,7 @@ abstract class AbstractBindingProcessor extends AbstractProcessor {
             errors.merge(e.getErrors());
           }
         }
-      });
+      };
     }
   }
 }

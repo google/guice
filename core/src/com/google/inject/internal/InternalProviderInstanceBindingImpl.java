@@ -19,6 +19,18 @@ import com.google.inject.spi.ProviderWithExtensionVisitor;
  */
 final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindingImpl<T>
     implements DelayedInitialize {
+  enum InitializationTiming {
+    /** This factory can be initialized eagerly.  This should be the case for most things. */
+    EAGER,
+
+    /**
+     * Initialization of this factory should be delayed until after all other static initialization
+     * completes.  This will be useful for factories that need to call 
+     * {@link InjectorImpl#getExistingBinding(Key)} to not create jit bindings, but also want to be
+     * able to conditionally consume jit bindings created by other other bindings. 
+     */
+    DELAYED;
+  }
   private final Factory<T> originalFactory;
 
   InternalProviderInstanceBindingImpl(
@@ -38,6 +50,10 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
         ImmutableSet.<InjectionPoint>of());
     this.originalFactory = originalFactory;
   }
+  
+  InitializationTiming getInitializationTiming() {
+    return originalFactory.initializationTiming;
+  }
 
   @Override
   public void initialize(final InjectorImpl injector, final Errors errors) throws ErrorsException {
@@ -54,10 +70,14 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
    * {@code CyclicFactory} subclass, but trivial factories can use this one.
    */
   abstract static class Factory<T> implements InternalFactory<T>, Provider<T>, HasDependencies {
+    private final InitializationTiming initializationTiming;
     private Object source;
     private Provider<T> delegateProvider;
     ProvisionListenerStackCallback<T> provisionCallback;
 
+    Factory(InitializationTiming initializationTiming) {
+      this.initializationTiming = initializationTiming;
+    }
     /**
      * The binding source.
      * 
@@ -121,6 +141,9 @@ final class InternalProviderInstanceBindingImpl<T> extends ProviderInstanceBindi
    */
   abstract static class CyclicFactory<T> extends Factory<T> {
 
+    CyclicFactory(InitializationTiming initializationTiming) {
+      super(initializationTiming);
+    }
 
     @Override
     public final T get(

@@ -23,6 +23,7 @@ import com.google.inject.Exposed;
 import com.google.inject.Key;
 import com.google.inject.PrivateBinder;
 import com.google.inject.Provides;
+import com.google.inject.internal.InternalProviderInstanceBindingImpl.InitializationTiming;
 import com.google.inject.internal.util.StackTraceElements;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
@@ -108,6 +109,9 @@ public abstract class ProviderMethod<T> extends InternalProviderInstanceBindingI
   private ProviderMethod(Key<T> key, Method method, Object instance,
       ImmutableSet<Dependency<?>> dependencies,
       Class<? extends Annotation> scopeAnnotation, Annotation annotation) {
+    // We can be safely initialized eagerly since our bindings must exist statically and it is an
+    // error for them not to.
+    super(InitializationTiming.EAGER);
     this.key = key;
     this.scopeAnnotation = scopeAnnotation;
     this.instance = instance;

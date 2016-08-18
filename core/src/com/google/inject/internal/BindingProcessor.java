@@ -174,7 +174,16 @@ final class BindingProcessor extends AbstractBindingProcessor {
                 provider,
                 Scoping.scope(key, injector, provider, source, scoping),
                 scoping);
-        scheduleInitialization(binding);
+        switch (binding.getInitializationTiming()) {
+          case DELAYED:
+            scheduleDelayedInitialization(binding);
+            break;
+          case EAGER:
+            scheduleInitialization(binding);
+            break;
+          default:
+            throw new AssertionError();
+        }
         putBinding(binding);
         return true;
       }
