@@ -73,19 +73,22 @@ public final class RealOptionalBinder<T> implements Module {
     Class<?> optional = null;
     Object emptyObject = null;
     Method of = null;
+    boolean useJavaOptional = false;
     try {
       optional = Class.forName("java.util.Optional");
       emptyObject = optional.getDeclaredMethod("empty").invoke(null);
       of = optional.getDeclaredMethod("of", Object.class);
+      // only use optional support if all our reflection succeeded
+      useJavaOptional = true;
     } catch (ClassNotFoundException ignored) {
     } catch (NoSuchMethodException ignored) {
     } catch (SecurityException ignored) {
     } catch (IllegalAccessException ignored) {
     } catch (InvocationTargetException ignored) {
     }
-    JAVA_OPTIONAL_CLASS = optional;
-    JAVA_OPTIONAL_EMPTY = emptyObject;
-    JAVA_OPTIONAL_OF_METHOD = of;
+    JAVA_OPTIONAL_CLASS = useJavaOptional ? optional : null;
+    JAVA_OPTIONAL_EMPTY = useJavaOptional ? emptyObject : null;
+    JAVA_OPTIONAL_OF_METHOD = useJavaOptional ? of : null;
   }
 
   /**
