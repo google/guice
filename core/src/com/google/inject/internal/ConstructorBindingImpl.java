@@ -265,8 +265,7 @@ final class ConstructorBindingImpl<T> extends BindingImpl<T>
 
       // This may not actually be safe because it could return a super type of T (if that's all the
       // client needs), but it should be OK in practice thanks to the wonders of erasure.
-      return (T) constructorInjector.construct(errors, context,
-          dependency.getKey().getTypeLiteral().getRawType(), provisionCallback);
+      return (T) constructorInjector.construct(errors, context, dependency, provisionCallback);
     }
   }
 }
