@@ -40,6 +40,7 @@ import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -84,6 +85,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.inject.Singleton;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -1212,6 +1214,36 @@ public class MultibinderTest extends TestCase {
       expected.add(providerDependency);
     }
     assertEquals(expected, providerBinding.getDependencies());
+  }
+
+  private static final class ObjectWithInjectionPoint {
+    boolean setterHasBeenCalled;
+    @Inject void setter(String dummy) {
+      setterHasBeenCalled = true;
+    }
+  }
+
+  // This tests for a behavior where InstanceBindingImpl.getProvider() would return uninitialized
+  // instances if called during injector creation (depending on the order of injection requests).
+  public void testMultibinderDependsOnInstanceBindingWithInjectionPoints() {
+    Guice.createInjector(
+        new AbstractModule() {
+      private Provider<Set<ObjectWithInjectionPoint>> provider;
+
+      @Override protected void configure() {
+        bind(Object.class).toInstance(this);  // force setter() to be injected first
+        bind(String.class).toInstance("foo");
+        this.provider = getProvider(new Key<Set<ObjectWithInjectionPoint>>() {});
+        Multibinder.newSetBinder(binder(), ObjectWithInjectionPoint.class).addBinding()
+            .toInstance(new ObjectWithInjectionPoint());
+      }
+
+      @Inject void setter(String s) {
+        for (ObjectWithInjectionPoint item : provider.get()) {
+          assertTrue(item.setterHasBeenCalled);
+        }
+      }
+    });
   }
 
   private <T> Collection<T> collectValues(

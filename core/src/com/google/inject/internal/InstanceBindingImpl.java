@@ -21,20 +21,16 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.Provider;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.InstanceBinding;
-import com.google.inject.util.Providers;
-
 import java.util.Set;
 
 final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBinding<T> {
 
   final T instance;
-  final Provider<T> provider;
   final ImmutableSet<InjectionPoint> injectionPoints;
 
   public InstanceBindingImpl(InjectorImpl injector, Key<T> key, Object source,
@@ -43,7 +39,6 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
     super(injector, key, source, internalFactory, Scoping.EAGER_SINGLETON);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
-    this.provider = Providers.of(instance);
   }
 
   public InstanceBindingImpl(Object source, Key<T> key, Scoping scoping,
@@ -51,11 +46,6 @@ final class InstanceBindingImpl<T> extends BindingImpl<T> implements InstanceBin
     super(source, key, scoping);
     this.injectionPoints = ImmutableSet.copyOf(injectionPoints);
     this.instance = instance;
-    this.provider = Providers.of(instance);
-  }
-
-  @Override public Provider<T> getProvider() {
-    return this.provider;
   }
 
   public <V> V acceptTargetVisitor(BindingTargetVisitor<? super T, V> visitor) {

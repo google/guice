@@ -44,6 +44,7 @@ import com.google.inject.spi.ConvertedConstantBinding;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.InjectionPoint;
+import com.google.inject.spi.InstanceBinding;
 import com.google.inject.spi.ProviderBinding;
 import com.google.inject.spi.TypeConverterBinding;
 import com.google.inject.util.Providers;
@@ -422,7 +423,11 @@ final class InjectorImpl implements Injector, Lookups {
       return null;
     }
 
-    String stringValue = stringBinding.getProvider().get();
+    // We can't call getProvider().get() because this InstanceBinding may not have been inintialized
+    // yet (because we may have been called during InternalInjectorCreator.initializeStatically and
+    // instance binding validation hasn't happened yet.)
+    @SuppressWarnings("unchecked")
+    String stringValue = ((InstanceBinding<String>) stringBinding).getInstance();
     Object source = stringBinding.getSource();
 
     // Find a matching type converter.
