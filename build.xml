@@ -34,7 +34,6 @@
     <ant antfile="extensions/jmx/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/jndi/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/throwingproviders/build.xml" target="distjars" inheritAll="false"/>
-    <ant antfile="extensions/multibindings/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/dagger-adapter/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/persist/build.xml" target="distjars" inheritAll="false"/>
     <ant antfile="extensions/grapher/build.xml" target="distjars" inheritAll="false"/>
@@ -60,9 +59,6 @@
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/throwingproviders/build" includes="*.jar"/>
-    </copy>
-    <copy toDir="${build.dir}/dist">
-      <fileset dir="extensions/multibindings/build" includes="*.jar"/>
     </copy>
     <copy toDir="${build.dir}/dist">
       <fileset dir="extensions/dagger-adapter/build" includes="*.jar"/>
@@ -124,6 +120,7 @@
         <pathelement location="lib/build/guava-testlib-19.0.jar"/>
         <pathelement location="lib/build/junit.jar"/>
         <pathelement location="lib/build/servlet-api-2.5.jar"/>
+        <pathelement location="lib/build/truth-0.29.jar"/>
         <pathelement location="lib/build/easymock.jar"/>
         <pathelement location="lib/build/javax.inject-tck.jar"/>
         <pathelement location="lib/build/bnd-0.0.384.jar"/>
@@ -162,7 +159,6 @@
       <fileset dir="${jmx.src.dir}"/>
       <fileset dir="${jndi.src.dir}"/>
       <fileset dir="${throwingproviders.src.dir}"/>
-      <fileset dir="${multibindings.src.dir}"/>
       <fileset dir="${daggeradapter.src.dir}"/>
       <fileset dir="${persist.src.dir}"/>
       <fileset dir="${struts2.src.dir}"/>
@@ -204,7 +200,7 @@
              windowtitle="Guice ${new.api} API"
              author="false"
              protected="true">
-      <group title="Guice Core" packages="com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder"/>
+      <group title="Guice Core" packages="com.google.inject:com.google.inject.util:com.google.inject.spi:com.google.inject.name:com.google.inject.matcher:com.google.inject.binder:com.google.inject.multibindings:"/>
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <include name="com/google/inject/**"/>
         <exclude name="com/google/inject/internal/**"/>
@@ -216,9 +212,6 @@
       <group title="AssistedInject Extension" packages="com.google.inject.assistedinject"/>
       <fileset dir="${assistedinject.src.dir}"/>
       
-      <group title="Multibinder Extension" packages="com.google.inject.multibindings"/>
-      <fileset dir="${multibindings.src.dir}"/>
-
       <group title="Dagger Adapter" packages="com.google.inject.daggeradapter"/>
       <fileset dir="${daggeradapter.src.dir}"/>
 
@@ -309,7 +302,6 @@
     <ant dir="extensions/jmx" antfile="build.xml" target="clean"/>
     <ant dir="extensions/jndi" antfile="build.xml" target="clean"/>
     <ant dir="extensions/throwingproviders" antfile="build.xml" target="clean"/>
-    <ant dir="extensions/multibindings" antfile="build.xml" target="clean"/>
     <ant dir="extensions/dagger-adapter" antfile="build.xml" target="clean"/>
     <ant dir="extensions/persist" antfile="build.xml" target="clean"/>
     <ant dir="extensions/grapher" antfile="build.xml" target="clean"/>

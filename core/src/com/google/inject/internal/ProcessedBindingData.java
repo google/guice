@@ -30,6 +30,7 @@ class ProcessedBindingData {
   
   private final List<CreationListener> creationListeners = Lists.newArrayList();
   private final List<Runnable> uninitializedBindings = Lists.newArrayList();
+  private final List<Runnable> delayedUninitializedBindings = Lists.newArrayList();
   
   void addCreationListener(CreationListener listener) {
     creationListeners.add(listener);
@@ -39,16 +40,38 @@ class ProcessedBindingData {
     uninitializedBindings.add(runnable);
   }
   
+  void addDelayedUninitializedBinding(Runnable runnable) {
+    delayedUninitializedBindings.add(runnable);
+  }
+  
+  /**
+   * Initialize bindings.  This may be done eagerly
+   */
   void initializeBindings() {
     for (Runnable initializer : uninitializedBindings) {
       initializer.run();
     }
   }
 
+  /**
+   * Runs creation listeners.
+   * 
+   * <p>TODO(lukes): figure out exactly why this case exists.
+   */
   void runCreationListeners(Errors errors) {
     for (CreationListener creationListener : creationListeners) {
       creationListener.notify(errors);
     }
   }
 
+  /**
+   * Initialized bindings that need to be delayed until after all injection points and other 
+   * bindings are processed.  The main current usecase for this is resolving Optional 
+   * dependencies for OptionalBinder bindings.
+   */
+  void initializeDelayedBindings() {
+    for (Runnable initializer : delayedUninitializedBindings) {
+      initializer.run();
+    }
+  }
 }

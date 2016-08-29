@@ -100,11 +100,11 @@ public class ErrorHandlingTest {
     Invalid(String s) {}
   }
 
-  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error to test
-  @Singleton 
+  // suppress compiler error to test
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass, multiple-scope"})
+  @Singleton
   @GoodScope
-  static class TooManyScopes {
-  }
+  static class TooManyScopes {}
 
   @Target(ElementType.TYPE)
   @Retention(RUNTIME)

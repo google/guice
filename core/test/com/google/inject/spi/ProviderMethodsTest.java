@@ -33,6 +33,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
@@ -88,6 +89,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
     );
   }
 
+  @Override
   public void configure(Binder binder) {}
 
   interface Bob {
@@ -102,10 +104,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
   @Provides
   Bob provideBob(final Dagny dagny) {
     return new Bob() {
+      @Override
       public String getName() {
         return "A Bob";
       }
 
+      @Override
       public Dagny getDaughter() {
         return dagny;
       }
@@ -117,10 +121,12 @@ public class ProviderMethodsTest extends TestCase implements Module {
   @Sole
   Bob provideSoleBob(final Dagny dagny) {
     return new Bob() {
+      @Override
       public String getName() {
         return "Only Bob";
       }
 
+      @Override
       public Dagny getDaughter() {
         return dagny;
       }
@@ -131,6 +137,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   @Singleton
   Dagny provideDagny() {
     return new Dagny() {
+      @Override
       public int getAge() {
         return 1;
       }
@@ -144,57 +151,57 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
 
 
-// We'll have to make getProvider() support circular dependencies before this
-// will work.
-//
-//  public void testCircularDependency() {
-//    Injector injector = Guice.createInjector(new Module() {
-//      public void configure(Binder binder) {
-//        binder.install(ProviderMethods.from(ProviderMethodsTest.this));
-//      }
-//    });
-//
-//    Foo foo = injector.getInstance(Foo.class);
-//    assertEquals(5, foo.getI());
-//    assertEquals(10, foo.getBar().getI());
-//    assertEquals(5, foo.getBar().getFoo().getI());
-//  }
-//
-//  interface Foo {
-//    Bar getBar();
-//    int getI();
-//  }
-//
-//  interface Bar {
-//    Foo getFoo();
-//    int getI();
-//  }
-//
-//  @Provides Foo newFoo(final Bar bar) {
-//    return new Foo() {
-//
-//      public Bar getBar() {
-//        return bar;
-//      }
-//
-//      public int getI() {
-//        return 5;
-//      }
-//    };
-//  }
-//
-//  @Provides Bar newBar(final Foo foo) {
-//    return new Bar() {
-//
-//      public Foo getFoo() {
-//        return foo;
-//      }
-//
-//      public int getI() {
-//        return 10;
-//      }
-//    };
-//  }
+  public void testCircularDependency() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {}
+
+      @Provides Foo newFoo(final Bar bar) {
+        return new Foo() {
+
+          @Override
+          public Bar getBar() {
+            return bar;
+          }
+
+          @Override
+          public int getI() {
+            return 5;
+          }
+        };
+      }
+
+      @Provides Bar newBar(final Foo foo) {
+        return new Bar() {
+
+          @Override
+          public Foo getFoo() {
+            return foo;
+          }
+
+          @Override
+          public int getI() {
+            return 10;
+          }
+        };
+      }
+    });
+
+    Foo foo = injector.getInstance(Foo.class);
+    assertEquals(5, foo.getI());
+    assertEquals(10, foo.getBar().getI());
+    assertEquals(5, foo.getBar().getFoo().getI());
+  }
+
+  public interface Foo {
+    Bar getBar();
+    int getI();
+  }
+
+  public interface Bar {
+    Foo getFoo();
+    int getI();
+  }
 
 
   public void testMultipleBindingAnnotations() {
@@ -461,6 +468,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
   private static class BindingCapturer<T> extends DefaultBindingTargetVisitor<T, ProvidesMethodBinding<T>>
       implements ProvidesMethodTargetVisitor<T, ProvidesMethodBinding<T>> {
 
+    @Override
     @SuppressWarnings("unchecked")
     public ProvidesMethodBinding<T> visit(
         ProvidesMethodBinding<? extends T> providesMethodBinding) {
@@ -838,6 +846,7 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   static class ModuleImpl extends AbstractModule implements ProviderInterface<String> {
     @Override protected void configure() {}
+    @Override
     @Provides public String getT() {
       return "string";
     }
@@ -851,6 +860,24 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
   public void testIgnoreSyntheticBridgeMethods() {
     Guice.createInjector(new ModuleImpl());
+  }
+
+  public void testScopedProviderMethodThrowsException() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override protected void configure() {}
+      @Provides @Singleton int provideInt() {
+        throw new RuntimeException("boom");
+      }
+    });
+    Provider<Integer> intProvider = injector.getProvider(Integer.class);
+    try {
+      intProvider.get();
+      fail();
+    } catch (ProvisionException pe) {
+      // by default assertContains asserts that the last item doesn't repeat... which is the main
+      // thing we are testing for
+      assertContains(pe.getMessage(), "java.lang.RuntimeException: boom", "provideInt");
+    }
   }
 
   public void testNullability() throws Exception {
@@ -881,6 +908,35 @@ public class ProviderMethodsTest extends TestCase implements Module {
     runNullableTest(injector, fooDependency, module);
 
     injector.getInstance(Long.class);
+  }
+
+  public void testModuleBindings() throws Exception {
+    Module module =
+        new AbstractModule() {
+          @Override
+          protected void configure() {}
+
+          @Provides
+          Integer fail() {
+            return 1;
+          }
+        };
+    // sanity check that the injector works
+    Injector injector = Guice.createInjector(module);
+    assertEquals(1, injector.getInstance(Integer.class).intValue());
+    ProviderInstanceBinding injectorBinding =
+        (ProviderInstanceBinding) injector.getBinding(Integer.class);
+    assertEquals(1, injectorBinding.getUserSuppliedProvider().get());
+
+    ProviderInstanceBinding moduleBinding =
+        (ProviderInstanceBinding) Iterables.getOnlyElement(Elements.getElements(module));
+    try {
+      moduleBinding.getUserSuppliedProvider().get();
+      fail();
+    } catch (IllegalStateException ise) {
+      assertEquals(
+          "This Provider cannot be used until the Injector has been created.", ise.getMessage());
+    }
   }
 
   private void runNullableTest(Injector injector, Dependency<?> dependency, Module module) {

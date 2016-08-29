@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
@@ -35,6 +36,7 @@ import org.aopalliance.intercept.MethodInvocation;
 /*end[AOP]*/
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -219,9 +221,13 @@ public class BindingTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("InjectMultipleAtInjectConstructors")
   static class TooManyConstructors {
-    @Inject TooManyConstructors(Injector i) {}
-    @Inject TooManyConstructors() {}
+    @Inject
+    TooManyConstructors(Injector i) {}
+
+    @Inject
+    TooManyConstructors() {}
   }
 
   public void testToConstructorBinding() throws NoSuchMethodException {
@@ -469,6 +475,7 @@ public class BindingTest extends TestCase {
       public void configure() {
         bind(Bacon.class).to(UncookedBacon.class);
         bind(Bacon.class).annotatedWith(named("Turkey")).to(TurkeyBacon.class);
+        bind(Bacon.class).annotatedWith(named("Tofu")).to(TofuBacon.class);
         bind(Bacon.class).annotatedWith(named("Cooked")).toConstructor(
             (Constructor)InjectionPoint.forConstructorOf(Bacon.class).getMember());
       }
@@ -483,21 +490,113 @@ public class BindingTest extends TestCase {
     
     Bacon cookedBacon = injector.getInstance(Key.get(Bacon.class, named("Cooked")));
     assertEquals(Food.PORK, cookedBacon.getMaterial());
-    assertTrue(cookedBacon.isCooked());    
+    assertTrue(cookedBacon.isCooked());
+
+    try {
+      // Turkey typo, missing a letter...
+      injector.getInstance(Key.get(Bacon.class, named("Turky")));
+      fail();
+    } catch (ConfigurationException e) {
+      String msg = e.getMessage();
+      assertContains(msg,
+          "Guice configuration errors:",
+          "1) No implementation for"
+              + " com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=Turky) was bound.",
+          "Did you mean?",
+          "* com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=Turkey)",
+          "* com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=Tofu)",
+          "1 more binding with other annotations.",
+          "while locating com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=Turky)");
+    }
   }
-  
-  enum Food { TURKEY, PORK }
-  
+
+  public void testMissingAnnotationOneChoice() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public void configure() {
+        bind(Bacon.class).annotatedWith(named("Turkey")).to(TurkeyBacon.class);
+      }
+    });
+
+    try {
+      // turkey typo (should be Upper case)...
+      injector.getInstance(Key.get(Bacon.class, named("turkey")));
+      fail();
+    } catch (ConfigurationException e) {
+      String msg = e.getMessage();
+      assertContains(msg, "Guice configuration errors:");
+      assertContains(msg,
+          "1) No implementation for com.google.inject.BindingTest$Bacon"
+              + " annotated with"
+              + " @com.google.inject.name.Named(value=turkey) was bound.",
+          "Did you mean?",
+          "* com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=Turkey)",
+          "while locating com.google.inject.BindingTest$Bacon annotated with"
+              + " @com.google.inject.name.Named(value=turkey)");
+    }
+  }
+
+  enum Food { TURKEY, PORK, TOFU }
+
   private static class Bacon {
     public Food getMaterial() { return Food.PORK; }
     public boolean isCooked() { return true; }
   }
 
   private static class TurkeyBacon extends Bacon {
+    @Override
     public Food getMaterial() { return Food.TURKEY; }
   }
 
+  private static class TofuBacon extends Bacon {
+    @Override
+    public Food getMaterial() { return Food.TOFU; }
+  }
+
   private static class UncookedBacon extends Bacon {
+    @Override
     public boolean isCooked() { return false; }
+  }
+
+  public void testMissingAnnotationRelated() {
+    try {
+      final TypeLiteral<List<Butter>> list = new TypeLiteral<List<Butter>>() {};
+
+      Guice.createInjector(new AbstractModule() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public void configure() {
+          bind(list).toInstance(butters);
+          bind(Sandwitch.class).to(ButterSandwitch.class);
+        }
+      });
+
+      fail();
+    } catch (CreationException e) {
+      final String msg = e.getMessage();
+      assertContains(msg, "Unable to create injector, see the following errors:",
+          "Did you mean?",
+          "java.util.List<com.google.inject.BindingTest$Butter> bound"
+          + "  at com.google.inject.BindingTest$24.configure");
+    }
+  }
+
+  private static List<Butter> butters = new ArrayList<Butter>();
+
+  private static interface Sandwitch {};
+
+  private static interface Butter {};
+
+  private static class ButterSandwitch implements Sandwitch {
+    private ButterSandwitch() {};
+
+    @Inject
+    ButterSandwitch(@Named("unsalted") Butter butter) {};
   }
 }

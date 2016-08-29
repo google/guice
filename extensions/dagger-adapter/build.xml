@@ -8,7 +8,6 @@
     <fileset dir="${lib.dir}" includes="*.jar"/>
     <fileset dir="${ext.lib.dir}" includes="*.jar"/>
     <pathelement path="../../build/classes"/>
-    <fileset dir="../multibindings/build" includes="*.jar"/>
   </path>
 
   <target name="jar" depends="compile, manifest" description="Build jar.">

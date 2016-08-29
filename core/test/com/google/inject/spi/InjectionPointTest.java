@@ -32,9 +32,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.name.Named;
 import com.google.inject.spi.InjectionPoint.Signature;
-
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -43,6 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -331,6 +329,7 @@ public class InjectionPointTest extends TestCase {
   }
   
   static class Sub extends Super {
+    @SuppressWarnings("OverridesJavaxInjectableMethod")
     public void atInject() {}
     public void gInject() {}
     
@@ -348,6 +347,7 @@ public class InjectionPointTest extends TestCase {
   
   static class SubSub extends Sub {
     @Override public void privateAtAndPublicG() {}
+    @SuppressWarnings("OverridesJavaxInjectableMethod")
     @Override public void privateGAndPublicAt() {}
     
     @Override public void atFirstThenG() {}

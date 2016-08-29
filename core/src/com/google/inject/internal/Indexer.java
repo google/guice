@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import com.google.common.base.Objects;
 import com.google.inject.Binding;
@@ -39,6 +39,11 @@ import java.lang.annotation.Annotation;
 /**
  * Visits bindings to return a {@code IndexedBinding} that can be used to emulate the binding
  * deduplication that Guice internally performs.
+ *
+ * <p>Note: simply using equals/hashCode on the BindingImpls doesn't work because they all have
+ * unique annotations. This works around that by reimplementing equality semantics that ignores
+ * {@link Element#uniqueId()}.  A better solution might be to introduce the idea of an 'anonymous'
+ * binding to guice, that might support this usecase directly.
  */
 class Indexer extends DefaultBindingTargetVisitor<Object, Indexer.IndexedBinding>
     implements BindingScopingVisitor<Object> {

@@ -102,9 +102,18 @@ public class Asserts {
   }
 
   /**
-   * Fails unless {@code text} includes all {@code substrings}, in order.
+   * Fails unless {@code text} includes all {@code substrings}, in order,
+   * no duplicates
    */
   public static void assertContains(String text, String... substrings) {
+    assertContains(text, false, substrings);
+  }
+
+  /**
+   * Fails unless {@code text} includes all {@code substrings}, in order,
+   * and optionally {@code allowDuplicates}.
+   */
+  public static void assertContains(String text, boolean allowDuplicates, String... substrings) {
     /*if[NO_AOP]
     // when we strip out bytecode manipulation, we lose the ability to generate some source lines.
     if (text.contains("(Unknown Source)")) {
@@ -120,9 +129,11 @@ public class Asserts {
       startingFrom = index + substring.length();
     }
 
-    String lastSubstring = substrings[substrings.length - 1];
-    assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
-        text, lastSubstring), text.indexOf(lastSubstring, startingFrom) == -1);
+    if (! allowDuplicates) {
+      String lastSubstring = substrings[substrings.length - 1];
+      assertTrue(String.format("Expected \"%s\" to contain substring \"%s\" only once),",
+          text, lastSubstring), text.indexOf(lastSubstring, startingFrom) == -1);
+    }
   }
 
   /**

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import com.google.inject.Key;
-import com.google.inject.internal.Annotations;
-
+import com.google.inject.internal.Element.Type;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -81,24 +80,5 @@ class RealElement implements Element {
         + ((127 * "uniqueId".hashCode()) ^ uniqueId)
         + ((127 * "type".hashCode()) ^ type.hashCode())
         + ((127 * "keyType".hashCode()) ^ keyType.hashCode());
-  }
-
-  /**
-   * Returns the name the binding should use.  This is based on the annotation.
-   * If the annotation has an instance and is not a marker annotation,
-   * we ask the annotation for its toString.  If it was a marker annotation
-   * or just an annotation type, we use the annotation's name. Otherwise,
-   * the name is the empty string.
-   */
-  static String nameOf(Key<?> key) {
-    Annotation annotation = key.getAnnotation();
-    Class<? extends Annotation> annotationType = key.getAnnotationType();
-    if (annotation != null && !Annotations.isMarker(annotationType)) {
-      return key.getAnnotation().toString();
-    } else if (key.getAnnotationType() != null) {
-      return "@" + key.getAnnotationType().getName();
-    } else {
-      return "";
-    }
   }
 }

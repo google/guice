@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.multibindings.Multibinder.collectionOfJavaxProvidersOf;
-import static com.google.inject.multibindings.SpiUtils.VisitType.BOTH;
-import static com.google.inject.multibindings.SpiUtils.VisitType.MODULE;
-import static com.google.inject.multibindings.SpiUtils.assertSetVisitor;
-import static com.google.inject.multibindings.SpiUtils.instance;
-import static com.google.inject.multibindings.SpiUtils.providerInstance;
+import static com.google.inject.internal.RealMultibinder.collectionOfJavaxProvidersOf;
+import static com.google.inject.internal.SpiUtils.assertSetVisitor;
+import static com.google.inject.internal.SpiUtils.instance;
+import static com.google.inject.internal.SpiUtils.providerInstance;
+import static com.google.inject.internal.SpiUtils.VisitType.BOTH;
+import static com.google.inject.internal.SpiUtils.VisitType.MODULE;
 import static com.google.inject.name.Names.named;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -40,6 +40,7 @@ import com.google.inject.Binding;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -49,6 +50,9 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
@@ -60,9 +64,6 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -81,6 +82,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -441,6 +443,33 @@ public class MultibinderTest extends TestCase {
         instance("A"), instance("B"), instance("C"));
   }
 
+  public void testMultibinderSetPermitDuplicateElementsFromOtherModule() {
+    // This module duplicates a binding for "B", which would normally be an error.
+    // Because module cd is also installed and the Multibinder<String>
+    // in cd sets permitDuplicates, there should be no error.
+    Module ab = new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().toInstance("B");
+        multibinder.addBinding().toProvider(Providers.of("B"));
+      }
+    };
+    Module cd = new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.permitDuplicates();
+        multibinder.addBinding().toInstance("C");
+        multibinder.addBinding().toInstance("D");
+      }
+    };
+    Injector injector = Guice.createInjector(ab, cd);
+
+    assertEquals(setOf("A", "B", "C", "D"), injector.getInstance(Key.get(setOfString)));
+    assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, cd), BOTH, true, 0,
+        instance("A"), instance("B"), providerInstance("B"), instance("C"), instance("D"));
+  }
+
   public void testMultibinderSetPermitDuplicateCallsToPermitDuplicates() {
     Module ab = new AbstractModule() {
       @Override protected void configure() {
@@ -493,7 +522,8 @@ public class MultibinderTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.Integer",
+      assertContains(expected.getMessage(), true,
+          "No implementation for java.lang.Integer",
           "at " + getClass().getName());
     }
   }
@@ -1208,6 +1238,47 @@ public class MultibinderTest extends TestCase {
       expected.add(providerDependency);
     }
     assertEquals(expected, providerBinding.getDependencies());
+  }
+  
+  public void testEmptyMultibinder() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          Multibinder.newSetBinder(binder(), String.class);
+        }
+      });
+    assertEquals(ImmutableSet.of(), injector.getInstance(new Key<Set<String>>(){}));
+    assertEquals(ImmutableList.of(),
+        injector.getInstance(new Key<Collection<Provider<String>>>(){}));
+  }
+
+  private static final class ObjectWithInjectionPoint {
+    boolean setterHasBeenCalled;
+    @Inject void setter(String dummy) {
+      setterHasBeenCalled = true;
+    }
+  }
+
+  // This tests for a behavior where InstanceBindingImpl.getProvider() would return uninitialized
+  // instances if called during injector creation (depending on the order of injection requests).
+  public void testMultibinderDependsOnInstanceBindingWithInjectionPoints() {
+    Guice.createInjector(
+        new AbstractModule() {
+      private Provider<Set<ObjectWithInjectionPoint>> provider;
+
+      @Override protected void configure() {
+        bind(Object.class).toInstance(this);  // force setter() to be injected first
+        bind(String.class).toInstance("foo");
+        this.provider = getProvider(new Key<Set<ObjectWithInjectionPoint>>() {});
+        Multibinder.newSetBinder(binder(), ObjectWithInjectionPoint.class).addBinding()
+            .toInstance(new ObjectWithInjectionPoint());
+      }
+
+      @Inject void setter(String s) {
+        for (ObjectWithInjectionPoint item : provider.get()) {
+          assertTrue(item.setterHasBeenCalled);
+        }
+      }
+    });
   }
 
   private <T> Collection<T> collectValues(

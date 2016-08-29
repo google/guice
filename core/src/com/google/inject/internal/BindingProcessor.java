@@ -107,10 +107,11 @@ final class BindingProcessor extends AbstractBindingProcessor {
         // TODO(lukes): add support for multibinder/mapbinder/optionalbinder here as well
         // this may require extracting some generic interface instead of testing for specific
         // implementations.
-        if (provider instanceof ProviderMethod) {
+        if (provider instanceof InternalProviderInstanceBindingImpl.Factory) {
           @SuppressWarnings("unchecked")
-          ProviderMethod<T> asProviderMethod = (ProviderMethod<T>) provider;
-          return visitProviderMethod(asProviderMethod);
+          InternalProviderInstanceBindingImpl.Factory<T> asProviderMethod =
+              (InternalProviderInstanceBindingImpl.Factory<T>) provider;
+          return visitInternalProviderInstanceBindingFactory(asProviderMethod);
         }
         Set<InjectionPoint> injectionPoints = binding.getInjectionPoints();
         Initializable<? extends javax.inject.Provider<? extends T>> initializable =
@@ -163,10 +164,26 @@ final class BindingProcessor extends AbstractBindingProcessor {
       }
       
       /** Handle ProviderMethods specially. */
-      private Boolean visitProviderMethod(ProviderMethod<T> provider) {
-        BindingImpl<T> binding = 
-            ProviderMethod.createBinding(injector, key, provider, source, scoping);
-        scheduleInitialization(binding);
+      private Boolean visitInternalProviderInstanceBindingFactory(
+          InternalProviderInstanceBindingImpl.Factory<T> provider) {
+        InternalProviderInstanceBindingImpl<T> binding =
+            new InternalProviderInstanceBindingImpl<T>(
+                injector,
+                key, 
+                source,
+                provider,
+                Scoping.scope(key, injector, provider, source, scoping),
+                scoping);
+        switch (binding.getInitializationTiming()) {
+          case DELAYED:
+            scheduleDelayedInitialization(binding);
+            break;
+          case EAGER:
+            scheduleInitialization(binding);
+            break;
+          default:
+            throw new AssertionError();
+        }
         putBinding(binding);
         return true;
       }

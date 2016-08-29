@@ -552,7 +552,8 @@ public class FactoryProviderTest extends TestCase {
           "1) Parameter of type 'double' is not injectable or annotated with @Assisted");
     }
   }
-  
+
+  @SuppressWarnings("SelfEquals")
   public void testMethodsDeclaredInObject() {
     Injector injector = Guice.createInjector(new AbstractModule() {
         @Override protected void configure() {

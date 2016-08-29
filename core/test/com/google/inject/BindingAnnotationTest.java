@@ -56,7 +56,8 @@ public class BindingAnnotationTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+      assertContains(expected.getMessage(), true,
+          "No implementation for java.lang.String annotated with",
           "BindingAnnotationTest$Blue(value=5) was bound",
           "at " + BindingAnnotationTest.class.getName(),
           getDeclaringSourcePart(getClass()));
@@ -86,7 +87,8 @@ public class BindingAnnotationTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+      assertContains(expected.getMessage(),true,
+          "No implementation for java.lang.String annotated with",
           "BindingAnnotationTest$Color",
           "at " + BindingAnnotationTest.class.getName(),
           getDeclaringSourcePart(getClass()));
@@ -105,7 +107,8 @@ public class BindingAnnotationTest extends TestCase {
       });
       fail();
     } catch (CreationException expected) {
-      assertContains(expected.getMessage(), "No implementation for java.lang.String annotated with",
+      assertContains(expected.getMessage(), true,
+          "No implementation for java.lang.String annotated with",
           "BindingAnnotationTest$Blue(value=5) was bound",
           "at " + BindingAnnotationTest.class.getName(),
           getDeclaringSourcePart(getClass()));

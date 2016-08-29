@@ -34,8 +34,8 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
   private final TypeLiteral<T> typeLiteral;
   private final InjectorImpl injector;
   private final ImmutableList<SingleMemberInjector> memberInjectors;
-  private final ImmutableSet<MembersInjector<? super T>> userMembersInjectors;
-  private final ImmutableSet<InjectionListener<? super T>> injectionListeners;
+  private final ImmutableList<MembersInjector<? super T>> userMembersInjectors;
+  private final ImmutableList<InjectionListener<? super T>> injectionListeners;
   /*if[AOP]*/
   private final ImmutableList<MethodAspect> addedAspects;
   /*end[AOP]*/
@@ -45,8 +45,8 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
     this.injector = injector;
     this.typeLiteral = typeLiteral;
     this.memberInjectors = memberInjectors;
-    this.userMembersInjectors = encounter.getMembersInjectors();
-    this.injectionListeners = encounter.getInjectionListeners();
+    this.userMembersInjectors = encounter.getMembersInjectors().asList();
+    this.injectionListeners = encounter.getInjectionListeners().asList();
     /*if[AOP]*/
     this.addedAspects = encounter.getAspects();
     /*end[AOP]*/
@@ -114,7 +114,9 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
   void notifyListeners(T instance, Errors errors) throws ErrorsException {
     int numErrorsBefore = errors.size();
-    for (InjectionListener<? super T> injectionListener : injectionListeners) {
+    // optimization: use manual for/each to save allocating an iterator here
+    for (int i = 0; i < injectionListeners.size(); i++) {
+      InjectionListener<? super T> injectionListener = injectionListeners.get(i);
       try {
         injectionListener.afterInjection(instance);
       } catch (RuntimeException e) {
@@ -135,7 +137,9 @@ final class MembersInjectorImpl<T> implements MembersInjector<T> {
 
     // TODO: There's no way to know if a user's MembersInjector wants toolable injections.
     if(!toolableOnly) {
-      for (MembersInjector<? super T> userMembersInjector : userMembersInjectors) {
+      // optimization: use manual for/each to save allocating an iterator here
+      for (int i = 0; i < userMembersInjectors.size(); i++) {
+        MembersInjector<? super T> userMembersInjector = userMembersInjectors.get(i);
         try {
           userMembersInjector.injectMembers(t);
         } catch (RuntimeException e) {

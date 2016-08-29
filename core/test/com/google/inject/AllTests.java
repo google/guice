@@ -156,6 +156,13 @@ public class AllTests {
     suite.addTestSuite(com.googlecode.guice.OSGiContainerTest.class);
     suite.addTestSuite(Jsr330Test.class);
 
+    // multibindings tests
+    suite.addTestSuite(com.google.inject.internal.MapBinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.MultibinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.OptionalBinderTest.class);
+    suite.addTestSuite(com.google.inject.internal.RealElementTest.class);
+    suite.addTestSuite(com.google.inject.multibindings.ProvidesIntoTest.class);
+
     return SuiteUtils.removeSuppressedTests(suite, SUPPRESSED_TEST_NAMES);
   }
 }

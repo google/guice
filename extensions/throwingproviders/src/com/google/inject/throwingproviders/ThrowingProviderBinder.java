@@ -18,8 +18,7 @@ package com.google.inject.throwingproviders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -44,8 +43,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -397,100 +394,12 @@ public class ThrowingProviderBinder {
     }
 
     private boolean checkInterface() {
-      if(!checkArgument(interfaceType.isInterface(),
-         "%s must be an interface", interfaceType.getName())) {
-        return false;
-      }
-      if(!checkArgument(interfaceType.getGenericInterfaces().length == 1,
-          "%s must extend CheckedProvider (and only CheckedProvider)",
-          interfaceType)) {
-        return false;
-      }
-      
-      boolean tpMode = interfaceType.getInterfaces()[0] == ThrowingProvider.class;      
-      if(!tpMode) {
-        if(!checkArgument(interfaceType.getInterfaces()[0] == CheckedProvider.class,
-            "%s must extend CheckedProvider (and only CheckedProvider)",
-            interfaceType)) {
-          return false;
-        }
-      }
-
-      // Ensure that T is parameterized and unconstrained.
-      ParameterizedType genericThrowingProvider
-          = (ParameterizedType) interfaceType.getGenericInterfaces()[0];
-      if (interfaceType.getTypeParameters().length == 1) {
-        String returnTypeName = interfaceType.getTypeParameters()[0].getName();
-        Type returnType = genericThrowingProvider.getActualTypeArguments()[0];
-        if(!checkArgument(returnType instanceof TypeVariable,
-            "%s does not properly extend CheckedProvider, the first type parameter of CheckedProvider (%s) is not a generic type",
-            interfaceType, returnType)) {
-          return false;
-        }
-        if(!checkArgument(returnTypeName.equals(((TypeVariable) returnType).getName()),
-            "The generic type (%s) of %s does not match the generic type of CheckedProvider (%s)",
-            returnTypeName, interfaceType, ((TypeVariable)returnType).getName())) {
-          return false;
-        }
-      } else {
-        if(!checkArgument(interfaceType.getTypeParameters().length == 0,
-            "%s has more than one generic type parameter: %s",
-            interfaceType, Arrays.asList(interfaceType.getTypeParameters()))) {
-          return false;
-        }
-        if(!checkArgument(genericThrowingProvider.getActualTypeArguments()[0].equals(valueType),
-            "%s expects the value type to be %s, but it was %s",
-            interfaceType, genericThrowingProvider.getActualTypeArguments()[0], valueType)) {
-          return false;
-        }
-      }
-
-      if(tpMode) { // only validate exception in ThrowingProvider mode.
-        Type exceptionType = genericThrowingProvider.getActualTypeArguments()[1];
-        if(!checkArgument(exceptionType instanceof Class,
-            "%s has the wrong Exception generic type (%s) when extending CheckedProvider",
-            interfaceType, exceptionType)) {
-          return false;
-        }
-      }
-      
-      // Skip synthetic/bridge methods because java8 generates
-      // a default method on the interface w/ the superinterface type that
-      // just delegates directly to the overridden method.
-      List<Method> declaredMethods = FluentIterable
-          .from(Arrays.asList(interfaceType.getDeclaredMethods()))
-          .filter(NotSyntheticOrBridgePredicate.INSTANCE)
-          .toList();
-      if (declaredMethods.size() == 1) {
-        Method method = declaredMethods.get(0);
-        if(!checkArgument(method.getName().equals("get"),
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, method)) {
-          return false;
-        }
-        if(!checkArgument(method.getParameterTypes().length == 0,
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, method.toGenericString())) {
-          return false;
-        }
-      } else {
-        if(!checkArgument(declaredMethods.isEmpty(),
-            "%s may not declare any new methods, but declared %s",
-            interfaceType, Arrays.asList(interfaceType.getDeclaredMethods()))) {
-          return false;
-        }
-      }
-      
-      return true;
-    }
-
-    private boolean checkArgument(boolean condition,
-        String messageFormat, Object... args) {
-      if (!condition) {
-        binder.addError(messageFormat, args);
-        return false;
-      } else {
+      try {
+        ProviderChecker.checkInterface(interfaceType, Optional.of(valueType));
         return true;
+      } catch (IllegalArgumentException e) {
+        binder.addError(e.getMessage());
+        return false;
       }
     }
 
@@ -557,13 +466,6 @@ public class ThrowingProviderBinder {
   private static class ResultException extends RuntimeException {
     ResultException(Exception cause) {
       super(cause);
-    }
-  }
-  
-  private static class NotSyntheticOrBridgePredicate implements Predicate<Method> {
-    static NotSyntheticOrBridgePredicate INSTANCE = new NotSyntheticOrBridgePredicate();
-    @Override public boolean apply(Method input) {
-      return !input.isBridge() && !input.isSynthetic();
     }
   }
 }

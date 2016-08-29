@@ -26,9 +26,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.google.common.primitives.Primitives;
+import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provides;
@@ -54,6 +57,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,7 +87,50 @@ import java.util.logging.Logger;
 public final class Errors implements Serializable {
 
   private static final Logger logger = Logger.getLogger(Guice.class.getName());
-  
+
+  /** When a binding is not found, show at most this many bindings with the same type */
+  private static final int MAX_MATCHING_TYPES_REPORTED = 3;
+
+  /** When a binding is not found, show at most this many bindings that have some similarities */
+  private static final int MAX_RELATED_TYPES_REPORTED = 3;
+
+  /** 
+   * Throws a ConfigurationException with an NullPointerExceptions as the cause if the given 
+   * reference is {@code null}. 
+   */
+  static <T> T checkNotNull(T reference, String name) {
+    if (reference != null) {
+      return reference;
+    }
+
+    NullPointerException npe = new NullPointerException(name);
+    throw new ConfigurationException(ImmutableSet.of(
+        new Message(npe.toString(), npe)));
+  }
+
+  /**
+   * Throws a ConfigurationException with a formatted {@link Message} if this condition is 
+   * {@code false}.
+   */
+  static void checkConfiguration(boolean condition, String format, Object... args) {
+    if (condition) {
+      return;
+    }
+
+    throw new ConfigurationException(ImmutableSet.of(new Message(Errors.format(format, args))));
+  }
+
+ /**
+   * If the key is unknown and it is one of these types, it generally means there is
+   * a missing annotation.
+   */
+  private static final ImmutableSet<Class<?>> COMMON_AMBIGUOUS_TYPES =
+      ImmutableSet.<Class<?>>builder()
+          .add(Object.class)
+          .add(String.class)
+          .addAll(Primitives.allWrapperTypes())
+          .build();
+
   private static final Set<Dependency<?>> warnedDependencies =
       Collections.newSetFromMap(new ConcurrentHashMap<Dependency<?>, Boolean>());
 
@@ -150,7 +197,78 @@ public final class Errors implements Serializable {
   public Errors missingImplementation(Key key) {
     return addMessage("No implementation for %s was bound.", key);
   }
-  
+
+  /** Within guice's core, allow for better missing binding messages */
+  <T> Errors missingImplementationWithHint(Key<T> key, Injector injector) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(format("No implementation for %s was bound.", key));
+
+    // Keys which have similar strings as the desired key
+    List<String> possibleMatches = new ArrayList<String>();
+
+    // Check for other keys that may have the same type,
+    // but not the same annotation
+    TypeLiteral<T> type = key.getTypeLiteral();
+    List<Binding<T>> sameTypes = injector.findBindingsByType(type);
+    if (!sameTypes.isEmpty()) {
+      sb.append(format("%n  Did you mean?"));
+      int howMany = Math.min(sameTypes.size(), MAX_MATCHING_TYPES_REPORTED);
+      for (int i = 0; i < howMany; ++i) {
+        // TODO: Look into a better way to prioritize suggestions. For example, possbily
+        // use levenshtein distance of the given annotation vs actual annotation.
+        sb.append(format("%n    * %s", sameTypes.get(i).getKey()));
+      }
+      int remaining = sameTypes.size() - MAX_MATCHING_TYPES_REPORTED;
+      if (remaining > 0) {
+        String plural = (remaining == 1) ? "" : "s";
+        sb.append(format("%n    %d more binding%s with other annotations.", remaining, plural));
+      }
+    } else {
+      // For now, do a simple substring search for possibilities. This can help spot
+      // issues when there are generics being used (such as a wrapper class) and the
+      // user has forgotten they need to bind based on the wrapper, not the underlying
+      // class. In the future, consider doing a strict in-depth type search.
+      // TODO: Look into a better way to prioritize suggestions. For example, possbily
+      // use levenshtein distance of the type literal strings.
+      String want = type.toString();
+      Map<Key<?>, Binding<?>> bindingMap = injector.getAllBindings();
+      for (Key<?> bindingKey : bindingMap.keySet()) {
+        String have = bindingKey.getTypeLiteral().toString();
+        if (have.contains(want) || want.contains(have)) {
+          Formatter fmt = new Formatter();
+          formatSource(fmt, bindingMap.get(bindingKey).getSource());
+          String match = String.format("%s bound%s", convert(bindingKey),
+              fmt.toString());
+          possibleMatches.add(match);
+          // TODO: Consider a check that if there are more than some number of results,
+          // don't suggest any.
+          if (possibleMatches.size() > MAX_RELATED_TYPES_REPORTED) {
+            // Early exit if we have found more than we need.
+            break;
+          }
+        }
+      }
+
+      if ((possibleMatches.size() > 0) && (possibleMatches.size() <= MAX_RELATED_TYPES_REPORTED)) {
+        sb.append(format("%n  Did you mean?"));
+        for (String possibleMatch : possibleMatches) {
+          sb.append(format("%n    %s", possibleMatch));
+        }
+      }
+    }
+
+    // If where are no possibilities to suggest, then handle the case of missing
+    // annotations on simple types. This is usually a bad idea.
+    if (sameTypes.isEmpty() && possibleMatches.isEmpty() && key.getAnnotation() == null
+        && COMMON_AMBIGUOUS_TYPES.contains(key.getTypeLiteral().getRawType())) {
+      // We don't recommend using such simple types without annotations.
+      sb.append(format("%nThe key seems very generic, did you forget an annotation?"));
+    }
+
+    return addMessage(sb.toString());
+  }
+
   public Errors jitDisabled(Key key) {
     return addMessage("Explicit bindings are required and %s is not explicitly bound.", key);
   }
@@ -489,7 +607,18 @@ public final class Errors implements Serializable {
   private Message merge(Message message) {
     List<Object> sources = Lists.newArrayList();
     sources.addAll(getSources());
-    sources.addAll(message.getSources());
+    List<Object> messageSources = message.getSources();
+    // It is possible that the end of getSources() and the beginning of message.getSources() are 
+    // equivalent, in this case we should drop the repeated source when joining the lists.  The
+    // most likely scenario where this would happen is when a scoped binding throws an exception,
+    // due to the fact that InternalFactoryToProviderAdapter applies the binding source when 
+    // merging errors.
+    if (!sources.isEmpty() && !messageSources.isEmpty() 
+        && Objects.equal(messageSources.get(0), sources.get(sources.size() - 1))) {
+      messageSources = messageSources.subList(1, messageSources.size());
+    }
+    sources.addAll(messageSources);
+
     return new Message(sources, message.getMessage(), message.getCause());
   }
 

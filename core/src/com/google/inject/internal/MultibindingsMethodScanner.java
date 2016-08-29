@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Google Inc.
+ * Copyright (C) 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,102 +14,77 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
+package com.google.inject.internal;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapKey;
+import com.google.inject.multibindings.ProvidesIntoMap;
+import com.google.inject.multibindings.ProvidesIntoOptional;
+import com.google.inject.multibindings.ProvidesIntoSet;
 import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
 /**
- * Scans a module for annotations that signal multibindings, mapbindings, and optional bindings.
- *
- * @since 4.0
+ * A {@link ModuleAnnotatedMethodScanner} that handles the {@link ProvidesIntoSet}, {@link
+ * ProvidesIntoMap} and {@link ProvidesIntoOptional}.
+ * 
+ * <p>The public interface is currently {@link com.google.inject.multibindings.MultibindingsScanner}
+ * but this should eventually be installed by default. 
  */
-public class MultibindingsScanner {
+public final class MultibindingsMethodScanner extends ModuleAnnotatedMethodScanner {
+  public static final MultibindingsMethodScanner INSTANCE = new MultibindingsMethodScanner();
 
-  private MultibindingsScanner() {}
+  private MultibindingsMethodScanner() {}
 
-  /**
-   * Returns a module that, when installed, will scan all modules for methods with the annotations
-   * {@literal @}{@link ProvidesIntoMap}, {@literal @}{@link ProvidesIntoSet}, and
-   * {@literal @}{@link ProvidesIntoOptional}.
-   * 
-   * <p>This is a convenience method, equivalent to doing
-   * {@code binder().scanModulesForAnnotatedMethods(MultibindingsScanner.scanner())}.
-   */
-  public static Module asModule() {
-    return new AbstractModule() {
-      @Override protected void configure() {
-        binder().scanModulesForAnnotatedMethods(Scanner.INSTANCE);
-      }
-    };
-  }
-  
-  /**
-   * Returns a {@link ModuleAnnotatedMethodScanner} that, when bound, will scan all modules for
-   * methods with the annotations {@literal @}{@link ProvidesIntoMap},
-   * {@literal @}{@link ProvidesIntoSet}, and {@literal @}{@link ProvidesIntoOptional}.
-   */
-  public static ModuleAnnotatedMethodScanner scanner() {
-    return Scanner.INSTANCE;
+  @Override
+  public Set<? extends Class<? extends Annotation>> annotationClasses() {
+    return ImmutableSet.of(
+        ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
   }
 
-  private static class Scanner extends ModuleAnnotatedMethodScanner {
-    private static final Scanner INSTANCE = new Scanner();
-    
-    @Override
-    public Set<? extends Class<? extends Annotation>> annotationClasses() {
-      return ImmutableSet.of(
-          ProvidesIntoSet.class, ProvidesIntoMap.class, ProvidesIntoOptional.class);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"}) // mapKey doesn't know its key type
-    @Override
-    public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
-        InjectionPoint injectionPoint) {
-      Method method = (Method) injectionPoint.getMember();
-      AnnotationOrError mapKey = findMapKeyAnnotation(binder, method);
-      if (annotation instanceof ProvidesIntoSet) {
-        if (mapKey.annotation != null) {
-          binder.addError("Found a MapKey annotation on non map binding at %s.", method);
-        }
-        return Multibinder.newRealSetBinder(binder, key).getKeyForNewItem();
-      } else if (annotation instanceof ProvidesIntoMap) {
-        if (mapKey.error) {
-          // Already failed on the MapKey, don't bother doing more work.
-          return key;
-        }
-        if (mapKey.annotation == null) {
-          // If no MapKey, make an error and abort.
-          binder.addError("No MapKey found for map binding at %s.", method);
-          return key;
-        }
-        TypeAndValue typeAndValue = typeAndValueOfMapKey(mapKey.annotation);
-        return MapBinder.newRealMapBinder(binder, typeAndValue.type, key)
-            .getKeyForNewValue(typeAndValue.value);
-      } else if (annotation instanceof ProvidesIntoOptional) {
-        if (mapKey.annotation != null) {
-          binder.addError("Found a MapKey annotation on non map binding at %s.", method);
-        }
-        switch (((ProvidesIntoOptional)annotation).value()) {
-          case DEFAULT:
-            return OptionalBinder.newRealOptionalBinder(binder, key).getKeyForDefaultBinding();
-          case ACTUAL:
-            return OptionalBinder.newRealOptionalBinder(binder, key).getKeyForActualBinding();
-        }
+  @SuppressWarnings({"unchecked", "rawtypes"}) // mapKey doesn't know its key type
+  @Override
+  public <T> Key<T> prepareMethod(Binder binder, Annotation annotation, Key<T> key,
+      InjectionPoint injectionPoint) {
+    Method method = (Method) injectionPoint.getMember();
+    AnnotationOrError mapKey = findMapKeyAnnotation(binder, method);
+    if (annotation instanceof ProvidesIntoSet) {
+      if (mapKey.annotation != null) {
+        binder.addError("Found a MapKey annotation on non map binding at %s.", method);
       }
-      throw new IllegalStateException("Invalid annotation: " + annotation);
+      return RealMultibinder.newRealSetBinder(binder, key).getKeyForNewItem();
+    } else if (annotation instanceof ProvidesIntoMap) {
+      if (mapKey.error) {
+        // Already failed on the MapKey, don't bother doing more work.
+        return key;
+      }
+      if (mapKey.annotation == null) {
+        // If no MapKey, make an error and abort.
+        binder.addError("No MapKey found for map binding at %s.", method);
+        return key;
+      }
+      TypeAndValue typeAndValue = typeAndValueOfMapKey(mapKey.annotation);
+      return RealMapBinder.newRealMapBinder(binder, typeAndValue.type, key)
+          .getKeyForNewValue(typeAndValue.value);
+    } else if (annotation instanceof ProvidesIntoOptional) {
+      if (mapKey.annotation != null) {
+        binder.addError("Found a MapKey annotation on non map binding at %s.", method);
+      }
+      switch (((ProvidesIntoOptional) annotation).value()) {
+        case DEFAULT:
+          return RealOptionalBinder.newRealOptionalBinder(binder, key).getKeyForDefaultBinding();
+        case ACTUAL:
+          return RealOptionalBinder.newRealOptionalBinder(binder, key).getKeyForActualBinding();
+      }
     }
+    throw new IllegalStateException("Invalid annotation: " + annotation);
   }
   
   private static class AnnotationOrError {

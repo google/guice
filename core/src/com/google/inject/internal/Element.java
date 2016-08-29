@@ -14,23 +14,32 @@
  * limitations under the License.
  */
 
-package com.google.inject.multibindings;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.google.inject.internal;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.google.inject.BindingAnnotation;
+
+import java.lang.annotation.Retention;
 
 /**
+ * An internal binding annotation applied to each element in a multibinding.
+ * All elements are assigned a globally-unique id to allow different modules
+ * to contribute multibindings independently.
+ *
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public class AllTests {
+@Retention(RUNTIME) @BindingAnnotation
+@interface Element {
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
-    suite.addTestSuite(MapBinderTest.class);
-    suite.addTestSuite(MultibinderTest.class);
-    suite.addTestSuite(OptionalBinderTest.class);
-    suite.addTestSuite(RealElementTest.class);
-    suite.addTestSuite(ProvidesIntoTest.class);
-    return suite;
+  enum Type {
+    MAPBINDER,
+    MULTIBINDER;
   }
+
+  String setName();
+  int uniqueId();
+  Type type();
+  String keyType();
 }

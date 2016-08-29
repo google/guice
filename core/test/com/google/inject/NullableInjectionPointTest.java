@@ -3,6 +3,11 @@ package com.google.inject;
 import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 
+import com.google.common.base.Optional;
+import com.google.inject.multibindings.OptionalBinder;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import com.google.inject.util.Providers;
 import junit.framework.TestCase;
 
 import java.lang.annotation.Documented;
@@ -105,11 +110,7 @@ public class NullableInjectionPointTest extends TestCase {
     return Guice.createInjector(
         new AbstractModule() {
           protected void configure() {
-            bind(Foo.class).toProvider(new Provider<Foo>() {
-              public Foo get() {
-                return null;
-              }
-            });
+            bind(Foo.class).toProvider(Providers.<Foo>of(null));
           }
         });
   }
@@ -135,11 +136,7 @@ public class NullableInjectionPointTest extends TestCase {
   public void testBindNullToProvider() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(Foo.class).toProvider(new Provider<Foo>() {
-          public Foo get() {
-            return null;
-          }
-        });
+        bind(Foo.class).toProvider(Providers.<Foo>of(null));
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
@@ -156,11 +153,7 @@ public class NullableInjectionPointTest extends TestCase {
   public void testBindScopedNull() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(Foo.class).toProvider(new Provider<Foo>() {
-          public Foo get() {
-            return null;
-          }
-        }).in(Scopes.SINGLETON);
+        bind(Foo.class).toProvider(Providers.<Foo>of(null)).in(Scopes.SINGLETON);
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
@@ -177,11 +170,7 @@ public class NullableInjectionPointTest extends TestCase {
   public void testBindNullAsEagerSingleton() {
     Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(Foo.class).toProvider(new Provider<Foo>() {
-          public Foo get() {
-            return null;
-          }
-        }).asEagerSingleton();
+        bind(Foo.class).toProvider(Providers.<Foo>of(null)).asEagerSingleton();
       }
     });
     assertNull(injector.getInstance(NullableFooField.class).foo);
@@ -194,6 +183,25 @@ public class NullableInjectionPointTest extends TestCase {
       assertContains(expected.getMessage(), "null returned by binding "
           + "at com.google.inject.NullableInjectionPointTest");
     }
+  }
+  
+  /**
+   * Tests for a regression where dependency objects were not updated properly and OptionalBinder
+   * was rejecting nulls from its dependencies.
+   */
+  public void testBindNullAndLinkFromOptionalBinder() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(Foo.class).toProvider(Providers.<Foo>of(null));
+        OptionalBinder.newOptionalBinder(binder(), Foo.class);
+      }
+
+      @Provides @Named("throughProvidesMethod") Foo provideFoo(Optional<Foo> foo) {
+        return foo.orNull();
+      }
+    });
+    assertNull(injector.getInstance(Key.get(Foo.class, Names.named("throughProvidesMethod"))));
   }
 
   static class Foo { }

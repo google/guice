@@ -25,10 +25,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Named;
+import com.google.inject.spi.DefaultBindingScopingVisitor;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.PrivateElements;
+import com.google.inject.spi.ProvisionListener;
 import com.google.inject.util.Providers;
 
 import junit.framework.TestCase;
@@ -489,7 +492,8 @@ public class ScopesTest extends TestCase {
     final int instanceId = nextInstanceId++;
   }
 
-  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error for testing
+  // suppress compiler error for testing
+  @SuppressWarnings({"MoreThanOneScopeAnnotationOnClass", "multiple-scope"})
   @Singleton
   @CustomScoped
   static class SingletonAndCustomScoped {}
@@ -1188,5 +1192,58 @@ public class ScopesTest extends TestCase {
     assertFalse("I0 thread could not be blocked by K0",
         firstErrorLineForThread.get(0).contains("K0")
             && firstErrorLineForThread.get(2).contains("I0"));
+  }
+
+  // Test for https://github.com/google/guice/issues/1032
+
+  public void testScopeAppliedByUserInsteadOfScoping() throws Exception {
+    Injector injector =
+        java.util.concurrent.Executors.newSingleThreadExecutor()
+            .submit(
+                new Callable<Injector>() {
+                  @Override
+                  public Injector call() {
+                    return Guice.createInjector(
+                        new AbstractModule() {
+                          @Override
+                          protected void configure() {
+                            bindListener(Matchers.any(), new ScopeMutatingProvisionListener());
+                            bind(SingletonClass.class);
+                          }
+                        });
+                  }
+                })
+            .get();
+    injector.getInstance(SingletonClass.class); // will fail here with NPE
+  }
+
+  @Singleton
+  static class SingletonClass {}
+
+  /** Uses Scope's public API to add a 'marker' into the provisioned instance's scope. */
+  private static final class ScopeMutatingProvisionListener implements ProvisionListener {
+    private static class ScopeMarker {
+      static final Provider<ScopeMarker> PROVIDER =
+          new Provider<ScopeMarker>() {
+            public ScopeMarker get() {
+              return new ScopeMarker();
+            }
+          };
+    }
+
+    @Override
+    public <T> void onProvision(final ProvisionInvocation<T> provisionInvocation) {
+      provisionInvocation.provision();
+      provisionInvocation
+          .getBinding()
+          .acceptScopingVisitor(
+              new DefaultBindingScopingVisitor<Void>() {
+                @Override
+                public Void visitScope(Scope scope) {
+                  scope.scope(Key.get(ScopeMarker.class), ScopeMarker.PROVIDER);
+                  return null;
+                }
+              });
+    }
   }
 }
