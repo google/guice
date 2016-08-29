@@ -129,7 +129,7 @@ public class CheckedProviderSubjectTest {
   }
 
   private <T, P extends CheckedProvider<T>> CheckedProviderSubject<T, P> createSubject(P provider) {
-    return new CheckedProviderSubject<>(new ThrowingFailureStrategy(), provider);
+    return new CheckedProviderSubject<T, P>(new ThrowingFailureStrategy(), provider);
   }
 
   private String getReturningProviderName(String providing) {
