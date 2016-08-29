@@ -2,7 +2,6 @@ package com.google.inject.throwingproviders;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assert_;
-import static com.google.inject.testing.throwingproviders.CheckedProviderSubject.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.inject.TypeLiteral;
@@ -17,34 +16,30 @@ import junit.framework.TestCase;
 public final class CheckedProvidersTest extends TestCase {
   private static interface StringCheckedProvider extends CheckedProvider<String> {}
 
-  public void testCheckedProviderClass_get_returnsValidString() {
+  public void testCheckedProviderClass_get_returnsValidString() throws Exception {
     String expected = "rick";
 
     StringCheckedProvider provider = CheckedProviders.of(StringCheckedProvider.class, expected);
-
-    assertThat(provider).providedValue().isEqualTo(expected);
+    assertThat(provider.get()).isEqualTo(expected);
   }
 
-  public void testCheckedProviderTypeLiteral_get_returnsValidString() {
+  public void testCheckedProviderTypeLiteral_get_returnsValidString() throws Exception {
     String expected = "morty";
 
     StringCheckedProvider provider =
         CheckedProviders.of(TypeLiteral.get(StringCheckedProvider.class), expected);
-
-    assertThat(provider).providedValue().isEqualTo(expected);
+    assertThat(provider.get()).isEqualTo(expected);
   }
 
-  public void testCheckedProviderClassNull_get_returnsNull() {
+  public void testCheckedProviderClassNull_get_returnsNull() throws Exception {
     StringCheckedProvider provider = CheckedProviders.of(StringCheckedProvider.class, null);
-
-    assertThat(provider).providedValue().isNull();
+    assertThat(provider.get()).isNull();
   }
 
-  public void testCheckedProviderTypeLiteralNull_get_returnsNull() {
+  public void testCheckedProviderTypeLiteralNull_get_returnsNull() throws Exception {
     StringCheckedProvider provider =
         CheckedProviders.of(TypeLiteral.get(StringCheckedProvider.class), null);
-
-    assertThat(provider).providedValue().isNull();
+    assertThat(provider.get()).isNull();
   }
 
   private static final class FooException extends Exception {}
@@ -57,15 +52,19 @@ public final class CheckedProvidersTest extends TestCase {
   public void testThrowingCheckedProviderClass_get_throwsException() {
     FooCheckedProvider provider =
         CheckedProviders.throwing(FooCheckedProvider.class, FooException.class);
-
-    assertThat(provider).thrownException().isInstanceOf(FooException.class);
+    try {
+      provider.get();
+      fail();
+    } catch (FooException expected) {}
   }
 
   public void testThrowingCheckedProviderTypeLiteral_get_throwsException() {
     FooCheckedProvider provider =
         CheckedProviders.throwing(TypeLiteral.get(FooCheckedProvider.class), FooException.class);
-
-    assertThat(provider).thrownException().isInstanceOf(FooException.class);
+    try {
+      provider.get();
+      fail();
+    } catch (FooException expected) {}
   }
 
   private interface MoreMethodsCheckedProvider<T> extends CheckedProvider<T> {
