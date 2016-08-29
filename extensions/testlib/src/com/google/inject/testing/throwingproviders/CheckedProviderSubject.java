@@ -61,7 +61,7 @@ public final class CheckedProviderSubject<T, P extends CheckedProvider<T>>
       got = provider.get();
     } catch (Exception e) {
       failureStrategy.fail(String.format("checked provider <%s> threw an exception", provider), e);
-      throw new AssertionError("Impossible, I hope...", e);
+      throw new AssertionError(e);
     }
     return assert_().withFailureMessage("value provided by <%s>", provider).that(got);
   }
