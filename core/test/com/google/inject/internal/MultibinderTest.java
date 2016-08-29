@@ -64,9 +64,6 @@ import com.google.inject.spi.LinkedKeyBinding;
 import com.google.inject.util.Modules;
 import com.google.inject.util.Providers;
 import com.google.inject.util.Types;
-
-import junit.framework.TestCase;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -85,7 +82,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.inject.Singleton;
+import junit.framework.TestCase;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -444,6 +441,33 @@ public class MultibinderTest extends TestCase {
     assertEquals(setOf("A", "B", "C"), injector.getInstance(Key.get(setOfString)));
     assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, bc), BOTH, true, 0,
         instance("A"), instance("B"), instance("C"));
+  }
+
+  public void testMultibinderSetPermitDuplicateElementsFromOtherModule() {
+    // This module duplicates a binding for "B", which would normally be an error.
+    // Because module cd is also installed and the Multibinder<String>
+    // in cd sets permitDuplicates, there should be no error.
+    Module ab = new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.addBinding().toInstance("A");
+        multibinder.addBinding().toInstance("B");
+        multibinder.addBinding().toProvider(Providers.of("B"));
+      }
+    };
+    Module cd = new AbstractModule() {
+      @Override protected void configure() {
+        Multibinder<String> multibinder = Multibinder.newSetBinder(binder(), String.class);
+        multibinder.permitDuplicates();
+        multibinder.addBinding().toInstance("C");
+        multibinder.addBinding().toInstance("D");
+      }
+    };
+    Injector injector = Guice.createInjector(ab, cd);
+
+    assertEquals(setOf("A", "B", "C", "D"), injector.getInstance(Key.get(setOfString)));
+    assertSetVisitor(Key.get(setOfString), stringType, setOf(ab, cd), BOTH, true, 0,
+        instance("A"), instance("B"), providerInstance("B"), instance("C"), instance("D"));
   }
 
   public void testMultibinderSetPermitDuplicateCallsToPermitDuplicates() {
@@ -1214,6 +1238,17 @@ public class MultibinderTest extends TestCase {
       expected.add(providerDependency);
     }
     assertEquals(expected, providerBinding.getDependencies());
+  }
+  
+  public void testEmptyMultibinder() {
+    Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override protected void configure() {
+          Multibinder.newSetBinder(binder(), String.class);
+        }
+      });
+    assertEquals(ImmutableSet.of(), injector.getInstance(new Key<Set<String>>(){}));
+    assertEquals(ImmutableList.of(),
+        injector.getInstance(new Key<Collection<Provider<String>>>(){}));
   }
 
   private static final class ObjectWithInjectionPoint {

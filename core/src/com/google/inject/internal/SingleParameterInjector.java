@@ -32,7 +32,7 @@ final class SingleParameterInjector<T> {
     this.binding = binding;
   }
 
-  private T inject(Errors errors, InternalContext context) throws ErrorsException {
+  T inject(Errors errors, InternalContext context) throws ErrorsException {
     Dependency previous = context.pushDependency(dependency, binding.getSource());
     try {
       return binding.getInternalFactory().get(errors.withSource(dependency), context, dependency, false);
