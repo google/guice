@@ -28,8 +28,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-throwingproviders</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.truth</groupId>
       <artifactId>truth</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
