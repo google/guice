@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":9,"i2":9,"i3":9,"i4":9,"i5":9,"i6":9,"i7":6};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":9,"i4":9,"i5":9,"i6":9,"i7":9,"i8":9,"i9":10};
+var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -107,7 +107,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <hr>
 <br>
-<pre>public abstract class <span class="typeNameLabel">MapBinder&lt;K,V&gt;</span>
+<pre>public class <span class="typeNameLabel">MapBinder&lt;K,V&gt;</span>
 extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">An API to bind multiple map entries separately, only to later inject them as
  a complete map. MapBinder is intended for use in your application's module:
@@ -184,18 +184,26 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>abstract <a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;</code></td>
+<td class="colFirst"><code><a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#addBinding-K-">addBinding</a></span>(<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>&nbsp;key)</code>
 <div class="block">Returns a binding builder used to add a new entry in the map.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#equals-java.lang.Object-">equals</a></span>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;obj)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-java.lang.Class-java.lang.Class-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;K&gt;&nbsp;keyType,
@@ -204,7 +212,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with no binding annotation.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-java.lang.Class-java.lang.Class-java.lang.annotation.Annotation-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;K&gt;&nbsp;keyType,
@@ -214,7 +222,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with <code>annotation</code>.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-java.lang.Class-java.lang.Class-java.lang.Class-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html?is-external=true" title="class or interface in java.lang">Class</a>&lt;K&gt;&nbsp;keyType,
@@ -224,7 +232,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with <code>annotationType</code>.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-com.google.inject.TypeLiteral-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;K&gt;&nbsp;keyType,
@@ -233,7 +241,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with no binding annotation.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-com.google.inject.TypeLiteral-java.lang.annotation.Annotation-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;K&gt;&nbsp;keyType,
@@ -243,7 +251,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with <code>annotation</code>.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>static &lt;K,V&gt;&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;K,V&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#newMapBinder-com.google.inject.Binder-com.google.inject.TypeLiteral-com.google.inject.TypeLiteral-java.lang.Class-">newMapBinder</a></span>(<a href="../../../../com/google/inject/Binder.html" title="interface in com.google.inject">Binder</a>&nbsp;binder,
             <a href="../../../../com/google/inject/TypeLiteral.html" title="class in com.google.inject">TypeLiteral</a>&lt;K&gt;&nbsp;keyType,
@@ -253,8 +261,8 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
  <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util"><code>Map</code></a> that is itself bound with <code>annotationType</code>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
-<td class="colFirst"><code>abstract <a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>,<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;</code></td>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>,<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/google/inject/multibindings/MapBinder.html#permitDuplicates--">permitDuplicates</a></span>()</code>
 <div class="block">Configures the <code>MapBinder</code> to handle duplicate entries.</div>
 </td>
@@ -265,7 +273,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
-<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
+<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone--" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize--" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass--" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify--" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll--" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString--" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait--" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait-long-int-" title="class or interface in java.lang">wait</a></code></li>
 </ul>
 </li>
 </ul>
@@ -369,7 +377,7 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 <ul class="blockList">
 <li class="blockList">
 <h4>permitDuplicates</h4>
-<pre>public abstract&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>,<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;&nbsp;permitDuplicates()</pre>
+<pre>public&nbsp;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="class in com.google.inject.multibindings">MapBinder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>,<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;&nbsp;permitDuplicates()</pre>
 <div class="block">Configures the <code>MapBinder</code> to handle duplicate entries.
  <p>When multiple equal keys are bound, the value that gets included in the map is
  arbitrary.
@@ -393,10 +401,10 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 </a><a name="addBinding-K-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>addBinding</h4>
-<pre>public abstract&nbsp;<a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;&nbsp;addBinding(<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>&nbsp;key)</pre>
+<pre>public&nbsp;<a href="../../../../com/google/inject/binder/LinkedBindingBuilder.html" title="interface in com.google.inject.binder">LinkedBindingBuilder</a>&lt;<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">V</a>&gt;&nbsp;addBinding(<a href="../../../../com/google/inject/multibindings/MapBinder.html" title="type parameter in MapBinder">K</a>&nbsp;key)</pre>
 <div class="block">Returns a binding builder used to add a new entry in the map. Each
  key must be distinct (and non-null). Bound providers will be evaluated each
  time the map is injected.
@@ -406,6 +414,32 @@ extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?
 
  <p>Scoping elements independently is supported. Use the <code>in</code> method
  to specify a binding scope.</div>
+</li>
+</ul>
+<a name="equals-java.lang.Object-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>equals</h4>
+<pre>public&nbsp;boolean&nbsp;equals(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;obj)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals-java.lang.Object-" title="class or interface in java.lang">equals</a></code>&nbsp;in class&nbsp;<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="hashCode--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>hashCode</h4>
+<pre>public&nbsp;int&nbsp;hashCode()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode--" title="class or interface in java.lang">hashCode</a></code>&nbsp;in class&nbsp;<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></code></dd>
+</dl>
 </li>
 </ul>
 </li>
