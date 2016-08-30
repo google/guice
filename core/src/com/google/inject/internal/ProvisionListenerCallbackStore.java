@@ -59,16 +59,19 @@ final class ProvisionListenerCallbackStore {
     this.listenerBindings = ImmutableList.copyOf(listenerBindings);
   }
 
-  /** Returns a new {@link ProvisionListenerStackCallback} for the key.
+  /**
+   * Returns a new {@link ProvisionListenerStackCallback} for the key or {@code null} if there are
+   * no listeners
    */
   @SuppressWarnings("unchecked") // the ProvisionListenerStackCallback type always agrees with the passed type
   public <T> ProvisionListenerStackCallback<T> get(Binding<T> binding) {
     // Never notify any listeners for internal bindings.
     if (!INTERNAL_BINDINGS.contains(binding.getKey())) {
-      return (ProvisionListenerStackCallback<T>) cache.getUnchecked(
+      ProvisionListenerStackCallback<T> callback = (ProvisionListenerStackCallback<T>) cache.getUnchecked(
           new KeyBinding(binding.getKey(), binding));
+      return callback.hasListeners() ? callback : null;
     }
-    return ProvisionListenerStackCallback.emptyListener();
+    return null;
   }
 
   /**

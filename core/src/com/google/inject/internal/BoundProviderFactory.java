@@ -40,7 +40,7 @@ final class BoundProviderFactory<T> extends ProviderInternalFactory<T> implement
       Object source,
       ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
-    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
+    this.provisionCallback = provisionCallback;
     this.injector = injector;
     this.providerKey = providerKey;
   }

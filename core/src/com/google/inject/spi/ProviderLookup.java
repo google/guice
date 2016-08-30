@@ -99,9 +99,12 @@ public final class ProviderLookup<T> implements Element {
   public Provider<T> getProvider() {
     return new ProviderWithDependencies<T>() {
       public T get() {
-        checkState(delegate != null,
-            "This Provider cannot be used until the Injector has been created.");
-        return delegate.get();
+        Provider<T> local = delegate;
+        if (local == null) {
+          throw new IllegalStateException(
+              "This Provider cannot be used until the Injector has been created.");
+        }
+        return local.get();
       }
 
       public Set<Dependency<?>> getDependencies() {

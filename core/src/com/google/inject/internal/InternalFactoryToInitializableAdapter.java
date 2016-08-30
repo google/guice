@@ -36,7 +36,7 @@ final class InternalFactoryToInitializableAdapter<T> extends ProviderInternalFac
       Initializable<? extends javax.inject.Provider<? extends T>> initializable,
       Object source, ProvisionListenerStackCallback<T> provisionCallback) {
     super(source);
-    this.provisionCallback = checkNotNull(provisionCallback, "provisionCallback");
+    this.provisionCallback = provisionCallback;
     this.initializable = checkNotNull(initializable, "provider");
   }
 

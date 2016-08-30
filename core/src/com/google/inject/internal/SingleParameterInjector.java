@@ -25,17 +25,20 @@ final class SingleParameterInjector<T> {
   private static final Object[] NO_ARGUMENTS = {}; 
 
   private final Dependency<T> dependency;
-  private final BindingImpl<? extends T> binding;
+  private final Object source;
+  private final InternalFactory<? extends T> factory;
 
   SingleParameterInjector(Dependency<T> dependency, BindingImpl<? extends T> binding) {
     this.dependency = dependency;
-    this.binding = binding;
+    this.source = binding.getSource();
+    this.factory = binding.getInternalFactory();
   }
 
   T inject(Errors errors, InternalContext context) throws ErrorsException {
-    Dependency previous = context.pushDependency(dependency, binding.getSource());
+    Dependency<T> localDependency = dependency;
+    Dependency previous = context.pushDependency(localDependency, source);
     try {
-      return binding.getInternalFactory().get(errors.withSource(dependency), context, dependency, false);
+      return factory.get(errors.withSource(localDependency), context, localDependency, false);
     } finally {
       context.popStateAndSetDependency(previous);
     }

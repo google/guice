@@ -90,9 +90,12 @@ public final class MembersInjectorLookup<T> implements Element {
   public MembersInjector<T> getMembersInjector() {
     return new MembersInjector<T>() {
       public void injectMembers(T instance) {
-        checkState(delegate != null,
-            "This MembersInjector cannot be used until the Injector has been created.");
-        delegate.injectMembers(instance);
+        MembersInjector<T> local = delegate;
+        if (local == null) {
+          throw new IllegalStateException(
+              "This MembersInjector cannot be used until the Injector has been created.");
+        }
+        local.injectMembers(instance);
       }
 
       @Override public String toString() {

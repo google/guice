@@ -754,27 +754,14 @@ final class InjectorImpl implements Injector, Lookups {
 
     // Look up the target binding.
     final Key<? extends T> targetKey = Key.get(subclass);
-    final BindingImpl<? extends T> targetBinding = getBindingOrThrow(targetKey, errors, JitLimitation.NEW_OR_EXISTING_JIT);
-
-    InternalFactory<T> internalFactory = new InternalFactory<T>() {
-      public T get(Errors errors, InternalContext context, Dependency<?> dependency, boolean linked)
-          throws ErrorsException {
-        context.pushState(targetKey, targetBinding.getSource());
-        try {
-          return targetBinding.getInternalFactory().get(
-              errors.withSource(targetKey), context, dependency, true);
-        } finally {
-          context.popState();
-        }
-      }
-    };
-
     Object source = rawType;
+    FactoryProxy<T> factory = new FactoryProxy<T>(this, key, targetKey, source);
+    factory.notify(errors);  // causes the factory to initialize itself internally
     return new LinkedBindingImpl<T>(
         this,
         key,
         source,
-        Scoping.<T>scope(key, this, internalFactory, source, scoping),
+        Scoping.<T>scope(key, this, factory, source, scoping),
         scoping,
         targetKey);
   }
@@ -1010,8 +997,10 @@ final class InjectorImpl implements Injector, Lookups {
   }
 
   <T> Provider<T> getProviderOrThrow(final Dependency<T> dependency, Errors errors) throws ErrorsException {
-    final Key<T> key = dependency.getKey();
-    final BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
+    Key<T> key = dependency.getKey();
+    BindingImpl<? extends T> binding = getBindingOrThrow(key, errors, JitLimitation.NO_JIT);
+    final InternalFactory<? extends T> internalFactory = binding.getInternalFactory();
+    final Object source = binding.getSource();
 
     return new Provider<T>() {
       public T get() {
@@ -1019,9 +1008,9 @@ final class InjectorImpl implements Injector, Lookups {
         try {
           T t = callInContext(new ContextualCallable<T>() {
             public T call(InternalContext context) throws ErrorsException {
-              Dependency previous = context.pushDependency(dependency, binding.getSource());
+              Dependency previous = context.pushDependency(dependency, source);
               try {
-                return binding.getInternalFactory().get(errors, context, dependency, false);
+                return internalFactory.get(errors, context, dependency, false);
               } finally {
                 context.popStateAndSetDependency(previous);
               }
@@ -1035,7 +1024,7 @@ final class InjectorImpl implements Injector, Lookups {
       }
 
       @Override public String toString() {
-        return binding.getInternalFactory().toString();
+        return internalFactory.toString();
       }
     };
   }

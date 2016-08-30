@@ -86,7 +86,7 @@ final class Initializer {
     // short circuit if the object has no injections or listeners.
     if (instance == null || (injectionPoints.isEmpty()
         && !injector.membersInjectorStore.hasTypeListeners()
-        && (provisionCallback == null || !provisionCallback.hasListeners()))) {
+        && provisionCallback == null)) {
       return Initializables.of(instance);
     }
 
