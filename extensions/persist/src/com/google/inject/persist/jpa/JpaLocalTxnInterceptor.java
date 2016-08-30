@@ -1,65 +1,63 @@
 /**
  * Copyright (C) 2010 Google, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.google.inject.persist.jpa;
-
-import com.google.inject.Inject;
-import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.Method;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.persist.Transactional;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 class JpaLocalTxnInterceptor implements MethodInterceptor {
 
-  // TODO(gak): Move these args to the cxtor & make these final.
-  @Inject
-  private JpaPersistService emProvider = null;
-
-  @Inject
-  private UnitOfWork unitOfWork = null;
-
   @Transactional
-  private static class Internal {}
+  private static class Internal {
+  }
 
-  // Tracks if the unit of work was begun implicitly by this transaction.
-  private final ThreadLocal<Boolean> didWeStartWork = new ThreadLocal<Boolean>();
+  // TODO(gak): Move this arg to the cxtor & make this final.
+  @Inject
+  private Provider<EntityManager> emProvider;
 
+  @Inject
+  private UnitOfWorkService unitOfWork;
+
+  @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 
-    // Should we start a unit of work?
-    if (!emProvider.isWorking()) {
-      emProvider.begin();
-      didWeStartWork.set(true);
-    }
+    unitOfWork.requireUnitOfWork();
 
     Transactional transactional = readTransactionMetadata(methodInvocation);
-    EntityManager em = this.emProvider.get();
+    EntityManager em = emProvider.get();
 
-    // Allow 'joining' of transactions if there is an enclosing @Transactional method.
+    // Allow 'joining' of transactions if there is an enclosing
+    // @Transactional method.
     if (em.getTransaction().isActive()) {
-      return methodInvocation.proceed();
+      try {
+        return methodInvocation.proceed();
+      } finally {
+        unitOfWork.endRequireUnitOfWork();
+      }
     }
 
     final EntityTransaction txn = em.getTransaction();
@@ -70,34 +68,29 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       result = methodInvocation.proceed();
 
     } catch (Exception e) {
-      //commit transaction only if rollback didnt occur
+      // commit transaction only if rollback didnt occur
       if (rollbackIfNecessary(transactional, e, txn)) {
         txn.commit();
       }
 
-      //propagate whatever exception is thrown anyway
+      // propagate whatever exception is thrown anyway
       throw e;
     } finally {
-      // Close the em if necessary (guarded so this code doesn't run unless catch fired).
-      if (null != didWeStartWork.get() && !txn.isActive()) {
-        didWeStartWork.remove();
-        unitOfWork.end();
+      if (!txn.isActive()) {
+        unitOfWork.endRequireUnitOfWork();
       }
     }
 
-    //everything was normal so commit the txn (do not move into try block above as it
-    //  interferes with the advised method's throwing semantics)
+    // everything was normal so commit the txn (do not move into try block
+    // above as it
+    // interferes with the advised method's throwing semantics)
     try {
       txn.commit();
     } finally {
-      //close the em if necessary
-      if (null != didWeStartWork.get() ) {
-        didWeStartWork.remove();
-        unitOfWork.end();
-      }
+      unitOfWork.endRequireUnitOfWork();
     }
 
-    //or return result
+    // or return result
     return result;
   }
 
@@ -131,16 +124,17 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
       EntityTransaction txn) {
     boolean commit = true;
 
-    //check rollback clauses
+    // check rollback clauses
     for (Class<? extends Exception> rollBackOn : transactional.rollbackOn()) {
 
-      //if one matched, try to perform a rollback
+      // if one matched, try to perform a rollback
       if (rollBackOn.isInstance(e)) {
         commit = false;
 
-        //check ignore clauses (supercedes rollback clause)
+        // check ignore clauses (supercedes rollback clause)
         for (Class<? extends Exception> exceptOn : transactional.ignore()) {
-          //An exception to the rollback clause was found, DON'T rollback
+          // An exception to the rollback clause was found, DON'T
+          // rollback
           // (i.e. commit and throw anyway)
           if (exceptOn.isInstance(e)) {
             commit = true;
@@ -148,11 +142,11 @@ class JpaLocalTxnInterceptor implements MethodInterceptor {
           }
         }
 
-        //rollback only if nothing matched the ignore check
+        // rollback only if nothing matched the ignore check
         if (!commit) {
           txn.rollback();
         }
-        //otherwise continue to commit
+        // otherwise continue to commit
 
         break;
       }

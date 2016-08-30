@@ -1,20 +1,23 @@
 /**
  * Copyright (C) 2010 Google, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.google.inject.persist.jpa;
+
+import java.util.Date;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -24,11 +27,6 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 
 import junit.framework.TestCase;
-
-import java.util.Date;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  * Created with IntelliJ IDEA. On: 2/06/2007
@@ -49,7 +47,7 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
   public void setUp() {
     injector = Guice.createInjector(new JpaPersistModule("testUnit"));
 
-    //startup persistence
+    // startup persistence
     injector.getInstance(PersistService.class).start();
   }
 
@@ -59,25 +57,32 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
   }
 
   public void testSimpleCrossTxnWork() {
-    //pretend that the request was started here
-    EntityManager em = injector.getInstance(EntityManager.class);
 
-    JpaTestEntity entity = injector
-        .getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
-        .runOperationInTxn();
+    // pretend that the request was started here
+    injector.getInstance(UnitOfWork.class).begin();
+
+    EntityManager emOrig = injector.getInstance(EntityManager.class);
+
+    JpaTestEntity entity =
+        injector.getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
+            .runOperationInTxn();
     injector.getInstance(ManualLocalTransactionsWithCustomMatcherTest.TransactionalObject.class)
         .runOperationInTxn2();
 
-    //persisted entity should remain in the same em (which should still be open)
-    assertTrue("EntityManager  appears to have been closed across txns!",
+    EntityManager em = injector.getInstance(EntityManager.class);
+
+    assertEquals("Em was not kept open across txns", em, emOrig);
+    // persisted entity should remain in the same em (which should still be open)
+    assertTrue("EntityManager appears to have been closed across txns!",
         injector.getInstance(EntityManager.class).contains(entity));
-    assertTrue("EntityManager  appears to have been closed across txns!", em.contains(entity));
+    assertTrue("EntityManager appears to have been closed across txns!", em.contains(entity));
     assertTrue("EntityManager appears to have been closed across txns!", em.isOpen());
 
     injector.getInstance(UnitOfWork.class).end();
 
-    //try to query them back out
+    // try to query them back out
     em = injector.getInstance(EntityManager.class);
+    assertNotSame("EntityManager appears to be same after unitOfWork", em, emOrig);
     assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
         .setParameter("text", UNIQUE_TEXT).getSingleResult());
     assertNotNull(em.createQuery("from JpaTestEntity where text = :text")
@@ -86,7 +91,8 @@ public class ManualLocalTransactionsWithCustomMatcherTest extends TestCase {
   }
 
   public static class TransactionalObject {
-    @Inject EntityManager em;
+    @Inject
+    EntityManager em;
 
     @Transactional
     public JpaTestEntity runOperationInTxn() {
