@@ -66,8 +66,43 @@ public interface ProvisionListener {
 
     /** Performs the provision, returning the object provisioned. */
     public abstract T provision();
-    
-    /** Returns the dependency chain that led to this object being provisioned. */
+
+    /**
+     * Returns the dependency chain that led to this object being provisioned.
+     *
+     * @deprecated This method is planned for removal in Guice 4.4.  Some use cases can be replaced
+     * by inferring the current chain via ThreadLocals in the listener, other use cases can use
+     * the static dependency graph.  For example,
+     * <pre>{@code    
+     *   bindListener(Matchers.any(), new MyListener());
+     *   ...
+     *   
+     *   private static final class MyListener implements ProvisionListener {
+     *     private final ThreadLocal<ArrayDeque<Binding<?>>> bindingStack = 
+     *         new ThreadLocal<ArrayDeque<Binding<?>>>() {
+     *           {@literal @}Override protected ArrayDeque<Binding<?>> initialValue() {
+     *             return new ArrayDeque<>();
+     *           }
+     *         };
+     *     {@literal @}Override public <T> void onProvision(ProvisionInvocation<T> invocation) {
+     *       bindingStack.get().push(invocation.getBinding());
+     *       try {
+     *         invocation.provision();
+     *       } finally {
+     *         bindingStack.get().pop();
+     *       }
+     *       // Inspect the binding stack...
+     *     }
+     *   }
+     * 
+     * }<pre>
+     * 
+     * In this example the bindingStack thread local will contain a data structure that is very
+     * similar to the data returned by this list.  The main differences are that linked keys are
+     * not in the stack, but such edges do exist in the static dependency graph (inspectable via
+     * {@link HasDependencies#getDependencies()}), so you could infer some of the missing edges..
+     */
+    @Deprecated
     public abstract List<DependencyAndSource> getDependencyChain();
     
   }
